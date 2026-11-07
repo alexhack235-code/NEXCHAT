@@ -375,7 +375,7 @@
               <span class="pin-category-badge ${item.category}">
                 <i class="fa-solid ${icon}"></i> ${item.category.toUpperCase()}
               </span>
-              <span class="pin-author-meta">@${this.escapeHtml(item.senderName)} &bull; ${item.pinnedAt}</span>
+              <span class="pin-author-meta">@${this.escapeHtml(item.senderName)} • ${item.pinnedAt}</span>
             </div>
             ${bodyMarkup}
             ${auditStamp}

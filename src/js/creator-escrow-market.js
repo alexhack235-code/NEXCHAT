@@ -216,7 +216,7 @@ class CreatorEscrowMarketEngine {
                       </span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: #94a3b8; margin-top: 8px; flex-wrap: wrap; gap: 8px;">
-                      <span>Buyer: <strong style="color: #cbd5e1;">@${c.buyer}</strong> &bull; Seller: <strong style="color: #cbd5e1;">@${c.seller}</strong></span>
+                      <span>Buyer: <strong style="color: #cbd5e1;">@${c.buyer}</strong> • Seller: <strong style="color: #cbd5e1;">@${c.seller}</strong></span>
                       <span style="font-family: monospace; font-size: 12px; font-weight: 700; color: #fbbf24;">
                         <i class="fa-solid fa-coins"></i> ${c.amount} ${c.currency}
                       </span>

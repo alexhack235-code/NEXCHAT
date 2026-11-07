@@ -170,7 +170,7 @@
         existingHud = document.createElement('div');
         existingHud.id = 'aegisPrivacyHud';
         existingHud.className = 'aegis-privacy-hud';
-        existingHud.innerHTML = '<span class="aegis-hud-beacon"></span><i class="fa-solid fa-user-secret"></i> <span>AEGIS SHIELD ACTIVE &bull; HOVER OR HOLD TO REVEAL</span>';
+        existingHud.innerHTML = '<span class="aegis-hud-beacon"></span><i class="fa-solid fa-user-secret"></i> <span>AEGIS SHIELD ACTIVE • HOVER OR HOLD TO REVEAL</span>';
         existingHud.onclick = () => this.toggleShield(false);
         existingHud.title = 'Click to disengage Aegis Shield';
         container.prepend(existingHud);

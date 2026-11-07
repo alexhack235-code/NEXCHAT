@@ -401,14 +401,14 @@
         </div>
 
         <h4 class="poll-question-title mt-2">${activePoll.question}</h4>
-        <span class="poll-meta-sub">Created by ${activePoll.creatorName || 'Operative'} &bull; Stake: ${activePoll.wager > 0 ? activePoll.wager + ' NEX' : 'Free'}</span>
+        <span class="poll-meta-sub">Created by ${activePoll.creatorName || 'Operative'} • Stake: ${activePoll.wager > 0 ? activePoll.wager + ' NEX' : 'Free'}</span>
 
         <div class="poll-options-grid mt-3" id="pollOptionsGrid_${pollId}">
           ${this.renderOptionsHTML(activePoll, totalVotes, userVotedOpt)}
         </div>
 
         <div class="poll-status-footer mt-3">
-          <span>${totalVotes} Total Vote${totalVotes !== 1 ? 's' : ''} &bull; ${activePoll.status === 'resolved' ? '<strong class="text-amber-400">RESOLVED</strong>' : '<strong class="text-[#00ff66]">OPEN FOR VOTES</strong>'}</span>
+          <span>${totalVotes} Total Vote${totalVotes !== 1 ? 's' : ''} • ${activePoll.status === 'resolved' ? '<strong class="text-amber-400">RESOLVED</strong>' : '<strong class="text-[#00ff66]">OPEN FOR VOTES</strong>'}</span>
           ${isCreator && activePoll.status !== 'resolved' ? `<button type="button" class="poll-resolve-open-btn" data-poll-id="${pollId}">RESOLVE MARKET</button>` : ''}
         </div>
 
@@ -508,7 +508,7 @@
       const footer = card.querySelector('.poll-status-footer');
       if (footer) {
         footer.innerHTML = `
-          <span>${totalVotes} Total Vote${totalVotes !== 1 ? 's' : ''} &bull; ${poll.status === 'resolved' ? '<strong class="text-amber-400">RESOLVED</strong>' : '<strong class="text-[#00ff66]">OPEN FOR VOTES</strong>'}</span>
+          <span>${totalVotes} Total Vote${totalVotes !== 1 ? 's' : ''} • ${poll.status === 'resolved' ? '<strong class="text-amber-400">RESOLVED</strong>' : '<strong class="text-[#00ff66]">OPEN FOR VOTES</strong>'}</span>
         `;
       }
 

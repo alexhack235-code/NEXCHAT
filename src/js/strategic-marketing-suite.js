@@ -329,7 +329,7 @@
                     </strong>
                     <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">${pkg.desc}</div>
                     <div style="font-size: 10.5px; color: #00ff66; font-family: monospace; margin-top: 3px;">
-                      ${pkg.tokens.toLocaleString()} NEX Tokens &bull; $${pkg.usd.toFixed(2)} USD (₦${pkg.ngn.toLocaleString()})
+                      ${pkg.tokens.toLocaleString()} NEX Tokens • $${pkg.usd.toFixed(2)} USD (₦${pkg.ngn.toLocaleString()})
                     </div>
                   </div>
                 </div>
@@ -541,7 +541,7 @@
           </div>
 
           <div style="font-size: 10.5px; color: #94a3b8; text-align: center;">
-            Total Claimed to date: <strong style="color: #ffd700; font-family: monospace;">${this.data.totalTokensClaimed} NEX</strong> &bull; Reset cycle every 7 days
+            Total Claimed to date: <strong style="color: #ffd700; font-family: monospace;">${this.data.totalTokensClaimed} NEX</strong> • Reset cycle every 7 days
           </div>
         </div>
       `;

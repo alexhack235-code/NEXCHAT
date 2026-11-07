@@ -185,7 +185,7 @@
                 ${PROFILES.map(p => `
                   <button type="button" class="voice-profile-card ${p.id === this.selectedProfileId ? 'active' : ''}" data-profile-id="${escapeHtml(p.id)}" style="border-left: 3px solid ${sanitizeColor(p.color)};">
                     <strong class="text-white text-xs block">${escapeHtml(p.name)}</strong>
-                    <span class="text-[10px] text-gray-400">Pitch: ${p.pitch}x &bull; Rate: ${p.rate}x</span>
+                    <span class="text-[10px] text-gray-400">Pitch: ${p.pitch}x • Rate: ${p.rate}x</span>
                   </button>
                 `).join('')}
               </div>

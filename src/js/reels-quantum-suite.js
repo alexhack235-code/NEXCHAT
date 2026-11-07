@@ -218,7 +218,7 @@
               <div style="position: relative; height: 100%; background: #0a0e17;">
                 <video id="duetOriginalVideo" src="${originalReel.videoUrl}" loop playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
                 <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 4px; font-size: 10px; color: #94a3b8; font-family: monospace;">
-                  ORIGINAL &bull; @${authorName}
+                  ORIGINAL • @${authorName}
                 </div>
               </div>
 
@@ -226,7 +226,7 @@
               <div style="position: relative; height: 100%; background: #07090e; border-left: 1px solid rgba(0,242,255,0.3);">
                 <video id="duetLiveCamPreview" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
                 <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 4px; font-size: 10px; color: #00ff88; font-family: monospace;">
-                  LIVE DUET CAM &bull; 1080p
+                  LIVE DUET CAM • 1080p
                 </div>
                 <div id="duetRecIndicator" style="display: none; position: absolute; top: 12px; right: 12px; background: #ff0055; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px;">
                   REC 00:08
@@ -583,7 +583,7 @@
       pin.innerHTML = `
         <div style="background: rgba(0,0,0,0.85); border: 1px solid #fbbf24; border-radius: 20px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(251,191,36,0.5);">
           <i class="fa-solid fa-gem" style="color: #fbbf24; font-size: 13px;"></i>
-          <span style="font-size: 11px; font-weight: 800; color: #fff;">${product.price} CR &bull; BUY ASSET</span>
+          <span style="font-size: 11px; font-weight: 800; color: #fff;">${product.price} CR • BUY ASSET</span>
         </div>
       `;
 
@@ -619,7 +619,7 @@
             <div style="display: flex; align-items: center; gap: 10px;">
               <i class="fa-solid fa-bag-shopping" style="color: #fbbf24; font-size: 18px;"></i>
               <h3 style="margin: 0; font-size: 15px; color: #fff; font-weight: 800;">
-                SHOPPABLE CYBER ASSET &bull; INSTANT ESCROW
+                SHOPPABLE CYBER ASSET • INSTANT ESCROW
               </h3>
             </div>
             <button type="button" class="nextgen-modal-close" id="closeProductCheckoutBtn">
@@ -633,7 +633,7 @@
                 <i class="fa-solid fa-cube"></i>
               </div>
               <h4 style="margin: 0 0 4px 0; color: #fff; font-size: 13.5px;">${product.title}</h4>
-              <p style="margin: 0; font-size: 11px; color: #94a3b8;">Creator &bull; @${product.seller}</p>
+              <p style="margin: 0; font-size: 11px; color: #94a3b8;">Creator • @${product.seller}</p>
               <div style="margin-top: 10px; font-family: monospace; font-size: 16px; font-weight: 800; color: #fbbf24;">
                 ${product.price} NEX CREDITS
               </div>
@@ -890,7 +890,7 @@
               </div>
 
               <div style="font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: ${tier.color}; font-family: monospace; margin-bottom: 6px;">
-                NEXCHAT SOVEREIGN PROTOCOL &bull; LEVEL 3 VERIFIED
+                NEXCHAT SOVEREIGN PROTOCOL • LEVEL 3 VERIFIED
               </div>
 
               <h2 style="margin: 0 0 4px 0; color: #fff; font-size: 20px; font-weight: 900; font-family: 'Space Grotesk', sans-serif;">
@@ -907,7 +907,7 @@
                 <div><span style="color: #64748b;">ISSUING AUTHORITY:</span> <strong style="color: #fff;">${tier.authority}</strong></div>
                 <div><span style="color: #64748b;">PROOF SIGNATURE:</span> <strong style="color: ${tier.color};">${rootHash}</strong></div>
                 <div><span style="color: #64748b;">AUTHENTICITY:</span> <strong style="color: #00ff88;"><i class="fa-solid fa-shield-halved"></i> HARDWARE VALIDATED</strong></div>
-                <div><span style="color: #64748b;">STATUS:</span> <strong style="color: #00ff88;">ACTIVE &bull; CRYPTOGRAPHICALLY SECURE</strong></div>
+                <div><span style="color: #64748b;">STATUS:</span> <strong style="color: #00ff88;">ACTIVE • CRYPTOGRAPHICALLY SECURE</strong></div>
               </div>
             </div>
 

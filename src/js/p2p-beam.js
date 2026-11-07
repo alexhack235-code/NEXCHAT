@@ -91,7 +91,7 @@
 
               <div class="p2p-security-tag mt-3">
                 <i class="fa-solid fa-shield-check text-[#00ff66]"></i>
-                <span>SHA-256 Chunk Verification Active &bull; Zero Server Retain</span>
+                <span>SHA-256 Chunk Verification Active • Zero Server Retain</span>
               </div>
             </div>
 

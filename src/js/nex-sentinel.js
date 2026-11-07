@@ -365,7 +365,7 @@
           <div class="sentinel-hud-header">
             <div class="sentinel-hud-title">
               <i class="fa-solid fa-shield-halved" style="color: #00ff66;"></i>
-              <span>NEXSENTINEL &bull; LIVE HEALTH HUD</span>
+              <span>NEXSENTINEL • LIVE HEALTH HUD</span>
               <span class="sentinel-status-chip optimal" id="sentinelStatusChip">OPTIMAL</span>
             </div>
             <div class="sentinel-hud-ctrls">

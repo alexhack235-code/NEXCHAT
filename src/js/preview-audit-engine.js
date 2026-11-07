@@ -1004,7 +1004,7 @@
 
               ${arrowIcon}
 
-              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.time} &bull; ${c.subtitle}</span>
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.time} • ${c.subtitle}</span>
 
             </div>
 

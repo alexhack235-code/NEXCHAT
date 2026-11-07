@@ -22,7 +22,7 @@
       repoSlug: 'nex-ecosystem/nex-reels',
       iconClass: 'reels',
       iconFa: 'fa-solid fa-clapperboard',
-      category: 'Official Extension &bull; Video Engine',
+      category: 'Official Extension • Video Engine',
       description: 'High-framerate vertical reels feed, viral video drops, 8K camera engine, and bidirectional media sharing.',
       scopes: [
         { code: 'read:profile', label: 'Access public profile & handle', desc: 'Read your display name, avatar, and verification badge.' },
@@ -39,7 +39,7 @@
       repoSlug: 'nex-ecosystem/metropolis-3d',
       iconClass: 'metro',
       iconFa: 'fa-solid fa-gamepad',
-      category: 'Official Extension &bull; 3D Cyberverse',
+      category: 'Official Extension • 3D Cyberverse',
       description: '3D WebGL metaverse with soldier combat, cyber vehicles, physics engine, and proximity audio.',
       scopes: [
         { code: 'read:profile', label: 'Public Profile', desc: 'Sync soldier avatar and combat ranking.' },
@@ -54,7 +54,7 @@
       repoSlug: 'nex-ecosystem/nexbot-ai',
       iconClass: 'nexbot',
       iconFa: 'fa-solid fa-robot',
-      category: 'Official Extension &bull; Neural AI Builder',
+      category: 'Official Extension • Neural AI Builder',
       description: 'Visual logic flow simulator, autonomous AI bot authoring, custom personality triggers, and test workbench.',
       scopes: [
         { code: 'read:profile', label: 'Author Identity', desc: 'Sign bot configurations.' },
@@ -69,7 +69,7 @@
       repoSlug: 'nex-ecosystem/chronex-transcribe',
       iconClass: 'chronex',
       iconFa: 'fa-solid fa-wave-square',
-      category: 'Verified Partner &bull; Audio Pipeline',
+      category: 'Verified Partner • Audio Pipeline',
       description: 'Real-time zero-latency multilingual speech recognition, automatic chat translation, and voice synthesis.',
       scopes: [
         { code: 'read:chat', label: 'Audio Ingestion', desc: 'Process live voice packets.' },
@@ -279,7 +279,7 @@
           <div class="nex-ext-account-info">
             <div class="nex-ext-avatar-badge">${name.charAt(0).toUpperCase()}</div>
             <div>
-              <div class="nex-ext-account-name">${name} &bull; Personal Account <i class="fa-solid fa-circle-check" style="color: #00d4ff; font-size: 11px;"></i></div>
+              <div class="nex-ext-account-name">${name} • Personal Account <i class="fa-solid fa-circle-check" style="color: #00d4ff; font-size: 11px;"></i></div>
               <div class="nex-ext-account-email">${email}</div>
             </div>
           </div>
@@ -350,7 +350,7 @@
 
         <!-- Scopes Box -->
         <div class="nex-consent-scopes-box">
-          <div class="nex-consent-scopes-heading">REQUESTED PERMISSIONS &bull; SCOPES</div>
+          <div class="nex-consent-scopes-heading">REQUESTED PERMISSIONS • SCOPES</div>
 
           <div class="nex-consent-scope-item">
             <div class="nex-consent-scope-icon"><i class="fa-solid fa-id-badge"></i></div>
@@ -610,7 +610,7 @@
           <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 255, 136, 0.12); border: 1px solid #00ff88; padding: 6px 14px; border-radius: 9999px; margin-bottom: 14px;">
             <i class="fa-solid fa-shield-halved" style="color: #00ff88; font-size: 13px;"></i>
             <span style="font-family: monospace; font-size: 11px; font-weight: 800; color: #00ff88; letter-spacing: 1px;">
-              SECURITY CLEARANCE ISSUED &bull; VERCEL PROTOCOL
+              SECURITY CLEARANCE ISSUED • VERCEL PROTOCOL
             </span>
           </div>
 
@@ -630,7 +630,7 @@
               ${verificationPin}
             </div>
             <div style="font-size: 11.5px; color: #94a3b8; line-height: 1.5;">
-              6-Digit Security Verification PIN &bull; Email verification link sent
+              6-Digit Security Verification PIN • Email verification link sent
             </div>
           </div>
 
@@ -691,7 +691,7 @@
           existing = document.createElement('div');
           existing.id = 'nexReelsDeniedBanner';
           existing.className = 'nex-reels-denied-pill';
-          existing.innerHTML = `<i class="fa-solid fa-shield-halved"></i> NEXCHAT Sync Blocked &bull; Tap to Authorize`;
+          existing.innerHTML = `<i class="fa-solid fa-shield-halved"></i> NEXCHAT Sync Blocked • Tap to Authorize`;
           existing.addEventListener('click', () => openConsentModal('nex-reels'));
           document.body.appendChild(existing);
         }
@@ -748,7 +748,7 @@
     if (!pill) return;
     if (status === 'approved') {
       pill.className = 'camshot-permission-pill approved';
-      pill.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #00ff88;"></i> <span>CAMSHOT LINKED &bull; REVIEW</span>';
+      pill.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #00ff88;"></i> <span>CAMSHOT LINKED • REVIEW</span>';
       pill.title = 'CamShot is authorized. Click to review or manage NEXCHAT access permissions.';
     } else {
       pill.className = 'camshot-permission-pill pending';

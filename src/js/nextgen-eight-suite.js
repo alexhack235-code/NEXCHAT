@@ -512,7 +512,7 @@
         bubble.innerHTML = `
           <div class="chronex-inline-bubble" style="padding: 16px 18px; border-radius: 4px 16px 16px 16px; max-width: 480px;">
             <div class="chronex-bubble-badge">
-              <i class="fa-solid fa-microchip"></i> CHRONEX AI BRIEFING &bull; CONTEXT SUMMARY
+              <i class="fa-solid fa-microchip"></i> CHRONEX AI BRIEFING • CONTEXT SUMMARY
             </div>
             <div style="font-size: 13px; line-height: 1.5; color: #f8fafc; margin-bottom: 10px;">
               <p style="margin: 0 0 6px 0; font-weight: 600; color: #00d4ff;">Situation Report (Last ${sampleTexts.length || 10} transmissions):</p>
@@ -581,7 +581,7 @@
 
       const overlay = document.createElement('div');
       overlay.className = 'quantum-burn-lock-overlay';
-      overlay.innerHTML = `<i class="fa-solid fa-fire-flame-curved"></i> TOP SECRET &bull; TAP TO DECRYPT (${durationSeconds}s)`;
+      overlay.innerHTML = `<i class="fa-solid fa-fire-flame-curved"></i> TOP SECRET • TAP TO DECRYPT (${durationSeconds}s)`;
       element.appendChild(overlay);
 
       element.addEventListener('click', () => {
@@ -848,7 +848,7 @@
                 </button>
               </div>
               <span id="spatialAudioTelemetry" style="font-family: var(--ng-font-mono); font-size: 11px; color: #00d4ff;">
-                NEAR PEERS: 3 &bull; STEREO PAN: 0.00
+                NEAR PEERS: 3 • STEREO PAN: 0.00
               </span>
             </div>
           </div>
@@ -1115,7 +1115,7 @@
               <div class="nextgen-cohost-slot" id="mainBroadcastSlot" style="position: relative; height: 100%; background: #0a0e17; border: 1px solid rgba(0,242,255,0.3); border-radius: 10px; overflow: hidden;">
                 <video id="liveSelfVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
                 <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 3px 8px; border-radius: 5px; font-family: monospace; font-size: 10px; color: #00ff88; border: 1px solid rgba(0,255,136,0.3);">
-                  PRIMARY HOST &bull; 1080p 60FPS
+                  PRIMARY HOST • 1080p 60FPS
                 </div>
                 <!-- Interactive Particle FX Canvas -->
                 <canvas id="nexLiveFxCanvas" style="position: absolute; inset: 0; pointer-events: none; width: 100%; height: 100%; z-index: 5;"></canvas>

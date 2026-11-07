@@ -1605,7 +1605,7 @@ function renderChronexWelcomeStage(container) {
 
       <div class="chronex-hero-content">
         <div class="chronex-hero-badge">
-          <i class="fa-solid fa-bolt"></i> NEURAL ENGINE v4.2 &bull; ACTIVE
+          <i class="fa-solid fa-bolt"></i> NEURAL ENGINE v4.2 • ACTIVE
         </div>
         <h2 class="chronex-hero-title">CHRONEX AI ASSISTANT</h2>
         <p class="chronex-hero-desc">
@@ -8002,7 +8002,7 @@ function displayChronexAIResponse(response, stream = true) {
     <img src="chronex-ai.jpg" class="message-avatar chronex-avatar" onerror="this.src='logo.jpg';" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff66; margin-bottom: 2px; flex-shrink: 0;" alt="ChronEX AI">
     <div class="message-bubble chronex-ai-bubble" style="background: #111722; color: #f0f6fc; padding: 14px 18px; border-radius: 18px 18px 18px 4px; max-width: 85%; word-wrap: break-word; border: 1px solid rgba(0, 255, 102, 0.28); font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.6; box-shadow: 0 8px 24px rgba(0,0,0,0.45);">
       <div style="font-size: 11px; font-weight: 700; color: #00ff66; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between;">
-        <span><i class="fa-solid fa-bolt" style="font-size: 10px; margin-right: 4px;"></i> CHRONEX AI &bull; PRO</span>
+        <span><i class="fa-solid fa-bolt" style="font-size: 10px; margin-right: 4px;"></i> CHRONEX AI • PRO</span>
         <button type="button" class="copy-ai-msg-btn" onclick="navigator.clipboard.writeText(this.closest('.chronex-ai-bubble').querySelector('.ai-body-content').innerText); showNotif('Copied to clipboard', 'success', 1500);" style="background: none; border: none; color: #8b949e; cursor: pointer; font-size: 11px;" title="Copy response"><i class="fa-regular fa-copy"></i></button>
       </div>
       ${voicePlayerMarkup}
@@ -8762,7 +8762,7 @@ function loadMessages() {
             <div class="synthesis-card-header">
               <div class="synthesis-header-badge">
                 <i class="fa-solid fa-bolt"></i>
-                <span>THREAD SYNTHESIS &bull; CHRONEX NEURAL</span>
+                <span>THREAD SYNTHESIS • CHRONEX NEURAL</span>
               </div>
               <span class="synthesis-time">${formatTime(m.time?.toDate?.() || new Date())}</span>
             </div>
@@ -8775,7 +8775,7 @@ function loadMessages() {
             </div>
             <div class="synthesis-card-footer">
               <span class="synthesis-stats-pill">
-                <i class="fa-solid fa-users"></i> ${m.participantCount || 2} Participants &bull; ${m.replyCount || 0} Replies
+                <i class="fa-solid fa-users"></i> ${m.participantCount || 2} Participants • ${m.replyCount || 0} Replies
               </span>
               <button type="button" class="btn-jump-to-thread" data-thread-id="${escape(m.sourceThreadId || '')}">
                 <span>Inspect Thread</span>
@@ -14363,14 +14363,14 @@ function setupAiDefenseListeners() {
     if (!quarantineList) return;
     const items = window.aiSecurityScanner ? window.aiSecurityScanner.getQuarantine() : [];
     if (!items || items.length === 0) {
-      quarantineList.innerHTML = '<div style="color: #64748b; font-size: 11.5px; text-align: center; padding: 12px;"><i class="fa-solid fa-circle-check" style="color: #00ff66;"></i> Vault clean &bull; No active threats in isolation</div>';
+      quarantineList.innerHTML = '<div style="color: #64748b; font-size: 11.5px; text-align: center; padding: 12px;"><i class="fa-solid fa-circle-check" style="color: #00ff66;"></i> Vault clean • No active threats in isolation</div>';
       return;
     }
     quarantineList.innerHTML = items.map((q) => `
       <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 8px; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
         <div>
           <div style="font-weight: 700; font-size: 12px; color: #fca5a5;"><i class="fa-solid fa-triangle-exclamation"></i> ${escapeHtml(q.filename || 'Malicious Payload')}</div>
-          <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Reason: ${escapeHtml(q.reason || 'Signature match')} &bull; ${new Date(q.timestamp).toLocaleTimeString()}</div>
+          <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">Reason: ${escapeHtml(q.reason || 'Signature match')} • ${new Date(q.timestamp).toLocaleTimeString()}</div>
         </div>
         <span style="font-size: 9.5px; font-weight: 800; background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 2px 6px; border-radius: 4px;">ISOLATED</span>
       </div>
@@ -14457,7 +14457,7 @@ function setupAiDefenseListeners() {
                 ${escapeHtml(report.summary || 'Zero active malware signatures detected. All client-side storage, WebSockets, and Firestore channels verified secure.')}
               </div>
               <div style="font-size: 10px; color: #94a3b8; margin-top: 6px;">
-                Vectors Checked: ${report.totalScanned || 52} &bull; Latency: 12ms &bull; Zero False Positives
+                Vectors Checked: ${report.totalScanned || 52} • Latency: 12ms • Zero False Positives
               </div>
             </div>
           `;
@@ -20024,7 +20024,7 @@ async function loadStatusFeed() {
             </h4>
             <p class="status-row-time">
               <span><i class="fa-solid fa-clock-rotate-left"></i> T-${timeFormatted}</span>
-              <span style="color:#00FF88;">&bull; TTL: ${remHours}h</span>
+              <span style="color:#00FF88;">• TTL: ${remHours}h</span>
             </p>
           </div>
         `;
@@ -22314,10 +22314,81 @@ function setupMobileFeatures() {
     desktopSearchBtnEl.addEventListener('click', triggerGlobalSearch);
   }
 
-  // Mobile FAB New Chat button triggers openSearch directly
+  // Mobile Unified FAB: Opens Action Sheet (New Chat, New Channel, Post Reel)
+  const openFabActionSheet = () => {
+    const sheet = document.getElementById('fabActionSheet');
+    if (sheet) {
+      sheet.style.display = 'flex';
+      sheet.setAttribute('aria-hidden', 'false');
+    }
+  };
+  const closeFabActionSheet = () => {
+    const sheet = document.getElementById('fabActionSheet');
+    if (sheet) {
+      sheet.style.display = 'none';
+      sheet.setAttribute('aria-hidden', 'true');
+    }
+  };
+  window.openFabActionSheet = openFabActionSheet;
+  window.closeFabActionSheet = closeFabActionSheet;
+
   document.getElementById('mobileFabNewChat')?.addEventListener('click', (e) => {
     e.preventDefault();
+    openFabActionSheet();
+  });
+
+  document.getElementById('closeFabActionSheetBtn')?.addEventListener('click', closeFabActionSheet);
+  document.getElementById('fabActionSheetBackdrop')?.addEventListener('click', closeFabActionSheet);
+
+  document.getElementById('fabSheetNewChat')?.addEventListener('click', () => {
+    closeFabActionSheet();
     openSearch();
+  });
+
+  document.getElementById('fabSheetNewChannel')?.addEventListener('click', () => {
+    closeFabActionSheet();
+    if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openCreateChannelModal === 'function') {
+      window.broadcastChannelsEngine.openCreateChannelModal();
+    } else if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openModal === 'function') {
+      window.broadcastChannelsEngine.openModal('create');
+    } else {
+      const updatesNav = document.getElementById('nav-status');
+      if (updatesNav) updatesNav.click();
+    }
+  });
+
+  document.getElementById('fabSheetNewReel')?.addEventListener('click', () => {
+    closeFabActionSheet();
+    window.location.href = 'reels.html';
+  });
+
+  // Empty State Buttons Event Delegation
+  document.addEventListener('click', (e) => {
+    const startBtn = e.target.closest('#emptyStartNewChatBtn');
+    if (startBtn) {
+      e.preventDefault();
+      openSearch();
+      return;
+    }
+    const exploreBtn = e.target.closest('#emptyExploreChannelsBtn');
+    if (exploreBtn) {
+      e.preventDefault();
+      if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openModal === 'function') {
+        window.broadcastChannelsEngine.openModal('explore');
+      } else {
+        const updatesNav = document.getElementById('nav-status');
+        if (updatesNav) updatesNav.click();
+      }
+      return;
+    }
+    const chronexBtn = e.target.closest('#emptyTryChronexAiBtn');
+    if (chronexBtn) {
+      e.preventDefault();
+      if (typeof openChat === 'function') {
+        openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai');
+      }
+      return;
+    }
   });
 
   // Chat Detail Header Video Call & Voice Call buttons
@@ -23038,7 +23109,7 @@ async function loadContacts() {
         </div>
         <p class="chat-preview" style="color: #25d366; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
           <i class="fa-solid fa-microchip delivery-icon"></i>
-          <span class="preview-text">Ready &bull; Latency 14ms</span>
+          <span class="preview-text">Ready • Latency 14ms</span>
         </p>
       </div>
       <div class="chat-time-container">
@@ -23458,7 +23529,33 @@ async function loadContacts() {
 
     const groupCount = await appendGroupsToContactList(contactList);
     if (contactDataList.length === 0 && groupCount === 0) {
-      contactList.innerHTML += `<li class="empty-state"><p>No chats yet. Start a conversation!</p></li>`;
+      contactList.innerHTML = `
+        <li class="empty-state" id="emptyChatState">
+          <div class="empty-state-watermark" aria-hidden="true">
+            <svg viewBox="0 0 100 100" class="nex-watermark-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 80V20L50 50L78 20V80" stroke="#00FF9D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="empty-state-content">
+            <h3 class="empty-state-title">No chats yet</h3>
+            <p class="empty-state-subtitle">Search for friends to start chatting</p>
+            <div class="empty-state-actions">
+              <button type="button" class="empty-action-btn primary" id="emptyStartNewChatBtn">
+                <i class="fa-solid fa-plus"></i>
+                <span>Start New Chat</span>
+              </button>
+              <button type="button" class="empty-action-btn secondary" id="emptyExploreChannelsBtn">
+                <i class="fa-solid fa-satellite-dish"></i>
+                <span>Explore Channels</span>
+              </button>
+              <button type="button" class="empty-action-btn secondary" id="emptyTryChronexAiBtn">
+                <i class="fa-solid fa-microchip"></i>
+                <span>Try ChronEX AI</span>
+              </button>
+            </div>
+          </div>
+        </li>
+      `;
     }
 
     // Synchronize Archived & Locked Chats UI
@@ -23981,7 +24078,7 @@ function renderCallHistoryItem(call) {
         <div class="call-status-line">
           ${directionArrow}
           <span class="call-timestamp">${timestampStr}</span>
-          <span class="call-status-separator">&bull;</span>
+          <span class="call-status-separator">•</span>
           <span class="call-status-subtitle">${statusSubtitle}</span>
         </div>
       </div>
@@ -25306,7 +25403,7 @@ export default async function handler(req, res) {
     const term = document.getElementById('nexbotExtTerminalLog');
     if (term) {
       term.innerHTML = `<span style="color:#67e8f9;">[${new Date().toLocaleTimeString()}] [SYNTHESIZER] Bot Profile &amp; Code Extension synthesized successfully!</span><br/>` +
-        `<span style="color:#00ff66;">[${new Date().toLocaleTimeString()}] [READY] Generated: ${escapeHtml(nameInput?.value || 'Bot')} &bull; Target: In-App Extension. Click 'Run Extension In NEXCHAT' to activate live.</span>`;
+        `<span style="color:#00ff66;">[${new Date().toLocaleTimeString()}] [READY] Generated: ${escapeHtml(nameInput?.value || 'Bot')} • Target: In-App Extension. Click 'Run Extension In NEXCHAT' to activate live.</span>`;
     }
 
     showNotif(`[ACTIVE] Bot & Code Extension [${nameInput?.value || 'Bot'}] synthesized! Script is ready to run below.`, 'success', 3000);
@@ -25463,7 +25560,7 @@ export default async function handler(req, res) {
         return;
       }
 
-      appendTermLog(`<br/><span style="color:#a78bfa;">[${new Date().toLocaleTimeString()}] [MATCH] Trigger condition verified &bull; Simulating ${bDelay}s latency...</span>`);
+      appendTermLog(`<br/><span style="color:#a78bfa;">[${new Date().toLocaleTimeString()}] [MATCH] Trigger condition verified • Simulating ${bDelay}s latency...</span>`);
 
       await new Promise(r => setTimeout(r, Math.min(1500, bDelay * 1000)));
 
@@ -25480,7 +25577,7 @@ export default async function handler(req, res) {
       }
 
       appendTermLog(`<br/><span style="color:#00ff66;font-weight:700;">[${new Date().toLocaleTimeString()}] [DISPATCHED REPLY] (${bName}): "${escapeHtml(responseText)}"</span><br/>` +
-        `<span style="color:#38bdf8;">[${new Date().toLocaleTimeString()}] [STATUS 200] Delivery verified &bull; Roundtrip 12ms.</span>`);
+        `<span style="color:#38bdf8;">[${new Date().toLocaleTimeString()}] [STATUS 200] Delivery verified • Roundtrip 12ms.</span>`);
 
       if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
     });
@@ -25679,7 +25776,7 @@ export default async function handler(req, res) {
       <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
         <div>
           <div style="font-weight: 800; font-size: 13.5px; color: #f1f5f9;"><i class="fa-solid fa-robot"></i> ApexSupport AI (Default)</div>
-          <div style="font-size: 11px; color: #00ff66; margin-top: 3px;"><i class="fa-solid fa-bolt"></i> Active &bull; 0 / 100 Quota Used</div>
+          <div style="font-size: 11px; color: #00ff66; margin-top: 3px;"><i class="fa-solid fa-bolt"></i> Active • 0 / 100 Quota Used</div>
         </div>
         <span style="font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0, 255, 102, 0.2); color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.4);">RUNNING</span>
       </div>
@@ -25690,7 +25787,7 @@ export default async function handler(req, res) {
         <div style="background: rgba(15, 23, 38, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-weight: 800; font-size: 13.5px; color: #f1f5f9;"><i class="fa-solid fa-microchip"></i> ${escapeHtml(bot.name)}</div>
-            <div style="font-size: 11px; color: #94a3b8; margin-top: 3px;">Temp ${bot.temp} &bull; Latency ${bot.delay}s &bull; Custom Triggers</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 3px;">Temp ${bot.temp} • Latency ${bot.delay}s • Custom Triggers</div>
           </div>
           <button type="button" class="load-bot-fleet-btn" data-bot-idx="${idx}" style="background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.4); color: #c4b5fd; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
             Load
@@ -25895,7 +25992,7 @@ export default async function handler(req, res) {
       if (bannerText) {
         bannerText.innerHTML = allPass
           ? '<strong style="color: #00ff66;">Full Mesh Synchronized:</strong> 5/5 infrastructure pipelines connected at sub-50ms latency.'
-          : 'Mesh partially operational &bull; fallback local engines active.';
+          : 'Mesh partially operational • fallback local engines active.';
       }
 
       if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
@@ -26517,7 +26614,7 @@ function initCyberStreak() {
     if (claimBtn) {
       if (alreadyClaimedToday) {
         claimBtn.disabled = true;
-        claimBtn.innerHTML = '<i class="fa-solid fa-check"></i> CLAIMED TODAY &bull; RESET AT MIDNIGHT';
+        claimBtn.innerHTML = '<i class="fa-solid fa-check"></i> CLAIMED TODAY • RESET AT MIDNIGHT';
       } else {
         claimBtn.disabled = false;
         claimBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> CLAIM DAY ${currentStreak} REWARD (+${rewardForToday} TOKENS)`;
@@ -27177,7 +27274,7 @@ function initCipherVault() {
             <span class="secret-room-name">${escapeHtml(roomName.trim())}</span>
             <span class="secret-room-badge">ZERO-TRACE</span>
           </div>
-          <p class="secret-room-meta">Self-destruct on disconnect &bull; End-to-end memory isolated</p>
+          <p class="secret-room-meta">Self-destruct on disconnect • End-to-end memory isolated</p>
         </div>
         <button type="button" class="open-secret-room-btn" data-room="${escapeHtml(roomName.trim())}">
           <i class="fa-solid fa-arrow-right"></i> ENTER

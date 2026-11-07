@@ -349,7 +349,7 @@
             <i class="fa-solid fa-crown fa-bounce"></i>
           </div>
           <h2>GROUP SYNDICATE LEVEL UP!</h2>
-          <div class="levelup-tag">REACHED LEVEL ${level} &bull; ${title.toUpperCase()}</div>
+          <div class="levelup-tag">REACHED LEVEL ${level} • ${title.toUpperCase()}</div>
           <p>Every member in this syndicate unlocked +50 bonus token rewards!</p>
           <button type="button" class="btn-levelup-claim" onclick="this.closest('.group-levelup-banner-overlay').remove();">
             <i class="fa-solid fa-bolt"></i> Claim +50 Tokens
@@ -570,7 +570,7 @@
             <i class="fa-solid fa-gift fa-bounce" style="color: #ef4444; font-size: 20px;"></i>
             <div>
               <strong>CYBER SCRAMBLE PACKET</strong>
-              <small>${packetData.totalTokens} Tokens &bull; ${packetData.totalSpots} Spots</small>
+              <small>${packetData.totalTokens} Tokens • ${packetData.totalSpots} Spots</small>
             </div>
           </div>
           <p class="packet-desc">First to tap claims a randomized share of the bounty!</p>

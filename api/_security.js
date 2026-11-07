@@ -386,10 +386,10 @@ export class NexchatCdnShield {
     </div>
     <div class="footer">
       <div class="footer-line">
-        Cloud Ray ID: <span class="footer-meta">${currentRay}</span> &bull; Your IP: <span class="footer-meta">${escapeHtml(clientIp)}</span>
+        Cloud Ray ID: <span class="footer-meta">${currentRay}</span> • Your IP: <span class="footer-meta">${escapeHtml(clientIp)}</span>
       </div>
       <div class="footer-line" style="font-size: 12px; color: #9ca3af;">
-        Action performed: Blocked by Edge Policy &bull; Edge Node: ${this.edgeLocation} &bull; Timestamp: ${utcTimestamp}
+        Action performed: Blocked by Edge Policy • Edge Node: ${this.edgeLocation} • Timestamp: ${utcTimestamp}
       </div>
       <div class="badge-edge">Performance &amp; security by Fortress Global Edge Network</div>
     </div>

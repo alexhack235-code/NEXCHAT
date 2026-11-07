@@ -412,7 +412,7 @@
         <div class="nex-thread-root-pill-left">
           <i class="fa-solid fa-comments"></i>
           <span class="nex-thread-root-pill-count">${countLabel}</span>
-          <span class="nex-thread-root-pill-sep">&bull;</span>
+          <span class="nex-thread-root-pill-sep">•</span>
           <span class="nex-thread-root-pill-time">Last reply Just now</span>
         </div>
         <div class="nex-thread-root-pill-arrow">

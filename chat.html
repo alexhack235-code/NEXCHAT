@@ -750,23 +750,75 @@
         <div class="chats-section">
           <ul id="contactList" class="chat-list">
             <li class="empty-state" id="emptyChatState">
-              <p>No chats yet</p>
-              <p class="hint">Search for friends to start chatting</p>
+              <div class="empty-state-watermark" aria-hidden="true">
+                <svg viewBox="0 0 100 100" class="nex-watermark-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22 80V20L50 50L78 20V80" stroke="#00FF9D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="empty-state-content">
+                <h3 class="empty-state-title">No chats yet</h3>
+                <p class="empty-state-subtitle">Search for friends to start chatting</p>
+                <div class="empty-state-actions">
+                  <button type="button" class="empty-action-btn primary" id="emptyStartNewChatBtn">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Start New Chat</span>
+                  </button>
+                  <button type="button" class="empty-action-btn secondary" id="emptyExploreChannelsBtn">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                    <span>Explore Channels</span>
+                  </button>
+                  <button type="button" class="empty-action-btn secondary" id="emptyTryChronexAiBtn">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>Try ChronEX AI</span>
+                  </button>
+                </div>
+              </div>
             </li>
           </ul>
         </div>
 
-        <!-- WhatsApp Floating Action Buttons Cluster (ChronEX AI + WhatsApp Emerald Chat FAB) -->
-        <div class="chat-fab-cluster" id="chatFabCluster">
-          <button type="button" id="chronexAiFabBtn" class="chronex-ai-fab" title="Ask ChronEX AI" aria-label="Ask ChronEX AI" onclick="if(typeof openChat === 'function') openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai');">
-            <div class="ai-conic-ring">
-              <i class="fa-solid fa-circle-nodes"></i>
-            </div>
-          </button>
-          <button type="button" id="mobileFabNewChat" class="mobile-fab whatsapp-chat-fab" title="New Chat" aria-label="New Chat">
-            <span class="nex-fab-n" style="font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:24px; color:#0A0F1E; line-height:1;">N</span>
+        <!-- WhatsApp Single 56px Neon Green FAB (New Chat / Channel / Reel Action Sheet) -->
+        <div class="chat-fab-cluster single-fab-cluster" id="chatFabCluster">
+          <button type="button" id="mobileFabNewChat" class="mobile-fab nex-unified-fab" title="New" aria-label="New Actions">
+            <i class="fa-solid fa-plus"></i>
           </button>
         </div>
+
+        <!-- FAB Bottom Action Sheet Modal (200ms ease slide-up) -->
+        <div id="fabActionSheet" class="fab-action-sheet-overlay" style="display: none;" aria-hidden="true">
+          <div class="fab-action-sheet-backdrop" id="fabActionSheetBackdrop"></div>
+          <div class="fab-action-sheet-panel">
+            <div class="fab-action-sheet-handle"></div>
+            <div class="fab-action-sheet-header">
+              <h3>Create</h3>
+              <button type="button" class="fab-action-sheet-close" id="closeFabActionSheetBtn" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="fab-action-sheet-list">
+              <button type="button" class="fab-action-sheet-item" id="fabSheetNewChat">
+                <div class="fab-sheet-item-icon chat-icon"><i class="fa-solid fa-comment-medical"></i></div>
+                <div class="fab-sheet-item-meta">
+                  <span class="fab-sheet-item-title">Start New Chat</span>
+                  <span class="fab-sheet-item-sub">Search contacts and friends</span>
+                </div>
+              </button>
+              <button type="button" class="fab-action-sheet-item" id="fabSheetNewChannel">
+                <div class="fab-sheet-item-icon channel-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+                <div class="fab-sheet-item-meta">
+                  <span class="fab-sheet-item-title">New Channel</span>
+                  <span class="fab-sheet-item-sub">Broadcast updates to followers</span>
+                </div>
+              </button>
+              <button type="button" class="fab-action-sheet-item" id="fabSheetNewReel">
+                <div class="fab-sheet-item-icon reel-icon"><i class="fa-solid fa-clapperboard"></i></div>
+                <div class="fab-sheet-item-meta">
+                  <span class="fab-sheet-item-title">Post Reel / CamShot</span>
+                  <span class="fab-sheet-item-sub">Share immersive short videos</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <section id="chatWelcomePanel" class="chat-welcome-panel" aria-label="Chat workspace">
@@ -905,7 +957,7 @@
         <div id="ghostActiveBanner" class="ghost-active-banner" style="display: none;">
           <div class="ghost-banner-content">
             <i class="fa-solid fa-ghost" style="color: #c084fc;"></i>
-            <span>GHOST PROTOCOL ENGAGED &bull; Disintegrating in <strong id="ghostTtlLabel">30s</strong></span>
+            <span>GHOST PROTOCOL ENGAGED • Disintegrating in <strong id="ghostTtlLabel">30s</strong></span>
           </div>
           <button type="button" id="closeGhostBannerBtn" class="close-ghost-banner-btn" title="Disable Ghost Mode">
             <i class="fa-solid fa-xmark"></i>
@@ -1106,7 +1158,7 @@
             </div>
 
             <div class="passcode-keypad-matrix" id="passcodeKeypadMatrix">
-              <button type="button" class="passcode-key" data-digit="1"><span class="key-num">1</span><span class="key-sub">&bull;</span></button>
+              <button type="button" class="passcode-key" data-digit="1"><span class="key-num">1</span><span class="key-sub">•</span></button>
               <button type="button" class="passcode-key" data-digit="2"><span class="key-num">2</span><span class="key-sub">ABC</span></button>
               <button type="button" class="passcode-key" data-digit="3"><span class="key-num">3</span><span class="key-sub">DEF</span></button>
               <button type="button" class="passcode-key" data-digit="4"><span class="key-num">4</span><span class="key-sub">GHI</span></button>
@@ -1130,7 +1182,7 @@
               <button type="button" class="passcode-gate-btn-link" id="btnGateLeaveChat">
                 <i class="fa-solid fa-arrow-left"></i> Back to Chats
               </button>
-              <span class="passcode-gate-sep">&bull;</span>
+              <span class="passcode-gate-sep">•</span>
               <button type="button" class="passcode-gate-btn-link" id="btnGateChangeCode">
                 <i class="fa-solid fa-key"></i> Setup Code
               </button>
@@ -1141,7 +1193,7 @@
         <div id="tacticalMeshBanner" class="tactical-mesh-banner direct-chat-hidden" style="display: none !important;">
           <div class="mesh-banner-inner">
             <i class="fa-solid fa-tower-broadcast"></i>
-            <span>OFF-GRID LOCAL P2P MESH ACTIVE &bull; ZERO-CLOUD DIRECT RELAY</span>
+            <span>OFF-GRID LOCAL P2P MESH ACTIVE • ZERO-CLOUD DIRECT RELAY</span>
           </div>
         </div>
 
@@ -1284,7 +1336,7 @@
           <div id="slashCommandsMenu" class="slash-commands-menu" style="display: none;">
             <div class="slash-commands-header">
               <span class="slash-title"><i class="fa-solid fa-terminal"></i> Command Hub</span>
-              <span class="slash-hint">Tab/Click to select &bull; Esc to dismiss</span>
+              <span class="slash-hint">Tab/Click to select • Esc to dismiss</span>
             </div>
             <div class="slash-commands-list" id="slashCommandsList"></div>
           </div>
@@ -2385,7 +2437,7 @@
                         </button>
                       </div>
                       <div class="settings-profile-handle" id="tabProfileHandle">@nexchat_user</div>
-                      <div class="settings-profile-status"><span class="status-online-dot"></span> Active &bull; Cryptographically Verified</div>
+                      <div class="settings-profile-status"><span class="status-online-dot"></span> Active • Cryptographically Verified</div>
                     </div>
                   </div>
 
@@ -2422,7 +2474,7 @@
                         <span class="settings-input-prefix">@</span>
                         <input type="text" id="settingsNewUsernameInput" class="settings-username-input" placeholder="Enter new username" maxlength="30" autocomplete="off" spellcheck="false">
                       </div>
-                      <div class="settings-input-hint">3-30 characters &bull; Letters, numbers, underscores &amp; spaces</div>
+                      <div class="settings-input-hint">3-30 characters • Letters, numbers, underscores &amp; spaces</div>
                       <div class="settings-inline-actions">
                         <button type="button" class="settings-btn-cancel" id="btnCancelEditUsername2">Cancel</button>
                         <button type="button" class="settings-btn-save" id="btnSaveNewUsername"><i class="fa-solid fa-check"></i> Save Username</button>
@@ -2932,7 +2984,7 @@
                   <span class="trimmer-cursor-blink">_</span>
                 </div>
                 <div class="trimmer-header-meta">
-                  <span id="trimmerDurationDetected">TTL: 24H &bull; 0s DETECTED</span>
+                  <span id="trimmerDurationDetected">TTL: 24H • 0s DETECTED</span>
                 </div>
               </div>
 
@@ -5077,7 +5129,7 @@
               <div id="statusDropPlaceholder">
                 <i class="fa-solid fa-cloud-arrow-up" style="font-size: 38px; color: #00ff88; margin-bottom: 8px; filter: drop-shadow(0 0 10px rgba(0,255,136,0.4));"></i>
                 <div style="font-size: 14px; font-weight: 700; color: #fff; font-family: 'JetBrains Mono', monospace;">CLICK OR DRAG MEDIA PAYLOAD</div>
-                <div style="font-size: 11.5px; color: #8b949e; margin-top: 4px; font-family: 'JetBrains Mono', monospace;">Supports MP4, MOV, PNG, JPG &bull; Max 2 Minutes (120s limit)</div>
+                <div style="font-size: 11.5px; color: #8b949e; margin-top: 4px; font-family: 'JetBrains Mono', monospace;">Supports MP4, MOV, PNG, JPG • Max 2 Minutes (120s limit)</div>
               </div>
               <div id="statusMediaPreviewBox" style="display: none; position: relative;">
                 <img id="statusModalImgPreview" src="" alt="Preview" style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; object-fit: contain; margin: 0 auto; border: 1px solid rgba(0,255,136,0.3);">
@@ -5373,7 +5425,7 @@
       <button id="nav-status" class="nav-item" data-nav="updates" title="Status Updates">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-circle-notch"></i>
-          <span class="nav-status-beacon" style="background:#00C896;"></span>
+          <span class="nav-status-beacon" id="navUpdatesBeacon" style="display: none; background:#00FF9D;"></span>
         </div>
         <span class="nav-label">Updates</span>
       </button>
@@ -5398,7 +5450,7 @@
       <button id="nav-announcements" class="nav-item" data-nav="announcements" title="System Announcements">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-bullhorn"></i>
-          <span class="nav-status-beacon" style="background:#00C896;"></span>
+          <span class="nav-status-beacon" id="navAlertsBeacon" style="display: none; background:#00FF9D;"></span>
         </div>
         <span class="nav-label">Alerts</span>
       </button>
@@ -5415,7 +5467,7 @@
       <button id="nav-ai" class="nav-item desktop-only-nav" data-nav="ai" title="ChronEX AI Assistant">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-microchip"></i>
-          <span class="nav-status-beacon" style="background:#00FFC6;"></span>
+          <span class="nav-status-beacon" id="navAiBeacon" style="display: none; background:#00FF9D;"></span>
         </div>
         <span class="nav-label">ChronEX AI</span>
       </button>
@@ -5482,7 +5534,7 @@
             </div>
             <div class="status-viewer-sub-row">
               <span id="statusViewerTime" class="status-viewer-time">Just now</span>
-              <span class="status-sub-sep">&bull;</span>
+              <span class="status-sub-sep">•</span>
               <span id="statusViewerDetailsExpires" class="status-expires-text">Expires in 24h</span>
             </div>
           </div>
@@ -5667,7 +5719,7 @@
           <div class="nexbot-header-icon"><i class="fa-solid fa-robot"></i></div>
           <div>
             <h2 class="nexbot-header-title">NEXBOT STUDIO</h2>
-            <div class="nexbot-header-subtitle">WHATSAPP BOT ARCHITECT &bull; AUTONOMOUS AI ENGINE</div>
+            <div class="nexbot-header-subtitle">WHATSAPP BOT ARCHITECT • AUTONOMOUS AI ENGINE</div>
           </div>
         </div>
         <div class="nexbot-header-right">
@@ -5964,7 +6016,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                     <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-fire text-amber-500"></i> Cloud Firestore</span>
                     <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
                   </div>
-                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Security Rules v2 &bull; Realtime Listeners</div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Security Rules v2 • Realtime Listeners</div>
                   <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
                 </div>
 
@@ -5974,7 +6026,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                     <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-bolt text-emerald-400"></i> Supabase Realtime</span>
                     <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
                   </div>
-                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Postgres CDC &bull; Broadcast Mesh</div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Postgres CDC • Broadcast Mesh</div>
                   <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
                 </div>
 
@@ -5984,7 +6036,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                     <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-cloud text-blue-400"></i> Cloudinary Media</span>
                     <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
                   </div>
-                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Edge Video Delivery &bull; Vault CDN</div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Edge Video Delivery • Vault CDN</div>
                   <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
                 </div>
 
@@ -5994,7 +6046,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                     <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-robot text-purple-400"></i> Chronex AI Engine</span>
                     <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
                   </div>
-                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Autonomous Neural LLM &bull; WA Bot Brain</div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Autonomous Neural LLM • WA Bot Brain</div>
                   <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
                 </div>
 
@@ -6004,7 +6056,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                     <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-shield-halved text-cyan-400"></i> REDOX AI Scanner</span>
                     <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
                   </div>
-                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Zero-Trust WAF &bull; RealTime Defender</div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Zero-Trust WAF • RealTime Defender</div>
                   <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
                 </div>
               </div>
@@ -6209,7 +6261,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <div class="vault-icon"><i class="fa-solid fa-crown"></i></div>
           <div>
             <h2 class="vault-title">VIP TOKEN VAULT</h2>
-            <div class="vault-subtitle">COMMERCIAL LICENSES &bull; NEURAL POWERPACKS</div>
+            <div class="vault-subtitle">COMMERCIAL LICENSES • NEURAL POWERPACKS</div>
           </div>
         </div>
         <div class="vault-balance-badge">
@@ -6299,7 +6351,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <div class="streak-icon-box"><i class="fa-solid fa-bolt"></i></div>
           <div>
             <h2 class="streak-title">CYBER STREAK MATRIX</h2>
-            <div class="streak-subtitle">DAILY LOGIN FREQUENCY &bull; NEURAL MULTIPLIERS</div>
+            <div class="streak-subtitle">DAILY LOGIN FREQUENCY • NEURAL MULTIPLIERS</div>
           </div>
         </div>
         <button type="button" class="streak-close-btn" id="closeCyberStreakBtn" title="Close Streak Matrix">
@@ -6413,7 +6465,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <div class="spaces-icon-box"><i class="fa-solid fa-podcast"></i></div>
           <div>
             <h2 class="spaces-title">NEURAL AUDIO SPACES</h2>
-            <div class="spaces-subtitle">DECENTRALIZED VOICE STAGES &bull; LIVE AUDIO PODIUMS</div>
+            <div class="spaces-subtitle">DECENTRALIZED VOICE STAGES • LIVE AUDIO PODIUMS</div>
           </div>
         </div>
         <div class="spaces-header-actions">
@@ -6572,7 +6624,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <div class="cyberdrop-icon-box"><i class="fa-solid fa-share-nodes"></i></div>
           <div>
             <h2 class="cyberdrop-title">CYBERDROP P2P BEAM</h2>
-            <div class="cyberdrop-subtitle">ZERO-SERVER BANDWIDTH &bull; GIGABIT WEBRTC MESH BEAM</div>
+            <div class="cyberdrop-subtitle">ZERO-SERVER BANDWIDTH • GIGABIT WEBRTC MESH BEAM</div>
           </div>
         </div>
         <button type="button" class="cyberdrop-close-btn" id="closeCyberDropBtn" title="Close CyberDrop">
@@ -6613,7 +6665,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       <div class="cyberdrop-zone" id="cyberDropZone">
         <i class="fa-solid fa-cloud-arrow-up cyberdrop-zone-icon"></i>
         <div class="cyberdrop-zone-title">DRAG &amp; DROP FILES TO BEAM</div>
-        <p class="cyberdrop-zone-desc">High-speed P2P transmission &bull; Unlimited file size &bull; Direct encryption</p>
+        <p class="cyberdrop-zone-desc">High-speed P2P transmission • Unlimited file size • Direct encryption</p>
         <button type="button" class="select-beam-files-btn" id="selectBeamFilesBtn">
           <i class="fa-solid fa-folder-open"></i> BROWSE FILES
         </button>
@@ -6628,7 +6680,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
             <span id="beamFileName">firmware_v4.tar.gz</span>
           </div>
           <div class="beam-metrics">
-            <span id="beamSpeed">38.4 MB/s</span> &bull; <span id="beamTransferred">0%</span>
+            <span id="beamSpeed">38.4 MB/s</span> • <span id="beamTransferred">0%</span>
           </div>
         </div>
         <div class="beam-progress-bar">
@@ -6649,7 +6701,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <div class="cipher-icon-box"><i class="fa-solid fa-key"></i></div>
           <div>
             <h2 class="cipher-title">CIPHER VAULT</h2>
-            <div class="cipher-subtitle">ZERO-KNOWLEDGE HIDDEN ROOMS &bull; END-TO-END AES-256</div>
+            <div class="cipher-subtitle">ZERO-KNOWLEDGE HIDDEN ROOMS • END-TO-END AES-256</div>
           </div>
         </div>
         <button type="button" class="cipher-close-btn" id="closeCipherVaultBtn" title="Close Vault">
@@ -6693,7 +6745,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
         <div class="cipher-telemetry-banner">
           <div class="cipher-status-indicator">
             <i class="fa-solid fa-lock"></i>
-            <span>ENCRYPTED MESH: AES-256-GCM ACTIVE &bull; MEMORY RESIDENT ONLY</span>
+            <span>ENCRYPTED MESH: AES-256-GCM ACTIVE • MEMORY RESIDENT ONLY</span>
           </div>
           <button type="button" class="cipher-lock-btn" id="relockCipherVaultBtn">
             <i class="fa-solid fa-lock"></i> LOCK VAULT
@@ -6716,7 +6768,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                   <span class="secret-room-name">Project Obsidian</span>
                   <span class="secret-room-badge">CIPHER-LOCKED</span>
                 </div>
-                <p class="secret-room-meta">Zero metadata logs &bull; 24h auto-rotation &bull; 2 participants</p>
+                <p class="secret-room-meta">Zero metadata logs • 24h auto-rotation • 2 participants</p>
               </div>
               <button type="button" class="open-secret-room-btn" data-room="Project Obsidian">
                 <i class="fa-solid fa-arrow-right"></i> ENTER
@@ -6730,7 +6782,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                   <span class="secret-room-name">Phantom Mesh Vault</span>
                   <span class="secret-room-badge">EPHEMERAL</span>
                 </div>
-                <p class="secret-room-meta">End-to-end client salted key &bull; Burn on close</p>
+                <p class="secret-room-meta">End-to-end client salted key • Burn on close</p>
               </div>
               <button type="button" class="open-secret-room-btn" data-room="Phantom Mesh Vault">
                 <i class="fa-solid fa-arrow-right"></i> ENTER
@@ -6744,7 +6796,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                   <span class="secret-room-name">Quantum Ledger HQ</span>
                   <span class="secret-room-badge">ENCLAVE</span>
                 </div>
-                <p class="secret-room-meta">Biometric requirement &bull; Off-grid cache only</p>
+                <p class="secret-room-meta">Biometric requirement • Off-grid cache only</p>
               </div>
               <button type="button" class="open-secret-room-btn" data-room="Quantum Ledger HQ">
                 <i class="fa-solid fa-arrow-right"></i> ENTER
@@ -6961,8 +7013,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
     <div class="panic-terminal-box" id="panicTerminalBox">
       <div class="panic-logo"><i class="fa-solid fa-shield-halved"></i></div>
       <div class="panic-title">GHOST LOCK ACTIVE</div>
-      <div class="panic-subtitle">Privacy Shield Engaged &bull; Visual &amp; Audio Telemetry Cloaked<br>Enter Master Security PIN to Disarm</div>
-      <input type="password" id="panicPinInput" class="panic-pin-input" placeholder="&bull;&bull;&bull;&bull;" maxlength="8" autocomplete="off">
+      <div class="panic-subtitle">Privacy Shield Engaged • Visual &amp; Audio Telemetry Cloaked<br>Enter Master Security PIN to Disarm</div>
+      <input type="password" id="panicPinInput" class="panic-pin-input" placeholder="••••" maxlength="8" autocomplete="off">
       <button type="button" id="panicUnlockBtn" class="panic-unlock-btn"><i class="fa-solid fa-key"></i> DISARM SHIELD</button>
       <button type="button" id="panicDecoyToggle" class="panic-decoy-toggle">Switch to Decoy System Terminal</button>
     </div>
@@ -7119,7 +7171,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <div style="font-size: 38px; color: #c084fc; margin-bottom: 12px; filter: drop-shadow(0 0 14px rgba(192, 132, 252, 0.6));"><i class="fa-solid fa-fingerprint"></i></div>
           <div style="font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px;">BIOMETRIC GHOST AUTHENTICATOR</div>
           <div style="font-size: 12px; color: #94a3b8; margin-bottom: 18px;">Cloaked conversations are hidden from the public chat feed.<br>Enter Master PIN to authenticate enclave.</div>
-          <input type="password" id="ghostVaultPinInput" class="panic-pin-input" style="border-color: rgba(192, 132, 252, 0.4); color: #c084fc; max-width: 280px; margin: 0 auto 16px auto;" placeholder="&bull;&bull;&bull;&bull;" maxlength="8">
+          <input type="password" id="ghostVaultPinInput" class="panic-pin-input" style="border-color: rgba(192, 132, 252, 0.4); color: #c084fc; max-width: 280px; margin: 0 auto 16px auto;" placeholder="••••" maxlength="8">
           <button type="button" id="ghostVaultUnlockBtn" class="stegano-btn-primary" style="max-width: 280px; margin: 0 auto; background: linear-gradient(135deg, #a855f7, #6366f1);"><i class="fa-solid fa-unlock-keyhole"></i> Unlock Ghost Vault</button>
         </div>
         <!-- Cloaked list section -->
@@ -8672,7 +8724,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <i class="fa-solid fa-file-zipper text-2xl text-[#00f2fe]"></i>
           <div class="receiver-file-meta">
             <strong id="airdropIncomingFileName">bundle.zip</strong>
-            <span id="airdropIncomingFileSize">145 MB &bull; Direct LAN WebRTC</span>
+            <span id="airdropIncomingFileSize">145 MB • Direct LAN WebRTC</span>
           </div>
         </div>
         <div class="receiver-actions">

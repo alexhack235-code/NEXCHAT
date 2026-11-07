@@ -343,7 +343,7 @@
             <!-- Call Network & Telemetry HUD -->
             <div id="callTelemetryHUD" style="position: absolute; top: 20px; left: 20px; display: flex; align-items: center; gap: 8px; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 20px; padding: 6px 14px; font-size: 11px; font-family: monospace; color: #f8fafc; z-index: 40; backdrop-filter: blur(10px);">
               <span id="callSignalDot" style="width: 8px; height: 8px; border-radius: 50%; background: #00ff66; box-shadow: 0 0 8px #00ff66;"></span>
-              <span id="callQualityText">HD 1080p &bull; 18ms &bull; 0% Loss</span>
+              <span id="callQualityText">HD 1080p • 18ms • 0% Loss</span>
             </div>
 
             <!-- Call Top Actions (Minimize to Floating Dock) -->
@@ -1527,7 +1527,7 @@
           const qualityText = document.getElementById('callQualityText');
           const signalDot = document.getElementById('callSignalDot');
           if (qualityText) {
-            qualityText.innerHTML = `HD 1080p &bull; ${rtt}ms &bull; ${packetLoss}% Loss`;
+            qualityText.innerHTML = `HD 1080p • ${rtt}ms • ${packetLoss}% Loss`;
           }
           if (signalDot) {
             signalDot.style.background = rtt < 60 ? '#00ff66' : (rtt < 150 ? '#ffd700' : '#ff3b30');

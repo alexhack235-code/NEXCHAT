@@ -382,7 +382,7 @@
       card.innerHTML = `
         <div class="prediction-header">
           <i class="fa-solid fa-scale-balanced" style="color: #00f2ff;"></i>
-          <span>LIVE PREDICTOR &bull; VOTE & EARN +10 XP</span>
+          <span>LIVE PREDICTOR • VOTE & EARN +10 XP</span>
         </div>
         <div class="prediction-question">${this.escapeHtml(question || 'Which setup takes the win?')}</div>
         <div class="prediction-options">
@@ -465,7 +465,7 @@
             </div>
             <div class="sound-details">
               <h4>${this.escapeHtml(title)}</h4>
-              <p><i class="fa-solid fa-user-ninja"></i> ${this.escapeHtml(author)} &bull; 14.2K Reels Created</p>
+              <p><i class="fa-solid fa-user-ninja"></i> ${this.escapeHtml(author)} • 14.2K Reels Created</p>
             </div>
             <button type="button" class="sound-close-btn" onclick="document.getElementById('reelsSoundRemixModal').style.display='none';">
               <i class="fa-solid fa-xmark"></i>

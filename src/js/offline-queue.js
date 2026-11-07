@@ -104,7 +104,7 @@
         label.textContent = 'ENCRYPTED ONLINE';
       } else {
         pill.className = 'network-status-pill offline animate-pulse';
-        label.innerHTML = `OFFLINE &bull; QUEUED (<strong id="queueCountVal">0</strong>)`;
+        label.innerHTML = `OFFLINE • QUEUED (<strong id="queueCountVal">0</strong>)`;
         this.refreshQueueCount();
       }
     }

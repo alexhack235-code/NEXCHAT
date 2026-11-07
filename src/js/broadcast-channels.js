@@ -2759,7 +2759,7 @@
 
               </div>
 
-              <div class="channel-card-followers">${countFormatted} followers &bull; ${c.handle}</div>
+              <div class="channel-card-followers">${countFormatted} followers • ${c.handle}</div>
 
               <div class="channel-card-snippet">${c.description}</div>
 

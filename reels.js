@@ -2856,9 +2856,9 @@ function openChronexAiDrawer(reel) {
           <span style="background: rgba(0,255,102,0.15); color: #00ff66; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 6px;">${intel.score}% Match</span>
         </div>
         <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #cbd5e1; line-height: 1.6;">
-          <li><strong>Theme & Vector:</strong> ${escapeHtml(intel.affinity)} &bull; Authored by @${escapeHtml(author)}.</li>
+          <li><strong>Theme & Vector:</strong> ${escapeHtml(intel.affinity)} • Authored by @${escapeHtml(author)}.</li>
           <li><strong>Telemetry Dynamics:</strong> Seamless 60FPS sync, zero dropped frames, real-time audio FFT.</li>
-          <li><strong>REDOX Security Certified:</strong> Zero malware hashes &bull; Clean prompt injection filter &bull; Safe asset.</li>
+          <li><strong>REDOX Security Certified:</strong> Zero malware hashes • Clean prompt injection filter • Safe asset.</li>
         </ul>
       </div>
     `;
@@ -5816,10 +5816,10 @@ function openReelDetailsSlideUp(reel) {
   const soundTrackTitle = reel.soundTrack || reel.soundTitle || 'Neon Tokyo Funk 2088';
 
   const aiMatchEl = document.getElementById('slideUpAiMatch');
-  if (aiMatchEl) aiMatchEl.innerHTML = `${neuralIntel.score}% AI Match <span style="color:#8696a0;font-weight:normal;">&bull; ${escapeHtml(neuralIntel.affinity)}</span>`;
+  if (aiMatchEl) aiMatchEl.innerHTML = `${neuralIntel.score}% AI Match <span style="color:#8696a0;font-weight:normal;">• ${escapeHtml(neuralIntel.affinity)}</span>`;
 
   const aiVerifiedEl = document.getElementById('slideUpAiVerified');
-  if (aiVerifiedEl) aiVerifiedEl.innerHTML = `Clean <span style="color:#00ff88;font-size:11px;">&bull; Verified Clean</span>`;
+  if (aiVerifiedEl) aiVerifiedEl.innerHTML = `Clean <span style="color:#00ff88;font-size:11px;">• Verified Clean</span>`;
 
   const creatorEl = document.getElementById('slideUpCreator');
   if (creatorEl) creatorEl.textContent = `${authorName} (@${authorHandle})`;

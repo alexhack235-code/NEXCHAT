@@ -299,7 +299,7 @@
                   <i class="fa-solid fa-circle-check"></i> Pro Plan
                 </div>
                 <div class="tier-size-spec" style="color: #1d9bf0;">100 MB</div>
-                <div class="tier-rate-spec">15 uploads/min &bull; 2s</div>
+                <div class="tier-rate-spec">15 uploads/min • 2s</div>
                 <div class="tier-price-spec">$12 / 18,000 NGN</div>
                 <button type="button" class="btn-tier-upgrade btn-pro" onclick="window.NexChatFileManager.handleUpgradePlan('TIER_PRO')">
                   <i class="fa-solid fa-bolt"></i> Upgrade 100MB
@@ -312,7 +312,7 @@
                   <i class="fa-solid fa-certificate"></i> Pro Master
                 </div>
                 <div class="tier-size-spec" style="color: #00f2ff;">150 MB</div>
-                <div class="tier-rate-spec">30 uploads/min &bull; 1s</div>
+                <div class="tier-rate-spec">30 uploads/min • 1s</div>
                 <div class="tier-price-spec">$25 / 38,000 NGN</div>
                 <button type="button" class="btn-tier-upgrade btn-promax" onclick="window.NexChatFileManager.handleUpgradePlan('TIER_PRO_MAX')">
                   <i class="fa-solid fa-crown"></i> Upgrade 150MB
@@ -325,7 +325,7 @@
                   <i class="fa-solid fa-briefcase"></i> VIP Sovereign
                 </div>
                 <div class="tier-size-spec" style="color: #ffd700;">200 MB</div>
-                <div class="tier-rate-spec">60 uploads/min &bull; 0s</div>
+                <div class="tier-rate-spec">60 uploads/min • 0s</div>
                 <div class="tier-price-spec">$50 / 75,000 NGN</div>
                 <button type="button" class="btn-tier-upgrade btn-vip" onclick="window.NexChatFileManager.handleUpgradePlan('TIER_BUSINESS_GOLD')">
                   <i class="fa-solid fa-star"></i> Enterprise

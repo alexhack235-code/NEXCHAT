@@ -1438,7 +1438,7 @@
               </div>
             </div>
             <div style="font-size: 11px; color: #64748b; font-family: monospace; text-align: center;">
-              Packet Hash: 0x9f4a...88e1 &bull; Zero-Knowledge Mesh
+              Packet Hash: 0x9f4a...88e1 • Zero-Knowledge Mesh
             </div>
           </div>
           <div class="nex-prof-modal-footer">
@@ -1584,7 +1584,7 @@
                 <div class="nex-doc-ext-badge"><i class="fa-solid fa-code"></i></div>
                 <div>
                   <div class="nex-doc-name">${escapeHtml(box.querySelector('.nex-code-title')?.textContent || 'Code Snippet')}</div>
-                  <div class="nex-doc-date">Code Block &bull; ${escapeHtml(box.querySelector('.nex-code-lang-badge')?.textContent || 'CODE')}</div>
+                  <div class="nex-doc-date">Code Block • ${escapeHtml(box.querySelector('.nex-code-lang-badge')?.textContent || 'CODE')}</div>
                 </div>
               </div>
             </div>
@@ -2102,7 +2102,7 @@ ${text}`;
           const total = poll.options.reduce((sum, o) => sum + (o.votes || 0), 0);
           pollCard.innerHTML = `
             <div class="nex-poll-question">${escapeHtml(poll.question)}</div>
-            <div class="nex-poll-meta-badge">${poll.isAnonymous ? 'ANONYMOUS POLL' : 'PUBLIC POLL'} &bull; ${total} VOTE${total === 1 ? '' : 'S'}</div>
+            <div class="nex-poll-meta-badge">${poll.isAnonymous ? 'ANONYMOUS POLL' : 'PUBLIC POLL'} • ${total} VOTE${total === 1 ? '' : 'S'}</div>
             <div style="display: flex; flex-direction: column; gap: 6px;">
               ${poll.options.map(opt => {
                 const votes = opt.votes || 0;
@@ -2155,7 +2155,7 @@ ${text}`;
       overlay.innerHTML = `
         <div class="nex-drag-drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
         <div class="nex-drag-drop-title">RELEASE FILES TO ENCRYPT &amp; ATTACH</div>
-        <div class="nex-drag-drop-desc">All file types supported &bull; AES-256-GCM Zero-Knowledge Vault</div>
+        <div class="nex-drag-drop-desc">All file types supported • AES-256-GCM Zero-Knowledge Vault</div>
       `;
 
       chatArea.appendChild(overlay);
@@ -2230,7 +2230,7 @@ ${text}`;
             banner.id = 'nexVanishBanner';
             banner.className = 'nex-vanish-banner';
             banner.innerHTML = `
-              <span><i class="fa-solid fa-ghost"></i> STEALTH VANISH MODE &bull; 15s AUTO-PURGE ACTIVE</span>
+              <span><i class="fa-solid fa-ghost"></i> STEALTH VANISH MODE • 15s AUTO-PURGE ACTIVE</span>
               <span style="font-family: monospace; font-size: 10px;">ZERO-LOG SESSION</span>
             `;
             const header = document.querySelector('.chat-detail-header');
@@ -4170,7 +4170,7 @@ ${text}`;
               </button>
             </div>
             <div class="nex-welcome-security-footer">
-              <i class="fa-solid fa-lock"></i> Verification Fingerprint: <code>7F9A-4B2E-88D1-C902</code> &bull; 100% Client-Side
+              <i class="fa-solid fa-lock"></i> Verification Fingerprint: <code>7F9A-4B2E-88D1-C902</code> • 100% Client-Side
             </div>
           `;
 

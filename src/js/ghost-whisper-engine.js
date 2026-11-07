@@ -12,7 +12,7 @@
  *    - Countdown ticker & burning progress bar smoothly drain from designated timeout.
  *    - Web Audio synchronized ticking chimes.
  *    - Permanent ash disintegration sound & particle dissolution at 0s.
- *    - Immutable tombstone: [VIEW-ONCE EXPIRED &bull; DISINTEGRATED] (never reopenable).
+ *    - Immutable tombstone: [VIEW-ONCE EXPIRED • DISINTEGRATED] (never reopenable).
  * 4. Anti-Screenshot & Screen Capture Protection Suite ("You cannot take pictures of it"):
  *    - Instant Blackout Privacy Shield triggered on window blur / tab switch / Alt+Tab.
  *    - Screen capture keystroke neutralization: PrintScreen, Meta+Shift+S, Ctrl+Shift+S, Ctrl+P.
@@ -347,7 +347,7 @@
             </div>
             <div>
               <h3>View-Once Transmission Studio</h3>
-              <p>Self-destructs after designated timeout &bull; Anti-Capture Shield</p>
+              <p>Self-destructs after designated timeout • Anti-Capture Shield</p>
             </div>
             <button type="button" class="whisper-close-btn" id="voCloseComposerBtn">
               <i class="fa-solid fa-xmark"></i>
@@ -369,7 +369,7 @@
           <div class="whisper-body">
             <div class="whisper-alert-strip">
               <i class="fa-solid fa-shield-halved" style="color: #c084fc;"></i>
-              <span>Hashes come to life on click &bull; Disappears permanently after designated timer. Screen captures strictly blocked.</span>
+              <span>Hashes come to life on click • Disappears permanently after designated timer. Screen captures strictly blocked.</span>
             </div>
 
             <!-- TAB 1: PHOTO -->
@@ -814,7 +814,7 @@
       this.activeViewer = viewer;
 
       // Forensic watermark tile generator
-      const watermarkText = `VIEWER: @${this.escapeHtml(currentViewerName)} [${this.escapeHtml(viewerUID)}] &bull; NEXCHAT ANTI-CAPTURE ARMED &bull; ${timestampStr}`;
+      const watermarkText = `VIEWER: @${this.escapeHtml(currentViewerName)} [${this.escapeHtml(viewerUID)}] • NEXCHAT ANTI-CAPTURE ARMED • ${timestampStr}`;
 
       viewer.innerHTML = `
         <div class="vo-secure-backdrop"></div>
@@ -825,7 +825,7 @@
             <i class="fa-solid fa-shield-halved"></i>
             <h3>ANTI-SCREENSHOT SHIELD ACTIVE</h3>
             <p>Screen capture shortcut detected or window focus lost.</p>
-            <p class="vo-sub-alert">Content protected by NEXCHAT Hardware-Accelerated DRM &bull; Return focus to resume.</p>
+            <p class="vo-sub-alert">Content protected by NEXCHAT Hardware-Accelerated DRM • Return focus to resume.</p>
           </div>
         </div>
 
@@ -848,7 +848,7 @@
               <span class="vo-badge-bubble">1</span>
               <div>
                 <h4>SECURE VIEW-ONCE ${type.toUpperCase()}</h4>
-                <p><i class="fa-solid fa-lock"></i> Encrypted Session &bull; Disintegrates on Timeout</p>
+                <p><i class="fa-solid fa-lock"></i> Encrypted Session • Disintegrates on Timeout</p>
               </div>
             </div>
 
@@ -896,7 +896,7 @@
           <!-- FOOTER SECURITY NOTICE -->
           <div class="vo-secure-hud-footer">
             <i class="fa-solid fa-fingerprint"></i>
-            <span>Attributable Forensic Watermark Attached &bull; Screenshots & Screen Recordings are Blocked</span>
+            <span>Attributable Forensic Watermark Attached • Screenshots & Screen Recordings are Blocked</span>
           </div>
         </div>
       `;
@@ -1079,7 +1079,7 @@
           </div>
           <div class="vo-tombstone-info">
             <span class="vo-tombstone-title">VIEW ONCE EXPIRED</span>
-            <span class="vo-tombstone-sub">Permanently disintegrated &bull; Cannot be replayed</span>
+            <span class="vo-tombstone-sub">Permanently disintegrated • Cannot be replayed</span>
           </div>
           <span class="vo-tombstone-lock"><i class="fa-solid fa-lock"></i></span>
         </div>

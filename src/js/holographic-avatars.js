@@ -58,7 +58,7 @@
             <div class="holo-viewport-container" id="holoViewportContainer">
               <canvas id="holoAvatarCanvas" class="holo-avatar-canvas" width="280" height="260"></canvas>
               <div class="holo-scanline-beam"></div>
-              <span class="holo-tracking-label" id="holoCoordsLabel">ROT X: 0.00 &bull; ROT Y: 0.00</span>
+              <span class="holo-tracking-label" id="holoCoordsLabel">ROT X: 0.00 • ROT Y: 0.00</span>
             </div>
 
             <div class="holo-styles-row mt-3">

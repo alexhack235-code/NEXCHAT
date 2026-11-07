@@ -94,7 +94,7 @@
                     </div>
                     <div class="peek-telemetry-row">
                       <span class="peek-airgap-tag"><i class="fa-solid fa-shield-halved"></i> AIR-GAP ISOLATED</span>
-                      <span class="peek-telemetry-bullet">&bull;</span>
+                      <span class="peek-telemetry-bullet">•</span>
                       <span id="quantumPeekSubtitle" class="peek-time-label">Snapshot</span>
                     </div>
                   </div>
@@ -220,7 +220,7 @@
           hudBanner.innerHTML = `
             <div class="stealth-hud-content">
               <span class="stealth-hud-indicator"></span>
-              <span>STEALTH GHOST ENGAGED &bull; PRESENCE FROZEN &bull; ZERO READ RECEIPTS</span>
+              <span>STEALTH GHOST ENGAGED • PRESENCE FROZEN • ZERO READ RECEIPTS</span>
             </div>
             <button type="button" class="stealth-hud-restore-btn" onclick="window.NexStealthPrivacy?.AirGap?.toggleStealthGhostMode(false)">Restore</button>
           `;

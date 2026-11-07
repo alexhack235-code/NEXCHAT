@@ -363,7 +363,7 @@
                   NEXCHAT Watermark Video Export Studio
                 </h3>
                 <div style="font-size: 11px; color: #94a3b8;">
-                  TikTok-Style Shifting Watermark Tag &bull; Clean In-App &bull; Branded Download
+                  TikTok-Style Shifting Watermark Tag • Clean In-App • Branded Download
                 </div>
               </div>
             </div>

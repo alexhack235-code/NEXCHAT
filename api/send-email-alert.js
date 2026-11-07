@@ -116,7 +116,7 @@ export default async function handler(req, res) {
                       ${verificationPin}
                     </div>
                     <p style="margin: 10px 0 0; font-size: 11px; color: #94a3b8;">
-                      6-Digit Security Verification PIN &bull; Enter in NEXCHAT to activate CamShot
+                      6-Digit Security Verification PIN • Enter in NEXCHAT to activate CamShot
                     </p>
                   </td>
                 </tr>
@@ -152,7 +152,7 @@ export default async function handler(req, res) {
           <!-- Footer -->
           <tr>
             <td style="padding: 18px 30px; background-color: #070b14; border-top: 1px solid rgba(255, 255, 255, 0.08); text-align: center; font-family: monospace; font-size: 10px; color: #64748b;">
-              NEXCHAT COMMUNICATIONS &bull; ZERO-TRUST ARCHITECTURE &bull; VERCEL APIS
+              NEXCHAT COMMUNICATIONS • ZERO-TRUST ARCHITECTURE • VERCEL APIS
             </td>
           </tr>
         </table>

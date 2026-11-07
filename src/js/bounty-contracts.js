@@ -304,7 +304,7 @@
 
         <h4 class="bounty-task-title mt-2">${active.title}</h4>
         <p class="bounty-task-desc mt-1">${active.description}</p>
-        <span class="bounty-meta-line">Issuer: ${active.creatorName || 'Operative'} &bull; Status: <strong class="${isFulfilled ? 'text-amber-400' : 'text-[#00ff66]'}">${active.status}</strong></span>
+        <span class="bounty-meta-line">Issuer: ${active.creatorName || 'Operative'} • Status: <strong class="${isFulfilled ? 'text-amber-400' : 'text-[#00ff66]'}">${active.status}</strong></span>
 
         <!-- Submissions & Actions Container -->
         <div class="bounty-action-box mt-3" id="bountyActionBox_${bId}">
