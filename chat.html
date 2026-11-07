@@ -750,7 +750,7 @@
         <div class="chats-section">
           <ul id="contactList" class="chat-list">
             <!-- ChronEX AI Pre-seeded Instant Chat -->
-            <li class="chat-list-item chat-item chronex-ai-item" data-chat-id="chronex-ai" data-chat-type="ai" data-name="Chronex AI">
+            <li class="chat-list-item chat-item chronex-ai-item" data-chat-id="chronex-ai" data-chat-type="ai" data-name="Chronex AI" onclick="if(typeof openChat==='function'){openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai'); if(typeof showChatDetailView==='function')showChatDetailView();}">
               <div class="chat-avatar-container" style="position: relative;">
                 <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
                 <span class="chat-online-beacon" style="display: block;"></span>
@@ -774,7 +774,7 @@
             </li>
 
             <!-- NEXCHAT Concierge Pre-seeded Instant Chat -->
-            <li class="chat-list-item chat-item" data-chat-id="nex-support" data-chat-type="direct" data-name="NEXCHAT Concierge">
+            <li class="chat-list-item chat-item" data-chat-id="nex-support" data-chat-type="direct" data-name="NEXCHAT Concierge" onclick="if(typeof openChat==='function'){openChat('nex-support', 'NEXCHAT Concierge', 'logo.jpg', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
               <div class="chat-avatar-container" style="position: relative;">
                 <img src="logo.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff9d; box-shadow: 0 0 12px rgba(0, 255, 157, 0.3);">
                 <span class="chat-online-beacon" style="display: block;"></span>
