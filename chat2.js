@@ -135,6 +135,9 @@ export function createContactListItem(chat) {
     if (typeof window.openChat === 'function') {
       window.openChat(chat.uid, chat.name, chat.pic || 'logo.jpg', chat.type || 'direct');
     }
+    if (typeof window.showChatDetailView === 'function') {
+      window.showChatDetailView();
+    }
   });
 
   return li;
@@ -147,8 +150,44 @@ export function syncLocalChatsToDOM() {
   const contactList = document.getElementById('contactList');
   if (!contactList) return;
 
-  const chats = getStoredChats();
-  if (chats.length === 0) return;
+  let chats = getStoredChats();
+  if (chats.length === 0) {
+    chats = [
+      {
+        uid: 'chronex-ai',
+        name: 'ChronEX AI',
+        pic: 'chronex-ai.jpg',
+        type: 'ai',
+        badge: 'AI',
+        isVerified: true,
+        status: 'Autonomous Cyber Intelligence (Online)',
+        lastMsg: 'Tap to chat with ChronEX AI Assistant'
+      },
+      {
+        uid: 'nex-support',
+        name: 'NEXCHAT Concierge',
+        pic: 'logo.jpg',
+        type: 'direct',
+        badge: 'VERIFIED',
+        isVerified: true,
+        status: 'Official VIP System Support',
+        lastMsg: 'Official VIP Support • Tap to connect'
+      },
+      {
+        uid: 'cyber-syndicate',
+        name: 'Cyber Syndicate',
+        pic: 'logo.jpg',
+        type: 'group',
+        badge: 'VERIFIED',
+        isVerified: true,
+        status: 'Decentralized Tech Network',
+        lastMsg: 'Broadcast updates: Neural Translation Active'
+      }
+    ];
+    try {
+      localStorage.setItem(LOCAL_CHATS_STORAGE_KEY, JSON.stringify(chats));
+    } catch (_) {}
+  }
 
   // Remove empty state watermark once chats exist
   const emptyState = document.getElementById('emptyChatState');
@@ -159,7 +198,7 @@ export function syncLocalChatsToDOM() {
   chats.forEach(chat => {
     const existingLi = contactList.querySelector(`li[data-chat-id="${chat.uid}"]`);
     if (!existingLi) {
-      contactList.prepend(createContactListItem(chat));
+      contactList.appendChild(createContactListItem(chat));
     }
   });
 }
@@ -170,8 +209,16 @@ export function syncLocalChatsToDOM() {
 export function closeFabSheet() {
   const sheet = document.getElementById('fabActionSheet');
   if (sheet) {
-    sheet.style.display = 'none';
-    sheet.classList.remove('is-active', 'open');
+    sheet.classList.remove('is-active', 'active', 'open');
+    sheet.style.setProperty('display', 'none', 'important');
+    sheet.setAttribute('aria-hidden', 'true');
+    const panel = document.getElementById('fabActionSheetPanel');
+    const backdrop = document.getElementById('fabActionSheetBackdrop');
+    if (panel) {
+      panel.classList.remove('closing');
+      panel.style.transform = '';
+    }
+    if (backdrop) backdrop.classList.remove('closing');
   }
 }
 
@@ -834,6 +881,12 @@ export function initChat2() {
 }
 
 // Global Exports
+window.openContactPickerModal = openContactPickerModal;
+window.openChannelCreateModal = openChannelCreateModal;
+window.openReelUploadModal = openReelUploadModal;
+window.closeFabSheet = closeFabSheet;
+window.syncLocalChatsToDOM = syncLocalChatsToDOM;
+
 window.nexChat2 = {
   initChat2,
   openContactPickerModal,

@@ -1757,7 +1757,7 @@ function loadChatApprovalSettings() {
 }
 
 function isDirectChatAllowed(targetUid) {
-  if (targetUid === 'chronex-ai') return true;
+  if (targetUid === 'chronex-ai' || targetUid === 'nex-support' || targetUid === 'cyber-syndicate' || targetUid === 'alex-vance') return true;
   if (directChatAutoAccept) return true;
   if (!targetUid) return false;
   if (approvedChatUsers.includes(targetUid)) return true;
@@ -22427,28 +22427,26 @@ function setupMobileFeatures() {
       panel.style.transform = '';
     }
     if (backdrop) backdrop.classList.remove('closing');
-    sheet.style.display = 'flex';
+    sheet.classList.add('is-active', 'active', 'open');
+    sheet.style.setProperty('display', 'flex', 'important');
     sheet.setAttribute('aria-hidden', 'false');
   };
 
   const closeFabActionSheet = () => {
     const sheet = document.getElementById('fabActionSheet');
-    if (!sheet || sheet.style.display === 'none' || isClosingFabSheet) return;
+    if (!sheet) return;
     const panel = document.getElementById('fabActionSheetPanel');
     const backdrop = document.getElementById('fabActionSheetBackdrop');
-    isClosingFabSheet = true;
     if (panel) panel.classList.add('closing');
     if (backdrop) backdrop.classList.add('closing');
-    setTimeout(() => {
-      sheet.style.display = 'none';
-      sheet.setAttribute('aria-hidden', 'true');
-      if (panel) {
-        panel.classList.remove('closing');
-        panel.style.transform = '';
-      }
-      if (backdrop) backdrop.classList.remove('closing');
-      isClosingFabSheet = false;
-    }, 200);
+    sheet.classList.remove('is-active', 'active', 'open');
+    sheet.style.setProperty('display', 'none', 'important');
+    sheet.setAttribute('aria-hidden', 'true');
+    if (panel) {
+      panel.classList.remove('closing');
+      panel.style.transform = '';
+    }
+    if (backdrop) backdrop.classList.remove('closing');
   };
   window.openFabActionSheet = openFabActionSheet;
   window.closeFabActionSheet = closeFabActionSheet;
@@ -22463,18 +22461,19 @@ function setupMobileFeatures() {
 
   // Drag handle / Touch swipe down to close
   const fabPanel = document.getElementById('fabActionSheetPanel');
-  if (fabPanel) {
+  const fabHandle = document.getElementById('fabActionSheetHandle');
+  if (fabPanel && fabHandle) {
     let touchStartY = 0;
     let touchCurrentY = 0;
     let isSwiping = false;
 
-    fabPanel.addEventListener('touchstart', (e) => {
+    fabHandle.addEventListener('touchstart', (e) => {
       touchStartY = e.touches[0].clientY;
       touchCurrentY = touchStartY;
       isSwiping = true;
     }, { passive: true });
 
-    fabPanel.addEventListener('touchmove', (e) => {
+    fabHandle.addEventListener('touchmove', (e) => {
       if (!isSwiping) return;
       touchCurrentY = e.touches[0].clientY;
       const deltaY = touchCurrentY - touchStartY;
@@ -22483,7 +22482,7 @@ function setupMobileFeatures() {
       }
     }, { passive: true });
 
-    fabPanel.addEventListener('touchend', () => {
+    fabHandle.addEventListener('touchend', () => {
       if (!isSwiping) return;
       isSwiping = false;
       const deltaY = touchCurrentY - touchStartY;
@@ -22509,28 +22508,48 @@ function setupMobileFeatures() {
     });
   });
 
-  document.getElementById('fabSheetNewChat')?.addEventListener('click', () => {
-    closeFabActionSheet();
-    openSearch();
+  ['click', 'touchend'].forEach(evt => {
+    document.getElementById('closeFabActionSheetBtn')?.addEventListener(evt, (e) => {
+      e.preventDefault();
+      closeFabActionSheet();
+    });
+    document.getElementById('fabActionSheetBackdrop')?.addEventListener(evt, (e) => {
+      e.preventDefault();
+      closeFabActionSheet();
+    });
   });
 
-  document.getElementById('fabSheetNewChannel')?.addEventListener('click', () => {
+  document.getElementById('fabSheetNewChat')?.addEventListener('click', (e) => {
+    e.preventDefault();
     closeFabActionSheet();
-    if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openCreateModal === 'function') {
+    if (typeof window.openContactPickerModal === 'function') {
+      window.openContactPickerModal();
+    } else if (typeof openSearch === 'function') {
+      openSearch();
+    }
+  });
+
+  document.getElementById('fabSheetNewChannel')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeFabActionSheet();
+    if (typeof window.openChannelCreateModal === 'function') {
+      window.openChannelCreateModal();
+    } else if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openCreateModal === 'function') {
       window.broadcastChannelsEngine.openCreateModal();
-    } else if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openCreateChannelModal === 'function') {
-      window.broadcastChannelsEngine.openCreateChannelModal();
-    } else if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openModal === 'function') {
-      window.broadcastChannelsEngine.openModal('explore');
     } else {
       const updatesNav = document.getElementById('nav-status');
       if (updatesNav) updatesNav.click();
     }
   });
 
-  document.getElementById('fabSheetNewReel')?.addEventListener('click', () => {
+  document.getElementById('fabSheetNewReel')?.addEventListener('click', (e) => {
+    e.preventDefault();
     closeFabActionSheet();
-    window.location.href = 'reels.html';
+    if (typeof window.openReelUploadModal === 'function') {
+      window.openReelUploadModal();
+    } else {
+      window.location.href = 'reels.html';
+    }
   });
 
   // Empty State Buttons Event Delegation
@@ -23684,33 +23703,13 @@ async function loadContacts() {
 
     const groupCount = await appendGroupsToContactList(contactList);
     if (contactDataList.length === 0 && groupCount === 0) {
-      contactList.innerHTML = `
-        <li class="empty-state" id="emptyChatState">
-          <div class="empty-state-watermark" aria-hidden="true">
-            <svg viewBox="0 0 100 100" class="nex-watermark-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22 80V20L50 50L78 20V80" stroke="#00FF9D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="empty-state-content">
-            <h3 class="empty-state-title">No chats yet</h3>
-            <p class="empty-state-subtitle">Search for friends to start chatting</p>
-            <div class="empty-state-actions">
-              <button type="button" class="empty-action-btn primary" id="emptyStartNewChatBtn">
-                <i class="fa-solid fa-plus"></i>
-                <span>Start New Chat</span>
-              </button>
-              <button type="button" class="empty-action-btn secondary" id="emptyExploreChannelsBtn">
-                <i class="fa-solid fa-satellite-dish"></i>
-                <span>Explore Channels</span>
-              </button>
-              <button type="button" class="empty-action-btn secondary" id="emptyTryChronexAiBtn">
-                <i class="fa-solid fa-microchip"></i>
-                <span>Try ChronEX AI</span>
-              </button>
-            </div>
-          </div>
-        </li>
-      `;
+      // PRESERVE CHAT VIEW: Never overwrite contactList with empty dead state
+      if (!contactList.querySelector('li[data-chat-id="chronex-ai"]')) {
+        contactList.appendChild(chronexLi);
+      }
+      if (typeof window.syncLocalChatsToDOM === 'function') {
+        window.syncLocalChatsToDOM();
+      }
     }
 
     // Synchronize Archived & Locked Chats UI

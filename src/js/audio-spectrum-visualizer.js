@@ -51,7 +51,7 @@
 
   class TacticalAcousticSpectrumEngine {
     constructor() {
-      this.enabled = true;
+      this.enabled = false;
       this.audioCtx = null;
       this.analyser = null;
       this.sourceNodes = new WeakSet();
@@ -246,12 +246,19 @@
        3. DOM WIREFRAME INJECTION IN CALL OVERLAY & TACTICAL DOCK
        ------------------------------------------------------------------------ */
     injectCallDockVisualizer() {
-      const callContainer = document.querySelector('.active-call-container') || document.body;
+      // STRICT CALL GUARD: Only mount spectrum visualizer inside active WebRTC call containers
+      const callContainer = document.querySelector('.active-call-container');
+      const subBox = document.getElementById('liveCallSubtitlesBox');
+      if (!callContainer && !subBox) {
+        return; // NEVER inject into normal chat view
+      }
+
       if (document.getElementById('callAudioSpectrumCanvas')) return;
 
       const wrap = document.createElement('div');
       wrap.id = 'callSpectrumWrap';
       wrap.className = 'call-spectrum-wrap';
+      wrap.style.display = 'none'; // Strictly hidden by default
       wrap.innerHTML = `
         <div class="spectrum-header">
           <div class="spectrum-brand">
@@ -277,14 +284,10 @@
         </div>
       `;
 
-      const subBox = document.getElementById('liveCallSubtitlesBox');
       if (subBox && subBox.parentNode) {
         subBox.parentNode.insertBefore(wrap, subBox);
-      } else {
-        const header = document.querySelector('.chat-detail-header');
-        if (header && header.parentNode) {
-          header.parentNode.insertBefore(wrap, header.nextSibling);
-        }
+      } else if (callContainer) {
+        callContainer.appendChild(wrap);
       }
 
       this.canvas = document.getElementById('callAudioSpectrumCanvas');

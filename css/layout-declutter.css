@@ -4665,3 +4665,6 @@ body[data-active-section="updates"] .top-header {
 .app[data-custom-bg="true"] #chatDetailView {
   background: transparent !important;
 }
+
+
+#callSpectrumWrap:not(.spectrum-active) { display: none !important; }

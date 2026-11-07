@@ -749,30 +749,47 @@
         <!-- Active Chats Section -->
         <div class="chats-section">
           <ul id="contactList" class="chat-list">
-            <li class="empty-state" id="emptyChatState">
-              <div class="empty-state-watermark" aria-hidden="true">
-                <svg viewBox="0 0 100 100" class="nex-watermark-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 80V20L50 50L78 20V80" stroke="#00FF9D" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+            <!-- ChronEX AI Pre-seeded Instant Chat -->
+            <li class="chat-list-item chat-item chronex-ai-item" data-chat-id="chronex-ai" data-chat-type="ai" data-name="Chronex AI">
+              <div class="chat-avatar-container" style="position: relative;">
+                <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
+                <span class="chat-online-beacon" style="display: block;"></span>
+                <span class="avatar-achievement-badge" style="background: linear-gradient(135deg, #00ff66, #00d4ff); color: #041019; box-shadow: 0 0 10px rgba(0,255,102,0.5);"><i class="fa-solid fa-bolt"></i><span>AI</span></span>
               </div>
-              <div class="empty-state-content">
-                <h3 class="empty-state-title">No chats yet</h3>
-                <p class="empty-state-subtitle">Search for friends to start chatting</p>
-                <div class="empty-state-actions">
-                  <button type="button" class="empty-action-btn primary" id="emptyStartNewChatBtn">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Start New Chat</span>
-                  </button>
-                  <button type="button" class="empty-action-btn secondary" id="emptyExploreChannelsBtn">
-                    <i class="fa-solid fa-satellite-dish"></i>
-                    <span>Explore Channels</span>
-                  </button>
-                  <button type="button" class="empty-action-btn secondary" id="emptyTryChronexAiBtn">
-                    <i class="fa-solid fa-microchip"></i>
-                    <span>Try ChronEX AI</span>
-                  </button>
+              <div class="chat-item-content">
+                <div class="chat-item-header">
+                  <span class="chat-name" style="font-family: 'Space Grotesk', sans-serif;">Chronex AI</span>
+                  <span class="tg-verified-badge green nex-verified-badge" title="Verified AI Assistant"><i class="fa-solid fa-circle-check"></i></span>
+                  <span class="chronex-vip-pill"><i class="fa-solid fa-bolt"></i> NEURAL CORE</span>
                 </div>
+                <p class="chat-preview" style="color: #25d366; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                  <i class="fa-solid fa-microchip delivery-icon"></i>
+                  <span class="preview-text">Ready • Tap to chat with AI</span>
+                </p>
               </div>
+              <div class="chat-time-container">
+                <span class="chat-item-time" style="color: #25d366; font-weight: 600; font-size: 12px;">ONLINE</span>
+              </div>
+              <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            </li>
+
+            <!-- NEXCHAT Concierge Pre-seeded Instant Chat -->
+            <li class="chat-list-item chat-item" data-chat-id="nex-support" data-chat-type="direct" data-name="NEXCHAT Concierge">
+              <div class="chat-avatar-container" style="position: relative;">
+                <img src="logo.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff9d; box-shadow: 0 0 12px rgba(0, 255, 157, 0.3);">
+                <span class="chat-online-beacon" style="display: block;"></span>
+              </div>
+              <div class="chat-item-content">
+                <div class="chat-item-header">
+                  <span class="chat-name" style="font-family: 'Space Grotesk', sans-serif;">NEXCHAT Concierge</span>
+                  <span class="tg-verified-badge green nex-verified-badge" title="Official VIP Support"><i class="fa-solid fa-circle-check"></i></span>
+                </div>
+                <p class="chat-preview" style="color: #8b949e; font-size: 13px;">Official VIP System Support • Tap to connect</p>
+              </div>
+              <div class="chat-time-container">
+                <span class="chat-item-time" style="color: #8b949e; font-size: 12px;">Active</span>
+              </div>
+              <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
             </li>
           </ul>
         </div>
