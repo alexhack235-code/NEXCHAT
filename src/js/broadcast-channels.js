@@ -1320,6 +1320,7 @@
         body.channel-route-active .bottom-nav,
         body.channel-route-active #statusContainer,
         body.channel-route-active .nex-status-container,
+        body.channel-route-active .top-header,
         body.channel-route-active .chat-header,
         body.channel-route-active #mainHeader,
         body.channel-route-active .status-fab-container,
@@ -2281,7 +2282,11 @@
 
       // Feed Modal close / back -> Returns directly to Updates list
       document.getElementById('feedBackBtn')?.addEventListener('click', () => {
-        this.closeFeedModal();
+        if (window.history.state && window.history.state.channelRoute) {
+          window.history.back();
+        } else {
+          this.closeFeedModal();
+        }
       });
 
       // 3-dots Menu Toggle
@@ -2966,7 +2971,7 @@
       if (bottomNav) bottomNav.style.setProperty('display', 'none', 'important');
       const statusContainer = document.getElementById('statusContainer');
       if (statusContainer) statusContainer.style.setProperty('display', 'none', 'important');
-      const mainHeader = document.getElementById('mainHeader') || document.querySelector('.chat-header');
+      const mainHeader = document.getElementById('mainHeader') || document.querySelector('.top-header') || document.querySelector('.chat-header');
       if (mainHeader) mainHeader.style.setProperty('display', 'none', 'important');
 
       // 2. Setup Header & Content
@@ -3301,7 +3306,7 @@
       if (bottomNav) bottomNav.style.removeProperty('display');
       const statusContainer = document.getElementById('statusContainer');
       if (statusContainer) statusContainer.style.removeProperty('display');
-      const mainHeader = document.getElementById('mainHeader') || document.querySelector('.chat-header');
+      const mainHeader = document.getElementById('mainHeader') || document.querySelector('.top-header') || document.querySelector('.chat-header');
       if (mainHeader) mainHeader.style.removeProperty('display');
 
       const menu = document.getElementById('feedOptionsMenu');

@@ -75,7 +75,7 @@
     }
 
     renderPalette() {
-      const listEl = document.getElementById('slashCommandsList');
+      const listEl = document.getElementById('slashPaletteCommandsList') || document.getElementById('slashCommandsList');
       if (!listEl) return;
 
       listEl.innerHTML = '';

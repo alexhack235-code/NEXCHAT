@@ -1,4 +1,4 @@
-﻿let deferredPrompt;
+let deferredPrompt;
 let installPromptShown = false;
 window.nexchatInstallReady = false;
 
@@ -79,7 +79,7 @@ function showInstallPrompt() {
   installBtn.onclick = handleInstall;
   
   const closeBtn = document.createElement('button');
-  closeBtn.textContent = '&times;';
+  closeBtn.textContent = '×';
   closeBtn.style.cssText = `
     background: transparent;
     color: #0a0f1a;

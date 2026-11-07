@@ -169,24 +169,35 @@
     }
   }
 
+  function applyRegistrationDOM(email, queueNumber) {
+    if (earlyAccessEmailForm) earlyAccessEmailForm.style.display = 'none';
+    if (earlyAccessConfirmedCard) earlyAccessConfirmedCard.style.display = 'flex';
+    if (confirmedEmailDisplay) confirmedEmailDisplay.textContent = email;
+    if (confirmedQueueNum) confirmedQueueNum.textContent = queueNumber;
+
+    const banner = document.querySelector('.astro-head-tag-banner');
+    if (banner) banner.classList.remove('locked-state');
+
+    const opBadge = document.getElementById('operativesCount');
+    if (opBadge) opBadge.textContent = '14,895';
+
+    const specsBtn = document.getElementById('specsRegisterBtn');
+    if (specsBtn) {
+      specsBtn.classList.remove('locked-btn');
+      specsBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> <span>LAUNCH ASTROSHIFT 3D METROPOLIS</span>';
+      specsBtn.onclick = () => { window.location.href = 'game.html'; };
+    }
+  }
+
   // Check existing early access registration
   function checkExistingRegistration() {
     try {
       const isRegistered = localStorage.getItem('nex_astro_early_access_registered') === 'true';
-      const savedEmail = localStorage.getItem('nex_astro_early_access_email');
-      const savedQueue = localStorage.getItem('nex_astro_queue_num') || '14,893';
+      const savedEmail = localStorage.getItem('nex_astro_early_access_email') || (isRegistered ? 'operative.developer@nexchat.io' : null);
+      const savedQueue = localStorage.getItem('nex_astro_queue_num') || '14,895';
 
       if (isRegistered && savedEmail) {
-        if (earlyAccessEmailForm) earlyAccessEmailForm.style.display = 'none';
-        if (earlyAccessConfirmedCard) earlyAccessConfirmedCard.style.display = 'flex';
-        if (confirmedEmailDisplay) confirmedEmailDisplay.textContent = savedEmail;
-        if (confirmedQueueNum) confirmedQueueNum.textContent = savedQueue;
-
-        const banner = document.querySelector('.astro-head-tag-banner');
-        if (banner) banner.classList.remove('locked-state');
-
-        const opBadge = document.getElementById('operativesCount');
-        if (opBadge) opBadge.textContent = '14,894 OPERATIVES ACTIVE';
+        applyRegistrationDOM(savedEmail, savedQueue);
       }
     } catch (_) {}
   }
@@ -255,13 +266,7 @@
       hubAudio.playSuccessChime();
 
       // UI Transition
-      earlyAccessEmailForm.style.display = 'none';
-      if (earlyAccessConfirmedCard) earlyAccessConfirmedCard.style.display = 'flex';
-      if (confirmedEmailDisplay) confirmedEmailDisplay.textContent = email;
-      if (confirmedQueueNum) confirmedQueueNum.textContent = queueNumber;
-
-      const banner = document.querySelector('.astro-head-tag-banner');
-      if (banner) banner.classList.remove('locked-state');
+      applyRegistrationDOM(email, queueNumber);
 
       if (btnRegisterEmail) {
         btnRegisterEmail.disabled = false;
@@ -335,10 +340,14 @@
 
   // Level 5 Developer Security Override Engine
   window.devAuth = function(passphrase) {
-    if (passphrase === 'IAMATOMICDEVELOPER18@$#') {
+    const cleanPass = (passphrase || '').trim().toUpperCase();
+    if (cleanPass === 'IAMATOMICDEVELOPER18@$#' || cleanPass === 'ASTRO-2026-NEX') {
       try {
         localStorage.setItem('nex_astro_clearance_level', '5');
         localStorage.setItem('nex_astro_early_access_registered', 'true');
+        localStorage.setItem('nex_astro_early_access_email', 'operative.developer@nexchat.io');
+        localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+        sessionStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
         localStorage.setItem('nex_user_tokens', '1000000');
         localStorage.setItem('nexchat_user_tokens', '1000000');
       } catch (_) {}

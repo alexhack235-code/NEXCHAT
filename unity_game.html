@@ -1690,11 +1690,20 @@
         // Desktop Keyboard Controls
         const keys = {};
         window.addEventListener('keydown', (e) => {
+          const active = document.activeElement;
+          const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+          if (isTyping) {
+            if (e.code === 'Escape') active.blur();
+            return;
+          }
           keys[e.code] = true;
           if (e.code === 'KeyV') toggleCamera();
           if (e.code === 'KeyE') handleInteract();
         });
         window.addEventListener('keyup', (e) => {
+          const active = document.activeElement;
+          const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+          if (isTyping) return;
           keys[e.code] = false;
         });
 
@@ -1853,7 +1862,8 @@
           handleInteract: handleInteract
         };
 
-        requestAnimationFrame(animate);
+        updateCanvasDimensions();
+          requestAnimationFrame(animate);
       }
 
       // 3. Initiate Load Sequence

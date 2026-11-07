@@ -9612,6 +9612,32 @@ function updateNavAlertsBeacon(hasUnread) {
 }
 window.updateNavAlertsBeacon = updateNavAlertsBeacon;
 
+function updateNavAiBeacon(hasUnread) {
+  const beacon = document.getElementById('navAiBeacon');
+  if (!beacon) return;
+  if (hasUnread) {
+    beacon.classList.add('has-unread');
+    beacon.style.setProperty('display', 'block', 'important');
+  } else {
+    beacon.classList.remove('has-unread');
+    beacon.style.setProperty('display', 'none', 'important');
+  }
+}
+window.updateNavAiBeacon = updateNavAiBeacon;
+
+window.toggleCyberHubModal = function() {
+  const modal = document.getElementById('cyberHubModal');
+  if (!modal) return;
+  const isVisible = modal.style.display === 'flex' || modal.classList.contains('open');
+  if (isVisible) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+  } else {
+    modal.style.display = 'flex';
+    modal.classList.add('open');
+  }
+};
+
 async function openChat(uid, username, profilePic, chatType = 'direct') {
   // Ensure voice recording is cancelled cleanly when navigating to any chat
   if (window.voiceRecorderController && typeof window.voiceRecorderController.cancelRecording === 'function') {
@@ -17545,7 +17571,7 @@ document.getElementById("uploadBackgroundBtn")?.addEventListener("click", async 
     e.stopPropagation();
   }
   const fileInput = document.getElementById("backgroundImageInput");
-  const file = fileInput.files[0];
+  const file = fileInput?.files?.[0];
 
   if (!file) {
     showNotif("Please select an image first", "error");
@@ -18108,10 +18134,12 @@ async function createGroup(e) {
 
   if (!myUID || !auth.currentUser) {
     showNotif('You must be logged in to create a group', 'error', 3000);
-    resultDiv.style.display = 'block';
-    resultDiv.style.background = '#ff6b6b';
-    resultDiv.style.color = '#fff';
-    resultDiv.textContent = '? User not authenticated. Please log in again.';
+    if (resultDiv) {
+      resultDiv.style.display = 'block';
+      resultDiv.style.background = '#ff6b6b';
+      resultDiv.style.color = '#fff';
+      resultDiv.textContent = 'User not authenticated. Please log in again.';
+    }
     return;
   }
 
@@ -18130,19 +18158,23 @@ async function createGroup(e) {
   if (window.fortressGuard) {
     const nameCheck = window.fortressGuard(name, 'Group Creation - Name');
     if (!nameCheck.safe) {
-      resultDiv.style.display = 'block';
-      resultDiv.style.background = '#ff6b6b';
-      resultDiv.style.color = '#fff';
-      resultDiv.textContent = 'Blocked by FORTRESS: ' + nameCheck.threats.join(', ');
+      if (resultDiv) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#ff6b6b';
+        resultDiv.style.color = '#fff';
+        resultDiv.textContent = 'Blocked by FORTRESS: ' + nameCheck.threats.join(', ');
+      }
       return;
     }
     if (description) {
       const descCheck = window.fortressGuard(description, 'Group Creation - Description');
       if (!descCheck.safe) {
-        resultDiv.style.display = 'block';
-        resultDiv.style.background = '#ff6b6b';
-        resultDiv.style.color = '#fff';
-        resultDiv.textContent = 'Blocked by FORTRESS: ' + descCheck.threats.join(', ');
+        if (resultDiv) {
+          resultDiv.style.display = 'block';
+          resultDiv.style.background = '#ff6b6b';
+          resultDiv.style.color = '#fff';
+          resultDiv.textContent = 'Blocked by FORTRESS: ' + descCheck.threats.join(', ');
+        }
         return;
       }
     }
@@ -19180,15 +19212,15 @@ function showGroupJoinModal(groupData, groupId) {
   currentJoinModalGroupId = groupId;
   currentJoinRequestDocId = null;
 
-  iconEl.src = groupData.profilePic || 'logo.jpg';
-  nameEl.textContent = groupData.name || 'Group';
-  descEl.textContent = groupData.description || 'No description provided.';
+  if (iconEl) iconEl.src = groupData.profilePic || 'logo.jpg';
+  if (nameEl) nameEl.textContent = groupData.name || 'Group';
+  if (descEl) descEl.textContent = groupData.description || 'No description provided.';
   const members = groupData.members || [];
-  memberCountEl.textContent = `${members.length} members`;
-  approvalStatusEl.textContent = (groupData.privacy === 'private' || groupData.approval === 'admin') ? 'Admin approval required' : 'Auto-join';
-  statusEl.textContent = (groupData.privacy === 'private' || groupData.approval === 'admin') ? 'This group requires approval before joining.' : 'You can join freely without approval.';
+  if (memberCountEl) memberCountEl.textContent = `${members.length} members`;
+  if (approvalStatusEl) approvalStatusEl.textContent = (groupData.privacy === 'private' || groupData.approval === 'admin') ? 'Admin approval required' : 'Auto-join';
+  if (statusEl) statusEl.textContent = (groupData.privacy === 'private' || groupData.approval === 'admin') ? 'This group requires approval before joining.' : 'You can join freely without approval.';
 
-  memberListEl.innerHTML = '';
+  if (memberListEl) memberListEl.innerHTML = '';
   const displayMembers = members.slice(0, 4);
   displayMembers.forEach(memberId => {
     const chip = document.createElement('span');
@@ -22484,10 +22516,12 @@ function setupMobileFeatures() {
 
   document.getElementById('fabSheetNewChannel')?.addEventListener('click', () => {
     closeFabActionSheet();
-    if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openCreateChannelModal === 'function') {
+    if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openCreateModal === 'function') {
+      window.broadcastChannelsEngine.openCreateModal();
+    } else if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openCreateChannelModal === 'function') {
       window.broadcastChannelsEngine.openCreateChannelModal();
     } else if (window.broadcastChannelsEngine && typeof window.broadcastChannelsEngine.openModal === 'function') {
-      window.broadcastChannelsEngine.openModal('create');
+      window.broadcastChannelsEngine.openModal('explore');
     } else {
       const updatesNav = document.getElementById('nav-status');
       if (updatesNav) updatesNav.click();
@@ -25946,7 +25980,7 @@ export default async function handler(req, res) {
   const simBotStatus = document.getElementById('simBotStatus');
 
   const executeSimMessage = async () => {
-    if (!simInput) return;
+    if (!simInput || !simMessagesArea) return;
     const text = simInput.value.trim();
     if (!text) return;
     simInput.value = '';

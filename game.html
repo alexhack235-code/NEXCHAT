@@ -6731,8 +6731,10 @@
     // Passphrase: IAMATOMICDEVELOPER18@$#
     // ============================================================
     window.devAuth = function(passphrase) {
-      if (passphrase === 'IAMATOMICDEVELOPER18@$#' || passphrase === 'ASTRO-2026-NEX') {
+      const cleanPass = (passphrase || '').trim().toUpperCase();
+      if (cleanPass === 'IAMATOMICDEVELOPER18@$#' || cleanPass === 'ASTRO-2026-NEX') {
         localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+        sessionStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
         localStorage.setItem('BS_HAS_LOGGED_IN', 'true');
         localStorage.setItem('nex_astro_early_access_registered', 'true');
         console.log('%c[LEVEL 5 CLEARANCE GRANTED] Welcome Operative DEMONALEX.', 'color: #00ff88; font-weight: bold; font-size: 14px;');
@@ -6793,9 +6795,10 @@
 
     function bypassLaunchLock() {
       const keyInput = document.getElementById('launch-access-key');
-      const enteredKey = keyInput ? keyInput.value.trim() : '';
+      const enteredKey = keyInput ? keyInput.value.trim().toUpperCase() : '';
       const isDevKey = (enteredKey === 'ASTRO-2026-NEX' || enteredKey === 'IAMATOMICDEVELOPER18@$#');
-      const isRegistered = (localStorage.getItem('nex_astro_early_access_registered') === 'true');
+      const isRegistered = (localStorage.getItem('nex_astro_early_access_registered') === 'true') ||
+                           (localStorage.getItem('ATOMIC_METROPOLIS_UNLOCKED') === 'true');
 
       if (!isRegistered && !isDevKey) {
         alert('[GAMING HUB LOCKED // EARLY ACCESS ONLY]\n\nAstroShift: Beyond Earth is currently locked in closed early development.\n\nPlease visit the Gaming Hub to register your email down early on the priority whitelist!');
@@ -6850,9 +6853,10 @@
 
     function submitLoginAndDeploy() {
       const keyInput = document.getElementById('launch-access-key');
-      const enteredKey = keyInput ? keyInput.value.trim() : '';
+      const enteredKey = keyInput ? keyInput.value.trim().toUpperCase() : '';
       const isDevKey = (enteredKey === 'ASTRO-2026-NEX' || enteredKey === 'IAMATOMICDEVELOPER18@$#');
-      const isRegistered = (localStorage.getItem('nex_astro_early_access_registered') === 'true');
+      const isRegistered = (localStorage.getItem('nex_astro_early_access_registered') === 'true') ||
+                           (localStorage.getItem('ATOMIC_METROPOLIS_UNLOCKED') === 'true');
 
       if (!isRegistered && !isDevKey) {
         alert('[GAMING HUB LOCKED // EARLY ACCESS ONLY]\n\nAstroShift: Beyond Earth is currently locked in closed early development.\n\nPlease visit the Gaming Hub to register your email down early on the priority whitelist!');
@@ -16604,6 +16608,12 @@
     // INPUT HANDLING & INTERACTIONS
     // ============================================================
     window.addEventListener('keydown', e => {
+      const active = document.activeElement;
+      const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+      if (isTyping) {
+        if (e.code === 'Escape') active.blur();
+        return;
+      }
       cyberAudio.init();
       keys[e.code] = true;
 
@@ -16703,6 +16713,9 @@
     });
 
     window.addEventListener('keyup', e => {
+      const active = document.activeElement;
+      const isTyping = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
+      if (isTyping) return;
       keys[e.code] = false;
     });
 
