@@ -518,6 +518,115 @@ export async function askChronexAI(promptText) {
   }
 }
 
+// In-Memory Fast Cache for Instant 0ms Re-Translations
+const clientTranslationCache = new Map();
+
+function renderTranslationBox(box, bubbleEl, translated, detected, target) {
+  box.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; gap: 8px;">
+      <span class="nex-trans-label" style="margin: 0;"><i class="fa-solid fa-language"></i> ${escapeHtml(detected)} &rarr; ${escapeHtml(target)}</span>
+      <div class="nex-trans-lang-ctrl" style="display: flex; align-items: center; gap: 4px;">
+        <select class="nex-trans-quick-switch" style="background: rgba(0,0,0,0.55); border: 1px solid rgba(0,255,157,0.3); color: #00ff9d; font-size: 10px; border-radius: 4px; padding: 2px 4px; outline: none; cursor: pointer; max-width: 130px;">
+          <option value="" disabled selected>300+ Languages</option>
+          <option value="CUSTOM">+ Type Any Language...</option>
+          <optgroup label="Popular Global">
+            <option value="English">English</option>
+            <option value="Spanish">Spanish</option>
+            <option value="French">French</option>
+            <option value="German">German</option>
+            <option value="Russian">Russian</option>
+            <option value="Portuguese">Portuguese</option>
+            <option value="Italian">Italian</option>
+            <option value="Dutch">Dutch</option>
+          </optgroup>
+          <optgroup label="African Languages">
+            <option value="Nigerian Pidgin">Nigerian Pidgin</option>
+            <option value="Yoruba">Yoruba</option>
+            <option value="Igbo">Igbo</option>
+            <option value="Hausa">Hausa</option>
+            <option value="Swahili">Swahili</option>
+            <option value="Amharic">Amharic</option>
+            <option value="Zulu">Zulu</option>
+            <option value="Xhosa">Xhosa</option>
+            <option value="Somali">Somali</option>
+          </optgroup>
+          <optgroup label="Asian & Middle East">
+            <option value="Arabic">Arabic</option>
+            <option value="Chinese (Mandarin)">Chinese</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Korean">Korean</option>
+            <option value="Hindi">Hindi</option>
+            <option value="Bengali">Bengali</option>
+            <option value="Punjabi">Punjabi</option>
+            <option value="Tagalog">Tagalog</option>
+            <option value="Vietnamese">Vietnamese</option>
+            <option value="Turkish">Turkish</option>
+            <option value="Hebrew">Hebrew</option>
+            <option value="Thai">Thai</option>
+            <option value="Indonesian">Indonesian</option>
+            <option value="Persian (Farsi)">Persian</option>
+            <option value="Urdu">Urdu</option>
+          </optgroup>
+          <optgroup label="Eastern & Nordic Europe">
+            <option value="Ukrainian">Ukrainian</option>
+            <option value="Polish">Polish</option>
+            <option value="Czech">Czech</option>
+            <option value="Greek">Greek</option>
+            <option value="Swedish">Swedish</option>
+            <option value="Norwegian">Norwegian</option>
+            <option value="Danish">Danish</option>
+            <option value="Finnish">Finnish</option>
+            <option value="Hungarian">Hungarian</option>
+            <option value="Romanian">Romanian</option>
+          </optgroup>
+        </select>
+        <div class="nex-custom-lang-input-wrap" style="display: none; align-items: center; gap: 3px;">
+          <input type="text" class="nex-custom-lang-input" placeholder="Language name..." style="width: 85px; padding: 2px 4px; font-size: 10px; background: rgba(0,0,0,0.6); border: 1px solid #00ff9d; color: #fff; border-radius: 4px; outline: none;">
+          <button type="button" class="nex-custom-lang-go-btn" style="background: #00ff9d; color: #000; border: none; font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 4px; cursor: pointer;">Go</button>
+        </div>
+      </div>
+    </div>
+    <div class="nex-trans-content">${escapeHtml(translated)}</div>
+  `;
+
+  const selectEl = box.querySelector('.nex-trans-quick-switch');
+  const customWrap = box.querySelector('.nex-custom-lang-input-wrap');
+  const customInput = box.querySelector('.nex-custom-lang-input');
+  const customGo = box.querySelector('.nex-custom-lang-go-btn');
+
+  selectEl?.addEventListener('change', (e) => {
+    const nextLang = e.target.value;
+    if (nextLang === 'CUSTOM') {
+      selectEl.style.display = 'none';
+      if (customWrap) customWrap.style.display = 'flex';
+      customInput?.focus();
+    } else if (nextLang) {
+      translateMessageElement(bubbleEl, nextLang);
+    }
+  });
+
+  const handleCustomSubmit = () => {
+    const typed = (customInput?.value || '').trim();
+    if (typed) {
+      translateMessageElement(bubbleEl, typed);
+    } else {
+      selectEl.style.display = 'block';
+      if (customWrap) customWrap.style.display = 'none';
+    }
+  };
+
+  customGo?.addEventListener('click', handleCustomSubmit);
+  customInput?.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      handleCustomSubmit();
+    } else if (ev.key === 'Escape') {
+      selectEl.style.display = 'block';
+      if (customWrap) customWrap.style.display = 'none';
+    }
+  });
+}
+
 /**
  * Real-Time Neural Translation Handler
  */
@@ -546,9 +655,17 @@ export async function translateMessageElement(bubbleEl, requestedTarget = null) 
     bubbleEl.appendChild(box);
   }
 
-  box.innerHTML = `<span class="nex-trans-label"><i class="fa-solid fa-spinner fa-spin"></i> Translating...</span>`;
-
   let targetLang = requestedTarget || window.nexPreferredLang || localStorage.getItem('nex_preferred_lang') || 'English';
+  const cacheKey = `${targetLang.toLowerCase()}:${rawText}`;
+
+  // Tier 0: 0ms Instant Memory Cache
+  if (clientTranslationCache.has(cacheKey)) {
+    const hit = clientTranslationCache.get(cacheKey);
+    renderTranslationBox(box, bubbleEl, hit.translated, hit.detected, hit.target);
+    return;
+  }
+
+  box.innerHTML = `<span class="nex-trans-label"><i class="fa-solid fa-spinner fa-spin"></i> Translating...</span>`;
 
   try {
     const res = await fetch('/api/translate', {
@@ -585,105 +702,8 @@ export async function translateMessageElement(bubbleEl, requestedTarget = null) 
       }
     }
 
-    box.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; gap: 8px;">
-        <span class="nex-trans-label" style="margin: 0;"><i class="fa-solid fa-language"></i> ${escapeHtml(detected)} &rarr; ${escapeHtml(target)}</span>
-        <div class="nex-trans-lang-ctrl" style="display: flex; align-items: center; gap: 4px;">
-          <select class="nex-trans-quick-switch" style="background: rgba(0,0,0,0.55); border: 1px solid rgba(0,255,157,0.3); color: #00ff9d; font-size: 10px; border-radius: 4px; padding: 2px 4px; outline: none; cursor: pointer; max-width: 130px;">
-            <option value="" disabled selected>300+ Languages</option>
-            <option value="CUSTOM">+ Type Any Language...</option>
-            <optgroup label="Popular Global">
-              <option value="English">English</option>
-              <option value="Spanish">Spanish</option>
-              <option value="French">French</option>
-              <option value="German">German</option>
-              <option value="Russian">Russian</option>
-              <option value="Portuguese">Portuguese</option>
-              <option value="Italian">Italian</option>
-              <option value="Dutch">Dutch</option>
-            </optgroup>
-            <optgroup label="African Languages">
-              <option value="Nigerian Pidgin">Nigerian Pidgin</option>
-              <option value="Yoruba">Yoruba</option>
-              <option value="Igbo">Igbo</option>
-              <option value="Hausa">Hausa</option>
-              <option value="Swahili">Swahili</option>
-              <option value="Amharic">Amharic</option>
-              <option value="Zulu">Zulu</option>
-              <option value="Xhosa">Xhosa</option>
-              <option value="Somali">Somali</option>
-            </optgroup>
-            <optgroup label="Asian & Middle East">
-              <option value="Arabic">Arabic</option>
-              <option value="Chinese (Mandarin)">Chinese</option>
-              <option value="Japanese">Japanese</option>
-              <option value="Korean">Korean</option>
-              <option value="Hindi">Hindi</option>
-              <option value="Bengali">Bengali</option>
-              <option value="Punjabi">Punjabi</option>
-              <option value="Tagalog">Tagalog</option>
-              <option value="Vietnamese">Vietnamese</option>
-              <option value="Turkish">Turkish</option>
-              <option value="Hebrew">Hebrew</option>
-              <option value="Thai">Thai</option>
-              <option value="Indonesian">Indonesian</option>
-              <option value="Persian (Farsi)">Persian</option>
-              <option value="Urdu">Urdu</option>
-            </optgroup>
-            <optgroup label="Eastern & Nordic Europe">
-              <option value="Ukrainian">Ukrainian</option>
-              <option value="Polish">Polish</option>
-              <option value="Czech">Czech</option>
-              <option value="Greek">Greek</option>
-              <option value="Swedish">Swedish</option>
-              <option value="Norwegian">Norwegian</option>
-              <option value="Danish">Danish</option>
-              <option value="Finnish">Finnish</option>
-              <option value="Hungarian">Hungarian</option>
-              <option value="Romanian">Romanian</option>
-            </optgroup>
-          </select>
-          <div class="nex-custom-lang-input-wrap" style="display: none; align-items: center; gap: 3px;">
-            <input type="text" class="nex-custom-lang-input" placeholder="Language name..." style="width: 85px; padding: 2px 4px; font-size: 10px; background: rgba(0,0,0,0.6); border: 1px solid #00ff9d; color: #fff; border-radius: 4px; outline: none;">
-            <button type="button" class="nex-custom-lang-go-btn" style="background: #00ff9d; color: #000; border: none; font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 4px; cursor: pointer;">Go</button>
-          </div>
-        </div>
-      </div>
-      <div class="nex-trans-content">${escapeHtml(translated)}</div>
-    `;
-
-    const selectEl = box.querySelector('.nex-trans-quick-switch');
-    const customWrap = box.querySelector('.nex-custom-lang-input-wrap');
-    const customInput = box.querySelector('.nex-custom-lang-input');
-    const customGo = box.querySelector('.nex-custom-lang-go-btn');
-
-    selectEl?.addEventListener('change', (e) => {
-      const nextLang = e.target.value;
-      if (nextLang === 'CUSTOM') {
-        selectEl.style.display = 'none';
-        customWrap.style.display = 'inline-flex';
-        customInput.focus();
-      } else if (nextLang) {
-        translateMessageElement(bubbleEl, nextLang);
-      }
-    });
-
-    const handleCustomSubmit = () => {
-      const typed = customInput.value.trim();
-      if (typed) {
-        localStorage.setItem('nex_preferred_lang', typed);
-        window.nexPreferredLang = typed;
-        translateMessageElement(bubbleEl, typed);
-      }
-    };
-
-    customGo?.addEventListener('click', handleCustomSubmit);
-    customInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleCustomSubmit();
-      }
-    });
+    clientTranslationCache.set(cacheKey, { translated, detected, target });
+    renderTranslationBox(box, bubbleEl, translated, detected, target);
   } catch (err) {
     box.innerHTML = `<span style="color: #ff4d4d; font-size: 11px;"><i class="fa-solid fa-triangle-exclamation"></i> Translation failed</span>`;
   }
