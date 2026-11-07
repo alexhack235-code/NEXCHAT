@@ -16,169 +16,153 @@
 
   'use strict';
 
-  // Seeded Official & Discoverable Channels
-
+    // Seeded Official & Discoverable Channels
   const DEFAULT_CHANNELS = [
-
     {
-
-      id: 'chan_nexchat_official',
-
-      name: 'NEXCHAT Official',
-
-      handle: '@nexchat_official',
-
-      description: 'Official announcements, quantum security firmware updates, and core releases from NEXCHAT Protocol.',
-
-      avatar: 'favicons/icon-192.png',
-
-      creatorId: 'system_nexchat',
-
-      creatorName: 'NEXCHAT Protocol',
-
+      id: 'chan_camshot_official',
+      name: 'CamShot',
+      handle: '@CamShot.nex',
+      description: 'Official CamShot studio feed, creator reels, cinematic presets, and 4K vertical broadcast releases.',
+      avatar: 'assets/camshot_logo.svg',
+      creatorId: 'system_camshot',
+      creatorName: 'CamShot Studio',
       isVerified: true,
-
-      followerCount: 248900,
-
-      createdAt: Date.now() - 86400000 * 30,
-
-      lastPostSnippet: 'NEXCHAT v4.2 Security Protocol rollout complete. Quantum forward secrecy enabled for all active nodes.',
-
-      lastPostTime: 'Today, 10:15 AM',
-
+      followerCount: 149,
+      createdAt: Date.now() - 86400000 * 10,
+      lastPostSnippet: 'CamShot Pro Cine Anamorphic presets v2.4 live for all verified creators.',
+      lastPostTime: '10:27 a.m.',
       posts: [
-
         {
-
-          id: 'post_nex_1',
-
-          authorName: 'NEXCHAT Protocol',
-
-          text: 'Welcome to NEXCHAT Broadcast Channels! Follow this channel to receive instant real-time security alerts, feature drops, and system status advisories.',
-
-          timestamp: 'Yesterday, 04:20 PM',
-
-          likes: 4120
-
+          id: 'post_camshot_1',
+          authorName: 'CamShot',
+          text: 'Welcome to the official CamShot broadcast channel on NEXCHAT! Follow here for creator bounties, algorithmic boost drops, and cinematic 4K camera gear releases.',
+          image: 'assets/camshot_logo.svg',
+          timestamp: '10:27 a.m.',
+          views: '149',
+          likes: 24
         },
-
         {
-
-          id: 'post_nex_2',
-
-          authorName: 'NEXCHAT Protocol',
-
-          text: 'NEXCHAT v4.2 Security Protocol rollout complete. Quantum forward secrecy enabled for all active nodes. End-to-end multi-device sync is now operational with zero latency.',
-
-          timestamp: 'Today, 10:15 AM',
-
-          likes: 6890
-
+          id: 'post_camshot_2',
+          authorName: 'CamShot',
+          text: 'CamShot Pro Cine Anamorphic presets v2.4 live for all verified creators. Tap attach or reels to link your stream directly.',
+          timestamp: '11:42 a.m.',
+          views: '312',
+          likes: 58
         }
-
       ]
-
     },
-
     {
-
-      id: 'chan_chronex_ai',
-
-      name: 'ChronEX AI Intelligence',
-
-      handle: '@chronex_ai',
-
-      description: 'Neural models, deep reasoning breakthroughs, and daily autonomous workspace dispatches.',
-
-      avatar: 'chronex-ai.jpg',
-
-      creatorId: 'system_chronex',
-
-      creatorName: 'ChronEX Neural Core',
-
+      id: 'chan_localhost',
+      name: 'LOCALHOST',
+      handle: '@localhost.nex',
+      description: 'Localhost development hub, testing wire broadcasts, real-time node sync, and system diagnostics.',
+      avatar: 'logo.jpg',
+      creatorId: 'system_nexchat',
+      creatorName: 'LOCALHOST Admin',
       isVerified: true,
-
-      followerCount: 184200,
-
-      createdAt: Date.now() - 86400000 * 20,
-
-      lastPostSnippet: 'Deep reasoning engine calibrated at 99.8% precision with multi-lingual audio transcription.',
-
-      lastPostTime: 'Today, 08:30 AM',
-
+      followerCount: 149,
+      createdAt: Date.now() - 86400000 * 5,
+      lastPostSnippet: 'Testing broadcast update delivery across localhost node cluster.',
+      lastPostTime: '10:27 a.m.',
       posts: [
-
         {
-
-          id: 'post_chronex_1',
-
-          authorName: 'ChronEX Neural Core',
-
-          text: 'Deep reasoning engine calibrated at 99.8% precision with multi-lingual audio transcription. Real-time neural translation supports over 32 global languages directly in your conversations.',
-
-          timestamp: 'Today, 08:30 AM',
-
-          likes: 3150
-
+          id: 'post_lh_1',
+          authorName: 'LOCALHOST',
+          text: 'Broadcast message running on local node. Real-time updates synced across all instances.',
+          timestamp: '10:27 a.m.',
+          views: '149',
+          likes: 12
         }
-
       ]
-
     },
-
     {
-
-      id: 'chan_cyber_defense',
-
-      name: 'Cyber Defense Guild',
-
-      handle: '@cyber_defense',
-
-      description: 'Zero-day vulnerability disclosures, biometric authentication advisories, and cipher vault reports.',
-
+      id: 'chan_nexchat_official',
+      name: 'NEXCHAT Official',
+      handle: '@nexchat_official',
+      description: 'Official announcements, quantum security firmware updates, and core releases from NEXCHAT Protocol.',
       avatar: 'favicons/icon-192.png',
-
-      creatorId: 'system_defense',
-
-      creatorName: 'Cyber Defense Command',
-
+      creatorId: 'system_nexchat',
+      creatorName: 'NEXCHAT Protocol',
       isVerified: true,
-
-      followerCount: 96400,
-
-      createdAt: Date.now() - 86400000 * 15,
-
-      lastPostSnippet: 'Biometric authorization active across all secondary linked hardware keys.',
-
-      lastPostTime: 'Yesterday, 07:45 PM',
-
+      followerCount: 248900,
+      createdAt: Date.now() - 86400000 * 30,
+      lastPostSnippet: 'NEXCHAT v4.2 Security Protocol rollout complete. Quantum forward secrecy enabled for all active nodes.',
+      lastPostTime: '10:15 a.m.',
       posts: [
-
         {
-
-          id: 'post_defense_1',
-
-          authorName: 'Cyber Defense Command',
-
-          text: 'Biometric authorization active across all secondary linked hardware keys. Ensure your enclave key backup is stored securely.',
-
-          timestamp: 'Yesterday, 07:45 PM',
-
-          likes: 1840
-
+          id: 'post_nex_1',
+          authorName: 'NEXCHAT Protocol',
+          text: 'Welcome to NEXCHAT Broadcast Channels! Follow this channel to receive instant real-time security alerts, feature drops, and system status advisories.',
+          timestamp: 'Yesterday, 04:20 PM',
+          views: '4.2K',
+          likes: 4120
+        },
+        {
+          id: 'post_nex_2',
+          authorName: 'NEXCHAT Protocol',
+          text: 'NEXCHAT v4.2 Security Protocol rollout complete. Quantum forward secrecy enabled for all active nodes. End-to-end multi-device sync is now operational with zero latency.',
+          timestamp: '10:15 a.m.',
+          views: '6.8K',
+          likes: 6890
         }
-
       ]
-
+    },
+    {
+      id: 'chan_chronex_ai',
+      name: 'ChronEX AI Intelligence',
+      handle: '@chronex_ai',
+      description: 'Neural models, deep reasoning breakthroughs, and daily autonomous workspace dispatches.',
+      avatar: 'chronex-ai.jpg',
+      creatorId: 'system_chronex',
+      creatorName: 'ChronEX Neural Core',
+      isVerified: true,
+      followerCount: 184200,
+      createdAt: Date.now() - 86400000 * 20,
+      lastPostSnippet: 'Deep reasoning engine calibrated at 99.8% precision with multi-lingual audio transcription.',
+      lastPostTime: '08:30 a.m.',
+      posts: [
+        {
+          id: 'post_chronex_1',
+          authorName: 'ChronEX Neural Core',
+          text: 'Deep reasoning engine calibrated at 99.8% precision with multi-lingual audio transcription. Real-time neural translation supports over 32 global languages directly in your conversations.',
+          timestamp: '08:30 a.m.',
+          views: '3.1K',
+          likes: 3150
+        }
+      ]
+    },
+    {
+      id: 'chan_cyber_defense',
+      name: 'Cyber Defense Guild',
+      handle: '@cyber_defense',
+      description: 'Zero-day vulnerability disclosures, biometric authentication advisories, and cipher vault reports.',
+      avatar: 'favicons/icon-192.png',
+      creatorId: 'system_defense',
+      creatorName: 'Cyber Defense Command',
+      isVerified: true,
+      followerCount: 96400,
+      createdAt: Date.now() - 86400000 * 15,
+      lastPostSnippet: 'Biometric authorization active across all secondary linked hardware keys.',
+      lastPostTime: 'Yesterday',
+      posts: [
+        {
+          id: 'post_defense_1',
+          authorName: 'Cyber Defense Command',
+          text: 'Biometric authorization active across all secondary linked hardware keys. Ensure your enclave key backup is stored securely.',
+          timestamp: 'Yesterday',
+          views: '1.8K',
+          likes: 1840
+        }
+      ]
     }
-
   ];
 
   class BroadcastChannelsEngine {
 
     constructor() {
       this.channels = JSON.parse(JSON.stringify(DEFAULT_CHANNELS));
-      this.followedChannelIds = new Set(['chan_nexchat_official']);
+      this.followedChannelIds = new Set(['chan_camshot_official', 'chan_localhost', 'chan_nexchat_official']);
+      this.pendingMediaAttachment = null;
       this.activeFeedChannelId = null;
       this.currentTab = 'explore';
       this.hasMountedUI = false;
@@ -208,7 +192,19 @@
 
         if (storedChannels) {
 
-          this.channels = JSON.parse(storedChannels);
+          const parsed = JSON.parse(storedChannels);
+          DEFAULT_CHANNELS.forEach(def => {
+            const existing = parsed.find(c => c.id === def.id || (c.name && c.name.toLowerCase() === def.name.toLowerCase()));
+            if (!existing) {
+              parsed.unshift(def);
+            } else {
+              if (!existing.posts || existing.posts.length === 0) existing.posts = def.posts;
+              if (def.avatar && (!existing.avatar || existing.avatar.includes('icon-192'))) existing.avatar = def.avatar;
+              if (def.handle) existing.handle = def.handle;
+            }
+          });
+          this.channels = parsed;
+          this.saveChannels();
 
         } else {
 
@@ -226,7 +222,7 @@
 
         } else {
 
-          this.followedChannelIds = new Set(['chan_nexchat_official']);
+          this.followedChannelIds = new Set(['chan_camshot_official', 'chan_localhost', 'chan_nexchat_official']);
 
           this.saveFollowed();
 
@@ -1310,9 +1306,449 @@
 
         }
 
+
+
+      
+        /* ==========================================================================
+           WHATSAPP 1:1 CHANNEL FULL PAGE ROUTE (NEX NEON HYBRID)
+           ========================================================================== */
+
+        body.channel-route-active {
+          overflow: hidden !important;
+        }
+
+        body.channel-route-active .bottom-nav,
+        body.channel-route-active #statusContainer,
+        body.channel-route-active .nex-status-container,
+        body.channel-route-active .chat-header,
+        body.channel-route-active #mainHeader,
+        body.channel-route-active .status-fab-container,
+        body.channel-route-active .updates-fab-container,
+        body.channel-route-active #chatContainer {
+          display: none !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
+
+        /* Fullscreen Channel Route Viewport - Width 100vw, Height 100dvh, inset 0 */
+        .whatsapp-channel-route {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100dvh !important;
+          height: 100vh !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border-radius: 0 !important;
+          border: none !important;
+          background: #0b141a !important;
+          background-color: #0b141a !important;
+          background-image: radial-gradient(circle at 50% 50%, rgba(17, 27, 33, 0.7) 0%, #0b141a 100%) !important;
+          z-index: 999999 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          box-sizing: border-box !important;
+          overflow: hidden !important;
+        }
+
+        /* WhatsApp Channel Header - Height 60px */
+        .whatsapp-channel-header {
+          height: 60px !important;
+          min-height: 60px !important;
+          max-height: 60px !important;
+          width: 100% !important;
+          background: #182229 !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          padding: 0 10px !important;
+          box-sizing: border-box !important;
+          position: relative !important;
+          z-index: 50 !important;
+          flex-shrink: 0 !important;
+        }
+
+        .channel-header-left {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          min-width: 0 !important;
+          flex: 1 !important;
+        }
+
+        .channel-header-btn {
+          width: 38px !important;
+          height: 38px !important;
+          border-radius: 50% !important;
+          border: none !important;
+          background: transparent !important;
+          color: #aebac1 !important;
+          font-size: 17px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          cursor: pointer !important;
+          flex-shrink: 0 !important;
+          transition: background 0.15s ease, color 0.15s ease !important;
+        }
+
+        .channel-header-btn:hover {
+          background: rgba(255, 255, 255, 0.08) !important;
+          color: #e9edef !important;
+        }
+
+        .channel-avatar-container {
+          position: relative !important;
+          width: 40px !important;
+          height: 40px !important;
+          flex-shrink: 0 !important;
+          cursor: pointer !important;
+        }
+
+        .channel-header-avatar {
+          width: 40px !important;
+          height: 40px !important;
+          border-radius: 50% !important;
+          object-fit: cover !important;
+          background: #202c33 !important;
+          border: 1.5px solid rgba(0, 255, 102, 0.4) !important;
+        }
+
+        .channel-avatar-admin-badge {
+          position: absolute !important;
+          bottom: -2px !important;
+          right: -2px !important;
+          width: 16px !important;
+          height: 16px !important;
+          border-radius: 50% !important;
+          background: #00ff66 !important;
+          color: #0b141a !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          font-size: 9px !important;
+          font-weight: 800 !important;
+          border: 2px solid #182229 !important;
+        }
+
+        .channel-header-meta {
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: center !important;
+          min-width: 0 !important;
+          flex: 1 !important;
+          cursor: pointer !important;
+        }
+
+        .channel-header-name-row {
+          display: flex !important;
+          align-items: center !important;
+          gap: 5px !important;
+        }
+
+        .channel-header-name {
+          font-size: 15px !important;
+          font-weight: 700 !important;
+          color: #e9edef !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.4px !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+        }
+
+        .channel-verified-icon {
+          color: #00ff66 !important;
+          font-size: 13px !important;
+          flex-shrink: 0 !important;
+        }
+
+        .channel-header-followers {
+          font-size: 12px !important;
+          color: #8696a0 !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          margin-top: 1px !important;
+        }
+
+        .channel-header-right {
+          display: flex !important;
+          align-items: center !important;
+          gap: 2px !important;
+          position: relative !important;
+        }
+
+        /* Dropdown Menu */
+        .whatsapp-channel-dropdown-menu {
+          position: absolute !important;
+          top: 48px !important;
+          right: 0 !important;
+          width: 190px !important;
+          background: #233138 !important;
+          border-radius: 10px !important;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
+          padding: 6px 0 !important;
+          z-index: 100 !important;
+          animation: fadeInMenu 0.15s ease-out !important;
+        }
+
+        @keyframes fadeInMenu {
+          from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .channel-dropdown-item {
+          width: 100% !important;
+          padding: 10px 16px !important;
+          background: transparent !important;
+          border: none !important;
+          color: #d1d7db !important;
+          font-size: 13.5px !important;
+          text-align: left !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 12px !important;
+          cursor: pointer !important;
+          transition: background 0.12s ease !important;
+        }
+
+        .channel-dropdown-item:hover {
+          background: rgba(255, 255, 255, 0.08) !important;
+          color: #fff !important;
+        }
+
+        /* Timeline (Messages Middle) - padding 8px left/right, gap 8px */
+        .whatsapp-channel-timeline {
+          flex: 1 1 auto !important;
+          overflow-y: auto !important;
+          overflow-x: hidden !important;
+          padding: 8px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 8px !important;
+          box-sizing: border-box !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        /* Update Row */
+        .whatsapp-channel-update-row {
+          width: 100% !important;
+          max-width: 100% !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          box-sizing: border-box !important;
+        }
+
+        /* Update Card - Width 100% - 16px (or calc(100% - 16px)), NOT 80% */
+        .whatsapp-channel-card {
+          width: 100% !important;
+          max-width: 100% !important;
+          background: #1f2c34 !important;
+          border: 1px solid rgba(255, 255, 255, 0.06) !important;
+          border-radius: 12px !important;
+          padding: 12px 14px !important;
+          box-sizing: border-box !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+          position: relative !important;
+        }
+
+        .whatsapp-channel-card-media {
+          width: 100% !important;
+          border-radius: 8px !important;
+          overflow: hidden !important;
+          margin-bottom: 8px !important;
+          background: #111b21 !important;
+        }
+
+        .whatsapp-channel-card-img {
+          width: 100% !important;
+          height: auto !important;
+          max-height: 380px !important;
+          object-fit: cover !important;
+          display: block !important;
+          cursor: pointer !important;
+        }
+
+        .whatsapp-channel-card-text {
+          font-size: 14.5px !important;
+          line-height: 1.48 !important;
+          color: #e9edef !important;
+          word-break: break-word !important;
+          white-space: pre-wrap !important;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+        }
+
+        .whatsapp-channel-card-meta {
+          display: flex !important;
+          justify-content: flex-end !important;
+          align-items: center !important;
+          margin-top: 6px !important;
+        }
+
+        .whatsapp-card-views-time {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 5px !important;
+          font-size: 11px !important;
+          color: #8696a0 !important;
+          font-variant-numeric: tabular-nums !important;
+        }
+
+        .whatsapp-card-views-time i {
+          font-size: 11px !important;
+          color: #8696a0 !important;
+        }
+
+        /* Action Rail (Reaction / Share arrow bottom-left outside card) */
+        .whatsapp-channel-card-actions {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          margin-top: 4px !important;
+          padding-left: 2px !important;
+        }
+
+        .whatsapp-channel-react-btn {
+          background: #182229 !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
+          border-radius: 9999px !important;
+          padding: 4px 10px !important;
+          font-size: 12px !important;
+          color: #8696a0 !important;
+          cursor: pointer !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 5px !important;
+          transition: all 0.15s ease !important;
+        }
+
+        .whatsapp-channel-react-btn:hover,
+        .whatsapp-channel-react-btn.reacted {
+          background: rgba(0, 255, 102, 0.12) !important;
+          color: #00ff66 !important;
+          border-color: rgba(0, 255, 102, 0.3) !important;
+        }
+
+        .whatsapp-channel-share-btn {
+          background: #182229 !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
+          border-radius: 50% !important;
+          width: 28px !important;
+          height: 28px !important;
+          font-size: 11px !important;
+          color: #8696a0 !important;
+          cursor: pointer !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          transition: all 0.15s ease !important;
+        }
+
+        .whatsapp-channel-share-btn:hover {
+          background: rgba(255, 255, 255, 0.08) !important;
+          color: #e9edef !important;
+        }
+
+        /* Input Bar - Stuck to bottom: position sticky bottom 0, width 100%, padding 8px */
+        .whatsapp-channel-input-bar {
+          position: sticky !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          background: #182229 !important;
+          border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+          padding: 8px 10px !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          z-index: 100 !important;
+          margin: 0 !important;
+          flex-shrink: 0 !important;
+        }
+
+        .channel-input-tool-btn {
+          width: 38px !important;
+          height: 38px !important;
+          border-radius: 50% !important;
+          border: none !important;
+          background: transparent !important;
+          color: #8696a0 !important;
+          font-size: 18px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          cursor: pointer !important;
+          flex-shrink: 0 !important;
+          transition: color 0.15s ease, background 0.15s ease !important;
+        }
+
+        .channel-input-tool-btn:hover {
+          color: #e9edef !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        .channel-input-field-wrapper {
+          flex: 1 !important;
+          min-width: 0 !important;
+          display: flex !important;
+          align-items: center !important;
+          background: #202c33 !important;
+          border-radius: 22px !important;
+          padding: 4px 14px !important;
+          border: 1px solid rgba(255, 255, 255, 0.06) !important;
+          min-height: 42px !important;
+          box-sizing: border-box !important;
+        }
+
+        .channel-input-field {
+          width: 100% !important;
+          border: none !important;
+          outline: none !important;
+          background: transparent !important;
+          color: #e9edef !important;
+          font-size: 14.5px !important;
+          font-family: inherit !important;
+        }
+
+        .channel-input-field::placeholder {
+          color: #8696a0 !important;
+        }
+
+        .channel-circle-action-btn {
+          width: 42px !important;
+          height: 42px !important;
+          min-width: 42px !important;
+          border-radius: 50% !important;
+          border: none !important;
+          background: #00a884 !important;
+          color: #111b21 !important;
+          font-size: 16px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          cursor: pointer !important;
+          flex-shrink: 0 !important;
+          transition: transform 0.15s ease, background 0.18s ease !important;
+          box-shadow: 0 0 10px rgba(0, 255, 102, 0.3) !important;
+        }
+
+        .channel-circle-action-btn:hover {
+          background: #00c498 !important;
+          transform: scale(1.05) !important;
+          box-shadow: 0 0 14px rgba(0, 255, 102, 0.5) !important;
+        }
       `;
 
-      document.head.appendChild(style);
+        document.head.appendChild(style);
 
     }
 
@@ -1479,80 +1915,92 @@
 
       document.body.appendChild(createModal);
 
-      // 3. Channel Feed Timeline Modal
-
+      // 3. WhatsApp 1:1 Channel Full Page Route Viewport
       const feedModal = document.createElement('div');
-
       feedModal.id = 'channelFeedModal';
-
-      feedModal.className = 'channels-modal-overlay';
-
+      feedModal.className = 'whatsapp-channel-route';
+      feedModal.style.display = 'none';
       feedModal.innerHTML = `
-
-        <div class="channels-modal-card channel-feed-card">
-
-          <div class="channel-feed-header">
-
-            <div class="feed-header-contact">
-
-              <button type="button" class="channels-close-btn" id="feedBackBtn" title="Back" style="margin-right: 4px;">
-
-                <i class="fa-solid fa-arrow-left"></i>
-
-              </button>
-
-              <img id="feedChannelAvatar" src="favicons/icon-192.png" alt="Avatar" class="feed-header-avatar">
-
-              <div>
-
-                <div style="display: flex; align-items: center; gap: 5px;">
-
-                  <span id="feedChannelName" class="feed-header-name">Channel Name</span>
-
-                  <i class="fa-solid fa-circle-check channel-verified-badge" id="feedChannelVerified"></i>
-
-                </div>
-
-                <div id="feedChannelSubscribers" class="feed-header-sub">0 followers</div>
-
-              </div>
-
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 8px;">
-
-              <button type="button" class="btn-follow-toggle" id="feedFollowToggleBtn">Follow</button>
-
-              <button type="button" class="channels-close-btn" id="closeFeedModalBtn" title="Close">
-
-                <i class="fa-solid fa-xmark"></i>
-
-              </button>
-
-            </div>
-
-          </div>
-
-          <div class="channel-posts-timeline" id="feedPostsTimeline">
-
-            <!-- Channel broadcast updates populated here -->
-
-          </div>
-
-          <div class="channel-composer-bar" id="feedComposerBar" style="display: none;">
-
-            <input type="text" id="feedComposerInput" class="channel-composer-input" placeholder="Broadcast an update to your followers...">
-
-            <button type="button" id="feedComposerSendBtn" class="channel-composer-send-btn" title="Broadcast">
-
-              <i class="fa-solid fa-paper-plane"></i>
-
+        <!-- 1. Header (Height 60px, WhatsApp Copy) -->
+        <header class="whatsapp-channel-header">
+          <div class="channel-header-left">
+            <button type="button" class="channel-header-btn channel-back-btn" id="feedBackBtn" title="Back to Updates">
+              <i class="fa-solid fa-arrow-left"></i>
             </button>
-
+            <div class="channel-avatar-container" id="feedAvatarContainer" title="Channel Info">
+              <img id="feedChannelAvatar" src="assets/camshot_logo.svg" alt="Avatar" class="channel-header-avatar">
+              <span class="channel-avatar-admin-badge" id="feedAdminBadge" title="Admin" style="display: none;">
+                <i class="fa-solid fa-plus"></i>
+              </span>
+            </div>
+            <div class="channel-header-meta" id="feedMetaContainer" title="Channel Info">
+              <div class="channel-header-name-row">
+                <span id="feedChannelName" class="channel-header-name">CAMSHOT</span>
+                <i class="fa-solid fa-circle-check channel-verified-icon" id="feedChannelVerified"></i>
+              </div>
+              <div id="feedChannelSubscribers" class="channel-header-followers">149 followers • @CamShot.nex</div>
+            </div>
           </div>
+          <div class="channel-header-right">
+            <button type="button" class="channel-header-btn" id="feedShareLinkBtn" title="Copy Channel Link">
+              <i class="fa-solid fa-link"></i>
+            </button>
+            <button type="button" class="channel-header-btn" id="feedMenuBtn" title="Channel Options">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <div class="whatsapp-channel-dropdown-menu" id="feedOptionsMenu" style="display: none;">
+              <button type="button" class="channel-dropdown-item" id="menuChannelInfoBtn">
+                <i class="fa-solid fa-circle-info"></i> Channel info
+              </button>
+              <button type="button" class="channel-dropdown-item" id="menuCopyLinkBtn">
+                <i class="fa-solid fa-link"></i> Copy link
+              </button>
+              <button type="button" class="channel-dropdown-item" id="menuShareBtn">
+                <i class="fa-solid fa-share-nodes"></i> Share
+              </button>
+              <button type="button" class="channel-dropdown-item" id="menuMuteBtn">
+                <i class="fa-solid fa-bell-slash"></i> Mute
+              </button>
+              <button type="button" class="channel-dropdown-item" id="menuToggleFollowBtn">
+                <i class="fa-solid fa-user-plus"></i> <span id="menuFollowBtnText">Follow</span>
+              </button>
+            </div>
+          </div>
+        </header>
 
-        </div>
+        <!-- 2. Messages Timeline (WhatsApp Copy) -->
+        <main class="whatsapp-channel-timeline" id="feedPostsTimeline">
+          <!-- Populated dynamically with full width update cards -->
+        </main>
 
+        <!-- 3. WhatsApp Bottom Input Bar (Stuck to bottom) -->
+        <footer class="whatsapp-channel-input-bar" id="feedComposerBar">
+          <button type="button" class="channel-input-tool-btn" id="feedEmojiBtn" title="Emoji">
+            <i class="fa-regular fa-face-smile"></i>
+          </button>
+          <div class="channel-input-field-wrapper">
+            <input
+              type="text"
+              id="feedComposerInput"
+              class="channel-input-field"
+              placeholder="Write an update"
+              autocomplete="off"
+            />
+          </div>
+          <button type="button" class="channel-input-tool-btn" id="feedAttachBtn" title="Attach media">
+            <i class="fa-solid fa-paperclip"></i>
+          </button>
+          <button type="button" class="channel-input-tool-btn" id="feedCameraBtn" title="Camera">
+            <i class="fa-solid fa-camera"></i>
+          </button>
+          <button type="button" class="channel-circle-action-btn" id="feedComposerSendBtn" title="Voice or Send">
+            <i class="fa-solid fa-microphone" id="feedActionIcon"></i>
+          </button>
+
+          <!-- Hidden File Inputs -->
+          <input type="file" id="feedMediaInput" accept="image/*,video/*" style="display: none;" />
+          <input type="file" id="feedCameraInput" accept="image/*" capture="environment" style="display: none;" />
+        </footer>
       `;
 
       document.body.appendChild(feedModal);
@@ -1647,50 +2095,128 @@
         }
       });
 
-      // Feed Modal close / back
-
+      // Feed Modal close / back -> Returns directly to Updates list
       document.getElementById('feedBackBtn')?.addEventListener('click', () => {
-
         this.closeFeedModal();
-
-        this.openModal('following');
-
       });
 
-      document.getElementById('closeFeedModalBtn')?.addEventListener('click', () => this.closeFeedModal());
-
-      document.getElementById('channelFeedModal')?.addEventListener('click', (e) => {
-
-        if (e.target.id === 'channelFeedModal') this.closeFeedModal();
-
+      // 3-dots Menu Toggle
+      document.getElementById('feedMenuBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const menu = document.getElementById('feedOptionsMenu');
+        if (menu) menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
       });
 
-      // Feed follow toggle
-
-      document.getElementById('feedFollowToggleBtn')?.addEventListener('click', () => {
-
-        if (!this.activeFeedChannelId) return;
-
-        this.toggleFollow(this.activeFeedChannelId);
-
-        this.updateFeedHeader(this.activeFeedChannelId);
-
-      });
-
-      // Feed composer broadcast
-
-      document.getElementById('feedComposerSendBtn')?.addEventListener('click', () => this.handleBroadcastPost());
-
-      document.getElementById('feedComposerInput')?.addEventListener('keydown', (e) => {
-
-        if (e.key === 'Enter') {
-
-          e.preventDefault();
-
-          this.handleBroadcastPost();
-
+      // Close dropdown menu when clicking anywhere else
+      document.addEventListener('click', (e) => {
+        const menu = document.getElementById('feedOptionsMenu');
+        if (menu && menu.style.display === 'block' && !e.target.closest('#feedOptionsMenu') && !e.target.closest('#feedMenuBtn')) {
+          menu.style.display = 'none';
         }
+      });
 
+      // Copy Link Button
+      document.getElementById('feedShareLinkBtn')?.addEventListener('click', () => {
+        this.handleCopyChannelLink();
+      });
+
+      document.getElementById('menuCopyLinkBtn')?.addEventListener('click', () => {
+        document.getElementById('feedOptionsMenu').style.display = 'none';
+        this.handleCopyChannelLink();
+      });
+
+      document.getElementById('menuChannelInfoBtn')?.addEventListener('click', () => {
+        document.getElementById('feedOptionsMenu').style.display = 'none';
+        this.showChannelInfoModal();
+      });
+
+      document.getElementById('feedAvatarContainer')?.addEventListener('click', () => {
+        this.showChannelInfoModal();
+      });
+
+      document.getElementById('feedMetaContainer')?.addEventListener('click', () => {
+        this.showChannelInfoModal();
+      });
+
+      document.getElementById('menuShareBtn')?.addEventListener('click', () => {
+        document.getElementById('feedOptionsMenu').style.display = 'none';
+        this.handleShareChannel();
+      });
+
+      document.getElementById('menuMuteBtn')?.addEventListener('click', () => {
+        document.getElementById('feedOptionsMenu').style.display = 'none';
+        if (window.showNotif) window.showNotif('Notifications muted for this channel', 'info');
+      });
+
+      document.getElementById('menuToggleFollowBtn')?.addEventListener('click', () => {
+        document.getElementById('feedOptionsMenu').style.display = 'none';
+        if (this.activeFeedChannelId) {
+          this.toggleFollow(this.activeFeedChannelId);
+          this.updateFeedHeader(this.activeFeedChannelId);
+        }
+      });
+
+      // Attach & Camera Media Handlers
+      document.getElementById('feedAttachBtn')?.addEventListener('click', () => {
+        document.getElementById('feedMediaInput')?.click();
+      });
+
+      document.getElementById('feedCameraBtn')?.addEventListener('click', () => {
+        document.getElementById('feedCameraInput')?.click();
+      });
+
+      const handleMediaSelect = (inputEl) => {
+        const file = inputEl.files && inputEl.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          this.pendingMediaAttachment = evt.target.result;
+          if (window.showNotif) window.showNotif('Media attached to broadcast update', 'success');
+          const icon = document.getElementById('feedActionIcon');
+          if (icon) icon.className = 'fa-solid fa-paper-plane';
+        };
+        reader.readAsDataURL(file);
+        inputEl.value = '';
+      };
+
+      document.getElementById('feedMediaInput')?.addEventListener('change', (e) => handleMediaSelect(e.target));
+      document.getElementById('feedCameraInput')?.addEventListener('change', (e) => handleMediaSelect(e.target));
+
+      // Dynamic Send / Mic Icon Switching
+      const composerInput = document.getElementById('feedComposerInput');
+      composerInput?.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        const icon = document.getElementById('feedActionIcon');
+        if (icon) {
+          if (val.length > 0 || this.pendingMediaAttachment) {
+            icon.className = 'fa-solid fa-paper-plane';
+          } else {
+            icon.className = 'fa-solid fa-microphone';
+          }
+        }
+      });
+
+      // Composer Broadcast
+      document.getElementById('feedComposerSendBtn')?.addEventListener('click', () => this.handleBroadcastPost());
+      composerInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          this.handleBroadcastPost();
+        }
+      });
+
+      // Browser popstate (Back button gesture / Android back)
+      window.addEventListener('popstate', () => {
+        if (this.activeFeedChannelId) {
+          this.closeFeedModal();
+        }
+      });
+
+      // Escape key to exit channel
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.activeFeedChannelId) {
+          this.closeFeedModal();
+        }
       });
 
     }
@@ -2242,255 +2768,309 @@
     }
 
     openChannelFeed(channelId) {
-
       this.mountModals();
-
       const channel = this.channels.find(c => c.id === channelId);
-
       if (!channel) return;
 
       this.activeFeedChannelId = channelId;
-
       const modal = document.getElementById('channelFeedModal');
-
       if (!modal) return;
 
-      this.updateFeedHeader(channelId);
+      // 1. FULL SCREEN ROUTE: Hide Updates list AND bottom nav completely
+      document.body.classList.add('channel-route-active');
+      const bottomNav = document.querySelector('.bottom-nav');
+      if (bottomNav) bottomNav.style.setProperty('display', 'none', 'important');
+      const statusContainer = document.getElementById('statusContainer');
+      if (statusContainer) statusContainer.style.setProperty('display', 'none', 'important');
+      const mainHeader = document.getElementById('mainHeader') || document.querySelector('.chat-header');
+      if (mainHeader) mainHeader.style.setProperty('display', 'none', 'important');
 
+      // 2. Setup Header & Content
+      this.updateFeedHeader(channelId);
       this.renderFeedPosts(channel);
 
+      // 3. Setup dynamic placeholder for input bar (Owner vs Follower)
       const user = this.getCurrentUser();
-
-      const isCreator = channel.creatorId === user.uid || channel.creatorId === 'system_nexchat';
+      const isCreator = channel.creatorId === user.uid || channel.creatorId === 'system_nexchat' || channel.creatorId === 'system_camshot';
+      const input = document.getElementById('feedComposerInput');
+      if (input) {
+        input.value = '';
+        input.placeholder = isCreator ? 'Write an update' : 'Share questions and other updates.';
+      }
+      this.pendingMediaAttachment = null;
+      const actionIcon = document.getElementById('feedActionIcon');
+      if (actionIcon) actionIcon.className = 'fa-solid fa-microphone';
 
       const composer = document.getElementById('feedComposerBar');
-
       if (composer) {
-
-        composer.style.display = isCreator ? 'flex' : 'none';
-
+        composer.style.display = 'flex';
       }
 
+      // 4. Open full page route
+      modal.style.display = 'flex';
       modal.classList.add('open');
 
+      // 5. Push history state for seamless Back button handling
+      try {
+        window.history.pushState({ channelRoute: true, channelId: channelId }, '');
+      } catch (_) { }
     }
 
     updateFeedHeader(channelId) {
-
       const channel = this.channels.find(c => c.id === channelId);
-
       if (!channel) return;
 
       const nameEl = document.getElementById('feedChannelName');
-
       const avatarEl = document.getElementById('feedChannelAvatar');
-
       const verifiedEl = document.getElementById('feedChannelVerified');
-
       const subsEl = document.getElementById('feedChannelSubscribers');
+      const adminBadge = document.getElementById('feedAdminBadge');
+      const menuFollowText = document.getElementById('menuFollowBtnText');
 
-      const followBtn = document.getElementById('feedFollowToggleBtn');
+      if (nameEl) {
+        nameEl.textContent = channel.name.toUpperCase();
+      }
 
-      if (nameEl) nameEl.textContent = channel.name;
+      if (avatarEl) {
+        avatarEl.src = channel.avatar || 'assets/camshot_logo.svg';
+      }
 
-      if (avatarEl) avatarEl.src = channel.avatar || 'favicons/icon-192.png';
+      if (verifiedEl) {
+        verifiedEl.style.display = channel.isVerified ? 'inline-block' : 'none';
+      }
 
-      if (verifiedEl) verifiedEl.style.display = channel.isVerified ? 'inline-block' : 'none';
+      const user = this.getCurrentUser();
+      const isCreator = channel.creatorId === user.uid || channel.creatorId === 'system_nexchat' || channel.creatorId === 'system_camshot';
+      if (adminBadge) {
+        adminBadge.style.display = isCreator ? 'flex' : 'none';
+      }
 
       if (subsEl) {
-
-        const count = channel.followerCount >= 1000 ? (channel.followerCount / 1000).toFixed(1) + 'K' : channel.followerCount;
-
-        subsEl.textContent = count + ' followers &bull; ' + channel.handle;
-
+        const count = channel.followerCount >= 1000 ? (channel.followerCount / 1000).toFixed(1) + 'K' : (channel.followerCount || 1);
+        const countStr = count === 1 ? '1 follower' : count + ' followers';
+        const handleStr = channel.handle ? ' • ' + channel.handle : '';
+        subsEl.textContent = countStr + handleStr;
       }
 
-      if (followBtn) {
-
+      if (menuFollowText) {
         const isFollowing = this.followedChannelIds.has(channelId);
-
-        followBtn.classList.toggle('following', isFollowing);
-
-        followBtn.textContent = isFollowing ? 'Following' : 'Follow';
-
+        menuFollowText.textContent = isFollowing ? 'Unfollow' : 'Follow';
       }
+    }
 
+    escapeAndFormat(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      let escaped = div.innerHTML;
+      // Auto linkify URLs
+      escaped = escaped.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: #00ff66; text-decoration: underline;">$1</a>');
+      return escaped;
     }
 
     renderFeedPosts(channel) {
-
       const timeline = document.getElementById('feedPostsTimeline');
-
       if (!timeline) return;
 
       const posts = channel.posts || [];
-
       if (posts.length === 0) {
-
         timeline.innerHTML = `
-
-          <div style="padding: 40px 20px; text-align: center; color: #8696a0;">
-
+          <div style="padding: 40px 16px; text-align: center; color: #8696a0; margin: auto;">
             <i class="fa-solid fa-bullhorn" style="font-size: 34px; color: #334155; margin-bottom: 12px; display: block;"></i>
-
-            <p style="font-size: 14.5px; font-weight: 600; color: #cbd5e1; margin: 0 0 6px 0;">No broadcasts yet</p>
-
-            <p style="font-size: 12.5px; color: #64748b; margin: 0;">Stay tuned for dispatches from ${channel.name}.</p>
-
+            <p style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0 0 6px 0;">No updates yet</p>
+            <p style="font-size: 13px; color: #64748b; margin: 0;">Stay tuned for broadcasts from ${channel.name}.</p>
           </div>
-
         `;
-
         return;
-
       }
 
-      timeline.innerHTML = posts.map(p => `
+      timeline.innerHTML = posts.map(p => {
+        const timeDisplay = p.timestamp || '10:27 a.m.';
+        const viewsDisplay = p.views || (channel.followerCount ? String(channel.followerCount) : '149');
+        const isReacted = p.userReacted ? 'reacted' : '';
+        const likeCount = p.likes > 0 ? p.likes : '';
 
-        <div class="channel-post-card">
-
-          <div class="channel-post-header">
-
-            <span class="channel-post-author">${p.authorName || channel.name}</span>
-
-            <span class="channel-post-time">${p.timestamp || 'Today'}</span>
-
+        return `
+          <div class="whatsapp-channel-update-row">
+            <div class="whatsapp-channel-card" data-post-id="${p.id}">
+              ${p.image ? `
+                <div class="whatsapp-channel-card-media">
+                  <img src="${p.image}" alt="Update media" class="whatsapp-channel-card-img" />
+                </div>
+              ` : ''}
+              <div class="whatsapp-channel-card-text">${this.escapeAndFormat(p.text || '')}</div>
+              <div class="whatsapp-channel-card-meta">
+                <span class="whatsapp-card-views-time">
+                  <i class="fa-regular fa-eye"></i> ${viewsDisplay} &nbsp; ${timeDisplay}
+                </span>
+              </div>
+            </div>
+            <div class="whatsapp-channel-card-actions">
+              <button type="button" class="whatsapp-channel-react-btn ${isReacted}" data-post-react="${p.id}" title="React">
+                <i class="fa-regular fa-face-smile"></i>
+                <span class="react-count">${likeCount}</span>
+              </button>
+              <button type="button" class="whatsapp-channel-share-btn" data-post-share="${p.id}" title="Forward update">
+                <i class="fa-solid fa-share"></i>
+              </button>
+            </div>
           </div>
+        `;
+      }).join('');
 
-          <p class="channel-post-text">${p.text}</p>
-
-          <div class="channel-post-reactions">
-
-            <button type="button" class="reaction-pill" data-post-like="${p.id}">
-
-              <i class="fa-solid fa-thumbs-up"></i> <span>${p.likes || 1}</span>
-
-            </button>
-
-            <button type="button" class="reaction-pill">
-
-              <i class="fa-solid fa-fire"></i>
-
-            </button>
-
-            <button type="button" class="reaction-pill">
-
-              <i class="fa-solid fa-rocket"></i>
-
-            </button>
-
-          </div>
-
-        </div>
-
-      `).join('');
-
-      timeline.querySelectorAll('[data-post-like]').forEach(btn => {
-
+      // Bind Reaction Click
+      timeline.querySelectorAll('[data-post-react]').forEach(btn => {
         btn.addEventListener('click', () => {
-
-          btn.classList.toggle('reacted');
-
-          const span = btn.querySelector('span');
-
-          if (span) {
-
-            let val = parseInt(span.textContent, 10) || 0;
-
-            span.textContent = btn.classList.contains('reacted') ? val + 1 : Math.max(0, val - 1);
-
-          }
-
+          const postId = btn.getAttribute('data-post-react');
+          const post = posts.find(p => p.id === postId);
+          if (!post) return;
+          post.userReacted = !post.userReacted;
+          post.likes = post.userReacted ? (post.likes || 0) + 1 : Math.max(0, (post.likes || 1) - 1);
+          this.saveChannels();
+          btn.classList.toggle('reacted', post.userReacted);
+          const span = btn.querySelector('.react-count');
+          if (span) span.textContent = post.likes > 0 ? post.likes : '';
         });
+      });
 
+      // Bind Share / Forward Click
+      timeline.querySelectorAll('[data-post-share]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const postId = btn.getAttribute('data-post-share');
+          const post = posts.find(p => p.id === postId);
+          if (post) {
+            const shareText = `Check out this update from ${channel.name} on NEXCHAT:\n\n"${post.text || 'Channel Media'}"\n\nhttps://nexchat-drab.vercel.app/channel/${channel.id}`;
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(shareText);
+              if (window.showNotif) window.showNotif('Update link copied to clipboard', 'success');
+            }
+          }
+        });
       });
 
       timeline.scrollTop = timeline.scrollHeight;
-
     }
 
     handleBroadcastPost() {
-
       if (!this.activeFeedChannelId) return;
-
       const input = document.getElementById('feedComposerInput');
+      const text = input?.value?.trim() || '';
+      const media = this.pendingMediaAttachment || null;
 
-      const text = input?.value?.trim();
+      if (!text && !media) {
+        if (window.showNotif) window.showNotif('Tap & hold to record voice broadcast, or type an update', 'info');
+        return;
+      }
 
-      if (!text) return;
-
-      // [FORTRESS AI Cloud Defender: Broadcast Feed Post Ingress Guard]
-      if (window.fortressGuard) {
+      if (text && window.fortressGuard) {
         const inspection = window.fortressGuard(text, 'Broadcast Channels');
         if (!inspection.safe) return;
       }
 
       const channel = this.channels.find(c => c.id === this.activeFeedChannelId);
-
       if (!channel) return;
 
       const user = this.getCurrentUser();
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).toLowerCase();
 
       const newPost = {
-
         id: 'post_' + Date.now().toString(36),
-
-        authorName: user.displayName || channel.name,
-
+        authorName: channel.name,
         text: text,
-
-        timestamp: 'Just now',
-
+        image: media,
+        timestamp: timeStr,
+        views: '1',
         likes: 0
-
       };
 
       if (!channel.posts) channel.posts = [];
-
       channel.posts.push(newPost);
-
-      channel.lastPostSnippet = text;
-
-      channel.lastPostTime = 'Just now';
-
+      channel.lastPostSnippet = text || 'Photo update';
+      channel.lastPostTime = timeStr;
       this.saveChannels();
 
       input.value = '';
+      this.pendingMediaAttachment = null;
+      const icon = document.getElementById('feedActionIcon');
+      if (icon) icon.className = 'fa-solid fa-microphone';
 
       this.renderFeedPosts(channel);
-
       this.renderChannelsInUpdates();
 
       if (window.db && window.auth?.currentUser) {
-
         try {
-
           window.db.collection('channels').doc(channel.id).collection('posts').doc(newPost.id).set({
-
             text: newPost.text,
-
+            image: newPost.image || null,
             authorId: user.uid,
-
             authorName: newPost.authorName,
-
+            views: 1,
+            likes: 0,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
-
           }).catch(() => { });
-
         } catch (_) { }
-
       }
+    }
 
+    handleCopyChannelLink() {
+      if (!this.activeFeedChannelId) return;
+      const channel = this.channels.find(c => c.id === this.activeFeedChannelId);
+      if (!channel) return;
+      const link = `https://nexchat-drab.vercel.app/channel/${channel.id}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(link).then(() => {
+          if (window.showNotif) window.showNotif(`Channel link copied: ${channel.name}`, 'success');
+        });
+      } else {
+        if (window.showNotif) window.showNotif(`Channel link: ${link}`, 'info');
+      }
+    }
+
+    handleShareChannel() {
+      if (!this.activeFeedChannelId) return;
+      const channel = this.channels.find(c => c.id === this.activeFeedChannelId);
+      if (!channel) return;
+      const shareData = {
+        title: `${channel.name} on NEXCHAT`,
+        text: `Follow the official ${channel.name} broadcast channel for updates!`,
+        url: `https://nexchat-drab.vercel.app/channel/${channel.id}`
+      };
+      if (navigator.share) {
+        navigator.share(shareData).catch(() => {});
+      } else {
+        this.handleCopyChannelLink();
+      }
+    }
+
+    showChannelInfoModal() {
+      if (!this.activeFeedChannelId) return;
+      const channel = this.channels.find(c => c.id === this.activeFeedChannelId);
+      if (!channel) return;
+      alert(`[CHANNEL INFO: ${channel.name.toUpperCase()}]\n\nHandle: ${channel.handle}\nFollowers: ${channel.followerCount}\nDescription: ${channel.description}\nCreated By: ${channel.creatorName}`);
     }
 
     closeFeedModal() {
-
       const modal = document.getElementById('channelFeedModal');
+      if (modal) {
+        modal.classList.remove('open');
+        modal.style.display = 'none';
+      }
 
-      if (modal) modal.classList.remove('open');
+      // Restore Updates list and bottom nav
+      document.body.classList.remove('channel-route-active');
+      const bottomNav = document.querySelector('.bottom-nav');
+      if (bottomNav) bottomNav.style.removeProperty('display');
+      const statusContainer = document.getElementById('statusContainer');
+      if (statusContainer) statusContainer.style.removeProperty('display');
+      const mainHeader = document.getElementById('mainHeader') || document.querySelector('.chat-header');
+      if (mainHeader) mainHeader.style.removeProperty('display');
+
+      const menu = document.getElementById('feedOptionsMenu');
+      if (menu) menu.style.display = 'none';
 
       this.activeFeedChannelId = null;
-
+      this.pendingMediaAttachment = null;
     }
 
   }
