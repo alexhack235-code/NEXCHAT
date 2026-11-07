@@ -654,7 +654,11 @@ function _attachRealtimeListener(groupId, newestMessage) {
           messages[idx] = { id: msgId, ...data };
           changed = true;
         }
-      } else if (change.type === 'removed') {
+      } else if (change.type === 'removed' || (data.isDeleted && data.deletedForEveryone)) {
+        const target = document.getElementById('msg-' + msgId) || document.querySelector('[data-message-id="' + msgId + '"]');
+        if (target && typeof window.nexDeleteAdvanced === 'function') {
+          window.nexDeleteAdvanced(target, msgId);
+        }
         messages = messages.filter(m => m.id !== msgId);
         changed = true;
       }

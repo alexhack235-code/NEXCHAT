@@ -126,12 +126,42 @@ export function renderMessageBubble(message, container, options = {}) {
     wrapper.dataset.messageId = message.id;
     wrapper.id = 'msg-' + message.id;
 
-    // Context menu handler
-    const handleContextMenu = (e) => {
-      e.preventDefault();
-      if (options.onCopy) console.log('Show context menu for message', message.id);
+    // Context menu & Long-press handler to open Delete Modal
+    const openDeleteForThis = () => {
+      if (window.NexChatFileManager && typeof window.NexChatFileManager.openDeleteMessageModal === 'function') {
+        window.NexChatFileManager.openDeleteMessageModal(message, options.isOwn, () => {
+          if (typeof options.onDelete === 'function') options.onDelete(message.id);
+        });
+      }
     };
-    wrapper.addEventListener('contextmenu', handleContextMenu);
+    wrapper.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      openDeleteForThis();
+    });
+    let touchTimer = null;
+    let touchMoved = false;
+    wrapper.addEventListener('touchstart', (e) => {
+      touchMoved = false;
+      touchTimer = setTimeout(() => {
+        if (!touchMoved) openDeleteForThis();
+      }, 380);
+    }, { passive: true });
+    wrapper.addEventListener('touchend', () => { if (touchTimer) clearTimeout(touchTimer); });
+    wrapper.addEventListener('touchmove', () => { touchMoved = true; if (touchTimer) clearTimeout(touchTimer); }, { passive: true });
+
+    // Absolute overlay selection checkbox outside bubble
+    const selectWrap = document.createElement('div');
+    selectWrap.className = 'msg-selection-checkbox-wrap';
+    const selectCb = document.createElement('input');
+    selectCb.type = 'checkbox';
+    selectCb.className = 'msg-select-checkbox';
+    selectCb.dataset.messageId = message.id;
+    selectCb.onclick = (e) => {
+      e.stopPropagation();
+      wrapper.classList.toggle('is-selected', selectCb.checked);
+    };
+    selectWrap.appendChild(selectCb);
+    wrapper.appendChild(selectWrap);
 
     const senderColor = getSenderColor(message.from || message.senderId || options.senderName || 'user');
 

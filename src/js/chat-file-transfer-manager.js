@@ -519,7 +519,7 @@
       try {
         if (typeof window.showNotif === 'function') window.showNotif('Deleting message for everyone...', 'info', 1200);
 
-        // 1. Optimistic DOM removal immediately
+        // 1. Optimistic DOM removal immediately with Ash-Fade Pro
         const targets = [
           document.getElementById(`msg-wrapper-${docId}`),
           document.getElementById(`wrapper-${docId}`),
@@ -527,13 +527,12 @@
         ].filter(Boolean);
 
         targets.forEach(wrapper => {
-          if (typeof window.triggerAshDeleteAnimation === 'function') {
-            window.triggerAshDeleteAnimation(wrapper);
+          if (typeof window.nexDeleteAdvanced === 'function') {
+            window.nexDeleteAdvanced(wrapper, docId);
+          } else if (typeof window.triggerAshDeleteAnimation === 'function') {
+            window.triggerAshDeleteAnimation(wrapper, docId);
           } else {
-            wrapper.style.transition = 'opacity 180ms ease, transform 180ms ease';
-            wrapper.style.opacity = '0';
-            wrapper.style.transform = 'scale(0.88) translateY(-6px)';
-            setTimeout(() => wrapper.remove(), 180);
+            wrapper.remove();
           }
         });
 

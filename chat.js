@@ -7914,58 +7914,106 @@ window.hideMessageLocally = function(docId) {
   } catch (_) {}
 };
 
-window.triggerAshDeleteAnimation = function(targetEl, onComplete) {
+window.deletedMessageIds = window.deletedMessageIds || new Set();
+
+window.nexDeleteAdvanced = function(targetEl, messageId, onComplete) {
   if (!targetEl) {
     if (typeof onComplete === 'function') onComplete();
     return;
   }
 
-  const wrapper = targetEl.closest('.message-wrapper') || targetEl;
-  const bubble = wrapper.querySelector('.message-bubble') || targetEl;
+  const wrapper = targetEl.closest('.message-wrapper, .nex-msg-wrapper') || targetEl;
+  const bubble = wrapper.querySelector('.message-bubble, .nex-msg-bubble') || targetEl;
+  const effectiveId = messageId || wrapper.dataset.messageId || wrapper.dataset.docId || targetEl.dataset.messageId || targetEl.dataset.docId;
 
-  // Turn background to dark ash #1a1a1a and apply .nex-delete-ash
-  bubble.classList.add('nex-delete-ash');
-  wrapper.classList.add('nex-delete-ash');
-
-  // Spawn 8 floating ash dust particles
-  const rect = bubble.getBoundingClientRect();
-  const particleContainer = document.createElement('div');
-  particleContainer.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;left:0;top:0;width:100%;height:100%;';
-  document.body.appendChild(particleContainer);
-
-  for (let i = 0; i < 8; i++) {
-    const p = document.createElement('div');
-    p.className = 'nex-ash-particle';
-    const size = Math.floor(Math.random() * 4) + 3;
-    p.style.width = size + 'px';
-    p.style.height = size + 'px';
-    p.style.left = (rect.left + Math.random() * Math.max(20, rect.width)) + 'px';
-    p.style.top = (rect.top + Math.random() * Math.max(10, rect.height)) + 'px';
-    p.style.setProperty('--ash-drift-x', ((Math.random() - 0.5) * 40) + 'px');
-    p.style.setProperty('--ash-drift-y', (-(Math.random() * 25 + 20)) + 'px');
-    particleContainer.appendChild(p);
+  if (effectiveId) {
+    window.deletedMessageIds.add(String(effectiveId));
+    try {
+      const localHidden = JSON.parse(localStorage.getItem('nex_hidden_msg_ids') || '[]');
+      if (!localHidden.includes(String(effectiveId))) {
+        localHidden.push(String(effectiveId));
+        localStorage.setItem('nex_hidden_msg_ids', JSON.stringify(localHidden.slice(-500)));
+      }
+    } catch (_) {}
+    if (typeof window.evictMessageFromCache === 'function') {
+      window.evictMessageFromCache(String(effectiveId));
+    }
   }
 
-  const startH = wrapper.offsetHeight;
-  wrapper.style.maxHeight = startH + 'px';
+  // Prevent multiple animations on same element
+  if (bubble.classList.contains('nex-ash-pro')) {
+    return;
+  }
+
+  // 1. Lock initial height of wrapper for smooth collapse
+  const startHeight = wrapper.offsetHeight || 60;
+  wrapper.style.maxHeight = startHeight + 'px';
   wrapper.style.overflow = 'hidden';
 
-  requestAnimationFrame(() => {
-    wrapper.style.transition = 'max-height 180ms ease, margin 180ms ease, padding 180ms ease, opacity 180ms ease';
-    wrapper.style.maxHeight = '0px';
-    wrapper.style.marginTop = '0px';
-    wrapper.style.marginBottom = '0px';
-    wrapper.style.paddingTop = '0px';
-    wrapper.style.paddingBottom = '0px';
-    wrapper.style.opacity = '0';
-  });
+  // 2. Add .nex-ash-pro animation to bubble (260ms total duration)
+  bubble.classList.add('nex-ash-pro');
 
+  // 3. Create Fixed Overlay Container for Particles (no DOM clipping)
+  const rect = bubble.getBoundingClientRect();
+  const particleContainer = document.createElement('div');
+  particleContainer.className = 'nex-ash-particles-overlay';
+  particleContainer.style.cssText = 'position:fixed;pointer-events:none;z-index:999999;left:0;top:0;width:100%;height:100%;';
+  document.body.appendChild(particleContainer);
+
+  // PHASE 1: 0-60ms IGNITE - Spawn 6 EMBER particles at bottom of bubble
+  // Size: 5px, #ff8a00 orange, glow box-shadow 0 0 8px #ff8a00, 0 0 12px #ff3d00, fly up 30px, move X 12px
+  for (let i = 0; i < 6; i++) {
+    const ember = document.createElement('div');
+    ember.className = 'ash-ember';
+    const xPos = rect.left + 6 + (Math.random() * Math.max(10, rect.width - 12));
+    const yPos = rect.bottom - 4 + ((Math.random() - 0.5) * 4);
+    ember.style.left = xPos + 'px';
+    ember.style.top = yPos + 'px';
+    ember.style.setProperty('--ember-x', ((Math.random() - 0.5) * 20 + 12) + 'px');
+    particleContainer.appendChild(ember);
+  }
+
+  // PHASE 2: 60-160ms BURN - Spawn 3 SMOKE particles at bottom rising up
+  // Size: 14px, rgba(150,150,150,0.3), blur 4px, fly up 35px, scale 1.8
+  setTimeout(() => {
+    for (let i = 0; i < 3; i++) {
+      const smoke = document.createElement('div');
+      smoke.className = 'ash-smoke';
+      const xPos = rect.left + 10 + (Math.random() * Math.max(10, rect.width - 20));
+      smoke.style.left = xPos + 'px';
+      smoke.style.top = (rect.bottom - 6) + 'px';
+      smoke.style.setProperty('--smoke-x', ((Math.random() - 0.5) * 16 + 4) + 'px');
+      particleContainer.appendChild(smoke);
+    }
+  }, 60);
+
+  // PHASE 3: 160-260ms ASH FLY + COLLAPSE - Spawn 12 ASH DUST particles flying up with random X
+  // Size: 3px, #9a9a9a grey, fly up 22px, move X -10px, rotate 90deg
+  setTimeout(() => {
+    for (let i = 0; i < 12; i++) {
+      const dust = document.createElement('div');
+      dust.className = 'ash-dust';
+      const xPos = rect.left + (Math.random() * rect.width);
+      const yPos = rect.top + (Math.random() * rect.height);
+      dust.style.left = xPos + 'px';
+      dust.style.top = yPos + 'px';
+      dust.style.setProperty('--dust-x', ((Math.random() - 0.5) * 20 - 10) + 'px');
+      particleContainer.appendChild(dust);
+    }
+
+    // Collapse height, margin, padding over remaining 100ms (160ms to 260ms)
+    wrapper.classList.add('nex-ash-wrapper-collapse');
+  }, 160);
+
+  // FINALIZE: 260ms - Remove message element completely and trigger callback
   setTimeout(() => {
     try { wrapper.remove(); } catch (_) {}
     try { particleContainer.remove(); } catch (_) {}
     if (typeof onComplete === 'function') onComplete();
-  }, 180);
+  }, 260);
 };
+
+window.triggerAshDeleteAnimation = window.nexDeleteAdvanced;
 
 window.deleteMessageFromFirestore = async function(collectionName, docId, forEveryone) {
   if (!docId) return;
@@ -8172,11 +8220,17 @@ function loadMessages() {
     console.log("?? Message progress - loaded1:", loaded1, "loaded2:", loaded2, "messages1:", messages1.length, "messages2:", messages2.length);
 
     const dbMessages = [...messages1, ...messages2];
+    const hiddenMsgIds = JSON.parse(localStorage.getItem('nex_hidden_msg_ids') || '[]');
+    const hiddenSet = new Set([...hiddenMsgIds, ...(window.deletedMessageIds || [])]);
     const uniqueMessagesMap = new Map();
     dbMessages.forEach((msg) => {
-      const idKey = msg.docId || msg.id || msg.clientMsgId || msg._id;
-      if (idKey) {
-        uniqueMessagesMap.set(String(idKey), msg);
+      const idKey = String(msg.docId || msg.id || msg.clientMsgId || msg._id || '');
+      if (idKey && !hiddenSet.has(idKey)) {
+        if (!msg.isDeleted || msg.deletedForEveryone) {
+          if (!msg.deletedFor || !myUID || !msg.deletedFor.includes(myUID)) {
+            uniqueMessagesMap.set(idKey, msg);
+          }
+        }
       }
     });
 
@@ -8340,10 +8394,25 @@ function loadMessages() {
 
       const div = document.createElement("div");
       div.className = `message-wrapper ${isOwn ? "sent" : "received"}`;
-      if (m.docId) {
-        div.dataset.docId = m.docId;
-        div.id = `msg-wrapper-${m.docId}`;
+      const effectiveMid = m.docId || m.id || m.clientMsgId || '';
+      if (effectiveMid) {
+        div.dataset.docId = effectiveMid;
+        div.dataset.messageId = effectiveMid;
+        div.id = `msg-wrapper-${effectiveMid}`;
       }
+      // Absolute overlay selection checkbox outside bubble
+      const selectWrap = document.createElement('div');
+      selectWrap.className = 'msg-selection-checkbox-wrap';
+      const selectCb = document.createElement('input');
+      selectCb.type = 'checkbox';
+      selectCb.className = 'msg-select-checkbox';
+      selectCb.dataset.messageId = effectiveMid;
+      selectCb.onclick = (e) => {
+        e.stopPropagation();
+        div.classList.toggle('is-selected', selectCb.checked);
+      };
+      selectWrap.appendChild(selectCb);
+      div.appendChild(selectWrap);
       div.style.cssText = `
         display: flex;
         justify-content: ${isOwn ? "flex-end" : "flex-start"};
@@ -8791,8 +8860,23 @@ function loadMessages() {
   };
 
   messageListener = onSnapshot(q, (snap) => {
-    console.log("? Query 1 snapshot received:", snap.docs.length, "messages");
     cancelChatLoadFeedback();
+    snap.docChanges().forEach(change => {
+      const d = change.doc.data();
+      const docId = change.doc.id;
+      if (change.type === 'removed' || (d && (d.isDeleted || d.deletedForEveryone))) {
+        if (!window.deletedMessageIds) window.deletedMessageIds = new Set();
+        window.deletedMessageIds.add(docId);
+        const target = document.getElementById('msg-wrapper-' + docId) ||
+                       document.getElementById('wrapper-' + docId) ||
+                       document.getElementById('msg-' + docId) ||
+                       document.querySelector('[data-doc-id="' + docId + '"]') ||
+                       document.querySelector('[data-message-id="' + docId + '"]');
+        if (target && !target.classList.contains('nex-ash-pro')) {
+          window.nexDeleteAdvanced(target, docId);
+        }
+      }
+    });
     messages1 = snap.docs.map(docSnap => ({ ...docSnap.data(), docId: docSnap.id }));
     loaded1 = true;
     debouncedUpdateMessages();
@@ -8803,8 +8887,23 @@ function loadMessages() {
   });
 
   messageListener2 = onSnapshot(q2, (snap) => {
-    console.log("? Query 2 snapshot received:", snap.docs.length, "messages");
     cancelChatLoadFeedback();
+    snap.docChanges().forEach(change => {
+      const d = change.doc.data();
+      const docId = change.doc.id;
+      if (change.type === 'removed' || (d && (d.isDeleted || d.deletedForEveryone))) {
+        if (!window.deletedMessageIds) window.deletedMessageIds = new Set();
+        window.deletedMessageIds.add(docId);
+        const target = document.getElementById('msg-wrapper-' + docId) ||
+                       document.getElementById('wrapper-' + docId) ||
+                       document.getElementById('msg-' + docId) ||
+                       document.querySelector('[data-doc-id="' + docId + '"]') ||
+                       document.querySelector('[data-message-id="' + docId + '"]');
+        if (target && !target.classList.contains('nex-ash-pro')) {
+          window.nexDeleteAdvanced(target, docId);
+        }
+      }
+    });
     messages2 = snap.docs.map(docSnap => ({ ...docSnap.data(), docId: docSnap.id }));
     loaded2 = true;
     debouncedUpdateMessages();

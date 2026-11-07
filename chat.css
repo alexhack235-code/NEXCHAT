@@ -15585,71 +15585,237 @@ body:not(.group-active) #tacticalMeshBanner {
 
 
 /* ==========================================================================
-   NEX FAST ASH-FADE DELETE ANIMATION (180ms Snappy NEX Style)
+   NEX ASH-FADE PRO: ADVANCED PAPER-BURN DELETE ANIMATION (260ms Total)
+   Phase 1 (0-60ms): Ignite flash & 6 ember particles
+   Phase 2 (60-160ms): Burn to ash #1a1a1a & 3 smoke particles
+   Phase 3 (160-260ms): Ash dust fly (12 particles) & wrapper collapse
    ========================================================================== */
-.nex-delete-ash {
+
+.nex-ash-pro {
   position: relative !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   pointer-events: none !important;
-  background: #1a1a1a !important;
-  border-color: rgba(120, 120, 120, 0.3) !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.85) !important;
-  animation: nexAshPoof 180ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
-  transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease, max-height 180ms ease, margin 180ms ease, padding 180ms ease !important;
+  animation: nexBurn 260ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+  z-index: 50 !important;
 }
 
-@keyframes nexAshPoof {
+@keyframes nexBurn {
   0% {
+    filter: sepia(0.35) brightness(1.25) contrast(1.1);
+    transform: scale(1.01) rotate(0.5deg);
     opacity: 1;
-    filter: grayscale(0%) brightness(1) blur(0px);
-    transform: scale(1) translateY(0);
-    background: #1a1a1a;
   }
-  44% { /* 0-80ms: Fade to 40% opacity + turn grayscale + slight blur 2px */
+  23% { /* ~60ms IGNITE */
+    filter: sepia(0.4) brightness(1.15) contrast(1.1);
+    transform: scale(1.01) rotate(0.5deg);
+    background: #333333 !important;
+    opacity: 1;
+  }
+  61% { /* ~160ms BURN */
+    filter: grayscale(0.7) brightness(0.6) blur(1px);
+    transform: scale(0.96) rotate(-0.8deg);
+    background: #1a1a1a !important;
+    border-radius: 14px 2px 18px 8px !important;
+    opacity: 0.85;
+  }
+  85% { /* ~220ms */
+    filter: grayscale(1) blur(2.5px) brightness(0.3);
+    transform: scale(0.9) translateY(-8px) rotate(0.5deg);
     opacity: 0.4;
-    filter: grayscale(100%) brightness(0.6) blur(2px);
-    transform: scale(0.97) translateY(-2px);
-    background: #1a1a1a;
   }
-  78% { /* 80-140ms: Shrink to 92% scale + slide up 6px + dust puff */
-    opacity: 0.15;
-    filter: grayscale(100%) brightness(0.35) blur(3px);
-    transform: scale(0.92) translateY(-6px);
-  }
-  100% { /* 140-180ms: Fade to 0% opacity and collapse height */
+  100% { /* 260ms ASH FLY + COLLAPSE */
+    filter: grayscale(1) blur(3px) brightness(0.2);
+    transform: scale(0.88) translateY(-14px) rotate(1deg);
     opacity: 0;
-    filter: grayscale(100%) brightness(0.2) blur(4px);
-    transform: scale(0.86) translateY(-8px);
-    max-height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
   }
 }
 
-/* Ash Dust Particles */
-.nex-ash-particle {
+/* Wrapper Height Collapse (Smooth upward glide of subsequent messages) */
+.nex-ash-wrapper-collapse {
+  transition: max-height 100ms cubic-bezier(0.4, 0, 0.2, 1),
+              margin 100ms cubic-bezier(0.4, 0, 0.2, 1),
+              padding 100ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 100ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  max-height: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 3 Particle Types */
+/* 1. EMBER: 6 particles, 5px, #ff8a00, glow 0 0 8px #ff8a00, 0 0 12px #ff3d00, fly up 30px, move X 12px, fade in 260ms */
+.ash-ember {
   position: absolute;
   pointer-events: none;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: radial-gradient(circle, #d4d4d8 0%, #71717a 50%, #27272a 100%);
-  z-index: 99999;
-  animation: nexAshParticleFly 180ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  background: #ff8a00;
+  box-shadow: 0 0 8px #ff8a00, 0 0 12px #ff3d00;
+  animation: emberFly 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 999999;
 }
 
-@keyframes nexAshParticleFly {
+@keyframes emberFly {
   0% {
-    opacity: 0.9;
+    opacity: 1;
     transform: translate(0, 0) scale(1);
   }
   50% {
-    opacity: 0.6;
+    opacity: 0.85;
+    transform: translate(var(--ember-x, 8px), -16px) scale(1.2);
   }
   100% {
     opacity: 0;
-    transform: translate(var(--ash-drift-x, 0px), var(--ash-drift-y, -26px)) scale(0.2);
+    transform: translate(var(--ember-x, 12px), -30px) scale(0.2);
   }
+}
+
+/* 2. ASH DUST: 12 particles, 3px, #9a9a9a grey, fly up 22px, move X -10px, rotate 90deg, fade in 260ms */
+.ash-dust {
+  position: absolute;
+  pointer-events: none;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #9a9a9a;
+  animation: dustFly 260ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  z-index: 999999;
+}
+
+@keyframes dustFly {
+  0% {
+    opacity: 0.95;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  60% {
+    opacity: 0.6;
+    transform: translate(var(--dust-x, -6px), -12px) rotate(45deg) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dust-x, -10px), -22px) rotate(90deg) scale(0.2);
+  }
+}
+
+/* 3. SMOKE: 3 particles, 14px, rgba(150,150,150,0.3), filter blur 4px, fly up 35px, scale 1.8, fade in 260ms */
+.ash-smoke {
+  position: absolute;
+  pointer-events: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(150, 150, 150, 0.3);
+  filter: blur(4px);
+  animation: smokeUp 260ms ease-out forwards;
+  z-index: 999998;
+}
+
+@keyframes smokeUp {
+  0% {
+    opacity: 0.35;
+    transform: translate(0, 0) scale(1);
+  }
+  60% {
+    opacity: 0.2;
+    transform: translate(var(--smoke-x, 4px), -18px) scale(1.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--smoke-x, 8px), -35px) scale(1.8);
+  }
+}
+
+/* ==========================================================================
+   SELECTION MODE & BUBBLE GEOMETRY (ZERO LAYOUT SHIFT & ZERO OVERLAP)
+   ========================================================================== */
+
+/* Fixed layout & smooth sliding */
+.message-wrapper,
+.nex-msg-wrapper {
+  position: relative !important;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+/* Selection checkbox overlay: absolute, outside bubble, does not push bubble */
+.msg-selection-checkbox-wrap {
+  position: absolute !important;
+  left: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 15 !important;
+  pointer-events: auto !important;
+}
+
+.chat-selection-active .msg-selection-checkbox-wrap {
+  display: flex !important;
+}
+
+.chat-selection-active .message-wrapper,
+.chat-selection-active .nex-msg-wrapper {
+  padding-left: 36px !important; /* Fixed 28-36px column without layout shift */
+}
+
+.msg-select-checkbox {
+  width: 18px !important;
+  height: 18px !important;
+  accent-color: #00e575 !important;
+  cursor: pointer !important;
+}
+
+/* When selected, only change background tint, do NOT re-render text */
+.message-wrapper.is-selected .message-bubble,
+.nex-msg-wrapper.is-selected .nex-msg-bubble {
+  background: rgba(0, 240, 255, 0.18) !important;
+  outline: 1.5px solid rgba(0, 240, 255, 0.5) !important;
+}
+
+/* Time must be bottom-right with padding-bottom 18px on bubble so time never overlaps text */
+.nex-msg-bubble,
+.message-bubble {
+  padding: 8px 12px 18px 12px !important;
+  position: relative !important;
+}
+
+.nex-msg-meta,
+.message-time-row,
+.message-time-text {
+  position: absolute !important;
+  bottom: 3px !important;
+  right: 8px !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+/* Reply quote block must be inside bubble, separate div, with border-left 3px, padding 6px */
+.nex-msg-quote,
+.reply-quote {
+  position: relative !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+  border-left: 3px solid #00FF88 !important;
+  border-radius: 4px !important;
+  padding: 6px 8px !important;
+  margin-bottom: 6px !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+.message-text-content,
+.nex-msg-text {
+  position: static !important;
+  display: block !important;
+  margin-top: 2px !important;
+  line-height: 1.42 !important;
 }
 
 
