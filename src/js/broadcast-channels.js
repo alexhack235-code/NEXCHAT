@@ -1484,6 +1484,160 @@
           position: relative !important;
         }
 
+        
+        /* Channel Header Expand Down Arrow */
+        .channel-header-expand-btn {
+          background: none !important;
+          border: none !important;
+          color: #8696a0 !important;
+          font-size: 11px !important;
+          cursor: pointer !important;
+          padding: 2px 4px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          transition: color 0.15s ease !important;
+        }
+        .channel-header-expand-btn:hover {
+          color: #00ff66 !important;
+        }
+        #channelHeaderExpandIcon {
+          transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        /* Channel Info Dropdown Panel (200ms ease) */
+        .whatsapp-channel-info-dropdown {
+          position: absolute !important;
+          top: 60px !important;
+          left: 0 !important;
+          right: 0 !important;
+          background: #111b21 !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+          padding: 14px 16px !important;
+          z-index: 45 !important;
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+          transform: translateY(-100%) !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+          transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease !important;
+        }
+        .whatsapp-channel-info-dropdown.open {
+          transform: translateY(0) !important;
+          opacity: 1 !important;
+          pointer-events: auto !important;
+        }
+        .channel-info-dropdown-content {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 12px !important;
+        }
+        .channel-info-about-section {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 4px !important;
+        }
+        .channel-info-about-label {
+          font-size: 11px !important;
+          font-weight: 700 !important;
+          color: #8696a0 !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.4px !important;
+        }
+        .channel-info-about-text {
+          font-size: 13.5px !important;
+          color: #d1d7db !important;
+          line-height: 1.45 !important;
+          margin: 0 !important;
+        }
+        .channel-info-dropdown-actions {
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+        }
+        .channel-dropdown-action-btn, .channel-dropdown-follow-btn {
+          flex: 1 !important;
+          padding: 8px 14px !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 8px !important;
+          cursor: pointer !important;
+          transition: all 0.15s ease !important;
+        }
+        .channel-dropdown-action-btn {
+          background: rgba(255, 255, 255, 0.08) !important;
+          border: 1px solid rgba(255, 255, 255, 0.14) !important;
+          color: #e9edef !important;
+        }
+        .channel-dropdown-action-btn:hover {
+          background: rgba(255, 255, 255, 0.14) !important;
+        }
+        .channel-dropdown-follow-btn {
+          background: #00ff66 !important;
+          border: none !important;
+          color: #000 !important;
+          font-weight: 700 !important;
+        }
+        .channel-dropdown-follow-btn:hover {
+          background: #33ff88 !important;
+        }
+
+        /* Message Card Actions Dropdown (200ms ease) */
+        .whatsapp-channel-dots-btn {
+          background: none !important;
+          border: none !important;
+          color: #8696a0 !important;
+          cursor: pointer !important;
+          padding: 2px 6px !important;
+          border-radius: 4px !important;
+          font-size: 13px !important;
+          transition: color 0.15s ease, background 0.15s ease !important;
+          margin-left: auto !important;
+        }
+        .whatsapp-channel-dots-btn:hover {
+          color: #e9edef !important;
+          background: rgba(255, 255, 255, 0.08) !important;
+        }
+        .whatsapp-channel-card-actions-dropdown {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          margin-top: 4px !important;
+          margin-left: 4px !important;
+          transform: translateY(-8px) !important;
+          opacity: 0 !important;
+          transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease !important;
+        }
+        .whatsapp-channel-card-actions-dropdown.open {
+          transform: translateY(0) !important;
+          opacity: 1 !important;
+        }
+        .whatsapp-channel-action-chip {
+          background: #202c33 !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          color: #d1d7db !important;
+          border-radius: 16px !important;
+          padding: 5px 12px !important;
+          font-size: 12px !important;
+          font-weight: 600 !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          cursor: pointer !important;
+          transition: all 0.15s ease !important;
+        }
+        .whatsapp-channel-action-chip:hover {
+          background: #2a3942 !important;
+          color: #00ff66 !important;
+        }
+        .whatsapp-channel-action-chip.reacted {
+          color: #00ff66 !important;
+          border-color: #00ff66 !important;
+          background: rgba(0, 255, 102, 0.15) !important;
+        }
+
         /* Dropdown Menu */
         .whatsapp-channel-dropdown-menu {
           position: absolute !important;
@@ -1937,6 +2091,9 @@
               <div class="channel-header-name-row">
                 <span id="feedChannelName" class="channel-header-name">CAMSHOT</span>
                 <i class="fa-solid fa-circle-check channel-verified-icon" id="feedChannelVerified"></i>
+                <button type="button" class="channel-header-expand-btn" id="channelHeaderExpandBtn" title="Toggle Channel Info">
+                  <i class="fa-solid fa-chevron-down" id="channelHeaderExpandIcon"></i>
+                </button>
               </div>
               <div id="feedChannelSubscribers" class="channel-header-followers">149 followers • @CamShot.nex</div>
             </div>
@@ -1967,6 +2124,26 @@
             </div>
           </div>
         </header>
+
+        <!-- Dropdown Channel Info Panel (Slides Down 200ms) -->
+        <div id="channelInfoDropdownPanel" class="whatsapp-channel-info-dropdown" style="display: none;">
+          <div class="channel-info-dropdown-content">
+            <div class="channel-info-about-section">
+              <span class="channel-info-about-label">About</span>
+              <p class="channel-info-about-text" id="feedChannelAboutText"></p>
+            </div>
+            <div class="channel-info-dropdown-actions">
+              <button type="button" class="channel-dropdown-action-btn" id="dropdownCopyLinkBtn">
+                <i class="fa-solid fa-link"></i>
+                <span>Copy Link</span>
+              </button>
+              <button type="button" class="channel-dropdown-follow-btn" id="dropdownFollowBtn">
+                <i class="fa-solid fa-plus" id="dropdownFollowIcon"></i>
+                <span id="dropdownFollowText">Follow</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- 2. Messages Timeline (WhatsApp Copy) -->
         <main class="whatsapp-channel-timeline" id="feedPostsTimeline">
@@ -2903,20 +3080,56 @@
                 <span class="whatsapp-card-views-time">
                   <i class="fa-regular fa-eye"></i> ${viewsDisplay} &nbsp; ${timeDisplay}
                 </span>
+                <button type="button" class="whatsapp-channel-dots-btn" data-toggle-actions="${p.id}" title="Message Actions">
+                  <i class="fa-solid fa-ellipsis"></i>
+                </button>
               </div>
             </div>
-            <div class="whatsapp-channel-card-actions">
-              <button type="button" class="whatsapp-channel-react-btn ${isReacted}" data-post-react="${p.id}" title="React">
+            <!-- Message actions dropdown (React, Share, Forward) with 200ms animation -->
+            <div class="whatsapp-channel-card-actions-dropdown" id="actions_dropdown_${p.id}" style="display: none;">
+              <button type="button" class="whatsapp-channel-action-chip ${isReacted}" data-post-react="${p.id}" title="React">
                 <i class="fa-regular fa-face-smile"></i>
-                <span class="react-count">${likeCount}</span>
+                <span class="react-count">${likeCount ? `(${likeCount})` : 'React'}</span>
               </button>
-              <button type="button" class="whatsapp-channel-share-btn" data-post-share="${p.id}" title="Forward update">
+              <button type="button" class="whatsapp-channel-action-chip" data-post-share="${p.id}" title="Forward update">
                 <i class="fa-solid fa-share"></i>
+                <span>Forward</span>
+              </button>
+              <button type="button" class="whatsapp-channel-action-chip" data-post-copy="${p.id}" title="Copy Text">
+                <i class="fa-regular fa-copy"></i>
+                <span>Copy</span>
               </button>
             </div>
           </div>
         `;
       }).join('');
+
+      // Bind Actions Dropdown Toggle
+      timeline.querySelectorAll('[data-toggle-actions]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const postId = btn.getAttribute('data-toggle-actions');
+          const dropdown = document.getElementById(`actions_dropdown_${postId}`);
+          if (!dropdown) return;
+          const isShowing = dropdown.classList.contains('open');
+
+          // Close other open action dropdowns
+          timeline.querySelectorAll('.whatsapp-channel-card-actions-dropdown.open').forEach(d => {
+            if (d !== dropdown) {
+              d.classList.remove('open');
+              setTimeout(() => d.style.display = 'none', 200);
+            }
+          });
+
+          if (isShowing) {
+            dropdown.classList.remove('open');
+            setTimeout(() => dropdown.style.display = 'none', 200);
+          } else {
+            dropdown.style.display = 'flex';
+            requestAnimationFrame(() => dropdown.classList.add('open'));
+          }
+        });
+      });
 
       // Bind Reaction Click
       timeline.querySelectorAll('[data-post-react]').forEach(btn => {
@@ -2929,7 +3142,7 @@
           this.saveChannels();
           btn.classList.toggle('reacted', post.userReacted);
           const span = btn.querySelector('.react-count');
-          if (span) span.textContent = post.likes > 0 ? post.likes : '';
+          if (span) span.textContent = post.likes > 0 ? `(${post.likes})` : 'React';
         });
       });
 
@@ -2943,6 +3156,20 @@
             if (navigator.clipboard) {
               navigator.clipboard.writeText(shareText);
               if (window.showNotif) window.showNotif('Update link copied to clipboard', 'success');
+            }
+          }
+        });
+      });
+
+      // Bind Copy Text Click
+      timeline.querySelectorAll('[data-post-copy]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const postId = btn.getAttribute('data-post-copy');
+          const post = posts.find(p => p.id === postId);
+          if (post && post.text) {
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(post.text);
+              if (window.showNotif) window.showNotif('Update text copied to clipboard', 'success');
             }
           }
         });

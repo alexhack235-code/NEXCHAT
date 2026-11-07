@@ -1087,7 +1087,7 @@ function renderReels(reelsList) {
           </div>
         </div>
 
-        <!-- Right Action Bar: Creator Avatar, Like, Comment, Save, Share, More, Sound Disc -->
+        <!-- Right Action Bar: Creator Avatar, Like, Comment, Save, Share, Sound Disc (Strictly 4 Clean Actions) -->
         <aside class="reel-actions-column select-none pointer-events-auto">
           <!-- Creator Avatar in action column -->
           <div class="action-creator-avatar-wrap cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
@@ -1097,7 +1097,7 @@ function renderReels(reelsList) {
             </button>
           </div>
 
-          <!-- Heart (Like) -->
+          <!-- 1. Heart (Like) -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
             <button type="button" class="like-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Like">
               <i class="fa-solid fa-heart text-[28px] ${isLiked ? 'text-[#fe2c55]' : 'text-white'} drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
@@ -1105,7 +1105,7 @@ function renderReels(reelsList) {
             <span class="like-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]" data-raw-count="${likeCount}">${formatNumber(likeCount)}</span>
           </div>
 
-          <!-- Comment -->
+          <!-- 2. Comment -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
             <button type="button" class="comment-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Comments">
               <i class="fa-solid fa-comment-dots text-[28px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
@@ -1113,28 +1113,20 @@ function renderReels(reelsList) {
             <span class="reel-comment-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(commentCount)}</span>
           </div>
 
-          <!-- Bookmark / Vault -->
+          <!-- 3. Bookmark / Save -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
-            <button type="button" class="bookmark-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Save to Vault">
+            <button type="button" class="bookmark-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Save">
               <i class="${isBookmarked ? 'fa-solid fa-bookmark text-[#FFD700]' : 'fa-regular fa-bookmark text-white'} text-[25px] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
             </button>
             <span class="text-[11px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Save</span>
           </div>
 
-          <!-- Share -->
+          <!-- 4. Share -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
             <button type="button" class="share-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Share">
               <i class="fa-solid fa-share text-[26px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
             </button>
             <span class="text-[11px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
-          </div>
-
-          <!-- More Actions (3-Dots Menu) -->
-          <div class="flex flex-col items-center gap-1 cursor-pointer">
-            <button type="button" class="bot-btn reel-more-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="More Actions">
-              <i class="fa-solid fa-ellipsis text-[22px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-            </button>
-            <span class="text-[10px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">More</span>
           </div>
 
           <!-- Music disc rotating with floating notes & live equalizer bars -->
@@ -1151,34 +1143,22 @@ function renderReels(reelsList) {
           </div>
         </aside>
 
-        <!-- Bottom Creator Handle + Caption + Sound Hub Row -->
+        <!-- Bottom Info: Clean TikTok View (@username + Follow + Caption 2 lines + ...more + Music 1 line) -->
         <div class="reel-bottom-info flex flex-col gap-1.5 text-white select-none pointer-events-auto">
-          <!-- Super Intelligence Neural Match & Verification HUD -->
-          <div class="flex items-center gap-2 mb-0.5">
-            <div class="ai-neural-match-pill" title="Neural Recommendation Match Score">
-              <i class="fa-solid fa-sparkles"></i>
-              <span class="ai-match-score">${neuralIntel.score}% AI Match</span>
-              <span class="ai-match-reason">&bull; ${escapeHtml(neuralIntel.affinity)}</span>
-            </div>
-            <div class="ai-reel-verified-badge" title="REDOX AI Security Clean Verified">
-              <i class="fa-solid fa-shield-halved"></i>
-              <span>AI Verified Clean</span>
-            </div>
+          <!-- Small up arrow cue to slide up details panel -->
+          <div class="reel-slideup-cue-wrap">
+            <button type="button" class="reel-slideup-cue-btn" data-reel-id="${reel.id}" title="View Details & Rewards">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
           </div>
 
           <div class="reel-creator-row">
             <span class="reel-creator-handle font-bold text-[14.5px] tracking-wide text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] hover:underline cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
               @${escapeHtml(authorHandle)}
             </span>
-            <span class="reel-verified-badge" data-handle="${escapeHtml(authorHandle)}" data-tier="VERIFIED_CREATOR" title="Official Verified Creator Certificate" style="cursor: pointer;"><i class="fa-solid fa-circle-check" style="color: #00f2ff;"></i></span>
-            ${(reel.c2paManifest || reel.provenanceStatus === 'C2PA_VERIFIED_AUTHENTIC') ? `
-            <span class="reel-c2pa-badge" data-handle="${escapeHtml(authorHandle)}" data-tier="C2PA_HARDWARE_VERIFIED" title="C2PA Authenticity Provenance Verified: Hardware Cryptographically Signed" style="background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88; color: #00ff88; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-left: 4px; display: inline-flex; align-items: center; gap: 3px; cursor: pointer;">
-              <i class="fa-solid fa-shield-halved"></i> C2PA
-            </span>` : ''}
             <button type="button" class="reel-follow-pill ${isFollowing ? 'following' : ''}" data-author="${escapeHtml(authorHandle)}" title="Follow creator">
               ${isFollowing ? '<i class="fa-solid fa-check"></i> Following' : '<i class="fa-solid fa-plus"></i> Follow'}
             </button>
-            <button type="button" class="reel-cc-toggle-btn" title="Toggle Live Captions (CC)">CC</button>
           </div>
           <div class="reel-caption-wrap">
             <p class="reel-caption-text text-[13px] text-gray-100 font-normal leading-snug drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] break-words">
@@ -1186,39 +1166,10 @@ function renderReels(reelsList) {
             </p>
             ${(reel.caption && reel.caption.length > 70) ? '<button type="button" class="reel-caption-toggle-btn">...more</button>' : ''}
           </div>
-          <div class="reel-sound-row flex items-center justify-between text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] cursor-pointer hover:text-[var(--cs-gold-soft)] transition-colors" title="Open Sound Hub">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-music text-[11px]"></i>
-              <span class="truncate max-w-[190px] font-medium">${escapeHtml(soundTrackTitle)}</span>
-            </div>
-            <canvas class="ai-audio-visualizer-canvas" id="vis_${reel.id}" width="90" height="18"></canvas>
+          <div class="reel-sound-row flex items-center text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] cursor-pointer" title="Soundtrack">
+            <i class="fa-solid fa-music text-[11px] mr-1.5"></i>
+            <span class="truncate max-w-[220px] font-medium">${escapeHtml(soundTrackTitle)}</span>
           </div>
-        </div>
-
-        <!-- Sleek Bottom Inline Comment Bar -->
-        <div class="reel-bottom-bar flex items-center gap-2">
-          <!-- Floating Quick Emoji Reactions Bar (Strict 1-Reaction Per User) -->
-          <div class="reel-quick-reactions">
-            <button type="button" class="quick-react-btn ${activeReaction === 'fire' ? 'active' : ''}" data-react="fire" data-icon="fa-fire" data-color="#f97316" title="Fire"><i class="fa-solid fa-fire" style="color:#f97316;"></i></button>
-            <button type="button" class="quick-react-btn ${activeReaction === 'love' ? 'active' : ''}" data-react="love" data-icon="fa-heart" data-color="#fe2c55" title="Love"><i class="fa-solid fa-heart" style="color:#fe2c55;"></i></button>
-            <button type="button" class="quick-react-btn ${activeReaction === 'star' ? 'active' : ''}" data-react="star" data-icon="fa-star" data-color="#facc15" title="Star"><i class="fa-solid fa-star" style="color:#facc15;"></i></button>
-            <button type="button" class="quick-react-btn ${activeReaction === 'gem' ? 'active' : ''}" data-react="gem" data-icon="fa-gem" data-color="#67e8f9" title="Diamond"><i class="fa-solid fa-gem" style="color:#67e8f9;"></i></button>
-            <button type="button" class="quick-react-btn ${activeReaction === 'rocket' ? 'active' : ''}" data-react="rocket" data-icon="fa-rocket" data-color="#a78bfa" title="Rocket"><i class="fa-solid fa-rocket" style="color:#a78bfa;"></i></button>
-          </div>
-
-          <div class="reel-inline-bar-pill flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border border-white/10 transition-all">
-            <i class="fa-regular fa-comment-dots text-white/70 text-[13px]"></i>
-            <input type="text" class="reel-inline-input flex-1 bg-transparent text-white placeholder-gray-300 text-xs outline-none" placeholder="Add a comment..." autocomplete="off">
-            <button type="button" class="reel-inline-emoji-btn text-white/80 hover:text-white transition-colors" title="Add emoji">
-              <i class="fa-regular fa-face-smile text-[14px]"></i>
-            </button>
-            <button type="button" class="reel-inline-at-btn text-white/80 hover:text-white transition-colors" title="Mention user">
-              <i class="fa-solid fa-at text-[13px]"></i>
-            </button>
-          </div>
-          <button type="button" class="reel-inline-send-btn text-white hover:text-[var(--cs-gold)] transition-colors p-2 focus:outline-none" title="Post comment">
-            <i class="fa-solid fa-paper-plane text-sm"></i>
-          </button>
         </div>
 
         <!-- Premium Gold Scrubber Bar at Bottom -->
@@ -1227,8 +1178,7 @@ function renderReels(reelsList) {
             <div class="reel-progress-fill"></div>
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
 
     // ── INTERACTIVE CYBER OVERLAYS (Live Polls & Token Bounties) ──
     const stageEl = card.querySelector('.reel-stage');
@@ -1308,10 +1258,35 @@ function renderReels(reelsList) {
         playLuxuryPopSound();
         showToast('Claimed 10 NEX Tokens Bounty from this CamShot!');
       });
-      stageEl.appendChild(bountyBadge);
+      // Bounty badge moved to slide-up panel to keep video 100% clean
     }
 
     // Elements inside card
+    
+    // Slide-Up Cue Button Click Listener
+    const slideUpCueBtn = card.querySelector('.reel-slideup-cue-btn');
+    if (slideUpCueBtn) {
+      slideUpCueBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openReelDetailsSlideUp(reel);
+      });
+    }
+
+    // Touch Swipe-Up on Bottom Info to Open Slide-Up Panel
+    const bottomInfoEl = card.querySelector('.reel-bottom-info');
+    if (bottomInfoEl) {
+      let bTouchStartY = 0;
+      bottomInfoEl.addEventListener('touchstart', (e) => {
+        bTouchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      bottomInfoEl.addEventListener('touchend', (e) => {
+        const bTouchEndY = e.changedTouches[0].clientY;
+        if (bTouchStartY - bTouchEndY > 35) {
+          openReelDetailsSlideUp(reel);
+        }
+      }, { passive: true });
+    }
+
     const videoEl = card.querySelector('.reel-video');
     // Dynamic Aspect-Ratio Detection: Automatically expands landscape / gaming clips (16:9 cinema) or fills vertical reels (9:16)
     const updateVideoOrientation = () => {
@@ -2317,6 +2292,16 @@ async function handleLikeToggle(reelId, likeBtn, countSpan, forceLike = false) {
       setTimeout(() => heartIcon.classList.remove('scale-125'), 200);
 
       likedReelsSet.add(reelId);
+      // Clean +50 NEX Engagement Reward
+      const bountyKey = `camshot_bounty_${reelId}`;
+      if (!localStorage.getItem(bountyKey)) {
+        localStorage.setItem(bountyKey, 'true');
+        const currentTokens = parseInt(localStorage.getItem('nex_tokens') || '0', 10);
+        localStorage.setItem('nex_tokens', String(currentTokens + 50));
+        if (typeof showToast === 'function') {
+          showToast('+50 NEX reward added!');
+        }
+      }
       localStorage.setItem('camshot_liked_reels', JSON.stringify([...likedReelsSet]));
 
       rawCount = rawCount + 1;
@@ -5805,3 +5790,234 @@ document.addEventListener('click', (e) => {
     }
   }
 });
+
+
+/* ==========================================================================
+   GLOBAL SLIDE-UP PANEL & TOP DROPDOWN ENGINE (200MS EASE)
+   ========================================================================== */
+let currentSlideUpReel = null;
+
+function openReelDetailsSlideUp(reel) {
+  if (!reel) {
+    const activeCard = document.querySelector('.reel-card.active') || document.querySelector('.reel-card');
+    const reelId = activeCard?.getAttribute('data-reel-id');
+    reel = reelsData.find(r => r.id === reelId) || reelsData[0];
+  }
+  if (!reel) return;
+  currentSlideUpReel = reel;
+
+  const panel = document.getElementById('reelDetailsSlideUpPanel');
+  const backdrop = document.getElementById('reelDetailsBackdrop');
+  if (!panel || !backdrop) return;
+
+  const neuralIntel = computeNeuralReelIntelligence(reel);
+  const authorHandle = (reel.author || 'creator').replace(/^@/, '');
+  const authorName = reel.authorName || authorHandle;
+  const soundTrackTitle = reel.soundTrack || reel.soundTitle || 'Neon Tokyo Funk 2088';
+
+  const aiMatchEl = document.getElementById('slideUpAiMatch');
+  if (aiMatchEl) aiMatchEl.innerHTML = `${neuralIntel.score}% AI Match <span style="color:#8696a0;font-weight:normal;">&bull; ${escapeHtml(neuralIntel.affinity)}</span>`;
+
+  const aiVerifiedEl = document.getElementById('slideUpAiVerified');
+  if (aiVerifiedEl) aiVerifiedEl.innerHTML = `Clean <span style="color:#00ff88;font-size:11px;">&bull; Verified Clean</span>`;
+
+  const creatorEl = document.getElementById('slideUpCreator');
+  if (creatorEl) creatorEl.textContent = `${authorName} (@${authorHandle})`;
+
+  const musicEl = document.getElementById('slideUpMusic');
+  if (musicEl) musicEl.textContent = soundTrackTitle;
+
+  // Bounty state
+  const bountyKey = `camshot_bounty_${reel.id}`;
+  const isClaimed = Boolean(localStorage.getItem(bountyKey));
+  const bountyCard = document.getElementById('slideUpBountyCard');
+  const claimBtn = document.getElementById('slideUpClaimBountyBtn');
+  if (bountyCard && claimBtn) {
+    if (isClaimed) {
+      bountyCard.classList.add('claimed');
+      claimBtn.disabled = true;
+      claimBtn.innerHTML = `<i class="fa-solid fa-check"></i> Claimed`;
+    } else {
+      bountyCard.classList.remove('claimed');
+      claimBtn.disabled = false;
+      claimBtn.innerHTML = `Claim +50 NEX`;
+    }
+  }
+
+  // CC state
+  const ccBox = document.querySelector(`.reel-card[data-reel-id="${reel.id}"] .reel-live-cc-box`);
+  const isCcOn = ccBox && ccBox.style.display !== 'none';
+  const ccLabel = document.getElementById('slideUpCcLabel');
+  if (ccLabel) ccLabel.textContent = isCcOn ? 'Hide Captions (CC Active)' : 'Toggle Live Captions (CC)';
+
+  // Slide up with 200ms ease-out
+  backdrop.style.display = 'block';
+  panel.style.display = 'block';
+  requestAnimationFrame(() => {
+    backdrop.classList.add('open');
+    panel.classList.add('open');
+  });
+}
+
+function closeReelDetailsSlideUp() {
+  const panel = document.getElementById('reelDetailsSlideUpPanel');
+  const backdrop = document.getElementById('reelDetailsBackdrop');
+  if (!panel || !backdrop) return;
+
+  panel.classList.remove('open');
+  backdrop.classList.remove('open');
+  setTimeout(() => {
+    panel.style.display = 'none';
+    backdrop.style.display = 'none';
+    currentSlideUpReel = null;
+  }, 200);
+}
+
+window.openReelDetailsSlideUp = openReelDetailsSlideUp;
+window.closeReelDetailsSlideUp = closeReelDetailsSlideUp;
+
+// Wire Slide-Up Close & Actions
+document.getElementById('closeReelDetailsBtn')?.addEventListener('click', closeReelDetailsSlideUp);
+document.getElementById('reelDetailsBackdrop')?.addEventListener('click', closeReelDetailsSlideUp);
+
+// Swipe down on panel to close
+const slideUpPanelEl = document.getElementById('reelDetailsSlideUpPanel');
+if (slideUpPanelEl) {
+  let panelStartY = 0;
+  slideUpPanelEl.addEventListener('touchstart', (e) => {
+    panelStartY = e.touches[0].clientY;
+  }, { passive: true });
+  slideUpPanelEl.addEventListener('touchend', (e) => {
+    const panelEndY = e.changedTouches[0].clientY;
+    if (panelEndY - panelStartY > 40) {
+      closeReelDetailsSlideUp();
+    }
+  }, { passive: true });
+}
+
+// CC Button in slide-up
+document.getElementById('slideUpCcBtn')?.addEventListener('click', () => {
+  if (!currentSlideUpReel) return;
+  const ccBox = document.querySelector(`.reel-card[data-reel-id="${currentSlideUpReel.id}"] .reel-live-cc-box`);
+  if (!ccBox) return;
+  const isVisible = ccBox.style.display !== 'none';
+  ccBox.style.display = isVisible ? 'none' : 'block';
+  const ccLabel = document.getElementById('slideUpCcLabel');
+  if (ccLabel) ccLabel.textContent = isVisible ? 'Toggle Live Captions (CC)' : 'Hide Captions (CC Active)';
+  if (typeof showToast === 'function') showToast(isVisible ? 'Closed captions turned OFF' : 'Closed captions turned ON');
+});
+
+// Claim +50 NEX in slide-up
+document.getElementById('slideUpClaimBountyBtn')?.addEventListener('click', () => {
+  if (!currentSlideUpReel) return;
+  const bountyKey = `camshot_bounty_${currentSlideUpReel.id}`;
+  if (localStorage.getItem(bountyKey)) {
+    if (typeof showToast === 'function') showToast('You already claimed this +50 NEX reward!');
+    return;
+  }
+  localStorage.setItem(bountyKey, 'true');
+  const currentTokens = parseInt(localStorage.getItem('nex_tokens') || '0', 10);
+  localStorage.setItem('nex_tokens', String(currentTokens + 50));
+  if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+  if (typeof showToast === 'function') showToast('Claimed +50 NEX Engagement Reward!');
+
+  const bountyCard = document.getElementById('slideUpBountyCard');
+  const claimBtn = document.getElementById('slideUpClaimBountyBtn');
+  if (bountyCard && claimBtn) {
+    bountyCard.classList.add('claimed');
+    claimBtn.disabled = true;
+    claimBtn.innerHTML = `<i class="fa-solid fa-check"></i> Claimed`;
+  }
+});
+
+// Top Category Dropdown wireup (200ms ease)
+const categoryDropdownArrow = document.getElementById('categoryDropdownArrow');
+const trendingTagsWrapper = document.getElementById('trendingTagsRibbonWrapper');
+
+function toggleCategoryDropdown(forceState) {
+  if (!trendingTagsWrapper) return;
+  const isOpen = trendingTagsWrapper.classList.contains('open');
+  const nextState = forceState !== undefined ? forceState : !isOpen;
+
+  if (nextState) {
+    trendingTagsWrapper.classList.add('open');
+    if (categoryDropdownArrow) categoryDropdownArrow.classList.add('open');
+  } else {
+    trendingTagsWrapper.classList.remove('open');
+    if (categoryDropdownArrow) categoryDropdownArrow.classList.remove('open');
+  }
+}
+
+if (categoryDropdownArrow) {
+  categoryDropdownArrow.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleCategoryDropdown();
+  });
+}
+
+// When tapping For You tab, if already active, toggle category dropdown
+if (tabForYou) {
+  tabForYou.addEventListener('click', () => {
+    if (activeFeedMode === 'foryou') {
+      toggleCategoryDropdown();
+    }
+  });
+}
+
+// Tap video or anywhere outside category ribbon closes it
+document.addEventListener('click', (e) => {
+  if (trendingTagsWrapper && trendingTagsWrapper.classList.contains('open')) {
+    if (!e.target.closest('#trendingTagsRibbonWrapper') && !e.target.closest('#tabForYou') && !e.target.closest('#categoryDropdownArrow')) {
+      toggleCategoryDropdown(false);
+    }
+  }
+});
+
+// Category pills click auto-slides up category ribbon
+document.querySelectorAll('.tag-filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    setTimeout(() => toggleCategoryDropdown(false), 150);
+  });
+});
+
+// Top Search Drawer wireup
+const reelsSearchBtn = document.getElementById('reelsSearchBtn');
+const reelsSearchDrawer = document.getElementById('reelsSearchDrawer');
+const reelsSearchInput = document.getElementById('reelsSearchInput');
+const closeReelsSearchBtn = document.getElementById('closeReelsSearchBtn');
+
+if (reelsSearchBtn && reelsSearchDrawer) {
+  reelsSearchBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isShowing = reelsSearchDrawer.style.display !== 'none';
+    if (isShowing) {
+      reelsSearchDrawer.classList.remove('open');
+      setTimeout(() => reelsSearchDrawer.style.display = 'none', 200);
+    } else {
+      reelsSearchDrawer.style.display = 'flex';
+      requestAnimationFrame(() => {
+        reelsSearchDrawer.classList.add('open');
+        reelsSearchInput?.focus();
+      });
+    }
+  });
+
+  closeReelsSearchBtn?.addEventListener('click', () => {
+    reelsSearchDrawer.classList.remove('open');
+    setTimeout(() => reelsSearchDrawer.style.display = 'none', 200);
+  });
+
+  reelsSearchInput?.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    if (!q) {
+      applyFeedFilter();
+      return;
+    }
+    const filtered = reelsData.filter(r =>
+      (r.caption && r.caption.toLowerCase().includes(q)) ||
+      (r.author && r.author.toLowerCase().includes(q)) ||
+      (r.soundTrack && r.soundTrack.toLowerCase().includes(q))
+    );
+    renderReelsFeed(filtered);
+  });
+}

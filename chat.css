@@ -17104,3 +17104,176 @@ body.channel-route-active #chatContainer {
   transform: scale(1.05) !important;
   box-shadow: 0 0 14px rgba(0, 255, 102, 0.5) !important;
 }
+
+
+/* ==========================================================================
+   WHATSAPP CHANNEL ROUTE: DROPDOWN INFO & MESSAGE ACTIONS
+   ========================================================================== */
+.channel-header-expand-btn {
+  background: none !important;
+  border: none !important;
+  color: #8696a0 !important;
+  font-size: 11px !important;
+  cursor: pointer !important;
+  padding: 2px 4px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  transition: color 0.15s ease !important;
+}
+
+.channel-header-expand-btn:hover {
+  color: #00ff66 !important;
+}
+
+#channelHeaderExpandIcon {
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.whatsapp-channel-info-dropdown {
+  position: absolute !important;
+  top: 60px !important;
+  left: 0 !important;
+  right: 0 !important;
+  background: #111b21 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  padding: 14px 16px !important;
+  z-index: 45 !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+  transform: translateY(-100%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease !important;
+}
+
+.whatsapp-channel-info-dropdown.open {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.channel-info-dropdown-content {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.channel-info-about-section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.channel-info-about-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #8696a0 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.4px !important;
+}
+
+.channel-info-about-text {
+  font-size: 13.5px !important;
+  color: #d1d7db !important;
+  line-height: 1.45 !important;
+  margin: 0 !important;
+}
+
+.channel-info-dropdown-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.channel-dropdown-action-btn, .channel-dropdown-follow-btn {
+  flex: 1 !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.channel-dropdown-action-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #e9edef !important;
+}
+
+.channel-dropdown-action-btn:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+.channel-dropdown-follow-btn {
+  background: #00ff66 !important;
+  border: none !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+}
+
+.channel-dropdown-follow-btn:hover {
+  background: #33ff88 !important;
+}
+
+.whatsapp-channel-dots-btn {
+  background: none !important;
+  border: none !important;
+  color: #8696a0 !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 13px !important;
+  transition: color 0.15s ease, background 0.15s ease !important;
+  margin-left: auto !important;
+}
+
+.whatsapp-channel-dots-btn:hover {
+  color: #e9edef !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.whatsapp-channel-card-actions-dropdown {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 4px !important;
+  margin-left: 4px !important;
+  transform: translateY(-8px) !important;
+  opacity: 0 !important;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease !important;
+}
+
+.whatsapp-channel-card-actions-dropdown.open {
+  transform: translateY(0) !important;
+  opacity: 1 !important;
+}
+
+.whatsapp-channel-action-chip {
+  background: #202c33 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #d1d7db !important;
+  border-radius: 16px !important;
+  padding: 5px 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.whatsapp-channel-action-chip:hover {
+  background: #2a3942 !important;
+  color: #00ff66 !important;
+}
+
+.whatsapp-channel-action-chip.reacted {
+  color: #00ff66 !important;
+  border-color: #00ff66 !important;
+  background: rgba(0, 255, 102, 0.15) !important;
+}

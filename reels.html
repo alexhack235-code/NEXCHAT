@@ -24,119 +24,47 @@
   <!-- Top Navigation Header: Left Brand/Back | Center Feed Switcher | Right Controls -->
   <header class="reels-header">
     <div class="reels-header-left">
-      <a href="chat.html" class="reels-header-back-btn" title="Back to Chats">
+      <a href="chat.html" class="reels-header-back-btn" id="reelsBackBtn" title="Back to Chats">
         <i class="fa-solid fa-arrow-left"></i>
-        <span>Chats</span>
       </a>
-      <div class="camshot-header-brand" title="CamShot Video Stream">
-        <img src="assets/camshot_logo.svg" alt="CamShot" class="camshot-brand-logo">
-        <span class="camshot-brand-name">CAMSHOT</span>
-        <span class="camshot-brand-badge">PRO</span>
-      </div>
     </div>
 
     <div class="reels-header-center">
       <div class="reels-feed-tabs" id="reelsFeedTabs">
         <button type="button" class="feed-tab-btn" data-feed="following" id="tabFollowing">Following</button>
         <span class="feed-tab-divider"></span>
-        <button type="button" class="feed-tab-btn active" data-feed="foryou" id="tabForYou">For You</button>
+        <button type="button" class="feed-tab-btn active" data-feed="foryou" id="tabForYou">
+          <span>For You</span>
+          <i class="fa-solid fa-chevron-down category-dropdown-arrow" id="categoryDropdownArrow"></i>
+        </button>
       </div>
     </div>
 
     <div class="reels-header-right">
-      <!-- Prominent CamShot Access Permission Pill -->
-      <button type="button" id="camshotAllowAccessBtn" class="camshot-permission-pill pending" title="Allow CamShot to access NEXCHAT" onclick="if(window.NEX_ECOSYSTEM) window.NEX_ECOSYSTEM.openConsentModal('nex-reels');">
-        <i class="fa-solid fa-shield-halved" style="color: #00f2ff;"></i>
-        <span>ALLOW CAMSHOT TO ACCESS NEXCHAT</span>
+      <button type="button" id="reelsSearchBtn" class="reels-header-icon-btn" title="Search">
+        <i class="fa-solid fa-magnifying-glass"></i>
       </button>
 
-      <button id="zenModeToggleBtn" class="reels-header-icon-btn" title="Clean Screen Mode (Hide UI Overlays)">
-        <i class="fa-regular fa-eye-slash"></i>
-      </button>
-      <button id="globalSoundToggle" class="reels-header-icon-btn" title="Toggle Sound">
-        <i class="fa-solid fa-volume-xmark"></i>
-      </button>
-
-      <!-- CamShot Studio Power Tools Popover Trigger & Dropdown Menu -->
-      <div class="reels-studio-hub-container">
-        <button type="button" id="reelsStudioHubBtn" class="reels-header-icon-btn reels-studio-hub-btn" title="CamShot Creator Studio & Power Tools">
-          <i class="fa-solid fa-wand-magic-sparkles" style="color: #00f2ff;"></i>
-          <span class="studio-hub-badge">STUDIO</span>
-        </button>
-
-        <div id="reelsStudioHubMenu" class="reels-studio-hub-menu" style="display: none;">
-          <div class="studio-menu-header">
-            <span class="studio-menu-title"><i class="fa-solid fa-bolt" style="color: #00f2ff;"></i> CAMSHOT STUDIO TOOLS</span>
-            <button type="button" id="closeStudioHubBtn" class="studio-menu-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
-          </div>
-          <div class="studio-tools-grid">
-            <button type="button" id="openBeatSyncBtn" class="studio-tool-item" title="AI Auto-Beat Sync & Soundwave Trimmer" onclick="if(window.NexReelsQuantum) window.NexReelsQuantum.beatSync.openBeatSyncModal();">
-              <div class="studio-tool-icon" style="background: rgba(0, 255, 136, 0.15); color: #00ff88; border-color: rgba(0, 255, 136, 0.35);"><i class="fa-solid fa-wave-square"></i></div>
-              <span class="studio-tool-name">Beat Sync</span>
-              <span class="studio-tool-desc">AI Soundwave</span>
-            </button>
-
-            <button type="button" id="openVoiceoverStudioBtn" class="studio-tool-item" title="Multi-Track Audio & Voiceover DSP Mixer" onclick="if(window.NexReelsQuantum) window.NexReelsQuantum.voiceover.openStudio();">
-              <div class="studio-tool-icon" style="background: rgba(192, 132, 252, 0.15); color: #c084fc; border-color: rgba(192, 132, 252, 0.35);"><i class="fa-solid fa-sliders"></i></div>
-              <span class="studio-tool-name">Voiceover</span>
-              <span class="studio-tool-desc">DSP Mixer</span>
-            </button>
-
-            <button type="button" id="openGreenScreenBtn" class="studio-tool-item" title="AI Green Screen & Reaction Studio" onclick="window.NexReelsGreenScreen?.openStudio();">
-              <div class="studio-tool-icon" style="background: rgba(0, 243, 255, 0.15); color: #00f3ff; border-color: rgba(0, 243, 255, 0.35);"><i class="fa-solid fa-camera-retro"></i></div>
-              <span class="studio-tool-name">Green Screen</span>
-              <span class="studio-tool-desc">AI Reaction</span>
-            </button>
-
-            <button type="button" id="openPredictionPoolBtn" class="studio-tool-item" title="Interactive Prediction Pool & Token Wager" onclick="window.NexReelsPredictionEngine?.renderWidget('reel_default_01', 'reelPredictionOverlayContainer');">
-              <div class="studio-tool-icon" style="background: rgba(255, 215, 0, 0.15); color: #ffd700; border-color: rgba(255, 215, 0, 0.35);"><i class="fa-solid fa-chart-line"></i></div>
-              <span class="studio-tool-name">Prediction</span>
-              <span class="studio-tool-desc">Pool Wager</span>
-            </button>
-
-            <button type="button" id="toggleFilterBtn" class="studio-tool-item" title="Cinematic Filters">
-              <div class="studio-tool-icon" style="background: rgba(232, 184, 75, 0.15); color: #e8b84b; border-color: rgba(232, 184, 75, 0.35);"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-              <span class="studio-tool-name">Filters</span>
-              <span class="studio-tool-desc">Color Grades</span>
-            </button>
-
-            <button type="button" id="pipToggleBtn" class="studio-tool-item" title="Picture-in-Picture Mini-Player">
-              <div class="studio-tool-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.35);"><i class="fa-solid fa-clone"></i></div>
-              <span class="studio-tool-name">Mini Player</span>
-              <span class="studio-tool-desc">Picture-in-Picture</span>
-            </button>
-
-            <button type="button" id="theaterModeToggleBtn" class="studio-tool-item" title="Toggle Widescreen Theater Mode (Shortcut: T)">
-              <div class="studio-tool-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7; border-color: rgba(168, 85, 247, 0.35);"><i class="fa-solid fa-arrows-left-right-to-line"></i></div>
-              <span class="studio-tool-name">Theater</span>
-              <span class="studio-tool-desc">Widescreen</span>
-            </button>
-
-            <button type="button" id="reelsExtHubBtn" class="studio-tool-item extensions-trigger" title="NEX Ecosystem Extensions (Vercel Hub)">
-              <div class="studio-tool-icon" style="background: rgba(236, 72, 153, 0.15); color: #ec4899; border-color: rgba(236, 72, 153, 0.35);"><i class="fa-solid fa-cubes-stacked"></i></div>
-              <span class="studio-tool-name">Ecosystem</span>
-              <span class="studio-tool-desc">Extensions Hub</span>
-            </button>
-
-            <button type="button" id="openReelsSettingsBtn" class="studio-tool-item" title="Settings & Preferences">
-              <div class="studio-tool-icon" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border-color: rgba(148, 163, 184, 0.35);"><i class="fa-solid fa-gear"></i></div>
-              <span class="studio-tool-name">Settings</span>
-              <span class="studio-tool-desc">Preferences</span>
-            </button>
-          </div>
-        </div>
+      <!-- Auxiliary controls kept hidden for script safety -->
+      <div style="display:none;" aria-hidden="true">
+        <button type="button" id="camshotAllowAccessBtn"></button>
+        <button id="zenModeToggleBtn"></button>
+        <button id="globalSoundToggle"><i class="fa-solid fa-volume-high"></i></button>
+        <button id="reelsStudioHubBtn"></button>
+        <button id="camshotGoLiveBtn"></button>
+        <button id="openUploadModalBtn"></button>
       </div>
-
-      <button type="button" id="camshotGoLiveBtn" class="reels-create-main-btn" style="background: linear-gradient(135deg, #ff3366, #ff0055); box-shadow: 0 4px 18px rgba(255, 51, 102, 0.4);" title="Start Live Broadcast Stream" onclick="if(window.NextGenSuite) window.NextGenSuite.liveBroadcast.openModal();">
-        <i class="fa-solid fa-tower-broadcast"></i>
-        <span>Go Live</span>
-      </button>
-      <button id="openUploadModalBtn" class="reels-create-main-btn" title="Create / Post a CamShot (Shortcut: C)">
-        <i class="fa-solid fa-plus"></i>
-        <span>Create</span>
-      </button>
     </div>
   </header>
+
+  <!-- Sleek Search Dropdown Drawer (200ms ease) -->
+  <div class="reels-search-drawer" id="reelsSearchDrawer" style="display: none;">
+    <div class="reels-search-box">
+      <i class="fa-solid fa-magnifying-glass reels-search-icon"></i>
+      <input type="text" id="reelsSearchInput" class="reels-search-input" placeholder="Search reels, #tags, or creators..." autocomplete="off">
+      <button type="button" id="closeReelsSearchBtn" class="reels-search-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+  </div>
 
   <!-- Top Floating CamShot Access Banner (Immediately visible if not granted) -->
   <div id="camshotImmediateAccessBanner" class="camshot-immediate-access-banner" style="display: none;">
@@ -1746,6 +1674,83 @@
       }
     })();
   </script>
+
+
+  <!-- REEL DETAILS & REWARDS SLIDE-UP PANEL (TIKTOK STYLE) -->
+  <div id="reelDetailsBackdrop" class="reel-details-backdrop" style="display: none;"></div>
+  <div id="reelDetailsSlideUpPanel" class="reel-details-slideup-panel" style="display: none;">
+    <div class="reel-slideup-header-bar">
+      <div class="reel-slideup-drag-pill"></div>
+      <div class="reel-slideup-top-row">
+        <span class="reel-slideup-title"><i class="fa-solid fa-sparkles" style="color: #00ff88;"></i> REEL INTEL & REWARDS</span>
+        <button type="button" id="closeReelDetailsBtn" class="reel-slideup-close-btn" title="Close Panel">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+      </div>
+    </div>
+    <div class="reel-slideup-body">
+      <div class="reel-slideup-grid">
+        <!-- 1. AI Match -->
+        <div class="reel-slideup-item">
+          <div class="reel-slideup-item-icon" style="color: #00ff88; background: rgba(0, 255, 136, 0.12);"><i class="fa-solid fa-brain"></i></div>
+          <div class="reel-slideup-item-info">
+            <div class="reel-slideup-item-label">AI Match</div>
+            <div class="reel-slideup-item-value" id="slideUpAiMatch">91% AI Match</div>
+          </div>
+        </div>
+
+        <!-- 2. AI Verified -->
+        <div class="reel-slideup-item">
+          <div class="reel-slideup-item-icon" style="color: #00f2ff; background: rgba(0, 242, 255, 0.12);"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="reel-slideup-item-info">
+            <div class="reel-slideup-item-label">AI Verified</div>
+            <div class="reel-slideup-item-value" id="slideUpAiVerified">Clean</div>
+          </div>
+        </div>
+
+        <!-- 3. Creator -->
+        <div class="reel-slideup-item">
+          <div class="reel-slideup-item-icon" style="color: #ffd700; background: rgba(255, 215, 0, 0.12);"><i class="fa-solid fa-user-astronaut"></i></div>
+          <div class="reel-slideup-item-info">
+            <div class="reel-slideup-item-label">Creator</div>
+            <div class="reel-slideup-item-value" id="slideUpCreator">Neural Tech Master</div>
+          </div>
+        </div>
+
+        <!-- 4. Music -->
+        <div class="reel-slideup-item">
+          <div class="reel-slideup-item-icon" style="color: #ec4899; background: rgba(236, 72, 153, 0.12);"><i class="fa-solid fa-music"></i></div>
+          <div class="reel-slideup-item-info">
+            <div class="reel-slideup-item-label">Music</div>
+            <div class="reel-slideup-item-value" id="slideUpMusic">Neon Tokyo Funk 2088</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions & Rewards row -->
+      <div class="reel-slideup-bottom-actions">
+        <!-- CC / Transcript toggle button -->
+        <button type="button" id="slideUpCcBtn" class="reel-slideup-action-btn">
+          <i class="fa-solid fa-closed-captioning"></i>
+          <span id="slideUpCcLabel">Toggle Live Captions (CC)</span>
+        </button>
+
+        <!-- +50 NEX Reward Card -->
+        <div class="reel-slideup-bounty-card" id="slideUpBountyCard">
+          <div class="reel-slideup-bounty-left">
+            <i class="fa-solid fa-gift fa-bounce" style="color: #00ff88; font-size: 22px;"></i>
+            <div>
+              <div class="bounty-card-title">+50 NEX Reward</div>
+              <div class="bounty-card-desc">Engagement bounty for this CamShot</div>
+            </div>
+          </div>
+          <button type="button" id="slideUpClaimBountyBtn" class="reel-slideup-claim-btn">
+            <span>Claim</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
