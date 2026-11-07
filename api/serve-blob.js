@@ -136,7 +136,29 @@ export default async function handler(req, res) {
     candidateTokens = [token, ...Object.values(PUBLIC_TOKENS), ...BACKUP_TOKENS, TOKENS.default].filter(Boolean);
   }
 
+  // Primary attempt: Query COLD-VAULT microservice for instant multi-vault resolution
+  const COLD_VAULT_BLOB_URL = process.env.COLD_VAULT_BLOB_URL || 'https://cold-vault-api.vercel.app/api/blob';
+  const NEXCHAT_SECRET = process.env.NEXCHAT_SECRET || 'NEXCHAT_ULTRA_12345';
   let result = null;
+
+  try {
+    const coldQuery = `${COLD_VAULT_BLOB_URL}?pathname=${encodeURIComponent(pathname)}&type=${encodeURIComponent(type)}&vault=${encodeURIComponent(vaultParam || '1')}`;
+    const coldResp = await fetch(coldQuery, {
+      headers: { 'x-nexchat-secret': NEXCHAT_SECRET },
+      redirect: 'manual'
+    });
+
+    if (coldResp.status === 302 || coldResp.status === 301) {
+      const loc = coldResp.headers.get('location');
+      if (loc) {
+        return res.redirect(302, loc);
+      }
+    }
+  } catch (coldErr) {
+    console.warn('[COLD-VAULT] Fallback to secondary local tokens:', coldErr.message);
+  }
+
+  // Secondary attempt: Local fallback tokens if COLD-VAULT unreachable
   for (const t of candidateTokens) {
     try {
       result = await get(pathname, {

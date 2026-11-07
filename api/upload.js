@@ -222,21 +222,58 @@ export default async function handler(req, res) {
     }
     const bodyBuffer = Buffer.concat(chunks);
 
-    // Primary attempt + automatic failover to the 5 backup vaults
-    let lastError = null;
+    // Primary attempt: Route to COLD-VAULT microservice (< 500ms) with automatic multi-vault failover
+    const COLD_VAULT_BLOB_URL = process.env.COLD_VAULT_BLOB_URL || 'https://cold-vault-api.vercel.app/api/blob';
+    const NEXCHAT_SECRET = process.env.NEXCHAT_SECRET || 'NEXCHAT_ULTRA_12345';
     let successfulBlob = null;
+    let lastError = null;
 
-    for (const candidateToken of tokensToTry) {
-      try {
-        successfulBlob = await put(sanitizedFilename, bodyBuffer, {
-          access: accessMode,
-          token: candidateToken,
-          contentType: reqContentType || undefined,
-        });
-        if (successfulBlob) break;
-      } catch (err) {
-        console.warn(`[BLOB VAULT WARNING] Upload attempt with token prefix ${candidateToken.slice(0, 20)}... failed:`, err.message);
-        lastError = err;
+    try {
+      const coldResp = await fetch(COLD_VAULT_BLOB_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': reqContentType || 'application/octet-stream',
+          'x-nexchat-secret': NEXCHAT_SECRET,
+          'x-filename': sanitizedFilename,
+          'x-access': accessMode,
+          'x-upload-type': uploadType,
+          'x-vault-index': String(vaultParam || 1)
+        },
+        body: bodyBuffer
+      });
+
+      if (coldResp.ok) {
+        const coldData = await coldResp.json();
+        if (coldData && coldData.success) {
+          successfulBlob = {
+            url: coldData.url,
+            downloadUrl: coldData.downloadUrl,
+            pathname: coldData.pathname,
+            contentType: coldData.contentType
+          };
+          if (!vaultInfo) {
+            vaultInfo = { name: coldData.vaultName || 'COLD-VAULT', index: 1, access: accessMode, category: uploadType };
+          }
+        }
+      }
+    } catch (coldErr) {
+      console.warn('[COLD-VAULT WARNING] Fallback to secondary local tokens:', coldErr.message);
+    }
+
+    // Secondary attempt: Local fallback tokens if COLD-VAULT unreachable
+    if (!successfulBlob) {
+      for (const candidateToken of tokensToTry) {
+        try {
+          successfulBlob = await put(sanitizedFilename, bodyBuffer, {
+            access: accessMode,
+            token: candidateToken,
+            contentType: reqContentType || undefined,
+          });
+          if (successfulBlob) break;
+        } catch (err) {
+          console.warn(`[BLOB VAULT WARNING] Upload attempt with token prefix ${candidateToken.slice(0, 20)}... failed:`, err.message);
+          lastError = err;
+        }
       }
     }
 
