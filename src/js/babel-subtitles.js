@@ -43,8 +43,9 @@
     }
 
     injectSubtitlesOverlay() {
-      const callContainer = document.getElementById('call-overlay') || document.querySelector('.active-call-container') || document.getElementById('activeCallOverlay') || document.body;
-      if (callContainer && !document.getElementById('liveCallSubtitlesBox')) {
+      const callContainer = document.getElementById('call-overlay') || document.querySelector('.active-call-container') || document.getElementById('activeCallOverlay');
+      if (!callContainer) return;
+      if (!document.getElementById('liveCallSubtitlesBox')) {
         const subBox = document.createElement('div');
         subBox.id = 'liveCallSubtitlesBox';
         subBox.className = 'live-call-subtitles-box';

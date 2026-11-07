@@ -247,9 +247,8 @@
        ------------------------------------------------------------------------ */
     injectCallDockVisualizer() {
       // STRICT CALL GUARD: Only mount spectrum visualizer inside active WebRTC call containers
-      const callContainer = document.querySelector('.active-call-container');
-      const subBox = document.getElementById('liveCallSubtitlesBox');
-      if (!callContainer && !subBox) {
+      const callContainer = document.querySelector('.active-call-container') || document.getElementById('call-overlay');
+      if (!callContainer) {
         return; // NEVER inject into normal chat view
       }
 

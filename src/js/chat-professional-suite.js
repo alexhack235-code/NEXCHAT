@@ -2710,41 +2710,6 @@ ${text}`;
       // Primary VoiceRecorderController in voice-recorder.js handles all recording with strict user gestures.
       // Neutralized duplicate listener to prevent accidental click auto-record loop.
       return;
-    });
-
-      cancelBtn?.addEventListener('click', () => {
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-          mediaRecorder.stop();
-        }
-        resetUI();
-        this.showToast('Recording discarded');
-      });
-
-      const finalizeAndSend = () => {
-        if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-          const file = new File([blob], `voice_note_${Date.now()}.webm`, { type: mediaRecorder.mimeType });
-
-          // Try attaching to file-input
-          const fileInput = document.getElementById('file-input');
-          if (fileInput) {
-            try {
-              const dt = new DataTransfer();
-              dt.items.add(file);
-              fileInput.files = dt.files;
-              fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-            } catch (_) {}
-          }
-
-          resetUI();
-          this.showToast('Voice note recorded and prepared for dispatch!');
-        };
-        mediaRecorder.stop();
-      };
-
-      sendBtn?.addEventListener('click', finalizeAndSend);
-      stopBtn?.addEventListener('click', finalizeAndSend);
     }
 
     /* ------------------------------------------------------------------------
