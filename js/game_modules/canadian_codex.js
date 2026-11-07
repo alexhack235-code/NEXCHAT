@@ -52,6 +52,12 @@ class CanadianCodexSystem {
 
   bindKeys() {
     window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (this.codexModal) this.codexModal.style.display = 'none';
+        if (this.highwayModal) this.highwayModal.style.display = 'none';
+      }
+    });
+    window.addEventListener('keydown', (e) => {
       if (e.target && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
       if (e.code === 'KeyF') {
         this.toggleCodex();
@@ -125,7 +131,7 @@ class CanadianCodexSystem {
       <div style="background:rgba(18,32,48,0.7); border:1px solid ${p.stamp ? '#00ffcc' : 'rgba(255,255,255,0.1)'}; border-radius:8px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <span style="font-size:18px;">${p.icon}</span>
+            <span style="font-size:18px;">${p.icon && p.icon.startsWith("fa-") ? `<i class="fa-solid ${p.icon}"></i>` : (p.icon || '<i class="fa-solid fa-map-pin"></i>')}</span>
             <span style="font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; background:${p.stamp ? 'rgba(0,255,204,0.15)' : 'rgba(255,255,255,0.06)'}; color:${p.stamp ? '#00ffcc' : '#888'};">
               ${p.stamp ? '[VERIFIED] DISCOVERED' : 'LOCKED'}
             </span>
@@ -135,7 +141,7 @@ class CanadianCodexSystem {
           <div style="font-size:11px; color:#aaa; line-height:1.3;">${p.landmark}</div>
         </div>
         <div style="margin-top:10px; display:flex; gap:6px;">
-          <a href="${p.file}" style="flex:1; text-align:center; padding:6px; background:rgba(0,229,255,0.15); border:1px solid #00e5ff; color:#00e5ff; text-decoration:none; font-size:11px; font-weight:bold; border-radius:4px; transition:background 0.2s;">VISIT REALM</a>
+          <a href="${p.file}?from=game_module.html&tokens=${typeof tokens !== 'undefined' ? tokens : 2000}" style="flex:1; text-align:center; padding:6px; background:rgba(0,229,255,0.15); border:1px solid #00e5ff; color:#00e5ff; text-decoration:none; font-size:11px; font-weight:bold; border-radius:4px; transition:background 0.2s;">VISIT REALM</a>
         </div>
       </div>
     `).join('');
@@ -177,13 +183,13 @@ class CanadianCodexSystem {
     let cards = this.provinces.map(p => `
       <div style="background:rgba(15,26,42,0.85); border:1px solid rgba(0,229,255,0.3); border-radius:8px; padding:12px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
         <div style="display:flex; align-items:center; gap:10px;">
-          <span style="font-size:24px;">${p.icon}</span>
+          <span style="font-size:24px; color:#00e5ff;">${p.icon && p.icon.startsWith("fa-") ? `<i class="fa-solid ${p.icon}"></i>` : (p.icon || '<i class="fa-solid fa-map-pin"></i>')}</span>
           <div>
             <div style="font-weight:700; color:#fff; font-size:13px;">${p.name}</div>
             <div style="font-size:11px; color:#70d6ff;">${p.landmark}</div>
           </div>
         </div>
-        <a href="${p.file}" style="padding:6px 14px; background:#00e5ff; color:#0a101a; text-decoration:none; font-weight:bold; font-size:11px; border-radius:4px; letter-spacing:0.5px; white-space:nowrap;">
+        <a href="${p.file}?from=game_module.html&tokens=${typeof tokens !== 'undefined' ? tokens : 2000}" style="padding:6px 14px; background:#00e5ff; color:#0a101a; text-decoration:none; font-weight:bold; font-size:11px; border-radius:4px; letter-spacing:0.5px; white-space:nowrap;">
           HYPER-WARP <i class="fa-solid fa-rocket"></i>
         </a>
       </div>

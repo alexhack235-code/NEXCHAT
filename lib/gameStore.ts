@@ -402,22 +402,28 @@ interface GameState {
   resetGame: () => void;
 }
 
-const STORAGE_KEY = 'nextoken_game_balance';
+const STORAGE_KEY = 'nexchat_user_tokens';
 
 function getInitialTokens(): number {
   if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem('nexchat_user_tokens') ||
+                  localStorage.getItem('nex_user_tokens') ||
+                  localStorage.getItem('tokens') ||
+                  localStorage.getItem('nextoken_game_balance');
     if (saved) {
-      const val = parseInt(saved, 10);
+      const val = parseInt(saved.replace(/,/g, ''), 10);
       if (!isNaN(val)) return val;
     }
   }
-  return 1000;
+  return 2000;
 }
 
 function saveTokens(val: number) {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEY, val.toString());
+    ['nexchat_user_tokens', 'nex_user_tokens', 'tokens', 'nextoken_game_balance'].forEach(k => {
+      try { localStorage.setItem(k, val.toString()); } catch (_) {}
+    });
+    window.dispatchEvent(new CustomEvent('nexchat:tokens_changed', { detail: { balance: val } }));
   }
 }
 
@@ -610,8 +616,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   healPlayer: (amount = 20) => {
-    const { health } = get();
-    set({ health: Math.min(100, health + amount) });
+    const { health, isGameOver } = get();
+    if (health <= 0 || isGameOver) return;
+    set({ health: Math.min(100, Math.max(0, health + amount)) });
   },
 
   buyHydration: () => {
@@ -685,13 +692,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   switchVehicle: (vehicle: VehicleType) => {
-    const { unlockedVehicles } = get();
+    const { unlockedVehicles, vehicleHealth, vehicleMaxHealth } = get();
     if (unlockedVehicles.includes(vehicle)) {
       const def = VEHICLE_REGISTRY[vehicle];
+      const healthPct = vehicleMaxHealth > 0 ? (vehicleHealth / vehicleMaxHealth) : 1;
       set({
         currentVehicle: vehicle,
         vehicleMaxHealth: def.maxHealth,
-        vehicleHealth: def.maxHealth,
+        vehicleHealth: Math.max(1, Math.round(def.maxHealth * healthPct)),
         notification: `ACTIVE VEHICLE: ${def.name}`,
       });
     }

@@ -116,6 +116,53 @@ function vibrate(duration = 10) {
 }
 
 // ============================================================================
+// UNIFIED TOKEN SYNCHRONIZATION ENGINE (NEX ECOSYSTEM)
+// ============================================================================
+window.nexTokenManager = {
+  getBalance() {
+    const val = localStorage.getItem('nexchat_user_tokens') ||
+                localStorage.getItem('nex_user_tokens') ||
+                localStorage.getItem('tokens') ||
+                localStorage.getItem('userTokens') || '2000';
+    return parseInt(String(val).replace(/,/g, ''), 10) || 0;
+  },
+  setBalance(amount, reason = 'Sync') {
+    const next = Math.max(0, parseInt(amount, 10) || 0);
+    ['nexchat_user_tokens', 'nex_user_tokens', 'tokens', 'userTokens'].forEach(k => {
+      try { localStorage.setItem(k, String(next)); } catch (_) {}
+    });
+    if (typeof tokens !== 'undefined') tokens = next;
+    const tokenDisplay = document.getElementById('currentTokenBalance');
+    if (tokenDisplay) {
+      tokenDisplay.textContent = typeof formatBalanceDisplay === 'function' ? formatBalanceDisplay(next) : next.toLocaleString();
+    }
+    window.dispatchEvent(new CustomEvent('nexchat:tokens_changed', { detail: { balance: next, reason } }));
+    return next;
+  },
+  modifyTokens(deltaAmount, reason = 'General') {
+    const cur = this.getBalance();
+    const next = Math.max(0, cur + deltaAmount);
+    this.setBalance(next, reason);
+    if (typeof myUID !== 'undefined' && myUID && typeof db !== 'undefined' && typeof updateDoc === 'function' && typeof doc === 'function') {
+      try {
+        updateDoc(doc(db, 'users', myUID), { tokens: next }).catch(() => {});
+      } catch (_) {}
+    }
+    return next;
+  }
+};
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'nexchat_user_tokens' || e.key === 'nex_user_tokens' || e.key === 'tokens') {
+    const newBal = window.nexTokenManager.getBalance();
+    const tokenDisplay = document.getElementById('currentTokenBalance');
+    if (tokenDisplay) {
+      tokenDisplay.textContent = typeof formatBalanceDisplay === 'function' ? formatBalanceDisplay(newBal) : newBal.toLocaleString();
+    }
+  }
+});
+
+// ============================================================================
 // TELEGRAM-STYLE CONTACT MANAGEMENT & GROUP PRIVACY API
 // ============================================================================
 window.isUserInContacts = function (uid) {
@@ -5775,6 +5822,7 @@ function isRenderableAttachment(att) {
     att.isBountyContract || att.bountyData || att.isSteganoCloak ||
     att.isNeuralVoiceNote || att.voiceData || att.isQuantumSignature || att.signatureData ||
     att.isCasinoDuel || att.casinoData || att.isCodeSandbox || att.codeData ||
+    att.isRpsDuel || att.duelData ||
     att.isAiDebate || att.debateData || att.isGeofenceBeacon || att.beaconData ||
     att.isKanbanMission || att.kanbanData ||
     att.isSecurityAudit || att.auditData || att.isMissionTab || att.tabData ||
@@ -7204,10 +7252,22 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   }
 
   if (text && text.trim()) {
-    const textP = document.createElement("p");
-    textP.style.margin = "0";
-    textP.textContent = text;
-    bubble.appendChild(textP);
+    if (text.includes('[TACTICAL DUEL]') && typeof window.renderTacticalDuelTextBubble === 'function') {
+      const duelCard = window.renderTacticalDuelTextBubble(text, id);
+      if (duelCard) {
+        bubble.appendChild(duelCard);
+      } else {
+        const textP = document.createElement("p");
+        textP.style.margin = "0";
+        textP.textContent = text;
+        bubble.appendChild(textP);
+      }
+    } else {
+      const textP = document.createElement("p");
+      textP.style.margin = "0";
+      textP.textContent = text;
+      bubble.appendChild(textP);
+    }
   }
 
   const timeSpan = document.createElement("div");
@@ -12465,7 +12525,7 @@ async function claimStarterTokenGrant() {
 
   try {
     const tokenDisplay = document.getElementById('currentTokenBalance');
-    const currentVal = parseInt(tokenDisplay?.textContent || '0', 10);
+    const currentVal = parseInt(String(tokenDisplay?.textContent || '0').replace(/,/g, ''), 10);
     const newBal = (isNaN(currentVal) ? 0 : currentVal) + 100;
     tokens = newBal;
 

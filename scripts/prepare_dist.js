@@ -20,7 +20,7 @@ function copyRecursive(src, dest) {
 }
 
 // Copy root static folders
-const folders = ['public', 'assets', 'src', 'favicons', 'js', 'css', 'styles'];
+const folders = ['public', 'assets', 'src', 'favicons', 'js', 'css', 'styles', 'Builds', 'Canada'];
 for (const folder of folders) {
   const srcPath = path.resolve(folder);
   if (fs.existsSync(srcPath)) {
@@ -33,6 +33,21 @@ for (const folder of folders) {
       copyRecursive(srcPath, path.join(distDir, folder));
     }
     console.log(`[prepare_dist.js] Synced folder: ${folder}`);
+  }
+}
+
+// Copy root web files (e.g. gaminghub.js, sw.js) missed by Vite bundler
+const rootFileExtensions = ['.js', '.css', '.json', '.svg', '.ico', '.png', '.jpg', '.webp', '.html'];
+const rootFiles = fs.readdirSync('.').filter(file => {
+  const ext = path.extname(file).toLowerCase();
+  return rootFileExtensions.includes(ext) && !file.startsWith('.') && file !== 'vite.config.js';
+});
+
+for (const file of rootFiles) {
+  const destPath = path.join(distDir, file);
+  if (!fs.existsSync(destPath)) {
+    fs.copyFileSync(path.resolve(file), destPath);
+    console.log(`[prepare_dist.js] Synced root asset: ${file}`);
   }
 }
 

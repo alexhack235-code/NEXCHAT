@@ -1128,11 +1128,26 @@
       // =======================================================================
       if (btnToggleFs) {
         btnToggleFs.addEventListener('click', () => {
-          if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
+          const doc = document;
+          const elem = document.documentElement;
+          const isFs = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
+          if (!isFs) {
+            const req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.mozRequestFullScreen || elem.msRequestFullscreen;
+            if (req) {
+              try {
+                const p = req.call(elem);
+                if (p && typeof p.catch === 'function') p.catch(() => {});
+              } catch (_) {}
+            }
             if (fsIcon) fsIcon.className = 'fa-solid fa-compress';
           } else {
-            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+            const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+            if (exit) {
+              try {
+                const p = exit.call(doc);
+                if (p && typeof p.catch === 'function') p.catch(() => {});
+              } catch (_) {}
+            }
             if (fsIcon) fsIcon.className = 'fa-solid fa-expand';
           }
         });
@@ -1325,6 +1340,11 @@
 
       // Synthetic Keyboard Event Dispatcher
       const activeKeys = {};
+      window.addEventListener('blur', () => {
+        for (const k in activeKeys) {
+          if (activeKeys[k]) dispatchSyntheticKey(k, false);
+        }
+      });
       function dispatchSyntheticKey(code, isDown, keyCode) {
         if (activeKeys[code] === isDown) return;
         activeKeys[code] = isDown;
@@ -1826,8 +1846,8 @@
           onResize: (w, h, dpr) => {
             camera.aspect = w / h;
             camera.updateProjectionMatrix();
-            renderer.setSize(w, h, false);
             renderer.setPixelRatio(dpr);
+            renderer.setSize(w, h, false);
           },
           toggleCamera: toggleCamera,
           handleInteract: handleInteract

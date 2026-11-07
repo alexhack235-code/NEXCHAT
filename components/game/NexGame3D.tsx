@@ -3341,6 +3341,7 @@ export default function NexGame3D({
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       canvas.removeEventListener('mousedown', onMouseDown);
+      try { renderer.forceContextLoss(); } catch (_) {}
       renderer.dispose();
       groundGeo.dispose();
       groundMat.dispose();

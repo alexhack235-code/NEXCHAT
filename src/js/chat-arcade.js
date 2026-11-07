@@ -4,12 +4,115 @@
  * Capabilities:
  * - Rock-Paper-Scissors Token Wager (50, 100, 250 Tokens) with interactive in-chat resolution
  * - Cyber Pong: 60fps HTML5 Canvas Neon Paddle Game with responsive touch/mouse controls & AI
- * - Crypto & Cyber Trivia Blitz (5 rapid-fire questions with live timer)
- * - Real-time token pot transfers and celebratory victory banners
+ * - Crypto & Cyber Trivia Blitz (5 rapid-fire questions with live timer & anti-spam debounce)
+ * - Real-time token synchronization across all storage keys & Firestore
+ * - Web Audio procedural sound synthesis (zero external audio asset dependencies)
  */
 
 (function () {
   'use strict';
+
+  // Procedural Web Audio Synthesizer for Mini-Games
+  class ArcadeAudioEngine {
+    constructor() {
+      this.ctx = null;
+    }
+
+    ensureContext() {
+      if (!this.ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) this.ctx = new AudioCtx();
+      }
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+    }
+
+    playBeep(freq = 440, duration = 0.08, type = 'sine') {
+      try {
+        this.ensureContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      } catch (_) {}
+    }
+
+    playVictory() {
+      try {
+        this.ensureContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+          gain.gain.setValueAtTime(0.18, now + idx * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.22);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.09);
+          osc.stop(now + idx * 0.09 + 0.25);
+        });
+      } catch (_) {}
+    }
+
+    playDefeat() {
+      try {
+        this.ensureContext();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [340, 290, 220].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.12, now + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + 0.22);
+        });
+      } catch (_) {}
+    }
+  }
+
+  const arcadeAudio = new ArcadeAudioEngine();
+
+  // Unified Token Management Helper
+  function getArcadeTokens() {
+    if (window.nexTokenManager && typeof window.nexTokenManager.getBalance === 'function') {
+      return window.nexTokenManager.getBalance();
+    }
+    const val = localStorage.getItem('nexchat_user_tokens') ||
+                localStorage.getItem('nex_user_tokens') ||
+                localStorage.getItem('tokens') ||
+                localStorage.getItem('userTokens') || '2000';
+    return parseInt(String(val).replace(/,/g, ''), 10) || 0;
+  }
+
+  function adjustArcadeTokens(deltaAmount, reason = 'Arcade') {
+    if (window.nexTokenManager && typeof window.nexTokenManager.modifyTokens === 'function') {
+      window.nexTokenManager.modifyTokens(deltaAmount, reason);
+      return;
+    }
+    const cur = getArcadeTokens();
+    const next = Math.max(0, cur + deltaAmount);
+    ['nexchat_user_tokens', 'nex_user_tokens', 'tokens', 'userTokens'].forEach(k => {
+      try { localStorage.setItem(k, String(next)); } catch (_) {}
+    });
+    window.dispatchEvent(new CustomEvent('nexchat:tokens_changed', { detail: { balance: next, change: deltaAmount, reason } }));
+  }
 
   class ChatArcadeEngine {
     constructor() {
@@ -138,7 +241,8 @@
             </div>
 
             <div class="trivia-score-row mt-4">
-              <span>SCORE: <strong id="triviaScoreVal" class="text-[#00ff66]">0 PTS</strong></span>
+              <span class="text-xs text-gray-400">CURRENT SCORE:</span>
+              <span id="triviaScoreVal" class="text-base font-bold text-[#00ff66]">0 PTS</span>
             </div>
           </div>
         </div>
@@ -146,12 +250,13 @@
 
       document.body.appendChild(modal);
 
-      // Close modal
-      document.getElementById('closeArcadeModalBtn')?.addEventListener('click', () => {
-        this.closeModal();
+      // Close modal events
+      document.getElementById('closeArcadeModalBtn')?.addEventListener('click', () => this.closeModal());
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) this.closeModal();
       });
 
-      // Tab switcher
+      // Tabs
       modal.querySelectorAll('.arcade-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           modal.querySelectorAll('.arcade-tab-btn').forEach(b => b.classList.remove('active'));
@@ -167,6 +272,7 @@
           modal.querySelectorAll('.wager-pill').forEach(p => p.classList.remove('active'));
           pill.classList.add('active');
           this.selectedWager = parseInt(pill.dataset.wager, 10);
+          arcadeAudio.playBeep(520, 0.05, 'triangle');
         });
       });
 
@@ -176,6 +282,7 @@
           modal.querySelectorAll('.rps-choice-btn').forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
           this.myRpsChoice = btn.dataset.choice;
+          arcadeAudio.playBeep(640, 0.06, 'sine');
           const dispatchBtn = document.getElementById('dispatchRpsChallengeBtn');
           if (dispatchBtn) dispatchBtn.disabled = false;
         });
@@ -194,24 +301,35 @@
 
     bindTriggers() {
       // Add Arcade tile into Attachment Hub if not exists
-      const attachHubGrid = document.querySelector('.attach-hub-grid');
-      if (attachHubGrid && !document.getElementById('hubActionArcade')) {
-        const item = document.createElement('div');
-        item.id = 'hubActionArcade';
-        item.className = 'attach-hub-item';
-        item.innerHTML = `
-          <div class="attach-hub-icon icon-arcade" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(0, 240, 118, 0.25)); border-color: #a855f7;">
-            <i class="fa-solid fa-gamepad" style="color: #c084fc;"></i>
-          </div>
-          <span>Mini-Games</span>
-        `;
-        item.addEventListener('click', () => {
-          // Close attachment menu
-          const hub = document.getElementById('attachmentHub');
-          if (hub) hub.style.display = 'none';
-          this.openModal();
-        });
-        attachHubGrid.appendChild(item);
+      const targetContainers = [
+        document.getElementById('attachmentPopupHub'),
+        document.querySelector('.attach-hub-grid'),
+        document.getElementById('attachMenu')
+      ];
+
+      for (const container of targetContainers) {
+        if (container && !container.querySelector('#hubActionArcade')) {
+          const item = document.createElement('div');
+          item.id = 'hubActionArcade';
+          item.className = 'attach-hub-item';
+          item.innerHTML = `
+            <div class="attach-hub-icon icon-arcade" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(0, 240, 118, 0.25)); border-color: #a855f7;">
+              <i class="fa-solid fa-gamepad" style="color: #c084fc;"></i>
+            </div>
+            <span>Mini-Games</span>
+          `;
+          item.addEventListener('click', (e) => {
+            if (e) e.stopPropagation();
+            const hub = document.getElementById('attachmentPopupHub') || document.getElementById('attachmentHub');
+            if (hub) {
+              hub.classList.remove('active', 'is-open');
+              hub.style.display = 'none';
+            }
+            this.openModal();
+          });
+          container.appendChild(item);
+          break;
+        }
       }
     }
 
@@ -222,7 +340,7 @@
       if (nameEl) nameEl.textContent = partnerName;
 
       if (modal) modal.style.display = 'flex';
-      if (window.playLuxuryPopSound) window.playLuxuryPopSound();
+      arcadeAudio.playBeep(580, 0.08, 'triangle');
     }
 
     closeModal() {
@@ -252,13 +370,28 @@
       const partnerName = window.currentChatName || 'Partner';
       const myName = window.myUsername || 'You';
       const wager = this.selectedWager;
+      const currentTokens = getArcadeTokens();
+
+      if (wager > 0 && currentTokens < wager) {
+        if (window.showNotif) window.showNotif(`Insufficient tokens! You have ${currentTokens} NEX Tokens.`, 'error', 3000);
+        arcadeAudio.playDefeat();
+        return;
+      }
+
+      // Deduct entry wager if positive
+      if (wager > 0) {
+        adjustArcadeTokens(-wager, `RPS Wager Bet (${wager} Tokens)`);
+      }
+
       const challengeId = `rps_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
       // Store private secret in localStorage
-      localStorage.setItem(`rps_secret_${challengeId}`, this.myRpsChoice);
+      try {
+        localStorage.setItem(`rps_secret_${challengeId}`, this.myRpsChoice);
+      } catch (_) {}
 
-      // Create challenge card payload
-      const cardText = `[TACTICAL DUEL] **ROCK-PAPER-SCISSORS BATTLE**\n${myName} challenged ${partnerName}!\n **Wager Pot: ${wager > 0 ? wager + ' NEX Tokens' : 'Free Match'}**\n\nTap your move below to accept the challenge!`;
+      // Create structured challenge card payload
+      const cardText = `[TACTICAL DUEL] **ROCK-PAPER-SCISSORS BATTLE**\n${myName} challenged ${partnerName}!\nPot: **${wager > 0 ? wager + ' NEX Tokens' : 'Free Match'}**\nChallenge ID: \`${challengeId}\`\n\nTap your move to accept the challenge!`;
 
       const input = document.getElementById('message-input');
       if (input) {
@@ -269,7 +402,78 @@
       }
 
       this.closeModal();
+      arcadeAudio.playVictory();
       if (window.showNotif) window.showNotif(`Challenge dispatched with ${wager} token wager!`, 'success', 2500);
+    }
+
+    // Interactive in-chat duel resolver
+    resolveDuelMove(challengeId, choice, wager, buttonEl) {
+      if (!challengeId) return;
+
+      // Check tokens if wager > 0
+      const currentTokens = getArcadeTokens();
+      if (wager > 0 && currentTokens < wager) {
+        if (window.showNotif) window.showNotif(`You need at least ${wager} tokens to accept this wager!`, 'error', 3000);
+        arcadeAudio.playDefeat();
+        return;
+      }
+
+      // Read secret move or procedural opponent move
+      let challengerMove = null;
+      try {
+        challengerMove = localStorage.getItem(`rps_secret_${challengeId}`);
+      } catch (_) {}
+
+      if (!challengerMove) {
+        const moves = ['rock', 'paper', 'scissors'];
+        challengerMove = moves[Math.floor(Math.random() * moves.length)];
+      }
+
+      // Determine Outcome
+      let result = 'draw';
+      if (choice === challengerMove) {
+        result = 'draw';
+      } else if (
+        (choice === 'rock' && challengerMove === 'scissors') ||
+        (choice === 'paper' && challengerMove === 'rock') ||
+        (choice === 'scissors' && challengerMove === 'paper')
+      ) {
+        result = 'win';
+      } else {
+        result = 'lose';
+      }
+
+      // Disable card buttons
+      const cardEl = buttonEl ? buttonEl.closest('.tactical-duel-card') : null;
+      if (cardEl) {
+        cardEl.querySelectorAll('.duel-choice-btn').forEach(btn => {
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          btn.style.pointerEvents = 'none';
+        });
+      }
+
+      // Process Wager & Score
+      if (result === 'win') {
+        const reward = wager * 2;
+        if (wager > 0) adjustArcadeTokens(reward, `RPS Duel Victory (+${reward} Tokens)`);
+        arcadeAudio.playVictory();
+        
+        let wins = parseInt(localStorage.getItem('nex_rps_wins') || '0', 10) + 1;
+        try { localStorage.setItem('nex_rps_wins', String(wins)); } catch (_) {}
+
+        if (window.showNotif) window.showNotif(`[VICTORY] You chose ${choice.toUpperCase()}, opponent chose ${challengerMove.toUpperCase()}! Won ${reward} Tokens!`, 'success', 4000);
+      } else if (result === 'lose') {
+        if (wager > 0) adjustArcadeTokens(-wager, `RPS Duel Defeat (-${wager} Tokens)`);
+        arcadeAudio.playDefeat();
+        if (window.showNotif) window.showNotif(`[DEFEAT] You chose ${choice.toUpperCase()}, opponent had ${challengerMove.toUpperCase()}!`, 'error', 3500);
+      } else {
+        arcadeAudio.playBeep(440, 0.15, 'triangle');
+        if (window.showNotif) window.showNotif(`[DRAW] Both chose ${choice.toUpperCase()}! Wagers refunded.`, 'info', 3000);
+      }
+
+      // Invalidate secret so challenge cannot be answered twice
+      try { localStorage.removeItem(`rps_secret_${challengeId}`); } catch (_) {}
     }
 
     // ─── GAME 2: Cyber Pong Canvas Engine ───
@@ -316,15 +520,27 @@
     }
 
     startPongGame() {
+      if (this.pongAnimId) {
+        cancelAnimationFrame(this.pongAnimId);
+        this.pongAnimId = null;
+      }
       if (!this.pongState) this.initPongCanvas();
+      
       this.pongState.running = true;
       this.pongState.playerScore = 0;
       this.pongState.aiScore = 0;
+      
+      const pScoreEl = document.getElementById('pongScorePlayer');
+      const aScoreEl = document.getElementById('pongScoreAi');
+      if (pScoreEl) pScoreEl.textContent = '0';
+      if (aScoreEl) aScoreEl.textContent = '0';
+
       this.resetBall();
 
       const btn = document.getElementById('startPongGameBtn');
       if (btn) btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> RESET MATCH';
 
+      arcadeAudio.playBeep(480, 0.08, 'triangle');
       this.runPongLoop();
     }
 
@@ -332,7 +548,7 @@
       const s = this.pongState;
       s.ballX = s.canvas.width / 2;
       s.ballY = s.canvas.height / 2;
-      s.ballVx = (Math.random() > 0.5 ? 4 : -4);
+      s.ballVx = (Math.random() > 0.5 ? 4.5 : -4.5);
       s.ballVy = (Math.random() * 4 - 2);
     }
 
@@ -348,12 +564,13 @@
       // Top/Bottom walls
       if (s.ballY <= 6 || s.ballY >= s.canvas.height - 6) {
         s.ballVy = -s.ballVy;
+        arcadeAudio.playBeep(320, 0.03, 'sine');
       }
 
       // AI Paddle Tracking
       const aiCenter = s.aiY + s.paddleH / 2;
-      if (aiCenter < s.ballY - 12) s.aiY += 3.2;
-      else if (aiCenter > s.ballY + 12) s.aiY -= 3.2;
+      if (aiCenter < s.ballY - 12) s.aiY += 3.4;
+      else if (aiCenter > s.ballY + 12) s.aiY -= 3.4;
       s.aiY = Math.max(0, Math.min(s.canvas.height - s.paddleH, s.aiY));
 
       // Player Paddle Collision (Left)
@@ -361,6 +578,7 @@
         s.ballVx = Math.abs(s.ballVx) * 1.05; // speed up
         const delta = s.ballY - (s.playerY + s.paddleH / 2);
         s.ballVy = delta * 0.18;
+        arcadeAudio.playBeep(520, 0.04, 'square');
       }
 
       // AI Paddle Collision (Right)
@@ -368,16 +586,21 @@
         s.ballVx = -Math.abs(s.ballVx) * 1.05;
         const delta = s.ballY - (s.aiY + s.paddleH / 2);
         s.ballVy = delta * 0.18;
+        arcadeAudio.playBeep(420, 0.04, 'square');
       }
 
       // Scoring
       if (s.ballX < 0) {
         s.aiScore++;
-        document.getElementById('pongScoreAi').textContent = s.aiScore;
+        const aEl = document.getElementById('pongScoreAi');
+        if (aEl) aEl.textContent = s.aiScore;
+        arcadeAudio.playBeep(220, 0.12, 'sawtooth');
         this.resetBall();
       } else if (s.ballX > s.canvas.width) {
         s.playerScore++;
-        document.getElementById('pongScorePlayer').textContent = s.playerScore;
+        const pEl = document.getElementById('pongScorePlayer');
+        if (pEl) pEl.textContent = s.playerScore;
+        arcadeAudio.playBeep(780, 0.1, 'triangle');
         this.resetBall();
       }
 
@@ -385,8 +608,15 @@
       if (s.playerScore >= 5 || s.aiScore >= 5) {
         s.running = false;
         const win = s.playerScore >= 5;
-        if (win && window.showNotif) {
-          window.showNotif('[VICTORY] You defeated Cyber-AI 5-' + s.aiScore, 'success', 3500);
+        if (win) {
+          arcadeAudio.playVictory();
+          let wins = parseInt(localStorage.getItem('nex_pong_wins') || '0', 10) + 1;
+          try { localStorage.setItem('nex_pong_wins', String(wins)); } catch (_) {}
+          adjustArcadeTokens(150, 'Cyber Pong Victory (+150 Tokens)');
+          if (window.showNotif) window.showNotif(`[VICTORY] You defeated Cyber-AI 5-${s.aiScore}! +150 Tokens!`, 'success', 4000);
+        } else {
+          arcadeAudio.playDefeat();
+          if (window.showNotif) window.showNotif(`[DEFEAT] Cyber-AI defeated you 5-${s.playerScore}!`, 'error', 3500);
         }
       }
 
@@ -441,7 +671,8 @@
     startTriviaGame() {
       this.triviaIndex = 0;
       this.triviaScore = 0;
-      document.getElementById('triviaScoreVal').textContent = '0 PTS';
+      const scoreVal = document.getElementById('triviaScoreVal');
+      if (scoreVal) scoreVal.textContent = '0 PTS';
       this.renderTriviaQuestion();
     }
 
@@ -478,19 +709,39 @@
 
       if (this.triviaIndex >= questions.length) {
         // Complete
-        document.getElementById('triviaQuestionText').textContent = `[CHAMPION] TRIVIA COMPLETE! Your Final Score: ${this.triviaScore} / ${questions.length * 20} PTS`;
-        document.getElementById('triviaOptionsGrid').innerHTML = `
-          <button type="button" class="trivia-opt-btn correct text-center" id="restartTriviaBtn">
-            <i class="fa-solid fa-rotate-right"></i> PLAY AGAIN
-          </button>
-        `;
-        document.getElementById('restartTriviaBtn')?.addEventListener('click', () => this.startTriviaGame());
+        const maxPts = questions.length * 20;
+        const isPerfect = (this.triviaScore === maxPts);
+        if (isPerfect) {
+          arcadeAudio.playVictory();
+          adjustArcadeTokens(100, 'Perfect Trivia Score (+100 Tokens)');
+        }
+        
+        let high = parseInt(localStorage.getItem('nex_trivia_highscore') || '0', 10);
+        if (this.triviaScore > high) {
+          try { localStorage.setItem('nex_trivia_highscore', String(this.triviaScore)); } catch (_) {}
+        }
+
+        const qText = document.getElementById('triviaQuestionText');
+        if (qText) qText.textContent = `[CHAMPION] TRIVIA COMPLETE! Your Final Score: ${this.triviaScore} / ${maxPts} PTS ${isPerfect ? '(PERFECT! +100 TOKENS)' : ''}`;
+        
+        const grid = document.getElementById('triviaOptionsGrid');
+        if (grid) {
+          grid.innerHTML = `
+            <button type="button" class="trivia-opt-btn correct text-center" id="restartTriviaBtn">
+              <i class="fa-solid fa-rotate-right"></i> PLAY AGAIN
+            </button>
+          `;
+          document.getElementById('restartTriviaBtn')?.addEventListener('click', () => this.startTriviaGame());
+        }
         return;
       }
 
       const cur = questions[this.triviaIndex];
-      document.getElementById('triviaProgressLabel').textContent = `QUESTION ${this.triviaIndex + 1} OF ${questions.length}`;
-      document.getElementById('triviaQuestionText').textContent = cur.q;
+      const progLabel = document.getElementById('triviaProgressLabel');
+      if (progLabel) progLabel.textContent = `QUESTION ${this.triviaIndex + 1} OF ${questions.length}`;
+      
+      const qText = document.getElementById('triviaQuestionText');
+      if (qText) qText.textContent = cur.q;
 
       let seconds = 10;
       const timerBadge = document.getElementById('triviaTimerBadge');
@@ -501,12 +752,14 @@
         if (timerBadge) timerBadge.textContent = `${seconds}s`;
         if (seconds <= 0) {
           clearInterval(this.triviaTimer);
+          arcadeAudio.playBeep(260, 0.1, 'sawtooth');
           this.triviaIndex++;
           this.renderTriviaQuestion();
         }
       }, 1000);
 
       const grid = document.getElementById('triviaOptionsGrid');
+      if (!grid) return;
       grid.innerHTML = cur.opts.map((opt, idx) => `
         <button type="button" class="trivia-opt-btn" data-idx="${idx}">
           <span class="trivia-key">${String.fromCharCode(65 + idx)}</span>
@@ -514,28 +767,103 @@
         </button>
       `).join('');
 
+      // Attach anti-rapid-click handlers
       grid.querySelectorAll('.trivia-opt-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           clearInterval(this.triviaTimer);
+          
+          // Disable all options immediately to prevent double submission
+          grid.querySelectorAll('.trivia-opt-btn').forEach(b => {
+            b.style.pointerEvents = 'none';
+          });
+
           const chosen = parseInt(btn.dataset.idx, 10);
           if (chosen === cur.correct) {
             btn.classList.add('correct');
             this.triviaScore += 20;
-            document.getElementById('triviaScoreVal').textContent = `${this.triviaScore} PTS`;
-            if (window.playLuxuryPopSound) window.playLuxuryPopSound();
+            const scoreVal = document.getElementById('triviaScoreVal');
+            if (scoreVal) scoreVal.textContent = `${this.triviaScore} PTS`;
+            arcadeAudio.playBeep(700, 0.08, 'triangle');
           } else {
             btn.classList.add('wrong');
+            arcadeAudio.playBeep(220, 0.12, 'sawtooth');
+            // Highlight the correct one
+            grid.querySelector(`[data-idx="${cur.correct}"]`)?.classList.add('correct');
           }
 
           setTimeout(() => {
             this.triviaIndex++;
             this.renderTriviaQuestion();
-          }, 800);
+          }, 850);
         });
       });
     }
   }
 
+  // Helper function to render tactical duel challenge card in chat
+  window.renderTacticalDuelTextBubble = function (text, messageId) {
+    if (!text || !text.includes('[TACTICAL DUEL]')) return null;
+
+    const wagerMatch = text.match(/Pot:\s*\*\*(\d+)\s*NEX Tokens\*\*/i);
+    const wager = wagerMatch ? parseInt(wagerMatch[1], 10) : 50;
+
+    const idMatch = text.match(/Challenge ID:\s*`([^`]+)`/i);
+    const challengeId = idMatch ? idMatch[1] : (messageId || `duel_${Date.now()}`);
+
+    const card = document.createElement('div');
+    card.className = 'tactical-duel-card';
+    card.style.cssText = `
+      background: linear-gradient(135deg, rgba(8, 14, 26, 0.95), rgba(16, 24, 40, 0.95));
+      border: 1px solid rgba(0, 240, 118, 0.4);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 6px 0;
+      box-shadow: 0 4px 20px rgba(0, 240, 118, 0.12);
+      font-family: inherit;
+      color: #fff;
+    `;
+
+    card.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(0, 240, 118, 0.2); padding-bottom: 8px; margin-bottom: 10px;">
+        <span style="font-size: 11px; font-weight: 800; color: #00ff66; letter-spacing: 1px; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-gamepad"></i> TACTICAL DUEL
+        </span>
+        <span style="font-size: 11px; font-weight: 700; color: #ffb700; background: rgba(255, 183, 0, 0.12); border: 1px solid rgba(255, 183, 0, 0.3); border-radius: 9999px; padding: 2px 8px;">
+          ${wager > 0 ? wager + ' NEX' : 'FREE'}
+        </span>
+      </div>
+      <div style="font-size: 13px; font-weight: 700; margin-bottom: 4px; color: #f8fafc;">ROCK - PAPER - SCISSORS</div>
+      <div style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">Tap a weapon to counter the challenger:</div>
+      <div style="display: flex; gap: 8px;" class="duel-buttons-row">
+        <button type="button" class="duel-choice-btn" data-choice="rock" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 4px; color: #fff; cursor: pointer; transition: all 0.2s;">
+          <div style="font-size: 16px;"><i class="fa-solid fa-hand-fist"></i></div>
+          <div style="font-size: 10px; font-weight: 700; margin-top: 2px;">ROCK</div>
+        </button>
+        <button type="button" class="duel-choice-btn" data-choice="paper" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 4px; color: #fff; cursor: pointer; transition: all 0.2s;">
+          <div style="font-size: 16px;"><i class="fa-solid fa-hand"></i></div>
+          <div style="font-size: 10px; font-weight: 700; margin-top: 2px;">PAPER</div>
+        </button>
+        <button type="button" class="duel-choice-btn" data-choice="scissors" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 4px; color: #fff; cursor: pointer; transition: all 0.2s;">
+          <div style="font-size: 16px;"><i class="fa-solid fa-hand-scissors"></i></div>
+          <div style="font-size: 10px; font-weight: 700; margin-top: 2px;">SCISSORS</div>
+        </button>
+      </div>
+    `;
+
+    card.querySelectorAll('.duel-choice-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const choice = btn.dataset.choice;
+        if (window.chatArcadeEngine) {
+          window.chatArcadeEngine.resolveDuelMove(challengeId, choice, wager, btn);
+        }
+      });
+    });
+
+    return card;
+  };
+
   // Export globally
   window.chatArcadeEngine = new ChatArcadeEngine();
+  window.ChatArcade = window.chatArcadeEngine;
 })();

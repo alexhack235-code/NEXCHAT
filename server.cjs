@@ -308,6 +308,24 @@ const server = http.createServer(async (req, res) => {
             ? `[GRANTED] NEX-ECOSYSTEM: Access GRANTED to ${extName}`
             : `[BLOCKED] NEX-ECOSYSTEM: Access BLOCKED for ${extName}`;
           htmlContent = createExtensionConsentEmail(data || {});
+        } else if (type === 'early_access') {
+          const qNum = data?.queueNumber || 412;
+          subject = `[ASTROSHIFT ACCESS GRANTED] Operative Clearance Confirmed // Queue #${qNum}`;
+          htmlContent = `
+            <div style="background:#060a12; color:#f8fafc; padding:32px 24px; border-radius:14px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; border:1px solid #00ff88; max-width:600px; margin:0 auto; box-shadow:0 0 24px rgba(0,255,136,0.15);">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(0,255,136,0.2); padding-bottom:14px;">
+                <span style="font-size:11px; font-weight:800; letter-spacing:2px; color:#00ff88; text-transform:uppercase;">// ASTROSHIFT: BEYOND EARTH</span>
+                <span style="font-size:11px; font-weight:700; color:#00f2ff;">CLEARANCE: LEVEL 5</span>
+              </div>
+              <h1 style="color:#ffffff; margin:0 0 12px; font-size:24px; font-weight:900; letter-spacing:1px;">SECURITY CLEARANCE CONFIRMED</h1>
+              <p style="color:#94a3b8; font-size:14px; line-height:1.6; margin-bottom:20px;">Operative <strong>${toEmail}</strong>, you have been officially registered for the closed alpha enclave. Your position in the priority launch queue is locked.</p>
+              <div style="background:rgba(0,255,136,0.06); border:1px solid rgba(0,255,136,0.3); border-radius:10px; padding:18px; text-align:center; margin-bottom:24px;">
+                <div style="font-size:12px; color:#8fa3b8; text-transform:uppercase; letter-spacing:2px;">Assigned Queue Rank</div>
+                <div style="font-size:36px; font-weight:900; color:#00ff88; font-family:monospace; margin-top:4px;">#${qNum}</div>
+              </div>
+              <p style="color:#64748b; font-size:12px; line-height:1.5;">When the orbital gates open, your neural access token will activate automatically. Keep your terminal on standby.</p>
+            </div>
+          `;
         } else {
           htmlContent = parsed.htmlContent || `<p>${parsed.message || 'Notification from NEXCHAT'}</p>`;
         }

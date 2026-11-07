@@ -29,7 +29,7 @@
           <i class="fa-solid fa-arrow-left"></i> <span>Back to Chat</span>
         </a>
         <h1 class="gaming-title">
-          <img src="assets/gaminghub_logo.svg" alt="NEX Gaming Hub" class="hub-brand-logo">
+          <img src="assets/gaminghub_logo.svg" onerror="this.onerror=null;this.src='public/assets/gaminghub_logo.svg';" alt="NEX Gaming Hub" class="hub-brand-logo">
           <span>NEX GAMING HUB</span>
         </h1>
         <div class="hub-header-actions">
@@ -135,14 +135,17 @@
         </div>
 
         <div class="astro-action-row">
-          <a href="unity_game.html" class="btn-launch-astro" id="btnLaunchAstro" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-            <i class="fa-solid fa-gamepad"></i> <span>LAUNCH ASTROSHIFT (UNITY 3D ENGINE)</span>
+          <a href="game.html" class="btn-launch-astro" id="btnLaunchAstro" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-rocket"></i> <span>LAUNCH ASTROSHIFT 3D (CENTRAL METROPOLIS)</span>
+          </a>
+          <a href="unity_game.html" class="btn-specs" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fa-solid fa-gamepad"></i> <span>ASTROSHIFT WEBGL</span>
           </a>
           <a href="game_module.html" class="btn-specs" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
-            <i class="fa-solid fa-plane"></i> <span>CALGARY METROPOLIS (14 PROVINCES)</span>
+            <i class="fa-solid fa-plane"></i> <span>CALGARY (14 PROVINCES)</span>
           </a>
           <button type="button" class="btn-specs" id="openSpecsBtn">
-            <i class="fa-solid fa-circle-info"></i> SPECIFICATIONS &amp; CONTROLS
+            <i class="fa-solid fa-circle-info"></i> SPECS &amp; SECURITY
           </button>
         </div>
       </section>
@@ -217,6 +220,27 @@
           <div class="key-item"><span class="key-badge">CLICK</span> Primary Fire / Cannon</div>
           <div class="key-item"><span class="key-badge">R</span> Reload Weapon Magazine</div>
           <div class="key-item"><span class="key-badge">GEAR</span> In-Game Settings &amp; Gyro Controls</div>
+        </div>
+      </section>
+
+      <!-- NEX-ARCADE CAREER STATS & LEADERBOARDS -->
+      <section class="controls-section mt-8" style="margin-top: 28px;">
+        <h3 class="section-header-title">
+          <i class="fa-solid fa-trophy" style="color: #ffb700;"></i> NEX-Arcade Career Battle Records
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 14px;">
+          <div style="background: rgba(10, 16, 28, 0.7); border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 10px; padding: 14px; text-align: center;">
+            <div style="font-size: 11px; color: #8fa3b8; letter-spacing: 1px; text-transform: uppercase;">Cyber Pong Victories</div>
+            <div style="font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 800; color: #00ff66; margin-top: 4px;" id="statPongWins">0</div>
+          </div>
+          <div style="background: rgba(10, 16, 28, 0.7); border: 1px solid rgba(0, 242, 255, 0.25); border-radius: 10px; padding: 14px; text-align: center;">
+            <div style="font-size: 11px; color: #8fa3b8; letter-spacing: 1px; text-transform: uppercase;">Trivia Blitz High Score</div>
+            <div style="font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 800; color: #00f2ff; margin-top: 4px;" id="statTriviaHigh">0 PTS</div>
+          </div>
+          <div style="background: rgba(10, 16, 28, 0.7); border: 1px solid rgba(168, 85, 247, 0.25); border-radius: 10px; padding: 14px; text-align: center;">
+            <div style="font-size: 11px; color: #8fa3b8; letter-spacing: 1px; text-transform: uppercase;">RPS Tactical Duel Wins</div>
+            <div style="font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 800; color: #c084fc; margin-top: 4px;" id="statRpsWins">0</div>
+          </div>
         </div>
       </section>
     </main>

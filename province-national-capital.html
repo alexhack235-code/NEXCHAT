@@ -9,13 +9,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <script src="../js/three.min.js"></script>
+  <script src="js/three.min.js"></script>
   <script>if (typeof THREE === 'undefined') document.write('<script src="js/three.min.js"><\/script>');</script>
   <script>if (typeof THREE === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');</script>
-  <script src="../js/GLTFLoader.js"></script>
+  <script src="js/GLTFLoader.js"></script>
   <script>if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') document.write('<script src="js/GLTFLoader.js"><\/script>');</script>
   <script>if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');</script>
-  <script src="../js/game_hyper_realism.js"></script>
+  <script src="js/game_hyper_realism.js"></script>
   <script>if (typeof window.HyperRealismEngine === 'undefined') document.write('<script src="js/game_hyper_realism.js"><\/script>');</script>
 
   <style>
@@ -212,7 +212,9 @@
       <button type="button" class="btn-hud" id="btn-camera" onclick="toggleCameraView()"><i class="fa-solid fa-eye"></i> <span id="cam-mode-label">3P VIEW</span> [V]</button>
       <button type="button" class="btn-hud" id="btn-quality" onclick="cycleQuality()"><i class="fa-solid fa-sliders"></i> <span id="quality-label">GRAPHICS: HIGH</span> [Q]</button>
       <button type="button" class="btn-hud" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> HIGHWAYS [H]</button>
-      <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
+      <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS</button>
+      <a href="gaminghub.html" class="btn-return" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background:rgba(0,242,255,0.15); border-color:#00f2ff; color:#00f2ff;"><i class="fa-solid fa-gamepad"></i> GAMING HUB</a>
+      <a href="chat.html" class="btn-return" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background:rgba(0,255,102,0.15); border-color:#00ff66; color:#00ff66;"><i class="fa-solid fa-comments"></i> CHAT</a>
     </div>
   </div>
 
@@ -445,7 +447,10 @@
 
     function returnToMetropolis() {
       localStorage.setItem('BS_TOKENS', tokens.toString());
-      const hubBase = window.location.pathname.includes("/Canada/") ? "../game.html" : "game.html"; window.location.href = `${hubBase}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromParam = urlParams.get('from');
+      const hubBase = fromParam ? fromParam : (window.location.pathname.includes("/Canada/") ? "../game.html" : "game.html");
+      window.location.href = `${hubBase}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
     }
 
     function toggleMapModal() { document.getElementById('modal-map').classList.toggle('visible'); }

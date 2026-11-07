@@ -13,11 +13,32 @@
   
   <!-- High-reliability Three.js r128 (Local primary with automatic CDN fallback) -->
   <script src="js/three.min.js"></script>
-  <script>if (typeof THREE === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');</script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+      s.async = false;
+      document.head.appendChild(s);
+    }
+  </script>
   <script src="js/GLTFLoader.js"></script>
-  <script>if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');</script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+      s.async = false;
+      document.head.appendChild(s);
+    }
+  </script>
   <script src="js/DRACOLoader.js"></script>
-  <script>if (typeof THREE !== 'undefined' && typeof THREE.DRACOLoader === 'undefined') document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"><\/script>');</script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.DRACOLoader === 'undefined') {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js';
+      s.async = false;
+      document.head.appendChild(s);
+    }
+  </script>
 
   <style>
     * {
@@ -3443,7 +3464,7 @@
         <label for="launch-access-key" class="bs-login-label">
           <i class="fa-solid fa-key"></i> SECURITY CLEARANCE KEY
         </label>
-        <input type="password" id="launch-access-key" class="bs-login-input" value="ASTRO-2026-NEX" placeholder="SECURITY CLEARANCE KEY...">
+        <input type="password" id="launch-access-key" class="bs-login-input" value="" placeholder="ENTER SECURITY CLEARANCE KEY...">
       </div>
 
       <!-- Clearance Status Bar -->
@@ -6595,6 +6616,181 @@
       alert(`[PRE-REGISTRATION CONFIRMED]\nCallsign: ${callsign}\nFounder Rewards Allocated:\n- 100,000 NEX Tokens\n- Exclusive [FOUNDER] Clan Tag\n- Central Stadium VIP Clearance\n\nGame unlocks on countdown completion!`);
     }
 
+    // ============================================================
+    // TRANS-CANADA HIGHWAY (14 PROVINCES & TERRITORIES) & VIEWPORT CONTROLLER
+    // ============================================================
+    const CANADIAN_PROVINCES = [
+      { id: 'alberta', name: 'Alberta', capital: 'Edmonton / Calgary', icon: 'fa-mountain-sun', file: 'province-alberta.html', desc: 'Rocky Mountain Badlands & Energy Hub' },
+      { id: 'british-columbia', name: 'British Columbia', capital: 'Victoria / Vancouver', icon: 'fa-tree', file: 'province-british-columbia.html', desc: 'Pacific Rainforests & Coastal Ranges' },
+      { id: 'manitoba', name: 'Manitoba', capital: 'Winnipeg', icon: 'fa-wheat-awn', file: 'province-manitoba.html', desc: 'Gateway to the Western Prairies' },
+      { id: 'new-brunswick', name: 'New Brunswick', capital: 'Fredericton', icon: 'fa-water', file: 'province-new-brunswick.html', desc: 'Bay of Fundy Tides & Acadian Forest' },
+      { id: 'newfoundland', name: 'Newfoundland & Labrador', capital: 'St. John’s', icon: 'fa-anchor', file: 'province-newfoundland.html', desc: 'Atlantic Maritime Outposts & Iceberg Alley' },
+      { id: 'northwest-territories', name: 'Northwest Territories', capital: 'Yellowknife', icon: 'fa-icicles', file: 'province-northwest-territories.html', desc: 'Aurora Borealis & Diamond Reserves' },
+      { id: 'nova-scotia', name: 'Nova Scotia', capital: 'Halifax', icon: 'fa-ship', file: 'province-nova-scotia.html', desc: 'Historic Ocean Citadel & Harbor Watch' },
+      { id: 'nunavut', name: 'Nunavut', capital: 'Iqaluit', icon: 'fa-snowflake', file: 'province-nunavut.html', desc: 'High Arctic Tundra & Inuit Heritage' },
+      { id: 'ontario', name: 'Ontario', capital: 'Toronto', icon: 'fa-building-columns', file: 'province-ontario.html', desc: 'Great Lakes Metropolis & Financial Center' },
+      { id: 'prince-edward-island', name: 'Prince Edward Island', capital: 'Charlottetown', icon: 'fa-bridge', file: 'province-prince-edward-island.html', desc: 'Confederation Cradle & Red Sand Coast' },
+      { id: 'quebec', name: 'Quebec', capital: 'Quebec City / Montreal', icon: 'fa-monument', file: 'province-quebec.html', desc: 'St. Lawrence Riverway & Francophone Culture' },
+      { id: 'saskatchewan', name: 'Saskatchewan', capital: 'Regina', icon: 'fa-sun', file: 'province-saskatchewan.html', desc: 'Land of Living Skies & Potash Basins' },
+      { id: 'yukon', name: 'Yukon', capital: 'Whitehorse', icon: 'fa-gem', file: 'province-yukon.html', desc: 'Klondike Goldfield & Mount Logan Peaks' },
+      { id: 'national-capital', name: 'National Capital Region', capital: 'Ottawa', icon: 'fa-landmark-dome', file: 'province-national-capital.html', desc: 'Parliament Hill & Cyber Defense Enclave' }
+    ];
+
+    function toggleProvincesModal(fromOverlay = false) {
+      const modal = document.getElementById('modal-provinces');
+      if (!modal) return;
+      const isOpening = !modal.classList.contains('visible');
+      modal.classList.toggle('visible');
+      if (isOpening) {
+        renderProvincesGrid();
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+      } else {
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+      }
+    }
+
+    function renderProvincesGrid() {
+      const grid = document.getElementById('highway-provinces-grid');
+      if (!grid || grid.children.length > 0) return;
+      grid.innerHTML = '';
+      CANADIAN_PROVINCES.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'province-card';
+        card.style.cssText = 'background: rgba(4, 18, 32, 0.85); border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; transition: all 0.25s ease;';
+        card.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 15px; font-weight: 800; color: #00f2ff;"><i class="fa-solid ${p.icon}" style="margin-right: 8px; color: #ff3366;"></i>${p.name.toUpperCase()}</span>
+            <span style="font-size: 10px; color: #ffb700; background: rgba(255,183,0,0.15); border: 1px solid #ffb700; padding: 2px 6px; border-radius: 4px;">HWY-1</span>
+          </div>
+          <div style="font-size: 12px; color: #94a3b8;">${p.capital}</div>
+          <div style="font-size: 11px; color: #64748b; line-height: 1.4;">${p.desc}</div>
+          <div style="margin-top: auto; display: flex; gap: 8px;">
+            <button type="button" class="prov-bar-btn primary" style="flex: 1; padding: 6px; font-size: 11px; font-weight: 800; background: #00f2ff; color: #020a14; border: none; border-radius: 4px; cursor: pointer;">
+              <i class="fa-solid fa-plane-departure"></i> WARP VIEWPORT
+            </button>
+            <button type="button" class="prov-bar-btn" style="padding: 6px 10px; font-size: 11px; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; cursor: pointer;" title="Open in New Tab">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </button>
+          </div>
+        `;
+        const buttons = card.querySelectorAll('button');
+        if (buttons[0]) buttons[0].onclick = (e) => { e.stopPropagation(); warpToProvince(p.file, p.name); };
+        if (buttons[1]) buttons[1].onclick = (e) => { e.stopPropagation(); window.open(p.file + '?from=game.html', '_blank'); };
+        card.onclick = () => { warpToProvince(p.file, p.name); };
+        grid.appendChild(card);
+      });
+    }
+
+    function warpToProvince(file, name) {
+      const modal = document.getElementById('modal-provinces');
+      if (modal) modal.classList.remove('visible');
+      const overlay = document.getElementById('province-loader-overlay');
+      const frame = document.getElementById('province-viewport-frame');
+      const titleEl = document.getElementById('province-loader-title');
+      if (titleEl) titleEl.textContent = name.toUpperCase();
+      if (frame) frame.src = file + '?from=game.html';
+      if (overlay) {
+        overlay.classList.add('active');
+        overlay.style.display = 'flex';
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playWarpSound) cyberAudio.playWarpSound();
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`[WARP] TRANS-CANADA HIGHWAY WARP INITIALIZED // DESTINATION: ${name.toUpperCase()}`);
+      }
+    }
+
+    function reloadProvinceFrame() {
+      const f = document.getElementById('province-viewport-frame');
+      if (f && f.src) {
+        const s = f.src;
+        f.src = 'about:blank';
+        setTimeout(() => { f.src = s; }, 60);
+      }
+    }
+
+    function openProvinceNewTab() {
+      const f = document.getElementById('province-viewport-frame');
+      if (f && f.src && f.src !== 'about:blank') {
+        window.open(f.src, '_blank');
+      }
+    }
+
+    function closeProvinceLoader() {
+      const overlay = document.getElementById('province-loader-overlay');
+      const f = document.getElementById('province-viewport-frame');
+      if (overlay) {
+        overlay.classList.remove('active');
+        overlay.style.display = 'none';
+      }
+      if (f) f.src = 'about:blank';
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+    }
+
+    // ============================================================
+    // LEVEL 5 DEVELOPER CLEARANCE & CONSOLE ENGINE
+    // Passphrase: IAMATOMICDEVELOPER18@$#
+    // ============================================================
+    window.devAuth = function(passphrase) {
+      if (passphrase === 'IAMATOMICDEVELOPER18@$#' || passphrase === 'ASTRO-2026-NEX') {
+        localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+        localStorage.setItem('BS_HAS_LOGGED_IN', 'true');
+        localStorage.setItem('nex_astro_early_access_registered', 'true');
+        console.log('%c[LEVEL 5 CLEARANCE GRANTED] Welcome Operative DEMONALEX.', 'color: #00ff88; font-weight: bold; font-size: 14px;');
+        if (typeof bypassLaunchLock === 'function') bypassLaunchLock();
+        return true;
+      }
+      console.warn('[DEV AUTH] Invalid clearance credentials.');
+      return false;
+    };
+
+    window.devConsole = {
+      godMode: function(enable = true) {
+        window._godMode = enable;
+        if (enable && typeof gameState !== 'undefined') {
+          gameState.health = 99999;
+          gameState.shield = 99999;
+        }
+        console.log('[DEV CONSOLE] God mode:', enable);
+      },
+      infiniteAmmo: function(enable = true) {
+        window._infiniteAmmo = enable;
+        if (enable && typeof gameState !== 'undefined' && gameState.weapons) {
+          Object.values(gameState.weapons).forEach(w => { w.reserve = 9999; w.ammo = w.maxAmmo; });
+        }
+        console.log('[DEV CONSOLE] Infinite ammo:', enable);
+      },
+      giveTokens: function(amount = 50000) {
+        if (typeof gameState !== 'undefined') {
+          gameState.tokens = (gameState.tokens || 0) + amount;
+          if (window.nexTokenManager && typeof window.nexTokenManager.setTokens === 'function') {
+            window.nexTokenManager.setTokens(gameState.tokens);
+          }
+          const el = document.getElementById('hud-tokens');
+          if (el) el.textContent = gameState.tokens.toLocaleString();
+        }
+        console.log('[DEV CONSOLE] Tokens updated:', amount);
+      },
+      unlockAll: function() {
+        localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+        localStorage.setItem('BS_HAS_LOGGED_IN', 'true');
+        localStorage.setItem('nex_astro_early_access_registered', 'true');
+        if (typeof gameState !== 'undefined' && gameState.weapons) {
+          Object.values(gameState.weapons).forEach(w => { w.reserve = 999; });
+        }
+        console.log('[DEV CONSOLE] All worlds, vehicles, and weapons unlocked.');
+      },
+      teleport: function(target) {
+        if (!player || !player.pos) return;
+        if (target === 'starbase' || target === 'pad') player.pos.set(650, 2, -550);
+        else if (target === 'garage') player.pos.set(-85, 2, 45);
+        else if (target === 'metro') player.pos.set(20, -20.8, 20);
+        else if (target === 'stadium') player.pos.set(0, 2, 0);
+        else if (target === 'airport') player.pos.set(-450, 2, 200);
+        else if (typeof target === 'object' && target.x !== undefined) player.pos.set(target.x, target.y || 2, target.z);
+        console.log('[DEV CONSOLE] Teleported to:', target);
+      }
+    };
+
     function bypassLaunchLock() {
       const keyInput = document.getElementById('launch-access-key');
       const enteredKey = keyInput ? keyInput.value.trim() : '';
@@ -8109,6 +8305,60 @@
         osc.stop(now + 0.25);
       }
 
+      playChirp() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(1800, now + 0.08);
+        gain.gain.setValueAtTime(0.2 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      }
+
+      playStarshipLaunch() {
+        if (!this.ctx) return;
+        this.playLaunchSiren();
+        setTimeout(() => this.playAcousticLiftoffRoar(6.0), 1200);
+      }
+
+      playWeaponReload() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(660, now + 0.08);
+        gain.gain.setValueAtTime(0.18 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      }
+
+      playWeaponSwitch() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.06);
+        gain.gain.setValueAtTime(0.15 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.09);
+      }
+
     }
 
     const cyberAudio = new CyberAudioEngine();
@@ -8160,11 +8410,11 @@
       isAiming: false,
       currentWeapon: 'rifle',
       weapons: {
-        rifle: { name: 'TACTICAL RIFLE', ammo: 30, maxAmmo: 30, reserve: 180, damage: 32, rate: 0.12 },
-        railgun: { name: 'QUANTUM RAILGUN', ammo: 8, maxAmmo: 8, reserve: 32, damage: 120, rate: 0.8 },
-        plasma: { name: 'DUAL PLASMA', ammo: 40, maxAmmo: 40, reserve: 240, damage: 24, rate: 0.09 },
-        rpg: { name: 'HEAVY RPG', ammo: 4, maxAmmo: 4, reserve: 16, damage: 250, rate: 1.2 },
-        disintegrator: { name: 'PRECURSOR DISINTEGRATOR', ammo: 60, maxAmmo: 60, reserve: 360, damage: 45, rate: 0.08 }
+        rifle: { name: 'TACTICAL RIFLE', ammo: 30, maxAmmo: 30, reserve: 180, damage: 32, rate: 0.12, reloadTime: 1.2 },
+        railgun: { name: 'QUANTUM RAILGUN', ammo: 8, maxAmmo: 8, reserve: 32, damage: 120, rate: 0.8, reloadTime: 2.0 },
+        plasma: { name: 'DUAL PLASMA', ammo: 40, maxAmmo: 40, reserve: 240, damage: 24, rate: 0.09, reloadTime: 1.4 },
+        rpg: { name: 'HEAVY RPG', ammo: 4, maxAmmo: 4, reserve: 16, damage: 250, rate: 1.2, reloadTime: 2.5 },
+        disintegrator: { name: 'PRECURSOR DISINTEGRATOR', ammo: 60, maxAmmo: 60, reserve: 360, damage: 45, rate: 0.08, reloadTime: 1.5 }
       },
       missions: [
         {
@@ -11716,8 +11966,11 @@
 
             if (z.health <= 0) {
               z.alive = false;
+              z.isDying = true;
+              z.deathTime = now;
               z.mesh.rotation.x = -Math.PI / 2;
               z.mesh.position.y = 0.2;
+              if (z.healthBarGroup) z.healthBarGroup.visible = false;
               gameState.kills = (gameState.kills || 0) + 1;
               const killBadge = document.getElementById('mobile-kill-badge');
               if (killBadge) killBadge.textContent = gameState.kills;
@@ -16577,6 +16830,7 @@
       const now = performance.now();
       const wep = gameState.weapons[gameState.currentWeapon];
       if (now - player.lastShoot < wep.rate * 1000) return;
+      if (wep.isReloading) return;
       if (wep.ammo <= 0) {
         reloadWeapon();
         return;
@@ -16663,12 +16917,22 @@
 
     function reloadWeapon() {
       const wep = gameState.weapons[gameState.currentWeapon];
-      if (wep.ammo === wep.maxAmmo || wep.reserve <= 0) return;
-      const needed = wep.maxAmmo - wep.ammo;
-      const toTake = Math.min(needed, wep.reserve);
-      wep.ammo += toTake;
-      wep.reserve -= toTake;
+      if (!wep || wep.isReloading || wep.ammo === wep.maxAmmo || wep.reserve <= 0) return;
+      wep.isReloading = true;
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playWeaponReload) cyberAudio.playWeaponReload();
+      else if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+      
+      const reloadDuration = (wep.reloadTime || 1.4) * 1000;
       updateWeaponHUD();
+      
+      setTimeout(() => {
+        wep.isReloading = false;
+        const needed = wep.maxAmmo - wep.ammo;
+        const toTake = Math.min(needed, wep.reserve);
+        wep.ammo += toTake;
+        wep.reserve -= toTake;
+        updateWeaponHUD();
+      }, reloadDuration);
     }
 
 
@@ -17274,21 +17538,28 @@
 
       // 6. Subway Headhouse
       const distToSubwayHeadhouse = player.pos.distanceTo(new THREE.Vector3(18, 0, 25));
-      if (distToSubwayHeadhouse < 7.0 || gameState.isUnderground) {
+      const isNearSubwayExit = gameState.isUnderground && Math.hypot(player.pos.x - 20, player.pos.z - 20) < 9.0;
+      if (distToSubwayHeadhouse < 7.0 || isNearSubwayExit) {
         if (!gameState.isUnderground) {
           gameState.isUnderground = true;
-          player.pos.set(20, -21.0, 20);
+          player.pos.set(20, -20.8, 20);
           player.vel.set(0, 0, 0);
-          cyberAudio.playSubwayRumble();
-          document.getElementById('hud-depth-badge').textContent = '// SUBTERRANEAN: -22.0M';
-          document.getElementById('hud-depth-badge').classList.add('underground');
+          if (typeof cyberAudio !== 'undefined' && cyberAudio.playSubwayRumble) cyberAudio.playSubwayRumble();
+          const badge = document.getElementById('hud-depth-badge');
+          if (badge) {
+            badge.textContent = '// SUBTERRANEAN: -22.0M';
+            badge.classList.add('underground');
+          }
         } else {
           gameState.isUnderground = false;
           player.pos.set(18, 1.2, 28);
           player.vel.set(0, 0, 0);
-          cyberAudio.playSubwayRumble();
-          document.getElementById('hud-depth-badge').textContent = '// SURFACE: 0.0M';
-          document.getElementById('hud-depth-badge').classList.remove('underground');
+          if (typeof cyberAudio !== 'undefined' && cyberAudio.playSubwayRumble) cyberAudio.playSubwayRumble();
+          const badge = document.getElementById('hud-depth-badge');
+          if (badge) {
+            badge.textContent = '// SURFACE: 0.0M';
+            badge.classList.remove('underground');
+          }
         }
       }
     }
@@ -17388,7 +17659,11 @@
         if (roverNitroLight) roverNitroLight.intensity = 0;
         const hud = document.getElementById('car-dashboard-hud');
         if (hud) hud.style.display = 'none';
-        player.pos.set(roverGroup.position.x + 2.8, Math.max(1.2, roverGroup.position.y + 1.2), roverGroup.position.z);
+        const rYawDismount = roverGroup.rotation.y || 0;
+        const exitDist = 2.8;
+        const exitX = roverGroup.position.x + Math.cos(rYawDismount) * exitDist;
+        const exitZ = roverGroup.position.z - Math.sin(rYawDismount) * exitDist;
+        player.pos.set(exitX, Math.max(1.2, roverGroup.position.y + 1.2), exitZ);
         player.vel.set(0, 0, 0);
         player.isGrounded = true;
         if (playerModelGroup) playerModelGroup.visible = (gameState.cameraMode === '3P');
@@ -17402,10 +17677,68 @@
       modal.classList.toggle('visible');
     }
 
+    function modulateControlRods(deltaPct) {
+      if (!gameState.nuclear) return;
+      gameState.nuclear.rods = Math.max(0, Math.min(100, (gameState.nuclear.rods || 38) + deltaPct));
+      const rodFrac = (100 - gameState.nuclear.rods) / 100;
+      gameState.nuclear.output = Math.round(rodFrac * 3400);
+      gameState.nuclear.temp = Number((75.0 + rodFrac * 215.0).toFixed(1));
+      
+      const rodsEl = document.getElementById('nuke-rods');
+      const tempEl = document.getElementById('nuke-temp');
+      const outEl = document.getElementById('nuke-output');
+      if (rodsEl) rodsEl.textContent = `${gameState.nuclear.rods}%`;
+      if (tempEl) tempEl.textContent = `${gameState.nuclear.temp} °C`;
+      if (outEl) outEl.textContent = `${gameState.nuclear.output} MW`;
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+    }
+
+    function modulateCoolantFlow(deltaPct) {
+      if (!gameState.nuclear) return;
+      gameState.nuclear.coolant = Math.max(10, Math.min(100, (gameState.nuclear.coolant || 75) + deltaPct));
+      gameState.nuclear.temp = Number(Math.max(65.0, (gameState.nuclear.temp || 145) - deltaPct * 1.2).toFixed(1));
+      const tempEl = document.getElementById('nuke-temp');
+      if (tempEl) tempEl.textContent = `${gameState.nuclear.temp} °C`;
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+    }
+
+    function resetReactor() {
+      if (!gameState.nuclear) return;
+      gameState.nuclear.rods = 38;
+      gameState.nuclear.temp = 145.0;
+      gameState.nuclear.output = 3400;
+      gameState.nuclear.coolant = 75;
+      const rodsEl = document.getElementById('nuke-rods');
+      const tempEl = document.getElementById('nuke-temp');
+      const outEl = document.getElementById('nuke-output');
+      if (rodsEl) rodsEl.textContent = '38%';
+      if (tempEl) tempEl.textContent = '145.0 °C';
+      if (outEl) outEl.textContent = '3400 MW';
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('[NUCLEAR] REACTOR RESTORED TO NOMINAL CRITICALITY (3,400 MW)');
+      }
+    }
+
     function claimNuclearShift() {
-      gameState.tokens += 120;
-      cyberAudio.playLootChime();
-      document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
+      if (!gameState.nuclear || (gameState.nuclear.output || 0) <= 0) {
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('[WARNING] REACTOR SCRAMMED OR 0 MW OUTPUT - CANNOT CLAIM SHIFT DIVIDEND!');
+        }
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playEasterEggQuack) cyberAudio.playEasterEggQuack();
+        return;
+      }
+      const dividend = Math.round((gameState.nuclear.output / 3400) * 150);
+      gameState.tokens = (gameState.tokens || 0) + dividend;
+      if (window.nexTokenManager && typeof window.nexTokenManager.setTokens === 'function') {
+        window.nexTokenManager.setTokens(gameState.tokens);
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+      const tEl = document.getElementById('hud-tokens');
+      if (tEl) tEl.textContent = gameState.tokens.toLocaleString();
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`[GRID] POWER GRID SHIFT DIVIDEND CLAIMED: +${dividend} NEX TOKENS!`);
+      }
       toggleNuclearModal();
     }
 
@@ -17413,10 +17746,16 @@
       gameState.nuclear.rods = 100;
       gameState.nuclear.temp = 85.0;
       gameState.nuclear.output = 0;
-      document.getElementById('nuke-rods').textContent = '100% (SCRAM)';
-      document.getElementById('nuke-temp').textContent = '85.0 °C';
-      document.getElementById('nuke-output').textContent = '0 MW';
-      cyberAudio.playGeigerClick();
+      const rodsEl = document.getElementById('nuke-rods');
+      const tempEl = document.getElementById('nuke-temp');
+      const outEl = document.getElementById('nuke-output');
+      if (rodsEl) rodsEl.textContent = '100% (SCRAM)';
+      if (tempEl) tempEl.textContent = '85.0 °C';
+      if (outEl) outEl.textContent = '0 MW';
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playGeigerClick) cyberAudio.playGeigerClick();
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('[CRITICAL] EMERGENCY REACTOR SCRAM ACTIVATED // POWER OUTPUT 0 MW');
+      }
     }
 
     let detachedBooster = null;
@@ -17427,8 +17766,55 @@
     let launchSeqTimer = null;
     let launchSeqSeconds = 10.0;
 
+    function resetStarshipStack() {
+      if (!rocketStack) return;
+      rocketStack.position.set(650, 0, -550);
+      rocketStack.rotation.set(0, 0, 0);
+      gameState.starship.isStaged = false;
+      gameState.starship.boosterFuel = 100;
+      gameState.starship.shipFuel = 100;
+      gameState.starship.throttle = 0;
+      gameState.starship.velY = 0;
+      gameState.starship.velHoriz = 0;
+      gameState.starship.pitch = 0;
+      gameState.starship.yaw = 0;
+      gameState.starship.roll = 0;
+      gameState.starship.altitude = 0;
+      gameState.starship.maxVelocityAchieved = false;
+
+      if (starshipBooster) {
+        if (scene && scene.children.includes(starshipBooster)) scene.remove(starshipBooster);
+        if (!rocketStack.children.includes(starshipBooster)) {
+          starshipBooster.position.set(0, 0, 0);
+          starshipBooster.rotation.set(0, 0, 0);
+          rocketStack.add(starshipBooster);
+        }
+      }
+      if (starshipUpper) {
+        if (scene && scene.children.includes(starshipUpper)) scene.remove(starshipUpper);
+        if (!rocketStack.children.includes(starshipUpper)) {
+          starshipUpper.position.set(0, 71, 0);
+          starshipUpper.rotation.set(0, 0, 0);
+          rocketStack.add(starshipUpper);
+        }
+      }
+      detachedBooster = null;
+      raptorFlame = boosterFlame;
+      if (boosterFlame) boosterFlame.material.opacity = 0;
+      if (upperFlame) upperFlame.material.opacity = 0;
+      if (mechazillaChopsticks) mechazillaChopsticks.rotation.y = 0;
+      const stageBadge = document.getElementById('rocket-stage-badge');
+      if (stageBadge) {
+        stageBadge.textContent = 'STAGE 1: SUPER HEAVY';
+        stageBadge.style.background = 'rgba(0, 255, 136, 0.2)';
+        stageBadge.style.color = '#00ff88';
+        stageBadge.style.borderColor = '#00ff88';
+      }
+    }
+
     function initiateStarshipLaunchSequence() {
       if (!rocketStack) return;
+      resetStarshipStack();
       if (gameState.flightMode === 'starship') {
         toggleStarshipFlight();
         return;
@@ -18088,9 +18474,18 @@
 
     function updateWeaponHUD() {
       const wep = gameState.weapons[gameState.currentWeapon];
-      document.getElementById('hud-weapon-name').textContent = wep.name;
-      document.getElementById('hud-ammo-cur').textContent = wep.ammo;
-      document.getElementById('hud-ammo-max').textContent = wep.reserve;
+      const nameEl = document.getElementById('hud-weapon-name');
+      const curEl = document.getElementById('hud-ammo-cur');
+      const maxEl = document.getElementById('hud-ammo-max');
+      if (!wep) {
+        if (nameEl) nameEl.textContent = 'UNARMED / COMBAT FISTS';
+        if (curEl) curEl.textContent = '∞';
+        if (maxEl) maxEl.textContent = 'MELEE';
+        return;
+      }
+      if (nameEl) nameEl.textContent = wep.name;
+      if (curEl) curEl.textContent = wep.isReloading ? 'RELOAD...' : wep.ammo;
+      if (maxEl) maxEl.textContent = wep.reserve;
     }
 
     // UI Wireups
@@ -18954,7 +19349,8 @@
         // Earth Metropolis Prompts
         if (gameState.currentWorld === 'earth') {
           const dMetroSq = distSq3D(player.pos, _posMetroEntrance);
-          if ((dMetroSq < 49.0 && !gameState.isUnderground) || gameState.isUnderground) {
+          const isNearUndergroundExit = gameState.isUnderground && Math.hypot(player.pos.x - 20, player.pos.z - 20) < 9.0;
+          if ((dMetroSq < 49.0 && !gameState.isUnderground) || isNearUndergroundExit) {
             promptEl.style.display = 'flex';
             document.getElementById('prompt-text').textContent = gameState.isUnderground
               ? 'ASCEND TO SURFACE METROPOLIS [F]'
@@ -19282,16 +19678,12 @@
         if (gameState.starship.roll === undefined) gameState.starship.roll = 0;
         if (gameState.starship.throttle === undefined) gameState.starship.throttle = 0;
 
-        // Joystick inputs:
-        // Pushing UP / Forward (joyY < -0.15): Advances throttle and pitches nose FORWARD
-        // Pulling DOWN / Backward (joyY > 0.15): Cuts throttle and rights rocket toward vertical
+        // Direct Analog Virtual Joystick & Keyboard Controls
         if (Math.abs(joyY) > 0.15 || Math.abs(joyX) > 0.15) {
           if (joyY < -0.15) {
-            gameState.starship.throttle = Math.min(100, gameState.starship.throttle + Math.abs(joyY) * delta * 75);
-            gameState.starship.pitch = Math.min(Math.PI * 0.44, gameState.starship.pitch + Math.abs(joyY) * delta * 0.75);
+            gameState.starship.throttle = Math.min(100, gameState.starship.throttle + Math.abs(joyY) * delta * 65);
           } else if (joyY > 0.15) {
-            gameState.starship.throttle = Math.max(0, gameState.starship.throttle - joyY * delta * 75);
-            gameState.starship.pitch = Math.max(-Math.PI * 0.15, gameState.starship.pitch - joyY * delta * 0.75);
+            gameState.starship.throttle = Math.max(0, gameState.starship.throttle - joyY * delta * 65);
           }
 
           if (Math.abs(joyX) > 0.15) {
@@ -19305,15 +19697,19 @@
         }
 
         // Keyboard Controls:
-        // W / ArrowUp = throttle up & pitch forward
-        // S / ArrowDown = throttle down & pitch vertical
-        if (keys['KeyW'] || keys['ArrowUp']) {
-          gameState.starship.throttle = Math.min(100, gameState.starship.throttle + delta * 60);
-          gameState.starship.pitch = Math.min(Math.PI * 0.44, gameState.starship.pitch + delta * 0.55);
+        // W / S: Pure throttle control (Decoupled from pitch!)
+        if (keys['KeyW']) {
+          gameState.starship.throttle = Math.min(100, gameState.starship.throttle + delta * 50);
         }
-        if (keys['KeyS'] || keys['ArrowDown']) {
-          gameState.starship.throttle = Math.max(0, gameState.starship.throttle - delta * 55);
-          gameState.starship.pitch = Math.max(-Math.PI * 0.15, gameState.starship.pitch - delta * 0.55);
+        if (keys['KeyS']) {
+          gameState.starship.throttle = Math.max(0, gameState.starship.throttle - delta * 50);
+        }
+        // ArrowUp / ArrowDown: Pitch nose up / down
+        if (keys['ArrowUp']) {
+          gameState.starship.pitch = Math.min(Math.PI * 0.44, gameState.starship.pitch + delta * 0.45);
+        }
+        if (keys['ArrowDown']) {
+          gameState.starship.pitch = Math.max(-Math.PI * 0.2, gameState.starship.pitch - delta * 0.45);
         }
         if (keys['KeyA'] || keys['ArrowLeft']) {
           gameState.starship.yaw -= delta * 1.6;
@@ -19342,6 +19738,15 @@
               triggerStageSeparation();
             }
           }
+        } else {
+          // Stage 2 Vacuum Starship Propellant Burn
+          if (throttleFrac > 0.05) {
+            gameState.starship.shipFuel = Math.max(0, (gameState.starship.shipFuel !== undefined ? gameState.starship.shipFuel : 100) - delta * 0.75 * throttleFrac);
+            const fuelBar = document.getElementById('hud-rocket-fuel-bar');
+            const fuelTxt = document.getElementById('hud-rocket-fuel-text');
+            if (fuelBar) fuelBar.style.width = `${gameState.starship.shipFuel}%`;
+            if (fuelTxt) fuelTxt.textContent = `${Math.round(gameState.starship.shipFuel)}% [STAGE 2]`;
+          }
         }
 
         const maxThrust = gameState.starship.isStaged ? 95.0 : 155.0;
@@ -19356,11 +19761,13 @@
         // Forward flight vector in the direction of yaw
         const fwdDir = new THREE.Vector3(Math.sin(gameState.starship.yaw), 0, Math.cos(gameState.starship.yaw));
 
+        // Centrifugal orbital gravity relief
+        const orbitalRelief = ((gameState.starship.velHoriz || 0) ** 2) / 600.0;
+        const effectiveGravity = Math.max(0, gameState.currentGravity - orbitalRelief);
+
         // Net Vertical & Forward Horizontal Acceleration
-        // When pitch = 0 (upright): 100% thrust is vertical
-        // When pitch > 0 (tilting forward): thrust accelerates forward (Math.sin(pitch) > 0)!
         if (gameState.starship.velY === undefined) gameState.starship.velY = 0;
-        const netAccelY = thrust * Math.cos(gameState.starship.pitch) - gameState.currentGravity;
+        const netAccelY = thrust * Math.cos(gameState.starship.pitch) - effectiveGravity;
         gameState.starship.velY += netAccelY * delta;
 
         if (gameState.starship.velHoriz === undefined) gameState.starship.velHoriz = 0;
@@ -19369,6 +19776,23 @@
 
         rocketStack.position.y += gameState.starship.velY * delta;
         rocketStack.position.add(fwdDir.clone().multiplyScalar(gameState.starship.velHoriz * delta));
+
+        // Mechazilla Chopsticks Catch at Cape Starbase Orbital Launch Mount
+        if (!gameState.starship.isStaged && rocketStack.position.y > 20 && rocketStack.position.y < 36 && (gameState.starship.velY || 0) < 0 && (gameState.starship.velY || 0) > -16) {
+          const padDist = Math.hypot(rocketStack.position.x - 650, rocketStack.position.z - (-550));
+          if (padDist < 25) {
+            rocketStack.position.set(650, 28, -550);
+            gameState.starship.velY = 0;
+            gameState.starship.velHoriz = 0;
+            gameState.starship.throttle = 0;
+            gameState.starship.pitch = 0;
+            if (mechazillaChopsticks) mechazillaChopsticks.rotation.y = 0.0;
+            if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+            if (typeof showStoreNotification === 'function') {
+              showStoreNotification('🥢 MECHAZILLA TOWER CHOPSTICKS CATCH CONFIRMED! SUPER HEAVY SECURED!');
+            }
+          }
+        }
 
         const minAlt = gameState.currentWorld === 'space' ? -150 : 0;
         if (rocketStack.position.y < minAlt) {
@@ -19830,7 +20254,7 @@
           player.pos.z += player.vel.z * subDelta;
         }
 
-        let floorY = gameState.isUnderground ? -21.0 : (gameState.currentWorld === 'space' ? 40.0 : 1.2);
+        let floorY = gameState.isUnderground ? -20.8 : (gameState.currentWorld === 'space' ? 40.0 : 1.2);
 
         // Boundary Caldera Clamp
         if (!gameState.isUnderground && gameState.currentWorld !== 'space') {
@@ -20267,12 +20691,12 @@
 
       } else if (roverGroup) {
         // Ultra-Realistic Combat Rover Driving Dynamics, Nitro Injection & Physics
-        let steer = (keys['KeyA'] || keys['ArrowLeft'] ? 1 : 0) - (keys['KeyD'] || keys['ArrowRight'] ? 1 : 0);
+        let steer = (keys['KeyD'] || keys['ArrowRight'] ? 1 : 0) - (keys['KeyA'] || keys['ArrowLeft'] ? 1 : 0);
         let throttle = (keys['KeyW'] || keys['ArrowUp'] ? 1 : 0) - (keys['KeyS'] || keys['ArrowDown'] ? 1 : 0);
 
         // Mobile Analog Joystick steering & throttle support
         if (gameState.joyActive && typeof gameState.joyNormX === 'number' && typeof gameState.joyNormY === 'number') {
-          if (Math.abs(gameState.joyNormX) > 0.08) steer = -gameState.joyNormX;
+          if (Math.abs(gameState.joyNormX) > 0.08) steer = gameState.joyNormX;
           if (Math.abs(gameState.joyNormY) > 0.08) throttle = -gameState.joyNormY;
         }
 
@@ -20543,10 +20967,44 @@
         }
       }
 
-      // Update Zombies AI
+      // Update Zombies AI with Boids Separation, Health Bars, and Corpse Sinking
       if (player.pos) {
-        zombies.forEach(z => {
-          if (!z.alive) return;
+        zombies.forEach((z, zIdx) => {
+          if (!z.alive) {
+            if (z.isDying) {
+              const elapsed = (now - z.deathTime) / 1000;
+              if (elapsed < 2.5) {
+                z.mesh.position.y = Math.max(-0.6, 0.2 - elapsed * 0.3);
+              } else {
+                if (scene && z.mesh) scene.remove(z.mesh);
+                z.isDying = false;
+              }
+            }
+            return;
+          }
+
+          // Dynamic 3D Billboard Health Bar
+          if (!z.healthBarGroup && z.mesh && typeof THREE !== 'undefined') {
+            const hbGroup = new THREE.Group();
+            hbGroup.position.set(0, 2.3, 0);
+            const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.15), new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide }));
+            hbGroup.add(bgMesh);
+            const fillMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.16, 0.11), new THREE.MeshBasicMaterial({ color: 0xff0055, side: THREE.DoubleSide }));
+            fillMesh.position.z = 0.01;
+            hbGroup.add(fillMesh);
+            z.mesh.add(hbGroup);
+            z.healthBarGroup = hbGroup;
+            z.healthBarFill = fillMesh;
+            z.maxHealth = z.health || 60;
+          }
+          if (z.healthBarGroup && camera) {
+            z.healthBarGroup.quaternion.copy(camera.quaternion);
+            const hFrac = Math.max(0, z.health / (z.maxHealth || 60));
+            z.healthBarFill.scale.x = hFrac;
+            z.healthBarFill.position.x = -0.58 * (1 - hFrac);
+            z.healthBarFill.material.color.setHex(hFrac > 0.5 ? 0x00ff88 : (hFrac > 0.25 ? 0xffbb00 : 0xff0055));
+          }
+
           const dist = z.mesh.position.distanceTo(player.pos);
 
           if (dist < 40.0 && dist > 1.4) {
@@ -20554,6 +21012,21 @@
             dir.y = 0;
             z.mesh.position.add(dir.multiplyScalar(z.speed * delta));
             z.mesh.rotation.y = Math.atan2(dir.x, dir.z);
+
+            // Boids separation to prevent clumping
+            for (let k = 0; k < zombies.length; k++) {
+              const other = zombies[k];
+              if (other === z || !other.alive) continue;
+              const sepX = z.mesh.position.x - other.mesh.position.x;
+              const sepZ = z.mesh.position.z - other.mesh.position.z;
+              const sepDistSq = sepX * sepX + sepZ * sepZ;
+              if (sepDistSq < 1.8 && sepDistSq > 0.001) {
+                const sepDist = Math.sqrt(sepDistSq);
+                const push = (1.4 - sepDist) * 1.5 * delta;
+                z.mesh.position.x += (sepX / sepDist) * push;
+                z.mesh.position.z += (sepZ / sepDist) * push;
+              }
+            }
 
             // Building Collision for Zombies
             if (typeof getNearbyCityColliders === 'function') {
