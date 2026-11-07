@@ -1348,10 +1348,14 @@
           background-color: #0b141a !important;
           background-image: radial-gradient(circle at 50% 50%, rgba(17, 27, 33, 0.7) 0%, #0b141a 100%) !important;
           z-index: 999999 !important;
-          display: flex !important;
+          display: none !important;
           flex-direction: column !important;
           box-sizing: border-box !important;
           overflow: hidden !important;
+        }
+
+        .whatsapp-channel-route.open {
+          display: flex !important;
         }
 
         /* WhatsApp Channel Header - Height 60px */
@@ -1427,12 +1431,15 @@
           border-radius: 50% !important;
           background: #00ff66 !important;
           color: #0b141a !important;
-          display: flex !important;
+          display: none !important;
           align-items: center !important;
           justify-content: center !important;
           font-size: 9px !important;
           font-weight: 800 !important;
           border: 2px solid #182229 !important;
+        }
+        .channel-avatar-admin-badge.active {
+          display: flex !important;
         }
 
         .channel-header-meta {
@@ -2079,20 +2086,20 @@
         <header class="whatsapp-channel-header">
           <div class="channel-header-left">
             <button type="button" class="channel-header-btn channel-back-btn" id="feedBackBtn" title="Back to Updates">
-              <i class="fa-solid fa-arrow-left"></i>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </button>
             <div class="channel-avatar-container" id="feedAvatarContainer" title="Channel Info">
               <img id="feedChannelAvatar" src="assets/camshot_logo.svg" alt="Avatar" class="channel-header-avatar">
-              <span class="channel-avatar-admin-badge" id="feedAdminBadge" title="Admin" style="display: none;">
-                <i class="fa-solid fa-plus"></i>
+              <span class="channel-avatar-admin-badge" id="feedAdminBadge" title="Admin">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               </span>
             </div>
             <div class="channel-header-meta" id="feedMetaContainer" title="Channel Info">
               <div class="channel-header-name-row">
                 <span id="feedChannelName" class="channel-header-name">CAMSHOT</span>
-                <i class="fa-solid fa-circle-check channel-verified-icon" id="feedChannelVerified"></i>
+                <svg class="channel-verified-icon" id="feedChannelVerified" width="15" height="15" viewBox="0 0 24 24" fill="#00ff66"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                 <button type="button" class="channel-header-expand-btn" id="channelHeaderExpandBtn" title="Toggle Channel Info">
-                  <i class="fa-solid fa-chevron-down" id="channelHeaderExpandIcon"></i>
+                  <svg id="channelHeaderExpandIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
               </div>
               <div id="feedChannelSubscribers" class="channel-header-followers">149 followers • @CamShot.nex</div>
@@ -2100,10 +2107,10 @@
           </div>
           <div class="channel-header-right">
             <button type="button" class="channel-header-btn" id="feedShareLinkBtn" title="Copy Channel Link">
-              <i class="fa-solid fa-link"></i>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
             </button>
             <button type="button" class="channel-header-btn" id="feedMenuBtn" title="Channel Options">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
             </button>
             <div class="whatsapp-channel-dropdown-menu" id="feedOptionsMenu" style="display: none;">
               <button type="button" class="channel-dropdown-item" id="menuChannelInfoBtn">
@@ -2984,8 +2991,8 @@
       }
 
       // 4. Open full page route
-      modal.style.display = 'flex';
       modal.classList.add('open');
+      modal.style.setProperty('display', 'flex', 'important');
 
       // 5. Push history state for seamless Back button handling
       try {
@@ -3019,7 +3026,11 @@
       const user = this.getCurrentUser();
       const isCreator = channel.creatorId === user.uid || channel.creatorId === 'system_nexchat' || channel.creatorId === 'system_camshot';
       if (adminBadge) {
-        adminBadge.style.display = isCreator ? 'flex' : 'none';
+        if (isCreator) {
+          adminBadge.classList.add('active');
+        } else {
+          adminBadge.classList.remove('active');
+        }
       }
 
       if (subsEl) {
@@ -3281,7 +3292,7 @@
       const modal = document.getElementById('channelFeedModal');
       if (modal) {
         modal.classList.remove('open');
-        modal.style.display = 'none';
+        modal.style.setProperty('display', 'none', 'important');
       }
 
       // Restore Updates list and bottom nav
@@ -3317,10 +3328,6 @@
     } else if (chanModal === 'create') {
 
       setTimeout(() => engine.openCreateModal(), 100);
-
-    } else if (chanModal === 'feed') {
-
-      setTimeout(() => engine.openChannelFeed('chan_nexchat_official'), 100);
 
     }
 
