@@ -69,3 +69,7 @@ email-config.json
 NEXCHAT_API_KEYS_FOR_DEVELOPER.txt
 
 *.meta
+
+# Logs directory
+logs
+logs/
