@@ -652,28 +652,26 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
       } catch (_) {}
     }
 
-    // Fast Runner 3: ChronEX AI Gateway (with strict prompt guard & preamble stripper)
-    if (typeof window !== 'undefined' && typeof window.generateChronexAIResponse === 'function') {
+    // Fast Runner 3: Silent Machine Translation Endpoint (/api/translate or chronexAI.translateText)
+    if (typeof window !== 'undefined') {
       try {
-        const prompt = `Translate to ${langName}. Direct translation ONLY, no quotes:\n"${clean}"`;
-        const res = await window.generateChronexAIResponse(prompt);
-        if (res && res.trim() &&
-            !res.includes('QUOTA') &&
-            !res.includes('MODEL QUOTA REACHED') &&
-            !res.includes('ChronEX Neural Cognition') &&
-            !res.includes('I have received your message') &&
-            !res.includes('I am fully synchronized') &&
-            !res.startsWith('#')) {
-          let cleanAi = res.trim()
-            .replace(/^["'“”]|["'“”]$/g, '')
-            .replace(/###[\s\S]*?\n/g, '')
-            .replace(/I have received your message:?[\s\S]*?\n/gi, '')
-            .replace(/Translate to [A-Za-z\s]+\.?\s*Direct translation ONLY[\s\S]*?\n/gi, '')
-            .trim();
-          if (cleanAi && cleanAi.toLowerCase() !== clean.toLowerCase()) {
-            translationLRU.set(cacheKey, cleanAi);
-            return cleanAi;
+        let cleanAi = '';
+        if (window.chronexAI && typeof window.chronexAI.translateText === 'function') {
+          cleanAi = await window.chronexAI.translateText(clean, targetLang || langName);
+        } else if (typeof fetch === 'function') {
+          const transResp = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: clean, targetLang: targetLang || langName })
+          });
+          if (transResp.ok) {
+            const data = await transResp.json();
+            cleanAi = (data.result || data.response || '').trim();
           }
+        }
+        if (cleanAi && cleanAi.toLowerCase() !== clean.toLowerCase()) {
+          translationLRU.set(cacheKey, cleanAi);
+          return cleanAi;
         }
       } catch (_) {}
     }

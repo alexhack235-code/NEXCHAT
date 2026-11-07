@@ -202,14 +202,16 @@ export default async function handler(req, res) {
   const rawAudio = audio || req.body?.audioUrl;
   if (rawAudio) {
     let base64Audio = '';
-    let aMime = audioMimeType || 'audio/webm';
+    // Strip codec parameters (e.g. 'audio/webm;codecs=opus' -> 'audio/webm')
+    let aMime = (audioMimeType || 'audio/webm').split(';')[0].trim().toLowerCase();
+
     if (typeof rawAudio === 'string') {
       if (rawAudio.startsWith('http://') || rawAudio.startsWith('https://')) {
         try {
           const fetchRes = await fetch(rawAudio);
           if (fetchRes.ok) {
             const cType = fetchRes.headers.get('content-type');
-            if (cType) aMime = cType.split(';')[0].trim();
+            if (cType) aMime = cType.split(';')[0].trim().toLowerCase();
             const buffer = await fetchRes.arrayBuffer();
             base64Audio = Buffer.from(buffer).toString('base64');
           }
@@ -217,9 +219,9 @@ export default async function handler(req, res) {
           console.warn('[AI Gateway] Failed to fetch audio URL:', fetchErr.message);
         }
       } else if (rawAudio.startsWith('data:')) {
-        const matches = rawAudio.match(/^data:([^;]+);base64,(.+)$/);
+        const matches = rawAudio.match(/^data:([^;]+)(?:;[^,]*)?;base64,(.+)$/);
         if (matches) {
-          aMime = matches[1];
+          aMime = matches[1].split(';')[0].trim().toLowerCase();
           base64Audio = matches[2];
         } else {
           base64Audio = rawAudio.split(',')[1] || rawAudio;
@@ -227,6 +229,11 @@ export default async function handler(req, res) {
       } else {
         base64Audio = rawAudio;
       }
+    }
+
+    const SUPPORTED_AUDIO_MIMES = ['audio/webm', 'audio/mp3', 'audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/aac', 'audio/flac', 'audio/m4a'];
+    if (!SUPPORTED_AUDIO_MIMES.includes(aMime)) {
+      aMime = 'audio/webm';
     }
 
     if (base64Audio) {
@@ -254,6 +261,21 @@ Audio is not clear enough to be translated.
 - NEVER output conversational preamble like "I have received your message" or "Here is a modern implementation".`;
 
     textPrompt = `Listen to this audio note and transcribe it into ${targetLang || 'English'}. Return only the spoken words or "Audio is not clear enough to be translated."`;
+  } else if (mode === 'translate') {
+    currentSystemInstruction = `You are a direct, concise neural translator.
+Your ONLY task is to return the exact direct translation into ${targetLang || 'English'}.
+STRICT RULES:
+- Return ONLY the direct translation.
+- No introduction, no greeting, no "I have received", no "I am ready", no quotes, no explanation, no code.`;
+    textPrompt = message && typeof message === 'string' ? message.trim() : '';
+  } else if (mode === 'summarize') {
+    currentSystemInstruction = `You are an executive voice note summarizer.
+Your ONLY task is to summarize the spoken transcript into EXACTLY 2 concise bullet points starting with "• ".
+STRICT RULES:
+- Return ONLY 2 bullet points.
+- No greeting, no conversational filler, no "I am fully synchronized", no closing.
+- If there is no speech or content is empty, return "No speech to summarize".`;
+    textPrompt = message && typeof message === 'string' ? message.trim() : '';
   } else {
     textPrompt = message && typeof message === 'string' && message.trim() ? message.trim() : (image ? 'Analyze and describe this image in detail.' : '');
   }
@@ -273,9 +295,9 @@ Audio is not clear enough to be translated.
       parts: [{ text: currentSystemInstruction }]
     },
     generationConfig: {
-      temperature: isTranscribeMode ? 0.1 : 0.7,
-      maxOutputTokens: isTranscribeMode ? 512 : 2048,
-      topP: isTranscribeMode ? 0.8 : 0.95
+      temperature: (isTranscribeMode || mode === 'translate' || mode === 'summarize') ? 0.1 : 0.7,
+      maxOutputTokens: (isTranscribeMode || mode === 'summarize') ? 512 : 2048,
+      topP: (isTranscribeMode || mode === 'translate' || mode === 'summarize') ? 0.8 : 0.95
     }
   };
 

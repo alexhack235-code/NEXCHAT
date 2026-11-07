@@ -2063,23 +2063,46 @@ class NexTranslator {
     if (bubble.closest('.thread-synthesis-wrapper') || bubble.closest('.chronex-ai-item')) return;
 
     // Extract message text cleanly
+    const voiceCard = bubble.querySelector('.nex-voice-card-wrapper, .custom-audio-player, .nex-waveform-player, .chronex-voice-player-bar');
+    const isVoiceBubble = Boolean(voiceCard || bubble.querySelector('audio'));
+
     let rawText = '';
-    const textEl = bubble.querySelector('.message-text-content, .ai-body-content, .nex-msg-text, .message-text, p');
-    if (textEl) {
-      rawText = textEl.innerText || textEl.textContent || '';
+    if (isVoiceBubble) {
+      // ONLY allow genuine transcript from data attribute; NEVER read DOM text of player
+      const voiceContainer = bubble.querySelector('.nex-unified-voice-wrapper, .nex-voice-card-wrapper') || voiceCard;
+      rawText = (voiceContainer?.dataset?.transcript || '').trim();
+      if (!rawText) {
+        bubble.dataset.autoTranslated = 'true';
+        return;
+      }
     } else {
-      const clone = bubble.cloneNode(true);
-      clone.querySelectorAll(
-        '.nex-msg-meta, .message-hover-actions, .message-attachment-container, ' +
-        '.message-reaction-badge, .message-reaction-badge-container, .e2ee-secure-badge, ' +
-        '.message-translate-chip, .auto-translated-card, .time-span, .reply-quote, ' +
-        '.message-time-row, .message-time-text'
-      ).forEach(el => el.remove());
-      rawText = clone.innerText || clone.textContent || '';
+      const textEl = bubble.querySelector('.message-text-content, .ai-body-content, .nex-msg-text, .message-text, p');
+      if (textEl) {
+        rawText = textEl.innerText || textEl.textContent || '';
+      } else {
+        const clone = bubble.cloneNode(true);
+        clone.querySelectorAll(
+          '.nex-msg-meta, .message-hover-actions, .message-attachment-container, ' +
+          '.message-reaction-badge, .message-reaction-badge-container, .e2ee-secure-badge, ' +
+          '.message-translate-chip, .auto-translated-card, .time-span, .reply-quote, ' +
+          '.message-time-row, .message-time-text, .nex-voice-card-wrapper, .custom-audio-player, ' +
+          '.nex-waveform-player, .chronex-voice-player-bar, .voice-actions-row, .voice-speed-pill, ' +
+          '.voice-speed-chip, .chronex-voice-core-pill, .nex-transcribe-btn, .btn-voice-transcribe, ' +
+          '.btn-voice-translate, .btn-voice-summary, .voice-tldr-summary-box, .voice-translate-result-box'
+        ).forEach(el => el.remove());
+        rawText = clone.innerText || clone.textContent || '';
+      }
     }
 
     rawText = (rawText || '').trim();
-    if (!rawText || rawText.length < 2) return;
+    if (
+      !rawText ||
+      rawText.length < 2 ||
+      /^(?:\d+:\d+\s*\/\s*\d+:\d+|\d+\.\d+x|NEURAL\s*VOICE|Transcribe|Loading\s*audio|Translating|\s*)+$/i.test(rawText) ||
+      /^\d+:\d+\s*\/\s*\d+:\d+$/.test(rawText)
+    ) {
+      return;
+    }
 
     // Guard against re-translating translated text or system prompt leaks
     if (rawText.includes('### ChronEX') || rawText.includes('AUTO-TRANSLATED') || rawText.includes('ChronEX Neural Cognition')) {
@@ -2293,12 +2316,27 @@ class NexTranslator {
     })();
 
     const aiPromise = (async () => {
-      if (typeof window !== 'undefined' && typeof window.generateChronexAIResponse === 'function') {
-        const prompt = `Translate to ${langName}. Direct translation ONLY, no quotes:\n"${clean}"`;
-        const aiTranslation = await window.generateChronexAIResponse(prompt);
-        if (aiTranslation && aiTranslation.trim().length > 0 && !aiTranslation.includes('QUOTA')) {
-          return aiTranslation.trim().replace(/^["']|["']$/g, '');
-        }
+      if (typeof window !== 'undefined') {
+        try {
+          if (window.chronexAI && typeof window.chronexAI.translateText === 'function') {
+            const aiTranslation = await window.chronexAI.translateText(clean, targetLang || langName);
+            if (aiTranslation && aiTranslation.trim().length > 0) {
+              return aiTranslation.trim().replace(/^["']|["']$/g, '');
+            }
+          }
+          if (typeof fetch === 'function') {
+            const transResp = await fetch('/api/translate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: clean, targetLang: targetLang || langName })
+            });
+            if (transResp.ok) {
+              const data = await transResp.json();
+              const res = (data.result || data.response || '').trim();
+              if (res) return res.replace(/^["']|["']$/g, '');
+            }
+          }
+        } catch (_) {}
       }
       throw new Error('AI_UNAVAILABLE');
     })();

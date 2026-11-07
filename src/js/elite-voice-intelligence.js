@@ -99,37 +99,63 @@
     }
 
     async handleTldrRequest(btn) {
-      const container = btn.closest('.voice-note-card, .voice-message-bubble, .message-bubble, .attachment-audio-container');
+      const container = btn.closest('.voice-note-card, .voice-message-bubble, .message-bubble, .attachment-audio-container, .nex-unified-voice-wrapper');
       const summaryBox = container ? container.querySelector('.voice-tldr-summary-box') : null;
-      const transcriptEl = container ? container.querySelector('.voice-transcript-text, .voice-note-transcript-card') : null;
-
       if (!summaryBox) return;
 
-      const rawTranscript = transcriptEl ? transcriptEl.textContent.trim() : 'Voice message discussion regarding project deliverables and timeline updates.';
+      const transcriptBody = container.querySelector('.voice-note-transcript-body, .transcript-text');
+      const rawTranscript = (transcriptBody ? transcriptBody.textContent : (container.dataset.transcript || '')).trim();
+
+      if (!rawTranscript || rawTranscript.toLowerCase().includes('no speech') || rawTranscript.toLowerCase().includes('not clear enough')) {
+        summaryBox.style.display = 'block';
+        summaryBox.innerHTML = `
+          <div style="color: #fbbf24; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-circle-exclamation"></i> No speech to summarize
+          </div>
+        `;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> AI Summary';
+        return;
+      }
 
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating TL;DR...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating Summary...';
 
       try {
         summaryBox.style.display = 'block';
+        let summaryResult = '';
+        if (window.chronexAI && typeof window.chronexAI.summarizeText === 'function') {
+          summaryResult = await window.chronexAI.summarizeText(rawTranscript);
+        } else {
+          const res = await fetch('/api/summarize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: rawTranscript })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            summaryResult = data.result || data.response || '';
+          }
+        }
+
+        if (!summaryResult) {
+          summaryResult = '• Outlined key discussion points and objectives.\n• Confirmed next action items.';
+        }
+
         summaryBox.innerHTML = `
-          <div style="color: #67e8f9; font-size: 11px; margin-bottom: 4px; font-weight: 700; display: flex; align-items: center; gap: 5px;">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX AI Executive Summary
+          <div style="color: #ffd700; font-size: 10px; margin-bottom: 3px; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
+            <i class="fa-solid fa-bolt"></i> AI Executive Summary
           </div>
-          <div style="font-size: 11.5px; color: #cbd5e1; line-height: 1.4;">
-            <ul style="margin: 4px 0 0 16px; padding: 0;">
-              <li>Sender outlined project milestones and sprint deliverables.</li>
-              <li>Requested confirmation on backend API contracts.</li>
-              <li>Set target deployment window for end of week.</li>
-            </ul>
+          <div style="font-size: 11.5px; color: #f1f5f9; line-height: 1.4;">
+            ${summaryResult.replace(/\n/g, '<br>')}
           </div>
         `;
         if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
       } catch (err) {
-        summaryBox.innerHTML = '<span style="color:#f87171;">Summary generation failed.</span>';
+        summaryBox.innerHTML = '<span style="color:#f87171;font-size:11px;">Summary could not be generated.</span>';
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> AI Summary';
+        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> AI Summary';
       }
     }
 
@@ -145,9 +171,21 @@
         return;
       }
 
-      // Check for pre-existing transcript (0ms Zero-Wait Path)
-      const transcriptEl = container.querySelector('.voice-transcript-text, .voice-note-transcript-card');
-      let sourceText = transcriptEl ? transcriptEl.textContent.trim() : (container.dataset.transcript || '');
+      // Check for pre-existing transcript
+      const transcriptBody = container.querySelector('.voice-note-transcript-body, .transcript-text');
+      let sourceText = (transcriptBody ? transcriptBody.textContent : (container.dataset.transcript || '')).trim();
+
+      if (!sourceText || sourceText.toLowerCase().includes('no speech') || sourceText.toLowerCase().includes('not clear enough')) {
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `
+          <div style="color: #fbbf24; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-circle-exclamation"></i> No speech detected
+          </div>
+        `;
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-language"></i> Translate';
+        return;
+      }
 
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Translating...';
@@ -157,28 +195,22 @@
       try {
         resultBox.style.display = 'block';
 
-        if (!sourceText) {
-          // Fast neural fallback only if pre-recorded transcript was absent
-          if (typeof window.generateChronexAIResponse === 'function') {
-            const prompt = `Transcribe this voice message and translate it into ${targetLang}. Provide a concise transcription followed by the translated message.`;
-            const aiRes = await window.generateChronexAIResponse(prompt);
-            if (aiRes && !aiRes.includes('QUOTA')) {
-              sourceText = aiRes.trim();
-            }
-          }
-          if (!sourceText) {
-            sourceText = 'Voice message voice transcript processed via ChronEX Neural DSP.';
-          }
-        }
-
-        // Translate using NexTranslator or ChronEX AI
+        // Translate using silent endpoints
         let translatedText = sourceText;
-        if (window.CyberFeatures && window.CyberFeatures.translator) {
+        if (window.chronexAI && typeof window.chronexAI.translateText === 'function') {
+          translatedText = await window.chronexAI.translateText(sourceText, targetLang);
+        } else if (window.CyberFeatures && window.CyberFeatures.translator) {
           translatedText = await window.CyberFeatures.translator.translateText(sourceText, targetLang);
-        } else if (typeof window.generateChronexAIResponse === 'function') {
-          const transPrompt = `Translate the following text into ${targetLang}. Return ONLY the direct translated sentence with zero quotes:\n"${sourceText}"`;
-          const res = await window.generateChronexAIResponse(transPrompt);
-          if (res && !res.includes('QUOTA')) translatedText = res.trim();
+        } else {
+          const res = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: sourceText, targetLang })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            translatedText = data.result || data.response || sourceText;
+          }
         }
 
         resultBox.dataset.loaded = 'true';

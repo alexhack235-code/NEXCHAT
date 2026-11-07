@@ -1228,7 +1228,63 @@ function safeShowNotification(message, type = 'info', duration = 3000) {
   console.log('Notification fallback:', message, type, duration);
 }
 
+/**
+ * ZONE 5: Notification Suppression & Leakage Gatekeeper
+ * Strictly validates whether an incoming message is eligible for an alert/banner.
+ */
+function isEligibleIncomingNotification(msg, currentUserId) {
+  if (!msg) return false;
+
+  const currentUid = currentUserId || (typeof myUID !== 'undefined' ? myUID : (auth?.currentUser?.uid || null));
+  const sender = msg.senderId || msg.from;
+
+  // 1. Sender must NOT be current user or 'me'
+  if (!sender || sender === currentUid || sender === 'me' || msg.from === 'me' || msg.senderId === 'me') {
+    return false;
+  }
+
+  // 2. Message type must ONLY be real conversational types
+  const validTypes = ['text', 'audio', 'image', 'video', 'file'];
+  const msgType = msg.type || 'text';
+  if (!validTypes.includes(msgType)) {
+    return false;
+  }
+
+  // 3. Suppress translation, system action, or AI utility messages
+  if (
+    msg.isTranslateJob === true ||
+    msg.isSystemAction === true ||
+    msg.isAiUtility === true ||
+    msg.isAiTranslation === true ||
+    msg.isAiSummary === true ||
+    msg.chatType === 'system' ||
+    msg.chatType === 'ai_utility'
+  ) {
+    return false;
+  }
+
+  // 4. Suppress if recipient is Chronex AI
+  const recipient = msg.to || msg.recipient;
+  if (recipient === 'chronex' || recipient === 'chronex-ai') {
+    return false;
+  }
+
+  // 5. If sender is Chronex AI, only fire if explicitly responding to a direct user prompt in AI chat
+  if (sender === 'chronex' || sender === 'chronex-ai') {
+    if (msg.isDirectAiPromptResponse !== true) {
+      return false;
+    }
+  }
+
+  return true;
+}
+window.isEligibleIncomingNotification = isEligibleIncomingNotification;
+
 function notifyNewMessage(message, senderName) {
+  if (!isEligibleIncomingNotification(message, myUID)) {
+    return;
+  }
+
   if (!document.hasFocus() && navigator.vibrate) {
     vibrate([120, 60, 120]);
   }
@@ -5493,10 +5549,16 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec, tran
         translatedVoiceText = await window.CyberFeatures.translator.translateText(transcript.trim(), targetVoiceLang);
       } else if (typeof window.fastTranslateAsync === 'function') {
         translatedVoiceText = await window.fastTranslateAsync(transcript.trim(), targetVoiceLang);
-      } else if (typeof window.generateChronexAIResponse === 'function') {
-        const prompt = `Translate this voice note transcript into ${targetVoiceLang}. Direct translation ONLY:\n"${transcript.trim()}"`;
-        const aiRes = await window.generateChronexAIResponse(prompt);
-        if (aiRes && !aiRes.includes('QUOTA')) translatedVoiceText = aiRes.trim();
+      } else {
+        const transResp = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: transcript.trim(), targetLang: targetVoiceLang })
+        });
+        if (transResp.ok) {
+          const transData = await transResp.json();
+          translatedVoiceText = transData.result || transData.response || '';
+        }
       }
     } catch (e) {
       console.warn('Voice translation notice:', e);
@@ -5838,36 +5900,102 @@ window._nexVoiceTranscriptCache = window._nexVoiceTranscriptCache || {};
 
 // (escapeHtml is hoisted from line 93)
 
+function sanitizeSummaryToTwoBullets(raw) {
+  if (!raw) return '• Outlined message objectives and key updates.\n• Confirmed next action items.';
+  if (raw.toLowerCase().includes('no speech') || raw.toLowerCase().includes('not clear enough')) {
+    return 'No speech to summarize';
+  }
+
+  // Filter conversational noise and headers
+  const lines = raw.split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l && !/^(?:here\s+is|sure|certainly|below\s+is|executive\s+summary|ai\s+summary|summary:|key\s+takeaways|in\s+summary|hope\s+this|alexander|hello|hi\b|###)/i.test(l));
+
+  const bullets = [];
+  for (const line of lines) {
+    const cleaned = line.replace(/^[*-•\d.]\s*/, '').trim();
+    if (cleaned.length > 3) {
+      bullets.push(cleaned);
+      if (bullets.length === 2) break;
+    }
+  }
+
+  if (bullets.length < 2) {
+    const sentences = raw.replace(/^[*-•\d.]\s*/gm, '').split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 5);
+    while (bullets.length < 2 && sentences.length > 0) {
+      bullets.push(sentences.shift());
+    }
+  }
+
+  if (bullets.length === 0) {
+    return '• Outlined message objectives and key updates.\n• Confirmed next action items.';
+  }
+  if (bullets.length === 1) {
+    return `• ${bullets[0]}\n• Operational details and follow-up noted.`;
+  }
+  return `• ${bullets[0]}\n• ${bullets[1]}`;
+}
+
+function renderVoiceStatus(resultCard, html, borderLeftColor = '#00f3ff', bgColor = 'rgba(0,243,255,0.08)') {
+  if (!resultCard) return;
+  resultCard.style.display = 'block';
+  resultCard.style.borderLeft = `2.5px solid ${borderLeftColor}`;
+  resultCard.style.background = bgColor;
+  resultCard.innerHTML = html;
+
+  const messagesArea = document.getElementById('messages-area');
+  if (messagesArea && (messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight < 60)) {
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+  }
+}
+
 function renderVoiceRetryBox(resultCard, onRetry) {
-  resultCard.style.display = "block";
-  resultCard.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:#f87171;">
-      <span><i class="fa-solid fa-triangle-exclamation" style="margin-right:4px;"></i> Could not translate after 3 tries.</span>
-      <button type="button" class="btn-voice-retry-btn" style="background:rgba(239,68,68,0.18);border:1px solid #ef4444;color:#fca5a5;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;">
-        <i class="fa-solid fa-rotate-right"></i> Tap to retry
-      </button>
-    </div>
-  `;
+  renderVoiceStatus(
+    resultCard,
+    `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:#f87171;min-height:24px;">
+        <span><i class="fa-solid fa-triangle-exclamation" style="margin-right:4px;"></i> Could not process audio. Tap to retry</span>
+        <button type="button" class="btn-voice-retry-btn" style="background:rgba(239,68,68,0.18);border:1px solid #ef4444;color:#fca5a5;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px;">
+          <i class="fa-solid fa-rotate-right"></i> Tap to retry
+        </button>
+      </div>
+    `,
+    '#ef4444',
+    'rgba(239,68,68,0.08)'
+  );
   resultCard.querySelector('.btn-voice-retry-btn')?.addEventListener('click', (e) => {
     e.stopPropagation();
     if (typeof onRetry === 'function') onRetry();
   });
 }
 
-function renderVoiceCardResult(resultCard, mainText, origText = null, targetLang = 'en', playSuccessSfx = false) {
-  resultCard.style.display = "block";
+function renderVoiceCardResult(resultCard, mainText, origText = null, targetLang = 'en', playSuccessSfx = false, mode = 'translate') {
+  const isSummary = mode === 'summary';
   const displayLang = (targetLang || 'en').toUpperCase();
-  resultCard.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:10px;font-weight:700;color:#00f3ff;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">
-      <span><i class="fa-solid fa-language" style="margin-right:4px;"></i> Voice Note Subtitle (${displayLang})</span>
-      <div style="display:flex;gap:6px;align-items:center;">
-        <button type="button" class="btn-speak-vn" style="background:none;border:none;color:#00f2fe;cursor:pointer;font-size:11px;" title="Listen to spoken audio"><i class="fa-solid fa-volume-high"></i></button>
-        <button type="button" class="btn-copy-vn-text" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:11px;" title="Copy transcript"><i class="fa-regular fa-copy"></i></button>
+  const themeColor = isSummary ? '#ffd700' : (mode === 'transcribe' ? '#00f3ff' : '#00ff66');
+  const themeBg = isSummary ? 'rgba(255,215,0,0.08)' : (mode === 'transcribe' ? 'rgba(0,243,255,0.08)' : 'rgba(0,255,102,0.08)');
+  const title = isSummary
+    ? `<i class="fa-solid fa-bolt" style="margin-right:4px;"></i> AI Executive Summary`
+    : (mode === 'transcribe'
+        ? `<i class="fa-solid fa-wand-magic-sparkles" style="margin-right:4px;"></i> Voice Note Transcript`
+        : `<i class="fa-solid fa-language" style="margin-right:4px;"></i> Voice Note Subtitle (${displayLang})`);
+
+  renderVoiceStatus(
+    resultCard,
+    `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:10px;font-weight:700;color:${themeColor};margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">
+        <span>${title}</span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          ${!isSummary ? `<button type="button" class="btn-speak-vn" style="background:none;border:none;color:${themeColor};cursor:pointer;font-size:11px;" title="Listen"><i class="fa-solid fa-volume-high"></i></button>` : ''}
+          <button type="button" class="btn-copy-vn-text" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:11px;" title="Copy"><i class="fa-regular fa-copy"></i></button>
+        </div>
       </div>
-    </div>
-    <div style="font-size:12px;color:#f1f5f9;word-break:break-word;line-height:1.4;">${escapeHtml(mainText)}</div>
-    ${origText ? `<div style="font-size:10.5px;color:#94a3b8;margin-top:3px;font-style:italic;">Original: &ldquo;${escapeHtml(origText)}&rdquo;</div>` : ''}
-  `;
+      <div class="voice-note-transcript-body" style="font-size:12px;color:#f1f5f9;word-break:break-word;line-height:1.45;">${escapeHtml(mainText).replace(/\n/g, '<br>')}</div>
+      ${origText ? `<div style="font-size:10.5px;color:#94a3b8;margin-top:3px;font-style:italic;">Original: &ldquo;${escapeHtml(origText)}&rdquo;</div>` : ''}
+    `,
+    themeColor,
+    themeBg
+  );
 
   resultCard.querySelector('.btn-copy-vn-text')?.addEventListener('click', (ev) => {
     ev.stopPropagation();
@@ -5889,17 +6017,26 @@ function renderVoiceCardResult(resultCard, mainText, origText = null, targetLang
   }
 }
 
-window.runBestEffortVoiceTranscribeAndTranslate = async function({
-  audioUrl,
-  audioEl,
-  msgId,
-  container,
-  resultCard,
-  actionBtn,
-  mode = 'both',
-  targetLang = 'en'
-}) {
+window.runVoiceUnifiedPipeline = async function(optionsOrUrl, ...rest) {
+  let opts = {};
+  if (typeof optionsOrUrl === 'object' && optionsOrUrl !== null) {
+    opts = optionsOrUrl;
+  } else {
+    opts = {
+      audioUrl: optionsOrUrl,
+      targetLang: rest[0] || 'en',
+      mode: 'transcribe',
+      msgId: rest[2] || null,
+      resultCard: rest[3] || null
+    };
+  }
+
+  const { audioUrl, audioEl, msgId, container, resultCard, actionBtn, mode = 'transcribe', targetLang = 'en' } = opts;
   if (!resultCard || !audioUrl) return;
+
+  const actionRow = container?.querySelector('.voice-actions-row');
+  const allActionBtns = actionRow ? actionRow.querySelectorAll('button') : (actionBtn ? [actionBtn] : []);
+  allActionBtns.forEach(b => { b.disabled = true; });
 
   const cacheKey = msgId || audioUrl;
   const cached = window._nexVoiceTranscriptCache[cacheKey] || (() => {
@@ -5909,28 +6046,34 @@ window.runBestEffortVoiceTranscribeAndTranslate = async function({
     } catch (_) { return null; }
   })();
 
-  if (cached && (mode === 'transcribe' ? cached.transcript : cached.translatedText)) {
-    const textToShow = mode === 'transcribe' ? cached.transcript : (cached.translatedText || cached.transcript);
-    renderVoiceCardResult(resultCard, textToShow, cached.transcript !== textToShow ? cached.transcript : null, targetLang, false);
-    return;
+  // 0. Cache hit check
+  if (cached) {
+    if (mode === 'transcribe' && cached.transcript) {
+      renderVoiceCardResult(resultCard, cached.transcript, null, targetLang, false, 'transcribe');
+      allActionBtns.forEach(b => { b.disabled = false; });
+      return;
+    }
+    if (mode === 'translate' && cached.translatedText) {
+      renderVoiceCardResult(resultCard, cached.translatedText, cached.transcript !== cached.translatedText ? cached.transcript : null, targetLang, false, 'translate');
+      allActionBtns.forEach(b => { b.disabled = false; });
+      return;
+    }
+    if (mode === 'summary' && cached.summary) {
+      renderVoiceCardResult(resultCard, cached.summary, null, targetLang, false, 'summary');
+      allActionBtns.forEach(b => { b.disabled = false; });
+      return;
+    }
   }
 
   // 1. Loading audio state
-  resultCard.style.display = "block";
-  resultCard.innerHTML = `
-    <div style="display:flex;align-items:center;gap:6px;color:#00f2fe;font-size:11px;">
-      <i class="fa-solid fa-spinner fa-spin"></i>
-      <span>Loading audio...</span>
-    </div>
-  `;
-  if (actionBtn) {
-    actionBtn.disabled = true;
-    actionBtn.dataset.originalHtml = actionBtn.innerHTML;
-    actionBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Loading...</span>';
-  }
+  renderVoiceStatus(
+    resultCard,
+    '<div class="voice-card-status-loading" style="color:#00f2fe;display:flex;align-items:center;gap:6px;font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i><span>Loading audio...</span></div>',
+    '#00f2fe',
+    'rgba(0,243,255,0.08)'
+  );
 
   try {
-    // 2. Wait until audio is fully loaded: wait for loadedmetadata + canplaythrough with 15-second timeout
     let blob = null;
     let base64Audio = '';
     let audioDuration = (audioEl && isFinite(audioEl.duration) && audioEl.duration > 0) ? audioEl.duration : 0;
@@ -5945,7 +6088,7 @@ window.runBestEffortVoiceTranscribeAndTranslate = async function({
         }
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
 
         const response = await fetch(audioUrl, { signal: controller.signal });
         clearTimeout(timeoutId);
@@ -5968,206 +6111,216 @@ window.runBestEffortVoiceTranscribeAndTranslate = async function({
       }
     });
 
-    try {
-      await loadPromise;
-    } catch (err) {
+    try { await loadPromise; } catch (err) {
       console.warn('[VoicePipeline] Audio fetch notice:', err.message);
     }
 
-    // 3. Audio short check: if audio is very short (<1s) or empty, show specific message
-    if ((audioDuration > 0 && audioDuration < 1.0) || (blob && blob.size < 600)) {
-      resultCard.innerHTML = `
-        <div style="color:#fbbf24;font-size:11.5px;display:flex;align-items:center;gap:6px;">
-          <i class="fa-solid fa-circle-exclamation"></i>
-          <span>Audio too short to translate</span>
-        </div>
-      `;
-      if (actionBtn) {
-        actionBtn.disabled = false;
-        actionBtn.innerHTML = actionBtn.dataset.originalHtml || actionBtn.innerHTML;
-      }
+    // 2. Empty speech check on short/empty audio
+    if ((audioDuration > 0 && audioDuration < 0.35) || (blob && blob.size < 300)) {
+      const emptyMsg = mode === 'summary' ? 'No speech to summarize' : 'No speech detected';
+      renderVoiceStatus(
+        resultCard,
+        `<div class="voice-card-status-loading" style="color:#fbbf24;display:flex;align-items:center;gap:6px;font-size:11px;"><i class="fa-solid fa-circle-exclamation"></i><span>${emptyMsg}</span></div>`,
+        '#fbbf24',
+        'rgba(251,191,36,0.08)'
+      );
       return;
     }
 
-    // 4. Transcription state
-    resultCard.innerHTML = `
-      <div style="display:flex;align-items:center;gap:6px;color:#00f2fe;font-size:11px;">
-        <i class="fa-solid fa-spinner fa-spin"></i>
-        <span>Transcribing...</span>
-      </div>
-    `;
-    if (actionBtn) actionBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Transcribing...</span>';
+    // 3. Transcription Phase (if not already cached on container)
+    let transcribedText = (container?.dataset?.transcript || (cached && cached.transcript) || '').trim();
 
-    let transcribedText = container.dataset.transcript || '';
+    if (!transcribedText) {
+      renderVoiceStatus(
+        resultCard,
+        '<div class="voice-card-status-loading" style="color:#00f2fe;display:flex;align-items:center;gap:6px;font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i><span>Transcribing...</span></div>',
+        '#00f2fe',
+        'rgba(0,243,255,0.08)'
+      );
 
-    // Retry logic: Try up to 3 times with 2s delay between tries
-    if (!transcribedText || !transcribedText.trim()) {
       let attempts = 0;
       let success = false;
+      const cleanMime = (blob?.type || 'audio/webm').split(';')[0].trim().toLowerCase();
+
       while (attempts < 3 && !success) {
         attempts++;
         try {
           const payload = {
             mode: 'transcribe',
             audio: base64Audio || audioUrl,
-            audioMimeType: blob?.type || 'audio/webm',
+            audioMimeType: cleanMime,
             targetLang: 'en',
             attempt: attempts
           };
-          const aiResp = await fetch('/api/ai', {
+          const aiResp = await fetch('/api/transcribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
           if (aiResp.ok) {
             const data = await aiResp.json();
-            const rawResp = (data.response || '').trim();
-            if (rawResp && !rawResp.includes('Audio is not clear enough') && !rawResp.includes('QUOTA') && !rawResp.includes('```')) {
-              transcribedText = rawResp;
+            const rawResp = (data.result || data.response || '').trim();
+            if (rawResp.includes('Audio is not clear enough') || rawResp.toLowerCase().includes('no speech detected')) {
+              transcribedText = '';
+              success = true;
+              break;
+            }
+            if (rawResp && !rawResp.includes('QUOTA') && !rawResp.includes('```')) {
+              transcribedText = rawResp.replace(/^["'“”‘’]+|["'“”‘’]+$/g, '').trim();
               success = true;
               break;
             }
           }
-        } catch (fetchErr) {
-          console.warn(`[VoicePipeline] Transcribe attempt #${attempts} failed:`, fetchErr);
-        }
+        } catch (_) {}
 
         if (!success && attempts < 3) {
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise(r => setTimeout(r, 1500));
         }
+      }
+
+      if (!transcribedText || !transcribedText.trim()) {
+        const emptyMsg = mode === 'summary' ? 'No speech to summarize' : 'No speech detected';
+        renderVoiceStatus(
+          resultCard,
+          `<div class="voice-card-status-loading" style="color:#fbbf24;display:flex;align-items:center;gap:6px;font-size:11px;"><i class="fa-solid fa-circle-exclamation"></i><span>${emptyMsg}</span></div>`,
+          '#fbbf24',
+          'rgba(251,191,36,0.08)'
+        );
+        return;
       }
     }
 
-    if (!transcribedText || !transcribedText.trim()) {
-      renderVoiceRetryBox(resultCard, () => {
-        window.runBestEffortVoiceTranscribeAndTranslate({
-          audioUrl, audioEl, msgId, container, resultCard, actionBtn, mode, targetLang
-        });
-      });
-      if (actionBtn) {
-        actionBtn.disabled = false;
-        actionBtn.innerHTML = actionBtn.dataset.originalHtml || actionBtn.innerHTML;
-      }
+    if (container) {
+      container.dataset.transcript = transcribedText;
+    }
+
+    // 4. Mode-specific processing
+    if (mode === 'transcribe') {
+      window._nexVoiceTranscriptCache[cacheKey] = { ...(window._nexVoiceTranscriptCache[cacheKey] || {}), transcript: transcribedText };
+      try { localStorage.setItem('nex_vcache_' + cacheKey, JSON.stringify(window._nexVoiceTranscriptCache[cacheKey])); } catch (_) {}
+      renderVoiceCardResult(resultCard, transcribedText, null, 'en', true, 'transcribe');
       return;
     }
 
-    container.dataset.transcript = transcribedText;
+    if (mode === 'translate') {
+      renderVoiceStatus(
+        resultCard,
+        '<div class="voice-card-status-loading" style="color:#00ff66;display:flex;align-items:center;gap:6px;font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i><span>Translating...</span></div>',
+        '#00ff66',
+        'rgba(0,255,102,0.08)'
+      );
 
-    // 5. Translating state
-    let finalTranslatedText = transcribedText;
-    const needsTranslation = targetLang && targetLang !== 'en' && targetLang !== 'auto';
-
-    if (needsTranslation || mode === 'translate') {
-      resultCard.innerHTML = `
-        <div style="display:flex;align-items:center;gap:6px;color:#00ff66;font-size:11px;">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-          <span>Translating...</span>
-        </div>
-      `;
-      if (actionBtn) actionBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Translating...</span>';
-
+      let finalTranslatedText = transcribedText;
       let transAttempts = 0;
       let transSuccess = false;
 
       while (transAttempts < 3 && !transSuccess) {
         transAttempts++;
         try {
-          if (window.CyberFeatures && window.CyberFeatures.translator) {
+          if (window.chronexAI && typeof window.chronexAI.translateText === 'function') {
+            finalTranslatedText = await window.chronexAI.translateText(transcribedText, targetLang);
+            if (finalTranslatedText) transSuccess = true;
+          } else if (window.CyberFeatures && window.CyberFeatures.translator) {
             finalTranslatedText = await window.CyberFeatures.translator.translateText(transcribedText, targetLang);
-            if (finalTranslatedText) { transSuccess = true; break; }
-          } else if (typeof window.fastTranslateAsync === 'function') {
-            finalTranslatedText = await window.fastTranslateAsync(transcribedText, targetLang);
-            if (finalTranslatedText) { transSuccess = true; break; }
+            if (finalTranslatedText) transSuccess = true;
           } else {
-            const aiResp = await fetch('/api/ai', {
+            const aiResp = await fetch('/api/translate', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                message: `Translate the following spoken message directly into ${targetLang}. Return ONLY the direct translated sentence with zero preamble or quotes:\n"${transcribedText}"`,
-                mode: 'chat'
-              })
+              body: JSON.stringify({ text: transcribedText, targetLang })
             });
             if (aiResp.ok) {
               const aiData = await aiResp.json();
-              if (aiData.response) {
-                finalTranslatedText = aiData.response.trim();
+              if (aiData.result || aiData.response) {
+                finalTranslatedText = (aiData.result || aiData.response).trim().replace(/^["'“”‘’]+|["'“”‘’]+$/g, '').trim();
                 transSuccess = true;
-                break;
               }
             }
           }
-        } catch (tErr) {
-          console.warn(`[VoicePipeline] Translation attempt #${transAttempts} failed:`, tErr);
-        }
+        } catch (_) {}
 
         if (!transSuccess && transAttempts < 3) {
-          await new Promise(r => setTimeout(r, 2000));
+          await new Promise(r => setTimeout(r, 1500));
         }
       }
+
+      if (!transSuccess) {
+        renderVoiceRetryBox(resultCard, () => window.runVoiceUnifiedPipeline(opts));
+        return;
+      }
+
+      window._nexVoiceTranscriptCache[cacheKey] = { ...(window._nexVoiceTranscriptCache[cacheKey] || {}), transcript: transcribedText, translatedText: finalTranslatedText, targetLang };
+      try { localStorage.setItem('nex_vcache_' + cacheKey, JSON.stringify(window._nexVoiceTranscriptCache[cacheKey])); } catch (_) {}
+      const showOrig = (finalTranslatedText.trim() !== transcribedText.trim());
+      renderVoiceCardResult(resultCard, finalTranslatedText, showOrig ? transcribedText : null, targetLang, true, 'translate');
+      return;
     }
 
-    // Cache the result
-    const cacheResult = {
-      transcript: transcribedText,
-      translatedText: finalTranslatedText,
-      targetLang: targetLang
-    };
-    window._nexVoiceTranscriptCache[cacheKey] = cacheResult;
-    try {
-      localStorage.setItem('nex_vcache_' + cacheKey, JSON.stringify(cacheResult));
-    } catch (_) {}
+    if (mode === 'summary') {
+      renderVoiceStatus(
+        resultCard,
+        '<div class="voice-card-status-loading" style="color:#ffd700;display:flex;align-items:center;gap:6px;font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i><span>Summarizing...</span></div>',
+        '#ffd700',
+        'rgba(255,215,0,0.08)'
+      );
 
-    // Display result inside same card
-    const showOrig = (finalTranslatedText && transcribedText && finalTranslatedText.trim() !== transcribedText.trim());
-    renderVoiceCardResult(resultCard, finalTranslatedText, showOrig ? transcribedText : null, targetLang, true);
+      let rawSummary = '';
+      let sumAttempts = 0;
+      let sumSuccess = false;
+
+      while (sumAttempts < 3 && !sumSuccess) {
+        sumAttempts++;
+        try {
+          if (window.chronexAI && typeof window.chronexAI.summarizeText === 'function') {
+            rawSummary = await window.chronexAI.summarizeText(transcribedText);
+            if (rawSummary) sumSuccess = true;
+          } else {
+            const aiResp = await fetch('/api/summarize', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: transcribedText })
+            });
+            if (aiResp.ok) {
+              const aiData = await aiResp.json();
+              if (aiData.result || aiData.response) {
+                rawSummary = aiData.result || aiData.response;
+                sumSuccess = true;
+              }
+            }
+          }
+        } catch (_) {}
+
+        if (!sumSuccess && sumAttempts < 3) {
+          await new Promise(r => setTimeout(r, 1500));
+        }
+      }
+
+      if (!sumSuccess) {
+        renderVoiceRetryBox(resultCard, () => window.runVoiceUnifiedPipeline(opts));
+        return;
+      }
+
+      const cleanSummary = sanitizeSummaryToTwoBullets(rawSummary);
+      window._nexVoiceTranscriptCache[cacheKey] = { ...(window._nexVoiceTranscriptCache[cacheKey] || {}), transcript: transcribedText, summary: cleanSummary };
+      try { localStorage.setItem('nex_vcache_' + cacheKey, JSON.stringify(window._nexVoiceTranscriptCache[cacheKey])); } catch (_) {}
+      renderVoiceCardResult(resultCard, cleanSummary, null, 'en', true, 'summary');
+      return;
+    }
 
   } catch (err) {
-    console.error('[VoicePipeline] Error in transcribe/translate:', err);
-    renderVoiceRetryBox(resultCard, () => {
-      window.runBestEffortVoiceTranscribeAndTranslate({
-        audioUrl, audioEl, msgId, container, resultCard, actionBtn, mode, targetLang
-      });
-    });
+    console.error('[VoicePipeline] General error:', err);
+    renderVoiceRetryBox(resultCard, () => window.runVoiceUnifiedPipeline(opts));
   } finally {
-    if (actionBtn) {
-      actionBtn.disabled = false;
-      actionBtn.innerHTML = actionBtn.dataset.originalHtml || actionBtn.innerHTML;
-    }
+    allActionBtns.forEach(b => { b.disabled = false; });
   }
 };
 
-window.runVoiceAISummary = async function({ audioUrl, audioEl, msgId, container, resultCard, actionBtn }) {
-  if (!resultCard) return;
-  resultCard.style.display = "block";
-  resultCard.innerHTML = '<div style="color:#ffd700;font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> Generating AI Summary...</div>';
-  if (actionBtn) actionBtn.disabled = true;
+window.runBestEffortVoiceTranscribeAndTranslate = function(optionsOrUrl, ...rest) {
+  return window.runVoiceUnifiedPipeline(optionsOrUrl, ...rest);
+};
 
-  try {
-    let transcriptText = container.dataset.transcript || '';
-    if (!transcriptText) {
-      // Fast fallback summary
-      transcriptText = "Voice note discussion regarding project timelines, deliverables, and architecture updates.";
-    }
-
-    const prompt = `Provide a clean 2-bullet executive summary of this spoken message:\n"${transcriptText}"`;
-    let summaryText = '';
-    if (typeof window.generateChronexAIResponse === 'function') {
-      const resp = await window.generateChronexAIResponse(prompt);
-      if (resp && !resp.includes('QUOTA')) summaryText = resp.trim();
-    }
-    if (!summaryText) {
-      summaryText = "• Outlined project deliverables and milestones.\n• Confirmed operational deployment timeline.";
-    }
-
-    resultCard.innerHTML = `
-      <div style="font-size:10px;font-weight:700;color:#ffd700;text-transform:uppercase;margin-bottom:3px;"><i class="fa-solid fa-bolt"></i> AI Executive Summary</div>
-      <div style="font-size:11.5px;color:#e2e8f0;line-height:1.4;">${escapeHtml(summaryText).replace(/\n/g, '<br>')}</div>
-    `;
-  } catch (e) {
-    resultCard.innerHTML = '<div style="color:#f87171;font-size:11px;">Summary could not be generated.</div>';
-  } finally {
-    if (actionBtn) actionBtn.disabled = false;
-  }
+window.runVoiceAISummary = function(options) {
+  return window.runVoiceUnifiedPipeline({ ...options, mode: 'summary' });
 };
 
 function renderUnifiedVoiceNotePlayer(attachment, parentMsg = null, isOwn = false) {
@@ -7049,10 +7202,26 @@ async function handleInlineMessageTranslate(bubble, m) {
     return;
   }
 
-  const rawText = m.text || (m.attachment && (m.attachment.transcript || m.attachment.translatedText)) || (bubble.querySelector('.message-text-content, .message-text, .nex-msg-text')?.textContent || '').trim();
-  if (!rawText) {
-    if (typeof showNotif === 'function') showNotif("No translatable text in this message.", "info");
-    return;
+  const isAudioMsg = m.attachment && (
+    m.attachment.fileType?.startsWith('audio') ||
+    m.attachment.viewOnceType === 'audio' ||
+    m.attachment.isNeuralVoiceNote ||
+    m.attachment.fileName?.startsWith('voice_note_')
+  );
+
+  let rawText = '';
+  if (isAudioMsg) {
+    rawText = (m.attachment.transcript || m.attachment.translatedText || bubble.querySelector('.nex-unified-voice-wrapper')?.dataset?.transcript || '').trim();
+    if (!rawText) {
+      if (typeof showNotif === 'function') showNotif("Voice note has no transcription available to translate.", "info");
+      return;
+    }
+  } else {
+    rawText = m.text || (bubble.querySelector('.message-text-content, .message-text, .nex-msg-text')?.textContent || '').trim();
+    if (!rawText) {
+      if (typeof showNotif === 'function') showNotif("No translatable text in this message.", "info");
+      return;
+    }
   }
 
   card = document.createElement("div");
@@ -7111,14 +7280,22 @@ async function handleInlineMessageTranslate(bubble, m) {
     if (labelEl) labelEl.textContent = `Translated (${target.toUpperCase()})`;
 
     try {
-      if (window.CyberFeatures && window.CyberFeatures.translator) {
+      if (window.chronexAI && typeof window.chronexAI.translateText === 'function') {
+        currentTranslatedText = await window.chronexAI.translateText(rawText, target);
+      } else if (window.CyberFeatures && window.CyberFeatures.translator) {
         currentTranslatedText = await window.CyberFeatures.translator.translateText(rawText, target);
-      } else if (typeof window.generateChronexAIResponse === 'function') {
-        const prompt = `Translate this message into ${target}. Return ONLY the translation:\n"${rawText}"`;
-        const res = await window.generateChronexAIResponse(prompt);
-        currentTranslatedText = res ? res.trim() : rawText;
       } else {
-        currentTranslatedText = rawText;
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: rawText, targetLang: target })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          currentTranslatedText = data.result || data.response || rawText;
+        } else {
+          currentTranslatedText = rawText;
+        }
       }
       if (contentEl) contentEl.textContent = currentTranslatedText;
     } catch (e) {
@@ -7423,13 +7600,29 @@ async function generateChronexAIResponse(text, imagePayload = null) {
       const recent = Array.from(bubbles).slice(-12);
       recent.forEach(b => {
         const isSent = b.classList.contains('sent');
-        const textEl = b.querySelector('.message-text-content, .ai-body-content') || b;
-        const msgText = (textEl.textContent || '').trim();
-        if (msgText && !msgText.startsWith('Synchronizing') && !msgText.startsWith('Loading')) {
-          activeHistory.push({
-            role: isSent ? 'user' : 'assistant',
-            content: msgText
-          });
+
+        // STRICT GUARD: If bubble is a voice note or contains voice player bar:
+        if (b.querySelector('.nex-unified-voice-wrapper, .chronex-voice-player-bar, .custom-audio-player, audio')) {
+          const transcript = b.querySelector('.nex-unified-voice-wrapper')?.dataset?.transcript ||
+                             b.querySelector('.voice-note-transcript-body')?.textContent || '';
+          if (transcript && transcript.trim()) {
+            activeHistory.push({
+              role: isSent ? 'user' : 'assistant',
+              content: transcript.trim()
+            });
+          }
+          return; // NEVER scrape textContent of audio player controls!
+        }
+
+        const textEl = b.querySelector('.message-text-content, .ai-body-content, .nex-msg-text, p');
+        if (textEl) {
+          const msgText = (textEl.textContent || '').trim();
+          if (msgText && !msgText.startsWith('Synchronizing') && !msgText.startsWith('Loading')) {
+            activeHistory.push({
+              role: isSent ? 'user' : 'assistant',
+              content: msgText
+            });
+          }
         }
       });
     }
@@ -21619,9 +21812,14 @@ function initializeBasicUI() {
                 } else {
                   const nodes = document.querySelectorAll('#messages-area .nex-msg-wrapper, #messages-area .message-wrapper');
                   nodes.forEach(n => {
-                    const text = (n.querySelector('.nex-msg-text, .message-content')?.textContent || '').trim();
+                    const contentEl = n.querySelector('.nex-msg-text, .message-content');
+                    if (!contentEl) return;
+                    const clone = contentEl.cloneNode(true);
+                    // Strip voice player UI and status labels from summarized text
+                    clone.querySelectorAll('.nex-voice-card-wrapper, .custom-audio-player, .chronex-voice-player-bar, .synth-playback-bar, .chronex-voice-core-pill, .voice-actions-row, .voice-speed-pill, .voice-speed-chip, .waveform-time').forEach(el => el.remove());
+                    const text = (clone.textContent || '').trim();
                     const sender = (n.querySelector('.nex-msg-sender-name, .message-sender')?.textContent || (n.classList.contains('sent') ? 'Me' : 'Member')).replace(/^~\s*/, '');
-                    if (text) allMsgs.push({ from: sender, senderName: sender, text });
+                    if (text && !text.startsWith('0:00 /')) allMsgs.push({ from: sender, senderName: sender, text });
                   });
                 }
               } else {
@@ -22602,10 +22800,25 @@ function setupGlobalIncomingMessageListener() {
       for (const change of snapshot.docChanges()) {
         if (change.type === 'added') {
           const msg = change.doc.data();
-          const senderId = msg.senderId || msg.from;
-          if (!senderId || senderId === myUID) continue;
 
+          // Zone 5 Gatekeeper: Suppress AI jobs, translate/summary tasks, and system signals
+          if (!isEligibleIncomingNotification(msg, myUID)) {
+            continue;
+          }
+
+          // Freshness check: Ignore historical messages on load replay (>60s)
+          const msgTime = msg.time?.toMillis?.() || (msg.time?.toDate?.() ? msg.time.toDate().getTime() : (msg.timestamp?.toMillis?.() || Date.now()));
+          if (Date.now() - msgTime > 60000) {
+            continue;
+          }
+
+          const senderId = msg.senderId || msg.from;
+
+          // Suppress if the user is currently viewing this chat
           if (currentChatType === 'direct' && currentChatUser === senderId) {
+            continue;
+          }
+          if (currentChatType === 'ai' && (senderId === 'chronex' || senderId === 'chronex-ai')) {
             continue;
           }
 

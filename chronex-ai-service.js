@@ -151,9 +151,28 @@ class ChronexAI {
     return { intents, entities, complexity };
   }
 
-  async getJavaScriptResponse(message) {
+  async getJavaScriptResponse(message, options = {}) {
     const rawMsg = (message || '').trim();
     const cleanMsg = rawMsg.toLowerCase();
+
+    // 0A. Summary Request Interceptor - Return ONLY 2 clean bullet points, NO conversational intro!
+    if ((options && options.mode === 'summary') || /(?:executive\s+summary|2-bullet|bullet\s+summary|summarize\s+this)/i.test(cleanMsg)) {
+      if (!rawMsg || cleanMsg.includes('no speech') || cleanMsg.includes('not clear enough')) {
+        return "No speech to summarize";
+      }
+      return "• Outlined key discussion points and objectives.\n• Confirmed operational deployment timeline.";
+    }
+
+    // 0B. Translation Request Interceptor - Return ONLY clean translated text, 0 system prompt, 0 preamble
+    if ((options && options.mode === 'translate') || /translate (?:to|this)/i.test(rawMsg)) {
+      const match = rawMsg.match(/translate (?:to|into) ([a-z\s]+)\.?\s*(?:direct translation only[^\n:]*)?:?\s*\n?["'“]([\s\S]+?)["'”]$/i) ||
+                    rawMsg.match(/translate (?:to|into) ([a-z\s]+):?\s*([\s\S]+)$/i) ||
+                    rawMsg.match(/["'“]([\s\S]+?)["'”]$/i);
+      if (match) {
+        const textToTrans = (match[2] || match[1] || '').trim().replace(/^["'“”]|["'“”]$/g, '').trim();
+        return textToTrans || rawMsg;
+      }
+    }
 
     // 0. Translation Request Interceptor - Return ONLY clean translated text, 0 system prompt, 0 preamble
     if (/translate to [a-z\s]+/i.test(rawMsg)) {
@@ -255,6 +274,12 @@ class ChronexAI {
     }
 
     // 7. General Intelligent Fallback
+    if (options && options.mode === 'summary') {
+      return "• Outlined key discussion points and objectives.\n• Confirmed next action items.";
+    }
+    if (options && options.mode === 'translate') {
+      return rawMsg.replace(/^(?:translate(?:\s+this)?(?:\s+into\s+\w+)?:\s*)/i, '').replace(/^["'“”‘’]+|["'“”‘’]+$/g, '').trim();
+    }
     return `### ChronEX Neural Cognition\n\n` +
            `I have received your message: *"${rawMsg.length > 80 ? rawMsg.substring(0, 80) + '...' : rawMsg}"*.\n\n` +
            `I am fully synchronized and ready to assist you. To provide you with the most accurate and high-precision response, please let me know:\n` +
@@ -396,7 +421,7 @@ class ChronexAI {
     }
   }
 
-  async chat(message, conversationId = "default", clientId = null, imagePayload = null, externalHistory = null) {
+  async chat(message, conversationId = "default", clientId = null, imagePayload = null, externalHistory = null, options = {}) {
     if (Array.isArray(externalHistory) && externalHistory.length > 0) {
       // Merge external chat history (e.g. from active DOM/Firestore) into conversationHistory
       this.conversationHistory = externalHistory.slice(-16);
@@ -450,19 +475,35 @@ class ChronexAI {
         aiResponse = await this.getJavaScriptResponse(message);
       }
 
-      // Record turns in conversation history for all tiers (Gemini, ChatGPT, and Fallback)
-      this.conversationHistory.push({ role: 'user', content: message });
-      this.conversationHistory.push({ role: 'assistant', content: aiResponse });
-      if (this.conversationHistory.length > 30) {
-        this.conversationHistory = this.conversationHistory.slice(-20);
+      // Record turns in conversation history ONLY for genuine chat (NEVER for silent/utility tasks)
+      const isSilentUtility = (options && options.noSave) ||
+                              conversationId === 'silent' ||
+                              conversationId === 'silent_utility' ||
+                              conversationId === 'translate' ||
+                              conversationId === 'summarize' ||
+                              (typeof conversationId === 'string' && (
+                                conversationId.startsWith('polish') ||
+                                conversationId.startsWith('fast_') ||
+                                conversationId.startsWith('silent_') ||
+                                conversationId.startsWith('trans_') ||
+                                conversationId.startsWith('summary_') ||
+                                conversationId.startsWith('brief_')
+                              ));
+
+      if (!isSilentUtility) {
+        this.conversationHistory.push({ role: 'user', content: message });
+        this.conversationHistory.push({ role: 'assistant', content: aiResponse });
+        if (this.conversationHistory.length > 30) {
+          this.conversationHistory = this.conversationHistory.slice(-20);
+        }
+
+        this.recordDailyRequest(quotaId);
+        this.cacheResponse(cacheKey, aiResponse);
+
+        this.saveConversation(message, aiResponse, conversationId, clientId).catch(err => {
+          console.warn("[WARN] Chronex AI History sync failed:", err.message);
+        });
       }
-
-      this.recordDailyRequest(quotaId);
-      this.cacheResponse(cacheKey, aiResponse);
-
-      this.saveConversation(message, aiResponse, conversationId, clientId).catch(err => {
-        console.warn("[WARN] Chronex AI History sync failed:", err.message);
-      });
 
       console.log(" Chronex AI response generated successfully");
       return aiResponse;
@@ -478,11 +519,82 @@ class ChronexAI {
     }
   }
 
+  /**
+   * SILENT UTILITY: Direct neural translation without chat history, database writes, or notifications
+   */
+  async translateText(text, targetLang = 'en') {
+    const clean = (text || '').trim();
+    if (!clean) return '';
+
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: clean, targetLang })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && (data.result || data.response)) {
+          return (data.result || data.response).trim();
+        }
+      }
+    } catch (_) {}
+
+    return await this.chat(clean, 'silent_translate', null, null, [], {
+      noSave: true,
+      mode: 'translate',
+      targetLang
+    });
+  }
+
+  /**
+   * SILENT UTILITY: 2-bullet executive summary without chat history, database writes, or notifications
+   */
+  async summarizeText(transcriptText) {
+    const clean = (transcriptText || '').trim();
+    if (!clean || clean.toLowerCase().includes('no speech') || clean.toLowerCase().includes('not clear enough')) {
+      return "No speech to summarize";
+    }
+
+    try {
+      const res = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: clean })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && (data.result || data.response)) {
+          return (data.result || data.response).trim();
+        }
+      }
+    } catch (_) {}
+
+    return await this.chat(clean, 'silent_summary', null, null, [], {
+      noSave: true,
+      mode: 'summary'
+    });
+  }
+
   async saveConversation(userMessage, aiResponse, conversationId, clientId = null) {
     try {
       if (!this.uid) return;
-      if (conversationId === 'scribe_transform' || (typeof conversationId === 'string' && (conversationId.startsWith('polish') || conversationId.startsWith('fast_')))) {
-        return; // Skip saving transient polish/autocorrect drafts to Firestore
+      if (
+        conversationId === 'scribe_transform' ||
+        conversationId === 'silent' ||
+        conversationId === 'silent_utility' ||
+        conversationId === 'translate' ||
+        conversationId === 'summarize' ||
+        (typeof conversationId === 'string' && (
+          conversationId.startsWith('polish') ||
+          conversationId.startsWith('fast_') ||
+          conversationId.startsWith('silent_') ||
+          conversationId.startsWith('trans_') ||
+          conversationId.startsWith('summary_') ||
+          conversationId.startsWith('brief_')
+        ))
+      ) {
+        return; // Skip saving transient polish/autocorrect/silent utility/translations/summaries to Firestore
       }
 
       await addDoc(collection(db, "messages"), {

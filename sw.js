@@ -124,6 +124,29 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  // Zone 5: Push Notification Filtering Rules
+  if (
+    notificationData.isTranslateJob === true ||
+    notificationData.isSystemAction === true ||
+    notificationData.isAiUtility === true ||
+    notificationData.isAiTranslation === true ||
+    notificationData.isAiSummary === true ||
+    notificationData.chatType === 'system' ||
+    notificationData.chatType === 'ai_utility'
+  ) {
+    return; // Suppress background utility/system push notifications
+  }
+
+  // Suppress push if recipient is Chronex AI
+  if (
+    notificationData.recipient === 'chronex' ||
+    notificationData.recipient === 'chronex-ai' ||
+    notificationData.to === 'chronex' ||
+    notificationData.to === 'chronex-ai'
+  ) {
+    return;
+  }
+
   if (!notificationData.vibrate) {
     notificationData.vibrate = [200, 100, 200];
   }

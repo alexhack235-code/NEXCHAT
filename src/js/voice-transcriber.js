@@ -181,7 +181,10 @@
       }
 
       const audioEl = parent.querySelector('audio');
-      const audioUrl = audioEl ? (audioEl.currentSrc || audioEl.src) : '';
+      const audioUrl = parent.dataset.audioUrl ||
+                       parent.getAttribute('data-audio-url') ||
+                       (audioEl ? (audioEl.currentSrc || audioEl.src) : '') ||
+                       parent.querySelector('.waveform-play-btn')?.getAttribute('data-audio-src') || '';
       const msgId = parent.dataset.msgId || parent.getAttribute('data-id') || (audioUrl ? audioUrl.slice(-24) : 'voice-' + Date.now());
 
       if (!audioUrl) {
@@ -189,7 +192,7 @@
           <div class="transcript-header">
             <span class="transcript-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX TRANSCRIPT</span>
           </div>
-          <p class="transcript-text" style="color:#ffaa44;">"Audio too short to translate"</p>
+          <p class="transcript-text" style="color:#ffaa44;">"No speech detected"</p>
         `;
         resultBox.style.display = 'block';
         return;
