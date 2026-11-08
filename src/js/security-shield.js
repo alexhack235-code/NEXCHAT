@@ -48,8 +48,7 @@ const DEFAULT_FORTRESS_CONFIG = {
 
 class FortressSecurityShield {
   constructor(config = DEFAULT_FORTRESS_CONFIG) {
-    this.version = '12.5.0-ENTERPRISE-AGENT';
-    this.codename = 'Apex-Cognitive-Fortress';
+    this.version = '12.5.0';
     this.config = { ...DEFAULT_FORTRESS_CONFIG, ...config };
     this.threatCount = parseInt(getStorageItem('nexchat_threats_blocked', '0'), 10);
     this.aiThreatCount = parseInt(getStorageItem('nexchat_ai_threats_blocked', '0'), 10);
@@ -667,11 +666,31 @@ class FortressSecurityShield {
 
 export const fortressShield = new FortressSecurityShield();
 if (typeof window !== 'undefined') {
-  window.fortressShield = fortressShield;
-  window.fortressGuard = (text, moduleName) => {
-    if (window.fortressShield) {
-      return window.fortressShield.guardInput(text, moduleName);
-    }
-    return { safe: true, threats: [], sanitizedText: text };
-  };
+  try {
+    Object.defineProperty(window, 'fortressShield', {
+      value: fortressShield,
+      writable: false,
+      configurable: false,
+      enumerable: false
+    });
+    Object.defineProperty(window, 'fortressGuard', {
+      value: (text, moduleName) => {
+        if (window.fortressShield) {
+          return window.fortressShield.guardInput(text, moduleName);
+        }
+        return { safe: true, threats: [], sanitizedText: text };
+      },
+      writable: false,
+      configurable: false,
+      enumerable: false
+    });
+  } catch {
+    window.fortressShield = fortressShield;
+    window.fortressGuard = (text, moduleName) => {
+      if (window.fortressShield) {
+        return window.fortressShield.guardInput(text, moduleName);
+      }
+      return { safe: true, threats: [], sanitizedText: text };
+    };
+  }
 }

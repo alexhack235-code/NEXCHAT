@@ -384,11 +384,11 @@ const mockDb = {
 };
 const middleware = objectAuthGuard.requireOwnership(async (req) => mockDb[req.params?.id]);
 
-const unauthReq = { params: { id: "doc_100" } };
-const { res: unauthRes } = createMockReqRes();
+const unauthIncReq = { params: { id: "doc_100" } };
+const { res: unauthIncRes } = createMockReqRes();
 let nextCalled = false;
-await middleware(unauthReq, unauthRes, () => { nextCalled = true; });
-assert.strictEqual(unauthRes.statusCode, 401, "Unauthenticated request must return 401");
+await middleware(unauthIncReq, unauthIncRes, () => { nextCalled = true; });
+assert.strictEqual(unauthIncRes.statusCode, 401, "Unauthenticated request must return 401");
 
 // 16b. Authenticated as Bob querying Alice's resource -> MUST RETURN 404 NOT FOUND (NEVER 403)
 const bobReq = { params: { id: "doc_100" }, user: { id: "user_bob" } };
@@ -433,6 +433,57 @@ const appeal = submitJailAppeal(strikeIp, "I believe my IP was flagged due to VP
 assert.strictEqual(appeal.appealed, true);
 console.log(" [PASS] Progressive strike escalation verified: 5m -> 30m -> 24h with human appeal flow");
 
+// ================================================================
+// [TEST 18] CLIENT-SIDE ANTI-RECONNAISSANCE & NON-ENUMERABLE FACADE
+// ================================================================
+console.log("\n[TEST 18] Testing Client-Side Anti-Reconnaissance & Sealed Facade...");
+const { aiSecurityScanner } = await import("./src/js/ai-security-scanner-api.js");
+
+// 18a. Zero administrative leak on client
+assert.strictEqual(typeof aiSecurityScanner.getAdminSecurityReport, "undefined", "getAdminSecurityReport must not exist on client");
+
+// 18b. Zero STUN / WebRTC honeypot leak
+assert.strictEqual(typeof aiSecurityScanner.triggerHoneypotTrap, "undefined", "triggerHoneypotTrap must not exist on client");
+
+// 18c. Zero bombastic codename exposure
+assert.strictEqual(typeof aiSecurityScanner.codename, "undefined", "codename must not be exposed on client facade");
+
+// 18d. Tamper-proof frozen object
+assert.strictEqual(Object.isFrozen(aiSecurityScanner), true, "aiSecurityScanner must be frozen");
+
+// 18e. Scanner methods functional
+assert.strictEqual(aiSecurityScanner.scanMessage("<script>alert(1)</script>").safe, false);
+assert.strictEqual(aiSecurityScanner.detectPromptInjection("DAN Mode enabled").detected, true);
+assert.strictEqual(aiSecurityScanner.scanUrl("http://169.254.169.254/latest/meta-data").safe, false);
+assert.strictEqual(Array.isArray(aiSecurityScanner.getQuarantine()), true);
+console.log(" [PASS] Sealed client defense facade verified: zero leaks, anti-reconnaissance active, frozen object");
+
+// ================================================================
+// [TEST 19] INCIDENT TELEMETRY ADMINISTRATIVE AUTHORIZATION GUARD
+// ================================================================
+console.log("\n[TEST 19] Testing Incident Telemetry Administrative Authorization...");
+const cloudDefenseHandler = (await import("./api/_cloud-defense.js")).default;
+
+// 19a. Unauthorized incidents query -> Rejected with 403
+const { req: unauthIncidentsReq, res: unauthIncidentsRes } = createMockReqRes({
+  url: "/api/cloud-defense?action=incidents",
+  query: { action: "incidents" }
+});
+await cloudDefenseHandler(unauthIncidentsReq, unauthIncidentsRes);
+assert.strictEqual(unauthIncidentsRes.statusCode, 403, "Unauthorized access to incident logs must return 403");
+assert.strictEqual(unauthIncidentsRes.body?.error, "ADMIN_AUTHORIZATION_REQUIRED");
+
+// 19b. Authorized incidents query with x-admin-key -> 200 OK
+const { req: authIncidentsReq, res: authIncidentsRes } = createMockReqRes({
+  url: "/api/cloud-defense?action=incidents",
+  query: { action: "incidents" },
+  headers: { "x-admin-key": "IAMATOMICDEVELOPER16@$#" }
+});
+await cloudDefenseHandler(authIncidentsReq, authIncidentsRes);
+assert.strictEqual(authIncidentsRes.statusCode, 200, "Authorized admin access must return 200");
+assert.strictEqual(Array.isArray(authIncidentsRes.body?.incidents), true);
+console.log(" [PASS] Administrative incident telemetry strictly guarded by Master Key authorization");
+
 console.log("\n==================================================================");
-console.log("🎉 ALL 17 NEXCHAT FORTRESS SECURITY & TAB 30/32/34 DEFENSE TESTS PASSED 100%!");
+console.log("🎉 ALL 19 NEXCHAT FORTRESS SECURITY & TAB 30/32/34 DEFENSE TESTS PASSED 100%!");
 console.log("==================================================================");
