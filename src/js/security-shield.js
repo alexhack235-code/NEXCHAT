@@ -1,11 +1,13 @@
 /**
  * FORTRESS SECURITY SHIELD & CLOUD DEFENDER FOR NEXCHAT
- * Upgraded to v12.5.0-ENTERPRISE-AGENT
+ * Upgraded to v12.6.0-ENTERPRISE-AGENT
  * Powered by alexhack235-code & NEXO-TECH Cyber Defense Systems
  * Gateway: https://ai-security-scanner-delta.vercel.app
  * 
  * Provides:
- * 1. Layer 33: Autonomous Anti-AI Cognitive Countermeasure & ReAct Loop Neutralizer
+ * 1. Layer 35: Polymorphic OS Swarm & Ephemeral Micro-Sandbox Matrix (/api/os-swarm)
+ * 2. Layer 34: Cloud Defense Sentinel for ATO, Scraping & Secret Leakage (/api/cloud-defense)
+ * 3. Layer 33: Autonomous Anti-AI Cognitive Countermeasure & ReAct Loop Neutralizer
  * 2. Layer 32: Bare-Metal Microkernel & vCPU Sandbox Detonation Chamber (/api/kernel)
  * 3. Layer 30: Dynamic ASM Countermeasure Engine & Disassembler Traps (/api/asm)
  * 4. Layer 27: Post-Quantum Dilithium-5 + AES-256-GCM Cryptographic Lattice Vault
@@ -48,7 +50,7 @@ const DEFAULT_FORTRESS_CONFIG = {
 
 class FortressSecurityShield {
   constructor(config = DEFAULT_FORTRESS_CONFIG) {
-    this.version = '12.5.0';
+    this.version = '12.6.0';
     this.config = { ...DEFAULT_FORTRESS_CONFIG, ...config };
     this.threatCount = parseInt(getStorageItem('nexchat_threats_blocked', '0'), 10);
     this.aiThreatCount = parseInt(getStorageItem('nexchat_ai_threats_blocked', '0'), 10);
@@ -614,7 +616,7 @@ class FortressSecurityShield {
           latency,
           version: data.version || 'v12.5.0-ENTERPRISE-AGENT',
           posture: data.defense_posture || 'ACTIVE_DEFENSE_ENGAGED',
-          layers: '33_MULTI_DIMENSIONAL',
+          layers: '35_POLYMORPHIC_SWARM_MATRIX',
           antiAiActive: true,
           status: 'CONNECTED'
         };
