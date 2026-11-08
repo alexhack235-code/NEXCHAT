@@ -543,13 +543,13 @@ function _renderItem(item, element, currentUid, options = {}) {
       }
     },
     onDelete: async (msg) => {
-      if (confirm('Delete this message?')) {
-        try {
-          await deleteMessage(msg.id);
-          if (options.onNotify) options.onNotify(' Message deleted', 'success');
-        } catch (e) {
-          if (options.onNotify) options.onNotify(e.message, 'error');
-        }
+      const targetId = (msg && typeof msg === 'object') ? msg.id : msg;
+      if (!targetId) return;
+      try {
+        await deleteMessage(targetId);
+        if (options.onNotify) options.onNotify('Message deleted', 'success');
+      } catch (e) {
+        if (options.onNotify) options.onNotify(e.message, 'error');
       }
     },
     onCopy: (msg) => {

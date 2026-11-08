@@ -108,13 +108,21 @@ export async function createPairingSession(onStatusChange) {
     const data = snap.data();
 
     if (data.status === 'approved' && data.user) {
+      const effectiveUid = data.uid || data.primaryUid;
       // Store session identity locally
       localStorage.setItem('nexchat_linked_session', JSON.stringify({
         sessionId,
-        uid: data.uid,
+        uid: effectiveUid,
         user: data.user,
         linkedAt: Date.now(),
       }));
+      // Set root auth credentials so chat.html and ecosystem recognize user immediately
+      if (effectiveUid) {
+        localStorage.setItem('auth_uid', effectiveUid);
+        if (data.user.email) localStorage.setItem('auth_email', data.user.email);
+        if (data.user.name || data.user.displayName) localStorage.setItem('auth_name', data.user.name || data.user.displayName);
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+      }
       if (onStatusChange) onStatusChange('approved', data);
     } else if (data.status === 'rejected') {
       if (onStatusChange) onStatusChange('rejected', data);
@@ -137,7 +145,12 @@ export async function createPairingSession(onStatusChange) {
  * @returns {Promise<{sessionId: string, deviceInfo: object, expiresAt: string}|null>}
  */
 export async function findPendingSession(codeOrId) {
-  const clean = codeOrId.trim().toUpperCase();
+  let clean = codeOrId.trim().toUpperCase().replace(/\s+/g, '');
+  if (!clean.startsWith('NX-') && clean.length === 4) {
+    clean = 'NX-' + clean;
+  } else if (clean.startsWith('NX') && !clean.startsWith('NX-')) {
+    clean = 'NX-' + clean.slice(2);
+  }
 
   // Try by pairingCode
   const q = query(
@@ -198,6 +211,7 @@ export async function approvePairingSession(sessionId, primaryUser) {
   // 1. Mark session approved
   await updateDoc(sessionRef, {
     status: 'approved',
+    primaryUid: primaryUser.uid,
     uid: primaryUser.uid,
     user: userPayload,
     approvedAt: serverTimestamp(),

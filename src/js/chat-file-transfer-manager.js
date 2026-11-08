@@ -416,18 +416,33 @@
         </div>
       `;
 
-      modal.style.display = 'flex';
+      modal.style.setProperty('display', 'flex', 'important');
+      modal.classList.remove('hidden');
+      modal.removeAttribute('aria-hidden');
 
       const closeModal = () => {
-        modal.style.display = 'none';
+        modal.style.setProperty('display', 'none', 'important');
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
       };
+      window.closeNexDeleteMessageModal = closeModal;
 
       modal.onclick = (e) => {
         if (e.target === modal) closeModal();
       };
 
       const cancelBtn = modal.querySelector('#btnCancelDeleteMessage');
-      if (cancelBtn) cancelBtn.onclick = closeModal;
+      if (cancelBtn) {
+        cancelBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          closeModal();
+        };
+        cancelBtn.addEventListener('pointerdown', (e) => {
+          e.stopPropagation();
+          closeModal();
+        });
+      }
 
       const submitBtn = modal.querySelector('#btnConfirmDeleteSubmit');
       if (submitBtn) {

@@ -1,3 +1,54 @@
+
+// CYBER LAB: Sticker Element Factory with Contrast Die-Cut & Spoiler Blur
+function createCyberStickerElement(url, altText, isOwn) {
+  const stkWrap = document.createElement("div");
+  stkWrap.className = "message-sticker-wrap";
+  stkWrap.style.cssText = "position: relative; display: inline-block; cursor: pointer; width: 160px; height: 160px; user-select: none;";
+
+  const stkImg = document.createElement("img");
+  stkImg.src = url;
+  stkImg.alt = altText || "Sticker";
+  stkImg.className = "w-[160px] h-[160px] object-contain bg-transparent rounded-lg message-sticker-img";
+  stkImg.style.cssText = "width: 160px; height: 160px; object-fit: contain; background: transparent; border-radius: 8px; display: block;";
+  stkImg.draggable = false;
+  stkImg.loading = "lazy";
+
+  const blurEnabled = localStorage.getItem('nex_blur_stickers') === 'true';
+  if (blurEnabled) {
+    stkWrap.classList.add('is-spoiler-blurred');
+    const badge = document.createElement('div');
+    badge.className = 'sticker-spoiler-badge';
+    badge.innerHTML = '<i class="fa-solid fa-eye-slash" style="font-size:10px;"></i> Sticker (Tap to reveal)';
+    stkWrap.appendChild(badge);
+
+    const revealHandler = (e) => {
+      e.stopPropagation();
+      stkWrap.classList.remove('is-spoiler-blurred');
+      stkWrap.classList.add('is-spoiler-revealed');
+      badge.remove();
+      if (navigator.vibrate) navigator.vibrate(20);
+    };
+    stkWrap.addEventListener('click', revealHandler);
+  } else {
+    stkWrap.addEventListener('click', () => {
+      if (window.nexStickerStore && typeof window.nexStickerStore.saveCustomSticker === 'function') {
+        window.nexStickerStore.saveCustomSticker({
+          id: 'stk_' + Date.now(),
+          name: altText ? String(altText).replace('.webp', '') : 'Saved Sticker',
+          pack: 'my_stickers',
+          dataUrl: url,
+          createdAt: Date.now()
+        }).then(() => {
+          if (typeof showNotif === 'function') showNotif('Sticker saved to collection!', 'success', 2000);
+        }).catch(() => {});
+      }
+    });
+  }
+
+  stkWrap.appendChild(stkImg);
+  return stkWrap;
+}
+
 import {
   initNexbotStudio,
   initNeuralRadar,
@@ -7217,32 +7268,10 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
   const fileName = (attachment.fileName || '').toLowerCase();
   const url = attachment.downloadURL;
 
-  // WhatsApp-Style Clean Transparent Sticker
+  // WhatsApp-Style Clean Transparent Sticker with Contrast Outline & Blur/Spoiler
   const isSticker = attachment.isSticker || fileType === 'sticker' || (fileName && fileName.includes('sticker'));
   if (isSticker) {
-    const stickerWrap = document.createElement("div");
-    stickerWrap.className = "message-sticker-wrap";
-    stickerWrap.style.cssText = "position: relative; display: inline-block; cursor: pointer;";
-    const img = document.createElement("img");
-    img.src = url;
-    img.alt = attachment.fileName || "Sticker";
-    img.className = "message-sticker-img";
-    img.loading = "lazy";
-    img.title = "Click to save sticker to your device";
-    img.addEventListener("click", () => {
-      if (window.nexStickerStore) {
-        window.nexStickerStore.saveCustomSticker({
-          id: 'stk_' + Date.now(),
-          name: attachment.fileName ? attachment.fileName.replace('.webp', '') : 'Saved Sticker',
-          pack: 'my_stickers',
-          dataUrl: url,
-          createdAt: Date.now()
-        }).then(() => {
-          if (typeof showNotif === 'function') showNotif('Sticker saved to your device collection!', 'success');
-        });
-      }
-    });
-    stickerWrap.appendChild(img);
+    const stickerWrap = createCyberStickerElement(url, attachment.fileName || "Sticker", isOwn);
 
     // Transparent Timestamp Badge Overlay
     const msgDate = parentMsg?.time?.toDate?.() || (parentMsg?.time ? new Date(parentMsg.time) : new Date());
@@ -7863,16 +7892,7 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
 
   const stickerUrl = extraMeta?.imageUrl || attachment?.imageUrl || attachment?.downloadURL || attachment?.url || (isStk ? text : null);
   if (isStk && stickerUrl) {
-    const stkWrap = document.createElement("div");
-    stkWrap.className = "message-sticker-wrap";
-    stkWrap.style.cssText = "position: relative; display: inline-block; cursor: pointer; width: 160px; height: 160px;";
-    const stkImg = document.createElement("img");
-    stkImg.src = stickerUrl;
-    stkImg.alt = "Sticker";
-    stkImg.className = "w-[160px] h-[160px] object-contain bg-transparent rounded-lg message-sticker-img";
-    stkImg.style.cssText = "width: 160px; height: 160px; object-fit: contain; background: transparent; border-radius: 8px; display: block;";
-    stkImg.draggable = false;
-    stkWrap.appendChild(stkImg);
+    const stkWrap = createCyberStickerElement(stickerUrl, "Sticker", true);
     bubble.appendChild(stkWrap);
   } else if (attachment && isRenderableAttachment(attachment)) {
     const attachNode = renderMessageAttachment(attachment, { time: new Date(), status: 'pending' }, true);
@@ -8681,8 +8701,7 @@ window.nexDeleteAdvanced = function(targetEl, messageId, onComplete) {
     particleContainer.appendChild(ember);
   }
 
-  // PHASE 2: 60-160ms BURN - Spawn 3 SMOKE particles at bottom rising up
-  // Size: 14px, rgba(150,150,150,0.3), blur 4px, fly up 35px, scale 1.8
+  // PHASE 2: 250-800ms BURN - Spawn 3 SMOKE particles at bottom rising up
   setTimeout(() => {
     for (let i = 0; i < 3; i++) {
       const smoke = document.createElement('div');
@@ -8693,7 +8712,7 @@ window.nexDeleteAdvanced = function(targetEl, messageId, onComplete) {
       smoke.style.setProperty('--smoke-x', ((Math.random() - 0.5) * 16 + 4) + 'px');
       particleContainer.appendChild(smoke);
     }
-  }, 60);
+  }, 250);
 
   // MEDIA TWISTS (DM SPECIAL TWISTS PER MEDIA TYPE)
   // AUDIO: Waveform bars disappear one by one left to right
@@ -8703,14 +8722,14 @@ window.nexDeleteAdvanced = function(targetEl, messageId, onComplete) {
       setTimeout(() => {
         bar.style.opacity = '0';
         bar.style.transform = 'scaleY(0)';
-      }, idx * 6);
+      }, idx * 24);
     });
   }
 
   // IMAGE: Burn from 4 corners inward
   const mediaImages = wrapper.querySelectorAll('img:not(.chat-avatar), .message-media-img');
   mediaImages.forEach(img => {
-    img.style.animation = 'photoBurnCorners 260ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards';
+    img.style.animation = 'photoBurnCorners 1200ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards';
   });
 
   // FILE / DOC: Splits into 3 vertical strips like shredder
@@ -8724,10 +8743,9 @@ window.nexDeleteAdvanced = function(targetEl, messageId, onComplete) {
     }
   });
 
-  // PHASE 3: 160-260ms ASH FLY + COLLAPSE - Spawn 12 ASH DUST particles flying up with random X
-  // Size: 3px, #9a9a9a grey, fly up 22px, move X -10px, rotate 90deg
+  // PHASE 3: 750-1200ms ASH FLY + COLLAPSE (Telegram/TGN 1.2s Cinematic Dissolve)
   setTimeout(() => {
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 14; i++) {
       const dust = document.createElement('div');
       dust.className = 'ash-dust';
       const xPos = rect.left + (Math.random() * rect.width);
@@ -8738,16 +8756,16 @@ window.nexDeleteAdvanced = function(targetEl, messageId, onComplete) {
       particleContainer.appendChild(dust);
     }
 
-    // Collapse height, margin, padding over remaining 100ms (160ms to 260ms)
+    // Collapse height, margin, padding over remaining 450ms (750ms to 1200ms)
     wrapper.classList.add('nex-ash-wrapper-collapse');
-  }, 160);
+  }, 750);
 
-  // FINALIZE: 260ms - Remove message element completely and trigger callback
+  // FINALIZE: 1200ms (1.2s Telegram / TGN Standard) - Remove message element completely
   setTimeout(() => {
     try { wrapper.remove(); } catch (_) {}
     try { particleContainer.remove(); } catch (_) {}
     if (typeof onComplete === 'function') onComplete();
-  }, 260);
+  }, 1200);
 };
 
 // GROUP: NEX VOID DISSOLVE - PROFESSIONAL FUTURISTIC (260ms)
@@ -8804,12 +8822,12 @@ window.nexDeleteGroup = function(targetEl, messageId, onComplete) {
     particleContainer.appendChild(dot);
   }
 
-  // PHASE 3 (160-260ms): Collapse height
+  // PHASE 3 (750-1200ms): Collapse height (1.2s Dissolve)
   setTimeout(() => {
     wrapper.classList.add('nex-ash-wrapper-collapse');
-  }, 160);
+  }, 750);
 
-  // At 260ms: Vanish & Show small system pill
+  // At 1200ms (1.2s): Vanish & Show small system pill
   setTimeout(() => {
     try {
       if (particleContainer && particleContainer.parentNode) {
@@ -8834,7 +8852,7 @@ window.nexDeleteGroup = function(targetEl, messageId, onComplete) {
     }, 3000);
 
     if (typeof onComplete === 'function') onComplete();
-  }, 260);
+  }, 1200);
 };
 
 // UNIFIED DISPATCHER: Automatically selects Void Dissolve for Groups vs Ash-Fade Pro for DMs
@@ -9367,17 +9385,7 @@ function loadMessages() {
 
       if ((m.type === 'sticker' || isStk) && stickerOrImgUrl) {
         // WhatsApp exact: 160x160 image, transparent background, no bubble background, no text, no Translate button
-        const stkWrap = document.createElement("div");
-        stkWrap.className = "message-sticker-wrap";
-        stkWrap.style.cssText = "position: relative; display: inline-block; cursor: pointer; width: 160px; height: 160px;";
-        const stkImg = document.createElement("img");
-        stkImg.src = stickerOrImgUrl;
-        stkImg.alt = m.attachment?.fileName || "Sticker";
-        stkImg.className = "w-[160px] h-[160px] object-contain bg-transparent rounded-lg message-sticker-img";
-        stkImg.style.cssText = "width: 160px; height: 160px; object-fit: contain; background: transparent; border-radius: 8px; display: block;";
-        stkImg.draggable = false;
-        stkImg.loading = "lazy";
-        stkWrap.appendChild(stkImg);
+        const stkWrap = createCyberStickerElement(stickerOrImgUrl, m.attachment?.fileName || "Sticker", isOwn);
         bubble.appendChild(stkWrap);
       } else if (m.attachment && isRenderableAttachment(m.attachment)) {
         const attachNode = renderMessageAttachment(m.attachment, m, isOwn);
@@ -13063,6 +13071,9 @@ async function loadLinkedDevices() {
       return;
     }
 
+    const badge = document.getElementById("linkedSessionsCountBadge");
+    if (badge) badge.textContent = `${devices ? devices.length : 0} Active`;
+
     listEl.innerHTML = '';
     devices.forEach((dev) => {
       const item = document.createElement('div');
@@ -13120,7 +13131,8 @@ function setupLinkedDeviceListeners() {
 
   if (!modal) return;
 
-  openModalBtn?.addEventListener('click', () => {
+  const openLinkCodeBtn = document.getElementById("openLinkCodeModalBtn");
+  const openModalHandler = () => {
     modal.style.display = 'flex';
     if (codeInput) {
       codeInput.value = '';
@@ -13129,7 +13141,39 @@ function setupLinkedDeviceListeners() {
     if (foundCard) foundCard.style.display = 'none';
     if (feedback) feedback.textContent = '';
     currentPendingPairSession = null;
+  };
+
+  openModalBtn?.addEventListener('click', openModalHandler);
+  openLinkCodeBtn?.addEventListener('click', openModalHandler);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = 'none';
   });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      modal.style.display = 'none';
+    }
+  });
+
+  codeInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      findBtn?.click();
+    }
+  });
+
+  // Check if opened via scanned QR code URL (?link_session=...)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const linkSessionParam = urlParams.get('link_session');
+    if (linkSessionParam) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      modal.style.display = 'flex';
+      if (codeInput) codeInput.value = linkSessionParam;
+      setTimeout(() => { findBtn?.click(); }, 350);
+    }
+  } catch (_) {}
 
   closeModalBtn?.addEventListener('click', () => {
     modal.style.display = 'none';
@@ -13536,6 +13580,7 @@ function setupSettingsTabNavigation() {
 
   setupSettingsSearchFilter();
   setupChronexAiStudioSettings();
+  try { setupCyberLabDisplayPanel(); } catch (_) {}
 }
 
 function setupSettingsProfileIdentityControls() {
@@ -14750,8 +14795,16 @@ function setupLinkedDevicesManager() {
 
   if (revokeAllBtn && !revokeAllBtn.dataset.bound) {
     revokeAllBtn.dataset.bound = 'true';
-    revokeAllBtn.addEventListener('click', () => {
-      if (confirm('Are you sure you want to terminate all other linked sessions? Remote devices will be logged out immediately.')) {
+    revokeAllBtn.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to terminate all other linked sessions? Remote devices will be logged out immediately.')) return;
+      revokeAllBtn.disabled = true;
+      try {
+        if (typeof getLinkedDevices === 'function' && myUID) {
+          const devs = await getLinkedDevices(myUID);
+          for (const d of devs) {
+            await unlinkDevice(myUID, d.sessionId);
+          }
+        }
         if (otherList) {
           otherList.innerHTML = `
             <div style="text-align: center; padding: 14px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.08); color: #8b949e; font-size: 12px;">
@@ -14765,6 +14818,11 @@ function setupLinkedDevicesManager() {
         if (typeof showNotif === 'function') {
           showNotif('All remote linked devices terminated successfully.', 'success', 2500);
         }
+      } catch (err) {
+        console.error('Revoke all error:', err);
+        if (typeof showNotif === 'function') showNotif('Could not terminate all sessions: ' + err.message, 'error', 3000);
+      } finally {
+        revokeAllBtn.disabled = false;
       }
     });
   }
@@ -16972,6 +17030,33 @@ async function setupInitialization() {
     if (authRedirectTimer) {
       clearTimeout(authRedirectTimer);
       authRedirectTimer = null;
+    }
+
+    // Secondary Paired Device Support: Check if authenticated via QR Code / Session Pairing
+    if (!user) {
+      const linkedSessionRaw = localStorage.getItem('nexchat_linked_session');
+      const savedUid = localStorage.getItem('auth_uid');
+      if (linkedSessionRaw || savedUid) {
+        let sessionUid = savedUid;
+        let sessionUser = {};
+        if (linkedSessionRaw) {
+          try {
+            const parsed = JSON.parse(linkedSessionRaw);
+            sessionUid = sessionUid || parsed.uid || parsed.primaryUid;
+            sessionUser = parsed.user || {};
+          } catch (_) {}
+        }
+        if (sessionUid) {
+          console.log('[AUTH] Adopting paired secondary session identity:', sessionUid);
+          user = {
+            uid: sessionUid,
+            email: sessionUser.email || localStorage.getItem('auth_email') || '',
+            displayName: sessionUser.name || localStorage.getItem('auth_name') || 'Linked Device',
+            photoURL: sessionUser.photoURL || 'favicon.png',
+            isLinkedDevice: true
+          };
+        }
+      }
     }
 
     if (user) {
@@ -26393,4 +26478,126 @@ if (typeof window !== 'undefined') {
       }
     } catch (_) {}
   });
+}
+
+
+function setupCyberLabDisplayPanel() {
+  // 1. Blur Stickers Toggle
+  const chkBlur = document.getElementById('chkBlurStickers');
+  if (chkBlur && !chkBlur.dataset.bound) {
+    chkBlur.dataset.bound = 'true';
+    chkBlur.checked = localStorage.getItem('nex_blur_stickers') === 'true';
+    chkBlur.addEventListener('change', () => {
+      localStorage.setItem('nex_blur_stickers', chkBlur.checked ? 'true' : 'false');
+      if (typeof showNotif === 'function') {
+        showNotif(chkBlur.checked ? 'Sticker Spoiler Blur Enabled' : 'Stickers Set to Visible', 'info', 2000);
+      }
+    });
+  }
+
+  // 2. Sticker Die-Cut High-Contrast Outline
+  const chkDieCut = document.getElementById('chkStickerDieCut');
+  if (chkDieCut && !chkDieCut.dataset.bound) {
+    chkDieCut.dataset.bound = 'true';
+    chkDieCut.checked = localStorage.getItem('nex_sticker_diecut') !== 'false';
+    const applyDieCut = (val) => {
+      document.body.classList.toggle('disable-sticker-diecut', !val);
+    };
+    applyDieCut(chkDieCut.checked);
+    chkDieCut.addEventListener('change', () => {
+      localStorage.setItem('nex_sticker_diecut', chkDieCut.checked ? 'true' : 'false');
+      applyDieCut(chkDieCut.checked);
+    });
+  }
+
+  // 3. Cinematic Delete 1.2s
+  const chkCinema = document.getElementById('chkCinematicDelete');
+  if (chkCinema && !chkCinema.dataset.bound) {
+    chkCinema.dataset.bound = 'true';
+    chkCinema.checked = localStorage.getItem('nex_cinematic_delete') !== 'false';
+    chkCinema.addEventListener('change', () => {
+      localStorage.setItem('nex_cinematic_delete', chkCinema.checked ? 'true' : 'false');
+    });
+  }
+
+  // 4. GPU Delete Particles
+  const chkParticles = document.getElementById('chkDeleteParticles');
+  if (chkParticles && !chkParticles.dataset.bound) {
+    chkParticles.dataset.bound = 'true';
+    chkParticles.checked = localStorage.getItem('nex_delete_particles') !== 'false';
+    chkParticles.addEventListener('change', () => {
+      localStorage.setItem('nex_delete_particles', chkParticles.checked ? 'true' : 'false');
+    });
+  }
+
+  // 5. OLED True Black Mode
+  const chkOled = document.getElementById('chkOledPureBlack');
+  if (chkOled && !chkOled.dataset.bound) {
+    chkOled.dataset.bound = 'true';
+    chkOled.checked = localStorage.getItem('nex_oled_pure_black') === 'true';
+    const applyOled = (val) => {
+      document.body.classList.toggle('oled-mode', val);
+    };
+    applyOled(chkOled.checked);
+    chkOled.addEventListener('change', () => {
+      localStorage.setItem('nex_oled_pure_black', chkOled.checked ? 'true' : 'false');
+      applyOled(chkOled.checked);
+      if (typeof showNotif === 'function') {
+        showNotif(chkOled.checked ? 'OLED True Black Activated' : 'Standard Theme Restored', 'success', 2000);
+      }
+    });
+  }
+
+  // 6. Tactile Haptic Matrix
+  const chkHaptics = document.getElementById('chkTactileHaptics');
+  if (chkHaptics && !chkHaptics.dataset.bound) {
+    chkHaptics.dataset.bound = 'true';
+    chkHaptics.checked = localStorage.getItem('nex_tactile_haptics') !== 'false';
+    chkHaptics.addEventListener('change', () => {
+      localStorage.setItem('nex_tactile_haptics', chkHaptics.checked ? 'true' : 'false');
+      if (chkHaptics.checked && navigator.vibrate) navigator.vibrate([30, 50, 30]);
+    });
+  }
+
+  // 7. ProMotion 120Hz Hyper-Smooth Motion
+  const chk120 = document.getElementById('chk120HzProMotion');
+  if (chk120 && !chk120.dataset.bound) {
+    chk120.dataset.bound = 'true';
+    chk120.checked = localStorage.getItem('nex_120hz_motion') !== 'false';
+    document.body.classList.toggle('motion-120hz', chk120.checked);
+    chk120.addEventListener('change', () => {
+      localStorage.setItem('nex_120hz_motion', chk120.checked ? 'true' : 'false');
+      document.body.classList.toggle('motion-120hz', chk120.checked);
+    });
+  }
+
+  // 8. Cosmic Gyro Parallax
+  const chkGyro = document.getElementById('chkGyroParallax');
+  if (chkGyro && !chkGyro.dataset.bound) {
+    chkGyro.dataset.bound = 'true';
+    chkGyro.checked = localStorage.getItem('nex_gyro_parallax') === 'true';
+    let gyroBound = false;
+    const handleOrientation = (e) => {
+      if (!chkGyro.checked) return;
+      const gamma = e.gamma || 0;
+      const beta = e.beta || 0;
+      const xOffset = Math.min(Math.max(gamma / 3, -15), 15);
+      const yOffset = Math.min(Math.max(beta / 4, -15), 15);
+      const bg = document.querySelector('.chat-messages, #chat-messages');
+      if (bg) {
+        bg.style.backgroundPosition = `calc(50% + ${xOffset}px) calc(50% + ${yOffset}px)`;
+      }
+    };
+    if (chkGyro.checked && window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+      gyroBound = true;
+    }
+    chkGyro.addEventListener('change', () => {
+      localStorage.setItem('nex_gyro_parallax', chkGyro.checked ? 'true' : 'false');
+      if (chkGyro.checked && !gyroBound && window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+        gyroBound = true;
+      }
+    });
+  }
 }

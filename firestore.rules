@@ -29,12 +29,33 @@ service cloud.firestore {
     //   - ipAddresses / knownIps / recentIps / clientIps / detectedIps / verifiedIps: list of strings (max 4 IP addresses, each max 45 chars)
     //   - ipAddress / lastIp: string (optional, max 45 chars)
     // Subcollection: linkedDevices/{deviceId}
-    //   - deviceId: string (required/optional, max 128 chars)
+    //   - sessionId: string (optional, max 128 chars)
+    //   - deviceId: string (optional, max 128 chars)
+    //   - label: string (optional, max 128 chars)
     //   - deviceName: string (optional, max 128 chars)
+    //   - deviceType: string (optional, max 64 chars)
+    //   - browser: string (optional, max 64 chars)
+    //   - os: string (optional, max 64 chars)
     //   - platform: string (optional, max 64 chars)
+    //   - status: string (optional, max 50 chars, e.g. 'active', 'inactive', 'revoked')
+    //   - linkedAt: timestamp/number/string (optional)
+    //   - lastActive: timestamp/number/string (optional)
     //   - ipAddress / lastIp: string (optional, max 45 chars)
     //   - ipAddresses / knownIps / recentIps / clientIps / detectedIps / verifiedIps: list of strings (max 4 IP addresses)
-    //   - linkedAt: timestamp/number (optional)
+    //
+    // Collection: link_sessions
+    // Document ID: {sessionId} (Auto-generated or session ID)
+    // Fields:
+    //   - sessionId: string (optional, max 128 chars, matches document ID if present)
+    //   - pairingCode: string (optional, 1 to 20 chars, e.g. 'NX-4921')
+    //   - status: string (required, 'pending' | 'approved' | 'rejected' | 'revoked' | 'expired')
+    //   - deviceInfo: map (optional, client device metadata)
+    //   - primaryUid / uid: string (optional, approving user UID, max 128 chars)
+    //   - user: map (optional, primary user payload: uid, email, name, photoURL)
+    //   - ipAddress: string (optional, max 45 chars)
+    //   - createdAt: timestamp/number/string (optional, immutable)
+    //   - approvedAt / rejectedAt / revokedAt / expiresAt: timestamp/number/string (optional)
+    //
     // Subcollection: authorized_extensions/{extensionId}
     //   - extensionId: string (1 to 64 chars, immutable)
     //   - status: string (required, 'approved' | 'denied' | 'pending')
@@ -645,6 +666,59 @@ service cloud.firestore {
              isValidIpList('verifiedIps', 4);
     }
 
+    // Linked Device Subcollection Validator (/users/{uid}/linkedDevices/{deviceId})
+    function isValidLinkedDevice(data) {
+      return isValidOptionalString('sessionId', 0, 128) &&
+             isValidOptionalString('deviceId', 0, 128) &&
+             isValidOptionalString('deviceName', 0, 128) &&
+             isValidOptionalString('label', 0, 128) &&
+             isValidOptionalString('deviceType', 0, 64) &&
+             isValidOptionalString('browser', 0, 64) &&
+             isValidOptionalString('os', 0, 64) &&
+             isValidOptionalString('platform', 0, 64) &&
+             isValidOptionalString('status', 0, 50) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('lastIp', 0, 45) &&
+             (!('linkedAt' in data) || isValidTimestampOrNumber(data.linkedAt)) &&
+             (!('lastActive' in data) || isValidTimestampOrNumber(data.lastActive)) &&
+             isValidIpList('ipAddresses', 4) &&
+             isValidIpList('knownIps', 4) &&
+             isValidIpList('recentIps', 4) &&
+             isValidIpList('clientIps', 4) &&
+             isValidIpList('detectedIps', 4) &&
+             isValidIpList('verifiedIps', 4);
+    }
+
+    // Device Pairing Link Session Create Validator (/link_sessions/{sessionId})
+    function isValidLinkSessionCreate(data, sessionId) {
+      return ('status' in data && data.status == 'pending') &&
+             (!('sessionId' in data) || (data.sessionId is string && data.sessionId == sessionId && data.sessionId.size() <= 128)) &&
+             isValidOptionalString('pairingCode', 0, 20) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             (!('deviceInfo' in data) || data.deviceInfo == null || data.deviceInfo is map) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt));
+    }
+
+    // Device Pairing Link Session Update Validator (/link_sessions/{sessionId})
+    function isValidLinkSessionUpdate(data, prev) {
+      return ('status' in data && data.status is string && data.status in ['pending', 'approved', 'rejected', 'revoked', 'expired']) &&
+             (!('sessionId' in data) || !('sessionId' in prev) || data.sessionId == prev.sessionId) &&
+             (!('createdAt' in data) || !('createdAt' in prev) || data.createdAt == prev.createdAt) &&
+             (!('uid' in prev) || !('uid' in data) || data.uid == prev.uid) &&
+             (!('primaryUid' in prev) || !('primaryUid' in data) || data.primaryUid == prev.primaryUid) &&
+             isValidOptionalString('uid', 0, 128) &&
+             isValidOptionalString('primaryUid', 0, 128) &&
+             isValidOptionalString('pairingCode', 0, 20) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             (!('user' in data) || data.user == null || data.user is map) &&
+             (!('deviceInfo' in data) || data.deviceInfo == null || data.deviceInfo is map) &&
+             (!('approvedAt' in data) || isValidTimestampOrNumber(data.approvedAt)) &&
+             (!('rejectedAt' in data) || isValidTimestampOrNumber(data.rejectedAt)) &&
+             (!('revokedAt' in data) || isValidTimestampOrNumber(data.revokedAt)) &&
+             (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt));
+    }
+
     // Extension Hub Authorized Extension Validator: Schema validation for /users/{uid}/authorized_extensions/{extensionId}
     function isValidAuthorizedExtension(data, extId) {
       return extId is string &&
@@ -966,21 +1040,13 @@ service cloud.firestore {
       // Account deletion restricted to SuperAdmin
       allow delete: if isSuperAdmin();
 
-      // Linked Devices subcollection (Multi-device pairing with max 4 stored IP addresses)
+      // Linked Devices subcollection (Multi-device pairing with standard fields & IP limits)
       match /linkedDevices/{deviceId} {
         allow read: if isOwner(uid) || isSuperAdmin();
-        allow create, update: if (isOwner(uid) || isSuperAdmin()) &&
-                                 isValidOptionalString('deviceId', 0, 128) &&
-                                 isValidOptionalString('deviceName', 0, 128) &&
-                                 isValidOptionalString('platform', 0, 64) &&
-                                 isValidOptionalString('ipAddress', 0, 45) &&
-                                 isValidOptionalString('lastIp', 0, 45) &&
-                                 isValidIpList('ipAddresses', 4) &&
-                                 isValidIpList('knownIps', 4) &&
-                                 isValidIpList('recentIps', 4) &&
-                                 isValidIpList('clientIps', 4) &&
-                                 isValidIpList('detectedIps', 4) &&
-                                 isValidIpList('verifiedIps', 4);
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidLinkedDevice(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidLinkedDevice(request.resource.data);
         allow delete: if isOwner(uid) || isSuperAdmin();
       }
 
@@ -1801,20 +1867,33 @@ service cloud.firestore {
     // 12. DEVICE PAIRING QR SESSIONS
     // ===============================================================
     match /link_sessions/{sessionId} {
-      allow read: if isAuthenticated();
+      // Unpaired secondary devices listen via onSnapshot for approval before being logged in
+      allow read: if true;
 
+      // Unauthenticated secondary devices create session with 'pending' status
       allow create: if request.resource.data.status == 'pending' &&
-                       request.resource.data.sessionId == sessionId;
+                       isValidLinkSessionCreate(request.resource.data, sessionId);
 
+      // Authenticated primary device approves or revokes pairing session (matches primaryUid or uid)
       allow update: if isAuthenticated() && (
-        (request.resource.data.status == 'approved' && request.resource.data.primaryUid == request.auth.uid) ||
-        (request.resource.data.status in ['rejected', 'expired'] && resource.data.primaryUid == request.auth.uid) ||
-        isSuperAdmin()
+        (
+          ('primaryUid' in request.resource.data && request.resource.data.primaryUid == request.auth.uid) ||
+          ('uid' in request.resource.data && request.resource.data.uid == request.auth.uid) ||
+          ('primaryUid' in resource.data && resource.data.primaryUid == request.auth.uid) ||
+          ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
+          (resource.data.status == 'pending' && request.resource.data.status in ['rejected', 'expired']) ||
+          isSuperAdmin()
+        ) &&
+        isValidLinkSessionUpdate(request.resource.data, resource.data)
       );
 
-      allow delete: if (isAuthenticated() && resource.data.primaryUid == request.auth.uid) ||
-                       resource.data.expiresAt <= request.time.toMillis() ||
-                       isSuperAdmin();
+      // Session owner or SuperAdmin can delete session; expired sessions cleanable
+      allow delete: if (isAuthenticated() && (
+        ('primaryUid' in resource.data && resource.data.primaryUid == request.auth.uid) ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid)
+      )) ||
+      (resource.data.expiresAt is int && resource.data.expiresAt <= request.time.toMillis()) ||
+      isSuperAdmin();
     }
 
     // ===============================================================

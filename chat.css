@@ -15595,47 +15595,45 @@ body:not(.group-active) #tacticalMeshBanner {
   position: relative !important;
   overflow: visible !important;
   pointer-events: none !important;
-  animation: nexBurn 260ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+  animation: nexBurn 1200ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
   z-index: 50 !important;
 }
 
 @keyframes nexBurn {
   0% {
-    filter: sepia(0.35) brightness(1.25) contrast(1.1);
-    transform: scale(1.01) rotate(0.5deg);
+    filter: sepia(0.2) brightness(1.1);
+    transform: scale(1);
     opacity: 1;
   }
-  23% { /* ~60ms IGNITE */
-    filter: sepia(0.4) brightness(1.15) contrast(1.1);
-    transform: scale(1.01) rotate(0.5deg);
-    background: #333333 !important;
-    opacity: 1;
+  25% { /* 300ms Ignite & warm ember */
+    filter: sepia(0.5) brightness(1.2) contrast(1.15);
+    transform: scale(1.01) rotate(0.4deg);
+    background: #3a2212 !important;
+    box-shadow: 0 0 16px rgba(255, 138, 0, 0.4) !important;
+    opacity: 0.98;
   }
-  61% { /* ~160ms BURN */
-    filter: grayscale(0.7) brightness(0.6) blur(1px);
-    transform: scale(0.96) rotate(-0.8deg);
-    background: #1a1a1a !important;
+  55% { /* 660ms Burn to Charcoal */
+    filter: grayscale(0.7) brightness(0.55) blur(1px);
+    transform: scale(0.97) rotate(-0.6deg);
+    background: #181818 !important;
     border-radius: 14px 2px 18px 8px !important;
     opacity: 0.85;
   }
-  85% { /* ~220ms */
+  80% { /* 960ms Dissolve into Ash */
     filter: grayscale(1) blur(2.5px) brightness(0.3);
-    transform: scale(0.9) translateY(-8px) rotate(0.5deg);
+    transform: scale(0.92) translateY(-8px) rotate(0.4deg);
     opacity: 0.4;
   }
-  100% { /* 260ms ASH FLY + COLLAPSE */
-    filter: grayscale(1) blur(3px) brightness(0.2);
-    transform: scale(0.88) translateY(-14px) rotate(1deg);
+  100% { /* 1200ms Ash Float Away */
+    filter: grayscale(1) blur(4px) brightness(0.15);
+    transform: scale(0.85) translateY(-16px) rotate(1deg);
     opacity: 0;
   }
 }
 
 /* Wrapper Height Collapse (Smooth upward glide of subsequent messages) */
 .nex-ash-wrapper-collapse {
-  transition: max-height 100ms cubic-bezier(0.4, 0, 0.2, 1),
-              margin 100ms cubic-bezier(0.4, 0, 0.2, 1),
-              padding 100ms cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 100ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: max-height 400ms cubic-bezier(0.4, 0, 0.2, 1), margin 400ms cubic-bezier(0.4, 0, 0.2, 1), padding 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 400ms cubic-bezier(0.4, 0, 0.2, 1) !important;
   max-height: 0 !important;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
@@ -15655,7 +15653,7 @@ body:not(.group-active) #tacticalMeshBanner {
   border-radius: 50%;
   background: #ff8a00;
   box-shadow: 0 0 8px #ff8a00, 0 0 12px #ff3d00;
-  animation: emberFly 260ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: emberFly 1200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   z-index: 999999;
 }
 
@@ -15682,7 +15680,7 @@ body:not(.group-active) #tacticalMeshBanner {
   height: 3px;
   border-radius: 50%;
   background: #9a9a9a;
-  animation: dustFly 260ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  animation: dustFly 900ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
   z-index: 999999;
 }
 
@@ -15710,7 +15708,7 @@ body:not(.group-active) #tacticalMeshBanner {
   border-radius: 50%;
   background: rgba(150, 150, 150, 0.3);
   filter: blur(4px);
-  animation: smokeUp 260ms ease-out forwards;
+  animation: smokeUp 1200ms ease-out forwards;
   z-index: 999998;
 }
 
@@ -16443,7 +16441,7 @@ body:not(.group-active) #tacticalMeshBanner {
 /* IMAGE: Burn from 4 corners inward with curling and sepia */
 .nex-ash-pro img:not(.chat-avatar),
 .nex-ash-pro .message-media-img {
-  animation: photoBurnCorners 260ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+  animation: photoBurnCorners 1200ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
 }
 
 @keyframes photoBurnCorners {
@@ -16507,7 +16505,7 @@ body:not(.group-active) #tacticalMeshBanner {
 .nex-void-dissolve {
   position: relative !important;
   pointer-events: none !important;
-  animation: nexVoid 260ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+  animation: nexVoid 1200ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
   z-index: 50 !important;
 }
 
@@ -16552,7 +16550,7 @@ body:not(.group-active) #tacticalMeshBanner {
   border-radius: 50% !important;
   background: #00e5ff !important;
   box-shadow: 0 0 6px #00e5ff, 0 0 10px #ffffff !important;
-  animation: voidConverge 180ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+  animation: voidConverge 800ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
   z-index: 999999 !important;
 }
 
@@ -18796,10 +18794,10 @@ body.in-conversation #chatFabCluster {
 }
 
 /* 7. ONLY Allowed Small Popups: Confirm Delete, Emoji Picker, 3-dots Menu */
-.nex-delete-modal-overlay,
-.small-popup,
-.confirm-delete-popup,
-#nexDeleteMessageModal {
+.nex-delete-modal-overlay:not([style*="display: none"]):not([style*="display:none"]):not(.hidden):not([aria-hidden="true"]),
+.small-popup:not([style*="display: none"]):not([style*="display:none"]):not(.hidden):not([aria-hidden="true"]),
+.confirm-delete-popup:not([style*="display: none"]):not([style*="display:none"]):not(.hidden):not([aria-hidden="true"]),
+#nexDeleteMessageModal:not([style*="display: none"]):not([style*="display:none"]):not(.hidden):not([aria-hidden="true"]) {
   position: fixed !important;
   inset: 0 !important;
   background: rgba(0, 0, 0, 0.75) !important;
@@ -18812,6 +18810,20 @@ body.in-conversation #chatFabCluster {
   animation: none !important;
 }
 
+.nex-delete-modal-overlay[style*="display: none"],
+.nex-delete-modal-overlay[style*="display:none"],
+.nex-delete-modal-overlay.hidden,
+.nex-delete-modal-overlay[aria-hidden="true"],
+#nexDeleteMessageModal[style*="display: none"],
+#nexDeleteMessageModal[style*="display:none"],
+#nexDeleteMessageModal.hidden,
+#nexDeleteMessageModal[aria-hidden="true"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
 .nex-delete-modal-card,
 .small-popup-card {
   max-width: 340px !important;
@@ -18821,4 +18833,90 @@ body.in-conversation #chatFabCluster {
   padding: 22px 24px !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ==========================================================================
+   CYBER LAB & STICKER PRIVACY ENGINE
+   ========================================================================== */
+
+/* High-Contrast Sticker Base - Never blends into dark galaxy wallpaper */
+.message-sticker-wrap {
+  position: relative !important;
+  display: inline-block !important;
+  cursor: pointer !important;
+  border-radius: 12px !important;
+  overflow: visible !important;
+  user-select: none !important;
+  max-width: 160px !important;
+  max-height: 160px !important;
+}
+
+.message-sticker-img {
+  width: 160px !important;
+  height: 160px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  display: block !important;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.45));
+  transition: filter 0.3s cubic-bezier(0.2, 0.8, 0.25, 1), transform 0.18s ease;
+}
+
+.message-sticker-img:active {
+  transform: scale(0.96);
+}
+
+body.disable-sticker-diecut .message-sticker-img {
+  filter: none !important;
+}
+
+/* Blur / Spoiler Stickers (Feature toggleable in Cyber Lab) */
+.message-sticker-wrap.is-spoiler-blurred .message-sticker-img {
+  filter: blur(16px) brightness(0.65) saturate(1.2) !important;
+  cursor: pointer !important;
+}
+
+.sticker-spoiler-badge {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  padding: 6px 12px !important;
+  border-radius: 9999px !important;
+  background: rgba(15, 23, 42, 0.88) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  color: #f8fafc !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6) !important;
+  pointer-events: none !important;
+  z-index: 5 !important;
+  white-space: nowrap !important;
+  transition: opacity 0.25s ease, transform 0.25s ease !important;
+}
+
+.message-sticker-wrap.is-spoiler-revealed .message-sticker-img {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.45)) !important;
+}
+
+/* OLED Quantum Mode (True 0-Nit Black for AMOLED) */
+body.oled-mode,
+body.oled-mode .chat-main,
+body.oled-mode #chatDetailView,
+body.oled-mode .settings-container,
+body.oled-mode .settings-modal,
+body.oled-mode .cyber-hub-modal {
+  background: #000000 !important;
+  background-color: #000000 !important;
+}
+
+/* ProMotion 120Hz Hyper-Smooth Motion */
+body.motion-120hz * {
+  scroll-behavior: smooth;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
