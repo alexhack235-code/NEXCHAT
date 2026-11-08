@@ -4582,6 +4582,11 @@ uploadReelForm.addEventListener('submit', async (e) => {
 
     console.log('[CamShot] HD Video Saved to Vault:', uploadResult.vault);
 
+    // Safety Guard: Verify video was uploaded to cloud and not an ephemeral local blob URL
+    if (!uploadResult || !uploadResult.url || uploadResult.url.startsWith('blob:') || uploadResult.vaultIndex === -2) {
+      throw new Error('Cloud storage upload failed. Video could not be saved to any cloud vault. Please check your internet connection and try again.');
+    }
+
     // Phase 2: Upload thumbnail
     let thumbnailUrl = '';
     if (selectedReelThumbnailBlob) {

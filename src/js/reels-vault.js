@@ -53,6 +53,7 @@ export function getVideoDuration(file) {
  * @private
  */
 async function uploadToSingleVault(file, vaultIndex, options = {}) {
+  const vault = REELS_VAULTS[vaultIndex] || { name: `Vault ${vaultIndex}`, access: 'public' };
   const cleanName = (file.name || 'reel.mp4').replace(/[^a-zA-Z0-9._-]/g, '_');
   const uid = options.uid || 'anon';
   const filename = `reels/${uid}/${Date.now()}_${cleanName}`;

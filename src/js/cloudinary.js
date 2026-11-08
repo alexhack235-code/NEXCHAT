@@ -154,9 +154,9 @@ function uploadToSingleCloudinaryVault(file, vault, resourceType, folder, fileSi
             url: res.secure_url,
             public_id: res.public_id,
             duration: res.duration || 0,
-            format: res.format || (resourceType === 'video' ? 'mp4' : 'jpg'),
+            format: res.format || (file.name ? file.name.split('.').pop() : (resourceType === 'video' ? 'mp4' : 'jpg')),
             bytes: res.bytes || file.size,
-            fileName: file.name || `${res.public_id}.${res.format || 'bin'}`,
+            fileName: file.name || `${res.public_id}.${res.format || (resourceType === 'video' ? 'mp4' : 'jpg')}`,
             fileType: file.type || `${resourceType}/octet-stream`,
             fileSize: file.size,
           });

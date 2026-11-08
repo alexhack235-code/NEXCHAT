@@ -86,18 +86,9 @@ export async function uploadMediaBlob(file, options = {}) {
           reject(new Error('Failed to parse upload response'));
         }
       } else {
-        // Fallback: If running purely on local Vite without Vercel CLI serverless,
-        // create a temporary blob URL or data URL so testing never fails
-        console.warn('Vercel Blob endpoint unavailable, falling back to local object URL:', xhr.status);
-        const localUrl = URL.createObjectURL(file);
-        resolve({
-          url: localUrl,
-          downloadUrl: localUrl,
-          pathname: filename,
-          fileName: file.name || cleanName,
-          fileSize: file.size,
-          fileType: file.type || 'application/octet-stream',
-        });
+        // Reject so that caller fallback chain (e.g. uploadAnyMedia -> Base64 fallback) can safely take over
+        console.warn('Vercel Blob endpoint returned non-200 status:', xhr.status);
+        reject(new Error(`Vercel Blob upload failed with status ${xhr.status}: ${xhr.statusText || 'Endpoint unavailable'}`));
       }
     };
 
