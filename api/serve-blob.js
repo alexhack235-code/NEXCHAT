@@ -108,6 +108,16 @@ export default async function handler(req, res) {
         code: 'PRIVATE_BLOB_AUTH_REQUIRED'
       });
     }
+
+    // STRICT BOLA/IDOR PREVENTION: Ensure user owns this private storage resource or is SuperAdmin
+    const SUPERADMIN_UID = 'ZhvqSK7NNtQUP1sqszYfo1kzXSb2';
+    const isOwner = pathname.split('/').includes(authenticatedUser.uid) || authenticatedUser.uid === SUPERADMIN_UID;
+    if (!isOwner) {
+      return res.status(403).json({
+        error: 'Forbidden: You do not own this private storage resource.',
+        code: 'PRIVATE_BLOB_FORBIDDEN'
+      });
+    }
   }
 
   let token = '';

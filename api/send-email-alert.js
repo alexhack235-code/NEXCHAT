@@ -12,6 +12,25 @@ const {
   CONFIG
 } = require('../src/js/email-dispatcher.cjs');
 
+function escapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function sanitizeUrl(url) {
+  if (typeof url !== 'string') return '#';
+  const clean = url.trim();
+  if (clean.startsWith('https://') || clean.startsWith('http://') || clean.startsWith('mailto:')) {
+    return escapeHtml(clean);
+  }
+  return '#';
+}
+
 /**
  * /api/send-email-alert - Serverless Email Dispatch Engine for Vercel
  * 
@@ -31,7 +50,7 @@ export default async function handler(req, res) {
   }
 
   if (!enforceRateLimit(req, res, 30)) {
-    return res.status(429).json({ success: false, error: 'Rate limit exceeded. Try again in 60 seconds.' });
+    return;
   }
 
   try {
@@ -60,9 +79,17 @@ export default async function handler(req, res) {
       const passId = data.passId || `PASS-NEX-${Math.floor(1000 + Math.random() * 9000)}-VERIFIED`;
       const verificationPin = data.token || data.verificationCode || Math.floor(100000 + Math.random() * 900000).toString();
 
+      const safeUsername = escapeHtml(data.username || toEmail.split('@')[0]);
+      const safeExtName = escapeHtml(extName);
+      const safePassId = escapeHtml(passId);
+      const safePin = escapeHtml(verificationPin);
+      const safeIp = escapeHtml(data.ipAddress || clientIp);
+      const safeClientTime = escapeHtml(data.clientTime || timestamp);
+      const safeStatus = escapeHtml(status.toUpperCase());
+
       subject = isApproved
-        ? `[NEXCHAT VERIFICATION PASS] ${extName} Authorized - PIN: ${verificationPin}`
-        : `[NEXCHAT SECURITY ALERT] ${extName} Access Blocked`;
+        ? `[NEXCHAT VERIFICATION PASS] ${safeExtName} Authorized - PIN: ${safePin}`
+        : `[NEXCHAT SECURITY ALERT] ${safeExtName} Access Blocked`;
 
       emailHtml = `
 <!DOCTYPE html>
@@ -92,12 +119,12 @@ export default async function handler(req, res) {
           <tr>
             <td style="padding: 30px;">
               <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
-                Hello <strong>${data.username || toEmail.split('@')[0]}</strong>,
+                Hello <strong>${safeUsername}</strong>,
               </p>
               <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
                 ${isApproved
-                  ? `An authorization request for <strong>${extName}</strong> was successfully approved for your account. Below is your official cryptographic Verification Pass and security PIN.`
-                  : `An access request for <strong>${extName}</strong> was denied and blocked. No data access was granted.`
+                  ? `An authorization request for <strong>${safeExtName}</strong> was successfully approved for your account. Below is your official cryptographic Verification Pass and security PIN.`
+                  : `An access request for <strong>${safeExtName}</strong> was denied and blocked. No data access was granted.`
                 }
               </p>
 
@@ -110,10 +137,10 @@ export default async function handler(req, res) {
                       [OFFICIAL NEXCHAT VERIFICATION PASS]
                     </div>
                     <div style="font-family: monospace; font-size: 16px; font-weight: 800; color: #00ff88; margin-bottom: 12px;">
-                      ${passId}
+                      ${safePassId}
                     </div>
                     <div style="font-family: monospace; font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #ffffff; background-color: rgba(0, 255, 136, 0.1); padding: 10px 20px; border-radius: 8px; display: inline-block; border: 1px dashed #00ff88;">
-                      ${verificationPin}
+                      ${safePin}
                     </div>
                     <p style="margin: 10px 0 0; font-size: 11px; color: #94a3b8;">
                       6-Digit Security Verification PIN • Enter in NEXCHAT to activate CamShot
@@ -127,19 +154,19 @@ export default async function handler(req, res) {
               <table role="presentation" width="100%" style="background-color: #080d1a; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; font-family: monospace; font-size: 11px; margin-bottom: 24px;">
                 <tr>
                   <td style="padding: 10px 14px; color: #64748b; border-bottom: 1px solid rgba(255, 255, 255, 0.05); width: 35%;">EXTENSION</td>
-                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${extName}</td>
+                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${safeExtName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 10px 14px; color: #64748b; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">STATUS</td>
-                  <td style="padding: 10px 14px; color: ${isApproved ? '#00ff88' : '#ff3366'}; font-weight: 700; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${status.toUpperCase()}</td>
+                  <td style="padding: 10px 14px; color: ${isApproved ? '#00ff88' : '#ff3366'}; font-weight: 700; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${safeStatus}</td>
                 </tr>
                 <tr>
                   <td style="padding: 10px 14px; color: #64748b; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">CLIENT IP</td>
-                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${data.ipAddress || clientIp}</td>
+                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${safeIp}</td>
                 </tr>
                 <tr>
                   <td style="padding: 10px 14px; color: #64748b;">TIMESTAMP</td>
-                  <td style="padding: 10px 14px; color: #cbd5e1;">${data.clientTime || timestamp}</td>
+                  <td style="padding: 10px 14px; color: #cbd5e1;">${safeClientTime}</td>
                 </tr>
               </table>
 
@@ -165,8 +192,11 @@ export default async function handler(req, res) {
     } else if (type === 'password_reset') {
       const resetUrl = data.resetUrl || '#';
       const token = data.token || '000000';
+      const safeUsername = escapeHtml(data.username || toEmail.split('@')[0]);
+      const safeToken = escapeHtml(token);
+      const safeResetUrl = sanitizeUrl(resetUrl);
 
-      subject = `[NEXCHAT SECURITY] Password Reset PIN: ${token}`;
+      subject = `[NEXCHAT SECURITY] Password Reset PIN: ${safeToken}`;
 
       emailHtml = `
 <!DOCTYPE html>
@@ -191,18 +221,18 @@ export default async function handler(req, res) {
           <tr>
             <td style="padding: 30px;">
               <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
-                Hello <strong>${data.username || toEmail.split('@')[0]}</strong>,
+                Hello <strong>${safeUsername}</strong>,
               </p>
               <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
                 A password reset request was initiated for your NEXCHAT account. Use the PIN below or tap the button to proceed:
               </p>
               <div style="text-align: center; margin: 24px 0;">
                 <div style="font-family: monospace; font-size: 34px; font-weight: 900; letter-spacing: 8px; color: #00d4ff; background-color: #070b14; padding: 12px 24px; border-radius: 8px; display: inline-block; border: 1px solid #00d4ff;">
-                  ${token}
+                  ${safeToken}
                 </div>
               </div>
               <div style="text-align: center; margin-bottom: 24px;">
-                <a href="${resetUrl}" style="background-color: #00d4ff; color: #000; font-weight: 700; font-size: 13px; text-decoration: none; padding: 12px 28px; border-radius: 8px; display: inline-block;">
+                <a href="${safeResetUrl}" style="background-color: #00d4ff; color: #000; font-weight: 700; font-size: 13px; text-decoration: none; padding: 12px 28px; border-radius: 8px; display: inline-block;">
                   RESET PASSWORD
                 </a>
               </div>
@@ -224,7 +254,13 @@ export default async function handler(req, res) {
       const duration = data.duration || '24h';
       const suspendedUntil = data.suspendedUntil || 'Pending Review';
 
-      subject = `[NEXCHAT SECURITY] Account Sanction Notice: ${status}`;
+      const safeUsername = escapeHtml(data.username || toEmail.split('@')[0]);
+      const safeStatus = escapeHtml(status);
+      const safeReason = escapeHtml(reason);
+      const safeDuration = escapeHtml(duration);
+      const safeSuspendedUntil = escapeHtml(suspendedUntil);
+
+      subject = `[NEXCHAT SECURITY] Account Sanction Notice: ${safeStatus}`;
 
       emailHtml = `
 <!DOCTYPE html>
@@ -249,7 +285,7 @@ export default async function handler(req, res) {
           <tr>
             <td style="padding: 30px;">
               <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
-                Hello <strong>${data.username || toEmail.split('@')[0]}</strong>,
+                Hello <strong>${safeUsername}</strong>,
               </p>
               <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
                 This automated security transmission notifies you that an administrative sanction has been registered against your NEXCHAT account.
@@ -257,19 +293,19 @@ export default async function handler(req, res) {
               <table role="presentation" width="100%" style="background-color: #080d1a; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; font-family: monospace; font-size: 11px; margin-bottom: 24px;">
                 <tr>
                   <td style="padding: 10px 14px; color: #64748b; border-bottom: 1px solid rgba(255, 255, 255, 0.05); width: 35%;">SANCTION STATUS</td>
-                  <td style="padding: 10px 14px; color: #ff3366; font-weight: 800; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${status}</td>
+                  <td style="padding: 10px 14px; color: #ff3366; font-weight: 800; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${safeStatus}</td>
                 </tr>
                 <tr>
                   <td style="padding: 10px 14px; color: #64748b; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">REASON</td>
-                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${reason}</td>
+                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${safeReason}</td>
                 </tr>
                 <tr>
                   <td style="padding: 10px 14px; color: #64748b; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">DURATION</td>
-                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${duration}</td>
+                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${safeDuration}</td>
                 </tr>
                 <tr>
                   <td style="padding: 10px 14px; color: #64748b;">HOLD EXPIRATION</td>
-                  <td style="padding: 10px 14px; color: #00d4ff;">${suspendedUntil}</td>
+                  <td style="padding: 10px 14px; color: #00d4ff;">${safeSuspendedUntil}</td>
                 </tr>
               </table>
               <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">

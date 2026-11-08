@@ -1,5 +1,5 @@
 import { getNextKey, markKeyDead, markKeyHealthy, callGroqAI, callGeminiAI } from '../lib/translator.js';
-import { applySecurityHeaders, handleCors } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
 
 /**
  * NEXCHAT /api/chat & /api/ai Gateway
@@ -21,6 +21,10 @@ Personality & Rules:
 export default async function handler(req, res) {
   applySecurityHeaders(res);
   if (handleCors(req, res)) return;
+
+  if (!enforceRateLimit(req, res, 40)) {
+    return;
+  }
 
   if (req.method === 'GET') {
     return res.status(200).json({

@@ -1232,15 +1232,25 @@
 
       if (!isGroup) return;
 
-      const senderName = isOwn ? (this.currentUserName || 'You') : (wrapper.dataset.senderName || document.getElementById('chatName')?.textContent || 'Member');
+      const currentUid = window.myUID || (typeof myUID !== 'undefined' ? myUID : '') || (window.auth?.currentUser?.uid || '');
+      const senderUid = isOwn ? currentUid : (wrapper.dataset.senderUid || '');
+      const senderName = isOwn ? (this.currentUserName || window.myUsername || 'You') : (wrapper.dataset.senderName || document.getElementById('chatName')?.textContent || 'Member');
+      
+      const groupData = window._currentGroupData || window.currentGroupData || null;
+      const SUPERADMIN_UID = 'ZhvqSK7NNtQUP1sqszYfo1kzXSb2';
+
       let role = 'member';
-      if (isOwn) {
-        role = localStorage.getItem('is_admin') === 'true' ? 'admin' : (localStorage.getItem('is_vip') === 'true' ? 'vip' : 'member');
-      } else {
-        const lower = senderName.toLowerCase();
-        if (lower.includes('alex') || lower.includes('owner') || lower.includes('superadmin')) role = 'owner';
-        else if (lower.includes('admin') || lower.includes('mod')) role = 'admin';
-        else if (lower.includes('vip') || lower.includes('pro')) role = 'vip';
+      if (senderUid) {
+        const isOwner = (senderUid === SUPERADMIN_UID) || 
+          (groupData && (groupData.creatorId === senderUid || groupData.createdBy === senderUid));
+        const isAdmin = groupData && Array.isArray(groupData.admins) && groupData.admins.includes(senderUid);
+        const isMod = groupData && Array.isArray(groupData.moderators) && groupData.moderators.includes(senderUid);
+        const isVip = groupData && Array.isArray(groupData.vips) && groupData.vips.includes(senderUid);
+
+        if (isOwner) role = 'owner';
+        else if (isAdmin) role = 'admin';
+        else if (isMod) role = 'moderator';
+        else if (isVip) role = 'vip';
       }
 
       const roleBadges = {

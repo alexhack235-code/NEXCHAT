@@ -81,8 +81,9 @@ export default async function handler(req, res) {
       // Generate Reel ID
       const reelId = `reel_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
-      const effectiveAuthorId = authUser?.uid || authorId || 'user_anon';
-      const effectiveAuthorName = authorName || (safePublishingIdentity === 'creator' ? 'Creator Persona' : 'Primary Profile');
+      // STRICT IDENTITY INTEGRITY: Anonymous uploads cannot spoof arbitrary authorId
+      const effectiveAuthorId = authUser?.uid || 'user_anon';
+      const effectiveAuthorName = (authUser ? authorName : null) || (safePublishingIdentity === 'creator' ? 'Creator Persona' : 'Anonymous Operative');
 
       const reelRecord = {
         id: reelId,

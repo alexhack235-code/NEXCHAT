@@ -39,9 +39,9 @@ for (const cp of candidateConfigPaths) {
   }
 }
 
-// Guaranteed credentials fallback for production runtime
-if (!CONFIG.GMAIL_USER) CONFIG.GMAIL_USER = process.env.GMAIL_USER || 'oyewoletodoroki@gmail.com';
-if (!CONFIG.GMAIL_APP_PASS) CONFIG.GMAIL_APP_PASS = (process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_APP_PASS || 'biaruqvtvpnzhxkz').replace(/\s+/g, '');
+// Guaranteed credentials fallback for production runtime (strictly from environment)
+if (!CONFIG.GMAIL_USER) CONFIG.GMAIL_USER = process.env.GMAIL_USER || '';
+if (!CONFIG.GMAIL_APP_PASS) CONFIG.GMAIL_APP_PASS = (process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_APP_PASS || '').replace(/\s+/g, '');
 
 /**
  * Resolves any relative or localhost URL into a globally reachable HTTPS URL (e.g. Vercel production)
@@ -68,6 +68,31 @@ function resolvePublicUrl(urlPath, fallbackRelative = '') {
   }
 
   return `${publicBase}/${urlPath.replace(/^\/+/, '')}`;
+}
+
+/**
+ * Escapes HTML characters to prevent email injection / phishing vectors
+ */
+function escapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Validates and sanitizes links to prevent javascript: or malformed URLs
+ */
+function sanitizeUrl(url) {
+  if (typeof url !== 'string') return '#';
+  const clean = url.trim();
+  if (clean.startsWith('https://') || clean.startsWith('http://') || clean.startsWith('mailto:')) {
+    return escapeHtml(clean);
+  }
+  return '#';
 }
 
 // Preload official NEXCHAT logo for inline MIME attachment (prevents blank/missing logo in Gmail)
@@ -270,11 +295,13 @@ async function sendNotificationEmail({ to, subject, htmlContent }) {
  * Enterprise-Grade Password Reset & Cryptographic Key Recovery Email
  */
 function createPasswordResetEmail({ username, resetUrl, token, ipAddress, expiresMinutes = 15 }) {
-  const pin = token || Math.floor(100000 + Math.random() * 900000).toString();
+  const safeUsername = escapeHtml(username || 'User');
+  const safeIp = escapeHtml(ipAddress || '127.0.0.1');
+  const pin = escapeHtml(String(token || Math.floor(100000 + Math.random() * 900000)));
   const urlWithToken = resetUrl
     ? (resetUrl.includes('token=') ? resetUrl : (resetUrl.includes('?') ? `${resetUrl}&token=${pin}` : `${resetUrl}?token=${pin}`))
     : `reset.html?token=${pin}`;
-  const directLink = resolvePublicUrl(urlWithToken, `reset.html?token=${pin}`);
+  const directLink = sanitizeUrl(resolvePublicUrl(urlWithToken, `reset.html?token=${pin}`));
 
   return `
     <!DOCTYPE html>
@@ -315,7 +342,7 @@ function createPasswordResetEmail({ username, resetUrl, token, ipAddress, expire
         <tr>
           <td style="padding: 32px 32px 24px;">
             <p style="margin: 0 0 16px; font-size: 16px; color: #f8fafc; font-weight: 600;">
-              Hello <span style="color: #00f076;">${username || 'NEXCHAT User'}</span>,
+              Hello <span style="color: #00f076;">${safeUsername}</span>,
             </p>
             <p style="margin: 0 0 20px; font-size: 14px; color: #cbd5e1; line-height: 1.65;">
               A formal request has been received to reset the master access credentials for your NEXCHAT cryptographic account. If you initiated this request, please use the secure authorization details below.
@@ -412,7 +439,12 @@ function createPasswordResetEmail({ username, resetUrl, token, ipAddress, expire
  * Enterprise-Grade Device Link Security Alert Email
  */
 function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, revokeUrl }) {
-  const killUrl = resolvePublicUrl(revokeUrl, 'chat.html?action=manage_devices');
+  const safeUsername = escapeHtml(username || 'User');
+  const safeDeviceType = escapeHtml(deviceType || 'Device');
+  const safeBrowser = escapeHtml(browser || 'Web Browser');
+  const safeOs = escapeHtml(os || 'Operating System');
+  const safeIp = escapeHtml(ipAddress || '127.0.0.1');
+  const killUrl = sanitizeUrl(resolvePublicUrl(revokeUrl, 'chat.html?action=manage_devices'));
 
   return `
     <!DOCTYPE html>
@@ -464,7 +496,7 @@ function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, r
         <tr>
           <td style="padding: 32px 32px 24px;">
             <p style="margin: 0 0 16px; font-size: 16px; color: #f8fafc; font-weight: 600;">
-              Hello <strong style="color: #00d4ff;">${username || 'NEXCHAT User'}</strong>,
+              Hello <strong style="color: #00d4ff;">${safeUsername}</strong>,
             </p>
             <p style="margin: 0 0 20px; font-size: 14px; color: #cbd5e1; line-height: 1.65;">
               A new device was successfully paired via the QR Code pairing protocol and granted access to your active conversations.
@@ -482,7 +514,7 @@ function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, r
                 </tr>
                 <tr>
                   <td style="padding: 6px 0; color: #64748b;">Browser &amp; OS:</td>
-                  <td style="padding: 6px 0; color: #f8fafc; font-weight: 600; text-align: right;">${browser} on ${os}</td>
+                  <td style="padding: 6px 0; color: #f8fafc; font-weight: 600; text-align: right;">${safeBrowser} on ${safeOs}</td>
                 </tr>
                 <tr>
                   <td style="padding: 6px 0; color: #64748b;">Network IP Address:</td>
@@ -529,7 +561,10 @@ function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, r
  * Enterprise-Grade Offline Message Digest Email
  */
 function createOfflineMessageEmail({ recipientName, senderName, messageSnippet, chatUrl }) {
-  const directChat = resolvePublicUrl(chatUrl, 'chat.html');
+  const safeRecipientName = escapeHtml(recipientName || 'User');
+  const safeSenderName = escapeHtml(senderName || 'Contact');
+  const safeMessageSnippet = escapeHtml(messageSnippet || '');
+  const directChat = sanitizeUrl(resolvePublicUrl(chatUrl, 'chat.html'));
 
   return `
     <!DOCTYPE html>
@@ -609,9 +644,12 @@ function createOfflineMessageEmail({ recipientName, senderName, messageSnippet, 
  * Enterprise-Grade Extension Preview & Permission Consent Security Email
  */
 function createExtensionConsentEmail({ username, extensionName, extensionId, status, scopes, ipAddress, clientTime, revokeUrl }) {
+  const safeUsername = escapeHtml(username || 'User');
   const isApproved = (status === 'approved' || status === 'granted' || status === 'yes');
-  const directUrl = resolvePublicUrl(revokeUrl, 'chat.html?action=manage_extensions');
-  const name = extensionName || 'NEX-REELS (CamShot)';
+  const directUrl = sanitizeUrl(resolvePublicUrl(revokeUrl, 'chat.html?action=manage_extensions'));
+  const name = escapeHtml(extensionName || 'NEX-REELS (CamShot)');
+  const safeIp = escapeHtml(ipAddress || '127.0.0.1');
+  const safeTime = escapeHtml(clientTime || new Date().toUTCString());
   const defaultScopes = scopes && scopes.length ? scopes : [
     'read:profile',
     'write:media_vault',
@@ -704,7 +742,7 @@ function createExtensionConsentEmail({ username, extensionName, extensionId, sta
         <tr>
           <td style="padding: 32px 32px 24px;">
             <p style="margin: 0 0 16px; font-size: 16px; color: #f8fafc; font-weight: 600;">
-              Hello <span style="color: ${secondaryColor};">${username || 'Alex'}</span>,
+              Hello <span style="color: ${secondaryColor};">${safeUsername}</span>,
             </p>
             <p style="margin: 0 0 20px; font-size: 14px; color: #cbd5e1; line-height: 1.65;">
               ${isApproved 
@@ -736,7 +774,7 @@ function createExtensionConsentEmail({ username, extensionName, extensionId, sta
                 </tr>
                 <tr>
                   <td style="padding: 5px 0; color: #64748b;">Authorization Timestamp:</td>
-                  <td style="padding: 5px 0; color: #f8fafc; text-align: right;">${clientTime || new Date().toUTCString()}</td>
+                  <td style="padding: 5px 0; color: #f8fafc; text-align: right;">${safeTime}</td>
                 </tr>
               </table>
             </div>

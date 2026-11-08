@@ -9040,6 +9040,8 @@ function loadMessages() {
         div.dataset.messageId = effectiveMid;
         div.id = `msg-wrapper-${effectiveMid}`;
       }
+      div.dataset.senderUid = msgSenderId || m.from || m.senderId || (isOwn ? myUID : '');
+      div.dataset.senderName = m.senderName || m.senderUsername || m.userName || '';
       // Absolute overlay selection checkbox outside bubble
       const selectWrap = document.createElement('div');
       selectWrap.className = 'msg-selection-checkbox-wrap';

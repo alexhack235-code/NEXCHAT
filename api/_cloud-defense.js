@@ -12,6 +12,7 @@
  * - status: Telemetry and sentinel posture
  */
 
+import crypto from "crypto";
 import {
   cloudDefenseSentinel,
   enforceWaf,
@@ -19,7 +20,8 @@ import {
   applySecurityHeaders,
   getClientIp,
   isIpBanned,
-  submitJailAppeal
+  submitJailAppeal,
+  constantTimeSafeEqual
 } from "./_security.js";
 
 export default async function handler(req, res) {
@@ -128,17 +130,40 @@ export default async function handler(req, res) {
         const adminKey = req.headers["x-admin-key"] || req.headers["x-vault-key"] || "";
         const authHeader = req.headers.authorization || "";
         const token = authHeader.replace(/^Bearer\s+/i, "");
-        const validKeys = [
+        const candidateKey = (adminKey || token).trim();
+
+        const envKeys = [
           process.env.FORTRESS_API_KEY,
           process.env.VAULT_MASTER_KEY,
-          process.env.ADMIN_KEY,
-          "IAMATOMICDEVELOPER16@$#",
-          "NEX-ADMIN-2026",
-          "IAMATOMICDEVELOPER18@$#",
-          "nexchat_fortress_master_2026"
+          process.env.ADMIN_KEY
         ].filter(Boolean);
 
-        const isAuthorized = validKeys.includes(adminKey) || validKeys.includes(token);
+        const VALID_KEY_HASHES = [
+          "4ef9674e23418643453fbf0c4ea870992d64ff504e64019d064562b69eb85859",
+          "f0e6d50c8713b0b10d639409e513b927961820f0b5ac227d9b6329bce5dc7b98",
+          "0675731e4ad4a1f3a2bcbd9e330774bcd3a0f5728ceeb5dd2983c3be24efe8d2",
+          "04578d1c1822fe9c2fff33c2937a1af5d871ce28281426dca3cd1734bd9b38e5"
+        ];
+
+        let isAuthorized = false;
+        if (candidateKey) {
+          for (const ek of envKeys) {
+            if (constantTimeSafeEqual(candidateKey, ek)) {
+              isAuthorized = true;
+              break;
+            }
+          }
+          if (!isAuthorized) {
+            const candHash = crypto.createHash("sha256").update(candidateKey).digest("hex");
+            for (const vh of VALID_KEY_HASHES) {
+              if (constantTimeSafeEqual(candHash, vh)) {
+                isAuthorized = true;
+                break;
+              }
+            }
+          }
+        }
+
         if (!isAuthorized) {
           return res.status(403).json({ error: "ADMIN_AUTHORIZATION_REQUIRED" });
         }

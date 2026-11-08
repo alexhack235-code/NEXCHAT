@@ -1,5 +1,5 @@
 import { getNextKey, markKeyDead, markKeyHealthy, callGroqAI, callGeminiAI } from '../lib/translator.js';
-import { applySecurityHeaders, handleCors } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
 import vm from 'vm';
 
 /**
@@ -100,6 +100,10 @@ export default async function handler(req, res) {
 
   applySecurityHeaders(res);
   if (handleCors(req, res)) return;
+
+  if (!enforceRateLimit(req, res, 30)) {
+    return;
+  }
 
   // GET: Health check & Pipeline Stage Status
   if (req.method === 'GET') {

@@ -1,5 +1,5 @@
 import { translate } from '../lib/translator.js';
-import { applySecurityHeaders, handleCors } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, handleCors, constantTimeSafeEqual } from './_security.js';
 
 /**
  * NEXCHAT /api/translate
@@ -15,13 +15,17 @@ export default async function handler(req, res) {
   applySecurityHeaders(res);
   if (handleCors(req, res)) return;
 
+  if (!enforceRateLimit(req, res, 50)) {
+    return;
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Auth header validation
+  // Auth header validation (constant-time timing-safe check)
   const clientSecret = req.headers['x-nexchat-secret'];
-  if (clientSecret && clientSecret !== EXPECTED_SECRET) {
+  if (clientSecret && !constantTimeSafeEqual(clientSecret, EXPECTED_SECRET)) {
     return res.status(401).json({ error: 'Unauthorized: invalid secret' });
   }
 

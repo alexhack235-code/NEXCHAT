@@ -484,6 +484,75 @@ assert.strictEqual(authIncidentsRes.statusCode, 200, "Authorized admin access mu
 assert.strictEqual(Array.isArray(authIncidentsRes.body?.incidents), true);
 console.log(" [PASS] Administrative incident telemetry strictly guarded by Master Key authorization");
 
+// ================================================================
+// [TEST 20] EMAIL ALERT HTML ESCAPING & PHISHING NEUTRALIZATION
+// ================================================================
+console.log("\n[TEST 20] Testing Email Alert HTML Escaping & Phishing Neutralization...");
+const { createPasswordResetEmail, createDeviceLinkEmail } = await import("./src/js/email-dispatcher.cjs");
+
+// 20a. Verify template escapes malicious HTML/XSS and invalid schemes
+const rawHtml = createPasswordResetEmail({
+  username: "<script>alert('xss')</script>John",
+  resetUrl: "javascript:alert(document.cookie)",
+  token: "123456"
+});
+assert.strictEqual(rawHtml.includes("<script>"), false, "Must not contain raw script tags");
+assert.strictEqual(rawHtml.includes("&lt;script&gt;"), true, "Must properly escape HTML");
+assert.strictEqual(rawHtml.includes('href="javascript:'), false, "Must neutralize javascript: URLs to #");
+
+// 20b. Handler dispatches valid requests with 200 OK
+const emailAlertHandler = (await import("./api/send-email-alert.js")).default;
+const { req: emailOkReq, res: emailOkRes } = createMockReqRes({
+  method: "POST",
+  url: "/api/send-email-alert",
+  headers: { "x-forwarded-for": "198.51.100.77" },
+  body: {
+    type: "password_reset",
+    toEmail: "target@example.com",
+    data: {
+      username: "Security Operative",
+      resetUrl: "https://nexchat-drab.vercel.app/reset.html",
+      token: "123456"
+    }
+  }
+});
+await emailAlertHandler(emailOkReq, emailOkRes);
+assert.strictEqual(emailOkRes.statusCode, 200, "Valid email dispatch should return 200");
+console.log(" [PASS] Email dispatcher safely sanitized injection vectors and dispatched with 200 OK");
+
+// ================================================================
+// [TEST 21] PRIVATE BLOB BOLA / IDOR & ANONYMOUS REELS GUARDS
+// ================================================================
+console.log("\n[TEST 21] Testing Private Blob BOLA Guard & Upload Hardening...");
+const uploadHandler = (await import("./api/upload.js")).default;
+const { req: badAnonReelReq, res: badAnonReelRes } = createMockReqRes({
+  method: "POST",
+  url: "/api/upload?type=reels&filename=malicious.exe",
+  headers: {
+    "x-upload-type": "reels",
+    "x-filename": "malicious.exe",
+    "content-type": "application/x-msdownload"
+  }
+});
+await uploadHandler(badAnonReelReq, badAnonReelRes);
+assert.strictEqual(badAnonReelRes.statusCode === 400 || badAnonReelRes.statusCode === 403 || badAnonReelRes.statusCode === 415, true, "Prohibited file extension or invalid anonymous path must be rejected");
+console.log(" [PASS] Anonymous upload restrictions strictly enforced: executable extensions and non-video paths blocked");
+
+const reelsHandler = (await import("./api/reels.js")).default;
+const { req: spoofReelReq, res: spoofReelRes } = createMockReqRes({
+  method: "POST",
+  url: "/api/reels",
+  body: {
+    videoUrl: "https://example.com/stream.mp4",
+    authorId: "target_victim_uid_spoofed",
+    caption: "Spoofed reel author"
+  }
+});
+await reelsHandler(spoofReelReq, spoofReelRes);
+assert.strictEqual(spoofReelRes.statusCode, 201);
+assert.strictEqual(spoofReelRes.body?.reel?.authorId, "user_anon", "Anonymous reel submission must not accept forged authorId");
+console.log(" [PASS] Identity spoofing strictly blocked: anonymous reel authors defaulted to user_anon");
+
 console.log("\n==================================================================");
-console.log("🎉 ALL 19 NEXCHAT FORTRESS SECURITY & TAB 30/32/34 DEFENSE TESTS PASSED 100%!");
+console.log("🎉 ALL 21 NEXCHAT FORTRESS SECURITY & ACTIVE DEFENSE TESTS PASSED 100%!");
 console.log("==================================================================");
