@@ -12,12 +12,17 @@ service cloud.firestore {
     //   - uid: string (required on create/update, immutable)
     //   - email: string (optional, max 255 chars)
     //   - username: string (optional, max 100 chars)
-    //   - displayName: string (optional, max 100 chars)
-    //   - photoURL / avatar: string (optional URL, max 2048 chars)
+    //   - displayName / name: string (optional, max 100 chars)
+    //   - photoURL / avatar / profilePic: string (optional URL, max 2048 chars)
     //   - bio: string (optional, max 1000 chars)
+    //   - phone / phoneNumber: string (optional, max 30 chars)
+    //   - webPushToken / fcmToken: string (optional Web Push / FCM tokens, max 500 chars)
+    //   - contacts: list of strings (optional, user contact UIDs, max 5000 items)
+    //   - approvedChatUsers: list of strings (optional, approved 1-on-1 chat UIDs, max 1000 items)
     //   - tokens: number (optional, user token balance, anti-privilege escalation)
     //   - online: bool (optional)
     //   - lastSeen: timestamp (optional)
+    //   - privacyLastSeen / status: string (optional)
     //   - createdAt: timestamp (optional, immutable)
     //   - isAdmin / isSuperAdmin / role / banned: privileged flags (superAdmin only)
     //   - blockedUsers / mutedUsers / archivedChats: list of strings (max 500 items)
@@ -367,10 +372,11 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // 3. Super Admin Verification (Bootstrap email, token claim, admins collection, role, or developer UID)
+    // 3. Super Admin Verification (Bootstrap email with verified check, token claim, admins collection, role, or developer UID)
     function isSuperAdmin() {
       return isAuthenticated() && (
-        request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com', 'alexandergamedeveloper74@gmail.com'] ||
+        (request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com', 'alexandergamedeveloper74@gmail.com'] &&
+         request.auth.token.email_verified == true) ||
         request.auth.token.admin == true ||
         request.auth.uid in ['demonalexander526', 'alexhack235', 'ZhvqSK7NNtQUP1sqszYfo1kzXSb2'] ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
@@ -378,26 +384,36 @@ service cloud.firestore {
       );
     }
 
-    // 4. Group Membership Verification (Safely checks existence, members array, or group creator)
+    // 4. Group Membership Verification (Safely checks existence, members array, or group creator/createdBy)
     function isGroupMember(groupId) {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/groups/$(groupId)) &&
              (
                ('members' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
                 request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members) ||
-               request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId ||
+               ('creatorId' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId) ||
+               ('createdBy' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.createdBy) ||
+               ('creator' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creator) ||
                isSuperAdmin()
              );
     }
 
-    // 5. Group Admin Verification (Admins list, group creator, or SuperAdmin)
+    // 5. Group Admin Verification (Admins list, group creator/createdBy, or SuperAdmin)
     function isGroupAdmin(groupId) {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/groups/$(groupId)) &&
              (
                ('admins' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
                 request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.admins) ||
-               request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId ||
+               ('creatorId' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId) ||
+               ('createdBy' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.createdBy) ||
+               ('creator' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creator) ||
                isSuperAdmin()
              );
     }
@@ -413,6 +429,21 @@ service cloud.firestore {
                  request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.moderators
                )
              );
+    }
+
+    // 6b. Direct Message Sender / Recipient / Participant Helpers
+    function isMessageSender(data) {
+      return ('from' in data && request.auth.uid == data.from) ||
+             ('senderId' in data && request.auth.uid == data.senderId);
+    }
+
+    function isMessageRecipient(data) {
+      return ('to' in data && request.auth.uid == data.to) ||
+             ('receiverId' in data && request.auth.uid == data.receiverId);
+    }
+
+    function isMessageParticipant(data) {
+      return isMessageSender(data) || isMessageRecipient(data);
     }
 
     // 7. String Validation Helper (Non-empty with length limits)
@@ -542,7 +573,7 @@ service cloud.firestore {
     // DOMAIN VALIDATORS (Validator Function Pattern)
     // ===============================================================
 
-    // User Profile Validator: Prevents privilege escalation on isAdmin, isSuperAdmin, role, banned, and tokens; enforces max 4 IPs
+    // User Profile Validator: Prevents privilege escalation on isAdmin, isSuperAdmin, role, banned, and tokens; enforces max 4 IPs and limits on tokens, contacts, and profile data
     function isValidUserCreate(data) {
       return (!('isAdmin' in data) || data.isAdmin == false || isSuperAdmin()) &&
              (!('isSuperAdmin' in data) || data.isSuperAdmin == false || isSuperAdmin()) &&
@@ -551,13 +582,23 @@ service cloud.firestore {
              (!('tokens' in data) || (data.tokens is number && data.tokens >= 0 && data.tokens <= 2000) || isSuperAdmin()) &&
              isValidOptionalString('username', 0, 100) &&
              isValidOptionalString('displayName', 0, 100) &&
+             isValidOptionalString('name', 0, 100) &&
              isValidOptionalString('bio', 0, 1000) &&
              isValidOptionalString('email', 0, 255) &&
              isValidOptionalUrl('photoURL') &&
              isValidOptionalUrl('avatar') &&
+             isValidOptionalUrl('profilePic') &&
+             isValidOptionalString('phone', 0, 30) &&
+             isValidOptionalString('phoneNumber', 0, 30) &&
+             isValidOptionalString('webPushToken', 0, 500) &&
+             isValidOptionalString('fcmToken', 0, 500) &&
+             isValidOptionalList('contacts', 5000) &&
+             isValidOptionalList('approvedChatUsers', 1000) &&
              isValidOptionalList('blockedUsers', 500) &&
              isValidOptionalList('mutedUsers', 500) &&
              isValidOptionalList('archivedChats', 500) &&
+             isValidOptionalString('privacyLastSeen', 0, 50) &&
+             isValidOptionalString('status', 0, 100) &&
              isValidOptionalString('ipAddress', 0, 45) &&
              isValidOptionalString('lastIp', 0, 45) &&
              isValidIpList('ipAddresses', 4) &&
@@ -577,13 +618,23 @@ service cloud.firestore {
              (!('uid' in data) || !('uid' in prev) || data.uid == prev.uid) &&
              isValidOptionalString('username', 0, 100) &&
              isValidOptionalString('displayName', 0, 100) &&
+             isValidOptionalString('name', 0, 100) &&
              isValidOptionalString('bio', 0, 1000) &&
              isValidOptionalString('email', 0, 255) &&
              isValidOptionalUrl('photoURL') &&
              isValidOptionalUrl('avatar') &&
+             isValidOptionalUrl('profilePic') &&
+             isValidOptionalString('phone', 0, 30) &&
+             isValidOptionalString('phoneNumber', 0, 30) &&
+             isValidOptionalString('webPushToken', 0, 500) &&
+             isValidOptionalString('fcmToken', 0, 500) &&
+             isValidOptionalList('contacts', 5000) &&
+             isValidOptionalList('approvedChatUsers', 1000) &&
              isValidOptionalList('blockedUsers', 500) &&
              isValidOptionalList('mutedUsers', 500) &&
              isValidOptionalList('archivedChats', 500) &&
+             isValidOptionalString('privacyLastSeen', 0, 50) &&
+             isValidOptionalString('status', 0, 100) &&
              isValidOptionalString('ipAddress', 0, 45) &&
              isValidOptionalString('lastIp', 0, 45) &&
              isValidIpList('ipAddresses', 4) &&
@@ -608,15 +659,25 @@ service cloud.firestore {
              isValidOptionalString('extensionName', 0, 128);
     }
 
-    // Direct Message Validator
+    // Direct Message Validator: Supports either from or senderId for sender, and either to or receiverId for recipient
     function isValidMessageCreate(data) {
       return (
-               (('from' in data && data.from == request.auth.uid) && ('to' in data && data.to is string && data.to.size() <= 128)) ||
-               (('senderId' in data && data.senderId == request.auth.uid) && ('receiverId' in data && data.receiverId is string && data.receiverId.size() <= 128))
+               ('from' in data && data.from == request.auth.uid) ||
+               ('senderId' in data && data.senderId == request.auth.uid)
+             ) &&
+             (
+               ('to' in data && data.to is string && data.to.size() <= 128) ||
+               ('receiverId' in data && data.receiverId is string && data.receiverId.size() <= 128)
              ) &&
              isValidOptionalString('text', 0, 10000) &&
              isValidOptionalString('content', 0, 10000) &&
-             isValidOptionalReactions('reactions');
+             isValidOptionalString('senderName', 0, 100) &&
+             isValidOptionalString('senderUsername', 0, 100) &&
+             isValidOptionalUrl('senderAvatar') &&
+             isValidOptionalString('type', 0, 50) &&
+             isValidOptionalString('clientMsgId', 0, 128) &&
+             isValidOptionalReactions('reactions') &&
+             isValidOptionalList('deletedFor', 500);
     }
 
     // Thread Message Validator (/chats/{chatId}/threads/{threadId}/messages/{msgId})
@@ -723,6 +784,10 @@ service cloud.firestore {
              isValidOptionalString('caption', 0, 2000) &&
              isValidOptionalUrl('videoUrl') &&
              isValidOptionalUrl('thumbnailUrl') &&
+             isValidOptionalUrl('audioUrl') &&
+             isValidOptionalUrl('rawBlobUrl') &&
+             isValidOptionalString('authorName', 0, 100) &&
+             isValidOptionalUrl('authorPic') &&
              isValidOptionalString('sound', 0, 200) &&
              isValidOptionalString('country', 0, 10) &&
              isValidOptionalList('likes', 10000) &&
@@ -889,8 +954,14 @@ service cloud.firestore {
       // Creation restricted to owner with anti-privilege escalation & payload bounds
       allow create: if isOwner(uid) && isValidUserCreate(request.resource.data);
 
-      // Updates restricted to owner or SuperAdmin, protecting privileged flags
-      allow update: if (isOwner(uid) && isValidUserUpdate(request.resource.data, resource.data)) || isSuperAdmin();
+      // Updates restricted to owner (profile, push tokens, contacts), reciprocal chat approval, or SuperAdmin
+      allow update: if (isOwner(uid) && isValidUserUpdate(request.resource.data, resource.data)) ||
+                       (
+                         isAuthenticated() &&
+                         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approvedChatUsers']) &&
+                         isValidOptionalList('approvedChatUsers', 1000)
+                       ) ||
+                       isSuperAdmin();
 
       // Account deletion restricted to SuperAdmin
       allow delete: if isSuperAdmin();
@@ -929,45 +1000,44 @@ service cloud.firestore {
     // 2. DIRECT MESSAGES (End-to-End Privacy, Delivery Ticks & Reactions)
     // ===============================================================
     match /messages/{messageId} {
-      // Read access restricted to conversation participants or SuperAdmin
+      // Read access: users can query and read incoming messages where resource.data.to == request.auth.uid or resource.data.from == request.auth.uid
       allow read: if isAuthenticated() && (
-        request.auth.uid == resource.data.from ||
-        request.auth.uid == resource.data.to ||
-        ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
-        ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId) ||
+        resource.data.to == request.auth.uid ||
+        resource.data.from == request.auth.uid ||
+        ('receiverId' in resource.data && resource.data.receiverId == request.auth.uid) ||
+        ('senderId' in resource.data && resource.data.senderId == request.auth.uid) ||
         isSuperAdmin()
       );
 
-      // Create: supports both from/to and senderId/receiverId schemas with data validation (text <= 10000, reactions <= 100)
+      // Create: users can write new messages where request.resource.data.from == request.auth.uid or request.resource.data.senderId == request.auth.uid
       allow create: if isAuthenticated() && isValidMessageCreate(request.resource.data);
 
       // Update:
-      // - Sender can edit message text or reactions (immutable sender/receiver/timestamps protected)
-      // - Recipient can update delivery ticks (sent, delivered, read), status, reactions, and deletedFor
+      // - Sender can edit message text, content, reactions, or deletedFor (immutable participants & timestamps protected)
+      // - Recipient can update status (e.g. 'read', 'delivered'), read/delivered timestamps, reactions, and deletedFor
       // - Sender or participant can set tombstone / deletion fields
       // - SuperAdmin can manage or moderate
       allow update: if isAuthenticated() && (
+        // 1. Sender editing message text, content, reactions, or deletedFor
         (
-          (request.auth.uid == resource.data.from || ('senderId' in resource.data && request.auth.uid == resource.data.senderId)) &&
+          isMessageSender(resource.data) &&
           areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
           isValidOptionalString('text', 0, 10000) &&
           isValidOptionalString('content', 0, 10000) &&
           isValidOptionalReactions('reactions') &&
           isValidOptionalList('deletedFor', 500)
         ) ||
+        // 2. Recipient updating delivery ticks, status ('read', 'delivered'), reactions, deletedFor
         (
-          (request.auth.uid == resource.data.to || ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId)) &&
+          isMessageRecipient(resource.data) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'read', 'readAt', 'delivered', 'deliveredAt', 'reactions', 'deletedFor']) &&
+          isValidOptionalString('status', 0, 50) &&
           isValidOptionalReactions('reactions') &&
           isValidOptionalList('deletedFor', 500)
         ) ||
+        // 3. Either participant marking as deleted / deletedForEveryone / deletedFor
         (
-          (
-            request.auth.uid == resource.data.from ||
-            request.auth.uid == resource.data.to ||
-            ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
-            ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId)
-          ) &&
+          isMessageParticipant(resource.data) &&
           areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
           (
             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
@@ -985,8 +1055,7 @@ service cloud.firestore {
 
       // Delete: sender or SuperAdmin
       allow delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.from ||
-        ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
+        isMessageSender(resource.data) ||
         isSuperAdmin()
       );
     }
@@ -1174,7 +1243,10 @@ service cloud.firestore {
       allow read: if isAuthenticated();
 
       allow create: if isAuthenticated() &&
-                       request.resource.data.creatorId == request.auth.uid &&
+                       (
+                         ('creatorId' in request.resource.data && request.resource.data.creatorId == request.auth.uid) ||
+                         ('createdBy' in request.resource.data && request.resource.data.createdBy == request.auth.uid)
+                       ) &&
                        request.auth.uid in request.resource.data.members &&
                        request.auth.uid in request.resource.data.admins &&
                        validStringLength('name', 1, 128) &&
@@ -1185,7 +1257,7 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         (
           isGroupAdmin(groupId) &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdAt']) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
           isValidOptionalString('name', 1, 128) &&
           isValidOptionalString('description', 0, 1000) &&
           isValidOptionalList('members', 1000) &&
@@ -1197,20 +1269,27 @@ service cloud.firestore {
       );
 
       allow delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.creatorId ||
+        ('creatorId' in resource.data && request.auth.uid == resource.data.creatorId) ||
+        ('createdBy' in resource.data && request.auth.uid == resource.data.createdBy) ||
         isSuperAdmin()
       );
 
       match /messages/{messageId} {
         allow read: if isAuthenticated() && (isGroupMember(groupId) || isSuperAdmin());
         allow create: if isAuthenticated() && isGroupMember(groupId) &&
-                         (request.resource.data.senderId == request.auth.uid || request.resource.data.from == request.auth.uid) &&
+                         (
+                           ('senderId' in request.resource.data && request.resource.data.senderId == request.auth.uid) ||
+                           ('from' in request.resource.data && request.resource.data.from == request.auth.uid)
+                         ) &&
                          isValidOptionalString('text', 0, 10000) &&
                          isValidOptionalString('content', 0, 10000) &&
-                         isValidOptionalReactions('reactions');
+                         isValidOptionalString('senderName', 0, 100) &&
+                         isValidOptionalString('type', 0, 50) &&
+                         isValidOptionalReactions('reactions') &&
+                         isValidOptionalList('deletedFor', 500);
         allow update: if isAuthenticated() && (
           (
-            (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.from) &&
+            (('senderId' in resource.data && request.auth.uid == resource.data.senderId) || ('from' in resource.data && request.auth.uid == resource.data.from)) &&
             areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
             isValidOptionalString('text', 0, 10000) &&
             isValidOptionalString('content', 0, 10000) &&
@@ -1219,8 +1298,8 @@ service cloud.firestore {
           ) ||
           (
             (
-              request.auth.uid == resource.data.senderId ||
-              request.auth.uid == resource.data.from ||
+              ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
+              ('from' in resource.data && request.auth.uid == resource.data.from) ||
               isGroupAdmin(groupId)
             ) &&
             areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
@@ -1238,15 +1317,15 @@ service cloud.firestore {
           isGroupAdmin(groupId) ||
           (
             isGroupMember(groupId) &&
-            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor']) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor', 'status', 'read']) &&
             isValidOptionalReactions('reactions') &&
             isValidOptionalList('deletedFor', 500)
           ) ||
           isSuperAdmin()
         );
         allow delete: if isAuthenticated() && (
-          request.auth.uid == resource.data.senderId ||
-          request.auth.uid == resource.data.from ||
+          ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
+          ('from' in resource.data && request.auth.uid == resource.data.from) ||
           isGroupAdmin(groupId) ||
           isSuperAdmin()
         );
@@ -1361,11 +1440,15 @@ service cloud.firestore {
         allow read: if true;
         allow create: if isAuthenticated() &&
                          (request.resource.data.authorId == request.auth.uid || request.resource.data.userId == request.auth.uid) &&
-                         validStringLength('text', 1, 1000);
+                         validStringLength('text', 1, 1000) &&
+                         isValidOptionalString('authorName', 0, 100) &&
+                         isValidOptionalUrl('authorPic');
         allow update: if isAuthenticated() && (
           (request.auth.uid == resource.data.authorId || request.auth.uid == resource.data.userId) &&
           areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
-          validStringLength('text', 1, 1000)
+          validStringLength('text', 1, 1000) &&
+          isValidOptionalString('authorName', 0, 100) &&
+          isValidOptionalUrl('authorPic')
         ) || isSuperAdmin();
         allow delete: if isAuthenticated() && (
           request.auth.uid == resource.data.authorId ||
@@ -2857,9 +2940,14 @@ service cloud.firestore {
       allow create: if request.resource.data.keys().hasAll(['email', 'code', 'expiresAt', 'used'])
                     && request.resource.data.code is string
                     && request.resource.data.code.size() == 6
-                    && request.resource.data.used == false;
-      allow read: if true;
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used', 'usedAt', 'attempts']);
+                    && request.resource.data.used == false
+                    && isValidEmail(request.resource.data.email)
+                    && request.resource.data.email.size() <= 255;
+      // Single doc recovery check allowed; global list enumeration strictly denied
+      allow get: if true;
+      allow list: if false;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used', 'usedAt', 'attempts'])
+                    && (!('used' in request.resource.data) || request.resource.data.used is bool);
       allow delete: if isSuperAdmin();
     }
 
