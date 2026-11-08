@@ -182,6 +182,10 @@
       "destination": "/api/health?mode=cdn-ping"
     },
     {
+      "source": "/api/email-status",
+      "destination": "/api/health?mode=email-status"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     }

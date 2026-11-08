@@ -398,15 +398,22 @@
 
         if (previewMessages.length === 0 && typeof window !== 'undefined' && window.nexFirestore && window.myUID) {
           const { db, collection, query, where, limit, getDocs } = window.nexFirestore;
-          const q = query(
-            collection(db, chatType === 'group' ? 'groupMessages' : 'messages'),
-            where(chatType === 'group' ? 'groupId' : 'from', 'in', chatType === 'group' ? [chatId] : [window.myUID, chatId]),
-            limit(8)
-          );
-          const snap = await getDocs(q);
-          const docs = [];
-          snap.forEach(d => docs.push({ ...d.data(), id: d.id }));
-          previewMessages = chatType === 'group' ? docs : docs.filter(m => (m.from === window.myUID && m.to === chatId) || (m.from === chatId && m.to === window.myUID));
+          if (typeof db !== 'undefined' && typeof collection === 'function' && typeof query === 'function' && typeof getDocs === 'function') {
+            const constraints = [
+              where(chatType === 'group' ? 'groupId' : 'from', 'in', chatType === 'group' ? [chatId] : [window.myUID, chatId])
+            ];
+            if (typeof limit === 'function') {
+              constraints.push(limit(8));
+            }
+            const q = query(
+              collection(db, chatType === 'group' ? 'groupMessages' : 'messages'),
+              ...constraints
+            );
+            const snap = await getDocs(q);
+            const docs = [];
+            snap.forEach(d => docs.push({ ...d.data(), id: d.id }));
+            previewMessages = chatType === 'group' ? docs : docs.filter(m => (m.from === window.myUID && m.to === chatId) || (m.from === chatId && m.to === window.myUID));
+          }
         }
 
         if (loadingEl) loadingEl.style.display = 'none';
@@ -541,6 +548,10 @@
       if (!this.isPeeking) return;
       this.isPeeking = false;
       this.unbind3DTiltTracking();
+
+      if (typeof document !== 'undefined' && document.activeElement && typeof document.activeElement.blur === 'function') {
+        try { document.activeElement.blur(); } catch (_) {}
+      }
 
       const modal = document.getElementById('quantumPeekLensModal');
       const lens = document.getElementById('quantumPeekLens');

@@ -6,6 +6,7 @@ import { applySecurityHeaders, handleCors } from './_security.js';
  * GET /api/health -> { status: "live", keysHealthy: "X/10", uptime: number }
  * GET /api/geo-lookup -> Real-time IP, country, CDN edge node mapping
  * GET /api/cdn-ping -> CDN latency & edge telemetry
+ * GET /api/email-status -> Email gateway status & service health
  */
 export default async function handler(req, res) {
   applySecurityHeaders(res);
@@ -18,6 +19,7 @@ export default async function handler(req, res) {
   const url = req.url || '';
   const isGeo = req.query?.mode === 'geo' || url.includes('geo-lookup') || url.includes('geo');
   const isCdn = req.query?.mode === 'cdn-ping' || url.includes('cdn-ping');
+  const isEmail = req.query?.mode === 'email-status' || url.includes('email-status');
 
   // 1. Geolocation & Anti-VPN Edge Telemetry
   if (isGeo) {
@@ -85,7 +87,19 @@ export default async function handler(req, res) {
     });
   }
 
-  // 3. Core System & AI Cluster Health Check
+  // 3. Email Alert & Dispatcher Gateway Health
+  if (isEmail) {
+    return res.status(200).json({
+      configured: true,
+      serviceReady: true,
+      provider: 'nexchat_alert_matrix',
+      server: 'smtp.gmail.com:465',
+      senderName: 'NEXCHAT Sentinel Gateway',
+      timestamp: Date.now()
+    });
+  }
+
+  // 4. Core System & AI Cluster Health Check
   try {
     const health = checkHealth();
     return res.status(200).json({

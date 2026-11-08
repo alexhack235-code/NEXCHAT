@@ -98,11 +98,76 @@ if (typeof window !== 'undefined') {
     setDoc,
     query,
     where,
+    orderBy,
+    limit,
+    limitToLast,
+    Timestamp,
+    increment,
+    runTransaction,
+    writeBatch,
     onSnapshot,
     serverTimestamp,
     arrayUnion,
     arrayRemove
   };
+}
+
+function isValidImageUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  if (trimmed.startsWith('blob:')) return false;
+  if (/^https?:\/\/|^\/|^\.\/|^data:image\//i.test(trimmed)) {
+    return true;
+  }
+  return /\.(jpg|jpeg|png|webp|svg|gif|avif)(\?.*)?$/i.test(trimmed);
+}
+
+function getValidImageSrc(url, fallback = 'logo.jpg') {
+  if (!url || typeof url !== 'string') return fallback;
+  const trimmed = url.trim();
+  if (trimmed.startsWith('blob:')) return fallback;
+  if (/^https?:\/\/|^\/|^\.\/|^data:image\//i.test(trimmed)) {
+    return trimmed;
+  }
+  if (/\.(jpg|jpeg|png|webp|svg|gif|avif)(\?.*)?$/i.test(trimmed)) {
+    return trimmed;
+  }
+  return fallback;
+}
+
+function getContactName(uid) {
+  if (!uid) return '';
+  if (Array.isArray(window.loadedContactData)) {
+    const found = window.loadedContactData.find(c => (c.uid || c.id) === uid);
+    if (found && found.name) return found.name;
+  }
+  if (typeof document !== 'undefined') {
+    try {
+      const escapedUid = window.CSS && CSS.escape ? CSS.escape(uid) : uid.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|/@])/g, '\\$1');
+      const domEl = document.querySelector(`li[data-chat-id="${escapedUid}"] .chat-name, li[data-chat-id="${escapedUid}"] h4`);
+      if (domEl && domEl.textContent) return domEl.textContent.trim();
+    } catch (_) {}
+  }
+  if (window.activeChatUser && window.activeChatUser.uid === uid && window.activeChatUser.name) {
+    return window.activeChatUser.name;
+  }
+  try {
+    const cached = localStorage.getItem('nex_cached_contacts_' + (window.myUID || ''));
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed)) {
+        const found = parsed.find(c => (c.uid || c.id) === uid);
+        if (found && found.name) return found.name;
+      }
+    }
+  } catch (_) {}
+  return uid;
+}
+
+if (typeof window !== 'undefined') {
+  window.isValidImageUrl = isValidImageUrl;
+  window.getValidImageSrc = getValidImageSrc;
+  window.getContactName = getContactName;
 }
 
 function escapeHtml(str) {
@@ -876,6 +941,10 @@ async function updateTypingStatus(isTyping) {
       updatedAt: serverTimestamp()
     }, { merge: true });
   } catch (err) {
+    if (err && (err.code === 'permission-denied' || (err.message && err.message.includes('permission')))) {
+      // Supabase already broadcast typing successfully; ignore Firestore security rule reject
+      return;
+    }
     console.warn('Typing status update failed:', err);
   }
 }
@@ -20051,7 +20120,9 @@ async function loadStatusFeed() {
         cardDiv.title = grp.userName;
 
         const latestSlide = grp.slides?.[grp.slides.length - 1];
-        const previewBg = latestSlide?.mediaUrl || grp.avatarUrl || 'logo.jpg';
+        const safeAvatar = getValidImageSrc(grp.avatarUrl, 'logo.jpg');
+        const safeMedia = getValidImageSrc(latestSlide?.mediaUrl, safeAvatar);
+        const previewBg = safeMedia;
         const isVideo = latestSlide?.mediaType === 'video';
         const timeLabel = getStoryTimeLabel(grp.lastUpdated);
         const captionPreview = latestSlide?.caption ? escape(latestSlide.caption) : timeLabel;
@@ -20065,7 +20136,7 @@ async function loadStatusFeed() {
             <div class="status-card-gradient-overlay"></div>
           </div>
           <div class="status-card-avatar-wrap ${grp.isViewed ? 'viewed' : 'unread'}">
-            <img src="${grp.avatarUrl}" alt="${escape(grp.userName)}" class="status-card-avatar-img" onerror="this.src='logo.jpg'" />
+            <img src="${safeAvatar}" alt="${escape(grp.userName)}" class="status-card-avatar-img" onerror="this.src='logo.jpg'" />
           </div>
           <div class="status-card-copy">
             <span class="status-card-name">${escape(grp.userName)}</span>
@@ -20101,9 +20172,10 @@ async function loadStatusFeed() {
         const payloadType = latestSlide?.mediaType === 'video' ? 'VIDEO_STREAM' : (latestSlide?.mediaType === 'image' ? 'PHOTO_PAYLOAD' : 'TEXT_CIPHER');
         const remHours = Math.max(1, Math.round(((latestSlide?.expiresAtMs || Date.now() + 86400000) - Date.now()) / 3600000));
 
+        const safeRowAvatar = getValidImageSrc(grp.avatarUrl, 'logo.jpg');
         row.innerHTML = `
           <div class="status-row-avatar ${grp.isViewed ? 'viewed' : 'unread'}">
-            <img src="${grp.avatarUrl}" alt="${escape(grp.userName)}" onerror="this.src='logo.jpg'" />
+            <img src="${safeRowAvatar}" alt="${escape(grp.userName)}" onerror="this.src='logo.jpg'" />
           </div>
           <div class="status-row-info">
             <h4 class="status-row-name">
@@ -20206,7 +20278,7 @@ function showCurrentStorySlide() {
   const remMins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
   const expiresInLabel = remHours > 0 ? `Expires in ${remHours}h` : `Expires in ${remMins}m`;
 
-  if (avatar) avatar.src = currentGrp.avatarUrl || 'logo.jpg';
+  if (avatar) avatar.src = getValidImageSrc(currentGrp.avatarUrl, 'logo.jpg');
   if (name) name.textContent = currentGrp.userName || 'User';
   if (time) time.textContent = relativeTimeLabel;
   if (detailsExpires) detailsExpires.textContent = expiresInLabel;
@@ -20249,7 +20321,7 @@ function showCurrentStorySlide() {
       const canvas = document.getElementById('statusAudioSpectrumCanvas');
       const timer = document.getElementById('statusViewerAudioTimer');
       const avatar = document.getElementById('statusViewerAudioAvatar');
-      if (avatar) avatar.src = currentGrp.avatarUrl || 'logo.jpg';
+      if (avatar) avatar.src = getValidImageSrc(currentGrp.avatarUrl, 'logo.jpg');
       if (window.NexStatusEliteSuite) {
         window.NexStatusEliteSuite.playVoiceSlide(currentSlide.mediaUrl, canvas, timer, () => {
           const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
@@ -20284,7 +20356,7 @@ function showCurrentStorySlide() {
       muteBtn.style.display = 'flex';
       muteBtn.innerHTML = (video && !video.muted) ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
     }
-  } else if (currentSlide.mediaUrl) {
+  } else if (currentSlide.mediaUrl && isValidImageUrl(currentSlide.mediaUrl)) {
     if (audioStage) audioStage.style.display = 'none';
     if (codeStage) codeStage.style.display = 'none';
     if (video) {
@@ -20295,7 +20367,7 @@ function showCurrentStorySlide() {
     if (textSlide) textSlide.style.display = 'none';
     if (img) {
       img.style.display = 'block';
-      img.src = currentSlide.mediaUrl;
+      img.src = getValidImageSrc(currentSlide.mediaUrl, 'logo.jpg');
     }
   } else {
     if (audioStage) audioStage.style.display = 'none';

@@ -176,7 +176,6 @@ export async function sendSupabaseMessage({
         sender_id: from,
         recipient_id: chatType === 'direct' ? to : null,
         group_id: chatType === 'group' ? to : null,
-        client_msg_id: clientMsgId,
         text,
         attachment: attachment ? JSON.stringify(attachment) : null,
         reply_to: replyTo ? JSON.stringify(replyTo) : null,
