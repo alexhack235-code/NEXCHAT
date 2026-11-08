@@ -509,6 +509,11 @@ let userStatusUnsubscribe = null;
 let pendingRequestsListener = null;
 let typingStatusTimeout = null;
 let isTypingActive = false;
+// Strict Separation of Typing States (WhatsApp / Telegram Model)
+let isMyTypingActive = false; // Tracks if I am typing - NEVER SHOWS INDICATOR FOR THIS ON MY SCREEN
+let isOtherPersonTyping = false; // Tracks if OTHER person is typing - ONLY SHOW INDICATOR FOR THIS
+let myTypingDebounceTimer = null; // Timer to auto-stop my outgoing typing broadcast
+let otherTypingAutoDismissTimer = null; // Timer to auto-hide incoming indicator after 3s (Fixes Infinity Bug)
 let myUID = null;
 let myUsername = null;
 let currentJoinModalGroupId = null;
@@ -929,18 +934,27 @@ function getTypingDocRef(chatId, chatType) {
 }
 
 async function updateTypingStatus(isTyping) {
-  if (!myUID || !currentChatUser || !currentChatType) return;
+  const curUid = myUID || window.myUID || (auth && auth.currentUser ? auth.currentUser.uid : null);
+  if (!curUid || !currentChatUser || !currentChatType) return;
   const typingRef = getTypingDocRef(currentChatUser, currentChatType);
   if (!typingRef) return;
 
   try {
-    // 1. Supabase Realtime presence broadcast (instant, 0 billing)
-    broadcastTyping(isTyping);
+    // 1. Supabase Realtime presence broadcast (instant, 0 billing, ephemeral)
+    broadcastTyping(isTyping, currentChatUser);
 
-    // 2. Firestore presence backup
+    // 2. Firestore presence backup with safe timestamp map (self-expiring after 3.5s)
     await setDoc(typingRef, {
-      typingUsers: isTyping ? arrayUnion(myUID) : arrayRemove(myUID),
-      updatedAt: serverTimestamp()
+      typingUsersMap: {
+        [curUid]: {
+          isTyping: !!isTyping,
+          timestamp: Date.now(),
+          userName: myUsername || window.myUsername || 'User'
+        }
+      },
+      typingUsers: isTyping ? arrayUnion(curUid) : arrayRemove(curUid),
+      updatedAt: serverTimestamp(),
+      updatedAtMs: Date.now()
     }, { merge: true });
   } catch (err) {
     if (err && (err.code === 'permission-denied' || (err.message && err.message.includes('permission')))) {
@@ -952,20 +966,28 @@ async function updateTypingStatus(isTyping) {
 }
 
 async function clearTypingStatus() {
-  if (!isTypingActive) return;
-  isTypingActive = false;
+  if (myTypingDebounceTimer) {
+    clearTimeout(myTypingDebounceTimer);
+    myTypingDebounceTimer = null;
+  }
   if (typingStatusTimeout) {
     clearTimeout(typingStatusTimeout);
     typingStatusTimeout = null;
   }
-  await updateTypingStatus(false);
+  isTypingActive = false;
+  if (!isMyTypingActive) return;
+  isMyTypingActive = false;
+  await updateTypingStatus(false).catch(() => {});
 }
 
-let typingAutoDismissTimer = null;
-
 function showTypingIndicator(label, avatarUrl) {
+  // STRICT RULE: NEVER show typing indicator when I am the one typing
+  if (isMyTypingActive && !isOtherPersonTyping) return;
+
   const indicator = document.getElementById('typingIndicator');
   if (!indicator) return;
+
+  isOtherPersonTyping = true;
 
   // Resolve user avatar
   const chatAvatarImg = document.getElementById('chatAvatar') || document.querySelector('.chat-header-avatar');
@@ -989,19 +1011,20 @@ function showTypingIndicator(label, avatarUrl) {
   `;
   indicator.style.display = 'inline-flex';
 
-  // Auto-dismiss after 3000ms if no new typing event occurs
-  if (typingAutoDismissTimer) {
-    clearTimeout(typingAutoDismissTimer);
+  // Auto-dismiss after 3000ms if other person stops typing - FIXES INFINITY BUG
+  if (otherTypingAutoDismissTimer) {
+    clearTimeout(otherTypingAutoDismissTimer);
   }
-  typingAutoDismissTimer = setTimeout(() => {
+  otherTypingAutoDismissTimer = setTimeout(() => {
     hideTypingIndicator();
   }, 3000);
 }
 
 function hideTypingIndicator() {
-  if (typingAutoDismissTimer) {
-    clearTimeout(typingAutoDismissTimer);
-    typingAutoDismissTimer = null;
+  isOtherPersonTyping = false;
+  if (otherTypingAutoDismissTimer) {
+    clearTimeout(otherTypingAutoDismissTimer);
+    otherTypingAutoDismissTimer = null;
   }
   const indicator = document.getElementById('typingIndicator');
   if (!indicator) return;
@@ -1052,32 +1075,65 @@ function subscribeTypingIndicator(chatId, chatType) {
     typingStatusUnsubscribe();
     typingStatusUnsubscribe = null;
   }
+  if (otherTypingAutoDismissTimer) {
+    clearTimeout(otherTypingAutoDismissTimer);
+    otherTypingAutoDismissTimer = null;
+  }
+  hideTypingIndicator();
+
   if (!chatId || !chatType) {
-    hideTypingIndicator();
     unsubscribeChatPresence();
     return;
   }
 
-  // Supabase Realtime presence channel for instant typing indicator
+  const effectiveMyUID = myUID || window.myUID || (auth && auth.currentUser ? auth.currentUser.uid : null);
+  const effectiveMyUsername = myUsername || window.myUsername || 'User';
+
+  // 1. Supabase Realtime presence channel for instant typing indicator
   subscribeToChatPresence({
     chatId: chatId,
-    userId: myUID,
-    userName: myUsername,
-    onTypingUpdate: ({ isTyping, user }) => {
-      if (isTyping) {
-        showTypingIndicator(`${user} is typing...`);
-      } else {
-        hideTypingIndicator();
+    chatType: chatType,
+    userId: effectiveMyUID,
+    userName: effectiveMyUsername,
+    onTypingUpdate: ({ isTyping, user, from }) => {
+      // RULE 1: STRICTLY IGNORE my own typing event - this is the infinity bug
+      if (from && effectiveMyUID && String(from) === String(effectiveMyUID)) {
+        return;
       }
+      if (from && window.myUID && String(from) === String(window.myUID)) {
+        return;
+      }
+
+      // RULE 2: Only show for current active chat
+      if (chatType === 'direct' && from && currentChatUser && String(from) !== String(currentChatUser)) {
+        return;
+      }
+
+      // RULE 3: Stop-typing event received
+      if (!isTyping) {
+        hideTypingIndicator();
+        return;
+      }
+
+      // RULE 4: Show typing indicator ONLY for the OTHER person
+      showTypingIndicator(`${user} is typing...`);
+
+      // RULE 5: Auto-hide after 3 seconds - FIXES INFINITY BUG
+      if (otherTypingAutoDismissTimer) {
+        clearTimeout(otherTypingAutoDismissTimer);
+      }
+      otherTypingAutoDismissTimer = setTimeout(() => {
+        hideTypingIndicator();
+      }, 3000);
     }
   });
 
   const typingRef = getTypingDocRef(chatId, chatType);
   if (!typingRef) {
-    hideTypingIndicator();
     return;
   }
 
+  // 2. Firestore backup listener with strict 3.5s freshness check so stale records never cause infinity
   typingStatusUnsubscribe = onSnapshot(typingRef, (snap) => {
     if (!snap.exists()) {
       hideTypingIndicator();
@@ -1085,28 +1141,63 @@ function subscribeTypingIndicator(chatId, chatType) {
     }
 
     const data = snap.data();
-    const typingUsers = (data.typingUsers || []).filter(uid => uid && uid !== myUID);
-    if (!typingUsers.length) {
+    const now = Date.now();
+    const curUid = effectiveMyUID || myUID || window.myUID;
+
+    // Check for fresh typing events from OTHER users ONLY (within 3500ms)
+    let otherTypers = [];
+
+    if (data.typingUsersMap) {
+      otherTypers = Object.entries(data.typingUsersMap)
+        .filter(([uid, info]) => {
+          if (!uid || uid === curUid) return false; // STRICTLY IGNORE SELF
+          if (!info || !info.isTyping) return false;
+          const ts = info.timestamp || 0;
+          return (now - ts) < 3500; // Must be within last 3.5 seconds
+        })
+        .map(([uid, info]) => ({
+          uid,
+          name: info.userName || getTypingUserName(uid)
+        }));
+    } else if (Array.isArray(data.typingUsers)) {
+      // Legacy document array check: ONLY consider if doc was updated within last 3.5s
+      const docUpdated = data.updatedAt?.toMillis ? data.updatedAt.toMillis() : (data.updatedAtMs || 0);
+      if (docUpdated && (now - docUpdated < 3500)) {
+        otherTypers = data.typingUsers
+          .filter(uid => uid && uid !== curUid)
+          .map(uid => ({ uid, name: getTypingUserName(uid) }));
+      }
+    }
+
+    if (!otherTypers.length) {
       hideTypingIndicator();
       return;
     }
 
-    const names = typingUsers.map(uid => getTypingUserName(uid));
+    // Show indicator ONLY for the other person
     if (chatType === 'direct') {
-      const name = names[0] || currentChatName || 'Someone';
-      showTypingIndicator(`${name} is typing...`);
+      const other = otherTypers[0];
+      const displayName = other.name || currentChatName || 'User';
+      showTypingIndicator(`${displayName} is typing...`);
     } else {
-      if (names.length === 1) {
-        showTypingIndicator(`@${names[0]} is typing...`);
-      } else if (names.length === 2) {
-        showTypingIndicator(`@${names[0]} and @${names[1]} are typing...`);
+      if (otherTypers.length === 1) {
+        showTypingIndicator(`@${otherTypers[0].name} is typing...`);
+      } else if (otherTypers.length === 2) {
+        showTypingIndicator(`@${otherTypers[0].name} and @${otherTypers[1].name} are typing...`);
       } else {
         showTypingIndicator(`Multiple people are typing...`);
       }
     }
+
+    // Auto-dismiss after 3000ms
+    if (otherTypingAutoDismissTimer) {
+      clearTimeout(otherTypingAutoDismissTimer);
+    }
+    otherTypingAutoDismissTimer = setTimeout(() => {
+      hideTypingIndicator();
+    }, 3000);
   }, (error) => {
-    console.warn('Typing indicator snapshot failed:', error);
-    hideTypingIndicator();
+    console.warn('Typing indicator snapshot notice:', error);
   });
 }
 
@@ -1115,24 +1206,28 @@ function handleTypingInputEvent() {
   if (!input) return;
   const text = input.value.trim();
 
+  // If input is empty, immediately clear my typing broadcast
   if (!text) {
-    clearTypingStatus();
+    clearTypingStatus().catch(() => {});
     return;
   }
 
-  if (!isTypingActive) {
+  // When I type:
+  // ONLY broadcast to other person, DO NOT set otherTyping=true or show indicator for self
+  if (!isMyTypingActive) {
+    isMyTypingActive = true;
     isTypingActive = true;
     updateTypingStatus(true).catch(() => {});
   }
 
-  if (typingStatusTimeout) {
-    clearTimeout(typingStatusTimeout);
+  if (myTypingDebounceTimer) {
+    clearTimeout(myTypingDebounceTimer);
   }
 
-  typingStatusTimeout = setTimeout(() => {
-    isTypingActive = false;
+  // Debounce: auto-stop typing broadcast after 2.5 seconds of user idle
+  myTypingDebounceTimer = setTimeout(() => {
     clearTypingStatus().catch(() => {});
-  }, 2000);
+  }, 2500);
 }
 
 async function isGroupMemberMuted(groupId, userId) {

@@ -13,9 +13,22 @@ const DEFAULT_SUPABASE = {
 let supabaseClient = null;
 let currentChannel = null;
 let activeChatId = null;
+let activeChatType = 'direct';
 let currentUserId = null;
 let currentUserName = null;
 let typingDebounceTimer = null;
+
+/**
+ * Builds a deterministic bidirectional room name for two users or group
+ */
+export function buildPresenceChannelName(chatId, chatType, userId) {
+  if (!chatId) return 'presence-global';
+  if (chatType === 'group') {
+    return `presence-group-${chatId}`;
+  }
+  const uids = [String(userId || ''), String(chatId || '')].sort().join('__');
+  return `presence-direct-${uids}`;
+}
 
 /**
  * Dynamically loads Supabase JS from CDN ESM
@@ -44,22 +57,24 @@ async function getSupabase() {
  * Initializes chat presence and listens for typing state in a room
  * 
  * @param {object} params
- * @param {string} params.chatId - Unique chat room identifier
- * @param {string} params.userId - Current user UID
- * @param {string} params.userName - Current user username
- * @param {function({isTyping: boolean, user: string}):void} params.onTypingUpdate - Typing callback
+ * @param {string} params.chatId - Unique chat room identifier (other user UID or group ID)
+ * @param {string} [params.chatType='direct'] - 'direct' or 'group'
+ * @param {string} params.userId - Current user UID (myUID)
+ * @param {string} params.userName - Current user username (myUsername)
+ * @param {function({isTyping: boolean, user: string, from: string}):void} params.onTypingUpdate - Typing callback
  */
-export async function subscribeToChatPresence({ chatId, userId, userName, onTypingUpdate }) {
+export async function subscribeToChatPresence({ chatId, chatType = 'direct', userId, userName, onTypingUpdate }) {
   if (!chatId) return;
 
   // Leave previous channel if switching chats
-  if (currentChannel && activeChatId !== chatId) {
+  if (currentChannel && (activeChatId !== chatId || activeChatType !== chatType)) {
     await unsubscribeChatPresence();
   }
 
   activeChatId = chatId;
-  currentUserId = userId || 'anon';
-  currentUserName = userName || 'User';
+  activeChatType = chatType || 'direct';
+  currentUserId = userId || window.myUID || (typeof myUID !== 'undefined' ? myUID : 'anon');
+  currentUserName = userName || window.myUsername || (typeof myUsername !== 'undefined' ? myUsername : 'User');
 
   const client = await getSupabase();
   if (!client) {
@@ -68,21 +83,36 @@ export async function subscribeToChatPresence({ chatId, userId, userName, onTypi
   }
 
   try {
-    const channelName = `presence-chat-${chatId}`;
+    const channelName = buildPresenceChannelName(chatId, activeChatType, currentUserId);
     currentChannel = client.channel(channelName);
 
-    // Listen to typing broadcast events
+    // Listen to typing broadcast events - ONLY for other person
     currentChannel
       .on('broadcast', { event: 'typing' }, (payload) => {
         const data = payload.payload;
-        if (data && data.userId !== currentUserId) {
-          if (onTypingUpdate) {
-            onTypingUpdate({
-              isTyping: !!data.isTyping,
-              user: data.userName || 'User',
-              userId: data.userId
-            });
-          }
+        if (!data) return;
+
+        const myId = currentUserId || window.myUID;
+        const senderId = data.from || data.userId;
+
+        // RULE 1: STRICTLY IGNORE MY OWN TYPING EVENT (Prevents self typing and infinity loop)
+        if (senderId && myId && String(senderId) === String(myId)) {
+          return;
+        }
+
+        // RULE 2: If directed to someone else in direct chat, ignore
+        if (data.to && myId && String(data.to) !== String(myId) && activeChatType === 'direct') {
+          return;
+        }
+
+        // RULE 3: Deliver typing event only for the other person
+        if (onTypingUpdate) {
+          onTypingUpdate({
+            isTyping: !!data.isTyping,
+            user: data.userName || data.user || 'User',
+            from: senderId,
+            timestamp: data.timestamp || Date.now()
+          });
         }
       })
       .on('presence', { event: 'sync' }, () => {
@@ -106,18 +136,24 @@ export async function subscribeToChatPresence({ chatId, userId, userName, onTypi
 /**
  * Broadcasts typing status to other participants in the active chat
  * @param {boolean} isTyping
+ * @param {string} [targetUid=null]
  */
-export async function broadcastTyping(isTyping) {
+export async function broadcastTyping(isTyping, targetUid = null) {
   if (!currentChannel) return;
+
+  const myId = currentUserId || window.myUID || (typeof myUID !== 'undefined' ? myUID : 'anon');
+  const myName = currentUserName || window.myUsername || (typeof myUsername !== 'undefined' ? myUsername : 'User');
 
   try {
     await currentChannel.send({
       type: 'broadcast',
       event: 'typing',
       payload: {
-        userId: currentUserId,
-        userName: currentUserName,
-        isTyping: isTyping,
+        from: myId,
+        to: targetUid || activeChatId,
+        userId: myId,
+        userName: myName,
+        isTyping: !!isTyping,
         timestamp: Date.now(),
       },
     });
