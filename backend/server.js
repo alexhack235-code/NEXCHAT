@@ -105,7 +105,7 @@ if (app) {
     res.setHeader('Permissions-Policy', 'camera=(self), microphone=(self), geolocation=(), payment=()');
     res.setHeader(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://ai-security-scanner-delta.vercel.app;"
+      "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://esm.sh https://cdnjs.cloudflare.com https://apis.google.com https://www.gstatic.com https://*.firebaseapp.com; worker-src 'self' blob:; child-src 'self' blob:; frame-src 'self' https://*.firebaseapp.com https://accounts.google.com; frame-ancestors 'self'; manifest-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' blob: data: wss://*.livekit.cloud https://*.livekit.cloud https://*.public.blob.vercel-storage.com https://*.blob.vercel-storage.com https://ai-security-scanner-delta.vercel.app https://*.firebaseio.com https://*.googleapis.com https://*.google.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com wss://*.firebaseio.com https://api.ipify.org https://cdnjs.cloudflare.com https://www.gstatic.com https://fonts.gstatic.com https://fonts.googleapis.com https://cdn.jsdelivr.net https://esm.sh https://apis.google.com; img-src 'self' data: blob: https:; media-src 'self' blob: data: https:;"
     );
     next();
   });

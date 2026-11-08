@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'nexchat-v9-nuclear-alive';
+const CACHE_NAME = 'nexchat-v10-csp-bypass';
 const STATIC_FILES = [
   './manifest.json',
   './logo.jpg',
@@ -39,11 +39,9 @@ self.addEventListener('activate', (event) => {
       return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     }).then((clients) => {
       clients.forEach((client) => {
-        if (client.navigate) {
-          try {
-            client.navigate(client.url);
-          } catch (_) {}
-        }
+        try {
+          client.postMessage({ type: 'SW_ACTIVATED', version: CACHE_NAME });
+        } catch (_) {}
       });
     })
   );
@@ -54,22 +52,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Never intercept or cache HTML navigations or dynamic APIs — always serve directly from network
   try {
     const url = new URL(event.request.url);
+
+    // CRITICAL: NEVER intercept cross-origin requests (CDNs, Google APIs, Fonts, Firebase SDKs, Cloudflare, etc.)
+    // Let the browser load external scripts/stylesheets/fonts natively so they are checked against
+    // script-src, style-src, and font-src instead of tripping connect-src CSP!
+    if (url.origin !== self.location.origin) {
+      return; // Direct browser network bypass
+    }
+
+    // Direct network bypass for HTML navigations and dynamic serverless APIs
     if (
       event.request.mode === 'navigate' ||
       event.request.destination === 'document' ||
       url.pathname.endsWith('.html') ||
       url.pathname === '/' ||
-      url.pathname.startsWith('/api/') ||
-      url.hostname.includes('firebase') ||
-      url.hostname.includes('firestore')
+      url.pathname.startsWith('/api/')
     ) {
       return; // Direct network bypass
     }
-  } catch (_) {}
+  } catch (_) {
+    return;
+  }
 
+  // Only handle same-origin static assets
   event.respondWith(
     fetch(event.request)
       .then((response) => {
@@ -83,7 +90,7 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => {
         return caches.match(event.request).then((response) => {
-          return response || new Response('Offline - Page not cached', {
+          return response || new Response('Offline - Asset not cached', {
             status: 503,
             statusText: 'Service Unavailable'
           });

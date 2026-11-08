@@ -1,4 +1,4 @@
-﻿
+
 export class SecurityManager {
   constructor() {
     this.requestLimits = new Map();
@@ -103,19 +103,7 @@ export class SecurityManager {
   }
 
   static applyCSPHeaders() {
-    const meta = document.createElement('meta');
-    meta.httpEquiv = 'Content-Security-Policy';
-    meta.content = `
-      default-src 'self';
-      script-src 'self' 'unsafe-inline' https://www.gstatic.com;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' data: https:;
-      font-src 'self' https://fonts.gstatic.com;
-      frame-ancestors 'none';
-      base-uri 'self';
-      form-action 'self';
-    `;
-    document.head.appendChild(meta);
+    // Managed declaratively via vercel.json headers; dynamic meta tag disabled to avoid conflicting restrictions
   }
 
   static setSecureStorage(key, value) {
