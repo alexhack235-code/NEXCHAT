@@ -313,9 +313,10 @@ export function syncLocalChatsToDOM() {
     }
   ];
 
-  let stored = getStoredChats();
+    let stored = getStoredChats();
   const hasDuty = Array.isArray(stored) && stored.some(c => c && (c.uid === 'duty' || c.name === 'DUTY'));
-  let chatsToUse = (Array.isArray(stored) && stored.length >= 6 && hasDuty) ? stored : defaultChats;
+  const hasHomeAlone = Array.isArray(stored) && stored.some(c => c && (c.uid === 'home-alone' || c.name === 'Home Alone'));
+  let chatsToUse = (Array.isArray(stored) && stored.length >= 7 && hasDuty && hasHomeAlone) ? stored : defaultChats;
   try {
     localStorage.setItem(LOCAL_CHATS_STORAGE_KEY, JSON.stringify(chatsToUse));
   } catch (_) {}

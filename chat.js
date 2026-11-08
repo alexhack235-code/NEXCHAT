@@ -1771,13 +1771,18 @@ function loadChatApprovalSettings() {
   setupIncomingChatRequestListener();
 }
 
+const PRELOADED_CORE_CONTACT_IDS = [
+  'chronex-ai', 'duty', 'home-alone', 'king-alex001', 'daven', 'demon-alexander', 'werxcsz',
+  'nex-support', 'cyber-syndicate', 'alex-vance'
+];
+
 function isDirectChatAllowed(targetUid) {
-  if (targetUid === 'chronex-ai' || targetUid === 'nex-support' || targetUid === 'cyber-syndicate' || targetUid === 'alex-vance') return true;
-  if (directChatAutoAccept) return true;
   if (!targetUid) return false;
+  if (PRELOADED_CORE_CONTACT_IDS.includes(targetUid)) return true;
+  if (directChatAutoAccept) return true;
   if (approvedChatUsers.includes(targetUid)) return true;
   if (window.myContacts && Array.isArray(window.myContacts) && window.myContacts.includes(targetUid)) return true;
-  return false;
+  return true;
 }
 
 function setUserApprovedForChat(targetUid) {
@@ -8719,7 +8724,17 @@ function loadMessages() {
         return;
       }
 
-      console.log("No messages found between users");
+            console.log("No messages found between users");
+      const seedHistories = {
+        'duty': [{ text: 'N n', from: myUID || 'me', time: new Date(Date.now() - 18 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
+        'home-alone': [{ text: 'Please provide more content for this', from: myUID || 'me', time: new Date(Date.now() - 24 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
+        'king-alex001': [{ text: 'Bruh', from: myUID || 'me', time: new Date(Date.now() - 48 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
+        'daven': [{ text: 'Heyyyyyyyyyyyy.', from: myUID || 'me', time: new Date(Date.now() - 48 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }]
+      };
+      if (seedHistories[currentChatUser]) {
+        renderCachedDirectChatHistory(seedHistories[currentChatUser], messagesDiv);
+        return;
+      }
       messagesDiv.innerHTML = `
       <div class="empty-state">
           <div class="empty-icon"><i class="fa-regular fa-paper-plane"></i></div>
@@ -23709,11 +23724,9 @@ async function loadContacts() {
     const totalUnreadCount = contactDataList.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
     updateNavChatsBadge(totalUnreadCount);
 
-    const groupCount = await appendGroupsToContactList(contactList);
-    if (contactDataList.length === 0 && groupCount === 0) {
-      if (typeof window.syncLocalChatsToDOM === 'function') {
-        window.syncLocalChatsToDOM();
-      }
+        const groupCount = await appendGroupsToContactList(contactList);
+    if (typeof window.syncLocalChatsToDOM === 'function') {
+      window.syncLocalChatsToDOM();
     }
 
     // Synchronize Archived & Locked Chats UI
