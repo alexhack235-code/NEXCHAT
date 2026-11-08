@@ -666,7 +666,7 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
           });
           if (transResp.ok) {
             const data = await transResp.json();
-            cleanAi = (data.result || data.response || '').trim();
+            cleanAi = (data.translatedText || data.result || data.response || '').trim();
           }
         }
         if (cleanAi && cleanAi.toLowerCase() !== clean.toLowerCase()) {
