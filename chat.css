@@ -18418,7 +18418,7 @@ body.in-conversation #chatFabCluster {
 .cyber-streak-modal,
 .audio-spaces-modal,
 .cyber-drop-modal,
-.cipher-vault-modal,
+.cipher-vault-modal:not([style*="display: none"]):not([style*="display:none"]):not([aria-hidden="true"]):not(.hidden),
 .nex-canvas-modal,
 .nex-sandbox-modal,
 .ghost-vault-modal,
@@ -18486,6 +18486,25 @@ body.in-conversation #chatFabCluster {
 }
 
 /* Guard: Honor display: none strictly */
+.cipher-vault-modal,
+.cipher-vault-modal[style*="display: none"],
+.cipher-vault-modal[style*="display:none"],
+.cipher-vault-modal[aria-hidden="true"],
+.cipher-vault-modal.hidden,
+#cipherVaultModal,
+#cipherVaultModal[style*="display: none"],
+#cipherVaultModal[style*="display:none"],
+#cipherVaultModal[aria-hidden="true"],
+#cipherVaultModal.hidden,
+[style*="display: none"],
+[style*="display:none"],
+[aria-hidden="true"],
+[hidden],
+.hidden,
+.is-hidden {
+  display: none !important;
+}
+
 .modal:not(.small-popup)[style*="display: none"],
 .settings-modal[style*="display: none"],
 .cyber-hub-modal[style*="display: none"],

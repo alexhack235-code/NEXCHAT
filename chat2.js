@@ -3314,19 +3314,46 @@ function initCipherVault() {
   };
 
   const openModal = () => {
-    modal.style.display = 'flex';
+    const isPinDisabled = localStorage.getItem('nexchat_cipher_vault_pin_disabled') === 'true';
+    if (isPinDisabled) {
+      if (lockScreen) lockScreen.style.display = 'none';
+      if (unlockedView) unlockedView.style.display = 'flex';
+    } else {
+      lockVault();
+    }
+    modal.classList.remove('hidden');
+    modal.removeAttribute('aria-hidden');
+    modal.style.setProperty('display', 'flex', 'important');
     playCyberSfx('sonar');
     if (navigator.vibrate) navigator.vibrate(25);
   };
 
   const closeModal = () => {
-    modal.style.display = 'none';
+    modal.style.setProperty('display', 'none', 'important');
+    modal.setAttribute('aria-hidden', 'true');
+    modal.classList.add('hidden');
+    currentPin = '';
+    updatePinDots('normal');
   };
+
+  window.closeCipherVault = closeModal;
+  window.openCipherVault = openModal;
 
   if (headerBtn) headerBtn.addEventListener('click', openModal);
   if (cipherVaultMobileBtn) cipherVaultMobileBtn.addEventListener('click', openModal);
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  if (backdrop) backdrop.addEventListener('click', closeModal);
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeModal);
+    closeBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); closeModal(); });
+  }
+  if (backdrop) {
+    backdrop.addEventListener('click', closeModal);
+    backdrop.addEventListener('pointerdown', (e) => { e.preventDefault(); closeModal(); });
+  }
+  const cancelExitBtn = document.getElementById('cancelCipherVaultPinBtn');
+  if (cancelExitBtn) {
+    cancelExitBtn.addEventListener('click', closeModal);
+    cancelExitBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); closeModal(); });
+  }
 
   if (relockBtn) {
     relockBtn.addEventListener('click', () => {
@@ -3344,8 +3371,8 @@ function initCipherVault() {
       if (!keyBtn) return;
 
       if (keyBtn.id === 'pinClearBtn') {
-        currentPin = '';
-        updatePinDots('normal');
+        // Cancel button: Exit and close vault modal immediately!
+        closeModal();
         playCyberSfx('zap');
         return;
       }
@@ -3470,6 +3497,18 @@ function initCipherVault() {
 /* ======================================================= */
 function initMeshSettings() {
   const cipherPinInput = document.getElementById('settingsCipherPinInput');
+  const cipherPinToggle = document.getElementById('settingsCipherPinRequiredToggle');
+  if (cipherPinToggle) {
+    cipherPinToggle.checked = localStorage.getItem('nexchat_cipher_vault_pin_disabled') !== 'true';
+    cipherPinToggle.addEventListener('change', (e) => {
+      localStorage.setItem('nexchat_cipher_vault_pin_disabled', e.target.checked ? 'false' : 'true');
+      if (!e.target.checked) {
+        if (typeof showNotif === 'function') showNotif('Cipher Vault screen lock disabled. Vault opens directly.', 'info', 2500);
+      } else {
+        if (typeof showNotif === 'function') showNotif('Cipher Vault screen lock enabled with PIN.', 'success', 2500);
+      }
+    });
+  }
   const saveCipherPinBtn = document.getElementById('saveCipherPinBtn');
   const openCipherBtn = document.getElementById('openCipherFromSettingsBtn');
   const openCyberDropBtn = document.getElementById('openCyberDropFromSettingsBtn');

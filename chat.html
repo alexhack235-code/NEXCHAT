@@ -4974,6 +4974,16 @@
 
                 <!-- Cipher Vault Master PIN & Security Preferences -->
                 <div class="settings-card">
+                  <div class="luxury-toggle-row" style="margin-bottom: 12px;">
+                    <div>
+                      <strong>Enable Cipher Vault Screen Lock</strong>
+                      <p>When disabled, Cipher Vault opens directly without locking your screen with a PIN pad.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsCipherPinRequiredToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
                   <label><strong>Cipher Vault Master Security PIN</strong></label>
                   <p style="font-size: 11.5px; color: #8b949e; margin: 4px 0 10px;">Set your private 4-to-6 digit numeric vault PIN to access hidden rooms and zero-knowledge enclaves.</p>
                   <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -6870,18 +6880,19 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <!-- ========================================== -->
   <!-- 7. CIPHER VAULT & ENCRYPTED SECRET ROOMS   -->
   <!-- ========================================== -->
-  <div id="cipherVaultModal" class="cipher-vault-modal" style="display: none;">
-    <div class="cipher-modal-backdrop" id="closeCipherVaultBackdrop"></div>
+  <div id="cipherVaultModal" class="cipher-vault-modal hidden" style="display: none !important;" aria-hidden="true">
+    <div class="cipher-modal-backdrop" id="closeCipherVaultBackdrop" onclick="window.closeCipherVault ? window.closeCipherVault() : (document.getElementById('cipherVaultModal').style.setProperty('display', 'none', 'important'))"></div>
     <div class="cipher-modal-container">
       <div class="cipher-modal-header">
-        <div class="cipher-brand">
+        <button type="button" class="tg-modal-back-btn" onclick="window.closeCipherVault ? window.closeCipherVault() : (document.getElementById('cipherVaultModal').style.setProperty('display', 'none', 'important'))" title="Back to Chat" style="background:none;border:none;color:#fbbf24;font-size:18px;padding:6px 12px;cursor:pointer;"><i class="fa-solid fa-arrow-left"></i></button>
+        <div class="cipher-brand" style="flex:1;">
           <div class="cipher-icon-box"><i class="fa-solid fa-key"></i></div>
           <div>
             <h2 class="cipher-title">CIPHER VAULT</h2>
             <div class="cipher-subtitle">ZERO-KNOWLEDGE HIDDEN ROOMS • END-TO-END AES-256</div>
           </div>
         </div>
-        <button type="button" class="cipher-close-btn" id="closeCipherVaultBtn" title="Close Vault">
+        <button type="button" class="cipher-close-btn" id="closeCipherVaultBtn" title="Close Vault" onclick="window.closeCipherVault ? window.closeCipherVault() : (document.getElementById('cipherVaultModal').style.setProperty('display', 'none', 'important'))">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -6915,6 +6926,9 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <button type="button" class="pin-key" data-digit="0">0</button>
           <button type="button" class="pin-key backspace" id="pinBackspaceBtn"><i class="fa-solid fa-delete-left"></i></button>
         </div>
+        <button type="button" class="cipher-cancel-exit-btn" id="cancelCipherVaultPinBtn" onclick="window.closeCipherVault ? window.closeCipherVault() : (document.getElementById('cipherVaultModal').style.setProperty('display', 'none', 'important'))" style="margin-top: 18px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); color: #cbd5e1; border-radius: 9999px; padding: 10px 24px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s;">
+          <i class="fa-solid fa-arrow-left"></i> Cancel &amp; Return to Chat
+        </button>
       </div>
 
       <!-- Unlocked Vault View (Hidden until PIN is verified) -->
