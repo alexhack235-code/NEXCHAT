@@ -4668,3 +4668,426 @@ body[data-active-section="updates"] .top-header {
 
 
 #callSpectrumWrap:not(.spectrum-active) { display: none !important; }
+
+
+
+/* ==========================================================================
+   GLOBAL TELEGRAM MOBILE FULL SCREEN PAGE SYSTEM
+   Enforces 100% full-screen pages like Telegram Mobile across all detail/settings/info modals.
+   ========================================================================== */
+
+@keyframes tgSlideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 1. Master Full-Screen Page Containers (Fixed Inset-0, 100dvh, bg-[#0b141a]) */
+.modal:not(.small-popup):not(.nex-delete-modal-overlay),
+.settings-modal,
+.cyber-hub-modal,
+.stegano-modal,
+.theme-studio-modal,
+.chat-passcode-setup-modal,
+.vanish-manage-modal,
+.vanish-pin-modal,
+.chronex-brief-modal-backdrop,
+.calls-modal-backdrop,
+.search-overlay,
+.reconstructed-search-modal,
+.nexbot-studio-modal,
+.neural-radar-modal,
+.vip-vault-modal,
+.cyber-streak-modal,
+.audio-spaces-modal,
+.cyber-drop-modal,
+.cipher-vault-modal,
+.nex-canvas-modal,
+.nex-sandbox-modal,
+.ghost-vault-modal,
+.tg-fullscreen-page,
+#e2eeInspectorModal,
+#scheduledDispatchModal,
+#search-modal,
+#createGroupModal,
+#addGroupMembersModal,
+#groupJoinModal,
+#profilePicModal,
+#groupInfoModal,
+#settingsModal,
+#safetyNumberModal,
+#chatPasscodeSetupModal,
+#vanishManagementModal,
+#vanishSecretPinModal,
+#translationHubModal,
+#newUserLanguageModal,
+#callsScheduleModal,
+#callsNewCallModal,
+#callsKeypadModal,
+#pollModal,
+#createStatusModal,
+#timeCapsuleModal,
+#confidentialNoteModal,
+#scheduledQueueModal,
+#cyberThemeStudioModal,
+#nexCyberHubModal,
+#chronexBriefModal,
+#linkDeviceModal,
+#uploadProgressModal,
+#statusViewerModal,
+#mediaLightboxModal,
+#messageDiffModal,
+#nexGallerySandboxModal,
+#nexAirDropModal,
+#liveVcTranscriptModal,
+#muteMemberModal,
+#locationDiscoveryModal,
+#nexAppInstallModal {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 10050 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  background: #0b141a !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  animation: tgSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-sizing: border-box !important;
+}
+
+/* Guard: Honor display: none strictly */
+.modal:not(.small-popup)[style*="display: none"],
+.settings-modal[style*="display: none"],
+.cyber-hub-modal[style*="display: none"],
+.stegano-modal[style*="display: none"],
+.theme-studio-modal[style*="display: none"],
+.chat-passcode-setup-modal[style*="display: none"],
+.vanish-manage-modal[style*="display: none"],
+.vanish-pin-modal[style*="display: none"],
+.chronex-brief-modal-backdrop[style*="display: none"],
+.calls-modal-backdrop[style*="display: none"],
+.search-overlay[style*="display: none"],
+.reconstructed-search-modal[style*="display: none"],
+#e2eeInspectorModal[style*="display: none"],
+#scheduledDispatchModal[style*="display: none"],
+#search-modal[style*="display: none"],
+#createGroupModal[style*="display: none"],
+#addGroupMembersModal[style*="display: none"],
+#groupJoinModal[style*="display: none"],
+#profilePicModal[style*="display: none"],
+#groupInfoModal[style*="display: none"],
+#settingsModal[style*="display: none"],
+#safetyNumberModal[style*="display: none"],
+#chatPasscodeSetupModal[style*="display: none"],
+#vanishManagementModal[style*="display: none"],
+#vanishSecretPinModal[style*="display: none"],
+#translationHubModal[style*="display: none"],
+#newUserLanguageModal[style*="display: none"],
+#callsScheduleModal[style*="display: none"],
+#callsNewCallModal[style*="display: none"],
+#callsKeypadModal[style*="display: none"],
+#pollModal[style*="display: none"],
+#createStatusModal[style*="display: none"],
+#timeCapsuleModal[style*="display: none"],
+#confidentialNoteModal[style*="display: none"],
+#scheduledQueueModal[style*="display: none"],
+#cyberThemeStudioModal[style*="display: none"],
+#nexCyberHubModal[style*="display: none"],
+#chronexBriefModal[style*="display: none"],
+#linkDeviceModal[style*="display: none"],
+#uploadProgressModal[style*="display: none"],
+#statusViewerModal[style*="display: none"],
+#mediaLightboxModal[style*="display: none"],
+#messageDiffModal[style*="display: none"],
+#nexGallerySandboxModal[style*="display: none"],
+#nexAirDropModal[style*="display: none"],
+#liveVcTranscriptModal[style*="display: none"],
+#muteMemberModal[style*="display: none"],
+#locationDiscoveryModal[style*="display: none"],
+#nexAppInstallModal[style*="display: none"],
+[aria-hidden="true"],
+.modal.hidden {
+  display: none !important;
+}
+
+/* 2. Inner Page Content Container: 100% Full-Screen, Zero Floating Cards */
+.modal:not(.small-popup) .modal-content,
+.settings-modal-content,
+.luxury-settings-suite,
+.cyber-hub-modal-content,
+.stegano-container,
+.theme-studio-container,
+.chat-passcode-setup-card,
+.vanish-manage-card,
+.vanish-pin-card,
+.chronex-brief-hud-modal,
+.calls-schedule-card,
+.calls-picker-card,
+.calls-modal-card,
+.reconstructed-search-modal,
+.terminal-modal-box,
+.create-status-content,
+.nexbot-modal-container,
+.radar-modal-container,
+.vault-modal-container,
+.streak-modal-container,
+.spaces-modal-container,
+.cyberdrop-modal-container,
+.cipher-modal-container,
+#e2eeInspectorModal > div {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #0b141a !important;
+  box-shadow: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  position: static !important;
+  inset: auto !important;
+  animation: none !important;
+  box-sizing: border-box !important;
+}
+
+/* 3. Page Top Header: Back < + Title + X, sticky top-0, border-b border-white/10 */
+.modal:not(.small-popup) .modal-header,
+.tg-modal-top-header,
+.settings-header,
+.cyber-hub-header,
+.stegano-header,
+.setup-card-header,
+.vanish-manage-header,
+.vanish-pin-header,
+.chronex-hud-header,
+.calls-modal-head,
+.search-modal-header,
+.create-status-header,
+.reconstructed-search-modal .search-modal-header,
+#e2eeInspectorModal > div > div:first-child {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 16px !important;
+  min-height: 54px !important;
+  background: #0b141a !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.tg-modal-title,
+.search-modal-title,
+.cyber-hub-title,
+.stegano-title,
+.setup-card-title,
+.vanish-manage-title,
+.calls-modal-title,
+.settings-header-left h2 {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  letter-spacing: 0.2px !important;
+  margin: 0 !important;
+}
+
+/* Top Bar Back & Close Buttons */
+.modal:not(.small-popup) .close-modal,
+.modal:not(.small-popup) .close-btn,
+.tg-modal-back-btn,
+.settings-back-btn,
+.search-modal-close-btn,
+.close-sheet-btn,
+.setup-card-close-btn,
+.calls-modal-close-btn {
+  position: static !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #e9edef !important;
+  font-size: 15px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+}
+
+.modal:not(.small-popup) .close-modal:hover,
+.tg-modal-back-btn:hover,
+.settings-back-btn:hover,
+.search-modal-close-btn:hover,
+.setup-card-close-btn:hover,
+.calls-modal-close-btn:hover {
+  background: rgba(0, 168, 132, 0.2) !important;
+  color: #00a884 !important;
+  border-color: #00a884 !important;
+}
+
+/* 4. Page Scrollable Content: flex-1 overflow-y-auto px-4 py-4 */
+.modal:not(.small-popup) .modal-body,
+.tg-modal-body,
+.settings-body,
+.settings-scroll-area,
+.cyber-hub-body,
+.cyber-hub-modal-content > .cyber-hub-body,
+.stegano-body,
+.calls-modal-body,
+.search-modal-body,
+.terminal-modal-body,
+.chat-passcode-setup-body,
+.vanish-manage-body,
+.chronex-hud-body,
+.calls-picker-body,
+.modal-content > form,
+.modal-content > .modal-scroll-wrap,
+.reconstructed-search-modal .search-results-container,
+#createGroupModal .modal-content > form,
+#addGroupMembersModal .modal-content > div:not(.modal-header):not(.tg-modal-top-header),
+#groupInfoModal .modal-content > div:not(.modal-header):not(.tg-modal-top-header),
+#e2eeInspectorModal > div > .e2ee-body,
+#e2eeInspectorModal > div > div:not(:first-child) {
+  flex: 1 1 0% !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: 16px !important;
+  background: #0b141a !important;
+  box-sizing: border-box !important;
+}
+
+/* 5. Sticky Bottom Action Bar */
+.modal:not(.small-popup) .modal-footer,
+.modal:not(.small-popup) .modal-actions,
+.tg-modal-bottom-bar,
+.cyber-hub-footer,
+.settings-footer,
+.stegano-footer,
+.setup-card-footer,
+.vanish-manage-footer,
+.calls-modal-foot,
+.terminal-modal-footer,
+.search-modal-footer {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 50 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px)) 16px !important;
+  background: #0b141a !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  flex-shrink: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Full-Width 50px Action Buttons */
+.modal:not(.small-popup) .modal-footer button,
+.modal:not(.small-popup) .modal-actions button,
+.cyber-hub-footer button.primary-btn,
+.cyber-hub-footer button.cyber-action-btn,
+.settings-footer button.settings-save-btn,
+.setup-card-footer button.setup-save-btn,
+.vanish-manage-footer button.vanish-save-btn,
+.calls-modal-foot button.calls-action-btn,
+.terminal-modal-footer button.terminal-submit-btn,
+.modal:not(.small-popup) .modal-content > form button[type="submit"],
+.tg-full-action-btn {
+  width: 100% !important;
+  height: 50px !important;
+  min-height: 50px !important;
+  border-radius: 9999px !important;
+  background: #00a884 !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 15.5px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-shadow: 0 4px 14px rgba(0, 168, 132, 0.35) !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+.modal:not(.small-popup) .modal-footer button:hover,
+.tg-full-action-btn:hover {
+  background: #008f6f !important;
+  transform: translateY(-1px) !important;
+}
+
+/* 6. iPhone Bottom Safe Area Padding */
+.modal:not(.small-popup),
+.tg-fullscreen-page,
+.settings-modal,
+.cyber-hub-modal,
+.stegano-modal {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 7. ONLY Allowed Small Popups: Confirm Delete, Emoji Picker, 3-dots Menu */
+.nex-delete-modal-overlay,
+.small-popup,
+.confirm-delete-popup,
+#nexDeleteMessageModal {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  z-index: 10090 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  animation: none !important;
+}
+
+.nex-delete-modal-card,
+.small-popup-card {
+  max-width: 340px !important;
+  width: 90% !important;
+  border-radius: 16px !important;
+  background: #1e293b !important;
+  padding: 22px 24px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}

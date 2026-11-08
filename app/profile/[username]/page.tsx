@@ -25,6 +25,12 @@ const Zap = ({ className = 'w-4 h-4' }) => (
   </svg>
 );
 
+const ChevronLeft = ({ className = 'w-4 h-4' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m15 18-6-6 6-6" />
+  </svg>
+);
+
 const MapPin = ({ className = 'w-4 h-4' }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
@@ -644,29 +650,41 @@ export default function CreatorProfilePage({ params }: { params?: { username?: s
         <AnimatePresence>
           {showSettingsModal && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-0 z-50 w-full h-[100dvh] bg-[#0b141a] flex flex-col overflow-hidden select-none"
               onClick={() => setShowSettingsModal(false)}
             >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0, y: 15 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.95, opacity: 0, y: 15 }}
+              <div
                 onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-sm bg-[#0e131f] border border-white/15 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 text-left max-h-[85vh] overflow-y-auto"
+                className="w-full h-full flex flex-col overflow-hidden bg-[#0b141a]"
               >
-                {/* Modal Header */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <h3 className="font-extrabold text-sm tracking-wide text-white flex items-center gap-2">
-                    <Zap className="w-4 h-4 inline text-[#39FF14] mr-1" /> Reels Studio & Settings
-                  </h3>
+                {/* Top Bar: Back < + Title + X, sticky top-0 */}
+                <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0b141a] shrink-0 min-h-[54px]">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowSettingsModal(false)}
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                      title="Back"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-[#00a884]" />
+                    </button>
+                    <h3 className="font-extrabold text-sm tracking-wide text-white flex items-center gap-2">
+                      <Zap className="w-4 h-4 inline text-[#00a884]" /> Reels Studio & Settings
+                    </h3>
+                  </div>
                   <button
+                    type="button"
                     onClick={() => setShowSettingsModal(false)}
-                    className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center text-xs"
+                    className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center text-xs transition-colors"
+                    title="Close"
                   ><X className="w-5 h-5 inline" /></button>
                 </div>
+
+                <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4 text-left">
 
                 {/* Tabs */}
                 <div className="flex bg-black/40 p-1 rounded-xl border border-white/5 gap-1">
@@ -891,15 +909,19 @@ export default function CreatorProfilePage({ params }: { params?: { username?: s
                   </div>
                 )}
 
-                {/* Save Button */}
-                <button
-                  type="button"
-                  onClick={handleSaveSettings}
-                  className="w-full py-2.5 rounded-xl bg-[#39FF14] hover:brightness-110 text-black font-extrabold text-xs tracking-wide shadow-[0_0_16px_rgba(57,255,20,0.35)] transition-all active:scale-95 mt-1"
-                >
-                  Save & Apply Settings
-                </button>
-              </motion.div>
+                </div>
+
+                {/* Bottom Action: Sticky bottom: p-4 border-t border-white/10, button w-full h-[50px] rounded-full */}
+                <div className="sticky bottom-0 z-20 p-4 border-t border-white/10 bg-[#0b141a] pb-[calc(16px+env(safe-area-inset-bottom,0px))]">
+                  <button
+                    type="button"
+                    onClick={handleSaveSettings}
+                    className="w-full h-[50px] rounded-full bg-[#00a884] hover:bg-[#008f6f] text-white font-semibold text-[15.5px] tracking-wide shadow-lg shadow-[#00a884]/25 transition-all flex items-center justify-center cursor-pointer"
+                  >
+                    Save & Apply Settings
+                  </button>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

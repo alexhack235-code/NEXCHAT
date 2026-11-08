@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Heart,
   ExternalLink,
+  ChevronLeft,
 } from 'lucide-react';
 
 interface FounderPassModalProps {
@@ -85,163 +86,153 @@ export function FounderPassModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="relative w-full max-w-[620px] rounded-[20px] bg-[#0C0C10] border border-amber-500/30 shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_40px_rgba(255,184,0,0.1)] overflow-hidden font-mono text-xs flex flex-col">
-        {/* Modal Header */}
-        <div className="p-6 bg-gradient-to-b from-amber-950/20 to-transparent border-b border-amber-500/20 flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-[10px] bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
-              <Crown className="w-5 h-5" />
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 w-full h-[100dvh] bg-[#0b141a] flex flex-col overflow-hidden animate-[tgSlideUp_0.3s_cubic-bezier(0.16,1,0.3,1)] select-none"
+    >
+      {/* 2. Top Bar: Back < + Title + X, px-4 py-3, border-b border-white/10, sticky top-0 */}
+      <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0b141a] shrink-0 min-h-[54px]">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            title="Back"
+          >
+            <ChevronLeft className="w-5 h-5 text-[#00a884]" />
+          </button>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+              <Crown className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-sm tracking-tight">
-                  PRO ARCHITECT: FOUNDER PASS
-                </span>
-                <span className="px-2 py-0.5 rounded text-[9px] bg-amber-400/20 text-amber-300 border border-amber-400/30 font-semibold">
-                  ONE-TIME LIFETIME
+                <span className="font-bold text-white text-sm tracking-tight">Founder Pass</span>
+                <span className="px-1.5 py-0.5 rounded text-[9px] bg-amber-400/20 text-amber-300 border border-amber-400/30 font-semibold">
+                  LIFETIME
                 </span>
               </div>
-              <p className="text-[11px] text-[#F5F5F0]/60 mt-1 leading-relaxed">
-                No monthly subscriptions. Pay once, own lifetime access to God-Mode Neural Deliberation.
-              </p>
+              <p className="text-[11px] text-[#8696a0]">God-Mode Neural Reasoning & Architect Core</p>
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-9 h-9 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+          title="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* 3. Content: flex-1 overflow-y-auto px-4 py-4, scrollable */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+        {/* Benefits Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            {
+              title: '32k God-Mode Reasoning',
+              desc: 'Full O3-Max chain-of-thought with 4-agent Council deliberation.',
+              icon: Zap,
+            },
+            {
+              title: 'Quantum Layout Surgeon',
+              desc: 'Unlimited AST diagnoses & Apple-grade architectural restructures.',
+              icon: ShieldCheck,
+            },
+            {
+              title: 'Production Code Exports',
+              desc: '1-click clean .tsx component & Windows .bat script downloads.',
+              icon: CheckCircle2,
+            },
+            {
+              title: 'All Future Models Included',
+              desc: 'Zero API markup or rate limits. Continuous evergreen upgrades.',
+              icon: Sparkles,
+            },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className="p-3.5 rounded-2xl bg-[#202c33]/60 border border-white/5 flex flex-col gap-1.5"
+            >
+              <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs">
+                <item.icon className="w-4 h-4 shrink-0" />
+                <span>{item.title}</span>
+              </div>
+              <p className="text-[11.5px] text-[#8696a0] leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* License Activation Form */}
+        <form onSubmit={handleActivateKey} className="flex flex-col gap-2.5 p-4 rounded-2xl bg-[#202c33]/50 border border-white/5">
+          <label className="flex items-center gap-2 text-xs font-semibold text-white/90">
+            <Key className="w-4 h-4 text-amber-400" />
+            <span>Have a license key or gumroad order?</span>
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={licenseInput}
+              onChange={(e) => setLicenseInput(e.target.value)}
+              placeholder="PRO-XXXX-XXXX-XXXX"
+              className="flex-1 px-3.5 py-3 rounded-xl bg-[#2a3942] border border-white/10 text-white font-mono text-xs outline-none focus:border-amber-400"
+            />
+            <button
+              type="submit"
+              className="px-5 py-3 rounded-xl bg-[#2a3942] hover:bg-[#34444e] border border-white/15 text-white text-xs font-semibold"
+            >
+              Activate
+            </button>
+          </div>
+
+          {activationError && (
+            <span className="text-xs text-red-400 font-mono mt-0.5">{activationError}</span>
+          )}
+          {activationSuccess && (
+            <span className="text-xs text-emerald-400 font-mono mt-0.5 flex items-center gap-1">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Founder Pass activated! God-Mode Neural Core unlocked.</span>
+            </span>
+          )}
+        </form>
+
+        {/* Generous Creator Pass */}
+        <div className="p-4 rounded-2xl bg-[#202c33]/40 border border-white/5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Heart className="w-4 h-4 text-pink-400 shrink-0" />
+            <div>
+              <span className="text-xs font-semibold text-white block">Student or Indie Developer?</span>
+              <span className="text-[11px] text-[#8696a0] block">We never want price to block you from building great software.</span>
             </div>
           </div>
 
           <button
-            onClick={onClose}
-            className="p-1.5 rounded-[8px] bg-white/5 hover:bg-white/10 text-[#F5F5F0]/60 hover:text-white transition-colors"
+            onClick={handleIndieUnlock}
+            type="button"
+            className="px-3.5 py-2 rounded-full bg-[#202c33] hover:bg-[#2a3942] border border-[#00a884]/40 text-[#00a884] text-xs font-semibold shrink-0 cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            Unlock Free
           </button>
         </div>
+      </div>
 
-        {/* Modal Body */}
-        <div className="p-6 flex flex-col gap-5 overflow-y-auto max-h-[75vh]">
-          {/* Benefits Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {[
-              {
-                title: '32k God-Mode Reasoning',
-                desc: 'Full O3-Max chain-of-thought with 4-agent Council deliberation.',
-                icon: Zap,
-              },
-              {
-                title: 'Quantum Layout Surgeon',
-                desc: 'Unlimited AST diagnoses & Apple-grade architectural restructures.',
-                icon: ShieldCheck,
-              },
-              {
-                title: 'Production Code Exports',
-                desc: '1-click clean .tsx component & Windows .bat script downloads.',
-                icon: CheckCircle2,
-              },
-              {
-                title: 'All Future Models Included',
-                desc: 'Zero extra charge for Claude 3.7 Sonnet, OpenAI o3, or Gemini 2.5.',
-                icon: Sparkles,
-              },
-            ].map((b, i) => {
-              const Icon = b.icon;
-              return (
-                <div
-                  key={i}
-                  className="p-3 rounded-[10px] bg-[#121218] border border-white/5 flex items-start gap-2.5"
-                >
-                  <Icon className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold text-white block text-[11px]">{b.title}</span>
-                    <span className="text-[10px] text-[#F5F5F0]/50 block mt-0.5 leading-normal">{b.desc}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Pricing Box */}
-          <div className="p-4 rounded-[14px] bg-[#14141E] border border-amber-500/30 flex items-center justify-between gap-4">
-            <div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-white">$29</span>
-                <span className="text-xs text-[#F5F5F0]/40 line-through">$300/yr</span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">
-                  SAVE 90%
-                </span>
-              </div>
-              <span className="text-[10px] text-[#F5F5F0]/60 block mt-0.5">
-                Single payment. Valid for lifetime across all personal devices.
-              </span>
-            </div>
-
-            <a
-              href="https://buy.stripe.com/test_demo_founder_pass"
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => {
-                // Auto-unlock demo for preview
-                setIsProUnlocked(true);
-              }}
-              className="btn-press px-4 py-2.5 rounded-[10px] bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold font-mono text-xs flex items-center gap-1.5 shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:brightness-110 transition-all shrink-0"
-            >
-              <span>Get Founder Pass ($29)</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-
-          {/* License Key Activation Section */}
-          <form onSubmit={handleActivateKey} className="p-3.5 rounded-[12px] bg-[#101016] border border-white/10 flex flex-col gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-[#F5F5F0]/60 flex items-center gap-1.5">
-              <Key className="w-3 h-3 text-[#5E6AD2]" />
-              <span>Already have a license key?</span>
-            </span>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={licenseInput}
-                onChange={(e) => setLicenseInput(e.target.value)}
-                placeholder="PRO-XXXX-XXXX-XXXX"
-                className="flex-1 px-3 py-2 rounded-[8px] bg-[#1A1A22] border border-white/10 text-white font-mono text-xs outline-none focus:border-[#5E6AD2]"
-              />
-              <button
-                type="submit"
-                className="btn-press px-3.5 py-2 rounded-[8px] bg-[#1E1E28] hover:bg-[#282836] border border-white/15 text-white font-mono text-xs font-semibold"
-              >
-                Activate
-              </button>
-            </div>
-
-            {activationError && (
-              <span className="text-[10px] text-red-400 font-mono mt-0.5">{activationError}</span>
-            )}
-            {activationSuccess && (
-              <span className="text-[10px] text-emerald-400 font-mono mt-0.5 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" />
-                <span>Founder Pass activated! God-Mode Neural Core unlocked.</span>
-              </span>
-            )}
-          </form>
-
-          {/* The Anti-Bounce Generous Creator Pass */}
-          <div className="p-3 rounded-[12px] bg-[#0E0E14] border border-white/5 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Heart className="w-3.5 h-3.5 text-pink-400 shrink-0" />
-              <div>
-                <span className="text-[10px] font-semibold text-white block">Student or Indie Developer?</span>
-                <span className="text-[9px] text-[#F5F5F0]/50 block">We never want price to block you from building great software.</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleIndieUnlock}
-              type="button"
-              className="btn-press px-2.5 py-1.5 rounded-[7px] bg-[#181822] hover:bg-[#222230] border border-white/10 text-[#00FFA3] text-[10px] font-semibold shrink-0"
-            >
-              Unlock Free Today
-            </button>
-          </div>
-        </div>
+      {/* 4. Bottom Action: Sticky bottom: p-4 border-t border-white/10, button w-full h-[50px] rounded-full */}
+      <div className="sticky bottom-0 z-20 p-4 border-t border-white/10 bg-[#0b141a] pb-[calc(16px+env(safe-area-inset-bottom,0px))]">
+        <a
+          href="https://alexhack235.gumroad.com"
+          target="_blank"
+          rel="noreferrer"
+          className="w-full h-[50px] rounded-full bg-[#00a884] hover:bg-[#008f6f] text-white text-[15.5px] font-semibold tracking-wide transition-colors shadow-lg shadow-[#00a884]/25 flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>Claim Lifetime Pass ($29)</span>
+          <ArrowRight className="w-4 h-4" />
+        </a>
       </div>
     </div>
   );
 }
+
+export default FounderPassModal;

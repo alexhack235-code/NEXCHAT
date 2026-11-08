@@ -1789,9 +1789,11 @@
           <!-- Poll Modal -->
           <div id="pollModal" class="modal" style="display: none;">
             <div class="modal-content">
-              <span class="close-modal"
-                onclick="document.getElementById('pollModal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
-              <h2 style="font-family: 'Orbitron', monospace; font-size: 19px; color: var(--accent-primary); margin-bottom: 16px;"><i class="fa-solid fa-square-poll-vertical"></i> Create a Poll</h2>
+              <div class="tg-modal-top-header">
+                <button type="button" class="tg-modal-back-btn" onclick="document.getElementById('pollModal').style.display='none'" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+                <div class="tg-modal-title"><i class="fa-solid fa-square-poll-vertical text-[#00a884]"></i> Create Poll</div>
+                <button type="button" class="close-modal" onclick="document.getElementById('pollModal').style.display='none'" title="Close"><i class="fa-solid fa-xmark"></i></button>
+              </div>
               <form id="pollForm">
                 <div class="form-group">
                   <label class="form-label">Poll Question</label>
@@ -1823,9 +1825,12 @@
         <div id="search-modal" class="search-modal reconstructed-search-modal">
           <!-- Modal Top Header -->
           <div class="search-modal-header">
+            <button type="button" class="tg-modal-back-btn" onclick="document.getElementById('search-overlay').style.display='none'" title="Back">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
             <div class="search-modal-title">
               <i class="fa-solid fa-compass text-[#00ff66]"></i>
-              <span>Explore NEXCHAT</span>
+              <span>New Chat & Explore</span>
             </div>
             <button id="close-search-btn" class="search-modal-close-btn" title="Close">
               <i class="fa-solid fa-xmark"></i>
@@ -2210,7 +2215,7 @@
       </div>
 
       <div id="muteMemberModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content">
           <span class="close-modal" id="closeMuteMemberModalBtn"><i class="fa-solid fa-xmark"></i></span>
           <h2 style="margin-bottom: 12px; color: var(--accent-primary); font-family: 'Orbitron', monospace; font-size: 18px;"><i class="fa-solid fa-volume-xmark"></i> Mute Group Members</h2>
           <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">Select the members you want to mute and choose how long they remain muted.</p>
@@ -2223,8 +2228,12 @@
 
       <!-- NEW PROFILE PIC MODAL -->
       <div id="profilePicModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 520px; text-align: center;">
-          <button id="closeProfileModal" class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-content" style="text-align: center;">
+          <div class="tg-modal-top-header">
+            <button type="button" class="tg-modal-back-btn" onclick="document.getElementById('profilePicModal').style.display='none'" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="tg-modal-title"><i class="fa-solid fa-user text-[#00a884]"></i> Profile Info</div>
+            <button type="button" id="closeProfileModal" class="close-modal" title="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
           <img id="profileModalImg" src=""
             style="max-width: 100%; max-height: 65vh; border: 2px solid var(--accent-primary); box-shadow: 0 0 35px var(--accent-primary-dim); border-radius: var(--radius-lg); object-fit: contain; margin-top: 8px;">
           <h3 id="profileModalName"
@@ -2268,9 +2277,11 @@
       <!-- CREATE GROUP MODAL -->
       <div id="createGroupModal" class="modal" style="display: none;">
         <div class="modal-content">
-          <span class="close-modal"
-            onclick="document.getElementById('createGroupModal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
-          <h2 style="font-family: 'Orbitron', monospace; font-size: 20px; color: var(--accent-primary); margin-bottom: 20px;"><i class="fa-solid fa-user-group"></i> Create Group</h2>
+          <div class="tg-modal-top-header">
+            <button type="button" class="tg-modal-back-btn" onclick="document.getElementById('createGroupModal').style.display='none'" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="tg-modal-title"><i class="fa-solid fa-user-group text-[#00a884]"></i> New Group</div>
+            <button type="button" class="close-modal" onclick="document.getElementById('createGroupModal').style.display='none'" title="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
           <form id="createGroupForm">
             <div class="form-group" style="text-align: center; margin-bottom: 20px;">
               <label class="form-label">Group Icon</label>
@@ -2326,9 +2337,12 @@
 
       <!-- GROUP INFO MODAL -->
       <div id="groupInfoModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
-          <span class="close-modal"
-            onclick="document.getElementById('groupInfoModal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
+        <div class="modal-content">
+          <div class="tg-modal-top-header">
+            <button type="button" class="tg-modal-back-btn" onclick="document.getElementById('groupInfoModal').style.display='none'" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="tg-modal-title"><i class="fa-solid fa-circle-info text-[#00a884]"></i> Group Info</div>
+            <button type="button" class="close-modal" onclick="document.getElementById('groupInfoModal').style.display='none'" title="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
           <div class="modal-avatar-wrapper">
             <img id="infoGroupIcon" src="" alt="Group Icon" class="modal-avatar">
             <h2 id="infoGroupName" class="modal-title">Group Name</h2>
@@ -2378,7 +2392,7 @@
       </div>
 
       <div id="groupJoinModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 520px;">
+        <div class="modal-content">
           <span class="close-modal" onclick="closeGroupJoinModal()"><i class="fa-solid fa-xmark"></i></span>
           <div class="modal-avatar-wrapper">
             <img id="joinGroupIcon" src="logo.jpg" alt="Group Icon" class="modal-avatar">
@@ -2409,7 +2423,7 @@
       </div>
 
       <div id="addGroupMembersModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 520px;">
+        <div class="modal-content">
           <span class="close-modal" onclick="closeAddGroupMembersModal()"><i class="fa-solid fa-xmark"></i></span>
           <h2 style="margin-top: 0; color: var(--accent-primary); font-family: 'Orbitron', monospace; font-size: 18px;"><i class="fa-solid fa-user-plus"></i> Add Members to Group</h2>
           <div id="addGroupMembersInfo" style="color: var(--text-secondary); font-size: 13.5px; margin-bottom: 14px;">Select contacts to add to this group.</div>
@@ -5223,7 +5237,7 @@
 
       <!-- LINK DEVICE MODAL -->
       <div id="linkDeviceModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 440px;">
+        <div class="modal-content">
           <span class="close-modal" id="closeLinkDeviceModalBtn"><i class="fa-solid fa-xmark"></i></span>
           <h2 style="margin-top: 0; color: var(--accent-primary); font-family: 'Orbitron', monospace; font-size: 18px;">
             <i class="fa-solid fa-qrcode"></i> Link a New Device
@@ -5256,7 +5270,7 @@
 
       <!-- CREATE STATUS MODAL (NEXCHAT HACKER TERMINAL STORY TRANSMITTER) -->
       <div id="createStatusModal" class="modal create-status-modal terminal-create-modal" style="display: none;">
-        <div class="modal-content create-status-content terminal-modal-box" style="max-width: 540px; padding: 22px;">
+        <div class="modal-content create-status-content terminal-modal-box">
           <!-- Row 1: Modal Header (Title + Close Button) -->
           <div class="create-status-header terminal-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0, 255, 136, 0.2); padding-bottom: 10px;">
             <div style="display: flex; flex-direction: column; gap: 2px;">
@@ -7231,7 +7245,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
     <div class="more-sheet-backdrop" id="closeTranslationHubBackdrop"></div>
     <div class="stegano-container" style="border-color: rgba(6, 182, 212, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.95), 0 0 35px rgba(6, 182, 212, 0.25);">
       <div class="stegano-header" style="border-color: rgba(6, 182, 212, 0.2);">
-        <div class="stegano-title" style="color: #67e8f9;"><i class="fa-solid fa-language"></i> CHRONEX BABEL // Neural Translator</div>
+        <button type="button" class="tg-modal-back-btn" onclick="document.getElementById('translationHubModal').style.display='none'" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+        <div class="stegano-title" style="color: #67e8f9;"><i class="fa-solid fa-language"></i> Neural Translator</div>
         <button type="button" class="close-sheet-btn" id="closeTranslationHubBtn"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="stegano-body">
@@ -7898,7 +7913,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
     <!-- NEXCHAT APP INSTALLATION & PWA HUB MODAL -->
     <div id="nexAppInstallModal" class="modal" style="display: none; z-index: 10010;">
-      <div class="modal-content" style="max-width: 500px; padding: 24px; text-align: center; border: 1px solid rgba(0, 255, 102, 0.35); box-shadow: 0 0 35px rgba(0, 255, 102, 0.15);">
+      <div class="modal-content" style="text-align: center;">
         <span class="close-modal" id="closeAppInstallModalBtn"><i class="fa-solid fa-xmark"></i></span>
         <div style="width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 16px; overflow: hidden; border: 2px solid #00ff66; box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);">
           <img src="logo.jpg" alt="NEXCHAT" style="width: 100%; height: 100%; object-fit: cover;">
@@ -7947,11 +7962,12 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- NEXCHAT GLOBAL ONBOARDING & LANGUAGE SELECTOR MODAL -->
   <div id="newUserLanguageModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 720px; max-height: min(88dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2);">
-      <div class="cyber-hub-header" style="background: rgba(0, 242, 254, 0.05);">
+    <div class="cyber-hub-modal-content">
+      <div class="cyber-hub-header">
+        <button type="button" class="tg-modal-back-btn" onclick="document.getElementById('newUserLanguageModal').style.display='none'" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
         <div class="cyber-hub-title" style="color: #00f2fe; font-size: 16px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-earth-americas"></i>
-          <span>WELCOME TO NEXCHAT // CHOOSE YOUR LANGUAGE</span>
+          <span>Language / Translate</span>
         </div>
         <button type="button" class="close-modal" id="closeOnboardingLangBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -7978,11 +7994,14 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   </div>
   <!-- QUANTUM DISPATCH SCHEDULER (SEND ON TIMER MODAL) -->
   <div id="scheduledDispatchModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 580px; max-height: min(90dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2); overflow-y: auto;">
-      <div class="cyber-hub-header" style="background: rgba(0, 242, 254, 0.05); position: sticky; top: 0; z-index: 10;">
+    <div class="cyber-hub-modal-content">
+      <div class="cyber-hub-header">
+        <button type="button" class="tg-modal-back-btn" onclick="document.getElementById('scheduledDispatchModal').style.display='none'" title="Back">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
         <div class="cyber-hub-title" style="color: #00f2fe; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-clock-rotate-left"></i>
-          <span>SCHEDULE MESSAGE // QUANTUM TIMER DISPATCH</span>
+          <span>Schedule Message</span>
         </div>
         <button type="button" class="close-modal" id="closeScheduleModalBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -8103,7 +8122,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- SCHEDULED MESSAGES VAULT / QUEUE MODAL -->
   <div id="scheduledQueueModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 640px; max-height: min(88dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2); display: flex; flex-direction: column;">
+    <div class="cyber-hub-modal-content">
       <div class="cyber-hub-header" style="background: rgba(0, 242, 254, 0.05); flex-shrink: 0;">
         <div class="cyber-hub-title" style="color: #00f2fe; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-list-check"></i>
@@ -8224,7 +8243,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- MESSAGE REVISION HISTORY & GIT-STYLE DIFF MODAL -->
   <div id="messageDiffModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 620px; max-height: min(88dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2); overflow-y: auto;">
+    <div class="cyber-hub-modal-content">
       <div class="cyber-hub-header" style="background: rgba(0, 242, 254, 0.05); position: sticky; top: 0; z-index: 10;">
         <div class="cyber-hub-title" style="color: #00f2fe; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-code-compare"></i>
@@ -8256,7 +8275,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- ANTI-SHOULDER-SURFING CONFIDENTIAL CIPHER MODAL -->
   <div id="confidentialNoteModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 520px; max-height: min(85dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(192, 132, 252, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(192, 132, 252, 0.2);">
+    <div class="cyber-hub-modal-content">
       <div class="cyber-hub-header" style="background: rgba(192, 132, 252, 0.05);">
         <div class="cyber-hub-title" style="color: #c084fc; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-user-secret"></i>
@@ -8281,7 +8300,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- CRYPTOGRAPHIC SAFETY NUMBERS MODAL -->
   <div id="safetyNumberModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 560px; max-height: min(88dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 255, 102, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 102, 0.2);">
+    <div class="cyber-hub-modal-content">
       <div class="cyber-hub-header" style="background: rgba(0, 255, 102, 0.05);">
         <div class="cyber-hub-title" style="color: #00ff66; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-shield-halved"></i>
@@ -8751,7 +8770,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- 3.5. AIR-GAP GALLERY SANDBOX MODAL (ZERO CAMERA ROLL POLLUTION & ZERO CLOUD COST) -->
 <div id="nexGallerySandboxModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-  <div class="cyber-hub-modal-content" style="max-width: 720px; width: 95%; max-height: 85vh; display: flex; flex-direction: column;">
+  <div class="cyber-hub-modal-content">
     <div class="cyber-hub-header">
       <div class="cyber-hub-title">
         <i class="fa-solid fa-box-archive text-[#00f2fe]"></i>

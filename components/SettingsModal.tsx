@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Key, Cpu, Check, AlertCircle, RefreshCw, Shield } from 'lucide-react';
+import { X, Key, Cpu, Check, AlertCircle, RefreshCw, Shield, ChevronLeft } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -67,63 +67,73 @@ export function SettingsModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
-      onClick={onClose}
+      className="fixed inset-0 z-50 w-full h-[100dvh] bg-[#0b141a] flex flex-col overflow-hidden animate-[tgSlideUp_0.3s_cubic-bezier(0.16,1,0.3,1)] select-none"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[540px] rounded-[16px] border border-[rgba(255,255,255,0.12)] bg-[#0E0E12] shadow-[0_24px_64px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.08)] p-6 overflow-hidden flex flex-col gap-6"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] pb-4">
+      {/* 2. Header: Always top bar: Back < + Title + X, px-4 py-3, border-b border-white/10, sticky top-0 */}
+      <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0b141a] shrink-0 min-h-[54px]">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            title="Back"
+          >
+            <ChevronLeft className="w-5 h-5 text-[#00a884]" />
+          </button>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-[8px] bg-[#1A1A1E] border border-[rgba(255,255,255,0.12)] flex items-center justify-center text-[#5E6AD2]">
+            <div className="w-8 h-8 rounded-lg bg-[#202c33] border border-white/10 flex items-center justify-center text-[#00a884]">
               <Key className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-mono text-sm font-semibold text-white">AI Engine Configuration</h3>
-              <p className="font-mono text-[11px] text-[#F5F5F0]/50">Gemini API credentials & model architecture</p>
+              <h3 className="text-sm font-semibold text-white tracking-wide">Settings & AI Config</h3>
+              <p className="text-[11px] text-[#8696a0]">Gemini API credentials & neural models</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-full text-[#F5F5F0]/50 hover:text-white hover:bg-[#1A1A1E] transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-9 h-9 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+          title="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
 
+      {/* 3. Content: flex-1 overflow-y-auto px-4 py-4, scrollable */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
         {/* Model Selection */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 font-mono text-xs text-[#F5F5F0]/80">
-            <Cpu className="w-3.5 h-3.5 text-[#5E6AD2]" />
+        <div className="space-y-2.5 bg-[#202c33]/50 p-4 rounded-2xl border border-white/5">
+          <label className="flex items-center gap-2 text-xs font-semibold text-white/90">
+            <Cpu className="w-4 h-4 text-[#00a884]" />
             <span>Gemini Neural Thinking Model</span>
           </label>
           <select
             value={model}
             onChange={(e) => setModel(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-[10px] bg-[#1A1A1E] border border-[rgba(255,255,255,0.1)] text-[#F5F5F0] font-mono text-xs outline-none focus:border-[#5E6AD2] transition-colors"
+            className="w-full px-3.5 py-3 rounded-xl bg-[#2a3942] border border-white/10 text-white font-mono text-xs outline-none focus:border-[#00a884] transition-colors"
           >
             <option value="gemini-3.5-flash">gemini-3.5-flash (Ultra-Fast Neural Engine — Recommended)</option>
             <option value="gemini-3-flash-preview">gemini-3-flash-preview (Thinking Preview)</option>
             <option value="gemini-flash-latest">gemini-flash-latest (General Fast Model)</option>
             <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview (Deep Thinking Pro)</option>
           </select>
-          <p className="font-mono text-[10px] text-[#F5F5F0]/40">
+          <p className="text-[11.5px] text-[#8696a0] leading-relaxed">
             The Pro Thinking model synthesizes the highest fidelity motion tokens and typography pairings.
           </p>
         </div>
 
         {/* API Key Input */}
-        <div className="space-y-2">
+        <div className="space-y-2.5 bg-[#202c33]/50 p-4 rounded-2xl border border-white/5">
           <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 font-mono text-xs text-[#F5F5F0]/80">
-              <Shield className="w-3.5 h-3.5 text-[#5E6AD2]" />
+            <label className="flex items-center gap-2 text-xs font-semibold text-white/90">
+              <Shield className="w-4 h-4 text-[#00a884]" />
               <span>Google AI Studio API Key</span>
             </label>
             <button
+              type="button"
               onClick={() => setShowKey(!showKey)}
-              className="font-mono text-[10px] text-[#5E6AD2] hover:underline"
+              className="text-xs text-[#00a884] hover:underline font-mono"
             >
               {showKey ? 'Hide key' : 'Show key'}
             </button>
@@ -132,27 +142,27 @@ export function SettingsModal({
             type={showKey ? 'text' : 'password'}
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="AIzaSy... (leave blank to use system default key)"
-            className="w-full px-3.5 py-2.5 rounded-[10px] bg-[#1A1A1E] border border-[rgba(255,255,255,0.1)] text-[#F5F5F0] font-mono text-xs outline-none focus:border-[#5E6AD2] transition-colors"
+            placeholder="AIzaSy... (leave blank to use system default pool)"
+            className="w-full px-3.5 py-3 rounded-xl bg-[#2a3942] border border-white/10 text-white font-mono text-xs outline-none focus:border-[#00a884] transition-colors"
           />
-          <p className="font-mono text-[10px] text-[#F5F5F0]/40">
+          <p className="text-[11.5px] text-[#8696a0] leading-relaxed">
             Get your key free at{' '}
             <a
               href="https://aistudio.google.com/apikey"
               target="_blank"
               rel="noreferrer"
-              className="text-[#5E6AD2] hover:underline"
+              className="text-[#00a884] hover:underline"
             >
               aistudio.google.com/apikey
             </a>
-            . Stored locally in your browser session.
+            . Stored securely in your client device session.
           </p>
         </div>
 
         {/* Test Result Message */}
         {testResult && (
           <div
-            className={`p-3 rounded-[10px] font-mono text-xs flex items-center gap-2 ${
+            className={`p-3.5 rounded-xl text-xs flex items-center gap-2.5 ${
               testResult.success
                 ? 'bg-emerald-950/40 border border-emerald-500/30 text-emerald-300'
                 : 'bg-red-950/40 border border-red-500/30 text-red-300'
@@ -166,29 +176,26 @@ export function SettingsModal({
             <span>{testResult.message}</span>
           </div>
         )}
+      </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-2 border-t border-[rgba(255,255,255,0.06)]">
-          <button
-            onClick={testConnection}
-            disabled={testing}
-            className="btn-press flex items-center gap-2 px-3.5 py-2 rounded-[8px] bg-[#1A1A1E] hover:bg-[#25252A] text-white font-mono text-xs border border-[rgba(255,255,255,0.1)] transition-colors disabled:opacity-50"
-          >
-            {testing ? (
-              <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#5E6AD2]" />
-            ) : (
-              <Check className="w-3.5 h-3.5 text-[#5E6AD2]" />
-            )}
-            <span>Test Connection</span>
-          </button>
-
-          <button
-            onClick={onClose}
-            className="btn-press px-5 py-2 rounded-[8px] bg-[#5E6AD2] hover:bg-[#4D58B8] text-white font-mono text-xs font-medium tracking-wide transition-colors shadow-[0_0_16px_rgba(94,106,210,0.3)]"
-          >
-            Save & Close
-          </button>
-        </div>
+      {/* 4. Bottom Action: Sticky bottom: p-4 border-t border-white/10, button w-full h-[50px] rounded-full */}
+      <div className="sticky bottom-0 z-20 p-4 border-t border-white/10 bg-[#0b141a] pb-[calc(16px+env(safe-area-inset-bottom,0px))] flex items-center gap-3">
+        <button
+          type="button"
+          onClick={testConnection}
+          disabled={testing}
+          className="h-[50px] px-5 rounded-full bg-[#202c33] hover:bg-[#2a3942] text-white text-sm font-medium border border-white/10 transition-colors flex items-center gap-2 shrink-0 disabled:opacity-50"
+        >
+          {testing ? <RefreshCw className="w-4 h-4 animate-spin text-[#00a884]" /> : <Check className="w-4 h-4 text-[#00a884]" />}
+          <span>Test Ping</span>
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex-1 h-[50px] rounded-full bg-[#00a884] hover:bg-[#008f6f] text-white text-[15.5px] font-semibold tracking-wide transition-colors shadow-lg shadow-[#00a884]/25 flex items-center justify-center cursor-pointer"
+        >
+          Save & Close
+        </button>
       </div>
     </div>
   );

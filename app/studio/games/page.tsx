@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { FC } from 'react';
+import { ChevronLeft } from 'lucide-react';
+//  { useState, useEffect, useRef } from 'react';
 import UnrealToggle from './components/UnrealToggle';
 import PromptBar from './components/PromptBar';
 import Viewport3D from './components/Viewport3D';
@@ -199,38 +201,88 @@ export default function GameLabPage() {
 
       {/* Export Modal */}
       {exportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="max-w-md w-full p-6 rounded-2xl bg-[#121218] border border-white/10 shadow-2xl flex flex-col gap-4 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-[#00FF88]/20 border border-[#00FF88]/40 flex items-center justify-center mx-auto text-xl text-[#00FF88]">
-              {exportModal === 'reels' ? '🎬' : exportModal === 'fbx' ? '📦' : '🎞️'}
-            </div>
-
-            <div>
-              <h3 className="text-base font-bold text-white">
+        <div className="fixed inset-0 z-50 w-full h-[100dvh] bg-[#0b141a] flex flex-col overflow-hidden select-none">
+          <div className="sticky top-0 z-20 flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0b141a] shrink-0 min-h-[54px]">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setExportModal(null)}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                title="Back"
+              >
+                <ChevronLeft className="w-5 h-5 text-[#00a884]" />
+              </button>
+              <h3 className="text-sm font-semibold text-white tracking-wide">
                 {exportModal === 'reels'
                   ? 'Post to NEX Reels'
                   : exportModal === 'fbx'
                   ? 'Export for Unreal Engine 5 / Unity'
                   : 'Export Spritesheet / JSON'}
               </h3>
-              <p className="text-xs text-neutral-400 mt-1">
+            </div>
+            <button
+              type="button"
+              onClick={() => setExportModal(null)}
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors text-sm"
+              title="Close"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col items-center gap-5 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-[#00a884]/20 border border-[#00a884]/40 flex items-center justify-center mx-auto text-2xl text-[#00a884]">
+              {exportModal === 'reels' ? '🎬' : exportModal === 'fbx' ? '📦' : '🎞️'}
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-white">
+                {exportModal === 'reels'
+                  ? 'Post to NEX Reels'
+                  : exportModal === 'fbx'
+                  ? 'Export for Unreal Engine 5 / Unity'
+                  : 'Export Spritesheet / JSON'}
+              </h3>
+              <p className="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
                 {exportModal === 'reels'
                   ? 'Auto-publishes 1080x1920 60FPS video with title: "Made in NEX Game Lab 🔥"'
                   : 'Bakes bone transforms, morph targets, and particle vertex buffers.'}
               </p>
             </div>
 
-            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-left text-neutral-300">
+            <div className="w-full max-w-md p-4 rounded-2xl bg-[#202c33]/60 border border-white/5 text-xs font-mono text-left text-neutral-300 space-y-1">
               <p>• Bone Rig: Mixamo Rigged Bipedal</p>
               <p>• Particle Shards: 10,000 Points (NEX Logo)</p>
               <p>• Physics Engine: Rapier3D + Inverted Graviton</p>
               <p>• Duration: {duration}s @ 60 FPS</p>
             </div>
+          </div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setExportModal(null)}
+          <div className="sticky bottom-0 z-20 p-4 border-t border-white/10 bg-[#0b141a] pb-[calc(16px+env(safe-area-inset-bottom,0px))] flex gap-3">
+            <button
+              type="button"
+              onClick={() => setExportModal(null)}
+              className="flex-1 h-[50px] rounded-full bg-[#202c33] hover:bg-[#2a3942] text-white font-semibold text-sm transition-colors flex items-center justify-center cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                alert(
+                  exportModal === 'reels'
+                    ? 'Reel posted to NEX Feed! Title: "Made in NEX Game Lab 🔥"'
+                    : 'File exported successfully!'
+                );
+                setExportModal(null);
+              }}
+              className="flex-1 h-[50px] rounded-full bg-[#00a884] hover:bg-[#008f6f] text-white font-semibold text-sm uppercase tracking-wider shadow-lg shadow-[#00a884]/25 transition-colors flex items-center justify-center cursor-pointer"
+            >
+              Confirm Export
+            </button>
+          </div>
+        </div>
+      )}
                 className="flex-1 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs"
               >
                 Cancel
