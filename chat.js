@@ -22953,9 +22953,12 @@ async function loadGroups() {
 
       const groupPic = group.profilePic || group.groupPic || group.icon || group.photoURL || '';
       const groupInit = (group.name || 'G').charAt(0).toUpperCase();
+      const isGroupPicValid = groupPic && typeof groupPic === 'string' &&
+        !groupPic.startsWith('blob:') &&
+        (groupPic.startsWith('http://') || groupPic.startsWith('https://') || groupPic.startsWith('data:image/') || groupPic.startsWith('/') || groupPic.startsWith('./') || groupPic.endsWith('.jpg') || groupPic.endsWith('.png') || groupPic.endsWith('.webp') || groupPic.endsWith('.svg'));
 
       let avatarHtml;
-      if (groupPic) {
+      if (isGroupPicValid) {
         avatarHtml = `<img src="${groupPic}" class="chat-avatar group-avatar" style="object-fit:cover;" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${groupInit}</div>`;
       } else {
         avatarHtml = `<div class="chat-avatar avatar-placeholder" style="display:flex !important;">${groupInit}</div>`;
@@ -23426,7 +23429,7 @@ async function loadContacts() {
       top10Contacts = [...rawContacts].reverse().filter(uid => !archivedChats.includes(uid) && !lockedChats.includes(uid) && !deletedChats.includes(uid) && !vanishedChats.includes(uid)).slice(0, 20);
     }
 
-    const myContacts = top10Contacts;
+    const myContacts = top10Contacts.filter(uid => typeof uid === 'string' && uid.trim().length > 0 && uid !== myUID && uid !== 'null' && uid !== 'undefined');
 
     const batchSize = 10;
     let contactDataList = [];
@@ -23434,10 +23437,10 @@ async function loadContacts() {
     for (let i = 0; i < myContacts.length; i += batchSize) {
       const batch = myContacts.slice(i, i + batchSize);
       const batchPromises = batch.map(async (uid) => {
-        if (uid === myUID) return null;
+        if (!uid || typeof uid !== 'string' || !uid.trim() || uid === myUID || uid === 'null' || uid === 'undefined') return null;
 
         try {
-          const userDoc = await getDoc(doc(db, "users", uid));
+          const userDoc = await getDoc(doc(db, "users", uid.trim()));
           if (!userDoc.exists()) return null;
 
           const user = userDoc.data();
@@ -23574,7 +23577,11 @@ async function loadContacts() {
         userVerifiedBadgeHtml = `<span class="nex-verified-badge tg-verified-badge" title="Verified NEX User"><i class="fa-solid fa-circle-check"></i></span>`;
       }
 
-      let avatar = (pic && (pic.startsWith('http') || pic.startsWith('data:') || pic.includes('.')))
+      const isPicValid = pic && typeof pic === 'string' &&
+        !pic.startsWith('blob:') &&
+        (pic.startsWith('http://') || pic.startsWith('https://') || pic.startsWith('data:image/') || pic.startsWith('/') || pic.startsWith('./') || pic.endsWith('.jpg') || pic.endsWith('.png') || pic.endsWith('.webp') || pic.endsWith('.svg'));
+
+      let avatar = isPicValid
         ? `<img src="${pic}" class="chat-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}">` + `<div class="chat-avatar avatar-placeholder hidden" style="display:none !important; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
         : `<div class="chat-avatar avatar-placeholder" style="background:#202c33; color:#e9edef; display:flex !important; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`;
 
@@ -23818,8 +23825,12 @@ async function appendGroupsToContactList(contactList) {
       const lastMessageTime = group.lastMessageTime ? formatChatTimestamp(group.lastMessageTime) : '';
 
       const gPic = group.profilePic || group.groupPic || group.icon || group.photoURL || '';
+      const isGPicValid = gPic && typeof gPic === 'string' &&
+        !gPic.startsWith('blob:') &&
+        (gPic.startsWith('http://') || gPic.startsWith('https://') || gPic.startsWith('data:image/') || gPic.startsWith('/') || gPic.startsWith('./') || gPic.endsWith('.jpg') || gPic.endsWith('.png') || gPic.endsWith('.webp') || gPic.endsWith('.svg'));
+
       let avatarHtml;
-      if (gPic) {
+      if (isGPicValid) {
         avatarHtml = `<img src="${gPic}" class="chat-avatar group-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${gInit}</div>`;
       } else {
         avatarHtml = `<div class="chat-avatar avatar-placeholder" style="display:flex !important;">${gInit}</div>`;

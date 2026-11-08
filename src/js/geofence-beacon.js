@@ -26,18 +26,22 @@
 
     pollGeolocation() {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            this.currentCoords = {
-              lat: pos.coords.latitude,
-              lng: pos.coords.longitude
-            };
-          },
-          () => {
-            // Fallback stays at simulated tactical origin
-          },
-          { timeout: 5000, maximumAge: 60000 }
-        );
+        try {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              this.currentCoords = {
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude
+              };
+            },
+            () => {
+              // Fallback stays at simulated tactical origin
+            },
+            { timeout: 5000, maximumAge: 60000 }
+          );
+        } catch (_) {
+          // Graceful silent fallback
+        }
       }
     }
 
