@@ -100,73 +100,88 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-  console.log('Push notification received:', event);
-  
-  let notificationData = {
-    title: ' NEXCHAT',
-    body: 'You have a new message',
-    icon: './logo.jpg',
-    badge: './logo.jpg',
-    tag: 'nexchat-notification',
-    requireInteraction: true
-  };
+  console.log('[NEXCHAT SW] Push notification received:', event);
 
+  let rawData = {};
   if (event.data) {
     try {
-      notificationData = {
-        ...notificationData,
-        ...event.data.json()
-      };
-    } catch (err) {
-      notificationData.body = event.data.text();
+      rawData = event.data.json();
+    } catch (_) {
+      rawData = { body: event.data.text() };
     }
   }
 
+  const notification = rawData.notification || {};
+  const data = rawData.data || {};
+
+  const chatId = data.chatId || data.from || rawData.tag || 'direct';
+  const senderName = notification.title || data.senderName || rawData.title || 'NEXCHAT';
+  const messagePreview = notification.body || data.body || data.text || rawData.body || 'New message';
+  const icon = notification.icon || data.avatar || rawData.icon || '/nex-logo.png';
+
   // Zone 5: Push Notification Filtering Rules
   if (
-    notificationData.isTranslateJob === true ||
-    notificationData.isSystemAction === true ||
-    notificationData.isAiUtility === true ||
-    notificationData.isAiTranslation === true ||
-    notificationData.isAiSummary === true ||
-    notificationData.chatType === 'system' ||
-    notificationData.chatType === 'ai_utility'
+    rawData.isTranslateJob === true ||
+    rawData.isSystemAction === true ||
+    rawData.isAiUtility === true ||
+    data.isTranslateJob === true ||
+    data.chatType === 'system' ||
+    data.chatType === 'ai_utility'
   ) {
     return; // Suppress background utility/system push notifications
   }
 
   // Suppress push if recipient is Chronex AI
   if (
-    notificationData.recipient === 'chronex' ||
-    notificationData.recipient === 'chronex-ai' ||
-    notificationData.to === 'chronex' ||
-    notificationData.to === 'chronex-ai'
+    data.recipient === 'chronex' ||
+    data.recipient === 'chronex-ai' ||
+    data.to === 'chronex' ||
+    data.to === 'chronex-ai'
   ) {
     return;
   }
 
-  if (!notificationData.vibrate) {
-    notificationData.vibrate = [200, 100, 200];
-  }
+  // WHATSAPP IMAGE 2 FORMAT: Grouping by tag = chatId ensures 5 messages from same user update 1 row
+  const notificationTitle = senderName;
+  const notificationOptions = {
+    body: messagePreview,
+    icon: icon,
+    badge: '/favicons/icon-192.png',
+    tag: chatId, // Web grouping key like WhatsApp
+    renotify: true,
+    requireInteraction: false,
+    vibrate: [200, 100, 200],
+    data: {
+      chatId: chatId,
+      senderId: data.senderId || data.from,
+      url: '/chat.html?chatId=' + encodeURIComponent(chatId)
+    }
+  };
 
   event.waitUntil(
-    self.registration.showNotification(notificationData.title, notificationData)
+    self.registration.showNotification(notificationTitle, notificationOptions)
   );
 });
 
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification clicked:', event);
+  console.log('[NEXCHAT SW] Notification clicked:', event);
   event.notification.close();
+
+  const chatId = event.notification.data?.chatId;
+  const targetUrl = chatId ? `/chat.html?chatId=${encodeURIComponent(chatId)}` : '/chat.html';
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (let client of clientList) {
         if (client.url.includes('chat.html') && 'focus' in client) {
+          if (chatId && client.postMessage) {
+            client.postMessage({ type: 'OPEN_CHAT', chatId: chatId });
+          }
           return client.focus();
         }
       }
       if (clients.openWindow) {
-        return clients.openWindow('./chat.html');
+        return clients.openWindow(targetUrl);
       }
     })
   );

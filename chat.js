@@ -1385,58 +1385,284 @@ async function requestNotificationPermission() {
   return false;
 }
 
-function showBrowserNotification(title, body, icon = 'logo.jpg', tag = 'nexchat') {
-  if (!notificationPermissionGranted || document.hasFocus()) {
-    return; // Don't show notifications if app is focused
+// ==============================================================================
+// WHATSAPP IMAGE 2 SYSTEM NOTIFICATION SHADE & IN-APP ALERT SUBSYSTEM
+// ==============================================================================
+
+notificationPermissionGranted = (typeof Notification !== 'undefined' && Notification.permission === 'granted');
+let fcmMessaging = null;
+
+/**
+ * Initializes FCM Web Push Notifications and obtains webPushToken
+ */
+async function initWebPushNotifications() {
+  if (typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
+    return;
   }
 
-  try {
-    const options = {
-      body: body,
-      icon: icon,
-      tag: tag,
-      badge: 'logo.jpg',
-      requireInteraction: false,
-      silent: false,
-      renotify: true,
-      vibrate: [200, 100, 200],
-      data: {
-        url: './chat.html',
-        tag
+  // 1. Request permission on app start if default
+  if (Notification.permission === 'default') {
+    try {
+      const permission = await Notification.requestPermission();
+      notificationPermissionGranted = (permission === 'granted');
+      if (permission === 'denied') {
+        showNotif("Enable notifications in Settings to receive messages like WhatsApp", "info", 5000);
+        return;
       }
-    };
-
-    const notification = new Notification(title, options);
-
-    setTimeout(() => {
-      notification.close();
-    }, 5000);
-
-    notification.onclick = () => {
-      window.focus();
-      notification.close();
-    };
-
-    return notification;
-  } catch (err) {
-    console.warn('Could not show browser notification:', err);
+    } catch (_) {}
+  } else if (Notification.permission === 'denied') {
+    return;
+  } else if (Notification.permission === 'granted') {
+    notificationPermissionGranted = true;
   }
+
+  // 2. Register Service Worker for FCM Web Push
+  try {
+    const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+      scope: '/'
+    }).catch(() => navigator.serviceWorker.ready);
+
+    // 3. Dynamically import Firebase Messaging SDK
+    const { getMessaging, getToken, onMessage } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging.js');
+    fcmMessaging = getMessaging(app);
+
+    // 4. Obtain FCM Web Push Token and persist to users/{uid}/webPushToken
+    const vapidKey = window.VAPID_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuYkr3qBUYIHBQFLXYp5Nksh8U';
+    try {
+      const token = await getToken(fcmMessaging, {
+        serviceWorkerRegistration: swRegistration,
+        ...(vapidKey ? { vapidKey } : {})
+      });
+      const curUid = myUID || window.myUID;
+      if (token && curUid) {
+        console.log('[FCM] Web Push token registered:', token.substring(0, 16) + '...');
+        const userRef = doc(db, 'users', curUid);
+        await updateDoc(userRef, {
+          webPushToken: token,
+          fcmToken: token,
+          pushTokenUpdatedAt: serverTimestamp()
+        }).catch(() => {});
+      }
+    } catch (tokenErr) {
+      console.log('[FCM] Web Push token notice:', tokenErr.message);
+    }
+
+    // 5. Handle foreground FCM events (when app is open)
+    onMessage(fcmMessaging, (payload) => {
+      console.log('[FCM] Foreground push message received:', payload);
+      const data = payload.data || {};
+      const notification = payload.notification || {};
+      const chatId = data.chatId || data.from || 'direct';
+      const senderName = notification.title || data.senderName || 'NEXCHAT';
+      const textPreview = notification.body || data.body || data.text || 'New message';
+
+      handleIncomingMessageAlert(
+        { from: chatId, senderName, text: textPreview },
+        senderName,
+        textPreview,
+        chatId
+      );
+    });
+
+  } catch (err) {
+    console.log('[FCM] Web push engine notice:', err.message);
+  }
+}
+window.initWebPushNotifications = initWebPushNotifications;
+
+/**
+ * System Push Notification Shade (WhatsApp Image 2 Format)
+ * Web grouping: uses tag = chatId so multiple messages from same sender update the SAME row!
+ */
+function showWhatsAppStyleSystemNotification({ title, body, chatId, avatar }) {
+  if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+    return;
+  }
+
+  const iconUrl = avatar || '/nex-logo.png';
+  const tag = chatId || 'nex_chat_group';
+  const notificationTitle = title || 'NEXCHAT';
+
+  const notificationOptions = {
+    body: (body || 'New message').substring(0, 120),
+    icon: iconUrl,
+    badge: '/favicons/icon-192.png',
+    tag: tag, // Web grouping key like WhatsApp
+    renotify: true,
+    requireInteraction: false,
+    vibrate: [200, 100, 200],
+    data: {
+      chatId: chatId,
+      url: '/chat.html?chatId=' + encodeURIComponent(chatId || '')
+    }
+  };
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.showNotification(notificationTitle, notificationOptions);
+    }).catch(() => {
+      try {
+        const notif = new Notification(notificationTitle, notificationOptions);
+        notif.onclick = function() {
+          window.focus();
+          this.close();
+          if (chatId && typeof openChat === 'function') {
+            openChat(chatId, 'direct', title);
+          }
+        };
+      } catch (_) {}
+    });
+  } else {
+    try {
+      const notif = new Notification(notificationTitle, notificationOptions);
+      notif.onclick = function() {
+        window.focus();
+        this.close();
+        if (chatId && typeof openChat === 'function') {
+          openChat(chatId, 'direct', title);
+        }
+      };
+    } catch (_) {}
+  }
+}
+window.showWhatsAppStyleSystemNotification = showWhatsAppStyleSystemNotification;
+
+/**
+ * Single, compact in-app toast shown ONLY when user is looking at a DIFFERENT chat.
+ * Never stacks! Auto-dismisses in 3 seconds.
+ */
+function showSingleMessageToast(senderName, textPreview, chatId) {
+  const container = document.getElementById('notificationContainer');
+  if (!container) return;
+
+  // Clear any existing message toast — NEVER STACK!
+  const existing = container.querySelector('.nex-message-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'nex-message-toast';
+  toast.style.cssText = `
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #202c33;
+    color: #e9edef;
+    padding: 10px 16px;
+    border-radius: 9999px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    border: 1px solid rgba(0, 168, 132, 0.4);
+    font-size: 13px;
+    max-width: 90%;
+    cursor: pointer;
+    animation: toastPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: auto;
+    z-index: 10001;
+  `;
+  toast.innerHTML = `
+    <span style="color: #00a884; font-size: 15px;">💬</span>
+    <div style="display: flex; flex-direction: column; overflow: hidden; text-align: left;">
+      <span style="font-weight: 700; color: #fff; font-size: 12.5px; line-height: 1.2;">${escapeHtml(senderName)}</span>
+      <span style="color: #8696a0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;">${escapeHtml(textPreview)}</span>
+    </div>
+  `;
+
+  toast.onclick = () => {
+    toast.remove();
+    if (typeof openChat === 'function') {
+      openChat(chatId, 'direct', senderName);
+    }
+  };
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    if (toast.parentElement) {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(-10px)';
+      toast.style.transition = 'all 0.25s ease';
+      setTimeout(() => toast.remove(), 250);
+    }
+  }, 3000);
+}
+
+/**
+ * Master Incoming Message Alert Gatekeeper (WhatsApp Spec)
+ */
+function handleIncomingMessageAlert(message, senderName, textPreview, targetChatId) {
+  const senderId = message.from || message.senderId || targetChatId;
+  const currentUid = myUID || window.myUID;
+
+  // Rule 0: Never alert for own messages or ineligible utility events
+  if (!senderId || (currentUid && String(senderId) === String(currentUid))) {
+    return;
+  }
+  if (!isEligibleIncomingNotification(message, currentUid)) {
+    return;
+  }
+
+  const isAppFocused = document.hasFocus() && !document.hidden;
+  const isCurrentChatOpen = (currentChatUser && String(currentChatUser) === String(senderId));
+  const isInChatsList = (!currentChatUser || !document.body.classList.contains('in-chat'));
+
+  // 1. IN-APP RULE:
+  // If user is currently in THAT chat: NO notification at all!
+  if (isAppFocused && isCurrentChatOpen) {
+    return;
+  }
+
+  // 2. IN-APP RULE:
+  // If user is in Chats list: NO system banner! NO toast!
+  // Chat row snippet and unread badge update automatically in the DOM.
+  if (isAppFocused && isInChatsList) {
+    playNotificationSound('message');
+    return;
+  }
+
+  // 3. IN-APP RULE:
+  // If user is in a DIFFERENT chat:
+  // Show 1 small top toast, 3-sec auto-dismiss, NOT stacked blue boxes!
+  if (isAppFocused && currentChatUser && String(currentChatUser) !== String(senderId)) {
+    showSingleMessageToast(senderName, textPreview, senderId);
+    playNotificationSound('message');
+    return;
+  }
+
+  // 4. BACKGROUND / SYSTEM SHADE RULE:
+  // App is backgrounded, minimized, or screen locked:
+  // Show WhatsApp Image 2 system notification in phone/browser shade.
+  showWhatsAppStyleSystemNotification({
+    title: senderName,
+    body: textPreview,
+    chatId: senderId,
+    avatar: message.senderAvatar || '/nex-logo.png'
+  });
+}
+window.handleIncomingMessageAlert = handleIncomingMessageAlert;
+
+function notifyNewMessage(message, senderName) {
+  const text = message.text || (message.attachment ? 'Sent an attachment' : 'New message');
+  const targetId = message.from || message.senderId;
+  handleIncomingMessageAlert(message, senderName, text, targetId);
 }
 
 function safeShowNotification(message, type = 'info', duration = 3000) {
-  if (typeof showNotification === 'function') {
-    return showNotification(message, type, duration);
+  if (String(message).toLowerCase().includes('new message from')) {
+    return; // Completely suppress in-app blue message box stack
   }
   if (typeof showNotif === 'function') {
     return showNotif(message, type, duration);
   }
-  console.log('Notification fallback:', message, type, duration);
 }
 
-/**
- * ZONE 5: Notification Suppression & Leakage Gatekeeper
- * Strictly validates whether an incoming message is eligible for an alert/banner.
- */
+function showBrowserNotification(title, body, icon = 'logo.jpg', tag = 'nexchat') {
+  showWhatsAppStyleSystemNotification({
+    title,
+    body,
+    chatId: tag,
+    avatar: icon
+  });
+}
+
 function isEligibleIncomingNotification(msg, currentUserId) {
   if (!msg) return false;
 
@@ -1484,40 +1710,6 @@ function isEligibleIncomingNotification(msg, currentUserId) {
   return true;
 }
 window.isEligibleIncomingNotification = isEligibleIncomingNotification;
-
-function notifyNewMessage(message, senderName) {
-  if (!isEligibleIncomingNotification(message, myUID)) {
-    return;
-  }
-
-  if (!document.hasFocus() && navigator.vibrate) {
-    vibrate([120, 60, 120]);
-  }
-
-  const senderId = message.from || message.senderId;
-  const isSenderLocked = (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.isChatLocked === 'function' && window.NexChatPasscodeGate.isChatLocked(senderId)) ||
-                         (window.NexLockedChats && typeof window.NexLockedChats.isChatLocked === 'function' && window.NexLockedChats.isChatLocked(senderId));
-
-  if (isSenderLocked) {
-    safeShowNotification(`Confidential message from ${senderName}`, 'info', 3000);
-    showBrowserNotification(
-      'NEXCHAT - Confidential Message',
-      `${senderName}: [Confidential Locked Message]`,
-      'logo.jpg',
-      'new-message'
-    );
-    return;
-  }
-
-  safeShowNotification(`New message from ${senderName}`, 'info', 3000);
-
-  showBrowserNotification(
-    'NEXCHAT - New Message',
-    `${senderName}: ${message.text || 'New message'}`,
-    'logo.jpg',
-    'new-message'
-  );
-}
 
 function notifyIncomingCall(callerName, isVideo = false) {
   const callType = isVideo ? 'Video' : 'Voice';
@@ -2375,6 +2567,12 @@ function showNotif(msg, type = "info", duration = 3000) {
     .replace(/^(\?+\s*)+/, '')
     .replace(/^\[(Success|Error|Warning|Info)\]\s*/i, '')
     .trim();
+
+  // REMOVE IN-APP BLUE BOXES COMPLETELY:
+  // Never render in-app message alerts inside showNotif
+  if (cleanMsg.toLowerCase().startsWith('new message from')) {
+    return;
+  }
 
   const iconHtml = type === 'success'
     ? '<i class="fa-solid fa-circle-check" style="margin-right:8px;font-size:15px;color:#fff;"></i>'
@@ -5605,6 +5803,32 @@ async function sendMessage() {
         lastMessageSentAt: serverTimestamp(),
         contacts: arrayUnion(currentChatUser)
       });
+
+      // Dispatch background FCM push to recipient if recipient is outside this chat
+      try {
+        if (currentChatUser && currentChatUser !== 'chronex-ai') {
+          getDoc(doc(db, 'users', currentChatUser)).then((recipDoc) => {
+            if (recipDoc.exists()) {
+              const rData = recipDoc.data();
+              const pushToken = rData.webPushToken || rData.fcmToken;
+              if (pushToken) {
+                fetch('/api/notify', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    recipientTokens: [pushToken],
+                    senderName: currentSenderName,
+                    messagePreview: text || (attachment ? 'Sent an attachment' : 'New message'),
+                    chatId: myUID,
+                    senderId: myUID,
+                    avatar: currentSenderAvatar || '/nex-logo.png'
+                  })
+                }).catch(() => {});
+              }
+            }
+          }).catch(() => {});
+        }
+      } catch (_) {}
 
       try {
         await addDoc(collection(db, 'messageActivity'), {
@@ -8950,9 +9174,9 @@ function loadMessages() {
       const messageTime = latestUnread.time?.toDate?.() || new Date(0);
       const isRecent = Date.now() - messageTime.getTime() < 30000; // Within last 30 seconds
 
+      // User is viewing this chat — no in-app alert banner needed
       if (isRecent) {
-        const senderName = getContactName(latestUnread.from) || latestUnread.from;
-        notifyNewMessage(latestUnread, senderName);
+        // Suppressed in-chat banner
       }
     }
 
@@ -16781,6 +17005,8 @@ async function setupInitialization() {
       window.myUID = user.uid;
       pageInitializedForCurrentUser = true;
       console.log(" User authenticated:", myUID);
+      // Initialize WhatsApp-style Web Push Notifications
+      try { initWebPushNotifications(); } catch (_) {}
 
       const authEmail = user.email || localStorage.getItem('auth_email') || '';
       if (authEmail) {
@@ -23284,25 +23510,9 @@ function handleGlobalIncomingMessage(msg, isGroup = false) {
     ? (msg.groupName || 'Group')
     : (getContactName(senderId) || msg.senderName || 'Contact');
 
-  // 7. Show In-App Notification Toast
+  // 7 & 8. WhatsApp Image 2 System Notification Shade & In-App Alert Gatekeeper
   try {
-    if (typeof showNotif === 'function') {
-      showNotif(`New message from ${senderName}: "${textPreview}"`, 'info', 4000);
-    } else if (typeof safeShowNotification === 'function') {
-      safeShowNotification(`New message from ${senderName}: "${textPreview}"`, 'info', 4000);
-    }
-  } catch (_) {}
-
-  // 8. Show Browser OS / PWA Push Notification if app is backgrounded
-  try {
-    if (typeof showBrowserNotification === 'function') {
-      showBrowserNotification(
-        `NEXCHAT - ${senderName}`,
-        textPreview,
-        'logo.jpg',
-        'msg_' + targetId
-      );
-    }
+    handleIncomingMessageAlert(msg, senderName, textPreview, targetId);
   } catch (_) {}
 
   // 9. UPDATE CONTACT LIST IN DOM INSTANTLY (0ms)
@@ -26137,3 +26347,32 @@ window.addEventListener('nex:vanish:stateChanged', () => {
   }
 });
 
+
+// WhatsApp Image 2: Auto-focus and open chat on system notification click
+if (typeof window !== 'undefined') {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'OPEN_CHAT' && event.data.chatId) {
+        if (typeof openChat === 'function') {
+          openChat(event.data.chatId, 'direct');
+        }
+      }
+    });
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const cId = p.get('chatId');
+      if (cId) {
+        const interval = setInterval(() => {
+          if (myUID && typeof openChat === 'function') {
+            clearInterval(interval);
+            openChat(cId, 'direct');
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+        }, 300);
+        setTimeout(() => clearInterval(interval), 10000);
+      }
+    } catch (_) {}
+  });
+}
