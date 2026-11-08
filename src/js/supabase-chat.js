@@ -168,6 +168,27 @@ export async function sendSupabaseMessage({
       payload: { ...optimisticMessage, status: 'sent' },
     }).catch(() => {});
 
+    // 2b. Direct Realtime Push to Recipient Inbox (For live contact list updates & background alerts)
+    if (chatType === 'direct' && to) {
+      try {
+        const inboxChannel = client.channel(`user_inbox_${to}`);
+        inboxChannel.send({
+          type: 'broadcast',
+          event: 'incoming_dm',
+          payload: { ...optimisticMessage, status: 'sent' },
+        }).catch(() => {});
+      } catch (_) {}
+    } else if (chatType === 'group' && to) {
+      try {
+        const groupInbox = client.channel(`group_inbox_${to}`);
+        groupInbox.send({
+          type: 'broadcast',
+          event: 'incoming_group_msg',
+          payload: { ...optimisticMessage, status: 'sent' },
+        }).catch(() => {});
+      } catch (_) {}
+    }
+
     // 3. PostgreSQL Database Persistence
     const { data, error } = await client
       .from('messages')
@@ -306,6 +327,69 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
 }
 
 /**
+ * Subscribes to the global user inbox stream across all screens in the app.
+ * Real-time listeners:
+ * 1. Broadcast channel `user_inbox_${userUid}` (Sub-15ms direct peer push)
+ * 2. PostgreSQL CDC table inserts where `recipient_id=eq.${userUid}`
+ * 
+ * @param {string} userUid 
+ * @param {object} callbacks 
+ * @param {function(object):void} callbacks.onIncomingMessage 
+ * @returns {Promise<function():void>} Unsubscribe function
+ */
+export async function subscribeToUserInbox(userUid, { onIncomingMessage }) {
+  if (!userUid) return () => {};
+
+  const client = await getSupabaseClient();
+  const config = getSupabaseConfig();
+  if (!client || !config.isConfigured) return () => {};
+
+  const inboxChannelName = `user_inbox_${userUid}`;
+  if (activeSubscriptions.has(inboxChannelName)) {
+    try { activeSubscriptions.get(inboxChannelName)(); } catch (_) {}
+    activeSubscriptions.delete(inboxChannelName);
+  }
+
+  const channel = client.channel(inboxChannelName);
+
+  // 1. Direct WebSocket Broadcast push
+  channel.on('broadcast', { event: 'incoming_dm' }, ({ payload }) => {
+    if (payload && onIncomingMessage) {
+      onIncomingMessage(normalizeSupabaseMessage(payload));
+    }
+  });
+
+  // 2. PostgreSQL Database Changes (CDC for direct messages sent to me)
+  channel.on(
+    'postgres_changes',
+    {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `recipient_id=eq.${userUid}`,
+    },
+    (payload) => {
+      if (payload.new && onIncomingMessage) {
+        onIncomingMessage(normalizeSupabaseMessage(payload.new));
+      }
+    }
+  );
+
+  channel.subscribe((status) => {
+    console.log(`[SUPABASE INBOX] Subscribed to ${inboxChannelName}:`, status);
+  });
+
+  const unsub = () => {
+    try { channel.unsubscribe(); } catch (_) {}
+    activeSubscriptions.delete(inboxChannelName);
+    console.log(`[SUPABASE INBOX] Unsubscribed from ${inboxChannelName}`);
+  };
+
+  activeSubscriptions.set(inboxChannelName, unsub);
+  return unsub;
+}
+
+/**
  * Loads recent messages for a room from Supabase PostgreSQL.
  * 
  * @param {string} roomId 
@@ -408,6 +492,7 @@ function normalizeSupabaseMessage(raw) {
     from: raw.sender_id || raw.from,
     to: raw.recipient_id || raw.group_id || raw.to,
     text: raw.text || '',
+    type: raw.type || (attachment ? (attachment.fileType || attachment.type || 'image') : 'text'),
     attachment: attachment || null,
     replyTo: replyTo || null,
     status: raw.status || (raw.read ? 'read' : 'sent'),

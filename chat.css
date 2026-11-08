@@ -18199,3 +18199,13 @@ body.in-conversation #chatFabCluster {
   pointer-events: none !important;
   opacity: 0 !important;
 }
+
+/* Realtime Incoming Message Flash Glow */
+@keyframes nexNewMessageFlash {
+  0% { background: rgba(0, 255, 136, 0.28); }
+  50% { background: rgba(0, 255, 136, 0.12); }
+  100% { background: transparent; }
+}
+.chat-item.new-message-arrived {
+  animation: nexNewMessageFlash 2.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}

@@ -66,6 +66,7 @@ import { openWallpaperModal, applyActiveWallpaper, WALLPAPER_PRESETS } from "./s
 import {
   sendSupabaseMessage,
   subscribeToSupabaseRoom,
+  subscribeToUserInbox,
   fetchSupabaseRoomMessages,
   markSupabaseMessagesRead,
   buildRoomId
@@ -81,6 +82,7 @@ if (typeof window !== 'undefined') {
   window.isSupabaseActive = isSupabaseActive;
   window.sendSupabaseMessage = sendSupabaseMessage;
   window.subscribeToSupabaseRoom = subscribeToSupabaseRoom;
+  window.subscribeToUserInbox = subscribeToUserInbox;
   window.getActiveSupabaseSettings = getActiveSupabaseSettings;
   window.firebaseAuth = auth;
   window.firebaseSendEmailVerification = sendEmailVerification;
@@ -23122,16 +23124,179 @@ async function loadGroups() {
 // ══════════════════════════════════════════════════════════════════════
 // GLOBAL REALTIME INCOMING MESSAGES LISTENER (Instant Fresh Chat Display)
 // ══════════════════════════════════════════════════════════════════════
+let globalSupabaseInboxUnsub = null;
 let globalIncomingMessagesUnsub = null;
 let globalIncomingGroupsUnsub = null;
 let globalIncomingInitialLoadDone = false;
 let globalGroupsInitialLoadDone = false;
 let _globalIncomingListenerUID = null;
 
+if (typeof window !== 'undefined' && !window._nexProcessedIncomingIds) {
+  window._nexProcessedIncomingIds = new Set();
+}
+
+function handleGlobalIncomingMessage(msg, isGroup = false) {
+  if (!msg) return;
+  const myUid = myUID || (typeof auth !== 'undefined' ? auth?.currentUser?.uid : null);
+  if (!myUid) return;
+
+  const senderId = msg.from || msg.senderId;
+  const targetId = isGroup ? (msg.groupId || msg.to) : senderId;
+
+  // 1. Ignore outgoing messages sent by current user
+  if (!senderId || senderId === myUid || senderId === 'me' || msg.from === 'me' || msg.senderId === 'me') {
+    return;
+  }
+
+  // 2. Suppress system and AI job noise
+  if (typeof isEligibleIncomingNotification === 'function' && !isEligibleIncomingNotification(msg, myUid)) {
+    return;
+  }
+
+  // 3. Deduplicate across Supabase WebSocket + Supabase CDC + Firestore snapshot
+  const msgCorrelationId = msg.clientMsgId || msg.docId || msg.id || `${targetId}_${msg.text || ''}_${msg.createdAt || Date.now()}`;
+  if (window._nexProcessedIncomingIds.has(msgCorrelationId)) {
+    return;
+  }
+  window._nexProcessedIncomingIds.add(msgCorrelationId);
+  if (window._nexProcessedIncomingIds.size > 500) {
+    const first = window._nexProcessedIncomingIds.values().next().value;
+    window._nexProcessedIncomingIds.delete(first);
+  }
+
+  // 4. Check if user is currently inside this chat
+  const isViewingThisChat = (currentChatType === (isGroup ? 'group' : 'direct') && currentChatUser === targetId);
+  if (isViewingThisChat) {
+    if (!isGroup && typeof markSupabaseMessagesRead === 'function') {
+      const roomId = buildRoomId(myUid, senderId);
+      markSupabaseMessagesRead(roomId, myUid);
+    }
+    return;
+  }
+
+  // 5. Audio & Haptics Feedback
+  try { playLuxuryPopSound(); } catch (_) {}
+  try {
+    if (typeof hapticFeedback === 'function') hapticFeedback('light');
+    else if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+  } catch (_) {}
+
+  // 6. Format snippet preview
+  let textPreview = 'New message';
+  if (msg.text) {
+    textPreview = msg.text.length > 36 ? msg.text.substring(0, 36) + '...' : msg.text;
+  } else if (msg.attachment) {
+    const attType = String(msg.attachment.fileType || msg.attachment.type || '');
+    if (attType.includes('image')) textPreview = 'Photo';
+    else if (attType.includes('audio')) textPreview = 'Voice message';
+    else if (attType.includes('video')) textPreview = 'Video';
+    else textPreview = 'Attachment';
+  }
+
+  const senderName = isGroup
+    ? (msg.groupName || 'Group')
+    : (getContactName(senderId) || msg.senderName || 'Contact');
+
+  // 7. Show In-App Notification Toast
+  try {
+    if (typeof showNotif === 'function') {
+      showNotif(`New message from ${senderName}: "${textPreview}"`, 'info', 4000);
+    } else if (typeof safeShowNotification === 'function') {
+      safeShowNotification(`New message from ${senderName}: "${textPreview}"`, 'info', 4000);
+    }
+  } catch (_) {}
+
+  // 8. Show Browser OS / PWA Push Notification if app is backgrounded
+  try {
+    if (typeof showBrowserNotification === 'function') {
+      showBrowserNotification(
+        `NEXCHAT - ${senderName}`,
+        textPreview,
+        'logo.jpg',
+        'msg_' + targetId
+      );
+    }
+  } catch (_) {}
+
+  // 9. UPDATE CONTACT LIST IN DOM INSTANTLY (0ms)
+  const contactList = document.getElementById('contactList');
+  if (contactList) {
+    const existingLi = contactList.querySelector(`li[data-chat-id="${CSS.escape(targetId)}"]`);
+    if (existingLi) {
+      // Update snippet
+      const previewEl = existingLi.querySelector('.chat-preview');
+      if (previewEl) {
+        previewEl.innerHTML = `<span class="preview-text">${escapeHtml(textPreview)}</span>`;
+      }
+
+      // Update timestamp to "Now" and highlight green
+      const timeEl = existingLi.querySelector('.chat-item-time');
+      if (timeEl) {
+        timeEl.textContent = 'Now';
+        timeEl.classList.add('unread');
+      }
+
+      // Mark content unread
+      const contentEl = existingLi.querySelector('.chat-item-content');
+      if (contentEl) {
+        contentEl.classList.add('unread');
+      }
+
+      // Increment or create unread counter badge
+      let badgeEl = existingLi.querySelector('.unread-badge');
+      if (badgeEl) {
+        const count = parseInt(badgeEl.textContent, 10) || 0;
+        badgeEl.textContent = count + 1 > 99 ? '99+' : count + 1;
+      } else {
+        const timeContainer = existingLi.querySelector('.chat-time-container');
+        if (timeContainer) {
+          const badge = document.createElement('div');
+          badge.className = 'unread-badge';
+          badge.textContent = '1';
+          timeContainer.appendChild(badge);
+        }
+      }
+
+      // Bubble conversation row to the very top (right after Chronex AI if present)
+      const firstChat = contactList.querySelector('.chat-item:not(.chronex-ai-item)');
+      if (firstChat && firstChat !== existingLi) {
+        contactList.insertBefore(existingLi, firstChat);
+      }
+
+      // Visual flash animation
+      existingLi.classList.add('new-message-arrived');
+      setTimeout(() => existingLi.classList.remove('new-message-arrived'), 2500);
+
+    } else {
+      // If contact is not yet rendered in DOM, trigger loadContacts to render it at the top
+      if (typeof loadContacts === 'function') {
+        loadContacts().catch(console.warn);
+      }
+    }
+  }
+
+  // 10. Update Navigation unread badge & Window Document Title
+  try {
+    const badges = document.querySelectorAll('#contactList .unread-badge');
+    let total = 0;
+    badges.forEach(b => { total += (parseInt(b.textContent, 10) || 0); });
+    if (typeof updateNavChatsBadge === 'function') {
+      updateNavChatsBadge(total);
+    }
+    if (total > 0) {
+      document.title = `(${total}) NEXCHAT`;
+    }
+  } catch (_) {}
+}
+
 function setupGlobalIncomingMessageListener() {
   if (!myUID) return;
-  if (globalIncomingMessagesUnsub && _globalIncomingListenerUID === myUID) {
+  if (globalIncomingMessagesUnsub && _globalIncomingListenerUID === myUID && globalSupabaseInboxUnsub) {
     return;
+  }
+  if (typeof globalSupabaseInboxUnsub === 'function') {
+    try { globalSupabaseInboxUnsub(); } catch (_) {}
+    globalSupabaseInboxUnsub = null;
   }
   if (typeof globalIncomingMessagesUnsub === 'function') {
     try { globalIncomingMessagesUnsub(); } catch (_) {}
@@ -23144,9 +23309,27 @@ function setupGlobalIncomingMessageListener() {
   _globalIncomingListenerUID = myUID;
 
   try {
-    // 1. Direct Messages real-time tail
+    // 1. Supabase Realtime User Inbox (Sub-15ms push for direct messages)
+    if (typeof subscribeToUserInbox === 'function') {
+      subscribeToUserInbox(myUID, {
+        onIncomingMessage: (incoming) => {
+          handleGlobalIncomingMessage(incoming, false);
+        }
+      }).then(unsub => {
+        globalSupabaseInboxUnsub = unsub;
+      }).catch(err => {
+        console.warn('[SUPABASE INBOX] Subscribe notice:', err?.message);
+      });
+    }
+
+    // 2. Direct Messages Firestore real-time tail
     const messagesRef = collection(db, 'messages');
-    const q = query(messagesRef, where('to', '==', myUID), limit(50));
+    let q;
+    try {
+      q = query(messagesRef, where('to', '==', myUID), orderBy('time', 'desc'), limit(25));
+    } catch (_) {
+      q = query(messagesRef, where('to', '==', myUID), limit(50));
+    }
     globalIncomingInitialLoadDone = false;
 
     globalIncomingMessagesUnsub = onSnapshot(q, async (snapshot) => {
@@ -23157,71 +23340,32 @@ function setupGlobalIncomingMessageListener() {
 
       for (const change of snapshot.docChanges()) {
         if (change.type === 'added') {
-          const msg = change.doc.data();
-
-          // Zone 5 Gatekeeper: Suppress AI jobs, translate/summary tasks, and system signals
-          if (!isEligibleIncomingNotification(msg, myUID)) {
-            continue;
-          }
-
-          // Freshness check: Ignore historical messages on load replay (>60s)
-          const msgTime = msg.time?.toMillis?.() || (msg.time?.toDate?.() ? msg.time.toDate().getTime() : (msg.timestamp?.toMillis?.() || Date.now()));
-          if (Date.now() - msgTime > 60000) {
-            continue;
-          }
-
-          const senderId = msg.senderId || msg.from;
-
-          // Suppress if the user is currently viewing this chat
-          if (currentChatType === 'direct' && currentChatUser === senderId) {
-            continue;
-          }
-          if (currentChatType === 'ai' && (senderId === 'chronex' || senderId === 'chronex-ai')) {
-            continue;
-          }
-
-          playLuxuryPopSound();
-          hapticFeedback('light');
-
-          const textPreview = msg.text ? (msg.text.length > 50 ? msg.text.substring(0, 50) + '...' : msg.text) : 'Attachment';
-          showNotif(`New message from ${msg.senderName || 'User'}: "${textPreview}"`, 'info', 4000);
-
-          const contactList = document.getElementById('contactList');
-          if (contactList) {
-            const existingLi = contactList.querySelector(`li[data-chat-id="${senderId}"]`);
-            if (existingLi) {
-              const previewEl = existingLi.querySelector('.chat-preview');
-              if (previewEl) previewEl.innerHTML = `<span class="preview-text">${escape(textPreview)}</span>`;
-              const timeEl = existingLi.querySelector('.chat-item-time');
-              if (timeEl) timeEl.textContent = 'Just now';
-              let badgeEl = existingLi.querySelector('.unread-badge');
-              if (badgeEl) {
-                const count = parseInt(badgeEl.textContent, 10) || 0;
-                badgeEl.textContent = count + 1 > 99 ? '99+' : count + 1;
-              } else {
-                const timeContainer = existingLi.querySelector('.chat-time-container');
-                if (timeContainer) {
-                  const badge = document.createElement('div');
-                  badge.className = 'unread-badge';
-                  badge.textContent = '1';
-                  timeContainer.appendChild(badge);
-                }
-              }
-              const firstChat = contactList.querySelector('.chat-item:not(.chronex-ai-item)');
-              if (firstChat && firstChat !== existingLi) {
-                contactList.insertBefore(existingLi, firstChat);
-              }
-            } else {
-              loadContacts().catch(console.warn);
-            }
-          }
+          const msg = { docId: change.doc.id, ...change.doc.data() };
+          handleGlobalIncomingMessage(msg, false);
         }
       }
     }, (err) => {
+      if (err && err.code === 'failed-precondition') {
+        try {
+          const fallbackQ = query(messagesRef, where('to', '==', myUID), limit(50));
+          globalIncomingMessagesUnsub = onSnapshot(fallbackQ, (fallbackSnap) => {
+            if (!globalIncomingInitialLoadDone) {
+              globalIncomingInitialLoadDone = true;
+              return;
+            }
+            for (const change of fallbackSnap.docChanges()) {
+              if (change.type === 'added') {
+                const msg = { docId: change.doc.id, ...change.doc.data() };
+                handleGlobalIncomingMessage(msg, false);
+              }
+            }
+          });
+        } catch (_) {}
+      }
       console.warn('[GLOBAL INCOMING DIRECT] Listener notice:', err?.message);
     });
 
-    // 2. Group Chats real-time tail
+    // 3. Group Chats real-time tail (Firestore)
     const groupsRef = collection(db, 'groups');
     const qGroups = query(groupsRef, where('members', 'array-contains', myUID), limit(25));
     globalGroupsInitialLoadDone = false;
@@ -23236,56 +23380,20 @@ function setupGlobalIncomingMessageListener() {
         if (change.type === 'modified' || change.type === 'added') {
           const groupData = change.doc.data();
           const groupId = change.doc.id;
-          const lastSender = groupData.lastMessageSender || groupData.lastMessageFrom;
-          if (lastSender === myUID) continue;
-
-          // If inside this group, active VirtualScroller handles rendering
-          if (currentChatType === 'group' && currentChatUser === groupId) {
-            continue;
-          }
-
-          const rawLast = groupData.lastMessage || 'New message';
-          const textPreview = rawLast.length > 50 ? rawLast.substring(0, 50) + '...' : rawLast;
-
-          playLuxuryPopSound();
-          hapticFeedback('light');
-
-          const contactList = document.getElementById('contactList');
-          if (contactList) {
-            const existingLi = contactList.querySelector(`li[data-chat-id="${groupId}"]`);
-            if (existingLi) {
-              const previewEl = existingLi.querySelector('.chat-preview');
-              if (previewEl) previewEl.innerHTML = `<span class="preview-text">${escape(textPreview)}</span>`;
-              const timeEl = existingLi.querySelector('.chat-item-time');
-              if (timeEl) timeEl.textContent = 'Just now';
-              let badgeEl = existingLi.querySelector('.unread-badge');
-              if (badgeEl) {
-                const count = parseInt(badgeEl.textContent, 10) || 0;
-                badgeEl.textContent = count + 1 > 99 ? '99+' : count + 1;
-              } else {
-                const timeContainer = existingLi.querySelector('.chat-time-container');
-                if (timeContainer) {
-                  const badge = document.createElement('div');
-                  badge.className = 'unread-badge';
-                  badge.textContent = '1';
-                  timeContainer.appendChild(badge);
-                }
-              }
-              const firstChat = contactList.querySelector('.chat-item:not(.chronex-ai-item)');
-              if (firstChat && firstChat !== existingLi) {
-                contactList.insertBefore(existingLi, firstChat);
-              }
-            } else {
-              loadContacts().catch(console.warn);
-            }
-          }
+          handleGlobalIncomingMessage({
+            groupId,
+            to: groupId,
+            from: groupData.lastMessageSender || groupData.lastMessageFrom,
+            text: groupData.lastMessage || 'New message',
+            createdAt: groupData.lastMessageTime
+          }, true);
         }
       }
     }, (err) => {
       console.warn('[GLOBAL INCOMING GROUPS] Listener notice:', err?.message);
     });
 
-    // 3. Fallback polling loop (runs every 2.5s to ensure rock-solid real-time sync)
+    // 4. Fallback badge polling loop
     if (!window._realtimePollInterval) {
       window._realtimePollInterval = setInterval(() => {
         if (!myUID || document.hidden) return;
@@ -23579,6 +23687,22 @@ async function loadContacts() {
                 }
               });
             }
+
+            // Also check Supabase for latest message
+            if (typeof fetchSupabaseRoomMessages === 'function') {
+              try {
+                const supaMsgs = await fetchSupabaseRoomMessages(buildRoomId(myUID, uid), 1);
+                if (Array.isArray(supaMsgs) && supaMsgs.length > 0) {
+                  const sMsg = supaMsgs[0];
+                  const sTime = sMsg.time || sMsg.createdAt;
+                  if (!latestMsg || getMs(sTime) > getMs(latestTime)) {
+                    latestMsg = sMsg;
+                    latestTime = sTime;
+                  }
+                }
+              } catch (_) {}
+            }
+
             return { latestMsg, latestTime };
           })();
 
