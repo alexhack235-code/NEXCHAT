@@ -151,9 +151,9 @@ export function initSecurityGuard() {
       }
       dismissShield();
     } else {
-      // Check if user has an active guest UID
-      const guestUid = localStorage.getItem('auth_uid') || localStorage.getItem('nex_guest_uid');
-      if (guestUid) {
+      // If user has saved authenticated UID in localStorage
+      const userUid = localStorage.getItem('auth_uid');
+      if (userUid) {
         dismissShield();
         return;
       }

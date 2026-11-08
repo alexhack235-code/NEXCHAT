@@ -18186,3 +18186,16 @@ body.in-conversation #chatFabCluster {
   display: flex !important;
   visibility: visible !important;
 }
+
+
+/* Absolute Suppression of intrusive app download popups on Chat interface */
+.app-download-modal,
+.app-smart-banner,
+.app-modal-content,
+.pwa-prompt-overlay,
+#appDownloadModal {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}

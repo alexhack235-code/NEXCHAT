@@ -1,5 +1,10 @@
 ﻿
+
 function initializeAppPrompt() {
+  if (window.location.pathname.includes('chat') || window.location.href.includes('chat')) {
+    return;
+  }
+
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   
   const isDismissed = localStorage.getItem('nexchat_download_dismissed');
