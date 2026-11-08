@@ -6728,11 +6728,11 @@
 
     // ============================================================
     // LEVEL 5 DEVELOPER CLEARANCE & CONSOLE ENGINE
-    // Passphrase: IAMATOMICDEVELOPER18@$#
+    
     // ============================================================
-    window.devAuth = function(passphrase) {
+    const devAuth = function(passphrase) {
       const cleanPass = (passphrase || '').trim().toUpperCase();
-      if (cleanPass === 'IAMATOMICDEVELOPER18@$#' || cleanPass === 'ASTRO-2026-NEX') {
+      if (cleanPass === 'ASTRO-2026-NEX') {
         localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
         sessionStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
         localStorage.setItem('BS_HAS_LOGGED_IN', 'true');
@@ -6745,7 +6745,7 @@
       return false;
     };
 
-    window.devConsole = {
+    const devConsole = {
       godMode: function(enable = true) {
         window._godMode = enable;
         if (enable && typeof gameState !== 'undefined') {
@@ -6796,7 +6796,7 @@
     function bypassLaunchLock() {
       const keyInput = document.getElementById('launch-access-key');
       const enteredKey = keyInput ? keyInput.value.trim().toUpperCase() : '';
-      const isDevKey = (enteredKey === 'ASTRO-2026-NEX' || enteredKey === 'IAMATOMICDEVELOPER18@$#');
+      const isDevKey = (enteredKey === 'ASTRO-2026-NEX');
       const isRegistered = (localStorage.getItem('nex_astro_early_access_registered') === 'true') ||
                            (localStorage.getItem('ATOMIC_METROPOLIS_UNLOCKED') === 'true');
 
@@ -6854,7 +6854,7 @@
     function submitLoginAndDeploy() {
       const keyInput = document.getElementById('launch-access-key');
       const enteredKey = keyInput ? keyInput.value.trim().toUpperCase() : '';
-      const isDevKey = (enteredKey === 'ASTRO-2026-NEX' || enteredKey === 'IAMATOMICDEVELOPER18@$#');
+      const isDevKey = (enteredKey === 'ASTRO-2026-NEX');
       const isRegistered = (localStorage.getItem('nex_astro_early_access_registered') === 'true') ||
                            (localStorage.getItem('ATOMIC_METROPOLIS_UNLOCKED') === 'true');
 

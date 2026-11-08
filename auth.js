@@ -1321,10 +1321,6 @@ function initNexshotFusionIntro() {
   }
 }
 
-// Window exports for IP Sybil Shield & Registration Quota Monitoring
-window.checkIpRegistrationLimit = checkIpRegistrationLimit;
-window.recordIpRegistration = recordIpRegistration;
-window.detectIPAndVPN = detectIPAndVPN;
-window.sanitizeIpKey = sanitizeIpKey;
+// Internal IP registration and Sybil shield scoped locally
 
 

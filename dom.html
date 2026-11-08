@@ -503,7 +503,7 @@
 
     /* ============================================================
        ATOMIC SECURITY GATEWAY LOCK SCREEN (Z-INDEX 500)
-       Passphrase: IAMATOMICDEVELOPER18@$#
+       Passcode: ASTRO-2026
        ============================================================ */
     #atomic-lock-overlay {
       position: absolute;
@@ -1337,7 +1337,7 @@
     <span id="diag-text">INITIALIZING ENGINE...</span>
   </div>
 
-  <!-- ATOMIC ACCESS SECURITY GATEWAY (PASS: IAMATOMICDEVELOPER18@$#) -->
+  <!-- ATOMIC ACCESS SECURITY GATEWAY  -->
   <div id="atomic-lock-overlay" style="display: none;">
     <div class="lock-card">
       <div class="lock-icon-box">
@@ -1364,7 +1364,7 @@
           <i class="fa-solid fa-unlock-keyhole"></i> AUTHORIZE &amp; LAUNCH ASTROSHIFT
         </button>
 
-        <button type="button" id="btn-quick-unlock" onclick="autoFillAndAuthorize()" style="background: rgba(0, 242, 255, 0.12); border: 1px solid #00f2ff; color: #00f2ff; padding: 12px; border-radius: 12px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1.5px; cursor: pointer; transition: all 0.2s; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+        <button type="button" id="btn-quick-unlock" onclick="document.getElementById('atomic-pass-input').focus()" style="background: rgba(0, 242, 255, 0.12); border: 1px solid #00f2ff; color: #00f2ff; padding: 12px; border-radius: 12px; font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1.5px; cursor: pointer; transition: all 0.2s; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
           <i class="fa-solid fa-bolt"></i> QUICK AUTHORIZE // DEMO ACCESS
         </button>
       </form>
@@ -2076,9 +2076,9 @@
   <script>
     // ============================================================
     // ATOMIC SECURITY PASSCODE ENGINE
-    // Required Passphrase: IAMATOMICDEVELOPER18@$#
+    // Required Passcode: ASTRO-2026
     // ============================================================
-    const ATOMIC_SECRET_PASS = "IAMATOMICDEVELOPER18@$#";
+    const ATOMIC_SECRET_PASS = "ASTRO-2026";
 
     function togglePassVisibility() {
       const input = document.getElementById('atomic-pass-input');

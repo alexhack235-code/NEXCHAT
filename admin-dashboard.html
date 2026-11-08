@@ -6124,9 +6124,12 @@
   <!-- CONTROLLER SCRIPT -->
   <script>
     (function() {
-      //  CREDENTIALS & INITIALIZATION 
-      const MASTER_KEY = "IAMATOMICDEVELOPER16@$#";
-      const VALID_MASTER_KEYS = ["IAMATOMICDEVELOPER16@$#", "NEX-ADMIN-2026", "IAMATOMICDEVELOPER18@$#"];
+      //  CREDENTIALS & INITIALIZATION (CRYPTOGRAPHIC HASH VERIFICATION) 
+      const VALID_MASTER_KEY_HASHES = [
+        "4ef9674e23418643453fbf0c4ea870992d64ff504e64019d064562b69eb85859",
+        "f0e6d50c8713b0b10d639409e513b927961820f0b5ac227d9b6329bce5dc7b98",
+        "0675731e4ad4a1f3a2bcbd9e330774bcd3a0f5728ceeb5dd2983c3be24efe8d2"
+      ];
       const SUPERADMIN_EMAILS = ["demonalexander526@gmail.com", "alexhack235@gmail.com", "alexandergamedeveloper74@gmail.com"];
       const SUPERADMIN_UIDS = ["ZhvqSK7NNtQUP1sqszYfo1kzXSb2", "demonalexander526", "alexhack235"];
       const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 Minutes
@@ -6222,9 +6225,16 @@
         try { initFulfillmentDesk(); } catch(e) {}
       }
 
-      unlockBtn.addEventListener('click', () => {
+      async function computeKeyHash(str) {
+        if (!crypto?.subtle) return '';
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str || ''));
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      }
+
+      unlockBtn.addEventListener('click', async () => {
         const entered = passkeyInput.value.trim();
-        if (entered && (entered === MASTER_KEY || (typeof VALID_MASTER_KEYS !== 'undefined' && VALID_MASTER_KEYS.includes(entered)))) {
+        const hash = await computeKeyHash(entered);
+        if (hash && VALID_MASTER_KEY_HASHES.includes(hash)) {
           statusMsg.style.display = 'block';
           statusMsg.style.background = 'rgba(0,255,102,0.15)';
           statusMsg.style.border = '1px solid var(--border-green)';

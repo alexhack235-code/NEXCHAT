@@ -917,7 +917,11 @@ Active Network Mesh Connections:
           toggleMatrixRain();
         }
         else if (main === 'admin') {
-          if (parts[1] === 'IAMATOMICDEVELOPER16@$#') {
+          const inputHash = await (async (str) => {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str || ''));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+          })(parts[1]);
+          if (inputHash === '4ef9674e23418643453fbf0c4ea870992d64ff504e64019d064562b69eb85859') {
             sessionStorage.setItem('nex_admin_authorized', 'true');
             localStorage.removeItem('nex_is_admin');
             logTerminal('[SECURITY] SuperAdmin authenticated via secure passkey. Launching Security Console...', 'success');

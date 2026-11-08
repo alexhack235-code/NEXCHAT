@@ -216,7 +216,7 @@
 
       // Check for Developer Passphrase Override
       if (email === 'iamatomicdeveloper18@$#' || email === 'iamatomicdeveloper18@$#.com') {
-        window.devAuth('IAMATOMICDEVELOPER18@$#');
+        // developer override removed
         return;
       }
 
@@ -339,9 +339,9 @@
   }
 
   // Level 5 Developer Security Override Engine
-  window.devAuth = function(passphrase) {
+  const devAuth = function(passphrase) {
     const cleanPass = (passphrase || '').trim().toUpperCase();
-    if (cleanPass === 'IAMATOMICDEVELOPER18@$#' || cleanPass === 'ASTRO-2026-NEX') {
+    if (cleanPass === 'ASTRO-2026-NEX') {
       try {
         localStorage.setItem('nex_astro_clearance_level', '5');
         localStorage.setItem('nex_astro_early_access_registered', 'true');

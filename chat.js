@@ -3472,15 +3472,8 @@ window.addEventListener('DOMContentLoaded', () => {
     console.warn('?? `notificationContainer` was missing. Created fallback container.');
   }
 
-  window.testNotif = function (msg = 'Test notification', type = 'info', duration = 3000) {
-    try {
-      showNotif(msg, type, duration);
-    } catch (e) {
-      console.error('Failed to show test notification:', e);
-    }
-  };
-
-  const initAudioOnInteraction = () => {
+  // testNotif decommissioned
+const initAudioOnInteraction = () => {
     initializeAudio();
     document.removeEventListener('click', initAudioOnInteraction);
     document.removeEventListener('touchstart', initAudioOnInteraction);
@@ -3502,11 +3495,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('touchstart', requestNotificationsOnInteraction);
   document.addEventListener('keydown', requestNotificationsOnInteraction);
 
-  window.testRingtone = function(ringtone = 'skype') {
-    console.log(`Testing ${ringtone} ringtone...`);
-    startRinging(ringtone);
-    setTimeout(() => stopRinging(), 3000);
-  };
+  // testRingtone decommissioned
 });
 
 
@@ -16207,83 +16196,7 @@ function validateSettingsIntegrity() {
 
 
 
-window.debugSearchUsers = async function () {
-  console.log("?? DEBUG: Testing Firestore user query...");
-  console.log("?? Current user UID:", myUID);
-
-  try {
-    const usersRef = collection(db, "users");
-    const q = query(usersRef);
-    const snap = await getDocs(q);
-
-    console.log("? Firestore query successful!");
-    console.log("?? Total users found:", snap.docs.length);
-    console.log("?? Users in database:");
-
-    snap.docs.forEach(doc => {
-      const userData = doc.data();
-      console.log({
-        uid: doc.id,
-        username: userData.username,
-        email: userData.email,
-        name: userData.name,
-        hasProfilePic: !!userData.profilePic,
-        online: userData.online
-      });
-    });
-
-    if (snap.docs.length === 0) {
-      console.warn("??  No users found in Firestore!");
-    }
-  } catch (err) {
-    console.error("? Error querying users:", err);
-  }
-};
-
-
-window.debugAuthState = function () {
-  console.log("?? DEBUG: Checking auth state...");
-  console.log("?? myUID (from app):", myUID);
-  console.log("?? myUsername (from app):", myUsername);
-  console.log("?? auth.currentUser:", auth.currentUser);
-
-  if (auth.currentUser) {
-    console.log("? User is authenticated");
-    console.log("?? Current UID:", auth.currentUser.uid);
-    console.log("?? Current Email:", auth.currentUser.email);
-  } else {
-    console.log("? No user authenticated");
-  }
-};
-
-
-window.debugReloadAndSearch = async function () {
-  console.log("?? DEBUG: Reloading and testing search...");
-
-  await new Promise(r => setTimeout(r, 1000));
-
-  console.log("?? Checking auth state...");
-  if (!myUID) {
-    console.warn("?? User not authenticated yet");
-    console.log("? Waiting for auth...");
-    let attempts = 0;
-    while (!myUID && attempts < 50) {
-      await new Promise(r => setTimeout(r, 100));
-      attempts++;
-    }
-  }
-
-  console.log("?? Current myUID:", myUID);
-
-  if (myUID) {
-    console.log("? User authenticated, querying users...");
-    await window.debugSearchUsers();
-  } else {
-    console.log("? User still not authenticated!");
-  }
-};
-
-
+// Production Clean: Debug telemetry hooks decommissioned
 async function checkVideoLikeMilestones() {
   try {
     if (!myUID) return;
