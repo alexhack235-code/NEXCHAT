@@ -8,7 +8,6 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signInWithCredential,
-  signInAnonymously,
   GoogleAuthProvider,
   setPersistence,
   browserLocalPersistence
@@ -749,14 +748,29 @@ if (loginForm) {
   });
 }
 
-onAuthStateChanged(auth, user => {
-  if (!user) return;
-  const path = location.pathname.toLowerCase();
+function redirectIfOnAuthPage(user) {
+  if (!user || !user.uid) return;
+  const path = (window.location.pathname || '').toLowerCase();
   const isAuthPage = path === '' || path === '/' || path.endsWith('/') || path.endsWith('index.html') || path.includes('login.html');
   if (isAuthPage && !path.includes('profile') && !path.includes('chat') && !path.includes('register') && !path.includes('reset')) {
-    location.href = 'chat.html';
+    try {
+      localStorage.setItem('auth_uid', user.uid);
+      if (user.email) localStorage.setItem('auth_email', user.email);
+      if (user.displayName) localStorage.setItem('auth_name', user.displayName);
+    } catch (_) { }
+    window.location.href = 'chat.html';
+  }
+}
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    redirectIfOnAuthPage(user);
   }
 });
+
+if (auth.currentUser) {
+  redirectIfOnAuthPage(auth.currentUser);
+}
 
 let googleSignInInitialized = false;
 
@@ -820,40 +834,37 @@ async function processGoogleUser(user, credentialResult) {
     console.warn('[AUTH] Credential token note:', tokenErr);
   }
 
-  // 2. Safe, non-blocking sync with Firestore & Realtime Database
-  try {
-    const userRef = doc(db, 'users', user.uid);
-    const userDoc = await Promise.race([
-      getDoc(userRef),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
-    ]).catch(() => null);
+  // 2. Asynchronous background sync with Firestore & Realtime Database (non-blocking)
+  (async () => {
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef).catch(() => null);
 
-    if (!userDoc || !userDoc.exists()) {
-      setDoc(userRef, primaryUserData, { merge: true }).catch(() => { });
-      try {
-        set(ref(rtdb, 'users/' + user.uid), primaryUserData).catch(() => { });
-      } catch (_) { }
-    } else {
-      setDoc(userRef, {
-        online: true,
-        lastLogin: new Date().toISOString()
-      }, { merge: true }).catch(() => { });
+      if (!userDoc || !userDoc.exists()) {
+        setDoc(userRef, primaryUserData, { merge: true }).catch(() => { });
+        try {
+          set(ref(rtdb, 'users/' + user.uid), primaryUserData).catch(() => { });
+        } catch (_) { }
+      } else {
+        setDoc(userRef, {
+          online: true,
+          lastLogin: new Date().toISOString()
+        }, { merge: true }).catch(() => { });
 
-      try {
-        set(ref(rtdb, 'users/' + user.uid + '/online'), true).catch(() => { });
-        set(ref(rtdb, 'users/' + user.uid + '/lastLogin'), Date.now()).catch(() => { });
-      } catch (_) { }
+        try {
+          set(ref(rtdb, 'users/' + user.uid + '/online'), true).catch(() => { });
+          set(ref(rtdb, 'users/' + user.uid + '/lastLogin'), Date.now()).catch(() => { });
+        } catch (_) { }
+      }
+    } catch (syncErr) {
+      console.warn('[AUTH] Background cloud sync note:', syncErr);
     }
-  } catch (syncErr) {
-    console.warn('[AUTH] Background cloud sync note:', syncErr);
-  }
+  })();
 
   showResult('Google sign-in successful! Redirecting...', false);
 
-  setTimeout(() => {
-    hideLoginLoader();
-    location.href = 'chat.html';
-  }, 350);
+  // Instant redirect to chat.html
+  window.location.href = 'chat.html';
 }
 
 async function handleGoogleSignIn() {
@@ -902,9 +913,6 @@ async function handleGoogleSignIn() {
             <a href="https://console.firebase.google.com/project/nexchat-47326/authentication/settings" target="_blank" rel="noopener" class="quick-guest-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,243,255,0.15); border: 1px solid #00f3ff; color: #00f3ff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;">
               <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Firebase Console Settings
             </a>
-            <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
-              <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
-            </button>
           </div>
         </div>
       `;
@@ -916,9 +924,6 @@ async function handleGoogleSignIn() {
             Google Provider is not enabled in Firebase.<br>
             Enable it in <b>Firebase Console &gt; Authentication &gt; Sign-in method &gt; Google</b>.
           </p>
-          <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
-            <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
-          </button>
         </div>
       `;
     } else if (errCode === 'auth/popup-closed-by-user') {
@@ -946,9 +951,6 @@ async function handleGoogleSignIn() {
         <div class="auth-error-detail">
           <strong>Authentication Notice (${errCode || 'Info'})</strong>
           <p style="margin: 4px 0 8px; font-size: 12px;">${rawMsg}</p>
-          <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
-            <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
-          </button>
         </div>
       `;
     }
@@ -974,9 +976,6 @@ async function checkRedirectAuth() {
         <div class="auth-error-detail">
           <strong>Google Sign-In (${err.code || 'Notice'})</strong>
           <p style="margin: 4px 0 8px; font-size: 12px;">${rawMsg}</p>
-          <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
-            <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
-          </button>
         </div>
       `, true);
     }

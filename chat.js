@@ -5055,9 +5055,14 @@ async function sendMessage() {
   }
 
   if (!myUID) {
-    myUID = localStorage.getItem('auth_uid') || ('guest_' + Math.random().toString(36).substring(2, 9));
-    window.myUID = myUID;
-    try { localStorage.setItem('auth_uid', myUID); } catch (_) {}
+    const cachedUid = localStorage.getItem('auth_uid');
+    if (cachedUid) {
+      myUID = cachedUid;
+      window.myUID = cachedUid;
+    } else {
+      showNotif("[Error] Please log in first", "error");
+      return;
+    }
   }
 
   // Activity Monitor Logging
@@ -16898,23 +16903,23 @@ async function setupInitialization() {
             return;
           }
 
-          // Guest Auto-Authentication: Keep the app 100% alive without throwing users out to index.html
-          try {
-            const { signInAnonymously } = await import("https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js");
-            console.log("[NEXCHAT] Visitor session: auto-authenticating guest explorer...");
-            await signInAnonymously(auth);
+          // Grace period check: give Firebase Auth time to restore session
+          if (auth.currentUser) {
             authRedirectInProgress = false;
             authRedirectTimer = null;
-          } catch (guestErr) {
-            console.warn("[NEXCHAT] Guest fallback mode engaged locally:", guestErr);
-            if (!myUID) {
-              myUID = localStorage.getItem('auth_uid') || ('guest_' + Math.random().toString(36).substring(2, 9));
-              window.myUID = myUID;
-              try { localStorage.setItem('auth_uid', myUID); } catch (_) {}
-            }
-            authRedirectInProgress = false;
-            authRedirectTimer = null;
+            return;
           }
+          const savedUid = localStorage.getItem('auth_uid');
+          if (savedUid) {
+            authRedirectInProgress = false;
+            authRedirectTimer = null;
+            return;
+          }
+          // Genuine unauthenticated visitor
+          console.warn('[AUTH] No authenticated user detected, redirecting to login...');
+          authRedirectInProgress = false;
+          authRedirectTimer = null;
+          window.location.href = 'index.html';
         }, 1200);
 
       } else {
