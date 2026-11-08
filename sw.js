@@ -1,24 +1,6 @@
 
-const CACHE_NAME = 'nexchat-v8-alive-now';
+const CACHE_NAME = 'nexchat-v9-nuclear-alive';
 const STATIC_FILES = [
-  './',
-  './index.html',
-  './chat.html',
-  './reels.html',
-  './profile-upload.html',
-  './advertisement.html',
-  './game.html',
-  './gaminghub.html',
-  './gaminghub.css',
-  './gaminghub.js',
-  './terminal.html',
-  './cart.html',
-  './chat.css',
-  './reels.css',
-  './login.css',
-  './register.css',
-  './reset.css',
-  './profile-upload.css',
   './manifest.json',
   './logo.jpg',
   './chronex-ai.jpg',
@@ -27,14 +9,11 @@ const STATIC_FILES = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
+  console.log('[NEXCHAT SW] Installing nuclear alive service worker...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching application shell');
-      return cache.addAll(STATIC_FILES.filter(file => {
-        return !file.includes('node_modules');
-      })).catch(err => {
-        console.log('Some files could not be cached:', err);
+      return cache.addAll(STATIC_FILES).catch(err => {
+        console.warn('[NEXCHAT SW] Non-fatal static cache warning:', err);
         return Promise.resolve();
       });
     })
@@ -43,20 +22,31 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
+  console.log('[NEXCHAT SW] Activating, purging all stale caches, and reloading clients...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
+            console.log('[NEXCHAT SW] Purging old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
+    }).then(() => {
+      return self.clients.claim();
+    }).then(() => {
+      return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    }).then((clients) => {
+      clients.forEach((client) => {
+        if (client.navigate) {
+          try {
+            client.navigate(client.url);
+          } catch (_) {}
+        }
+      });
     })
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
@@ -64,30 +54,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  if (event.request.url.includes('firebase') || event.request.url.includes('firestore')) {
-    event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return new Response('Offline - Firebase not available', {
-            status: 503,
-            statusText: 'Service Unavailable'
-          });
-        })
-    );
-    return;
-  }
+  // Never intercept or cache HTML navigations or dynamic APIs — always serve directly from network
+  try {
+    const url = new URL(event.request.url);
+    if (
+      event.request.mode === 'navigate' ||
+      event.request.destination === 'document' ||
+      url.pathname.endsWith('.html') ||
+      url.pathname === '/' ||
+      url.pathname.startsWith('/api/') ||
+      url.hostname.includes('firebase') ||
+      url.hostname.includes('firestore')
+    ) {
+      return; // Direct network bypass
+    }
+  } catch (_) {}
 
   event.respondWith(
     fetch(event.request)
       .then((response) => {
         const clonedResponse = response.clone();
-        
         if (response.status === 200) {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, clonedResponse);
           });
         }
-        
         return response;
       })
       .catch(() => {

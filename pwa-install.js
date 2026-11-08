@@ -202,29 +202,27 @@ function removeInstallPrompt() {
 }
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js', { scope: './' })
+  navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' })
     .then(reg => {
-      console.log('PWA Service Worker registered successfully:', reg);
-      console.log('Scope:', reg.scope);
-      console.log('State:', reg.installing?.state || reg.active?.state);
-      
+      reg.update().catch(() => {});
       reg.onupdatefound = () => {
         const newWorker = reg.installing;
-        newWorker.onstatechange = () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            console.log('Service Worker update available');
-          }
-        };
+        if (newWorker) {
+          newWorker.onstatechange = () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('[NEXCHAT PWA] New Service Worker active, reloading page...');
+              window.location.reload();
+            }
+          };
+        }
       };
     })
     .catch(err => {
-      console.error('âŒ Service Worker registration failed:', err);
-      console.log('Details:', {
-        error: err.message,
-        stack: err.stack
-      });
+      console.warn('[NEXCHAT PWA] Service Worker registration failed:', err);
     });
-} else {
-  console.warn(' Service Workers not supported in this browser');
-}
 
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    console.log('[NEXCHAT PWA] Service worker controller changed, refreshing...');
+    window.location.reload();
+  });
+}

@@ -84,42 +84,60 @@ const NEXCHAT_SECRET = 'NEXCHAT_ULTRA_12345';
 const PRELOADED_CONTACTS = [
   {
     uid: 'chronex-ai',
-    name: 'ChronEX AI',
+    name: 'Chronex AI',
     pic: 'chronex-ai.jpg',
     type: 'ai',
     badge: 'AI',
     isVerified: true,
-    status: 'Autonomous Cyber Intelligence (Online)',
+    status: 'Ready • Latency 14ms',
     sub: 'Ask any question or translate languages'
   },
   {
-    uid: 'nex-support',
-    name: 'NEXCHAT Concierge',
-    pic: 'logo.jpg',
+    uid: 'duty',
+    name: 'DUTY',
     type: 'direct',
-    badge: 'VERIFIED',
-    isVerified: true,
-    status: 'Official VIP System Support',
-    sub: 'Platform assistance and feedback'
+    letter: 'D',
+    status: 'You: N n',
+    sub: 'You: N n'
   },
   {
-    uid: 'cyber-syndicate',
-    name: 'Cyber Syndicate',
-    pic: 'assets/syndicate.png',
-    type: 'group',
-    badge: 'VERIFIED',
-    isVerified: true,
-    status: 'Decentralized Tech Network',
-    sub: '3,842 members online'
+    uid: 'home-alone',
+    name: 'Home Alone',
+    type: 'direct',
+    letter: 'H',
+    status: 'You: Please provide more content for th...',
+    sub: 'You: Please provide more content for th...'
   },
   {
-    uid: 'alex-vance',
-    name: 'Alex Vance',
+    uid: 'king-alex001',
+    name: 'king Alex001',
     pic: 'logo.jpg',
     type: 'direct',
-    badge: 'DEV',
-    isVerified: true,
-    status: 'Core Contributor',
+    status: 'You: Bruh',
+    sub: 'You: Bruh'
+  },
+  {
+    uid: 'daven',
+    name: '@Daven ★',
+    type: 'direct',
+    isSmiley: true,
+    status: 'You: Heyyyyyyyyyyyy.',
+    sub: 'You: Heyyyyyyyyyyyy.'
+  },
+  {
+    uid: 'demon-alexander',
+    name: 'demon alexander',
+    type: 'direct',
+    letter: 'D',
+    status: 'No messages yet',
+    sub: 'Available'
+  },
+  {
+    uid: 'werxcsz',
+    name: 'Werxcsz',
+    type: 'direct',
+    letter: 'W',
+    status: 'No messages yet',
     sub: 'Available'
   }
 ];
@@ -327,7 +345,12 @@ export function syncLocalChatsToDOM() {
     emptyState.remove();
   }
 
+  // Purge any stale nex-support concierge from the active list
+  const staleSupport = contactList.querySelector('li[data-chat-id="nex-support"]');
+  if (staleSupport) staleSupport.remove();
+
   chatsToUse.forEach(chat => {
+    if (chat.uid === 'nex-support') return;
     const existingLi = contactList.querySelector(`li[data-chat-id="${chat.uid}"]`);
     if (!existingLi) {
       contactList.appendChild(createContactListItem(chat));

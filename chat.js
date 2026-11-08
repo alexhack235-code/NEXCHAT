@@ -1772,8 +1772,7 @@ function loadChatApprovalSettings() {
 }
 
 const PRELOADED_CORE_CONTACT_IDS = [
-  'chronex-ai', 'duty', 'home-alone', 'king-alex001', 'daven', 'demon-alexander', 'werxcsz',
-  'nex-support', 'cyber-syndicate', 'alex-vance'
+  'chronex-ai', 'duty', 'home-alone', 'king-alex001', 'daven', 'demon-alexander', 'werxcsz'
 ];
 
 function isDirectChatAllowed(targetUid) {
@@ -23724,7 +23723,9 @@ async function loadContacts() {
     const totalUnreadCount = contactDataList.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
     updateNavChatsBadge(totalUnreadCount);
 
-        const groupCount = await appendGroupsToContactList(contactList);
+    try {
+      await appendGroupsToContactList(contactList);
+    } catch (_) {}
     if (typeof window.syncLocalChatsToDOM === 'function') {
       window.syncLocalChatsToDOM();
     }
@@ -23758,17 +23759,8 @@ async function loadContacts() {
 
   } catch (err) {
     console.error("Contacts error", err);
-    if (contactList && chronexLi) {
-      contactList.innerHTML = "";
-      contactList.appendChild(chronexLi);
-      contactList.innerHTML += `<li style="text-align:center; padding:16px 10px; color: #94a3b8; font-size: 13px;">
-        <span style="color: #ff6b6b; display: block; margin-bottom: 6px;">Error loading contacts</span>
-        <button type="button" onclick="loadContacts()" style="padding: 4px 14px; background: rgba(0, 255, 102, 0.12); border: 1px solid #00ff66; border-radius: 6px; color: #00ff66; font-size: 12px; cursor: pointer;">
-          <i class="fa-solid fa-arrows-rotate"></i> Retry
-        </button>
-      </li>`;
-    } else if (contactList) {
-      contactList.innerHTML = `<li style="text-align:center; padding:10px; color: #ff6b6b;">Error loading contacts <button type="button" onclick="loadContacts()" style="margin-left:8px; padding:2px 8px; background:transparent; border:1px solid #ff6b6b; color:#ff6b6b; border-radius:4px; font-size:11px; cursor: pointer;">Retry</button></li>`;
+    if (typeof window.syncLocalChatsToDOM === "function") {
+      window.syncLocalChatsToDOM();
     }
   }
 }

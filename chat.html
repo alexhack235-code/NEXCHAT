@@ -28,10 +28,33 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+    // NEXCHAT INSTANT CACHE BUSTER & BUILD GUARD
+    (function() {
+      const BUILD_ID = 'v9_20261108_ALIVE_NUCLEAR';
+      if (localStorage.getItem('nex_build_version') !== BUILD_ID) {
+        localStorage.setItem('nex_build_version', BUILD_ID);
+        try {
+          localStorage.removeItem('nex_local_chats');
+          localStorage.removeItem('chronex_ai_messages');
+        } catch (_) {}
+        if ('caches' in window) {
+          caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
+        }
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(regs => {
+            regs.forEach(r => {
+              r.unregister().catch(() => {});
+            });
+          }).catch(() => {});
+        }
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="styles/theme.css">
-  <link rel="stylesheet" href="chat.css?v=8.2">
-  <link rel="stylesheet" href="chat2.css">
-  <link rel="stylesheet" href="src/features/group/group-chat.css">
+  <link rel="stylesheet" href="chat.css?v=9.0">
+  <link rel="stylesheet" href="chat2.css?v=9.0">
+  <link rel="stylesheet" href="src/features/group/group-chat.css?v=9.0">
   <link rel="stylesheet" href="extension-hub.css">
   <link rel="stylesheet" href="css/cyber-suite.css">
   <link rel="stylesheet" href="css/nextgen-suite.css">
@@ -7534,7 +7557,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script defer src="./src/js/chronexx-voice-personas.js"></script>
   <input type="file" id="inputP2PSwarmFile" style="display:none;" onchange="if(this.files[0]) window.NexP2PFileSwarm?.sendFile(this.files[0], 'peer');" />
   <script type="module" src="./src/js/i18n.js"></script>
-  <script type="module" src="pwa-install.js"></script>
+  <script type="module" src="pwa-install.js?v=9.0"></script>
   
   <script type="module" src="messaging-features.js"></script>
   <script type="module" src="chat-navigation.js"></script>
@@ -9373,8 +9396,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   </div>
 </div>
 
-<script type="module" src="chat.js?v=8.2"></script>
-<script type="module" src="chat2.js?v=8.2"></script>
+<script type="module" src="chat.js?v=9.0"></script>
+<script type="module" src="chat2.js?v=9.0"></script>
 <script>
   if (new URLSearchParams(window.location.search).has('settings')) {
     window.addEventListener('load', () => {
