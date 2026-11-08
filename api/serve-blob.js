@@ -93,8 +93,8 @@ export default async function handler(req, res) {
   const vaultParam = req.query.vault;
   const type = req.query.type || 'media';
 
-  // SECURITY PROTOCOL: Authenticate before serving sensitive private blobs
-  if (type === 'private') {
+  // SECURITY PROTOCOL: Authenticate before serving sensitive private or status blobs
+  if (type === 'private' || type === 'status') {
     let authenticatedUser = null;
     try {
       authenticatedUser = await verifyFirebaseIdToken(req);
@@ -111,7 +111,11 @@ export default async function handler(req, res) {
 
     // STRICT BOLA/IDOR PREVENTION: Ensure user owns this private storage resource or is SuperAdmin
     const SUPERADMIN_UID = 'ZhvqSK7NNtQUP1sqszYfo1kzXSb2';
-    const isOwner = pathname.split('/').includes(authenticatedUser.uid) || authenticatedUser.uid === SUPERADMIN_UID;
+    const cleanPath = pathname.replace(/^\/+/, '');
+    const isOwner = cleanPath.startsWith(`users/${authenticatedUser.uid}/`) ||
+                    cleanPath.startsWith(`${authenticatedUser.uid}/`) ||
+                    (cleanPath.startsWith('status/') && cleanPath.includes(`/${authenticatedUser.uid}/`)) ||
+                    authenticatedUser.uid === SUPERADMIN_UID;
     if (!isOwner) {
       return res.status(403).json({
         error: 'Forbidden: You do not own this private storage resource.',

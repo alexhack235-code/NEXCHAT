@@ -115,6 +115,13 @@ function sendViaGmailSMTP(to, subject, htmlContent) {
       return reject(new Error('GMAIL_USER or GMAIL_APP_PASSWORD is not configured.'));
     }
 
+    // Strip CRLF to prevent SMTP header injection / command smuggling
+    const cleanTo = String(to || '').replace(/[\r\n\x00]/g, '').trim();
+    const cleanSubject = String(subject || '').replace(/[\r\n\x00]/g, '').trim();
+    if (!cleanTo || !cleanTo.includes('@')) {
+      return reject(new Error('Invalid recipient email address'));
+    }
+
     const socket = tls.connect({
       host: 'smtp.gmail.com',
       port: 465,

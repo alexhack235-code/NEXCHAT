@@ -16,6 +16,7 @@ import crypto from "crypto";
 import {
   cloudDefenseSentinel,
   enforceWaf,
+  enforceRateLimit,
   handleCors,
   applySecurityHeaders,
   getClientIp,
@@ -28,6 +29,7 @@ export default async function handler(req, res) {
   // 1. CORS Preflight
   if (handleCors(req, res)) return;
   applySecurityHeaders(res);
+  if (!enforceRateLimit(req, res, 30)) return;
 
   const ip = getClientIp(req);
 
@@ -110,6 +112,9 @@ export default async function handler(req, res) {
 
       case "scan-secrets": {
         const { content, filename = "bundle.js" } = req.body || {};
+        if (typeof content !== "string" || content.length > 65536) {
+          return res.status(400).json({ error: "PAYLOAD_TOO_LARGE", message: "Content must be string <= 64KB" });
+        }
         const scanResult = cloudDefenseSentinel.scanBundleForSecrets(content, filename);
         return res.status(200).json(scanResult);
       }

@@ -233,9 +233,17 @@ export default async function handler(req, res) {
       return res.status(503).json({ error: 'Blob storage is not configured on the server.' });
     }
 
-    // Read the entire request body buffer to enable retry/failover across backup vaults
+    // Read the entire request body buffer to enable retry/failover across backup vaults (bounded stream)
+    let totalBytes = 0;
     const chunks = [];
     for await (const chunk of req) {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_UPLOAD_BYTES) {
+        return res.status(413).json({
+          error: 'Payload Too Large. Max allowed upload is 50MB.',
+          code: 'PAYLOAD_TOO_LARGE'
+        });
+      }
       chunks.push(chunk);
     }
     const bodyBuffer = Buffer.concat(chunks);

@@ -1570,11 +1570,31 @@
           return;
         }
 
-        container.innerHTML = `<div class="nex-media-gallery-grid">${mediaItems.map(item => `
-          <div class="nex-media-grid-item" onclick="window.open('${item.src || item.querySelector('source')?.src || ''}', '_blank')">
-            <img src="${item.src || item.poster || 'logo.jpg'}" alt="Media" onerror="this.src='logo.jpg'">
-          </div>
-        `).join('')}</div>`;
+        const grid = document.createElement('div');
+        grid.className = 'nex-media-gallery-grid';
+        mediaItems.forEach(item => {
+          const rawSrc = item.src || item.querySelector('source')?.src || '';
+          const posterSrc = item.src || item.poster || 'logo.jpg';
+          const div = document.createElement('div');
+          div.className = 'nex-media-grid-item';
+          const img = document.createElement('img');
+          img.alt = 'Media';
+          img.onerror = () => { img.src = 'logo.jpg'; };
+          if (posterSrc.startsWith('http://') || posterSrc.startsWith('https://') || posterSrc.startsWith('blob:') || posterSrc === 'logo.jpg') {
+            img.src = posterSrc;
+          } else {
+            img.src = 'logo.jpg';
+          }
+          div.appendChild(img);
+          div.addEventListener('click', () => {
+            if (rawSrc.startsWith('http://') || rawSrc.startsWith('https://') || rawSrc.startsWith('blob:')) {
+              window.open(rawSrc, '_blank', 'noopener,noreferrer');
+            }
+          });
+          grid.appendChild(div);
+        });
+        container.innerHTML = '';
+        container.appendChild(grid);
       } else if (tabKey === 'docs') {
         const fileLinks = Array.from(messagesArea.querySelectorAll('a[download], .file-download-btn, [data-file-url]'));
         const codeBoxes = Array.from(messagesArea.querySelectorAll('.nex-code-snippet-box'));
@@ -2294,9 +2314,22 @@ ${text}`;
           info: (...args) => outputLogs.push('[INFO] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '))
         };
 
+        // Fortress Security Shield: Block malicious access to browser internals, storage, and networking
+        const dangerousPatterns = /\b(fetch|XMLHttpRequest|WebSocket|localStorage|sessionStorage|indexedDB|cookie|document|parent|top|window|globalThis|eval|Function)\b/;
+        if (dangerousPatterns.test(rawCode)) {
+          consoleBox.textContent = '[SECURITY SHIELD]: Execution blocked. Direct access to browser DOM, storage, and networking is prohibited in client runner.';
+          this.showToast('Execution blocked: unsafe APIs detected', 'error');
+          return;
+        }
+
         try {
-          const runner = new Function('console', `"use strict";\n${rawCode}`);
-          const result = runner(customConsole);
+          // Shadow dangerous globals to guarantee sandboxed client-side execution
+          const runner = new Function(
+            'console', 'window', 'document', 'localStorage', 'sessionStorage',
+            'indexedDB', 'fetch', 'XMLHttpRequest', 'WebSocket', 'parent', 'top',
+            `"use strict";\n${rawCode}`
+          );
+          const result = runner(customConsole, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
           if (result !== undefined) {
             outputLogs.push('=> ' + (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result)));
           }

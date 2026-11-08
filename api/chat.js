@@ -93,7 +93,13 @@ export default async function handler(req, res) {
         break;
       }
     } catch (err) {
-      markKeyDead(active.key, err.status || 500, err.message);
+      const errStatus = err.status || 500;
+      if (errStatus === 401 || errStatus === 403 || errStatus === 429 || errStatus >= 500) {
+        markKeyDead(active.key, errStatus, err.message);
+      } else {
+        console.warn(`[AI GATEWAY] Upstream client rejection (${errStatus}):`, err.message);
+        break;
+      }
     }
   }
 

@@ -407,7 +407,7 @@ export default async function handler(req, res) {
       recipient: toEmail,
       subject: subject,
       passId: data.passId || `PASS-NEX-${Math.floor(1000 + Math.random() * 9000)}-VERIFIED`,
-      verificationCode: data.token || data.verificationCode || Math.floor(100000 + Math.random() * 900000).toString(),
+      verificationCode: 'REDACTED',
       timestamp: timestamp,
       messageId: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     });

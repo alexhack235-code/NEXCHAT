@@ -35,9 +35,25 @@ const setStorageItem = (k, v) => {
   } catch (e) {}
 };
 
+const getSafeFortressApiUrl = () => {
+  const custom = getStorageItem('nexchat_fortress_url', '');
+  if (custom) {
+    try {
+      const u = new URL(custom);
+      if (
+        (u.protocol === 'https:' && (u.hostname === 'ai-security-scanner-delta.vercel.app' || u.hostname.endsWith('.vercel.app'))) ||
+        (u.hostname === 'localhost' || u.hostname === '127.0.0.1')
+      ) {
+        return custom;
+      }
+    } catch (_) {}
+  }
+  return 'https://ai-security-scanner-delta.vercel.app';
+};
+
 const DEFAULT_FORTRESS_CONFIG = {
   enabled: true,
-  apiUrl: getStorageItem('nexchat_fortress_url', 'https://ai-security-scanner-delta.vercel.app'),
+  apiUrl: getSafeFortressApiUrl(),
   vaultKey: getStorageItem('nexchat_fortress_key', ''),
   mode: getStorageItem('nexchat_fortress_mode', 'active'), // 'active' | 'offline_only'
   blockPromptInjection: true,
