@@ -101,6 +101,7 @@
         }
       });
 
+      this.init24x7Guardian();
       console.log('[NEX-SENTINEL] Autonomous Crash Guardian & Telemetry Engine Online.');
     }
 
@@ -412,7 +413,165 @@
       this.refreshHUDDisplay();
     }
 
-    refreshHUDDisplay() {
+
+    // =========================================================================
+    // 24/7 PRODUCTION SUPERVISOR & CRASH-PREVENTION GUARDIAN
+    // =========================================================================
+    init24x7Guardian() {
+      console.log('[NEX-SENTINEL 24/7] Continuous High-Availability Supervisor initialized.');
+
+      // 1. Proactive Auth Token Keep-Alive (every 45 minutes)
+      // Firebase ID tokens expire at 60 min. Refreshing at 45 min guarantees continuous 24/7 access.
+      this.tokenRefreshTimer = setInterval(() => {
+        this.refreshAuthToken();
+      }, 45 * 60 * 1000);
+
+      // 2. Mobile Device Wake & Network Interruption Recovery
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          console.log('[NEX-SENTINEL 24/7] App foregrounded / unlocked. Running wake recovery sweep...');
+          this.handleWakeRecovery();
+        }
+      });
+
+      window.addEventListener('online', () => {
+        console.log('[NEX-SENTINEL 24/7] Internet connection restored. Resyncing live state...');
+        this.handleWakeRecovery();
+      });
+
+      // 3. UI Alive State & Dead-Page Watchdog (every 10 seconds)
+      // Ensures the 7 contacts, mobile header icons, and dual FAB never get wiped out.
+      this.domWatchdogTimer = setInterval(() => {
+        this.ensureAliveState();
+      }, 10000);
+
+      // 4. Memory & Garbage Collection (every 15 minutes)
+      // Prevents RAM accumulation and browser tab kills on mobile devices.
+      this.memoryGcTimer = setInterval(() => {
+        this.runMemoryGarbageCollection();
+      }, 15 * 60 * 1000);
+
+      // 5. Dynamic Deployment / Stale Chunk 404 Recovery
+      window.addEventListener('error', (event) => {
+        const msg = String(event.message || '').toLowerCase();
+        if (msg.includes('loading chunk') || msg.includes('dynamically imported module') || msg.includes('failed to fetch dynamically')) {
+          console.warn('[NEX-SENTINEL 24/7] Detected new production deployment while session was active. Performing clean sync...');
+          this.handleStaleDeploymentReload();
+        }
+      });
+    }
+
+    async refreshAuthToken() {
+      try {
+        if (window.auth && window.auth.currentUser) {
+          await window.auth.currentUser.getIdToken(true);
+          console.log('[NEX-SENTINEL 24/7] Auth token proactively refreshed.');
+        }
+      } catch (err) {
+        console.warn('[NEX-SENTINEL 24/7] Token refresh notice:', err.message);
+      }
+    }
+
+    async handleWakeRecovery() {
+      try {
+        // A. Proactively refresh auth token
+        await this.refreshAuthToken();
+
+        // B. Ensure UI is 100% alive
+        this.ensureAliveState();
+
+        // C. Clean up any stuck modals or orphaned spinners
+        this.runSelfHealingSweep();
+
+        // D. Reconnect incoming listeners if available
+        if (typeof window.setupGlobalIncomingMessageListener === 'function') {
+          try { window.setupGlobalIncomingMessageListener(); } catch (_) {}
+        }
+      } catch (_) {}
+    }
+
+    ensureAliveState() {
+      try {
+        const contactList = document.getElementById('contactList');
+        if (contactList) {
+          // Remove legacy concierge if present
+          const staleSupport = contactList.querySelector('li[data-chat-id="nex-support"]');
+          if (staleSupport) staleSupport.remove();
+
+          // If contacts dropped below 7, restore them immediately
+          const items = contactList.querySelectorAll('li.chat-item');
+          if (items.length < 7 && typeof window.syncLocalChatsToDOM === 'function') {
+            window.syncLocalChatsToDOM();
+          }
+        }
+
+        // Ensure Dual FAB is visible
+        const fabCluster = document.querySelector('.chat-fab-cluster') || document.getElementById('chatFabCluster');
+        if (fabCluster) {
+          fabCluster.style.setProperty('display', 'flex', 'important');
+          fabCluster.style.setProperty('visibility', 'visible', 'important');
+          fabCluster.style.setProperty('opacity', '1', 'important');
+        }
+
+        // Ensure Mobile Header Actions are visible on mobile screens
+        if (window.innerWidth <= 900) {
+          const mobileHeader = document.querySelector('.mobile-header-actions');
+          if (mobileHeader) {
+            mobileHeader.style.setProperty('display', 'flex', 'important');
+            mobileHeader.style.setProperty('visibility', 'visible', 'important');
+          }
+        }
+      } catch (_) {}
+    }
+
+    runMemoryGarbageCollection() {
+      try {
+        // A. Limit active rendered DOM message elements to 150 to keep RAM under 80MB
+        const messagesContainer = document.getElementById('messages') || document.getElementById('chatMessagesContainer');
+        if (messagesContainer) {
+          const msgs = messagesContainer.querySelectorAll('.message, .msg-bubble, .message-wrapper');
+          if (msgs.length > 150) {
+            const excess = msgs.length - 150;
+            for (let i = 0; i < excess; i++) {
+              msgs[i].remove();
+            }
+            console.log(`[NEX-SENTINEL 24/7] Pruned ${excess} aged DOM message elements for RAM stability.`);
+          }
+        }
+
+        // B. Revoke tracked blob URLs
+        if (window.trackedBlobUrls && Array.isArray(window.trackedBlobUrls)) {
+          while (window.trackedBlobUrls.length > 30) {
+            const staleUrl = window.trackedBlobUrls.shift();
+            try { URL.revokeObjectURL(staleUrl); } catch (_) {}
+          }
+        }
+
+        // C. Clean transient localStorage items to prevent QuotaExceededError
+        try {
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('nex_temp_') || key.startsWith('nex_audio_blob_temp_'))) {
+              localStorage.removeItem(key);
+            }
+          }
+        } catch (_) {}
+
+      } catch (err) {
+        console.warn('[NEX-SENTINEL 24/7] Memory GC notice:', err);
+      }
+    }
+
+    handleStaleDeploymentReload() {
+      const lastReload = parseInt(sessionStorage.getItem('nex_last_chunk_reload') || '0', 10);
+      const now = Date.now();
+      if (now - lastReload > 30000) {
+        sessionStorage.setItem('nex_last_chunk_reload', String(now));
+        window.location.reload();
+      }
+    }
+
+        refreshHUDDisplay() {
       const hud = document.getElementById('nexSentinelHUD');
       if (!hud || hud.style.display === 'none') return;
 
