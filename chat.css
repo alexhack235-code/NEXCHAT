@@ -16608,41 +16608,97 @@ body:not(.group-active) #tacticalMeshBanner {
   width: 100% !important;
 }
 
+/* ==========================================================================
+   WHATSAPP-EXACT MESSAGE INPUT COMPOSER (Single Line, 48px, Zero-Wrapping)
+   ========================================================================== */
+.message-input-area {
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px)) 8px !important;
+  background: #202c33 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  position: relative !important;
+  z-index: 30 !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.message-form {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  background: #202c33 !important;
+  flex-wrap: nowrap !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .message-input-wrapper {
   display: flex !important;
   align-items: center !important;
-  gap: 6px !important;
-  flex: 1 1 auto !important;
+  gap: 4px !important;
+  flex: 1 1 0% !important;
   min-width: 0 !important;
-  background: #202c33 !important;
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #2a3942 !important;
   border-radius: 24px !important;
-  padding: 4px 12px !important;
+  padding: 0 10px !important;
   box-sizing: border-box !important;
+  border: none !important;
+  flex-wrap: nowrap !important;
 }
 
-.message-input.nex-input {
-  flex: 1 1 auto !important;
+.message-input-wrapper .message-input,
+.message-input.nex-input,
+#message-input {
+  flex: 1 1 0% !important;
   min-width: 0 !important;
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
   background: transparent !important;
   border: none !important;
   outline: none !important;
-  color: #e9edef !important;
+  color: #ffffff !important;
   font-size: 15px !important;
-  line-height: 20px !important;
-  max-height: 100px !important;
-  resize: none !important;
-  padding: 6px 4px !important;
+  line-height: 48px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  padding: 0 6px !important;
+  margin: 0 !important;
   box-sizing: border-box !important;
   font-family: inherit !important;
+  display: block !important;
 }
 
-.message-input-wrapper .input-inline-btn {
+.message-input-wrapper .message-input::placeholder,
+.message-input.nex-input::placeholder,
+#message-input::placeholder {
+  color: #8696a0 !important;
+  opacity: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 48px !important;
+}
+
+.message-input-wrapper .input-inline-btn,
+.input-inline-btn.emoji-btn,
+#btnToggleAttachmentHub,
+#camera-btn.chat-camera-inline-btn {
   background: transparent !important;
   border: none !important;
   color: #8696a0 !important;
-  font-size: 18px !important;
+  font-size: 19px !important;
   cursor: pointer !important;
-  padding: 4px !important;
+  padding: 0 !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -16651,21 +16707,136 @@ body:not(.group-active) #tacticalMeshBanner {
   transition: color 0.15s ease !important;
 }
 
-.message-input-wrapper .input-inline-btn:hover {
+.message-input-wrapper .input-inline-btn:hover,
+#camera-btn.chat-camera-inline-btn:hover {
   color: #00FF88 !important;
 }
 
-#camera-btn.chat-camera-inline-btn {
-  display: inline-flex !important;
+.fab-circle-btn,
+#audio-record-btn.mic-action-btn,
+#sendBtn.send-btn {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  border-radius: 50% !important;
+  background: #00a884 !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  border: none !important;
+  font-size: 19px !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+  padding: 0 !important;
+}
+
+/* ==========================================================================
+   WHATSAPP-STYLE TRANSPARENT STICKER RENDERING (160x160, No Bubble Background)
+   ========================================================================== */
+.message-bubble.is-sticker-message {
   background: transparent !important;
   border: none !important;
-  color: #8696a0 !important;
-  font-size: 18px !important;
-  cursor: pointer !important;
-  padding: 4px !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  max-width: 160px !important;
+  width: 160px !important;
+}
+
+.message-sticker-wrap {
+  position: relative !important;
+  display: inline-block !important;
+  width: 160px !important;
+  height: 160px !important;
+  background: transparent !important;
+}
+
+.message-sticker-img {
+  width: 160px !important;
+  height: 160px !important;
+  min-width: 160px !important;
+  min-height: 160px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  border-radius: 8px !important;
+  display: block !important;
+  user-select: none !important;
+}
+
+/* ==========================================================================
+   UNIQUE NEXCHAT TERMINAL HASH TYPING INDICATOR (Above Input Box)
+   ========================================================================== */
+.nex-typing-indicator {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: #202c33 !important;
+  border-radius: 9999px !important;
+  padding: 8px 12px !important;
+  width: fit-content !important;
+  margin-left: 8px !important;
+  margin-bottom: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+  z-index: 35 !important;
+}
+
+.nex-typing-indicator .typing-avatar {
+  width: 22px !important;
+  height: 22px !important;
   border-radius: 50% !important;
+  object-fit: cover !important;
   flex-shrink: 0 !important;
-  transition: color 0.15s ease !important;
+}
+
+.nex-typing-indicator .typing-hashes {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  font-family: 'Courier New', monospace !important;
+  font-weight: 900 !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+}
+
+.nex-typing-indicator .hash-dot {
+  color: #00a884 !important;
+  display: inline-block !important;
+  animation: hashBlink 1.2s infinite ease-in-out !important;
+}
+
+.nex-typing-indicator .hash-dot:nth-child(1) {
+  animation-delay: 0s !important;
+}
+
+.nex-typing-indicator .hash-dot:nth-child(2) {
+  animation-delay: 0.2s !important;
+}
+
+.nex-typing-indicator .hash-dot:nth-child(3) {
+  animation-delay: 0.4s !important;
+}
+
+@keyframes hashBlink {
+  0%, 100% {
+    opacity: 0.2;
+    transform: translateY(0);
+    color: #8696a0;
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-2px);
+    color: #00a884;
+    text-shadow: 0 0 6px rgba(0, 168, 132, 0.6);
+  }
+}
+
+.nex-typing-indicator .typing-text {
+  font-size: 12.5px !important;
+  color: #8696a0 !important;
+  font-weight: 500 !important;
 }
 
 #camera-btn.chat-camera-inline-btn:hover {

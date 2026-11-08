@@ -961,27 +961,51 @@ async function clearTypingStatus() {
   await updateTypingStatus(false);
 }
 
-function showTypingIndicator(label) {
+let typingAutoDismissTimer = null;
+
+function showTypingIndicator(label, avatarUrl) {
   const indicator = document.getElementById('typingIndicator');
   if (!indicator) return;
-  indicator.style.display = 'flex';
+
+  // Resolve user avatar
+  const chatAvatarImg = document.getElementById('chatAvatar') || document.querySelector('.chat-header-avatar');
+  const resolvedAvatar = avatarUrl || (chatAvatarImg ? chatAvatarImg.src : '') || 'logo.jpg';
+
+  // Format label: e.g. "Alex is typing..." -> "Alex typing..." or default "typing..."
+  let cleanText = label || 'typing...';
+  if (cleanText.endsWith(' is typing...')) {
+    cleanText = cleanText.replace(' is typing...', ' typing...');
+  }
+
+  // Unique NEXCHAT Terminal Hash Indicator: [Avatar] ### typing...
   indicator.innerHTML = `
-    <span class="typing-label" style="font-size: 13px; color: #ccc; margin-right: 8px;">${label}</span>
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
+    <img class="typing-avatar" src="${resolvedAvatar}" alt="User" onerror="this.src='logo.jpg'">
+    <div class="typing-hashes">
+      <span class="hash-dot">#</span>
+      <span class="hash-dot">#</span>
+      <span class="hash-dot">#</span>
+    </div>
+    <span class="typing-text">${cleanText}</span>
   `;
+  indicator.style.display = 'inline-flex';
+
+  // Auto-dismiss after 3000ms if no new typing event occurs
+  if (typingAutoDismissTimer) {
+    clearTimeout(typingAutoDismissTimer);
+  }
+  typingAutoDismissTimer = setTimeout(() => {
+    hideTypingIndicator();
+  }, 3000);
 }
 
 function hideTypingIndicator() {
+  if (typingAutoDismissTimer) {
+    clearTimeout(typingAutoDismissTimer);
+    typingAutoDismissTimer = null;
+  }
   const indicator = document.getElementById('typingIndicator');
   if (!indicator) return;
   indicator.style.display = 'none';
-  indicator.innerHTML = `
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
-    <span class="typing-dot"></span>
-  `;
 }
 
 function getTypingUserName(uid) {
@@ -5555,6 +5579,8 @@ window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
 
   const stickerAttachment = {
     downloadURL: stickerUrl,
+    imageUrl: stickerUrl,
+    url: stickerUrl,
     fileName: (stickerName || 'sticker') + '.webp',
     fileType: 'sticker',
     isSticker: true
@@ -5564,7 +5590,10 @@ window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
 
   // 1. Instant 0ms Local UI Append
   if (typeof appendLocalSentMessage === 'function') {
-    appendLocalSentMessage("", stickerAttachment, false, 'sending', clientMsgId, null);
+    appendLocalSentMessage("", stickerAttachment, false, 'sending', clientMsgId, null, {
+      type: 'sticker',
+      imageUrl: stickerUrl
+    });
   }
 
   // 2. Realtime Supabase Broadcast
@@ -5573,6 +5602,8 @@ window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
       from: myUID,
       to: currentChatUser,
       text: "",
+      type: 'sticker',
+      imageUrl: stickerUrl,
       attachment: stickerAttachment,
       isSticker: true,
       chatType: currentChatType || 'direct'
@@ -5583,18 +5614,19 @@ window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
     }).catch(console.warn);
   }
 
-  // 3. Firestore Persistence
+  // 3. Firestore Persistence: type: 'sticker', imageUrl: stickerUrl, text: ''
   try {
     const messageData = {
       from: myUID,
       to: currentChatUser,
       text: "",
+      type: "sticker",
+      imageUrl: stickerUrl,
       attachment: stickerAttachment,
       isSticker: true,
       time: serverTimestamp(),
       read: false,
       status: "sent",
-      type: "sticker",
       clientMsgId: clientMsgId
     };
     await addDoc(collection(db, "messages"), messageData);
@@ -7504,7 +7536,7 @@ function handleMessageReaction(docId, targetKey, bubbleElement, collectionName =
 }
 window.handleMessageReaction = handleMessageReaction;
 
-function appendLocalSentMessage(text, attachment = null, showHeader = false, status = 'sending', clientMsgId = null, envelope = null) {
+function appendLocalSentMessage(text, attachment = null, showHeader = false, status = 'sending', clientMsgId = null, envelope = null, extraMeta = null) {
   const messagesContainer = document.getElementById("messages-area");
   if (!messagesContainer) return;
 
@@ -7514,19 +7546,32 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   wrapper.id = `wrapper-${id}`;
   wrapper.style.cssText = "display:flex; justify-content:flex-end; margin:8px 0; padding:0 12px; flex-direction: column; align-items: flex-end;";
 
-  const isStk = attachment && (attachment.isSticker || attachment.fileType === 'sticker');
+  const isStk = (extraMeta && extraMeta.type === 'sticker') || (attachment && (attachment.isSticker || attachment.fileType === 'sticker'));
   const isCirc = attachment && (attachment.isCircularVideo || attachment.fileType === 'video_note');
   const isDrop = attachment && (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData || attachment.isPredictionPoll || attachment.fileType === 'prediction_poll' || attachment.pollData || attachment.isScratchCard || attachment.fileType === 'scratch_card' || attachment.scratchData || attachment.isBountyContract || attachment.fileType === 'escrow_bounty' || attachment.bountyData || attachment.isSteganoCloak);
   const bubble = document.createElement("div");
-  bubble.className = isCirc ? "message-bubble sent is-clip-message" : (isDrop ? "message-bubble sent is-drop-message" : (isStk ? "message-bubble sent is-sticker-message" : "message-bubble sent"));
-  bubble.style.cssText = (isCirc || isStk || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #005c4b 0%, #059669 100%); border: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); color: #ffffff; padding:7px 11px 5px 11px; border-radius:12px 2px 12px 12px; max-width:72%; word-wrap:break-word;";
+  bubble.className = isStk ? "message-bubble sent is-sticker-message" : (isCirc ? "message-bubble sent is-clip-message" : (isDrop ? "message-bubble sent is-drop-message" : "message-bubble sent"));
+  bubble.style.cssText = isStk ? "background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 160px !important;" : ((isCirc || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #005c4b 0%, #059669 100%); border: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); color: #ffffff; padding:7px 11px 5px 11px; border-radius:12px 2px 12px 12px; max-width:72%; word-wrap:break-word;");
 
-  if (attachment && isRenderableAttachment(attachment)) {
+  const stickerUrl = extraMeta?.imageUrl || attachment?.imageUrl || attachment?.downloadURL || attachment?.url || (isStk ? text : null);
+  if (isStk && stickerUrl) {
+    const stkWrap = document.createElement("div");
+    stkWrap.className = "message-sticker-wrap";
+    stkWrap.style.cssText = "position: relative; display: inline-block; cursor: pointer; width: 160px; height: 160px;";
+    const stkImg = document.createElement("img");
+    stkImg.src = stickerUrl;
+    stkImg.alt = "Sticker";
+    stkImg.className = "w-[160px] h-[160px] object-contain bg-transparent rounded-lg message-sticker-img";
+    stkImg.style.cssText = "width: 160px; height: 160px; object-fit: contain; background: transparent; border-radius: 8px; display: block;";
+    stkImg.draggable = false;
+    stkWrap.appendChild(stkImg);
+    bubble.appendChild(stkWrap);
+  } else if (attachment && isRenderableAttachment(attachment)) {
     const attachNode = renderMessageAttachment(attachment, { time: new Date(), status: 'pending' }, true);
     if (attachNode) bubble.appendChild(attachNode);
   }
 
-  if (text && text.trim()) {
+  if (!isStk && text && text.trim()) {
     if (text.includes('[TACTICAL DUEL]') && typeof window.renderTacticalDuelTextBubble === 'function') {
       const duelCard = window.renderTacticalDuelTextBubble(text, id);
       if (duelCard) {
@@ -8934,10 +8979,13 @@ function loadMessages() {
       const msgDate = m.time?.toDate?.() || new Date();
       const time = formatTime(msgDate);
 
-      const isStk = m.isSticker || (m.attachment && (m.attachment.isSticker || m.attachment.fileType === 'sticker'));
+      const isStk = m.type === 'sticker' || m.isSticker || (m.attachment && (m.attachment.isSticker || m.attachment.fileType === 'sticker'));
+      const isImg = m.type === 'image' || (m.attachment && m.attachment.fileType && m.attachment.fileType.startsWith('image/'));
       const isCirc = m.attachment && (m.attachment.isCircularVideo || m.attachment.fileType === 'video_note');
+      const stickerOrImgUrl = m.imageUrl || m.stickerUrl || m.attachment?.imageUrl || m.attachment?.downloadURL || m.attachment?.url || (isStk ? m.text : null);
+
       const bubble = document.createElement("div");
-      bubble.className = `message-bubble ${isOwn ? "sent" : "received"} ${isCirc ? "is-clip-message" : (isStk ? "is-sticker-message" : "")}`;
+      bubble.className = `message-bubble ${isOwn ? "sent" : "received"} ${isStk ? "is-sticker-message" : (isCirc ? "is-clip-message" : "")}`;
       if (m.docId) {
         bubble.dataset.docId = m.docId;
       }
@@ -8951,7 +8999,15 @@ function loadMessages() {
           }
         });
       }
-      bubble.style.cssText = (isStk || isCirc) ? `
+      bubble.style.cssText = isStk ? `
+        position: relative;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 160px !important;
+        max-width: 160px !important;
+      ` : (isCirc ? `
         position: relative;
         padding: 2px;
         background: transparent;
@@ -8972,7 +9028,7 @@ function loadMessages() {
         font-size: 14.5px;
         line-height: 1.45;
         transition: transform 0.15s ease;
-      `;
+      `);
 
       // WhatsApp-Style Swipe to Reply Gesture
       if (typeof attachSwipeToReply === 'function') {
@@ -8999,7 +9055,21 @@ function loadMessages() {
         bubble.appendChild(replyQuote);
       }
 
-      if (m.attachment && isRenderableAttachment(m.attachment)) {
+      if ((m.type === 'sticker' || isStk) && stickerOrImgUrl) {
+        // WhatsApp exact: 160x160 image, transparent background, no bubble background, no text, no Translate button
+        const stkWrap = document.createElement("div");
+        stkWrap.className = "message-sticker-wrap";
+        stkWrap.style.cssText = "position: relative; display: inline-block; cursor: pointer; width: 160px; height: 160px;";
+        const stkImg = document.createElement("img");
+        stkImg.src = stickerOrImgUrl;
+        stkImg.alt = m.attachment?.fileName || "Sticker";
+        stkImg.className = "w-[160px] h-[160px] object-contain bg-transparent rounded-lg message-sticker-img";
+        stkImg.style.cssText = "width: 160px; height: 160px; object-fit: contain; background: transparent; border-radius: 8px; display: block;";
+        stkImg.draggable = false;
+        stkImg.loading = "lazy";
+        stkWrap.appendChild(stkImg);
+        bubble.appendChild(stkWrap);
+      } else if (m.attachment && isRenderableAttachment(m.attachment)) {
         const attachNode = renderMessageAttachment(m.attachment, m, isOwn);
         if (attachNode) bubble.appendChild(attachNode);
       }
@@ -9021,7 +9091,7 @@ function loadMessages() {
         deletedNotice.style.cssText = `font-style: italic; opacity: 0.65; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: ${isOwn ? 'rgba(255,255,255,0.7)' : '#94a3b8'};`;
         deletedNotice.innerHTML = '<i class="fa-solid fa-ban" style="font-size: 11px;"></i> This message was deleted';
         bubble.appendChild(deletedNotice);
-      } else if (m.text && m.text.trim() && !(m.attachment && (m.attachment.isViewOnce || m.attachment.fileType === 'view_once'))) {
+      } else if (!isStk && m.type !== 'sticker' && m.text && m.text.trim() && !(m.attachment && (m.attachment.isViewOnce || m.attachment.fileType === 'view_once'))) {
         const content = document.createElement("div");
         content.className = "message-text-content";
         if (isAI || (currentChatType === 'ai' && !isOwn)) {
@@ -9167,7 +9237,9 @@ function loadMessages() {
       actionsBar.appendChild(pinMatrixBtn);
 
       // --- BABEL NEURAL TRANSLATE HOVER ACTION HOOK ---
-      if (!isDeletedTombstone && (m.text || (m.attachment && (m.attachment.transcript || m.attachment.translatedText)))) {
+      // Translate button must ONLY show for type === 'text'. Never for sticker or image.
+      const isPureTextMsg = (!m.type || m.type === 'text') && !isStk && m.type !== 'sticker' && m.type !== 'image' && !(m.attachment && (m.attachment.isSticker || m.attachment.fileType === 'sticker' || m.attachment.fileType?.startsWith('image/')));
+      if (!isDeletedTombstone && isPureTextMsg && m.text && m.text.trim()) {
         const translateHoverBtn = document.createElement("button");
         translateHoverBtn.type = "button";
         translateHoverBtn.className = "reaction-quick-btn msg-translate-btn";
@@ -21903,13 +21975,18 @@ function initializeBasicUI() {
 
     const autoResize = () => {
       if (!messageInput) return;
+      // Single-line 48px WhatsApp input box - preserve exact 48px height
+      if (messageInput.tagName === 'INPUT') {
+        messageInput.style.height = '48px';
+        return;
+      }
       const text = messageInput.value;
       const len = text.length;
 
       if (len === 0) {
-        if (lastAssignedHeight !== 38) {
-          messageInput.style.height = '38px';
-          lastAssignedHeight = 38;
+        if (lastAssignedHeight !== 48) {
+          messageInput.style.height = '48px';
+          lastAssignedHeight = 48;
         }
         lastTextLength = 0;
         return;

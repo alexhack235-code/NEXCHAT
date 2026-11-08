@@ -3,13 +3,16 @@ import React from 'react';
 /**
  * NEXCHAT v2 Master Message Bubble
  * Layout: 14px top, 2px bottom tail, "◍ NEX Sealed" Badge, Cyan Time
- * 
+ * WhatsApp-compatible Sticker and Media rendering (160x160 transparent float)
+ *
  * STRICTLY ZERO EMOJIS: FontAwesome 6 vector icons and cyberpunk styling only.
  */
 
 export interface MessageBubbleProps {
   id: string;
-  text: string;
+  text?: string;
+  type?: 'text' | 'image' | 'sticker';
+  imageUrl?: string;
   isOwn: boolean;
   timeString: string;
   status?: 'pending' | 'sent' | 'delivered' | 'read';
@@ -17,22 +20,41 @@ export interface MessageBubbleProps {
     senderName: string;
     text: string;
   };
+  onTranslate?: (text: string) => void;
 }
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
-  text,
+  text = '',
+  type = 'text',
+  imageUrl,
   isOwn,
   timeString,
   status = 'read',
   replyTo,
+  onTranslate,
 }) => {
+  const isSticker = type === 'sticker';
+  const isImage = type === 'image';
+  const hasMedia = (isSticker || isImage) && Boolean(imageUrl);
+
   const bubbleRadius = isOwn ? '14px 14px 2px 14px' : '14px 14px 14px 2px';
-  const background = isOwn
+  const background = isSticker
+    ? 'transparent'
+    : isOwn
     ? 'linear-gradient(135deg, #0b253a 0%, #0d3b4f 100%)'
     : '#0A0F1E';
-  const border = isOwn
+  const border = isSticker
+    ? 'none'
+    : isOwn
     ? '1px solid rgba(0, 255, 198, 0.28)'
     : '1px solid rgba(255, 255, 255, 0.08)';
+  const boxShadow = isSticker
+    ? 'none'
+    : isOwn
+    ? '0 4px 14px rgba(0, 255, 198, 0.12)'
+    : '0 2px 8px rgba(0, 0, 0, 0.35)';
+  const padding = isSticker ? '0' : '8px 12px 6px 12px';
+  const widthStyle = isSticker ? { width: '160px', maxWidth: '160px' } : { maxWidth: '75%' };
 
   return (
     <div
@@ -45,21 +67,19 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       }}
     >
       <div
-        className={`message-bubble ${isOwn ? 'sent' : 'received'}`}
+        className={`message-bubble ${isOwn ? 'sent' : 'received'} ${isSticker ? 'is-sticker-message' : ''}`}
         style={{
           position: 'relative',
-          padding: '8px 12px 6px 12px',
-          borderRadius: bubbleRadius,
-          maxWidth: '75%',
+          padding,
+          borderRadius: isSticker ? '8px' : bubbleRadius,
           wordBreak: 'break-word',
-          boxShadow: isOwn
-            ? '0 4px 14px rgba(0, 255, 198, 0.12)'
-            : '0 2px 8px rgba(0, 0, 0, 0.35)',
+          boxShadow,
           background,
           border,
           color: '#f1f5f9',
           fontSize: '14px',
           lineHeight: '1.45',
+          ...widthStyle,
         }}
       >
         {/* Reply Quote Header */}
@@ -82,17 +102,62 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           </div>
         )}
 
-        {/* Message Content */}
-        <div className="message-content" style={{ margin: 0 }}>
-          {text}
-        </div>
+        {/* Media Content (Sticker / Image): 160x160 Transparent */}
+        {hasMedia ? (
+          <div className="message-media-wrap" style={{ position: 'relative', width: '160px', height: '160px' }}>
+            <img
+              src={imageUrl}
+              alt={isSticker ? 'Sticker' : 'Image'}
+              className="w-[160px] h-[160px] object-contain bg-transparent rounded-lg"
+              style={{
+                width: '160px',
+                height: '160px',
+                objectFit: 'contain',
+                background: 'transparent',
+                borderRadius: '8px',
+                display: 'block',
+              }}
+              draggable={false}
+            />
+          </div>
+        ) : (
+          /* Text Content with Translate button strictly guarded to pure text */
+          <div className="message-text-group" style={{ margin: 0 }}>
+            <p className="message-content" style={{ margin: 0 }}>
+              {text}
+            </p>
+            {onTranslate && type === 'text' && text.trim().length > 0 && (
+              <button
+                type="button"
+                onClick={() => onTranslate(text)}
+                className="translate-btn"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#00FFC6',
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  padding: '2px 0 0 0',
+                  opacity: 0.85,
+                }}
+                title="Translate Message"
+              >
+                <i className="fa-solid fa-language" style={{ fontSize: '12px' }} />
+                <span>Translate</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Message Footer: "◍ NEX Sealed" Badge & Cyan Time */}
         <div
           className="message-time-row"
           style={{
             fontSize: '10.5px',
-            marginTop: '4px',
+            marginTop: isSticker ? '2px' : '4px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end',
@@ -100,24 +165,26 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           }}
         >
           {/* NEX Sealed Badge replaces WhatsApp lock */}
-          <span
-            className="nex-sealed-badge"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '3px',
-              fontSize: '9.5px',
-              color: '#00FFC6',
-              opacity: 0.85,
-              fontWeight: 600,
-              letterSpacing: '0.3px',
-              marginRight: 'auto',
-            }}
-            title="End-to-End Quantum Enclave Sealed"
-          >
-            <span style={{ fontSize: '10px' }}>&#x25CD;</span>
-            <span>NEX Sealed</span>
-          </span>
+          {!isSticker && (
+            <span
+              className="nex-sealed-badge"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px',
+                fontSize: '9.5px',
+                color: '#00FFC6',
+                opacity: 0.85,
+                fontWeight: 600,
+                letterSpacing: '0.3px',
+                marginRight: 'auto',
+              }}
+              title="End-to-End Quantum Enclave Sealed"
+            >
+              <span style={{ fontSize: '10px' }}>&#x25CD;</span>
+              <span>NEX Sealed</span>
+            </span>
+          )}
 
           {/* Cyan Time Text */}
           <span
