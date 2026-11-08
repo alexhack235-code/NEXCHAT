@@ -20,7 +20,7 @@ export const TRENDING_SOUNDS = [
     artist: 'DEMON_BEATS',
     genre: 'Brazilian Phonk',
     duration: '0:45',
-    url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=phonk-drift-112199.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.mp3',
     cover: 'logo.jpg',
   },
   {
@@ -29,7 +29,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Future_Wave',
     genre: 'Funk / Cyberwave',
     duration: '0:38',
-    url: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=future-bass-108728.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample2.mp3',
     cover: 'logo.jpg',
   },
   {
@@ -38,7 +38,7 @@ export const TRENDING_SOUNDS = [
     artist: 'K-Trap Labs',
     genre: 'Drill Trap',
     duration: '0:50',
-    url: 'https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f792cb.mp3?filename=trap-future-122757.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.ogg',
     cover: 'logo.jpg',
   },
   {
@@ -47,7 +47,7 @@ export const TRENDING_SOUNDS = [
     artist: 'NEX_Records',
     genre: 'Lo-Fi Chill',
     duration: '0:55',
-    url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=lofi-study-112191.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.wav',
     cover: 'logo.jpg',
   },
   {
@@ -56,7 +56,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Retro_Future',
     genre: 'Synthwave',
     duration: '0:42',
-    url: 'https://cdn.pixabay.com/download/audio/2022/03/24/audio_3d1a89c4d8.mp3?filename=synthwave-80s-110045.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.m4a',
     cover: 'logo.jpg',
   },
   {
@@ -65,7 +65,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Favela_Sound',
     genre: 'Funk / Phonk',
     duration: '0:35',
-    url: 'https://cdn.pixabay.com/download/audio/2023/04/10/audio_5174542289.mp3?filename=phonk-dark-145638.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.mp3',
     cover: 'logo.jpg',
   },
   {
@@ -74,7 +74,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Astra_Bass',
     genre: 'EDM / Dance',
     duration: '0:48',
-    url: 'https://cdn.pixabay.com/download/audio/2022/11/06/audio_03d6d531ef.mp3?filename=electronic-future-beats-125023.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample2.mp3',
     cover: 'logo.jpg',
   },
   {
@@ -83,7 +83,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Hex_Core',
     genre: 'Glitch Hop',
     duration: '0:40',
-    url: 'https://cdn.pixabay.com/download/audio/2021/08/09/audio_88424c1045.mp3?filename=glitch-hop-beat-9014.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.ogg',
     cover: 'logo.jpg',
   },
   {
@@ -92,7 +92,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Zero_One',
     genre: 'Cyber Ambient',
     duration: '0:52',
-    url: 'https://cdn.pixabay.com/download/audio/2022/02/07/audio_d0a13f69d2.mp3?filename=chill-abstract-intention-12099.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.wav',
     cover: 'logo.jpg',
   },
   {
@@ -101,7 +101,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Ghost_808',
     genre: 'UK Drill',
     duration: '0:44',
-    url: 'https://cdn.pixabay.com/download/audio/2023/02/28/audio_550519fbb2.mp3?filename=trap-beat-shadow-140228.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.m4a',
     cover: 'logo.jpg',
   },
   {
@@ -110,7 +110,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Coast_Groove',
     genre: 'Boom Bap',
     duration: '0:36',
-    url: 'https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3?filename=boom-bap-hip-hop-111425.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.mp3',
     cover: 'logo.jpg',
   },
   {
@@ -119,7 +119,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Shibuya_Drift',
     genre: 'Speed Phonk',
     duration: '0:33',
-    url: 'https://cdn.pixabay.com/download/audio/2023/08/01/audio_145b23d9fa.mp3?filename=fast-phonk-rage-160100.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample2.mp3',
     cover: 'logo.jpg',
   },
   {
@@ -128,7 +128,7 @@ export const TRENDING_SOUNDS = [
     artist: 'NEX_Synth',
     genre: 'Deep House',
     duration: '0:46',
-    url: 'https://cdn.pixabay.com/download/audio/2022/08/02/audio_884b238dc2.mp3?filename=deep-club-house-117584.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.ogg',
     cover: 'logo.jpg',
   },
   {
@@ -137,7 +137,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Late_Night_Lab',
     genre: 'Nu-Disco',
     duration: '0:50',
-    url: 'https://cdn.pixabay.com/download/audio/2022/04/27/audio_03d6d531ef.mp3?filename=funk-disco-groove-111003.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.wav',
     cover: 'logo.jpg',
   },
   {
@@ -146,7 +146,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Cipher_Ghost',
     genre: 'Hard Trap',
     duration: '0:41',
-    url: 'https://cdn.pixabay.com/download/audio/2022/12/22/audio_1808fbf07a.mp3?filename=hard-trap-808-131456.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.m4a',
     cover: 'logo.jpg',
   },
   {
@@ -155,7 +155,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Starlight_Keys',
     genre: 'Emotional Lo-Fi',
     duration: '0:58',
-    url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_c8c8a73467.mp3?filename=piano-rain-chill-108722.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.mp3',
     cover: 'logo.jpg',
   },
   {
@@ -164,7 +164,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Apex_Nitro',
     genre: 'Drum & Bass',
     duration: '0:39',
-    url: 'https://cdn.pixabay.com/download/audio/2023/06/15/audio_3d1a89c4d8.mp3?filename=dnb-liquid-rush-153400.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample2.mp3',
     cover: 'logo.jpg',
   },
   {
@@ -173,7 +173,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Mall_1995',
     genre: 'Vaporwave',
     duration: '0:53',
-    url: 'https://cdn.pixabay.com/download/audio/2022/02/10/audio_5174542289.mp3?filename=vaporwave-aesthetic-105020.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.ogg',
     cover: 'logo.jpg',
   },
   {
@@ -182,7 +182,7 @@ export const TRENDING_SOUNDS = [
     artist: 'Katana_Drop',
     genre: 'Asian Trap / Phonk',
     duration: '0:42',
-    url: 'https://cdn.pixabay.com/download/audio/2023/03/12/audio_03d6d531ef.mp3?filename=samurai-trap-koto-142100.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample.wav',
     cover: 'logo.jpg',
   },
   {
@@ -191,7 +191,7 @@ export const TRENDING_SOUNDS = [
     artist: 'NEX_Orchestra',
     genre: 'Epic Cinematic',
     duration: '1:02',
-    url: 'https://cdn.pixabay.com/download/audio/2022/06/20/audio_db6591201e.mp3?filename=epic-cinematic-trailer-113200.mp3',
+    url: 'https://cdn.jsdelivr.net/gh/rafaelreis-hotmart/Audio-Sample-files@master/sample2.mp3',
     cover: 'logo.jpg',
   },
 ];

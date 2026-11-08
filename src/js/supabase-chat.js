@@ -161,31 +161,75 @@ export async function sendSupabaseMessage({
   try {
     // 2. Realtime WebSocket Broadcast (Instant peer delivery before DB roundtrip)
     const channelName = `chat_room_${roomId}`;
-    const channel = client.channel(channelName);
-    await channel.send({
-      type: 'broadcast',
-      event: 'new_message',
-      payload: { ...optimisticMessage, status: 'sent' },
-    }).catch(() => {});
+    const pushPayload = { ...optimisticMessage, status: 'sent' };
+    try {
+      let roomChannel = client.getChannels ? client.getChannels().find(c => c.topic === `realtime:${channelName}`) : null;
+      if (!roomChannel) {
+        roomChannel = client.channel(channelName);
+        roomChannel.subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            roomChannel.send({
+              type: 'broadcast',
+              event: 'new_message',
+              payload: pushPayload,
+            }).catch(() => {});
+          }
+        });
+      } else {
+        roomChannel.send({
+          type: 'broadcast',
+          event: 'new_message',
+          payload: pushPayload,
+        }).catch(() => {});
+      }
+    } catch (_) {}
 
     // 2b. Direct Realtime Push to Recipient Inbox (For live contact list updates & background alerts)
     if (chatType === 'direct' && to) {
       try {
-        const inboxChannel = client.channel(`user_inbox_${to}`);
-        inboxChannel.send({
-          type: 'broadcast',
-          event: 'incoming_dm',
-          payload: { ...optimisticMessage, status: 'sent' },
-        }).catch(() => {});
+        const inboxChannelName = `user_inbox_${to}`;
+        let inboxChannel = client.getChannels ? client.getChannels().find(c => c.topic === `realtime:${inboxChannelName}`) : null;
+        if (!inboxChannel) {
+          inboxChannel = client.channel(inboxChannelName);
+          inboxChannel.subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              inboxChannel.send({
+                type: 'broadcast',
+                event: 'incoming_dm',
+                payload: pushPayload,
+              }).catch(() => {});
+            }
+          });
+        } else {
+          inboxChannel.send({
+            type: 'broadcast',
+            event: 'incoming_dm',
+            payload: pushPayload,
+          }).catch(() => {});
+        }
       } catch (_) {}
     } else if (chatType === 'group' && to) {
       try {
-        const groupInbox = client.channel(`group_inbox_${to}`);
-        groupInbox.send({
-          type: 'broadcast',
-          event: 'incoming_group_msg',
-          payload: { ...optimisticMessage, status: 'sent' },
-        }).catch(() => {});
+        const groupInboxName = `group_inbox_${to}`;
+        let groupInbox = client.getChannels ? client.getChannels().find(c => c.topic === `realtime:${groupInboxName}`) : null;
+        if (!groupInbox) {
+          groupInbox = client.channel(groupInboxName);
+          groupInbox.subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              groupInbox.send({
+                type: 'broadcast',
+                event: 'incoming_group_msg',
+                payload: pushPayload,
+              }).catch(() => {});
+            }
+          });
+        } else {
+          groupInbox.send({
+            type: 'broadcast',
+            event: 'incoming_group_msg',
+            payload: pushPayload,
+          }).catch(() => {});
+        }
       } catch (_) {}
     }
 

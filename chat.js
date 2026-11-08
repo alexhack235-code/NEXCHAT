@@ -17232,7 +17232,31 @@ async function setupInitialization() {
           }
         }, (error) => {
           if (error.code === 'failed-precondition') {
-            console.warn("?? Index missing for incoming messages query. Please create 'messages' index: to (Asc) + timestamp (Desc)");
+            console.warn("?? Index missing for incoming messages query. Attaching resilient unindexed fallback...");
+            try {
+              const fallbackAuthQ = query(collection(db, "messages"), where("to", "==", myUID));
+              let fbInit = true;
+              window.incomingMessagesUnsubscribe = onSnapshot(fallbackAuthQ, (snap) => {
+                if (fbInit) { fbInit = false; return; }
+                const newSenders = new Set();
+                const newMessages = [];
+                snap.docChanges().forEach(c => {
+                  if (c.type === 'added') {
+                    const d = c.doc.data();
+                    if (d.from && d.from !== myUID) {
+                      newSenders.add(d.from);
+                      newMessages.push({ docId: c.doc.id, ...d });
+                    }
+                  }
+                });
+                if (newMessages.length > 0 && typeof handleSelfAIReplies === 'function') {
+                  handleSelfAIReplies(newMessages).catch(() => {});
+                }
+                if (newSenders.size > 0 && typeof loadContacts === 'function') {
+                  loadContacts();
+                }
+              });
+            } catch (_) {}
           }
           console.warn("Error listening to incoming messages:", error);
         });
@@ -23518,7 +23542,7 @@ function handleGlobalIncomingMessage(msg, isGroup = false) {
   // 9. UPDATE CONTACT LIST IN DOM INSTANTLY (0ms)
   const contactList = document.getElementById('contactList');
   if (contactList) {
-    const existingLi = contactList.querySelector(`li[data-chat-id="${CSS.escape(targetId)}"]`);
+    const existingLi = contactList.querySelector(`[data-chat-id="${targetId}"]`) || contactList.querySelector(`li[data-chat-id="${CSS.escape(targetId)}"]`);
     if (existingLi) {
       // Update snippet
       const previewEl = existingLi.querySelector('.chat-preview');
@@ -23621,46 +23645,40 @@ function setupGlobalIncomingMessageListener() {
 
     // 2. Direct Messages Firestore real-time tail
     const messagesRef = collection(db, 'messages');
+    
+    const attachDirectMessagesListener = (queryToUse, isFallback = false) => {
+      let initDone = false;
+      return onSnapshot(queryToUse, (snapshot) => {
+        if (!initDone) {
+          initDone = true;
+          return;
+        }
+        for (const change of snapshot.docChanges()) {
+          if (change.type === 'added') {
+            const msg = { docId: change.doc.id, ...change.doc.data() };
+            handleGlobalIncomingMessage(msg, false);
+          }
+        }
+      }, (err) => {
+        if (!isFallback && err && err.code === 'failed-precondition') {
+          console.warn('[GLOBAL INCOMING DIRECT] Missing index, switching to resilient fallback listener:', err.message);
+          try {
+            const fallbackQ = query(messagesRef, where('to', '==', myUID));
+            globalIncomingMessagesUnsub = attachDirectMessagesListener(fallbackQ, true);
+          } catch (_) {}
+        } else {
+          console.warn('[GLOBAL INCOMING DIRECT] Listener notice:', err?.message);
+        }
+      });
+    };
+
     let q;
     try {
       q = query(messagesRef, where('to', '==', myUID), orderBy('time', 'desc'), limit(25));
     } catch (_) {
-      q = query(messagesRef, where('to', '==', myUID), limit(50));
+      q = query(messagesRef, where('to', '==', myUID));
     }
-    globalIncomingInitialLoadDone = false;
-
-    globalIncomingMessagesUnsub = onSnapshot(q, async (snapshot) => {
-      if (!globalIncomingInitialLoadDone) {
-        globalIncomingInitialLoadDone = true;
-        return;
-      }
-
-      for (const change of snapshot.docChanges()) {
-        if (change.type === 'added') {
-          const msg = { docId: change.doc.id, ...change.doc.data() };
-          handleGlobalIncomingMessage(msg, false);
-        }
-      }
-    }, (err) => {
-      if (err && err.code === 'failed-precondition') {
-        try {
-          const fallbackQ = query(messagesRef, where('to', '==', myUID), limit(50));
-          globalIncomingMessagesUnsub = onSnapshot(fallbackQ, (fallbackSnap) => {
-            if (!globalIncomingInitialLoadDone) {
-              globalIncomingInitialLoadDone = true;
-              return;
-            }
-            for (const change of fallbackSnap.docChanges()) {
-              if (change.type === 'added') {
-                const msg = { docId: change.doc.id, ...change.doc.data() };
-                handleGlobalIncomingMessage(msg, false);
-              }
-            }
-          });
-        } catch (_) {}
-      }
-      console.warn('[GLOBAL INCOMING DIRECT] Listener notice:', err?.message);
-    });
+    globalIncomingMessagesUnsub = attachDirectMessagesListener(q, false);
 
     // 3. Group Chats real-time tail (Firestore)
     const groupsRef = collection(db, 'groups');
@@ -23846,7 +23864,7 @@ async function loadContacts() {
           const qInTime = query(messagesRef, where("to", "==", myUID), orderBy("time", "desc"), limit(50));
           snapIn = await getDocs(qInTime);
         } catch (_) {
-          const qInFallback = query(messagesRef, where("to", "==", myUID), limit(50));
+          const qInFallback = query(messagesRef, where("to", "==", myUID), limit(150));
           snapIn = await getDocs(qInFallback);
         }
       }
@@ -23859,7 +23877,7 @@ async function loadContacts() {
           const qOutTime = query(messagesRef, where("from", "==", myUID), orderBy("time", "desc"), limit(50));
           snapOut = await getDocs(qOutTime);
         } catch (_) {
-          const qOutFallback = query(messagesRef, where("from", "==", myUID), limit(50));
+          const qOutFallback = query(messagesRef, where("from", "==", myUID), limit(150));
           snapOut = await getDocs(qOutFallback);
         }
       }
