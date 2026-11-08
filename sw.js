@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'nexchat-v4-steady';
+const CACHE_NAME = 'nexchat-v5-alive-instant';
 const STATIC_FILES = [
   './',
   './index.html',
