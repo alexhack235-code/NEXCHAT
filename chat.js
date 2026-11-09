@@ -16899,7 +16899,7 @@ function applySettings(prefs) {
 
     const chatSize = prefs.chatSize || "medium";
     document.documentElement.setAttribute("data-chat-size", chatSize);
-    document.body.classList.remove("chat-size-small", "chat-size-medium", "chat-size-large", "chat-size-extra-large");
+    document.body.classList.remove("chat-size-extra-small", "chat-size-small", "chat-size-medium", "chat-size-large", "chat-size-extra-large");
     document.body.classList.add(`chat-size-${chatSize}`);
 
     const messagesContainer = document.querySelector('.messages');

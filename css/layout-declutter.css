@@ -6027,6 +6027,57 @@ textarea {
   padding: 0 !important;
 }
 
+/* Chat text size options (Pixel-perfect scale & zero-overlay geometry) */
+body.chat-size-extra-small .message,
+body.chat-size-extra-small .message-bubble,
+body.chat-size-extra-small .message-bubble p,
+body.chat-size-extra-small .message-bubble .message-text,
+body.chat-size-extra-small .message-text-content,
+body.chat-size-extra-small .nex-msg-text,
+html[data-chat-size="extra-small"] .message,
+html[data-chat-size="extra-small"] .message-bubble,
+html[data-chat-size="extra-small"] .message-bubble p,
+html[data-chat-size="extra-small"] .message-bubble .message-text,
+html[data-chat-size="extra-small"] .message-text-content,
+html[data-chat-size="extra-small"] .nex-msg-text {
+  font-size: 9.5px !important;
+  line-height: 1.3 !important;
+  padding: 4px 8px 4px 8px !important;
+  min-width: 68px !important;
+}
+
+body.chat-size-extra-small .message-time-row,
+html[data-chat-size="extra-small"] .message-time-row,
+body.chat-size-extra-small .message-time-text,
+html[data-chat-size="extra-small"] .message-time-text {
+  font-size: 8.5px !important;
+}
+
+body.chat-size-small .message,
+body.chat-size-small .message-bubble,
+body.chat-size-small .message-bubble p,
+body.chat-size-small .message-bubble .message-text,
+body.chat-size-small .message-text-content,
+body.chat-size-small .nex-msg-text,
+html[data-chat-size="small"] .message,
+html[data-chat-size="small"] .message-bubble,
+html[data-chat-size="small"] .message-bubble p,
+html[data-chat-size="small"] .message-bubble .message-text,
+html[data-chat-size="small"] .message-text-content,
+html[data-chat-size="small"] .nex-msg-text {
+  font-size: 10.5px !important;
+  line-height: 1.35 !important;
+  padding: 5px 9px 4px 9px !important;
+  min-width: 74px !important;
+}
+
+body.chat-size-small .message-time-row,
+html[data-chat-size="small"] .message-time-row,
+body.chat-size-small .message-time-text,
+html[data-chat-size="small"] .message-time-text {
+  font-size: 9px !important;
+}
+
 .message-time-row,
 .message-timestamp-row,
 .nex-msg-meta,
