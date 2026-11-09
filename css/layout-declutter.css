@@ -5210,3 +5210,211 @@ body.motion-120hz * {
   backface-visibility: hidden;
   transform: translateZ(0);
 }
+
+
+/* ==========================================================================
+   BNEXCHAT DESKTOP STABILITY ENGINE (RULES 1, 2, 3, 4, 5)
+   FIX: BLACKOUTS + CHAT LIST GLITCH / TEARING + TYPING NAME BUG + INPUT SMEAR
+   ========================================================================== */
+
+/* RULE 2: Set background on ALL layers to SAME solid color (#0f0a1e) to eliminate 1-frame blackouts */
+body,
+#root,
+.app,
+.chat-main,
+.chat-list-view,
+#chatListView,
+.chat-detail-view,
+#chatDetailView,
+.chat-welcome-panel,
+#chatWelcomePanel,
+.messages-area,
+#messages-area,
+#messagesContainer {
+  background: #0f0a1e !important;
+  background-color: #0f0a1e !important;
+}
+
+/* Remove all fade / opacity transitions and blur filters that trigger GPU black frame drops on Intel graphics */
+.chat-detail-view,
+#chatDetailView,
+.chat-main,
+.chat-list-view,
+#chatListView,
+.chat-detail-header,
+.active-chat-header,
+.message-input-area,
+.message-form,
+.messages-area,
+#messages-area {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* RULE 3 & RULE 5: Exact desktop 2-column flex layout (Screen width >= 900px) */
+@media (min-width: 900px) {
+  .app {
+    display: flex !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    background: #0f0a1e !important;
+  }
+
+  .chat-main {
+    display: flex !important;
+    flex-direction: row !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    background: #0f0a1e !important;
+  }
+
+  /* Chat list pane: fixed 320px width, isolated GPU layer, no horizontal overflow */
+  .chat-list,
+  .chat-list-view,
+  #chatListView {
+    width: 320px !important;
+    min-width: 320px !important;
+    max-width: 320px !important;
+    flex: 0 0 320px !important;
+    flex-shrink: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    contain: layout style !important;
+    will-change: auto !important;
+    transform: translateZ(0) !important;
+    background: #0f0a1e !important;
+    scroll-behavior: auto !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    z-index: 2 !important;
+    display: flex !important;
+  }
+
+  /* Chat window pane: fills remaining space, NEVER unmounts, swaps content smoothly */
+  .chat-window,
+  .chat-detail-view,
+  #chatDetailView {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    width: auto !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    background: #0f0a1e !important;
+    border-left: none !important;
+    z-index: 1 !important;
+  }
+
+  /* Bottom nav must NEVER appear on desktop */
+  .bottom-nav,
+  #bottomNav {
+    display: none !important;
+  }
+
+  /* Hide empty welcome screen when active conversation exists or is persisted */
+  .chat-main[data-layout="conversation"] .chat-welcome-panel,
+  body.in-conversation .chat-welcome-panel,
+  #chatWelcomePanel[style*="display: none"] {
+    display: none !important;
+  }
+}
+
+/* RULE 3: Chat List Rows - Stable keying, layout containment, zero sideways smearing */
+.chat-list,
+.chat-list-view,
+#chatListView,
+#contactList,
+#groupsList {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  contain: layout style !important;
+  will-change: auto !important;
+  transform: translateZ(0) !important;
+  background: #0f0a1e !important;
+  scroll-behavior: auto !important;
+}
+
+.chat-row,
+.chat-item,
+.chat-list-item {
+  contain: layout !important;
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  transition: background-color 0.15s ease !important;
+  min-height: 64px !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.chat-row.selected,
+.chat-row.active,
+.chat-item.selected,
+.chat-item.active,
+.chat-list-item.selected,
+.chat-list-item.active {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Fixed size 40px avatars stop list jumping when images load */
+.chat-row img,
+.chat-item img,
+.chat-avatar,
+.chat-row .chat-avatar,
+.chat-item .chat-avatar,
+.chat-avatar-container img {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  flex-shrink: 0 !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+/* RULE 4: Typing Indicator - Fixed 20px container; NEVER collapses to 0 height */
+.typing-indicator,
+#typingIndicator,
+.nex-typing-indicator {
+  height: 20px !important;
+  min-height: 20px !important;
+  max-height: 20px !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  padding: 0 16px !important;
+  background: transparent !important;
+}
+
+/* RULE 5: Fix Input Box Smear & Horizontal Drift */
+.message-input-wrap,
+.message-input-wrapper,
+.message-input-area {
+  min-height: 56px !important;
+  overflow: hidden !important;
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  background: #0f0a1e !important;
+}
+
+.chat-input,
+#message-input,
+#messageInput,
+.nex-input,
+textarea {
+  min-width: 0 !important;
+  flex: 1 !important;
+}

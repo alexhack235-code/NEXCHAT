@@ -2986,41 +2986,12 @@ ${text}`;
        31. REAL-TIME TYPING PRESENCE VISUALIZER
        ------------------------------------------------------------------------ */
     initTypingPresenceVisualizer() {
-      const messageForm = document.getElementById('message-form');
-      if (!messageForm || document.getElementById('nexTypingPresenceBar')) return;
-
-      const bar = document.createElement('div');
-      bar.id = 'nexTypingPresenceBar';
-      bar.className = 'nex-typing-presence-bar';
-      bar.style.display = 'none';
-      bar.innerHTML = `
-        <div class="nex-typing-pulse-dots">
-          <span></span><span></span><span></span>
-        </div>
-        <span id="nexTypingPresenceText">Member is typing...</span>
-      `;
-
-      messageForm.parentNode.insertBefore(bar, messageForm);
-
-      const input = document.getElementById('message-input');
-      let typingTimeout = null;
-
-      input?.addEventListener('input', () => {
-        clearTimeout(typingTimeout);
-        // Simulate broadcast response when in active chat
-        const chatName = document.getElementById('chatName')?.textContent?.trim() || 'Alexander';
-        const isGroup = (window.currentChatType === 'group');
-
-        const presenceText = document.getElementById('nexTypingPresenceText');
-        if (presenceText) {
-          presenceText.textContent = isGroup ? `@${chatName} is writing a response...` : `${chatName} is typing...`;
-        }
-        bar.style.display = 'flex';
-
-        typingTimeout = setTimeout(() => {
-          bar.style.display = 'none';
-        }, 2200);
-      });
+      // Neutralized mock listener: Local typing must NEVER show other user's name as typing.
+      // Keeps layout stable with 0 keystroke reflows.
+      const existingBar = document.getElementById('nexTypingPresenceBar');
+      if (existingBar) {
+        existingBar.remove();
+      }
     }
 
 

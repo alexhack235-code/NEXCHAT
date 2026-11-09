@@ -1060,7 +1060,13 @@ async function clearTypingStatus() {
 
 function showTypingIndicator(label, avatarUrl) {
   // STRICT RULE: NEVER show typing indicator when I am the one typing
-  if (isMyTypingActive && !isOtherPersonTyping) return;
+  if (isMyTypingActive) return;
+
+  // Filter out own name if present in label
+  const myName = myUsername || window.myUsername || '';
+  if (myName && label && label.toLowerCase().includes(myName.toLowerCase())) {
+    return;
+  }
 
   const indicator = document.getElementById('typingIndicator');
   if (!indicator) return;
@@ -1087,9 +1093,11 @@ function showTypingIndicator(label, avatarUrl) {
     </div>
     <span class="typing-text">${cleanText}</span>
   `;
+  // Maintain fixed 20px container height: use visibility, do NOT collapse/expand layout (Rule 4)
+  indicator.style.visibility = 'visible';
   indicator.style.display = 'inline-flex';
 
-  // Auto-dismiss after 3000ms if other person stops typing - FIXES INFINITY BUG
+  // Auto-dismiss after 3000ms if other person stops typing
   if (otherTypingAutoDismissTimer) {
     clearTimeout(otherTypingAutoDismissTimer);
   }
@@ -1106,7 +1114,9 @@ function hideTypingIndicator() {
   }
   const indicator = document.getElementById('typingIndicator');
   if (!indicator) return;
-  indicator.style.display = 'none';
+  // Fixed 20px container: keep height, hide content to prevent input jump/jitter (Rule 4)
+  indicator.style.visibility = 'hidden';
+  indicator.innerHTML = '';
 }
 
 function getTypingUserName(uid) {
@@ -1231,16 +1241,16 @@ function subscribeTypingIndicator(chatId, chatType) {
           if (!uid || uid === curUid) return false; // STRICTLY IGNORE SELF
           if (!info || !info.isTyping) return false;
           const ts = info.timestamp || 0;
-          return (now - ts) < 3500; // Must be within last 3.5 seconds
+          return (now - ts) < 3000; // Must be within last 3.0 seconds
         })
         .map(([uid, info]) => ({
           uid,
           name: info.userName || getTypingUserName(uid)
         }));
-    } else if (Array.isArray(data.typingUsers)) {
-      // Legacy document array check: ONLY consider if doc was updated within last 3.5s
+    } else if (Array.isArray(data.typingUsers) && !isMyTypingActive) {
+      // Legacy document array check: ONLY consider if doc was updated within last 3s AND local typing is NOT active
       const docUpdated = data.updatedAt?.toMillis ? data.updatedAt.toMillis() : (data.updatedAtMs || 0);
-      if (docUpdated && (now - docUpdated < 3500)) {
+      if (docUpdated && (now - docUpdated < 3000)) {
         otherTypers = data.typingUsers
           .filter(uid => uid && uid !== curUid)
           .map(uid => ({ uid, name: getTypingUserName(uid) }));
@@ -3963,10 +3973,18 @@ function showChatListView() {
     listView.style.removeProperty("z-index");
   }
   if (detailView) {
-    detailView.classList.add("hidden");
-    detailView.classList.remove("visible", "entering");
-    detailView.style.setProperty("display", "none", "important");
-    detailView.style.zIndex = "0";
+    if (window.innerWidth < 900) {
+      detailView.classList.add("hidden");
+      detailView.classList.remove("visible", "entering");
+      detailView.style.setProperty("display", "none", "important");
+      detailView.style.zIndex = "0";
+    } else {
+      // Desktop: Keep outer container mounted with solid #0f0a1e background (Rule 2)
+      detailView.classList.remove("hidden", "entering");
+      detailView.classList.add("visible");
+      detailView.style.setProperty("display", "flex", "important");
+      detailView.style.setProperty("background", "#0f0a1e", "important");
+    }
   }
   if (groupsContainer) {
     groupsContainer.style.setProperty("display", "none", "important");
@@ -9169,7 +9187,14 @@ function loadMessages() {
       }).catch(() => {});
     }
     if (messagesDiv.dataset.renderedChatKey !== chatKey) {
-      messagesDiv.innerHTML = '';
+      // Render subtle skeleton on same background to eliminate 1-frame blackout (Rule 2)
+      messagesDiv.innerHTML = `
+        <div class="chat-skeleton-loader" style="display:flex; flex-direction:column; gap:16px; padding:24px; opacity:0.35;">
+          <div style="align-self:flex-start; width:180px; height:42px; background:#202c33; border-radius:12px;"></div>
+          <div style="align-self:flex-end; width:220px; height:42px; background:#005c4b; border-radius:12px;"></div>
+          <div style="align-self:flex-start; width:140px; height:42px; background:#202c33; border-radius:12px;"></div>
+        </div>
+      `;
       messagesDiv.dataset.renderedChatKey = chatKey;
       messagesDiv.dataset.currentSignature = '';
     }
@@ -10294,6 +10319,27 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   currentChatName = username;
   window.currentChatName = username;
   window.currentChatAvatar = profilePic || 'logo.jpg';
+
+  // Toggle .selected and .active classes without re-creating list rows (Rules 1 & 3)
+  document.querySelectorAll('#contactList .chat-item.selected, #contactList .chat-item.active, #groupsList .chat-item.selected, #groupsList .chat-item.active').forEach(el => {
+    el.classList.remove('selected', 'active');
+  });
+  try {
+    document.querySelectorAll(`li[data-chat-id="${CSS.escape(uid)}"]`).forEach(el => {
+      el.classList.add('selected', 'active');
+    });
+  } catch (_) {}
+
+  // Persist selected chat in URL (?chat=...) + localStorage (Rule 2)
+  try {
+    localStorage.setItem('selected_chat_id', uid);
+    localStorage.setItem('selected_chat_name', username || '');
+    localStorage.setItem('selected_chat_pic', profilePic || 'logo.jpg');
+    localStorage.setItem('selected_chat_type', chatType || 'direct');
+    const u = new URL(window.location.href);
+    u.searchParams.set('chat', uid);
+    window.history.replaceState({ nexchatSelectedChat: uid }, '', u.toString());
+  } catch (_) {}
 
   // Instant reset of unread badge for this chat in conversation list
   const contactListEl = document.getElementById('contactList');
@@ -23599,14 +23645,17 @@ function showChatDetailView() {
   }
   document.body.classList.add('in-conversation');
 
+  // Hide empty welcome panel immediately to prevent black/empty flash (Rule 2)
+  const welcomePanel = document.getElementById('chatWelcomePanel');
+  if (welcomePanel) {
+    welcomePanel.style.setProperty('display', 'none', 'important');
+  }
+
   if (chatDetailView) {
     chatDetailView.style.setProperty('display', 'flex', 'important');
-    chatDetailView.classList.remove('hidden');
-    chatDetailView.classList.add('entering');
-    requestAnimationFrame(() => {
-      chatDetailView.classList.add('visible');
-      chatDetailView.classList.remove('entering');
-    });
+    chatDetailView.style.setProperty('background', '#0f0a1e', 'important');
+    chatDetailView.classList.remove('hidden', 'entering');
+    chatDetailView.classList.add('visible');
   }
   try {
     if (!history.state || history.state.nexchatView !== 'conversation') {
@@ -26882,21 +26931,46 @@ if (typeof window !== 'undefined') {
     });
   }
   window.addEventListener('DOMContentLoaded', () => {
-    try {
-      const p = new URLSearchParams(window.location.search);
-      const cId = p.get('chatId');
-      if (cId) {
-        const interval = setInterval(() => {
-          if (myUID && typeof openChat === 'function') {
-            clearInterval(interval);
-            openChat(cId, p.get('chatName') || 'Chat', 'logo.jpg', p.get('chatType') || 'direct');
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        }, 300);
-        setTimeout(() => clearInterval(interval), 10000);
-      }
-    } catch (_) {}
+    restorePersistedSelectedChat();
   });
+}
+
+function restorePersistedSelectedChat() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    const cId = p.get('chat') || p.get('chatId') || localStorage.getItem('selected_chat_id');
+    if (!cId) return;
+
+    const cName = p.get('chatName') || localStorage.getItem('selected_chat_name') || 'Chat';
+    const cPic = localStorage.getItem('selected_chat_pic') || 'logo.jpg';
+    const cType = p.get('chatType') || localStorage.getItem('selected_chat_type') || 'direct';
+
+    // Pre-mount chatDetailView immediately so empty screen never flashes (Rule 2)
+    const welcome = document.getElementById('chatWelcomePanel');
+    if (welcome) welcome.style.setProperty('display', 'none', 'important');
+    const detail = document.getElementById('chatDetailView');
+    if (detail) {
+      detail.style.setProperty('display', 'flex', 'important');
+      detail.style.setProperty('background', '#0f0a1e', 'important');
+      detail.classList.remove('hidden');
+    }
+    const nameEl = document.getElementById('chatName');
+    if (nameEl) nameEl.textContent = cName;
+    const picEl = document.getElementById('chatProfilePic');
+    if (picEl) picEl.src = cPic;
+
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      const currentUid = myUID || window.myUID || (typeof auth !== 'undefined' && auth.currentUser ? auth.currentUser.uid : null);
+      if (currentUid && typeof openChat === 'function') {
+        clearInterval(interval);
+        openChat(cId, cName, cPic, cType);
+      } else if (attempts > 30) {
+        clearInterval(interval);
+      }
+    }, 200);
+  } catch (_) {}
 }
 
 
