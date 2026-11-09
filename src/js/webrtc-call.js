@@ -481,6 +481,12 @@
       const infoVideoBtn = document.getElementById('infoVideoBtn');
 
       const triggerChoice = (isVideo) => {
+        if (window.currentChatType === 'group' || (typeof currentChatType !== 'undefined' && currentChatType === 'group')) {
+          if (typeof window.startCall === 'function') {
+            window.startCall(isVideo);
+          }
+          return;
+        }
         const target = window.currentChatName || window.currentChatUser || 'User';
         const targetId = window.currentChatUserId || window.currentChatUser;
 
@@ -789,7 +795,10 @@
             if (this.callTimeoutTimer) {
               clearTimeout(this.callTimeoutTimer);
               this.callTimeoutTimer = null;
-      this.reconnectWatchdog = null;
+            }
+            if (this.reconnectWatchdog) {
+              clearTimeout(this.reconnectWatchdog);
+              this.reconnectWatchdog = null;
             }
 
             try {
@@ -1578,7 +1587,10 @@
       if (this.callTimeoutTimer) {
         clearTimeout(this.callTimeoutTimer);
         this.callTimeoutTimer = null;
-      this.reconnectWatchdog = null;
+      }
+      if (this.reconnectWatchdog) {
+        clearTimeout(this.reconnectWatchdog);
+        this.reconnectWatchdog = null;
       }
       if (this.callTimerInterval) {
         clearInterval(this.callTimerInterval);

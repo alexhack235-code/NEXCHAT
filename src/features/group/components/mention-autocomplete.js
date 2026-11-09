@@ -277,9 +277,12 @@ export function parseMentions(text, members = []) {
 export function highlightMentions(text, mentionedUserIds = [], currentUid = '') {
   if (!text) return '';
 
-  return escapeHtml(text).replace(/@(\w+)/g, (match, username) => {
-    const isSelfMention = mentionedUserIds.includes(currentUid);
-    const extraClass = isSelfMention ? ' nex-mention-self' : '';
+  const myName = (typeof window !== 'undefined' && (window.currentUser?.displayName || localStorage.getItem('auth_name') || ''))
+    .toLowerCase().replace(/\s+/g, '');
+  return escapeHtml(text).replace(/@([\w\.-]+)/g, (match, username) => {
+    const cleanUser = username.toLowerCase();
+    const isSelf = (cleanUser === myName || cleanUser === 'you' || cleanUser === currentUid) && mentionedUserIds.includes(currentUid);
+    const extraClass = isSelf ? ' nex-mention-self' : '';
     return `<span class="nex-mention${extraClass}" data-username="${escapeHtml(username)}">${match}</span>`;
   });
 }

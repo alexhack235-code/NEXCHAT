@@ -4132,6 +4132,10 @@ function handleNavigation(section) {
   // Dismiss any active sheets when switching views
   document.getElementById("mobileMoreSheet")?.classList.remove("open");
 
+  if (section !== "chats") {
+    document.body.classList.remove('in-conversation');
+  }
+
   const chatListView = document.getElementById("chatListView");
   const statusContainer = document.getElementById("statusContainer");
   const groupsContainer = document.getElementById("groupsContainer");
@@ -10786,10 +10790,17 @@ async function startCall(isVideo = false) {
       participants: [],
       onJoin: async (type) => {
         try {
-          await joinLiveKitCall(currentChatUser, myUsername || 'User', type === 'video');
+          await joinLiveKitCall({
+            callId: currentChatUser,
+            participantName: myUsername || 'User',
+            isVideo: type === 'video'
+          });
         } catch (err) {
           showNotif('Group call error: ' + (err.message || err), 'error');
         }
+      },
+      onClose: () => {
+        try { leaveLiveKitCall(); } catch (_) {}
       }
     });
     return;
@@ -11542,10 +11553,11 @@ function showCallUI(isVideo = false, callStatus = 'active') {
     }
   };
 
-  // Update network quality every 3 seconds
+  // Update network quality every 3 seconds (tracked to prevent runaway interval leak)
   if (callStatus === 'active') {
     updateNetworkQuality();
-    setInterval(updateNetworkQuality, 3000);
+    if (window._callNetworkQualityInterval) clearInterval(window._callNetworkQualityInterval);
+    window._callNetworkQualityInterval = setInterval(updateNetworkQuality, 3000);
   }
 
   if (isVideo) {
@@ -11754,6 +11766,16 @@ function setupCallDocumentListener(callId) {
         const statusLabel = document.getElementById('call-status-label');
         if (statusLabel) statusLabel.textContent = 'Connected';
       }
+    } else if (callData.status === 'busy') {
+      if (callTimeoutTimer) {
+        clearTimeout(callTimeoutTimer);
+        callTimeoutTimer = null;
+      }
+      showNotif('User is currently on another call', 'warning');
+      if (callData.receiverId === myUID && !callActive) {
+        try { await saveCallToHistory(callData.callerId, myUID, callData.callType, 0, 'busy'); } catch (_) {}
+      }
+      endCall();
     } else if (callData.status === 'rejected') {
       if (callTimeoutTimer) {
         clearTimeout(callTimeoutTimer);
@@ -11761,7 +11783,7 @@ function setupCallDocumentListener(callId) {
       }
       showNotif('Call rejected', 'error');
       if (callData.receiverId === myUID && !callActive) {
-        await saveCallToHistory(callData.callerId, myUID, callData.callType, 0, 'rejected');
+        try { await saveCallToHistory(callData.callerId, myUID, callData.callType, 0, 'rejected'); } catch (_) {}
       }
       endCall();
     } else if (callData.status === 'no-answer') {
@@ -11771,7 +11793,7 @@ function setupCallDocumentListener(callId) {
       }
       showNotif(`Missed ${callData.callType} call from @${callData.callerName || callData.callerId}`, 'info');
       if (callData.receiverId === myUID) {
-        await saveCallToHistory(callData.callerId, myUID, callData.callType, 0, 'missed');
+        try { await saveCallToHistory(callData.callerId, myUID, callData.callType, 0, 'missed'); } catch (_) {}
       }
       endCall();
     } else if (callData.status === 'ended') {
@@ -11961,7 +11983,11 @@ function endCall() {
     });
   }
 
-  if (callTimer) clearInterval(callTimer);
+  if (callTimer) { clearInterval(callTimer); callTimer = null; }
+  if (window._callNetworkQualityInterval) {
+    clearInterval(window._callNetworkQualityInterval);
+    window._callNetworkQualityInterval = null;
+  }
   callActive = false;
   callStartTime = null;
 
@@ -20439,6 +20465,8 @@ async function loadStatusFeed() {
             timestamp: d.createdAtMs || (d.timestamp?.toMillis ? d.timestamp.toMillis() : now),
             expiresAtMs: expTime,
             isViewed: false,
+            viewCount: d.viewCount || (Array.isArray(d.viewers) ? d.viewers.length : 0),
+            viewers: Array.isArray(d.viewers) ? d.viewers : [],
             mode: d.mode || null,
             threadId: d.threadId || null,
             chainIndex: d.chainIndex || null,
@@ -20768,8 +20796,17 @@ function showCurrentStorySlide() {
       const winStart = (currentSlide.timeWindow?.start != null)
         ? currentSlide.timeWindow.start
         : (typeof currentSlide.trimStart === 'number' ? currentSlide.trimStart : 0);
-      video.currentTime = winStart;
       video.src = currentSlide.mediaUrl;
+      if (winStart > 0) {
+        const seekOnReady = () => {
+          try { video.currentTime = winStart; } catch (_) {}
+          video.removeEventListener('loadedmetadata', seekOnReady);
+        };
+        video.addEventListener('loadedmetadata', seekOnReady);
+        if (video.readyState >= 1) {
+          try { video.currentTime = winStart; } catch (_) {}
+        }
+      }
     }
     if (muteBtn) {
       muteBtn.style.display = 'flex';
@@ -23161,7 +23198,7 @@ function setupMobileFeatures() {
 }
 
 function showChatDetailView() {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 899 || document.body.classList.contains('mobile-preview'));
   const sections = isMobile
     ? ['chatListView', 'statusContainer', 'groupsContainer', 'announcementsContainer', 'callHistoryContainer']
     : ['statusContainer', 'groupsContainer', 'announcementsContainer', 'callHistoryContainer'];
@@ -23435,12 +23472,8 @@ async function loadGroups() {
           lastMessage = lastMessage.substring(0, 40) + "...";
         }
 
-        const messagesRef = collection(db, "groupMessages");
-        const unreadQuery = query(
-          messagesRef,
-          where("groupId", "==", groupId),
-          where("readBy", "array-contains-any", [myUID]) // Not read by this user
-        );
+        // Accurate group unread count derived directly without O(N) query overhead
+        unreadCount = (group.unreadCounts && group.unreadCounts[myUID]) || (group.unreadBy && group.unreadBy[myUID]) || 0;
       } catch (e) {
         console.log("Error loading group message preview:", e);
       }
@@ -25355,6 +25388,10 @@ document.addEventListener('DOMContentLoaded', () => {
     msgInput.addEventListener("focus", () => {
       const ep = document.getElementById("emoji-picker");
       if (ep) ep.style.display = "none";
+      setTimeout(() => {
+        const messagesArea = document.getElementById('messages-area') || document.getElementById('messages');
+        if (messagesArea) messagesArea.scrollTop = messagesArea.scrollHeight;
+      }, 120);
     });
   }
   setupInChatSearch();
@@ -26398,7 +26435,7 @@ function setupWhatsAppLockedChatsPullToReveal() {
   // Auto-collapse when user scrolls down through active conversations
   scrollTarget.addEventListener('scroll', () => {
     const currentScrollTop = scrollTarget.scrollTop;
-    const isMobile = window.innerWidth <= 768 || document.body.classList.contains('mobile-preview');
+    const isMobile = window.innerWidth <= 899 || document.body.classList.contains('mobile-preview');
 
     // Retract system action rows as soon as user begins scrolling down
     if (currentScrollTop > 14) {

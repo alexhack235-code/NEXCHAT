@@ -1255,10 +1255,22 @@ service cloud.firestore {
           isValidOptionalString('name', 1, 128) &&
           isValidOptionalString('description', 0, 1000) &&
           isValidOptionalList('members', 1000) &&
-          isValidOptionalList('admins', 100)
+          isValidOptionalList('admins', 100) &&
+          isValidOptionalList('moderators', 100)
         ) ||
-        (isGroupModerator(groupId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinnedMessages'])) ||
-        (isGroupMember(groupId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'lastMessage', 'lastMessageTime', 'lastSender', 'pinnedMessages'])) ||
+        (
+          isGroupModerator(groupId) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdAt']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinnedMessages', 'mutedMembers'])
+        ) ||
+        (
+          isGroupMember(groupId) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdAt']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'lastMessageTime', 'lastSender']) &&
+          isValidOptionalString('lastMessage', 0, 10000) &&
+          isValidOptionalString('lastSender', 0, 128) &&
+          (!('lastMessageTime' in request.resource.data) || isValidTimestampOrNumber(request.resource.data.lastMessageTime))
+        ) ||
         isSuperAdmin()
       );
 
@@ -1404,12 +1416,18 @@ service cloud.firestore {
           isValidReel(request.resource.data)
         ) ||
         (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']) &&
+          request.resource.data.views is number &&
+          (!('views' in resource.data) || request.resource.data.views >= resource.data.views)
+        ) ||
+        (
           request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'likes', 'likesCount', 'commentsCount', 'views', 'sharesCount',
             'poll', 'tokensTipped', 'c2paManifest', 'syntheticMetrics', 'provenanceStatus'
           ]) &&
           isValidOptionalList('likes', 10000) &&
           isValidOptionalString('provenanceStatus', 0, 100) &&
+          (!('views' in request.resource.data) || (request.resource.data.views is number && request.resource.data.views >= 0)) &&
           (!('c2paManifest' in request.resource.data) || request.resource.data.c2paManifest == null || request.resource.data.c2paManifest is map || (request.resource.data.c2paManifest is string && request.resource.data.c2paManifest.size() <= 100000)) &&
           (!('syntheticMetrics' in request.resource.data) || request.resource.data.syntheticMetrics == null || request.resource.data.syntheticMetrics is map)
         ) ||
@@ -1429,10 +1447,20 @@ service cloud.firestore {
                          (request.resource.data.authorId == request.auth.uid || request.resource.data.userId == request.auth.uid) &&
                          validStringLength('text', 1, 1000);
         allow update: if isAuthenticated() && (
-          (request.auth.uid == resource.data.authorId || request.auth.uid == resource.data.userId) &&
-          areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
-          validStringLength('text', 1, 1000)
-        ) || isSuperAdmin();
+          (
+            (request.auth.uid == resource.data.authorId || request.auth.uid == resource.data.userId) &&
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+            validStringLength('text', 1, 1000)
+          ) ||
+          (
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt', 'text']) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'likedBy']) &&
+            (!('likes' in request.resource.data) || (request.resource.data.likes is number && request.resource.data.likes >= 0) || isValidList(request.resource.data.likes, 10000)) &&
+            (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+            isValidOptionalList('likedBy', 10000)
+          ) ||
+          isSuperAdmin()
+        );
         allow delete: if isAuthenticated() && (
           request.auth.uid == resource.data.authorId ||
           request.auth.uid == resource.data.userId ||

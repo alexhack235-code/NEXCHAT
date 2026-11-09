@@ -16896,8 +16896,8 @@ body.channel-route-active #chatContainer {
   right: 0 !important;
   bottom: 0 !important;
   width: 100vw !important;
-  height: 100dvh !important;
   height: 100vh !important;
+  height: 100dvh !important;
   margin: 0 !important;
   padding: 0 !important;
   border-radius: 0 !important;
@@ -17420,12 +17420,16 @@ body.channel-route-active #chatContainer {
   margin-left: 4px !important;
   transform: translateY(-8px) !important;
   opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
   transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease !important;
 }
 
 .whatsapp-channel-card-actions-dropdown.open {
   transform: translateY(0) !important;
   opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
 }
 
 .whatsapp-channel-action-chip {
@@ -18333,8 +18337,16 @@ body.in-conversation #headerLogoContainer {
 }
 
 .chat-main[data-layout="conversation"] #chatFabCluster,
-body.in-conversation #chatFabCluster {
+body.in-conversation #chatFabCluster,
+.chat-main[data-layout="conversation"] .chat-fab-cluster,
+body.in-conversation .chat-fab-cluster,
+.chat-main[data-layout="conversation"] .bottom-nav,
+body.in-conversation .bottom-nav,
+.chat-main[data-layout="conversation"] #bottomNav,
+body.in-conversation #bottomNav {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 #mobileFabNewChat,

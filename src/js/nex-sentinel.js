@@ -498,9 +498,11 @@
           const staleSupport = contactList.querySelector('li[data-chat-id="nex-support"]');
           if (staleSupport) staleSupport.remove();
 
-          // If contacts dropped below 7, restore them immediately
+          // If contacts dropped below 7, restore them immediately (only if not in Decoy/Vanish Mode)
+          const isDecoyActive = localStorage.getItem('nex_decoy_active') === 'true' || window.nexDecoyVaultActive === true;
+          const isVanishActive = sessionStorage.getItem('vanish_mode_active') === 'true' || window.vanishModeActive === true;
           const items = contactList.querySelectorAll('li.chat-item');
-          if (items.length < 7 && typeof window.syncLocalChatsToDOM === 'function') {
+          if (!isDecoyActive && !isVanishActive && items.length < 7 && typeof window.syncLocalChatsToDOM === 'function') {
             window.syncLocalChatsToDOM();
           }
         }

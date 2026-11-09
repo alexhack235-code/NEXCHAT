@@ -394,6 +394,15 @@
 
       const isGroupChat = window.currentChatType === 'group' || !!document.querySelector('.group-chat') || (typeof GroupChat !== 'undefined' && GroupChat.isOpen);
       const recipientName = isGroupChat ? 'everyone in group' : (window.currentChatName || 'Whyte');
+      const isGroupStaff = isGroupChat && Boolean(
+        (window.currentGroupData && (
+          window.currentGroupData.creatorId === currentUid ||
+          window.currentGroupData.createdBy === currentUid ||
+          (Array.isArray(window.currentGroupData.admins) && window.currentGroupData.admins.includes(currentUid)) ||
+          (Array.isArray(window.currentGroupData.moderators) && window.currentGroupData.moderators.includes(currentUid))
+        )) ||
+        window.isCurrentGroupAdmin === true
+      );
 
       modal.innerHTML = `
         <div class="nex-delete-modal-card" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 22px 24px; max-width: 330px; width: 90%; box-shadow: 0 12px 36px rgba(0,0,0,0.75); color: #e2e8f0; font-family: inherit; box-sizing: border-box;">
@@ -401,7 +410,7 @@
           <p style="margin: 0 0 16px 0; font-size: 13.5px; color: #94a3b8; line-height: 1.45;">Are you sure you want to delete this message?</p>
           
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 22px; cursor: pointer;" onclick="const cb=document.getElementById('chkAlsoDeleteForPartner'); if(cb) cb.checked = !cb.checked;">
-            <input type="checkbox" id="chkAlsoDeleteForPartner" ${effectiveIsOwn ? 'checked' : ''} style="width: 17px; height: 17px; accent-color: #00e575; cursor: pointer;" onclick="event.stopPropagation();">
+            <input type="checkbox" id="chkAlsoDeleteForPartner" ${(effectiveIsOwn || isGroupStaff) ? 'checked' : ''} style="width: 17px; height: 17px; accent-color: #00e575; cursor: pointer;" onclick="event.stopPropagation();">
             <label for="chkAlsoDeleteForPartner" style="font-size: 13px; color: #e2e8f0; cursor: pointer; user-select: none;">Also delete for ${this.escapeHtml(recipientName)}</label>
           </div>
 
@@ -449,7 +458,7 @@
         submitBtn.onclick = async () => {
           closeModal();
           const alsoDelete = modal.querySelector('#chkAlsoDeleteForPartner')?.checked;
-          if (alsoDelete && effectiveIsOwn) {
+          if (alsoDelete && (effectiveIsOwn || isGroupStaff)) {
             await this.executeDeleteForEveryone(msg);
           } else {
             await this.executeDeleteForMe(msg);

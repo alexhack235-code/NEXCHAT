@@ -93,7 +93,7 @@ class FortressSecurityShield {
       // 2. SQL Injection (SQLi)
       sqli: [
         /(\b(union(\s+all)?)\s+select\b)/gi,
-        /(\b(select|delete|insert|update|drop|truncate|alter)\b.{1,40}\b(from|into|table|database)\b)/gi,
+        /(\b(select\s+[\*\w\s,]+\s+from|delete\s+from|insert\s+into|update\s+\w+\s+set|drop\s+table|truncate\s+table|alter\s+table)\b)/gi,
         /(?:'\s*or\s*'1'\s*=\s*'1|"\s*or\s*"1"\s*=\s*"1|'\s*or\s*1\s*=\s*1|--\s*$|\/\*.*?\*\/)/gi,
         /\b(exec(\s+xp_cmdshell)?|sp_executesql)\b/gi
       ],
@@ -138,8 +138,8 @@ class FortressSecurityShield {
       ],
       // 8. Layer 33: Autonomous AI Agent & ReAct Loop Signatures
       aiReAct: [
-        /(?:^|[\r\n\s",])\s*(?:Thought|Action|Action\s+Input|Observation)\s*:[^\r\n]*/i,
-        /(?:^|[\r\n\s",])\s*(?:Final\s+Answer|Sub-Goal|Execution\s+Trace)\s*:[^\r\n]*/i,
+        /(?:Thought:\s*[\s\S]{1,200}Action:\s*[\s\S]{1,200}Action\s+Input:)/i,
+        /(?:Final\s+Answer:\s*[\s\S]{1,100}Execution\s+Trace:)/i,
         /\b(?:PentestGPT|AutoGPT|BabyAGI|AgentGPT|LangChainAgent|LlamaIndexCrawler)\b/i
       ],
       // 9. Layer 33: Autonomous API Schema & OpenAPI Harvesters

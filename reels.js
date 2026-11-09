@@ -70,6 +70,9 @@ function resolveSafePoster(reel) {
     if (!t.startsWith('blob:') && (t.startsWith('http://') || t.startsWith('https://') || t.startsWith('/') || /\.(png|jpg|jpeg|webp|gif)$/i.test(t))) {
       return t;
     }
+    if (t.startsWith('blob:') && typeof activeLocalBlobUrls !== 'undefined' && activeLocalBlobUrls.has(t)) {
+      return t;
+    }
   }
   if (reel.videoUrl && typeof reel.videoUrl === 'string') {
     const v = reel.videoUrl.trim();
@@ -84,7 +87,14 @@ function resolveSafeAvatar(url, fallback = 'logo.jpg') {
   if (!url || typeof url !== 'string') return fallback;
   const trimmed = url.trim();
   if (!trimmed) return fallback;
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('blob:') || trimmed.startsWith('/') || /\.(png|jpg|jpeg|gif|webp|svg|ico)(\?.*)?$/i.test(trimmed)) {
+  // Ephemeral blob URLs from previous browser sessions are invalid across reloads
+  if (trimmed.startsWith('blob:')) {
+    if (typeof activeLocalBlobUrls !== 'undefined' && activeLocalBlobUrls.has(trimmed)) {
+      return trimmed;
+    }
+    return fallback;
+  }
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('/') || /\.(png|jpg|jpeg|gif|webp|svg|ico)(\?.*)?$/i.test(trimmed)) {
     return trimmed;
   }
   return fallback;
@@ -971,11 +981,20 @@ function initReelsFeed() {
       if (typeof vUrl === 'string' && vUrl.startsWith('blob:') && !activeLocalBlobUrls.has(vUrl)) {
         vUrl = 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/hourglass_timer.mp4';
       }
+      let tUrl = data.thumbnailUrl;
+      if (typeof tUrl === 'string' && tUrl.startsWith('blob:') && !activeLocalBlobUrls.has(tUrl)) {
+        tUrl = 'logo.jpg';
+      }
+      let aPic = data.authorPic;
+      if (typeof aPic === 'string' && aPic.startsWith('blob:') && !activeLocalBlobUrls.has(aPic)) {
+        aPic = 'logo.jpg';
+      }
       return {
         id: docSnap.id,
         ...data,
         videoUrl: vUrl,
-        thumbnailUrl: resolveSafePoster({ ...data, videoUrl: vUrl })
+        thumbnailUrl: tUrl || resolveSafePoster({ ...data, videoUrl: vUrl }),
+        authorPic: aPic || 'logo.jpg'
       };
     }) : [];
 

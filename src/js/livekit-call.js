@@ -190,13 +190,14 @@ function updateQualityIndicator(quality, isLocal) {
   if (!indicator) return;
 
   const qualityMap = {
-    Excellent: { color: '#00ff66', text: 'EXCELLENT', icon: 'fa-signal' },
-    Good: { color: '#00f2fe', text: 'GOOD', icon: 'fa-signal' },
-    Poor: { color: '#f59e0b', text: 'POOR', icon: 'fa-triangle-exclamation' },
-    Lost: { color: '#ef4444', text: 'UNSTABLE', icon: 'fa-circle-xmark' },
+    excellent: { color: '#00ff66', text: 'EXCELLENT', icon: 'fa-signal' },
+    good: { color: '#00f2fe', text: 'GOOD', icon: 'fa-signal' },
+    poor: { color: '#f59e0b', text: 'POOR', icon: 'fa-triangle-exclamation' },
+    lost: { color: '#ef4444', text: 'UNSTABLE', icon: 'fa-circle-xmark' },
   };
 
-  const status = qualityMap[quality] || qualityMap.Good;
+  const key = String(quality || '').toLowerCase();
+  const status = qualityMap[key] || qualityMap.good;
   indicator.innerHTML = `
     <span style="display:inline-flex; align-items:center; gap:5px; font-family:monospace; font-size:11px; color:${status.color}; background:rgba(0,0,0,0.7); padding:3px 8px; border-radius:6px; border:1px solid ${status.color}40;">
       <i class="fa-solid ${status.icon}"></i>

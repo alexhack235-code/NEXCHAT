@@ -642,7 +642,15 @@
       const encoded = new TextEncoder().encode(plainText);
       const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, tagLength: 128 }, aesKey, encoded);
 
-      const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+      const toB64 = (buf) => {
+        const bytes = new Uint8Array(buf);
+        let binary = '';
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+        }
+        return btoa(binary);
+      };
       return {
         isSecretCipher: true,
         salt: toB64(salt),

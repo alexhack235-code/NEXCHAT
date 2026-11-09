@@ -3385,13 +3385,15 @@ function initCipherVault() {
       }
 
       const digit = keyBtn.getAttribute('data-digit');
-      if (digit && currentPin.length < 4) {
+      const savedPinTarget = localStorage.getItem('nexchat_cipher_pin') || '';
+      const targetPinLen = savedPinTarget.length >= 4 ? savedPinTarget.length : 4;
+      if (digit && currentPin.length < targetPinLen) {
         currentPin += digit;
         updatePinDots('normal');
         playCyberSfx('chime');
         if (navigator.vibrate) navigator.vibrate(15);
 
-        if (currentPin.length === 4) {
+        if (currentPin.length === targetPinLen) {
           const savedPin = localStorage.getItem('nexchat_cipher_pin');
           if (!savedPin) {
             localStorage.setItem('nexchat_cipher_pin', currentPin);
@@ -3526,8 +3528,8 @@ function initMeshSettings() {
   if (saveCipherPinBtn && cipherPinInput) {
     saveCipherPinBtn.addEventListener('click', () => {
       const pin = cipherPinInput.value.trim();
-      if (!/^\d{4,6}$/.test(pin)) {
-        showNotif('PIN must be 4 to 6 numeric digits', 'error', 2500);
+      if (!/^\d{4}$/.test(pin)) {
+        showNotif('PIN must be exactly 4 numeric digits', 'error', 2500);
         cipherPinInput.focus();
         return;
       }

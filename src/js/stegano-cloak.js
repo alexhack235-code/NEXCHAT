@@ -233,8 +233,7 @@
         fileType: 'stegano_cloak',
         isSteganoCloak: true,
         downloadURL: dataUrl,
-        fileName: 'covert_recon_matrix.png',
-        cloakPayload: secretText
+        fileName: 'covert_recon_matrix.png'
       };
 
       if (typeof window.appendLocalSentMessage === 'function') {

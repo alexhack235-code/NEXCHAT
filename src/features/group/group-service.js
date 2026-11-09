@@ -867,7 +867,7 @@ export async function pinMessage(groupId, messageId) {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error('Not authenticated');
 
-    const hasPerm = await hasPermission(groupId, currentUser.uid, PERMISSIONS.MANAGE_SETTINGS);
+    const hasPerm = await hasPermission(groupId, currentUser.uid, PERMISSIONS.PIN_MESSAGE);
     if (!hasPerm) throw new Error('Insufficient permissions to pin messages');
 
     const group = await getGroup(groupId);
@@ -900,7 +900,7 @@ export async function unpinMessage(groupId, messageId) {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error('Not authenticated');
 
-    const hasPerm = await hasPermission(groupId, currentUser.uid, PERMISSIONS.MANAGE_SETTINGS);
+    const hasPerm = await hasPermission(groupId, currentUser.uid, PERMISSIONS.PIN_MESSAGE);
     if (!hasPerm) throw new Error('Insufficient permissions to unpin messages');
 
     const groupRef = doc(db, 'groups', groupId);

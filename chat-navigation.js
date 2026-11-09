@@ -1,6 +1,9 @@
 window.handleNavigation = function (navSection) {
     if (!navSection) return;
     const normalized = navSection.toLowerCase().trim();
+    if (normalized !== 'chats' && normalized !== 'chat' && normalized !== 'messages') {
+      document.body.classList.remove('in-conversation');
+    }
 
     const sections = {
         chat: 'chatListView',

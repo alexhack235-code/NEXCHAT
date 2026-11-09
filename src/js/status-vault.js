@@ -7,11 +7,11 @@ import { uploadVideoToCloudinary } from './cloudinary.js';
 import { getFirebaseAuthorizationHeaders } from './firebase-auth-header.js';
 
 export const STATUS_VAULTS = [
-  { index: 1, name: 'NEX-STATUS VAULT 1', access: 'private', configured: true },
-  { index: 2, name: 'NEX-STATUS VAULT 2', access: 'private', configured: true },
-  { index: 3, name: 'NEX-STATUS VAULT 3', access: 'private', configured: true },
-  { index: 4, name: 'NEX-STATUS VAULT 4', access: 'private', configured: true },
-  { index: 5, name: 'NEX-STATUS VAULT 5', access: 'private', configured: true },
+  { index: 1, name: 'NEX-STATUS VAULT 1', access: 'public', configured: true },
+  { index: 2, name: 'NEX-STATUS VAULT 2', access: 'public', configured: true },
+  { index: 3, name: 'NEX-STATUS VAULT 3', access: 'public', configured: true },
+  { index: 4, name: 'NEX-STATUS VAULT 4', access: 'public', configured: true },
+  { index: 5, name: 'NEX-STATUS VAULT 5', access: 'public', configured: true },
 ];
 
 /**
@@ -142,8 +142,8 @@ export async function uploadStatusMedia(file, options = {}) {
   // Fallback 1: Cloudinary Universal Media
   console.warn('[NEX-STATUS] All 5 Status Vaults exhausted or unavailable. Cascading to Cloudinary backup pipeline...');
   try {
-    const isVideo = file.type && file.type.startsWith('video/');
-    if (isVideo) {
+    const isMedia = file.type && (file.type.startsWith('video/') || file.type.startsWith('audio/'));
+    if (isMedia) {
       const cldRes = await uploadVideoToCloudinary(file, {
         folder: 'nexchat-statuses',
         onProgress: (percent, msg) => {

@@ -231,10 +231,12 @@
       clearInterval(this.danmakuTimer);
       this.danmakuTimer = setInterval(() => {
         if (!this.danmakuEnabled) return;
-        const visibleVideo = document.querySelector('.reel-card video');
-        if (!visibleVideo) return;
+        const playingVideo = Array.from(document.querySelectorAll('.reel-card video')).find(v => !v.paused) ||
+                             document.querySelector('.reel-card.active video') ||
+                             document.querySelector('.reel-card video');
+        if (!playingVideo) return;
 
-        const stage = visibleVideo.closest('.reel-stage') || visibleVideo.parentElement;
+        const stage = playingVideo.closest('.reel-stage') || playingVideo.parentElement;
         if (!stage) return;
 
         const text = this.danmakuPool[Math.floor(Math.random() * this.danmakuPool.length)];
@@ -347,28 +349,34 @@
         }, 320); // Hold for 320ms to activate
       });
 
-      document.addEventListener('mouseup', () => {
-        if (this.speedHoldTimer) clearTimeout(this.speedHoldTimer);
-        const activeVideo = document.querySelector('.reel-card video');
-        endHold(activeVideo);
-      });
+      let activeHeldVideo = null;
+      const safeStartHold = (v) => { activeHeldVideo = v; startHold(v); };
+      const safeEndHold = () => {
+        if (this.speedHoldTimer) { clearTimeout(this.speedHoldTimer); this.speedHoldTimer = null; }
+        if (activeHeldVideo) {
+          endHold(activeHeldVideo);
+          activeHeldVideo = null;
+        } else {
+          document.querySelectorAll('.reel-card video').forEach(v => {
+            if (v.playbackRate > 1.05) endHold(v);
+          });
+        }
+      };
 
-      // Touch events on mobile
+      document.addEventListener('mouseup', safeEndHold);
+      document.addEventListener('touchend', safeEndHold);
+      document.addEventListener('touchcancel', safeEndHold);
+
       document.addEventListener('touchstart', (e) => {
         const video = e.target.closest('.reel-card video');
         if (!video) return;
         if (e.target.closest('button') || e.target.closest('.reel-actions-column')) return;
 
-        this.speedHoldTimer = setTimeout(() => {
-          startHold(video);
-        }, 350);
-      }, { passive: true });
-
-      document.addEventListener('touchend', () => {
         if (this.speedHoldTimer) clearTimeout(this.speedHoldTimer);
-        const activeVideo = document.querySelector('.reel-card video');
-        endHold(activeVideo);
-      });
+        this.speedHoldTimer = setTimeout(() => {
+          safeStartHold(video);
+        }, 320);
+      }, { passive: true });
     }
 
     // =========================================================================
