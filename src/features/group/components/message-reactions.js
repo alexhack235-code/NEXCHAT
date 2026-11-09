@@ -4,7 +4,7 @@
  * Stacked pills below message showing emoji + count.
  */
 
-export const QUICK_REACTIONS = ['', '', '', '', '', ''];
+export const QUICK_REACTIONS = ['❤️', '👍', '🔥', '😂', '😮', '😢'];
 
 let currentPicker = null;
 

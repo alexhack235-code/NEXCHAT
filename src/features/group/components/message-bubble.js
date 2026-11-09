@@ -130,7 +130,14 @@ export function renderMessageBubble(message, container, options = {}) {
     const openDeleteForThis = () => {
       if (window.NexChatFileManager && typeof window.NexChatFileManager.openDeleteMessageModal === 'function') {
         window.NexChatFileManager.openDeleteMessageModal(message, options.isOwn, () => {
-          if (typeof options.onDelete === 'function') options.onDelete(message.id);
+          // Message modal handles delete for me or everyone; simply refresh view
+          const bubbleEl = document.getElementById('msg-' + message.id);
+          if (bubbleEl) {
+            bubbleEl.style.transition = 'opacity 0.25s, transform 0.25s';
+            bubbleEl.style.opacity = '0';
+            bubbleEl.style.transform = 'scale(0.95)';
+            setTimeout(() => bubbleEl.remove(), 260);
+          }
         });
       }
     };

@@ -929,8 +929,9 @@
 
       // 1. Instant Blackout on Window Blur (e.g. Snipping tool, Alt-Tab, click out)
       this.boundBlurHandler = () => triggerBlackout();
+      this.boundFocusHandler = () => removeBlackout();
       window.addEventListener('blur', this.boundBlurHandler);
-      window.addEventListener('focus', removeBlackout);
+      window.addEventListener('focus', this.boundFocusHandler);
 
       // 2. Visibility change (tab switch, window minimized)
       this.boundVisibilityHandler = () => {
@@ -990,6 +991,10 @@
       if (this.boundBlurHandler) {
         window.removeEventListener('blur', this.boundBlurHandler);
         this.boundBlurHandler = null;
+      }
+      if (this.boundFocusHandler) {
+        window.removeEventListener('focus', this.boundFocusHandler);
+        this.boundFocusHandler = null;
       }
       if (this.boundVisibilityHandler) {
         document.removeEventListener('visibilitychange', this.boundVisibilityHandler);

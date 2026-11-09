@@ -278,7 +278,7 @@ async function open(groupId, messagesContainer, options = {}) {
     if (group) {
       groupStore.setState({
         currentGroup: group,
-        pinnedMessages: group.pinnedMessages || []
+        pinnedMessages: group.settings?.pinnedMessages || group.pinnedMessages || []
       });
     }
   } catch (e) {
@@ -572,8 +572,9 @@ function _renderItem(item, element, currentUid, options = {}) {
       });
       showReadByModal(readByList, () => {});
     },
-    onReactionClick: async (emoji) => {
+    onReactionClick: async (arg1, arg2) => {
       try {
+        const emoji = arg2 !== undefined ? arg2 : arg1;
         await addReaction(item.id, emoji);
       } catch (e) {
         console.error('[GroupChat] Reaction toggle failed:', e);

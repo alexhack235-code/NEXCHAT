@@ -151,6 +151,21 @@ if (typeof window !== 'undefined') {
   window.firebaseSendEmailVerification = sendEmailVerification;
   window.saveSupabaseSettings = saveSupabaseSettings;
   window.fetchSupabaseRoomMessages = fetchSupabaseRoomMessages;
+  window.collection = collection;
+  window.doc = doc;
+  window.getDoc = getDoc;
+  window.getDocs = getDocs;
+  window.setDoc = setDoc;
+  window.updateDoc = updateDoc;
+  window.deleteDoc = deleteDoc;
+  window.increment = increment;
+  window.query = query;
+  window.where = where;
+  window.orderBy = orderBy;
+  window.limit = limit;
+  window.serverTimestamp = serverTimestamp;
+  window.arrayUnion = arrayUnion;
+  window.arrayRemove = arrayRemove;
   window.nexFirestore = {
     db,
     collection,
@@ -3856,9 +3871,7 @@ const initAudioOnInteraction = () => {
 
 
 function escape(text) {
-  const div = document.createElement("div");
-  div.textContent = text || "";
-  return div.innerHTML;
+  return escapeHtml(text);
 }
 
 function formatTime(timestamp) {
@@ -3943,7 +3956,11 @@ function showChatListView() {
     statusContainer.style.setProperty("display", "none", "important");
   }
   if (bottomNav) {
-    bottomNav.style.setProperty("display", "flex", "important");
+    if (window.innerWidth < 900) {
+      bottomNav.style.setProperty("display", "flex", "important");
+    } else {
+      bottomNav.style.removeProperty("display");
+    }
   }
   const activeChatHeader = document.getElementById('activeChatHeader');
   const headerLogoContainer = document.getElementById('headerLogoContainer');
@@ -4144,9 +4161,8 @@ function handleNavigation(section) {
   // Dismiss any active sheets when switching views
   document.getElementById("mobileMoreSheet")?.classList.remove("open");
 
-  if (section !== "chats") {
-    document.body.classList.remove('in-conversation');
-  }
+  // Cleanly restore layout when switching sections
+  document.body.classList.remove('in-conversation');
 
   const chatListView = document.getElementById("chatListView");
   const statusContainer = document.getElementById("statusContainer");
@@ -5603,6 +5619,7 @@ async function sendMessage() {
         attachment = await uploadFileToStorage(stagedSendAttachment, currentChatUser, currentChatType === 'group');
         if (window.isAttachmentViewOnce) {
           attachment.isViewOnce = true;
+          attachment.viewOnceId = 'vo_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
           attachment.viewOnceType = stagedSendAttachment.type?.startsWith('image/') ? 'photo' : (stagedSendAttachment.type?.startsWith('audio/') ? 'audio' : 'file');
           attachment.burnTimeout = window.attachmentViewOnceTimeout || 10;
           attachment.cipherHash = window.NexGhostWhisper ? window.NexGhostWhisper.generateRandomHash() : ('0x' + Math.random().toString(16).substring(2, 10).toUpperCase());
@@ -5791,6 +5808,7 @@ async function sendMessage() {
 
       // 2. High-speed Supabase Realtime Broadcast & Persistence
       sendSupabaseMessage({
+        clientMsgId: clientMsgId,
         from: myUID,
         to: currentChatUser,
         text: text || "",
@@ -6076,6 +6094,7 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec, tran
     fileType: isViewOnce ? 'view_once' : 'audio/webm',
     duration: durationSec || 1,
     isViewOnce: isViewOnce,
+    viewOnceId: isViewOnce ? ('vo_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8)) : null,
     viewOnceType: 'audio',
     burnTimeout: burnTimeout,
     transcript: transcript || '',
@@ -7384,7 +7403,8 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
         const errBox = document.createElement('div');
         errBox.className = 'img-error-placeholder';
         errBox.style.cssText = 'padding: 24px 16px; text-align: center; background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.15); border-radius: 10px; color: #94a3b8; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px;';
-        errBox.innerHTML = `<i class="fa-solid fa-image-slash" style="font-size: 22px; color: #64748b;"></i><span>Image preview unavailable</span><a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #00f3ff; font-size: 11px; text-decoration: none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open link</a>`;
+        const safeLinkUrl = (url && /^https?:\/\//i.test(url)) ? escapeHtml(url) : '';
+        errBox.innerHTML = `<i class="fa-solid fa-image-slash" style="font-size: 22px; color: #64748b;"></i><span>Image preview unavailable</span>${safeLinkUrl ? `<a href="${safeLinkUrl}" target="_blank" rel="noopener noreferrer" style="color: #00f3ff; font-size: 11px; text-decoration: none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open link</a>` : ''}`;
         imgWrap.appendChild(errBox);
       }
     };
@@ -9019,6 +9039,11 @@ function loadMessages() {
     console.error("? messages-area element not found");
     return;
   }
+  try {
+    messagesDiv.querySelectorAll('audio, video').forEach(m => {
+      try { m.pause(); m.currentTime = 0; } catch (_) {}
+    });
+  } catch (_) {}
 
   const isPasscodeLocked = (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.isChatLocked === 'function' && window.NexChatPasscodeGate.isChatLocked(currentChatUser));
   if (isPasscodeLocked) {
@@ -10142,6 +10167,13 @@ window.toggleCyberHubModal = function() {
 };
 
 async function openChat(uid, username, profilePic, chatType = 'direct') {
+  if (typeof clearTypingStatus === 'function') {
+    clearTypingStatus().catch(() => {});
+  }
+  if (window._slowModeTimerInterval) {
+    clearInterval(window._slowModeTimerInterval);
+    window._slowModeTimerInterval = null;
+  }
   // Ensure voice recording is cancelled cleanly when navigating to any chat
   if (window.voiceRecorderController && typeof window.voiceRecorderController.cancelRecording === 'function') {
     window.voiceRecorderController.cancelRecording();
@@ -11629,9 +11661,11 @@ function showCallUI(isVideo = false, callStatus = 'active') {
   toggleMicBtn?.addEventListener('click', () => {
     micEnabled = !micEnabled;
     const localVideo = document.getElementById('local-video');
+    const audioTrack = (localVideo && localVideo.srcObject)
+      ? localVideo.srcObject.getAudioTracks()[0]
+      : (window.currentCallStream ? window.currentCallStream.getAudioTracks()[0] : null);
 
-    if (localVideo && localVideo.srcObject) {
-      const audioTrack = localVideo.srcObject.getAudioTracks()[0];
+    if (audioTrack) {
       if (audioTrack) {
         audioTrack.enabled = micEnabled;
         toggleMicBtn.classList.toggle('disabled', !micEnabled);
@@ -11846,6 +11880,14 @@ function setupIncomingCallListener() {
 
   incomingCallListener = onSnapshot(incomingQuery, (snapshot) => {
     snapshot.docChanges().forEach((change) => {
+      if (change.type === 'removed') {
+        if (incomingCallOverlay) {
+          try { incomingCallOverlay.remove(); } catch (_) {}
+          incomingCallOverlay = null;
+        }
+        stopRinging();
+        return;
+      }
       if (change.type !== 'added') return;
       const callData = change.doc.data();
       const callId = change.doc.id;
@@ -11985,6 +12027,11 @@ document.addEventListener('audioMessageReady', (e) => {
 });
 
 function endCall() {
+  stopRinging();
+  if (incomingCallOverlay) {
+    try { incomingCallOverlay.remove(); } catch (_) {}
+    incomingCallOverlay = null;
+  }
   const callDuration = callStartTime ? Math.floor((Date.now() - callStartTime) / 1000) : 0;
   const callType = document.getElementById('local-video') ? 'video' : 'voice';
 
@@ -12535,7 +12582,8 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
   return new Promise((resolve, reject) => {
     try {
       const timestamp = Date.now();
-      const fileExt = (file.name.split('.').pop() || 'bin').toLowerCase();
+      const safeName = file?.name || (file?.type ? ('media.' + file.type.split('/')[1]) : 'attachment.bin');
+      const fileExt = (safeName.split('.').pop() || 'bin').toLowerCase();
       const fileName = `${timestamp}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
       const folderPath = isGroup ? `group-attachments/${chatId}/${myUID}` : `chat-attachments/${myUID}`;
@@ -15547,6 +15595,12 @@ async function acceptGroupJoinRequest(requestId, groupId) {
     const groupAdmins = groupData.admins || [groupData.createdBy];
     if (!groupAdmins.includes(myUID)) {
       showNotif('Unauthorized', 'error');
+      return;
+    }
+
+    const currentMembers = groupData.members || [];
+    if (currentMembers.length >= 100) {
+      showNotif('Cannot approve: this group has reached the maximum capacity of 100 members.', 'error', 4500);
       return;
     }
 
@@ -19866,6 +19920,12 @@ async function submitGroupJoinRequest() {
       return;
     }
 
+    if (groupData.members.length >= 100) {
+      showNotif(`Group capacity reached: "${groupData.name}" has reached the maximum limit of 100 members.`, 'error', 4500);
+      closeGroupJoinModal();
+      return;
+    }
+
     if (!isAdminApproval) {
       await updateDoc(groupRef, {
         members: arrayUnion(uid)
@@ -20480,7 +20540,13 @@ async function loadStatusFeed() {
     let statusesData = [];
 
     try {
-      const q = query(collection(db, 'statuses'), limit(100));
+      const cutoffMs = now - 24 * 60 * 60 * 1000;
+      let q;
+      try {
+        q = query(collection(db, 'statuses'), where('createdAtMs', '>=', cutoffMs), orderBy('createdAtMs', 'desc'), limit(100));
+      } catch (_) {
+        q = query(collection(db, 'statuses'), limit(100));
+      }
       const snapshot = await getDocs(q);
       snapshot.forEach(docSnap => {
         const d = docSnap.data();
@@ -20925,7 +20991,10 @@ function showCurrentStorySlide() {
     if (replyInput) replyInput.placeholder = `Reply to ${currentGrp.userName || 'User'}...`;
 
     // Record view in Firestore asynchronously (neutralized if Stealth Peeking is enabled)
-    if (currentSlide.id && typeof db !== 'undefined' && typeof myUID !== 'undefined' && myUID) {
+    window._viewedStatusSlides = window._viewedStatusSlides || new Set();
+    const slideKey = `${currentSlide.id}_${myUID}`;
+    if (!window._viewedStatusSlides.has(slideKey) && currentSlide.id && typeof db !== 'undefined' && typeof myUID !== 'undefined' && myUID) {
+      window._viewedStatusSlides.add(slideKey);
       if (!window.NexStatusEliteSuite || !window.NexStatusEliteSuite.isStealthActive()) {
         try {
           updateDoc(doc(db, 'statuses', currentSlide.id), {
@@ -23530,7 +23599,8 @@ async function loadGroups() {
 
       let avatarHtml;
       if (isGroupPicValid) {
-        avatarHtml = `<img src="${groupPic}" class="chat-avatar group-avatar" style="object-fit:cover;" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${groupInit}</div>`;
+        const safeGroupPic = escapeHtml(groupPic);
+        avatarHtml = `<img src="${safeGroupPic}" class="chat-avatar group-avatar" style="object-fit:cover;" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${groupInit}</div>`;
       } else {
         avatarHtml = `<div class="chat-avatar avatar-placeholder" style="display:flex !important;">${groupInit}</div>`;
       }
@@ -24252,8 +24322,9 @@ async function loadContacts() {
         !pic.startsWith('blob:') &&
         (pic.startsWith('http://') || pic.startsWith('https://') || pic.startsWith('data:image/') || pic.startsWith('/') || pic.startsWith('./') || pic.endsWith('.jpg') || pic.endsWith('.png') || pic.endsWith('.webp') || pic.endsWith('.svg'));
 
+      const safePic = escapeHtml(pic || '');
       let avatar = isPicValid
-        ? `<img src="${pic}" class="chat-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}">` + `<div class="chat-avatar avatar-placeholder hidden" style="display:none !important; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
+        ? `<img src="${safePic}" class="chat-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}">` + `<div class="chat-avatar avatar-placeholder hidden" style="display:none !important; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
         : `<div class="chat-avatar avatar-placeholder" style="background:#202c33; color:#e9edef; display:flex !important; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`;
 
       let lastMessageSnippet = "No messages yet";
@@ -26536,7 +26607,7 @@ if (typeof window !== 'undefined') {
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'OPEN_CHAT' && event.data.chatId) {
         if (typeof openChat === 'function') {
-          openChat(event.data.chatId, 'direct');
+          openChat(event.data.chatId, event.data.chatName || event.data.title || 'Chat', 'logo.jpg', event.data.chatType || 'direct');
         }
       }
     });
@@ -26549,7 +26620,7 @@ if (typeof window !== 'undefined') {
         const interval = setInterval(() => {
           if (myUID && typeof openChat === 'function') {
             clearInterval(interval);
-            openChat(cId, 'direct');
+            openChat(cId, p.get('chatName') || 'Chat', 'logo.jpg', p.get('chatType') || 'direct');
             window.history.replaceState({}, document.title, window.location.pathname);
           }
         }, 300);

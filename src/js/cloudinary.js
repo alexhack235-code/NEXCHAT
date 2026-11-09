@@ -111,6 +111,8 @@ export async function uploadMediaToCloudinary(file, options = {}) {
 function uploadToSingleCloudinaryVault(file, vault, resourceType, folder, fileSizeMb, onProgress, options = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+    xhr.timeout = 45000;
+    xhr.ontimeout = () => reject(new Error('Cloudinary upload timed out after 45s'));
     const endpoint = vault.uploadUrl || `https://api.cloudinary.com/v1_1/${encodeURIComponent(vault.cloudName)}/${resourceType}/upload`;
 
     if (typeof options.onXHRCreated === 'function') {

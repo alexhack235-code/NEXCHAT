@@ -69,13 +69,17 @@ export const ROLE_PERMISSIONS = {
  * @param {string} uid 
  * @returns {string} The role string
  */
+import { groupStore } from './group-store.js';
+
 export function getUserRole(groupData, uid) {
   if (!groupData || !uid) return ROLES.MEMBER;
 
   if (typeof groupData === 'string') {
-    const storeState = (typeof window !== 'undefined' && window.groupStore?.getState?.()) || null;
+    const storeState = groupStore?.getState?.() || (typeof window !== 'undefined' && window.groupStore?.getState?.()) || null;
     if (storeState?.currentGroup && (storeState.currentGroup.id === groupData || storeState.currentGroupId === groupData)) {
       groupData = storeState.currentGroup;
+    } else if (typeof window !== 'undefined' && window.currentGroupData && (window.currentGroupData.id === groupData || window.currentGroupId === groupData)) {
+      groupData = window.currentGroupData;
     } else {
       return ROLES.MEMBER;
     }

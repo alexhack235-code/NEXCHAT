@@ -167,3 +167,6 @@ class GroupStore {
 }
 
 export const groupStore = new GroupStore();
+if (typeof window !== 'undefined') {
+  window.groupStore = groupStore;
+}

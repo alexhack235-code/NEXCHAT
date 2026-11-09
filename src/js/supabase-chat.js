@@ -139,6 +139,7 @@ async function resolveRoomClient(roomId) {
 export async function sendSupabaseMessage({
   from,
   to,
+  clientMsgId: inputClientMsgId = null,
   text = '',
   attachment = null,
   replyTo = null,
@@ -146,7 +147,7 @@ export async function sendSupabaseMessage({
   onOptimisticDispatch = null,
 }) {
   const roomId = chatType === 'group' ? `group_${to}` : buildRoomId(from, to);
-  const clientMsgId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const clientMsgId = inputClientMsgId || `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const nowIso = new Date().toISOString();
 
   const optimisticMessage = {
@@ -433,7 +434,7 @@ export async function subscribeToUserInbox(userUid, { onIncomingMessage }) {
  * @param {number} [limit=50] 
  * @returns {Promise<Array<object>>}
  */
-export async function fetchSupabaseRoomMessages(roomId, limit = 50) {
+export async function fetchSupabaseRoomMessages(roomId, limit = 50, beforeTimestamp = null) {
   if (!roomId) return [];
 
   const { client, shardName } = await resolveRoomClient(roomId);
@@ -441,19 +442,25 @@ export async function fetchSupabaseRoomMessages(roomId, limit = 50) {
   if (!client || !config.isConfigured) return [];
 
   try {
-    const { data, error } = await client
+    let q = client
       .from('messages')
       .select('*')
       .eq('room_id', roomId)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(limit);
+
+    if (beforeTimestamp) {
+      q = q.lt('created_at', beforeTimestamp);
+    }
+
+    const { data, error } = await q;
 
     if (error) {
       console.warn(`[SUPABASE CHAT] History fetch notice from ${shardName}:`, error.message);
       return [];
     }
 
-    return (data || []).map(normalizeSupabaseMessage);
+    return (data || []).reverse().map(normalizeSupabaseMessage);
   } catch (err) {
     console.warn(`[SUPABASE CHAT] History error from ${shardName}:`, err.message);
     return [];

@@ -79,8 +79,13 @@ export async function openGroupChat(groupId) {
 
     const messages = [];
 
+    const currentUid = auth.currentUser?.uid || (typeof window !== 'undefined' && window.myUID) || null;
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
+      // Skip messages deleted for current user
+      if (currentUid && Array.isArray(data.deletedFor) && data.deletedFor.includes(currentUid)) {
+        continue;
+      }
       // Skip expired disappearing messages
       if (data.expiresAt) {
         const expiresAt = data.expiresAt.toDate ? data.expiresAt.toDate() : new Date(data.expiresAt);
@@ -617,9 +622,17 @@ function _attachRealtimeListener(groupId, newestMessage) {
     let messages = [...currentState.messages];
     let changed = false;
 
+    const currentUid = auth.currentUser?.uid || (typeof window !== 'undefined' && window.myUID) || null;
     for (const change of changes) {
       const data = change.doc.data();
       const msgId = change.doc.id;
+
+      // Skip messages deleted for current user
+      if (currentUid && Array.isArray(data.deletedFor) && data.deletedFor.includes(currentUid)) {
+        messages = messages.filter(m => m.id !== msgId);
+        changed = true;
+        continue;
+      }
 
       // Skip expired
       if (data.expiresAt) {

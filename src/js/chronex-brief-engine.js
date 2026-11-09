@@ -809,7 +809,7 @@ ${preparedLines.map(p => p.line).join('\n')}`;
             <div class="chronex-bullet-text" data-bullet-idx="${idx}">${(typeof window !== 'undefined' && typeof window.formatAiMarkdown === 'function') ? window.formatAiMarkdown(b.text) : this.escapeHtml(b.text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
             ${b.id ? `
               <div class="chronex-bullet-meta">
-                <button type="button" class="chronex-jump-pill" data-jump-id="${b.id}" title="Scroll smoothly to this original message">
+                <button type="button" class="chronex-jump-pill" data-jump-id="${this.escapeHtml(b.id)}" title="Scroll smoothly to this original message">
                   <i class="fa-solid fa-arrow-up-right-from-square"></i>
                   <span>Jump to Message</span>
                 </button>

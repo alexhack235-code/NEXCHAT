@@ -84,11 +84,12 @@ class FortressSecurityShield {
     this.patterns = {
       // 1. Cross-Site Scripting (XSS)
       xss: [
-        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-        /javascript\s*:/gi,
-        /data\s*:\s*text\/html/gi,
-        /on(?:error|load|click|mouseover|focus|blur|submit)\s*=/gi,
-        /<iframe\b|<object\b|<embed\b|<svg\b[^>]*onload/gi
+        /<script\b[^>]*>[\s\S]*?(?:<\/script>|$)/gi,
+        /<\s*script\b/gi,
+        /(?:javascript|vbscript)\s*:/gi,
+        /data\s*:\s*(?!image\/(?:png|jpeg|jpg|webp|gif))/gi,
+        /\bon\w+\s*=/gi,
+        /<iframe\b|<object\b|<embed\b|<svg\b|<details\b|<base\b/gi
       ],
       // 2. SQL Injection (SQLi)
       sqli: [

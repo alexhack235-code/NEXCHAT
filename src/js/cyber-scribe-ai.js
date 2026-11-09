@@ -149,7 +149,7 @@
                 <i class="fa-solid fa-arrow-down-to-bracket"></i>
                 <span>Insert Into Chat Draft</span>
               </button>
-              <button type="button" class="btn-scribe-copy" onclick="navigator.clipboard.writeText(document.getElementById('scribeResultText').innerText); this.innerHTML='<i class=\\'fa-solid fa-check\\'></i> Copied!'; setTimeout(()=>{ this.innerHTML='<i class=\\'fa-regular fa-copy\\'></i> Copy'; }, 1500);">
+              <button type="button" class="btn-scribe-copy" onclick="try{navigator.clipboard?.writeText(document.getElementById('scribeResultText').innerText).catch(()=>{});}catch(_){} this.innerHTML='<i class=\\'fa-solid fa-check\\'></i> Copied!'; setTimeout(()=>{ this.innerHTML='<i class=\\'fa-regular fa-copy\\'></i> Copy'; }, 1500);">
                 <i class="fa-regular fa-copy"></i> Copy
               </button>
             </div>

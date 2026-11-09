@@ -73,9 +73,9 @@ export default async function handler(req, res) {
   let replyText = null;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const active = getNextKey();
-
     try {
+      const active = getNextKey();
+      if (!active || !active.key) break;
       if (active.provider === 'gemini') {
         const gem = await callGeminiAI(active.key, CHRONEX_SYSTEM_PROMPT, cleanMessage);
         replyText = gem.text;

@@ -2260,7 +2260,7 @@ html, body {
   transform: translateX(-50%);
   width: calc(100% - 32px);
   max-width: 420px;
-  z-index: 10000;
+  z-index: 100050 !important;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3816,7 +3816,11 @@ html, body {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mobile-more-sheet.open .more-sheet-backdrop {
+  pointer-events: auto;
 }
 
 .mobile-more-sheet.open .more-sheet-backdrop {
@@ -17625,7 +17629,7 @@ body.channel-route-active #chatContainer {
 .fab-action-sheet-overlay {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 10000 !important;
+  z-index: 10020 !important;
   display: none !important;
   flex-direction: column !important;
   justify-content: flex-end !important;
@@ -18814,7 +18818,7 @@ body.in-conversation #bottomNav {
   inset: 0 !important;
   background: rgba(0, 0, 0, 0.75) !important;
   backdrop-filter: blur(8px) !important;
-  z-index: 10090 !important;
+  z-index: 1000000 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;

@@ -139,7 +139,7 @@
 
     hookMessageInput() {
       // Listen for @debater trigger in message input
-      const msgInput = document.getElementById('messageInput') || document.querySelector('.chat-input-textarea');
+      const msgInput = document.getElementById('message-input') || document.getElementById('messageInput') || document.querySelector('.chat-input-textarea');
       if (!msgInput) return;
 
       msgInput.addEventListener('keydown', (e) => {

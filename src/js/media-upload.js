@@ -34,7 +34,8 @@ export async function uploadMediaBlob(file, options = {}) {
   if (!file) throw new Error('No file provided for upload');
 
   const folder = options.folder || 'attachments';
-  const uid = options.uid || 'anon';
+  const resolvedUid = (typeof window !== 'undefined' && (window.myUID || window.auth?.currentUser?.uid)) || options.uid || 'anon';
+  const uid = resolvedUid;
   const access = options.access || 'public';
   const cleanName = (file.name || 'file').replace(/[^a-zA-Z0-9._-]/g, '_');
   const filename = `${folder}/${uid}/${Date.now()}_${cleanName}`;

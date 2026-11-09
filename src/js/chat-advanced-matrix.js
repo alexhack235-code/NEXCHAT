@@ -105,7 +105,7 @@
     }
 
     hookMessageInput() {
-      const input = document.getElementById('messageInput') || document.querySelector('.chat-input-textarea');
+      const input = document.getElementById('message-input') || document.getElementById('messageInput') || document.querySelector('.chat-input-textarea');
       if (!input) return;
 
       input.addEventListener('keydown', (e) => {
