@@ -127,6 +127,12 @@ import {
   saveSupabaseSettings,
   isSupabaseActive
 } from "./src/js/supabase-config.js";
+import {
+  getShardForGroup,
+  getShardForRoom,
+  getAllShards,
+  getShardStats
+} from "./src/js/supabase-sharding-coordinator.js";
 
 // Expose Supabase chat utilities globally
 if (typeof window !== 'undefined') {
@@ -135,6 +141,12 @@ if (typeof window !== 'undefined') {
   window.subscribeToSupabaseRoom = subscribeToSupabaseRoom;
   window.subscribeToUserInbox = subscribeToUserInbox;
   window.getActiveSupabaseSettings = getActiveSupabaseSettings;
+  window.nexchatSharding = {
+    getShardForGroup,
+    getShardForRoom,
+    getAllShards,
+    getShardStats
+  };
   window.firebaseAuth = auth;
   window.firebaseSendEmailVerification = sendEmailVerification;
   window.saveSupabaseSettings = saveSupabaseSettings;

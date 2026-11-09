@@ -4,10 +4,10 @@
  * Architecture:
  * - 4 Accounts x 2 Projects = 8 Projects (1,600 Concurrent Realtime Connections)
  * - Account 1: Project 1 (nexchat-main: Auth, Profiles, Groups, Shard Registry, Group->Shard Router)
- *             Project 2 (nexchat-chat-1: Messages for shard 1)
- * - Account 2: Project 3 (nexchat-chat-2), Project 4 (nexchat-chat-3)
- * - Account 3: Project 5 (nexchat-chat-4), Project 6 (nexchat-chat-5)
- * - Account 4: Project 7 (nexchat-chat-6), Project 8 (nexchat-chat-7)
+ *             Project 2 (nexchat-chat-1: Messages for shard 1, eu-central-1)
+ * - Account 2: Project 3 (nexchat-chat-2: eu-west-1), Project 4 (nexchat-chat-3: eu-west-1)
+ * - Account 3: Project 5 (nexchat-chat-4: ap-northeast-1 Tokyo), Project 6 (nexchat-chat-5: ap-northeast-1 Tokyo)
+ * - Account 4: Project 7 (nexchat-chat-6: us-west-2 Oregon), Project 8 (nexchat-chat-7: us-west-2 Oregon)
  */
 
 import { getActiveSupabaseSettings } from './supabase-config.js';
@@ -18,6 +18,8 @@ let mainClient = null;
 
 // Local in-memory cache of group -> shard mappings to avoid redundant round-trips
 const groupShardRouteCache = new Map();
+const directShardRouteCache = new Map();
+let cachedShardsList = null;
 
 /**
  * Initializes and returns the Supabase client for the MAIN project (nexchat-main).
@@ -40,11 +42,42 @@ export async function getMainClient() {
 }
 
 /**
+ * Fetches and caches the active message shards registered in nexchat-main.
+ * @param {boolean} [forceRefresh=false]
+ * @returns {Promise<Array<object>>}
+ */
+export async function getAllShards(forceRefresh = false) {
+  if (!forceRefresh && cachedShardsList && cachedShardsList.length > 0) {
+    return cachedShardsList;
+  }
+
+  const main = await getMainClient();
+  if (!main) return [];
+
+  try {
+    const { data, error } = await main
+      .from('shards')
+      .select('name, account_label, url, anon_key, status, active_groups_count')
+      .eq('status', 'active')
+      .order('name', { ascending: true });
+
+    if (!error && data && data.length > 0) {
+      cachedShardsList = data;
+      return cachedShardsList;
+    }
+  } catch (err) {
+    console.warn('[SHARDING] Notice loading shards list from main registry:', err.message);
+  }
+
+  return cachedShardsList || [];
+}
+
+/**
  * Resolves the shard configuration (name, url, anonKey) for a specific group.
- * Asks nexchat-main where this group's messages live.
+ * Asks nexchat-main where this group's messages live, or auto-allocates to the least loaded shard.
  * 
  * @param {string} groupId 
- * @returns {Promise<{ shardName: string, url: string, anonKey: string } | null>}
+ * @returns {Promise<{ shardName: string, accountLabel: string, url: string, anonKey: string } | null>}
  */
 export async function getShardForGroup(groupId) {
   if (!groupId) return null;
@@ -72,12 +105,12 @@ export async function getShardForGroup(groupId) {
       return route;
     }
 
-    // 2. Direct fallback query if RPC is not installed yet
+    // 2. Direct fallback query on group_shards
     const { data: mapping, error: mapErr } = await main
       .from('group_shards')
       .select('shard_name, shards(name, account_label, url, anon_key)')
       .eq('group_id', groupId)
-      .single();
+      .maybeSingle();
 
     if (!mapErr && mapping?.shards) {
       const route = {
@@ -90,6 +123,32 @@ export async function getShardForGroup(groupId) {
       groupShardRouteCache.set(groupId, route);
       return route;
     }
+
+    // 3. Auto-allocate shard if this group isn't routed yet
+    const shards = await getAllShards();
+    if (shards && shards.length > 0) {
+      const sorted = [...shards].sort((a, b) => (a.active_groups_count || 0) - (b.active_groups_count || 0));
+      const chosen = sorted[0];
+
+      const route = {
+        groupId,
+        shardName: chosen.name,
+        accountLabel: chosen.account_label,
+        url: chosen.url,
+        anonKey: chosen.anon_key,
+      };
+      groupShardRouteCache.set(groupId, route);
+
+      // Persist allocation in background
+      main.from('group_shards').upsert({
+        group_id: groupId,
+        shard_name: chosen.name,
+        allocated_at: new Date().toISOString(),
+        last_activity_at: new Date().toISOString()
+      }, { onConflict: 'group_id' }).catch(() => {});
+
+      return route;
+    }
   } catch (err) {
     console.error(`[SHARDING] Error resolving shard for group ${groupId}:`, err);
   }
@@ -98,12 +157,72 @@ export async function getShardForGroup(groupId) {
 }
 
 /**
+ * Deterministic hash of string for O(1) direct chat load-balancing.
+ * @param {string} str 
+ * @returns {number}
+ */
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+}
+
+/**
+ * Resolves the shard configuration for a 1-on-1 direct chat room.
+ * Uses deterministic hashing across all 7 shards for uniform load distribution.
+ * 
+ * @param {string} roomId 
+ * @returns {Promise<{ shardName: string, accountLabel: string, url: string, anonKey: string } | null>}
+ */
+export async function getShardForDirectChat(roomId) {
+  if (!roomId) return null;
+
+  if (directShardRouteCache.has(roomId)) {
+    return directShardRouteCache.get(roomId);
+  }
+
+  const shards = await getAllShards();
+  if (!shards || shards.length === 0) return null;
+
+  const index = Math.abs(hashString(roomId)) % shards.length;
+  const chosen = shards[index];
+
+  const route = {
+    roomId,
+    shardName: chosen.name,
+    accountLabel: chosen.account_label,
+    url: chosen.url,
+    anonKey: chosen.anon_key,
+  };
+
+  directShardRouteCache.set(roomId, route);
+  return route;
+}
+
+/**
+ * Universal shard resolver for any room (group or direct).
+ * 
+ * @param {string} roomId 
+ * @returns {Promise<{ shardName: string, accountLabel: string, url: string, anonKey: string } | null>}
+ */
+export async function getShardForRoom(roomId) {
+  if (!roomId) return null;
+  if (roomId.startsWith('group_')) {
+    return getShardForGroup(roomId.replace(/^group_/, ''));
+  }
+  return getShardForDirectChat(roomId);
+}
+
+/**
  * Gets or initializes a Supabase client for a specific shard (nexchat-chat-1 ... 7).
  * Reuses the existing client instance to stay well within the 200 Realtime connections cap.
  * 
  * @param {string} shardName 
- * @param {string} shardUrl 
- * @param {string} shardAnonKey 
+ * @param {string} [shardUrl] 
+ * @param {string} [shardAnonKey] 
  * @returns {Promise<any>}
  */
 export async function getShardClient(shardName, shardUrl, shardAnonKey) {
@@ -113,15 +232,13 @@ export async function getShardClient(shardName, shardUrl, shardAnonKey) {
     return shardClientsCache.get(shardName);
   }
 
-  // If URL/Key were not provided directly, look them up from nexchat-main's shards registry
+  // If URL/Key were not provided directly, look them up from cache or nexchat-main
   if (!shardUrl || !shardAnonKey) {
-    const main = await getMainClient();
-    if (main) {
-      const { data } = await main.from('shards').select('url, anon_key').eq('name', shardName).single();
-      if (data) {
-        shardUrl = data.url;
-        shardAnonKey = data.anon_key;
-      }
+    const shards = await getAllShards();
+    const found = shards.find(s => s.name === shardName);
+    if (found) {
+      shardUrl = found.url;
+      shardAnonKey = found.anon_key;
     }
   }
 
@@ -230,5 +347,24 @@ export async function subscribeToShardedGroup(groupId, onMessage) {
     unsubscribe: () => {
       shardClient.removeChannel(channel);
     }
+  };
+}
+
+/**
+ * Returns current health and connection statistics across all 8 Supabase projects.
+ * @returns {Promise<object>}
+ */
+export async function getShardStats() {
+  const shards = await getAllShards();
+  return {
+    architecture: '4 Accounts x 2 Projects = 8 Supabase Projects (1,600 Realtime Connections)',
+    mainProject: getActiveSupabaseSettings().url,
+    totalShards: shards.length,
+    activeShards: shards.map(s => ({
+      name: s.name,
+      account: s.account_label,
+      url: s.url,
+      connected: shardClientsCache.has(s.name)
+    }))
   };
 }

@@ -1,18 +1,21 @@
 /**
  * NEXCHAT Supabase Realtime High-Performance Chat Engine
  * 
- * Replaces Firestore read/write bottlenecks with:
+ * Powered by 8-Project Sharding Architecture:
+ * - 4 Supabase Accounts x 2 Projects = 8 Projects (1,600 Concurrent Realtime Connections)
  * - Sub-15ms Realtime WebSockets (Phoenix Channels)
  * - Zero-billing ephemeral broadcast for typing indicators and presence
- * - PostgreSQL relational storage with instant indexing and full-text search
+ * - PostgreSQL relational storage distributed across 7 dedicated message shards
  * - Optimistic UI message dispatch with instant DOM rendering
  * - Multi-tier delivery indicators (Pending clock -> Sent check -> Delivered double-check -> Read double-check)
  */
 
-const DEFAULT_CONFIG = {
-  url: 'https://ohsrsevoudwttudpvtpu.supabase.co',
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oc3JzZXZvdWR3dHR1ZHB2dHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyODgyMTUsImV4cCI6MjEwNjg2NDIxNX0.j5xCe7U2NCqVAEEPc6d40WIGKpbfRFj81RVueDkO4IU',
-};
+import { getActiveSupabaseSettings, SUPABASE_DEFAULTS } from './supabase-config.js';
+import {
+  getShardForRoom,
+  getShardClient,
+  getMainClient
+} from './supabase-sharding-coordinator.js';
 
 let supabaseClient = null;
 const activeSubscriptions = new Map();
@@ -22,22 +25,19 @@ const activeSubscriptions = new Map();
  * @returns {{ url: string, anonKey: string, isConfigured: boolean }}
  */
 export function getSupabaseConfig() {
-  if (typeof window !== 'undefined') {
-    if (window.SUPABASE_CONFIG?.url && window.SUPABASE_CONFIG?.anonKey) {
-      return { ...window.SUPABASE_CONFIG, isConfigured: true };
-    }
-    try {
-      const saved = localStorage.getItem('nexchat_supabase_config');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.url && parsed.anonKey) {
-          return { ...parsed, isConfigured: true };
-        }
-      }
-    } catch {}
+  const active = getActiveSupabaseSettings();
+  if (active && active.url && active.anonKey) {
+    return {
+      url: active.url,
+      anonKey: active.anonKey,
+      isConfigured: !active.url.includes('demo-nexchat')
+    };
   }
-  const hasValidDefault = Boolean(DEFAULT_CONFIG.url && DEFAULT_CONFIG.anonKey && !DEFAULT_CONFIG.url.includes('demo-nexchat'));
-  return { ...DEFAULT_CONFIG, isConfigured: hasValidDefault };
+  return {
+    url: SUPABASE_DEFAULTS.url,
+    anonKey: SUPABASE_DEFAULTS.anonKey,
+    isConfigured: true,
+  };
 }
 
 /**
@@ -59,13 +59,19 @@ export function saveSupabaseConfig(url, anonKey) {
 }
 
 /**
- * Initializes and returns the Supabase client instance.
+ * Initializes and returns the primary Supabase client instance (nexchat-main).
  * @returns {Promise<any>}
  */
 export async function getSupabaseClient() {
   if (supabaseClient) return supabaseClient;
 
   try {
+    supabaseClient = await getMainClient();
+    if (supabaseClient) {
+      console.log('[SUPABASE CHAT] Main client initialized.');
+      return supabaseClient;
+    }
+
     const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
     const config = getSupabaseConfig();
     supabaseClient = createClient(config.url, config.anonKey, {
@@ -75,7 +81,6 @@ export async function getSupabaseClient() {
         },
       },
     });
-    console.log('[SUPABASE CHAT] Client initialized successfully.');
     return supabaseClient;
   } catch (err) {
     console.warn('[SUPABASE CHAT] Could not load Supabase client:', err.message);
@@ -95,7 +100,31 @@ export function buildRoomId(uidA, uidB) {
 }
 
 /**
+ * Resolves the optimal Supabase client for a specific room (sharded across 8 projects).
+ * @private
+ * @param {string} roomId 
+ * @returns {Promise<{ client: any, shardName: string }>}
+ */
+async function resolveRoomClient(roomId) {
+  try {
+    const route = await getShardForRoom(roomId);
+    if (route && route.shardName) {
+      const shardClient = await getShardClient(route.shardName, route.url, route.anonKey);
+      if (shardClient) {
+        return { client: shardClient, shardName: route.shardName };
+      }
+    }
+  } catch (e) {
+    console.warn('[SUPABASE CHAT] Shard resolution notice, using main client:', e.message);
+  }
+
+  const fallback = await getSupabaseClient();
+  return { client: fallback, shardName: 'nexchat-main' };
+}
+
+/**
  * Sends a message via Supabase Realtime with immediate broadcast and Postgres insertion.
+ * Dynamically routes to the assigned chat shard among the 7 shards across 4 accounts.
  * 
  * @param {object} params
  * @param {string} params.from - Sender UID
@@ -146,7 +175,7 @@ export async function sendSupabaseMessage({
     }
   }
 
-  const client = await getSupabaseClient();
+  const { client, shardName } = await resolveRoomClient(roomId);
   const config = getSupabaseConfig();
 
   // If Supabase credentials are demo/offline, return optimistic object
@@ -159,9 +188,10 @@ export async function sendSupabaseMessage({
   }
 
   try {
-    // 2. Realtime WebSocket Broadcast (Instant peer delivery before DB roundtrip)
     const channelName = `chat_room_${roomId}`;
-    const pushPayload = { ...optimisticMessage, status: 'sent' };
+    const pushPayload = { ...optimisticMessage, status: 'sent', shard: shardName };
+
+    // 2. Realtime WebSocket Broadcast on target shard channel
     try {
       let roomChannel = client.getChannels ? client.getChannels().find(c => c.topic === `realtime:${channelName}`) : null;
       if (!roomChannel) {
@@ -184,56 +214,36 @@ export async function sendSupabaseMessage({
       }
     } catch (_) {}
 
-    // 2b. Direct Realtime Push to Recipient Inbox (For live contact list updates & background alerts)
-    if (chatType === 'direct' && to) {
+    // 2b. Direct Realtime Push to Recipient Inbox on nexchat-main (For badge alerts)
+    const main = await getSupabaseClient();
+    if (main) {
       try {
-        const inboxChannelName = `user_inbox_${to}`;
-        let inboxChannel = client.getChannels ? client.getChannels().find(c => c.topic === `realtime:${inboxChannelName}`) : null;
-        if (!inboxChannel) {
-          inboxChannel = client.channel(inboxChannelName);
-          inboxChannel.subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-              inboxChannel.send({
-                type: 'broadcast',
-                event: 'incoming_dm',
-                payload: pushPayload,
-              }).catch(() => {});
-            }
-          });
-        } else {
-          inboxChannel.send({
-            type: 'broadcast',
-            event: 'incoming_dm',
-            payload: pushPayload,
-          }).catch(() => {});
-        }
-      } catch (_) {}
-    } else if (chatType === 'group' && to) {
-      try {
-        const groupInboxName = `group_inbox_${to}`;
-        let groupInbox = client.getChannels ? client.getChannels().find(c => c.topic === `realtime:${groupInboxName}`) : null;
-        if (!groupInbox) {
-          groupInbox = client.channel(groupInboxName);
-          groupInbox.subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-              groupInbox.send({
-                type: 'broadcast',
-                event: 'incoming_group_msg',
-                payload: pushPayload,
-              }).catch(() => {});
-            }
-          });
-        } else {
-          groupInbox.send({
-            type: 'broadcast',
-            event: 'incoming_group_msg',
-            payload: pushPayload,
-          }).catch(() => {});
+        if (chatType === 'direct' && to) {
+          const inboxChannelName = `user_inbox_${to}`;
+          let inboxChannel = main.getChannels ? main.getChannels().find(c => c.topic === `realtime:${inboxChannelName}`) : null;
+          if (!inboxChannel) {
+            inboxChannel = main.channel(inboxChannelName);
+            inboxChannel.subscribe((status) => {
+              if (status === 'SUBSCRIBED') {
+                inboxChannel.send({
+                  type: 'broadcast',
+                  event: 'incoming_dm',
+                  payload: pushPayload,
+                }).catch(() => {});
+              }
+            });
+          } else {
+            inboxChannel.send({
+              type: 'broadcast',
+              event: 'incoming_dm',
+              payload: pushPayload,
+            }).catch(() => {});
+          }
         }
       } catch (_) {}
     }
 
-    // 3. PostgreSQL Database Persistence
+    // 3. PostgreSQL Database Persistence on designated Shard
     const { data, error } = await client
       .from('messages')
       .insert({
@@ -242,8 +252,8 @@ export async function sendSupabaseMessage({
         recipient_id: chatType === 'direct' ? to : null,
         group_id: chatType === 'group' ? to : null,
         text,
-        attachment: attachment ? JSON.stringify(attachment) : null,
-        reply_to: replyTo ? JSON.stringify(replyTo) : null,
+        attachment: attachment ? (typeof attachment === 'string' ? attachment : JSON.stringify(attachment)) : null,
+        reply_to: replyTo ? (typeof replyTo === 'string' ? replyTo : JSON.stringify(replyTo)) : null,
         status: 'sent',
         reactions: '[]',
         created_at: nowIso,
@@ -252,8 +262,8 @@ export async function sendSupabaseMessage({
       .single();
 
     if (error) {
-      console.warn('[SUPABASE CHAT] DB insert warning, relying on broadcast:', error.message);
-      return { ...optimisticMessage, status: 'sent' };
+      console.warn(`[SUPABASE CHAT] DB insert notice on ${shardName}, relying on broadcast:`, error.message);
+      return { ...optimisticMessage, status: 'sent', shard: shardName };
     }
 
     return {
@@ -262,6 +272,7 @@ export async function sendSupabaseMessage({
       roomId,
       from,
       to,
+      shard: shardName,
       text: data.text || text,
       attachment: data.attachment ? (typeof data.attachment === 'string' ? JSON.parse(data.attachment) : data.attachment) : null,
       replyTo: data.reply_to ? (typeof data.reply_to === 'string' ? JSON.parse(data.reply_to) : data.reply_to) : null,
@@ -272,13 +283,13 @@ export async function sendSupabaseMessage({
       time: { toDate: () => new Date(data.created_at || nowIso), toMillis: () => new Date(data.created_at || nowIso).getTime() },
     };
   } catch (err) {
-    console.warn('[SUPABASE CHAT] Send pipeline notice:', err.message);
-    return { ...optimisticMessage, status: 'sent' };
+    console.warn(`[SUPABASE CHAT] Send pipeline notice on ${shardName}:`, err.message);
+    return { ...optimisticMessage, status: 'sent', shard: shardName };
   }
 }
 
 /**
- * Subscribes to real-time message stream for a room using Supabase WebSocket channel.
+ * Subscribes to real-time message stream for a room using the designated shard WebSocket channel.
  * 
  * @param {string} roomId 
  * @param {object} callbacks
@@ -298,16 +309,17 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
     activeSubscriptions.delete(roomId);
   }
 
-  const client = await getSupabaseClient();
+  const { client, shardName } = await resolveRoomClient(roomId);
   const config = getSupabaseConfig();
   if (!client || !config.isConfigured) {
     return () => {};
   }
 
+  console.log(`[SUPABASE CHAT] Subscribing to room ${roomId} on shard: ${shardName}`);
   const channelName = `chat_room_${roomId}`;
   const channel = client.channel(channelName);
 
-  // 1. Listen for Broadcast Events (Ultra low latency sub-15ms peer stream)
+  // 1. Listen for Broadcast Events (Sub-15ms peer stream)
   channel
     .on('broadcast', { event: 'new_message' }, ({ payload }) => {
       if (payload && onNewMessage) {
@@ -325,7 +337,7 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
       }
     });
 
-  // 2. Listen for PostgreSQL Database Changes (CDC Replication)
+  // 2. Listen for PostgreSQL Database Changes (CDC Replication) on the Shard
   channel.on(
     'postgres_changes',
     {
@@ -357,13 +369,13 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
   );
 
   channel.subscribe((status) => {
-    console.log(`[SUPABASE CHAT] Subscribed to ${channelName}:`, status);
+    console.log(`[SUPABASE CHAT] [${shardName}] Subscribed to ${channelName}:`, status);
   });
 
   const unsub = () => {
-    channel.unsubscribe();
+    try { client.removeChannel(channel); } catch {}
     activeSubscriptions.delete(roomId);
-    console.log(`[SUPABASE CHAT] Unsubscribed from ${channelName}`);
+    console.log(`[SUPABASE CHAT] [${shardName}] Unsubscribed from ${channelName}`);
   };
 
   activeSubscriptions.set(roomId, unsub);
@@ -371,10 +383,7 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
 }
 
 /**
- * Subscribes to the global user inbox stream across all screens in the app.
- * Real-time listeners:
- * 1. Broadcast channel `user_inbox_${userUid}` (Sub-15ms direct peer push)
- * 2. PostgreSQL CDC table inserts where `recipient_id=eq.${userUid}`
+ * Subscribes to the global user inbox stream across all screens in the app via nexchat-main.
  * 
  * @param {string} userUid 
  * @param {object} callbacks 
@@ -396,35 +405,19 @@ export async function subscribeToUserInbox(userUid, { onIncomingMessage }) {
 
   const channel = client.channel(inboxChannelName);
 
-  // 1. Direct WebSocket Broadcast push
+  // Direct WebSocket Broadcast push
   channel.on('broadcast', { event: 'incoming_dm' }, ({ payload }) => {
     if (payload && onIncomingMessage) {
       onIncomingMessage(normalizeSupabaseMessage(payload));
     }
   });
 
-  // 2. PostgreSQL Database Changes (CDC for direct messages sent to me)
-  channel.on(
-    'postgres_changes',
-    {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'messages',
-      filter: `recipient_id=eq.${userUid}`,
-    },
-    (payload) => {
-      if (payload.new && onIncomingMessage) {
-        onIncomingMessage(normalizeSupabaseMessage(payload.new));
-      }
-    }
-  );
-
   channel.subscribe((status) => {
     console.log(`[SUPABASE INBOX] Subscribed to ${inboxChannelName}:`, status);
   });
 
   const unsub = () => {
-    try { channel.unsubscribe(); } catch (_) {}
+    try { client.removeChannel(channel); } catch (_) {}
     activeSubscriptions.delete(inboxChannelName);
     console.log(`[SUPABASE INBOX] Unsubscribed from ${inboxChannelName}`);
   };
@@ -434,7 +427,7 @@ export async function subscribeToUserInbox(userUid, { onIncomingMessage }) {
 }
 
 /**
- * Loads recent messages for a room from Supabase PostgreSQL.
+ * Loads recent messages for a room from its designated Supabase PostgreSQL shard.
  * 
  * @param {string} roomId 
  * @param {number} [limit=50] 
@@ -443,7 +436,7 @@ export async function subscribeToUserInbox(userUid, { onIncomingMessage }) {
 export async function fetchSupabaseRoomMessages(roomId, limit = 50) {
   if (!roomId) return [];
 
-  const client = await getSupabaseClient();
+  const { client, shardName } = await resolveRoomClient(roomId);
   const config = getSupabaseConfig();
   if (!client || !config.isConfigured) return [];
 
@@ -456,19 +449,19 @@ export async function fetchSupabaseRoomMessages(roomId, limit = 50) {
       .limit(limit);
 
     if (error) {
-      console.warn('[SUPABASE CHAT] History fetch notice:', error.message);
+      console.warn(`[SUPABASE CHAT] History fetch notice from ${shardName}:`, error.message);
       return [];
     }
 
     return (data || []).map(normalizeSupabaseMessage);
   } catch (err) {
-    console.warn('[SUPABASE CHAT] History error:', err.message);
+    console.warn(`[SUPABASE CHAT] History error from ${shardName}:`, err.message);
     return [];
   }
 }
 
 /**
- * Marks messages as read in Supabase and broadcasts receipt to room.
+ * Marks messages as read in Supabase on the designated shard and broadcasts receipt.
  * 
  * @param {string} roomId 
  * @param {string} readerId 
@@ -476,7 +469,7 @@ export async function fetchSupabaseRoomMessages(roomId, limit = 50) {
 export async function markSupabaseMessagesRead(roomId, readerId) {
   if (!roomId || !readerId) return;
 
-  const client = await getSupabaseClient();
+  const { client } = await resolveRoomClient(roomId);
   const config = getSupabaseConfig();
   if (!client || !config.isConfigured) return;
 
@@ -490,7 +483,7 @@ export async function markSupabaseMessagesRead(roomId, readerId) {
       payload: { roomId, readerId, readAt: new Date().toISOString() },
     }).catch(() => {});
 
-    // 2. Update status in Postgres
+    // 2. Update status in Postgres on the shard
     await client
       .from('messages')
       .update({ status: 'read' })
@@ -533,6 +526,7 @@ function normalizeSupabaseMessage(raw) {
     id: canonicalDocId,
     clientMsgId: clientCorrelationId,
     dbId: raw.id ? String(raw.id) : null,
+    shard: raw.shard || null,
     from: raw.sender_id || raw.from,
     to: raw.recipient_id || raw.group_id || raw.to,
     text: raw.text || '',
