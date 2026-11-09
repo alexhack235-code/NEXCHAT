@@ -18765,6 +18765,20 @@ async function createGroup(e) {
     }
 
     const membersList = Array.from(members);
+    const MAX_GROUP_MEMBERS = 100;
+
+    if (membersList.length > MAX_GROUP_MEMBERS) {
+      if (typeof showNotif === 'function') {
+        showNotif(`Groups are strictly capped at maximum ${MAX_GROUP_MEMBERS} members (selected: ${membersList.length}). Please deselect ${membersList.length - MAX_GROUP_MEMBERS} member(s).`, 'error', 4500);
+      }
+      if (resultDiv) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#ff6b6b';
+        resultDiv.style.color = '#fff';
+        resultDiv.textContent = `Group member limit exceeded: maximum allowed is ${MAX_GROUP_MEMBERS} members.`;
+      }
+      return;
+    }
 
     console.log(`[GROUP] Creating group "${name}" with ${membersList.length} members`);
 
@@ -19216,8 +19230,24 @@ async function addSelectedGroupMembersToGroup(groupId) {
     }
 
     const groupRef = doc(db, 'groups', groupId);
+    const groupSnap = await getDoc(groupRef);
+    const existingGroupMembers = groupSnap.exists() ? (groupSnap.data()?.members || []) : [];
+    const MAX_GROUP_MEMBERS = 100;
+    const currentMemberCount = existingGroupMembers.length;
+
+    if (currentMemberCount >= MAX_GROUP_MEMBERS) {
+      showNotif(`This group is already at the maximum capacity of ${MAX_GROUP_MEMBERS} members.`, 'error', 4500);
+      return;
+    }
+
+    const availableSlots = MAX_GROUP_MEMBERS - currentMemberCount;
+    const toAdd = userIds.slice(0, availableSlots);
+    if (userIds.length > availableSlots) {
+      showNotif(`Only ${availableSlots} member(s) could be added due to the ${MAX_GROUP_MEMBERS}-member limit.`, 'warning', 4000);
+    }
+
     await updateDoc(groupRef, {
-      members: arrayUnion(...userIds)
+      members: arrayUnion(...toAdd)
     });
 
     const memberNames = selectedCheckboxes.map(cb => cb.getAttribute('data-username') || 'Member');

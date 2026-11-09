@@ -122,6 +122,30 @@ CREATE TABLE IF NOT EXISTS public.group_members (
 CREATE INDEX IF NOT EXISTS idx_group_members_group ON public.group_members(group_id);
 CREATE INDEX IF NOT EXISTS idx_group_members_user ON public.group_members(user_id);
 
+-- Enforce strict 100-member maximum capacity per group
+CREATE OR REPLACE FUNCTION public.check_group_member_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+    current_count INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO current_count
+    FROM public.group_members
+    WHERE group_id = NEW.group_id;
+
+    IF current_count >= 100 THEN
+        RAISE EXCEPTION 'Group member limit exceeded: maximum 100 members allowed per group';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_check_group_member_limit ON public.group_members;
+CREATE TRIGGER trigger_check_group_member_limit
+    BEFORE INSERT ON public.group_members
+    FOR EACH ROW
+    EXECUTE FUNCTION public.check_group_member_limit();
+
 -- ==============================================================================
 -- 6. GROUP -> SHARD MAPPING TABLE (CORE SHARDING ROUTER)
 -- Directs the client to the exact chat shard storing this group's messages

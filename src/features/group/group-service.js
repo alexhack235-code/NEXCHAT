@@ -42,6 +42,11 @@ export async function createGroup(params) {
     uids.add(currentUser.uid); // Ensure creator is included
     const memberArray = Array.from(uids);
 
+    const MAX_GROUP_MEMBERS = 100;
+    if (memberArray.length > MAX_GROUP_MEMBERS) {
+      throw new Error(`Group member limit exceeded: maximum allowed is ${MAX_GROUP_MEMBERS} members (provided ${memberArray.length})`);
+    }
+
     const inviteCode = Math.random().toString(36).substring(2, 10);
     const inviteLink = `${window.location.origin}?joinGroup=${inviteCode}`;
 
@@ -201,6 +206,13 @@ export async function addMembers(groupId, uids) {
 
     const hasPerm = await hasPermission(groupId, currentUser.uid, PERMISSIONS.MANAGE_MEMBERS);
     if (!hasPerm) throw new Error('Insufficient permissions to add members');
+
+    const groupCheck = await getGroup(groupId);
+    const existingCount = (groupCheck?.members || []).length;
+    const MAX_GROUP_MEMBERS = 100;
+    if (existingCount + uids.length > MAX_GROUP_MEMBERS) {
+      throw new Error(`Group capacity exceeded: maximum allowed is ${MAX_GROUP_MEMBERS} members (currently ${existingCount}, attempting to add ${uids.length})`);
+    }
 
     const groupRef = doc(db, 'groups', groupId);
     const updates = {
