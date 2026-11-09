@@ -17012,19 +17012,56 @@ function renderPoll(pollId, poll) {
 function applyBackgroundImage(imageUrl) {
   applyActiveWallpaper(imageUrl);
   const app = document.querySelector(".app");
-  if (app) {
-    if (imageUrl) {
+  const chatDetail = document.getElementById("chatDetailView");
+  const messagesArea = document.getElementById("messages-area");
+
+  if (imageUrl) {
+    const isSvg = String(imageUrl).startsWith('data:image/svg');
+    const bgSize = isSvg ? 'auto' : '100% 100%';
+    const bgRepeat = isSvg ? 'repeat' : 'no-repeat';
+
+    if (app) {
       app.style.backgroundImage = `url('${imageUrl}')`;
-      app.style.backgroundSize = imageUrl.startsWith('data:image/svg') ? 'auto' : 'cover';
-      app.style.backgroundPosition = 'center';
-      app.style.backgroundRepeat = imageUrl.startsWith('data:image/svg') ? 'repeat' : 'no-repeat';
+      app.style.backgroundSize = bgSize;
+      app.style.backgroundPosition = 'center center';
+      app.style.backgroundRepeat = bgRepeat;
       app.style.backgroundColor = 'transparent';
       app.setAttribute('data-custom-bg', 'true');
-    } else {
+    }
+    if (chatDetail) {
+      chatDetail.style.backgroundImage = `url('${imageUrl}')`;
+      chatDetail.style.backgroundSize = bgSize;
+      chatDetail.style.backgroundPosition = 'center center';
+      chatDetail.style.backgroundRepeat = bgRepeat;
+      chatDetail.style.backgroundColor = 'transparent';
+      chatDetail.classList.add('has-custom-wallpaper');
+      if (isSvg) chatDetail.setAttribute('data-wallpaper-type', 'svg');
+      else chatDetail.removeAttribute('data-wallpaper-type');
+    }
+    if (messagesArea) {
+      messagesArea.classList.add('has-custom-wallpaper');
+      messagesArea.style.backgroundImage = 'none';
+      messagesArea.style.backgroundColor = 'rgba(6, 9, 18, 0.35)';
+    }
+    updateBackgroundPreview(imageUrl);
+  } else {
+    if (app) {
       app.style.backgroundImage = "none";
       app.style.backgroundColor = "";
       app.setAttribute('data-custom-bg', 'false');
     }
+    if (chatDetail) {
+      chatDetail.style.backgroundImage = "none";
+      chatDetail.style.backgroundColor = "";
+      chatDetail.classList.remove('has-custom-wallpaper');
+      chatDetail.removeAttribute('data-wallpaper-type');
+    }
+    if (messagesArea) {
+      messagesArea.classList.remove('has-custom-wallpaper');
+      messagesArea.style.backgroundImage = "none";
+      messagesArea.style.backgroundColor = "";
+    }
+    updateBackgroundPreview(null);
   }
 }
 
@@ -17036,6 +17073,20 @@ function removeBackgroundImage() {
     app.style.backgroundColor = "";
     app.setAttribute('data-custom-bg', 'false');
   }
+  const chatDetail = document.getElementById("chatDetailView");
+  if (chatDetail) {
+    chatDetail.style.backgroundImage = "none";
+    chatDetail.style.backgroundColor = "";
+    chatDetail.classList.remove('has-custom-wallpaper');
+      chatDetail.removeAttribute('data-wallpaper-type');
+  }
+  const messagesArea = document.getElementById("messages-area");
+  if (messagesArea) {
+    messagesArea.classList.remove('has-custom-wallpaper');
+    messagesArea.style.backgroundImage = "none";
+    messagesArea.style.backgroundColor = "";
+  }
+  updateBackgroundPreview(null);
 }
 
 window.openChatWallpaperPicker = (chatId, chatName, isGroup) => {
@@ -17072,7 +17123,20 @@ document.getElementById('btnOpenFullWallpaperLibrary')?.addEventListener('click'
 function updateBackgroundPreview(imageUrl) {
   const preview = document.getElementById("backgroundPreview");
   if (preview) {
-    preview.style.backgroundImage = `url('${imageUrl}')`;
+    if (imageUrl) {
+      const isSvg = String(imageUrl).startsWith('data:image/svg');
+      preview.style.backgroundImage = `url('${imageUrl}')`;
+      preview.style.backgroundSize = isSvg ? 'auto' : '100% 100%';
+      preview.style.backgroundPosition = 'center center';
+      preview.style.backgroundRepeat = isSvg ? 'repeat' : 'no-repeat';
+      if (isSvg) preview.setAttribute('data-wallpaper-type', 'svg');
+      else preview.removeAttribute('data-wallpaper-type');
+      preview.style.display = 'block';
+    } else {
+      preview.style.backgroundImage = 'none';
+      preview.removeAttribute('data-wallpaper-type');
+      preview.style.display = 'none';
+    }
   }
 }
 
@@ -17145,12 +17209,14 @@ async function loadUserBackground() {
 
     const bgDoc = await getDoc(doc(db, "userBackgrounds", myUID));
     if (bgDoc.exists() && bgDoc.data().backgroundUrl) {
-      const bgUrl = bgDoc.data().backgroundUrl;
-      applyBackgroundImage(bgUrl);
-      updateBackgroundPreview(bgUrl);
-      localStorage.setItem("nexchat_background", bgUrl);
-    }
-  } catch (error) {
+        const bgUrl = bgDoc.data().backgroundUrl;
+        applyBackgroundImage(bgUrl);
+        updateBackgroundPreview(bgUrl);
+        localStorage.setItem("nexchat_background", bgUrl);
+      } else {
+        applyBackgroundImage(null);
+      }
+    } catch (error) {
     console.warn("?? Failed to load user background:", error);
   }
 }
@@ -18276,8 +18342,8 @@ document.getElementById("removeChatBackgroundBtn")?.addEventListener("click", as
       removedAt: serverTimestamp()
     });
 
-    removeBackgroundImage();
     localStorage.removeItem(`chat_bg_${currentChatUser}`);
+    loadUserBackground();
 
     showNotif("Chat background removed!", "success");
   } catch (error) {

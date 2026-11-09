@@ -144,20 +144,32 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
   const chatDetail = document.getElementById('chatDetailView');
 
   if (wallpaperUrl) {
+    const isSvg = String(wallpaperUrl).startsWith('data:image/svg');
+    const bgSize = isSvg ? 'auto' : '100% 100%';
+    const bgRepeat = isSvg ? 'repeat' : 'no-repeat';
+
     if (app) {
       app.style.backgroundImage = `url('${wallpaperUrl}')`;
-      app.style.backgroundSize = wallpaperUrl.startsWith('data:image/svg') ? 'auto' : 'cover';
-      app.style.backgroundPosition = 'center';
-      app.style.backgroundRepeat = wallpaperUrl.startsWith('data:image/svg') ? 'repeat' : 'no-repeat';
+      app.style.backgroundSize = bgSize;
+      app.style.backgroundPosition = 'center center';
+      app.style.backgroundRepeat = bgRepeat;
       app.style.backgroundColor = 'transparent';
       app.setAttribute('data-custom-bg', 'true');
     }
     if (chatDetail) {
-      chatDetail.style.background = 'transparent';
+      chatDetail.style.backgroundImage = `url('${wallpaperUrl}')`;
+      chatDetail.style.backgroundSize = bgSize;
+      chatDetail.style.backgroundPosition = 'center center';
+      chatDetail.style.backgroundRepeat = bgRepeat;
+      chatDetail.style.backgroundColor = 'transparent';
+      chatDetail.classList.add('has-custom-wallpaper');
+      if (isSvg) chatDetail.setAttribute('data-wallpaper-type', 'svg');
+      else chatDetail.removeAttribute('data-wallpaper-type');
     }
     if (messagesArea) {
       messagesArea.classList.add('has-custom-wallpaper');
-      messagesArea.style.backgroundColor = 'rgba(6, 9, 18, 0.45)';
+      messagesArea.style.backgroundImage = 'none'; // allow chatDetail full-frame wallpaper to show through cleanly
+      messagesArea.style.backgroundColor = 'rgba(6, 9, 18, 0.35)';
     }
   } else if (solidColor) {
     if (app) {
@@ -166,10 +178,14 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
       app.setAttribute('data-custom-bg', 'true');
     }
     if (chatDetail) {
+      chatDetail.style.backgroundImage = 'none';
       chatDetail.style.backgroundColor = solidColor;
+      chatDetail.classList.remove('has-custom-wallpaper');
+      chatDetail.removeAttribute('data-wallpaper-type');
     }
     if (messagesArea) {
       messagesArea.classList.remove('has-custom-wallpaper');
+      messagesArea.style.backgroundImage = 'none';
       messagesArea.style.backgroundColor = 'transparent';
     }
   } else {
@@ -179,10 +195,14 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
       app.setAttribute('data-custom-bg', 'false');
     }
     if (chatDetail) {
+      chatDetail.style.backgroundImage = 'none';
       chatDetail.style.background = '';
+      chatDetail.classList.remove('has-custom-wallpaper');
+      chatDetail.removeAttribute('data-wallpaper-type');
     }
     if (messagesArea) {
       messagesArea.classList.remove('has-custom-wallpaper');
+      messagesArea.style.backgroundImage = 'none';
       messagesArea.style.backgroundColor = '';
     }
   }
@@ -390,6 +410,8 @@ export function openWallpaperModal(options = {}) {
         gap: 8px;
         box-shadow: inset 0 2px 10px rgba(0,0,0,0.6);
         transition: background 0.3s ease;
+        background-size: 100% 100%;
+        background-position: center center; background-repeat: no-repeat;
       }
       .wp-mock-bubble {
         padding: 7px 13px;
@@ -486,8 +508,16 @@ export function openWallpaperModal(options = {}) {
         justify-content: flex-end;
         padding: 6px 8px;
         transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-        background-size: cover;
-        background-position: center;
+      }
+      .wp-preset-tile:not([data-is-svg="true"]) {
+        background-size: 100% 100% !important;
+        background-position: center center !important;
+        background-repeat: no-repeat !important;
+      }
+      .wp-preset-tile[data-is-svg="true"] {
+        background-size: auto !important;
+        background-position: center center !important;
+        background-repeat: repeat !important;
       }
       .wp-preset-tile:hover { transform: translateY(-2px); border-color: rgba(0,255,136,0.6); }
       .wp-preset-tile.active { border-color: #00ff88; box-shadow: 0 0 16px rgba(0,255,136,0.45); }
@@ -659,9 +689,12 @@ export function openWallpaperModal(options = {}) {
     const thumb = preset.thumbnailUrl || preset.url;
     if (thumb) {
       tile.style.backgroundImage = `url("${thumb.replace(/"/g, '\\"')}")`;
-      tile.style.backgroundSize = thumb.startsWith('data:image/svg') ? 'auto' : 'cover';
-      tile.style.backgroundRepeat = thumb.startsWith('data:image/svg') ? 'repeat' : 'no-repeat';
-      tile.style.backgroundPosition = 'center';
+      const isSvgThumb = thumb.startsWith('data:image/svg');
+      if (isSvgThumb) tile.setAttribute('data-is-svg', 'true');
+      else tile.removeAttribute('data-is-svg');
+      tile.style.backgroundSize = isSvgThumb ? 'auto' : '100% 100%';
+      tile.style.backgroundRepeat = isSvgThumb ? 'repeat' : 'no-repeat';
+      tile.style.backgroundPosition = 'center center';
     }
     tile.addEventListener('click', () => {
       modal.querySelectorAll('.wp-preset-tile').forEach(t => t.classList.remove('active'));
@@ -697,9 +730,10 @@ export function openWallpaperModal(options = {}) {
     if (!stage) return;
     if (selectedUrl) {
       stage.style.backgroundImage = `url("${selectedUrl.replace(/"/g, '\\"')}")`;
-      stage.style.backgroundSize = selectedUrl.startsWith('data:image/svg') ? 'auto' : 'cover';
-      stage.style.backgroundRepeat = selectedUrl.startsWith('data:image/svg') ? 'repeat' : 'no-repeat';
-      stage.style.backgroundPosition = 'center';
+      const isSvgStage = selectedUrl.startsWith('data:image/svg');
+      stage.style.backgroundSize = isSvgStage ? 'auto' : '100% 100%';
+      stage.style.backgroundRepeat = isSvgStage ? 'repeat' : 'no-repeat';
+      stage.style.backgroundPosition = 'center center';
       stage.style.backgroundColor = '#0b141a';
     } else {
       stage.style.backgroundImage = 'none';

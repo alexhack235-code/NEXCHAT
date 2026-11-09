@@ -798,23 +798,71 @@ html, body {
 }
 
 .chat-welcome-panel {
+  background: var(--bg-app);
+
   display: none;
 }
 
-/* Custom Encrypted Chat Wallpaper Support */
-.app[data-custom-bg="true"] .chat-detail-view {
-  background: transparent !important;
+/* Custom Encrypted Chat Wallpaper Support - Full Frame Rendering */
+.app[data-custom-bg="true"] {
+  background-size: 100% 100% !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+.app[data-custom-bg="true"] .chat-detail-view:not([data-wallpaper-type="svg"]),
+.chat-detail-view.has-custom-wallpaper:not([data-wallpaper-type="svg"]) {
+  background-size: 100% 100% !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+.app[data-custom-bg="true"] .chat-detail-view[data-wallpaper-type="svg"],
+.chat-detail-view.has-custom-wallpaper[data-wallpaper-type="svg"] {
+  background-size: auto !important;
+  background-position: center center !important;
+  background-repeat: repeat !important;
 }
 
 .app[data-custom-bg="true"] .messages-area,
 .messages-area.has-custom-wallpaper {
-  background-color: rgba(6, 10, 20, 0.75) !important;
+  background-color: rgba(6, 10, 20, 0.35) !important;
+  background-image: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
+body.light-mode .messages-area.has-custom-wallpaper,
+body.light-mode .app[data-custom-bg="true"] .messages-area {
+  background-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+.messages-area.has-custom-wallpaper::before,
+.app[data-custom-bg="true"] .messages-area::before {
+  display: none !important;
+}
+
 .app[data-custom-bg="true"] .nex-virtual-scroller {
   background: transparent !important;
+}
+
+.background-preview {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.background-preview:not([data-wallpaper-type="svg"]) {
+  background-size: 100% 100% !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+.background-preview[data-wallpaper-type="svg"] {
+  background-size: auto !important;
+  background-position: center center !important;
+  background-repeat: repeat !important;
 }
 
 
@@ -18922,7 +18970,7 @@ body.disable-sticker-diecut .message-sticker-img {
 /* OLED Quantum Mode (True 0-Nit Black for AMOLED) */
 body.oled-mode,
 body.oled-mode .chat-main,
-body.oled-mode #chatDetailView,
+body.oled-mode #chatDetailView:not(.has-custom-wallpaper),
 body.oled-mode .settings-container,
 body.oled-mode .settings-modal,
 body.oled-mode .cyber-hub-modal {
