@@ -6057,11 +6057,15 @@ async function sendMessage() {
         if (targetWrapper) attachGhostCountdown(targetWrapper, window.activeGhostTtl, addedDoc?.id);
       }
 
-      await updateDoc(userRef, {
-        tokens: increment(-1),
-        lastMessageSentAt: serverTimestamp(),
-        contacts: arrayUnion(currentChatUser)
-      });
+      try {
+        await updateDoc(userRef, {
+          tokens: increment(-1),
+          lastMessageSentAt: serverTimestamp(),
+          contacts: arrayUnion(currentChatUser)
+        });
+      } catch (uErr) {
+        console.warn("[USER PROFILE UPDATE NOTICE]", uErr?.message);
+      }
 
       // Dispatch background FCM push to recipient if recipient is outside this chat
       try {
