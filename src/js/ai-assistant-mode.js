@@ -744,5 +744,6 @@ if (typeof globalThis !== 'undefined') {
   globalThis.AIAssistantMode = AIAssistantMode;
 }
 
-export { AIAssistantMode };
-export default AIAssistantMode;
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = AIAssistantMode;
+}

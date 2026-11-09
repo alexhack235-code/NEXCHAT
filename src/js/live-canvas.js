@@ -43,6 +43,7 @@
       modal.id = 'liveCanvasModal';
       modal.className = 'cyber-modal-backdrop';
       modal.style.display = 'none';
+      modal.style.zIndex = '10000';
 
       modal.innerHTML = `
         <div class="cyber-modal-window live-canvas-window">

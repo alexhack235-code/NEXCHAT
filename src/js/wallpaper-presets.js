@@ -156,13 +156,15 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
       app.style.backgroundColor = 'transparent';
       app.setAttribute('data-custom-bg', 'true');
     }
+    document.documentElement.style.setProperty('--chat-wallpaper', `url('${wallpaperUrl}')`);
+    try { localStorage.setItem('nexchat_background', wallpaperUrl); } catch (_) {}
     if (chatDetail) {
       chatDetail.style.backgroundImage = `url('${wallpaperUrl}')`;
       chatDetail.style.backgroundSize = bgSize;
       chatDetail.style.backgroundPosition = 'center center';
       chatDetail.style.backgroundRepeat = bgRepeat;
       chatDetail.style.backgroundColor = 'transparent';
-      chatDetail.classList.add('has-custom-wallpaper');
+      chatDetail.classList.add('has-custom-wallpaper', 'chat-background');
       if (isSvg) chatDetail.setAttribute('data-wallpaper-type', 'svg');
       else chatDetail.removeAttribute('data-wallpaper-type');
     }
@@ -829,3 +831,11 @@ export function openWallpaperModal(options = {}) {
     if (e.target === modal) modal.remove();
   });
 }
+
+// Auto-apply persisted wallpaper on startup
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const saved = localStorage.getItem('nexchat_background');
+    if (saved) applyActiveWallpaper(saved);
+  } catch (_) {}
+});

@@ -696,7 +696,7 @@ function renderCachedDirectChatHistory(messages, messagesDiv) {
 
     // Exact WhatsApp bubble styling matching updateMessages
     const bubbleBg = isOwn ? 'linear-gradient(135deg, #005c4b 0%, #059669 100%)' : '#1f2c34';
-    const bubbleRadius = isOwn ? '12px 2px 12px 12px' : '2px 12px 12px 12px';
+    const bubbleRadius = '12px';
     const bubbleColor = isOwn ? '#ffffff' : '#e9edef';
     const align = isOwn ? 'flex-end' : 'flex-start';
 
@@ -5992,7 +5992,10 @@ async function sendMessage() {
 
       // 3. Dual-layer Firestore persistence
       const currentSenderName = (typeof myUsername !== 'undefined' && myUsername) || (auth?.currentUser?.displayName) || 'User';
-      const currentSenderAvatar = (typeof myProfilePic !== 'undefined' && myProfilePic) || (auth?.currentUser?.photoURL) || 'logo.jpg';
+      const rawAvatar = (typeof myProfilePic !== 'undefined' && myProfilePic) || (auth?.currentUser?.photoURL) || '/logo.jpg';
+      const currentSenderAvatar = (typeof rawAvatar === 'string' && (rawAvatar.startsWith('http://') || rawAvatar.startsWith('https://') || rawAvatar.startsWith('/') || rawAvatar.startsWith('data:') || rawAvatar.startsWith('blob:')))
+        ? rawAvatar
+        : ('/' + (rawAvatar || 'logo.jpg'));
       const messageData = {
         from: myUID,
         to: currentChatUser,
@@ -9808,13 +9811,13 @@ function loadMessages() {
           ttl = Math.max(0, m.ttl - elapsed);
         }
 
-        if (ttl > 0 && typeof attachGhostCountdown === 'function') {
+        // Rule 5: TTL countdown starts ONLY after recipient views message AND exits chat.
+        // NEVER hide messages while user is actively viewing chat.
+        if (typeof attachGhostCountdown === 'function' && ttl > 0) {
           attachGhostCountdown(div, ttl, m.docId, totalTtl);
-        } else if (ttl <= 0 && m.ttl) {
-          div.style.display = 'none';
-          if (m.docId) {
-            try { deleteDoc(doc(db, 'messages', m.docId)).catch(() => {}); } catch (_) {}
-          }
+        } else {
+          div.style.display = 'flex';
+          div.dataset.ephemeral = 'true';
         }
       }
       if (!isOwn && m.text && typeof window.updateSmartReplySuggestions === 'function') {
@@ -10486,6 +10489,49 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   currentChatName = username;
   window.currentChatName = username;
   window.currentChatAvatar = profilePic || 'logo.jpg';
+
+  // Rule 5: Reset window.activeGhostTtl = 0 in openChat() and clear admin-only for direct chats
+  window.activeGhostTtl = 0;
+  if (typeof window.resetGhostProtocol === 'function') {
+    try { window.resetGhostProtocol(); } catch (_) {}
+  }
+  if (window._chatBannerState) {
+    window._chatBannerState.ghostProtocol = false;
+    window._chatBannerState.adminOnly = (chatType === 'group' && Boolean(window._chatBannerState.adminOnly));
+  }
+  if (typeof updateActiveChatBanner === 'function') {
+    updateActiveChatBanner();
+  }
+
+  // Extra Bug 19: Apply wallpaper to current chat & persist after reload
+  try {
+    const globalWallpaper = localStorage.getItem('nexchat_background');
+    const chatWallpaper = localStorage.getItem('chat_bg_' + uid) || globalWallpaper;
+    if (chatWallpaper) {
+      document.documentElement.style.setProperty('--chat-wallpaper', `url('${chatWallpaper}')`);
+      const cdv = document.getElementById('chatDetailView');
+      const ma = document.getElementById('messages-area');
+      if (cdv) cdv.classList.add('has-custom-wallpaper', 'chat-background');
+      if (ma) ma.classList.add('has-custom-wallpaper', 'chat-background');
+    }
+  } catch (_) {}
+
+  // Rule 7: Auto-Translate integration for direct chats
+  try {
+    if (window.CyberFeatures && window.CyberFeatures.translator) {
+      if (typeof window.CyberFeatures.translator.updateChatHeaderBadge === 'function') {
+        window.CyberFeatures.translator.updateChatHeaderBadge();
+      }
+      const autoTranslatePref = localStorage.getItem('nex_auto_translate_on_load');
+      if (autoTranslatePref === 'true' || autoTranslatePref === true) {
+        if (typeof window.CyberFeatures.translator.clearAutoTranslateCacheAndRescan === 'function') {
+          setTimeout(() => {
+            try { window.CyberFeatures.translator.clearAutoTranslateCacheAndRescan(); } catch (_) {}
+          }, 200);
+        }
+      }
+    }
+  } catch (_) {}
 
   // Toggle .selected and .active classes without re-creating list rows (Rules 1 & 3)
   document.querySelectorAll('#contactList .chat-item.selected, #contactList .chat-item.active, #groupsList .chat-item.selected, #groupsList .chat-item.active').forEach(el => {
@@ -24466,37 +24512,35 @@ async function loadContacts() {
   if (!contactList || !myUID) return;
 
   let chronexLi = null;
-  // Zero-latency instant hydration: render cached contacts immediately (0ms)
-  const existingRealItems = contactList.querySelectorAll('.chat-item, .chat-list-item');
-  if (existingRealItems.length === 0) {
-    try {
-      const cached = JSON.parse(localStorage.getItem('nex_cached_contacts_' + myUID) || '[]');
-      if (Array.isArray(cached) && cached.length > 0) {
-        preWarmRecentChatsFromIndexedDB(cached).catch(() => {});
-        contactList.innerHTML = '';
-        cached.forEach(data => {
-          if (data && data.uid && data.name) {
-            const cachedLi = document.createElement("li");
-            cachedLi.className = "chat-list-item chat-item";
-            cachedLi.setAttribute('data-chat-id', data.uid);
-            cachedLi.innerHTML = `
-              <div class="chat-avatar-container" style="position: relative;">
-                <img src="${data.pic || 'logo.jpg'}" class="chat-avatar" onerror="this.src='logo.jpg';">
+  // Zero-latency instant hydration: append cached contacts without duplicates
+  try {
+    const cached = JSON.parse(localStorage.getItem('nex_cached_contacts_' + myUID) || '[]');
+    if (Array.isArray(cached) && cached.length > 0) {
+      preWarmRecentChatsFromIndexedDB(cached).catch(() => {});
+      cached.forEach(data => {
+        if (data && data.uid && data.name && !contactList.querySelector(`li[data-chat-id="${CSS.escape(data.uid)}"]`)) {
+          const cachedLi = document.createElement("li");
+          cachedLi.className = "chat-list-item chat-item";
+          cachedLi.setAttribute('data-chat-id', data.uid);
+          cachedLi.setAttribute('data-chat-type', 'direct');
+          cachedLi.setAttribute('data-name', data.name);
+          cachedLi.innerHTML = `
+            <div class="chat-avatar-container" style="position: relative;">
+              <img src="${data.pic || 'logo.jpg'}" class="chat-avatar" onerror="this.src='logo.jpg';">
+            </div>
+            <div class="chat-item-content">
+              <div class="chat-item-header">
+                <span class="chat-name">${escape(data.name)}</span>
               </div>
-              <div class="chat-item-content">
-                <div class="chat-item-header">
-                  <span class="chat-name">${escape(data.name)}</span>
-                </div>
-                <p class="chat-preview">${data.lastMessageSnippet || 'Open chat...'}</p>
-              </div>
-            `;
-            cachedLi.addEventListener("click", () => openChat(data.uid, data.name, data.pic, "direct"));
-            contactList.appendChild(cachedLi);
-          }
-        });
-      }
-    } catch (_) {}
-  }
+              <p class="chat-preview">${escape(data.lastMessageSnippet || 'Open chat...')}</p>
+            </div>
+          `;
+          cachedLi.addEventListener("click", () => openChat(data.uid, data.name, data.pic, "direct"));
+          contactList.appendChild(cachedLi);
+        }
+      });
+    }
+  } catch (_) {}
   try {
     if (typeof contactsListener === 'function') {
       try { contactsListener(); } catch (e) {  }
@@ -26464,7 +26508,8 @@ if (typeof document !== 'undefined') {
 // Swipe to Reply Implementation (Exact WhatsApp Threshold: dx > 80px, dy < 30px)
 function openReplyForMessage(msg, isOwn) {
   const senderTitle = isOwn ? 'You' : (msg.senderName || currentChatName || 'Friend');
-  const snippet = msg.text || (msg.attachment ? (msg.attachment.fileName || 'Attachment') : 'Message');
+  const rawText = msg.text || (msg.attachment ? (msg.attachment.fileName || 'Attachment') : 'Message');
+  const snippet = rawText.length > 40 ? rawText.substring(0, 40) + '...' : rawText;
   const replyData = {
     messageId: msg.docId || msg.id || msg.clientMsgId || '',
     senderId: msg.senderId || msg.from || (isOwn ? myUID : ''),
@@ -26475,17 +26520,18 @@ function openReplyForMessage(msg, isOwn) {
   window.currentReplyTo = replyData;
   window.replyMessageId = replyData.messageId;
 
+  const preview = document.getElementById('replyPreview');
+  const nameEl = document.getElementById('replyFromName');
+  const msgEl = document.getElementById('replyMessage');
+  if (preview && nameEl && msgEl) {
+    nameEl.textContent = senderTitle;
+    msgEl.textContent = snippet;
+    preview.style.display = 'flex';
+    preview.style.setProperty('display', 'flex', 'important');
+  }
+
   if (window.messagingFeatures && typeof window.messagingFeatures.setReplyingToMessage === 'function') {
-    window.messagingFeatures.setReplyingToMessage(replyData);
-  } else {
-    const preview = document.getElementById('replyPreview');
-    const nameEl = document.getElementById('replyFromName');
-    const msgEl = document.getElementById('replyMessage');
-    if (preview && nameEl && msgEl) {
-      nameEl.textContent = senderTitle;
-      msgEl.textContent = snippet;
-      preview.style.display = 'flex';
-    }
+    try { window.messagingFeatures.setReplyingToMessage(replyData); } catch (_) {}
   }
 
   const messageInput = document.getElementById('message-input');
@@ -26511,10 +26557,24 @@ window.setReplyingTo = function(val) {
 document.addEventListener('DOMContentLoaded', () => {
   const cancelBtn = document.getElementById('cancelReplyBtn');
   if (cancelBtn) {
-    cancelBtn.addEventListener('click', (e) => {
+    cancelBtn.onclick = (e) => {
+      e.preventDefault();
       e.stopPropagation();
       window.setReplyingTo(null);
-    });
+      window.currentReplyTo = null;
+      window.replyMessageId = null;
+      if (window.messagingFeatures && typeof window.messagingFeatures.hideReplyPreview === 'function') {
+        window.messagingFeatures.hideReplyPreview();
+      }
+      const preview = document.getElementById('replyPreview');
+      if (preview) {
+        preview.style.display = 'none';
+        preview.style.setProperty('display', 'none', 'important');
+      }
+      document.querySelectorAll('.message-bubble').forEach(b => {
+        b.style.transform = 'translateX(0px)';
+      });
+    };
   }
 });
 

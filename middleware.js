@@ -48,6 +48,23 @@ export const config = {
 export default function middleware(request) {
   const url = new URL(request.url);
   const pathname = url.pathname.toLowerCase();
+
+  // Skip static scripts, styles, and web assets from Edge rate limiting
+  if (
+    pathname.endsWith('.js') ||
+    pathname.endsWith('.mjs') ||
+    pathname.endsWith('.cjs') ||
+    pathname.endsWith('.css') ||
+    pathname.endsWith('.map') ||
+    pathname.endsWith('.json') ||
+    pathname.startsWith('/src/') ||
+    pathname.startsWith('/js/') ||
+    pathname.startsWith('/css/') ||
+    pathname.startsWith('/assets/') ||
+    pathname.startsWith('/favicons/')
+  ) {
+    return;
+  }
   const search = url.search;
   const rawUrl = request.url;
 

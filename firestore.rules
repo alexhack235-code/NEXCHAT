@@ -69,16 +69,28 @@ service cloud.firestore {
     // Fields:
     //   - from / senderId: string (required, sender UID, immutable)
     //   - to / receiverId: string (required, recipient UID, immutable)
-    //   - text / content: string (optional, max 10000 chars)
+    //   - text / content / message: string (optional, max 10000 chars)
+    //   - senderName / senderUsername: string (optional, max 100 chars)
+    //   - senderAvatar / senderProfilePic: string (optional URL or relative asset filename/path)
     //   - status: string (optional, e.g. 'sent', 'delivered', 'read')
     //   - read: bool (optional)
-    //   - readAt: timestamp/number/string (optional)
-    //   - reactions: list (optional, max 100 items)
+    //   - readAt / deliveredAt / deletedAt / editedAt: timestamp/number/string (optional)
+    //   - reactions: list or map (optional, max 100 items)
+    //   - clientMsgId: string (optional, client-generated message id, max 128 chars)
+    //   - type: string (optional, message type e.g. 'text', 'audio', 'sticker', 'view_once', max 50 chars)
+    //   - chatType: string (optional, e.g. 'direct', 'request', 'system', max 50 chars)
+    //   - replyToId: string (optional, parent message ID, max 128 chars)
+    //   - replyTo: map (optional, parent reply preview map)
+    //   - envelope: map (optional, E2EE cryptographic envelope payload)
+    //   - isEncrypted / isViewOnce / ephemeral / isScheduledDelivery / isSilent / isSticker / isEdited / edited: bool (optional)
+    //   - ttl / burnTimeout: number (optional)
+    //   - viewOnceType / cipherHash / autoResponder / botName / autoResponderSource: string (optional)
     //   - attachment: map or string URL (optional)
+    //   - attachmentUrl / imageUrl: string URL or relative path (optional)
+    //   - attachmentName: string (optional, max 255 chars)
     //   - deletedFor: list of strings (optional, user UIDs who deleted message for themselves, max 500 items)
     //   - isDeleted / deletedForEveryone: bool (optional, tombstone deletion flags)
-    //   - deletedAt: timestamp/number/string (optional)
-    //   - createdAt / timestamp: timestamp (optional, immutable)
+    //   - createdAt / timestamp / time: timestamp/number/string (optional, immutable)
     //
     // Collection: chats
     // Document ID: {chatId}
@@ -488,7 +500,13 @@ service cloud.firestore {
     function isValidUrl(url) {
       return url is string &&
              (
-               (url.size() <= 2048 && (url.matches("^https?://.*") || url.matches("^/.*") || url == "")) ||
+               (url.size() <= 2048 && (
+                 url.matches("^https?://.*") ||
+                 url.matches("^/.*") ||
+                 url.matches("^[a-zA-Z0-9_.-]+$") ||
+                 url.matches("^[a-zA-Z0-9_./-]+$") ||
+                 url == ""
+               )) ||
                (url.size() <= 1048576 && (url.matches("^data:image/.*") || url.matches("^data:video/.*") || url.matches("^blob:.*")))
              );
     }
@@ -739,19 +757,106 @@ service cloud.firestore {
                ('from' in data && data.from == request.auth.uid) ||
                ('senderId' in data && data.senderId == request.auth.uid)
              ) &&
+             (!('from' in data) || data.from == request.auth.uid) &&
+             (!('senderId' in data) || data.senderId == request.auth.uid) &&
              (
                ('to' in data && data.to is string && data.to.size() <= 128) ||
                ('receiverId' in data && data.receiverId is string && data.receiverId.size() <= 128)
              ) &&
+             (!('to' in data) || (data.to is string && data.to.size() <= 128)) &&
+             (!('receiverId' in data) || (data.receiverId is string && data.receiverId.size() <= 128)) &&
              isValidOptionalString('text', 0, 10000) &&
              isValidOptionalString('content', 0, 10000) &&
+             isValidOptionalString('message', 0, 10000) &&
              isValidOptionalString('senderName', 0, 100) &&
              isValidOptionalString('senderUsername', 0, 100) &&
              isValidOptionalUrl('senderAvatar') &&
+             isValidOptionalUrl('senderProfilePic') &&
              isValidOptionalString('type', 0, 50) &&
+             isValidOptionalString('status', 0, 50) &&
              isValidOptionalString('clientMsgId', 0, 128) &&
+             isValidOptionalString('replyToId', 0, 128) &&
+             isValidOptionalString('chatType', 0, 50) &&
+             isValidOptionalString('autoResponder', 0, 50) &&
+             isValidOptionalString('botName', 0, 100) &&
+             isValidOptionalString('autoResponderSource', 0, 100) &&
+             isValidOptionalString('viewOnceType', 0, 50) &&
+             isValidOptionalString('cipherHash', 0, 128) &&
+             isValidOptionalUrl('attachmentUrl') &&
+             isValidOptionalString('attachmentName', 0, 255) &&
+             isValidOptionalUrl('imageUrl') &&
              isValidOptionalReactions('reactions') &&
-             isValidOptionalList('deletedFor', 500);
+             isValidOptionalList('deletedFor', 500) &&
+             (!('read' in data) || data.read is bool) &&
+             (!('edited' in data) || data.edited is bool) &&
+             (!('isEdited' in data) || data.isEdited is bool) &&
+             (!('isEncrypted' in data) || data.isEncrypted is bool) &&
+             (!('isViewOnce' in data) || data.isViewOnce is bool) &&
+             (!('ephemeral' in data) || data.ephemeral is bool) &&
+             (!('isScheduledDelivery' in data) || data.isScheduledDelivery is bool) &&
+             (!('isSilent' in data) || data.isSilent is bool) &&
+             (!('isSticker' in data) || data.isSticker is bool) &&
+             (!('isDeleted' in data) || data.isDeleted is bool) &&
+             (!('deletedForEveryone' in data) || data.deletedForEveryone is bool) &&
+             (!('time' in data) || isValidTimestampOrNumber(data.time)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('deletedAt' in data) || isValidTimestampOrNumber(data.deletedAt)) &&
+             (!('ttl' in data) || data.ttl is int || data.ttl is number) &&
+             (!('burnTimeout' in data) || data.burnTimeout is int || data.burnTimeout is number) &&
+             (!('attachment' in data) || data.attachment == null || data.attachment is map || data.attachment is string) &&
+             (!('envelope' in data) || data.envelope == null || data.envelope is map) &&
+             (!('replyTo' in data) || data.replyTo == null || data.replyTo is map);
+    }
+
+    // Direct Message Update Validator: Enforces immutable participants/timestamps, strict role-based field diffs & type safety
+    function isValidMessageUpdate(data, prev) {
+      return (
+        // 1. Sender editing message text, content, message, reactions, deletedFor, or edit metadata
+        (
+          isMessageSender(prev) &&
+          areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp', 'time']) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalString('message', 0, 10000) &&
+          (!('isEdited' in data) || data.isEdited is bool) &&
+          (!('edited' in data) || data.edited is bool) &&
+          (!('editedAt' in data) || isValidTimestampOrNumber(data.editedAt)) &&
+          isValidOptionalReactions('reactions') &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        // 2. Recipient updating delivery ticks, status ('read', 'delivered'), read flag, timestamps, reactions, deletedFor
+        (
+          isMessageRecipient(prev) &&
+          data.diff(prev).affectedKeys().hasOnly(['status', 'read', 'readAt', 'delivered', 'deliveredAt', 'reactions', 'deletedFor']) &&
+          isValidOptionalString('status', 0, 50) &&
+          (!('read' in data) || data.read is bool) &&
+          (!('readAt' in data) || isValidTimestampOrNumber(data.readAt)) &&
+          (!('delivered' in data) || data.delivered is bool) &&
+          (!('deliveredAt' in data) || isValidTimestampOrNumber(data.deliveredAt)) &&
+          isValidOptionalReactions('reactions') &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        // 3. Either participant marking as deleted / deletedForEveryone / deletedFor / attachment tombstone
+        (
+          isMessageParticipant(prev) &&
+          areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp', 'time']) &&
+          (
+            data.diff(prev).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
+            (
+              data.diff(prev).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content', 'message']) &&
+              (('isDeleted' in data && data.isDeleted == true) || ('deletedForEveryone' in data && data.deletedForEveryone == true))
+            )
+          ) &&
+          (!('isDeleted' in data) || data.isDeleted is bool) &&
+          (!('deletedForEveryone' in data) || data.deletedForEveryone is bool) &&
+          (!('deletedAt' in data) || isValidTimestampOrNumber(data.deletedAt)) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalString('message', 0, 10000) &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        isSuperAdmin()
+      );
     }
 
     // Thread Message Validator (/chats/{chatId}/threads/{threadId}/messages/{msgId})
@@ -1083,41 +1188,7 @@ service cloud.firestore {
       // - Recipient can update status (e.g. 'read', 'delivered'), read/delivered timestamps, reactions, and deletedFor
       // - Sender or participant can set tombstone / deletion fields
       // - SuperAdmin can manage or moderate
-      allow update: if isAuthenticated() && (
-        // 1. Sender editing message text, content, reactions, or deletedFor
-        (
-          isMessageSender(resource.data) &&
-          areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
-          isValidOptionalString('text', 0, 10000) &&
-          isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalReactions('reactions') &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        // 2. Recipient updating delivery ticks, status ('read', 'delivered'), reactions, deletedFor
-        (
-          isMessageRecipient(resource.data) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'read', 'readAt', 'delivered', 'deliveredAt', 'reactions', 'deletedFor']) &&
-          isValidOptionalString('status', 0, 50) &&
-          isValidOptionalReactions('reactions') &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        // 3. Either participant marking as deleted / deletedForEveryone / deletedFor
-        (
-          isMessageParticipant(resource.data) &&
-          areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
-          (
-            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
-            (
-              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content']) &&
-              (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
-            )
-          ) &&
-          isValidOptionalString('text', 0, 10000) &&
-          isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        isSuperAdmin()
-      );
+      allow update: if isAuthenticated() && isValidMessageUpdate(request.resource.data, resource.data);
 
       // Delete: sender or SuperAdmin
       allow delete: if isAuthenticated() && (

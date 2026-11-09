@@ -4,7 +4,8 @@ import { readdirSync } from 'fs'
 import { fileURLToPath } from 'url'
 
 const rootDir = fileURLToPath(new URL('.', import.meta.url))
-const htmlFiles = readdirSync(rootDir).filter(file => file.endsWith('.html'))
+const excludeFromVite = ['province-', 'unity_game', 'game_module', 'dom.html', 'game.html', 'admin-dashboard.html'];
+const htmlFiles = readdirSync(rootDir).filter(file => file.endsWith('.html') && !excludeFromVite.some(ex => file.includes(ex)))
 const input = htmlFiles.reduce((entries, file) => {
   const name = file === 'index.html' ? 'index' : file.replace(/\.html$/, '')
   entries[name] = resolve(rootDir, file).replace(/\\/g, '/')

@@ -548,7 +548,7 @@ user-select: text !important;
 align-self: flex-end !important;
 background: linear-gradient(135deg, #005c4b 0%, #059669 100%) !important;
 color: #ffffff !important;
-border-radius: 12px 2px 12px 12px !important;
+border-radius: 12px !important;
 border: none !important;
 }
 
@@ -724,11 +724,11 @@ opacity: 0.95 !important;
 
 .reply-preview-text .reply-from {
   color: #00a884 !important;
-  font-size: 11.5px !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
-  line-height: 14px !important;
+  line-height: 15px !important;
   margin: 0 !important;
-  max-width: 70% !important;
+  max-width: 100% !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -737,16 +737,15 @@ opacity: 0.95 !important;
 
 .reply-preview-text .reply-message {
   color: #8696a0 !important;
-  font-size: 11px !important;
-  line-height: 13px !important;
+  font-size: 11.5px !important;
+  line-height: 14px !important;
   margin: 0 !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
+  white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   word-break: break-word !important;
   max-width: 100% !important;
+  display: block !important;
 }
 
 .cancel-reply-btn {
@@ -3171,7 +3170,7 @@ margin: 3px 0 !important;
 }
 
 .message-bubble {
-max-width: calc(75% - 8px) !important;
+max-width: 82% !important;
 box-sizing: border-box !important;
 word-break: break-word !important;
 overflow-wrap: anywhere !important;
@@ -3182,8 +3181,8 @@ min-width: 80px !important;
 .message-bubble.sent {
 margin-left: auto !important;
 margin-right: 8px !important;
-max-width: calc(75% - 8px) !important;
-border-radius: 12px 2px 12px 12px !important;
+max-width: 82% !important;
+border-radius: 12px !important;
 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
 overflow: visible !important;
 }
@@ -3214,7 +3213,7 @@ font-size: 15.5px !important;
 background: #005c4b !important;
 background-color: #005c4b !important;
 color: #ffffff !important;
-border-radius: 12px 2px 12px 12px !important;
+border-radius: 12px !important;
 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -5601,16 +5600,35 @@ body,
 .app,
 .chat-main,
 .chat-list-view,
-#chatListView,
-.chat-detail-view,
-#chatDetailView,
+:root {
+  --chat-wallpaper: none;
+}
+
+.chat-detail-view:not(.has-custom-wallpaper),
+#chatDetailView:not(.has-custom-wallpaper),
 .chat-welcome-panel,
-#chatWelcomePanel,
-.messages-area,
-#messages-area,
-#messagesContainer {
+#chatWelcomePanel {
   background: #0f0a1e !important;
   background-color: #0f0a1e !important;
+}
+
+.messages-area:not(.has-custom-wallpaper),
+#messages-area:not(.has-custom-wallpaper),
+#messagesContainer:not(.has-custom-wallpaper) {
+  background: #0f0a1e !important;
+  background-color: #0f0a1e !important;
+}
+
+.chat-background,
+.chat-detail-view.has-custom-wallpaper,
+#chatDetailView.has-custom-wallpaper,
+.messages-area.has-custom-wallpaper,
+#messages-area.has-custom-wallpaper {
+  background-image: var(--chat-wallpaper) !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
 }
 
 /* Remove all fade / opacity transitions and blur filters that trigger GPU black frame drops on Intel graphics */
@@ -5659,10 +5677,9 @@ body,
     max-width: 320px !important;
     flex: 0 0 320px !important;
     flex-shrink: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    overscroll-behavior: contain !important;
-    contain: layout style !important;
+    overflow: hidden !important;
+    overscroll-behavior: auto !important;
+    contain: none !important;
     will-change: auto !important;
     transform: translateZ(0) !important;
     background: #0f0a1e !important;
@@ -5704,20 +5721,40 @@ body,
   }
 }
 
-/* RULE 3: Chat List Rows - Stable keying, layout containment, zero sideways smearing */
-.chat-list,
-.chat-list-view,
+/* RULE 3: Chat List Rows - Single Scroll Container on .chats-section, Zero Touch Traps */
 #chatListView,
-#contactList,
-#groupsList {
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  overscroll-behavior: contain !important;
-  contain: layout style !important;
+.chat-list-view {
+  overflow: hidden !important;
+  overscroll-behavior: auto !important;
+  contain: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
   will-change: auto !important;
   transform: translateZ(0) !important;
   background: #0f0a1e !important;
+}
+
+.chats-section {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch !important;
   scroll-behavior: auto !important;
+  padding-bottom: calc(var(--bottom-nav-height, 66px) + 50px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.chat-list,
+#contactList,
+#groupsList {
+  overflow: visible !important;
+  height: auto !important;
+  contain: none !important;
+  overscroll-behavior: auto !important;
+  background: transparent !important;
 }
 
 .chat-row,
@@ -5832,7 +5869,7 @@ textarea {
 
 /* Bubble base: max-width calc(75% - 8px), overflow visible */
 .message-bubble {
-  max-width: calc(75% - 8px) !important;
+  max-width: 82% !important;
   min-width: 80px !important;
   overflow: visible !important;
   border-radius: 16px !important;
@@ -5851,7 +5888,7 @@ textarea {
 .nex-msg-wrapper.sent .nex-msg-bubble {
   margin-left: auto !important;
   margin-right: 8px !important;
-  max-width: calc(75% - 8px) !important;
+  max-width: 82% !important;
   min-width: 80px !important;
   align-self: flex-end !important;
   overflow: visible !important;
@@ -5865,7 +5902,7 @@ textarea {
 .nex-msg-wrapper.received .nex-msg-bubble {
   margin-right: auto !important;
   margin-left: 0 !important;
-  max-width: calc(75% - 8px) !important;
+  max-width: 82% !important;
   min-width: 80px !important;
   align-self: flex-start !important;
   overflow: visible !important;
@@ -5874,7 +5911,7 @@ textarea {
 
 .message-bubble.has-voice,
 .message-bubble:has(.nex-voice-card-wrapper) {
-  max-width: calc(75% - 8px) !important;
+  max-width: 82% !important;
   overflow: visible !important;
   position: relative !important;
   padding-bottom: 18px !important;

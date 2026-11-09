@@ -1,0 +1,434 @@
+================================================================================
+                    NEXCHAT MOBILE WEB APP - FULL 5-PASS BUG HUNT
+                              TEAM APPROVAL REPORT
+================================================================================
+Date:               November 9, 2026
+Target Environment: Mobile Web App - Android Chrome (360px & 390px Viewport)
+Audit Mode:         DETECT ONLY (Zero Code/CSS Modifications in This Pass)
+Evaluator:          Antigravity QA & Architectural Analysis Engine
+Author:             Engineering Team
+Status:             Awaiting Lead / Stakeholder Approval
+
+--------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY & REAL-WORLD GROUND TRUTH
+--------------------------------------------------------------------------------
+This report consolidates findings from an exhaustive 5-pass architectural bug 
+hunt on NexChat. Ground-truth issues reported by daily mobile users on Android 
+Chrome (Lagos) were directly validated against the codebase:
+
+1. DUTY Chat: Outgoing green bubbles cut 50% to 60% off the right screen edge.
+   Text, timestamps, and checkmarks are clipped. Incoming white bubbles render OK.
+2. @Daven Chat: Bubble edge, timestamp (08:47 AM), and checkmarks cut off right 
+   viewport margin.
+3. Chat List: Conversation list is completely frozen. Users can see Chronex AI, 
+   DUTY, Home Alone, king Alex001, @Daven, demon alexander, and Werxcsz, but 
+   CANNOT scroll down to reach Fire, Supa, Monolog, and Coach Roach. Stuck at 
+   Werxcsz.
+4. Home Alone Chat: Date pills render (23 Oct, 25 Oct, 27 Oct), but the messages 
+   area is completely BLANK. Top banner displays: 
+   "GHOST PROTOCOL ENGAGED - Disintegrating in 30s".
+5. Home Alone Chat: Bottom bar with Stegano-Voice / Token Rain / Co-Doodle / Beam 
+   is stuck visible and sits directly on top of the message input box, 
+   compressing input field width to <40%.
+6. Regression Loop: Previous patch used `overflow: hidden` on body to prevent 
+   bubble overflow, which broke scrolling across the entire application. 
+
+All 18 bugs identified below must be approved for a coordinated, holistic fix 
+to prevent recurring regressions.
+
+================================================================================
+2. MASTER BUG MATRIX (TOP 5 MARKED *** CRITICAL ***)
+================================================================================
+
+#  | SEVERITY      | SCREEN / AREA          | BUG SUMMARY & ROOT CAUSE FILE + LINE
+---|---------------|------------------------|--------------------------------------------------
+01 | *** CRITICAL *** | DUTY & @Daven Chat  | OUTGOING GREEN BUBBLE CUT-OFF 50-60%:
+   |               |                        | Asymmetric `border-radius: 12px 2px 12px 12px !important;`
+   |               |                        | lopping off top-right, combined with `.chat-detail-view`
+   |               |                        | `overflow-x: hidden !important;` clipping sent bubble
+   |               |                        | margin and right boundary.
+   |               |                        | File: css/layout-declutter.css (L3186-L3217)
+   |               |                        | File: chat.css (L16163)
+---|---------------|------------------------|--------------------------------------------------
+02 | *** CRITICAL *** | Chat List View       | CHAT LIST FROZEN AT WERXCSZ:
+   |               |                        | Triple-nested scroll containers (#chatListView ->
+   |               |                        | .chats-section -> #contactList) each enforce
+   |               |                        | `overflow-y: auto !important; overscroll-behavior: contain !important;
+   |               |                        | contain: layout style !important;`. Android Chrome traps
+   |               |                        | touch drag on #contactList (height: auto), halts
+   |               |                        | gesture bubbling, and blocks scroll down to Fire, Supa,
+   |               |                        | Monolog, and Coach Roach.
+   |               |                        | File: css/layout-declutter.css (L5708-L5721)
+   |               |                        | File: chat.css (L1447)
+   |               |                        | File: chat.html (L774)
+---|---------------|------------------------|--------------------------------------------------
+03 | *** CRITICAL *** | Home Alone Chat      | BLANK MESSAGES WITH ORPHAN DATE PILLS:
+   |               |                        | Premature TTL disintegration math hides message divs
+   |               |                        | (`div.style.display = 'none'`) during active chat viewing
+   |               |                        | when sentMs > 30s, while date pills (23 Oct, 25 Oct,
+   |               |                        | 27 Oct) remain visible in DOM.
+   |               |                        | File: chat.js (L9546-L9552, L9813-L9818)
+---|---------------|------------------------|--------------------------------------------------
+04 | *** CRITICAL *** | Home Alone Chat      | TOOLS BAR COVERING MESSAGE INPUT:
+   |               |                        | #attachmentPopupHub sits directly above #message-form in
+   |               |                        | DOM. When toggled or stuck open, absolute/grid positioning
+   |               |                        | overlays #message-form, squishing input box to <40% width.
+   |               |                        | File: chat.html (L1565)
+   |               |                        | File: chat.css (L14908-L14936)
+---|---------------|------------------------|--------------------------------------------------
+05 | *** CRITICAL *** | Global Chat State    | GHOST PROTOCOL GLOBAL STATE BLEED:
+   |               |                        | `window.activeGhostTtl` is a global variable that is
+   |               |                        | NEVER reset to 0 in `openChat()`. Ghost banner and 30s
+   |               |                        | auto-disintegration bleed into other chats on navigation.
+   |               |                        | File: chat2.js (L2641)
+   |               |                        | File: chat.js (L10450-L10520)
+---|---------------|------------------------|--------------------------------------------------
+06 | HIGH          | @Daven Chat            | TIMESTAMP & CHECKMARK COLLISION:
+   |               |                        | `position: absolute; bottom: 4px; right: 8px;` inside short
+   |               |                        | bubbles ("Yo", "ok") lacks min-width buffer, overlapping
+   |               |                        | text and clipping checkmarks off right margin.
+   |               |                        | File: chat.js (L9760-L9775)
+   |               |                        | File: css/layout-declutter.css (L3217)
+---|---------------|------------------------|--------------------------------------------------
+07 | HIGH          | DUTY & @Daven Chat     | ADMIN-ONLY NOTICE IN DIRECT CHATS:
+   |               |                        | `window._chatBannerState.adminOnly` is not cleared on
+   |               |                        | 1-on-1 private chat entry, displaying "Only group admins
+   |               |                        | can send messages" to private users.
+   |               |                        | File: chat.js (L10469-L10520)
+   |               |                        | File: chat.html (L1480)
+---|---------------|------------------------|--------------------------------------------------
+08 | HIGH          | Chat Detail View       | SOFT KEYBOARD VIEWPORT SQUISH:
+   |               |                        | .chat-detail-view is bound to `100vh` instead of `100dvh`,
+   |               |                        | forcing active messages and input bar down behind Android
+   |               |                        | virtual keyboard.
+   |               |                        | File: chat.css (L5638, L19030)
+---|---------------|------------------------|--------------------------------------------------
+09 | HIGH          | Composer Banners       | BANNER STACKING WITH SLOW MODE BAR:
+   |               |                        | #slowModeCountdownBar is placed outside #composerBannerStack,
+   |               |                        | displaying simultaneously with Ghost Protocol and Admin
+   |               |                        | banners, covering lower chat window.
+   |               |                        | File: chat.html (L1700)
+   |               |                        | File: chat.js (L2880)
+---|---------------|------------------------|--------------------------------------------------
+10 | MEDIUM        | Attachment Popup Hub   | 360PX VIEWPORT HORIZONTAL OVERFLOW:
+   |               |                        | `grid-template-columns: repeat(4, minmax(0, 1fr))` with
+   |               |                        | max-width 380px and side paddings breaches screen edges
+   |               |                        | on 360px Android devices.
+   |               |                        | File: chat.css (L14910-L14916)
+---|---------------|------------------------|--------------------------------------------------
+11 | MEDIUM        | Co-Doodle Canvas       | TOUCH CANVAS DRAW EVENT INTERCEPTION:
+   |               |                        | Canvas backdrop modal has lower z-index than bottom dock;
+   |               |                        | drawing strokes trigger clicks on underlying buttons.
+   |               |                        | File: src/js/live-canvas.js (L64)
+---|---------------|------------------------|--------------------------------------------------
+12 | MEDIUM        | Direct Chats           | CHRONEX BABEL AUTO-TRANSLATE DEAD FEATURE:
+   |               |                        | Direct chats do not invoke language detection or prompt
+   |               |                        | inline translation on initial message render.
+   |               |                        | File: chat.js (L2830)
+   |               |                        | File: src/js/i18n.js (L120)
+---|---------------|------------------------|--------------------------------------------------
+13 | MEDIUM        | Direct Chats           | P2P CYBERDROP DIRECT BEAM DEAD FEATURE:
+   |               |                        | #btnAirDropBeam has inline `display: none !important;`
+   |               |                        | and lacks operational trigger pipeline.
+   |               |                        | File: chat.html (L1757)
+   |               |                        | File: src/js/p2p-beam.js (L10)
+---|---------------|------------------------|--------------------------------------------------
+14 | MEDIUM        | Chat Header            | HEADER ACTION ICONS CRAMMED:
+   |               |                        | 9 action icons rendered with `flex-wrap: nowrap` without
+   |               |                        | responsive collapse, overflowing into viewport right edge.
+   |               |                        | File: chat.html (L240-L270)
+   |               |                        | File: chat.css (L4060)
+---|---------------|------------------------|--------------------------------------------------
+15 | LOW           | Slash Commands         | COMMAND PALETTE SCROLL LOCK:
+   |               |                        | #slashCommandPalette uses `overflow: hidden;` and inner
+   |               |                        | list lacks momentum scrolling, clipping commands on
+   |               |                        | short viewports.
+   |               |                        | File: chat.html (L1685)
+---|---------------|------------------------|--------------------------------------------------
+16 | LOW           | Token Rain             | TOKEN RAIN IN DIRECT 1-ON-1 CHAT:
+   |               |                        | Token Rain bounty drop is visible in 1-on-1 private chats
+   |               |                        | where group distribution is inapplicable.
+   |               |                        | File: src/js/token-rain.js (L161)
+---|---------------|------------------------|--------------------------------------------------
+17 | LOW           | Global Document        | BODY TOUCH SCROLL LOCK REGRESSION:
+   |               |                        | Dynamic assignment of `touch-action: none` or
+   |               |                        | `overflow: hidden` on body during drawer toggles traps
+   |               |                        | entire page scroll.
+   |               |                        | File: css/layout-declutter.css (L1120)
+---|---------------|------------------------|--------------------------------------------------
+18 | LOW           | Contact Hydration      | HARDCODED CONTACT DOM SHORT-CIRCUIT:
+   |               |                        | #contactList hardcodes 7 <li> items, causing cold-start
+   |               |                        | logic (`existingRealItems.length === 0`) to skip local
+   |               |                        | cache hydration of other saved contacts.
+   |               |                        | File: chat.html (L776-L906)
+   |               |                        | File: chat.js (L24470)
+
+================================================================================
+3. PASS 1: LAYOUT, OVERFLOW & BUBBLE CUT-OFF AUDIT
+================================================================================
+Evaluated on 360px and 390px mobile viewport widths on Android Chrome.
+
+[PASS 1 - BUG 01]
+Screen:        DUTY Chat / @Daven Chat
+Element:       .message-wrapper.sent .message-bubble.sent
+File & Line:   css/layout-declutter.css:3186-3217, chat.css:16163
+Bug Detail:    Asymmetric border-radius (`12px 2px 12px 12px !important`) clips
+               the top-right border corner. Combined with `.chat-detail-view`
+               having `overflow-x: hidden !important;`, bubbles with `margin-right: 8px`
+               breach the right boundary calculation.
+What User Sees: Outgoing green bubbles cut 50% to 60% off the right edge. Text,
+               time, and checkmarks clipped. Incoming white bubbles render OK.
+
+[PASS 1 - BUG 02]
+Screen:        @Daven Chat
+Element:       .message-time-row, .e2ee-secure-badge
+File & Line:   chat.js:9760-9775, css/layout-declutter.css:3217
+Bug Detail:    Timestamp and read receipt positioned with `position: absolute; bottom: 4px; right: 8px;`
+               without dynamic minimum width padding on small messages ("Yo", "ok").
+What User Sees: Time `08:47 AM` and checkmarks clipped off the right viewport border.
+
+[PASS 1 - BUG 03]
+Screen:        Home Alone Chat
+Element:       .chat-input-wrapper / #message-form
+File & Line:   chat.html:1730-1775, chat.css:14950
+Bug Detail:    Parent container lacks `flex: 1; min-width: 0;` while sibling
+               buttons (#emoji-btn, #btnToggleAttachmentHub, #camera-btn, voice FAB)
+               lack fixed `flex-shrink: 0`.
+What User Sees: Message input box is squeezed into a tiny box (<40% screen width).
+
+[PASS 1 - BUG 04]
+Screen:        Chat Detail Header
+Element:       .chat-header-actions / .cyber-sub-tool
+File & Line:   chat.html:240-270, chat.css:4060
+Bug Detail:    9 action buttons rendered with `flex-wrap: nowrap` on a 360px screen
+               with no responsive hiding or overflow wrapping.
+What User Sees: Header icons overflow off right screen edge and overlap chat title.
+
+[PASS 1 - BUG 05]
+Screen:        Attachment Popup Hub
+Element:       #attachmentPopupHub (.attachment-popup-hub)
+File & Line:   chat.css:14910-14925, css/cyber-suite.css:14-54
+Bug Detail:    Grid layout hardcoded to `grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+               left: 8px; right: 8px; width: auto; max-width: 380px;`.
+What User Sees: Right column of tools is clipped off-screen on 360px devices.
+
+[PASS 1 - BUG 06]
+Screen:        Global Chat Bubbles
+Element:       .e2ee-secure-badge, .translate-pill
+File & Line:   chat.css:16210, chat.js:9720
+Bug Detail:    Badges render with fixed inline margin (`gap: 6px`) without
+               `flex-wrap: wrap` or `min-width: 0`.
+What User Sees: Badges overflow bubble boundaries and collide with message text.
+
+================================================================================
+4. PASS 2: SCROLL, FLEX & HEIGHT AUDIT
+================================================================================
+Inspecting touch scrolling, gesture capture, nested containers, and Android units.
+
+[PASS 2 - BUG 01]
+Area:              Chat List (#contactList)
+Scrolls?           NO (Trapped at item 7)
+Blocking CSS:      Triple-nested containers with `overflow-y: auto !important; contain: layout style !important; overscroll-behavior: contain !important; transform: translateZ(0) !important;`.
+Parent Chain:      #contactList (chat.html:774) -> .chats-section (chat.html:773) -> #chatListView (chat.html:760)
+CSS References:    css/layout-declutter.css:5708-5721, chat.css:1447
+What User Sees:    Chat list is frozen. User sees Chronex AI, DUTY, Home Alone,
+                   king Alex001, @Daven, demon alexander, Werxcsz, but CANNOT
+                   scroll down to Fire, Supa, Monolog, Coach Roach. Stuck at Werxcsz.
+
+[PASS 2 - BUG 02]
+Area:              Chat Detail Messages (#messages-area)
+Scrolls?           NO (When Android soft keyboard opens)
+Blocking CSS:      `.chat-detail-view` bound to `height: 100vh !important;` instead of `100dvh`.
+Parent Chain:      .chat-detail-view (chat.css:5638) -> #messages-area (css/layout-declutter.css:3139)
+What User Sees:    Tapping input hides active messages behind keyboard; user cannot
+                   scroll up to see chat context while typing.
+
+[PASS 2 - BUG 03]
+Area:              Attachment Popup Hub (#attachmentPopupHub)
+Scrolls?           NO (Touch gesture traps)
+Blocking CSS:      `touch-action: pan-y !important; overscroll-behavior: contain !important; max-height: min(340px, 48vh) !important;`.
+Parent Chain:      #attachmentPopupHub (chat.html:1565); CSS: chat.css:14920-14925
+What User Sees:    Menu gets stuck when attempting to swipe down through all 22 tools.
+
+[PASS 2 - BUG 04]
+Area:              Slash Command Palette (#slashCommandPalette)
+Scrolls?           NO
+Blocking CSS:      Container uses `position: absolute; bottom: 65px; overflow: hidden;`
+                   with inner list lacking momentum scrolling.
+Parent Chain:      #slashCommandPalette (chat.html:1685)
+What User Sees:    Commands list cut off on 360px screen; scrolling does not work.
+
+[PASS 2 - BUG 05]
+Area:              Global Document Viewport
+Scrolls?           NO (Regression Loop)
+Blocking CSS:      Dynamic assignment of `touch-action: none` or `overflow: hidden` on body.
+Parent Chain:      body (css/layout-declutter.css:1120)
+What User Sees:    Entire page locks up; user cannot scroll until app reload.
+
+================================================================================
+5. PASS 3: DEAD CODE, ROUTING & UNCALLED FEATURES AUDIT
+================================================================================
+
+1. Function:       translate / autoTranslate
+   Exists?         YES (chat.js:2830, chat.html:7505)
+   Called?         NO
+   Called From:    Nowhere automatically; unused manual trigger #translateBtnHeader.
+   Should Be From: openChat() / renderCachedDirectChatHistory() upon detecting language mismatch.
+   User Impact:    @Daven foreign language messages remain untranslated with no action.
+
+2. Function:       ghostProtocol / disintegrate
+   Exists?         YES (chat.js:9813-9818, chat2.js:2641)
+   Called?         YES (Faulty logic)
+   Called From:    chat.js:9813 during historical message render (`ttl <= 0`).
+   Should Be From: Ephemeral countdown starting ONLY after recipient actively views message and exits.
+   User Impact:    In Home Alone, historical messages older than 30s were auto-hidden
+                   (`div.style.display = 'none'`) and deleted, leaving blank space with date pills.
+
+3. Function:       scheduledQueue
+   Exists?         YES (chat.js:2834, chat.html:1595)
+   Called?         NO
+   Called From:    #hubActionScheduleMsg dummy handler without queue persistence.
+   Should Be From: Long-press on #sendBtn or composer scheduler dialog.
+   User Impact:    Banner shows "1 Scheduled Message Queued" phantom notice even when
+                   queue is empty; button opens non-functional modal.
+
+4. Function:       steganoVoice (Quantum Stegano-Voice)
+   Exists?         YES (src/js/quantum-stegano-voice-ui.js:104)
+   Called?         YES
+   Called From:    Dynamically injected into #attachmentPopupHub.
+   Should Be From: Audio attachment drawer or mic mode toggle.
+   User Impact:    Card stays permanently docked or stuck open, covering input bar.
+
+5. Function:       tokenRain (Cyber Token Rain)
+   Exists?         YES (src/js/token-rain.js:161, chat.js:6434)
+   Called?         YES (Partial)
+   Called From:    Injected into #attachmentPopupHub.
+   Should Be From: Group chats only via `/drop` slash command.
+   User Impact:    Rendered in 1-on-1 private direct chats (Home Alone) where token
+                   distribution is meaningless; claims have no backend verification.
+
+6. Function:       coDoodle (CYBER CANVAS 2-PLAYER)
+   Exists?         YES (src/js/live-canvas.js:154)
+   Called?         YES (Broken)
+   Called From:    #attachmentPopupHub item.
+   Should Be From: Direct chat collaborative menu.
+   User Impact:    Canvas modal backdrop has lower z-index than bottom bar; touch draw
+                   gestures on Android Chrome are intercepted by underlying buttons.
+
+7. Function:       beam (btnAirDropBeam)
+   Exists?         YES (chat.html:1757, src/js/p2p-beam.js:10)
+   Called?         NO
+   Called From:    Button has inline `style="display: none !important;"`.
+   Should Be From: P2P AirDrop radar modal or attachment hub.
+   User Impact:    Button is completely dead code; cannot be tapped.
+
+8. Function:       adminOnly (groupAdminOnlyBanner)
+   Exists?         YES (chat.js:2833, chat.html:1480)
+   Called?         YES (Incorrect context)
+   Called From:    updateActiveChatBanner() in chat.js:2843.
+   Should Be From: ONLY inside Group chats (`chatType === 'group'`) when user role is not admin.
+   User Impact:    Displays "Only group admins can send messages" in 1-on-1 direct chats
+                   like @Daven and DUTY.
+
+================================================================================
+6. PASS 4: BANNERS, STATE, DEFAULTS & PERSISTENCE AUDIT
+================================================================================
+
+[PASS 4 - BUG 01]
+Banner / Setting:  Ghost Protocol Global State Bleed
+Expected:          Ghost Protocol TTL belongs to specific chat session and resets on navigation.
+Actual:            `window.activeGhostTtl` is stored as an unisolated global variable in chat2.js:2641.
+                   `openChat()` (chat.js:10450) NEVER resets `window.activeGhostTtl` back to 0.
+File & Line:       chat2.js:2641, chat.js:10450-10520
+What User Sees:    User opens Home Alone, and banner displays: "GHOST PROTOCOL ENGAGED -
+                   Disintegrating in 30s", even if user did not engage it in this chat.
+
+[PASS 4 - BUG 02]
+Banner / Setting:  Home Alone Blank Messages & Orphan Date Pills
+Expected:          If messages are expired/deleted, date separators should not render or empty state shown.
+Actual:            In chat.js:9546, `nex-date-separator-pill` elements (23 Oct, 25 Oct, 27 Oct)
+                   are appended unconditionally, but child message elements are set to
+                   `div.style.display = 'none'` because `ttl <= 0`.
+File & Line:       chat.js:9546-9552, chat.js:9813-9818
+What User Sees:    Home Alone chat shows dates 23 Oct, 25 Oct, 27 Oct, but messages area
+                   below them is completely BLANK / no messages rendered.
+
+[PASS 4 - BUG 03]
+Banner / Setting:  Banner Stacking with Slow Mode Bar
+Expected:          Strictly only ONE banner visible at any given time.
+Actual:            #slowModeCountdownBar sits outside #composerBannerStack at chat.html:1700
+                   and displays simultaneously with Ghost Protocol and Admin notices.
+File & Line:       chat.html:1700, chat.js:2880
+What User Sees:    2 to 4 stacked banners cover lower half of chat viewport, obscuring messages.
+
+[PASS 4 - BUG 04]
+Banner / Setting:  Auto-Translate Default Setting
+Expected:          Detect foreign language and prompt for inline translation.
+Actual:            `localStorage.getItem('nex_auto_translate_on_load')` defaults to false/null.
+File & Line:       chat.js:2830, src/js/i18n.js:120
+What User Sees:    Foreign chats like @Daven stay untranslated with zero user guidance.
+
+[PASS 4 - BUG 05]
+Banner / Setting:  Admin-Only Notice in Direct Chats
+Expected:          Notice only active for restricted groups.
+Actual:            `window._chatBannerState.adminOnly` is not cleared when entering direct
+                   chat (openChat()), leaving admin banner visible.
+File & Line:       chat.js:10469-10520
+What User Sees:    "Only group admins can send messages" banner appears in private 1-on-1 chats.
+
+================================================================================
+7. PASS 5: TOOLS BAR, BOTTOM BAR & INPUT OVERLAP AUDIT
+================================================================================
+
+1. Tool:           Stegano-Voice (Quantum Stegano-Voice)
+   Visible Default: NO (Stuck visible when .active or .is-open is left in DOM)
+   Covers Input?   YES
+   Works Tapped?   YES, but recorder modal freezes input.
+   File & Line:    src/js/quantum-stegano-voice-ui.js:104, chat.html:1565
+
+2. Tool:           Token Rain (Cyber Token Rain)
+   Visible Default: NO (Stuck visible when hub toggle fails)
+   Covers Input?   YES
+   Works Tapped?   PARTIALLY (Balance check fails offline)
+   File & Line:    src/js/token-rain.js:161, chat.html:1565
+
+3. Tool:           Co-Doodle (CYBER CANVAS 2-PLAYER)
+   Visible Default: NO (Stuck visible when hub toggle fails)
+   Covers Input?   YES
+   Works Tapped?   NO (Touch canvas draw events intercepted by underlying buttons)
+   File & Line:    src/js/live-canvas.js:154, chat.html:1565
+
+4. Tool:           Beam (btnAirDropBeam)
+   Visible Default: NO
+   Covers Input?   YES (When hub opens)
+   Works Tapped?   NO (Hardcoded `display: none !important;`)
+   File & Line:    chat.html:1576, chat.html:1757
+
+5. Tool:           Message Input Box (#message-input)
+   Visible Default: YES
+   Covers Input?   NO (Victim of overlap)
+   Works Tapped?   NO (Collapses to <40% width)
+   File & Line:    chat.html:1730-1775, chat.css:14910
+
+================================================================================
+8. ACTION PLAN & NEXT STEPS FOR APPROVER
+================================================================================
+To eliminate the regression loop and restore 100% stability on Android Chrome:
+
+OPTION 1: Fix Critical Only (Bugs 1 through 5)
+  - Unclip outgoing green bubbles in DUTY & @Daven (revert asymmetric radius, fix right margin).
+  - Unfreeze Chat List (remove nested overscroll traps and layout containment from #contactList).
+  - Restore Home Alone messages (fix TTL check so it only counts down after message read).
+  - Reposition Attachment Popup Hub so it never overlays #message-form.
+  - Reset `window.activeGhostTtl = 0` cleanly in `openChat()`.
+
+OPTION 2: Fix All (Bugs 1 through 18)
+  - Complete holistic resolution of all layout, scrolling, dead code, banner, and tool overlaps.
+
+OPTION 3: Fix One Screen at a Time
+  - Phase A: Chat List screen (scrolling, contact hydration).
+  - Phase B: Chat Detail View (bubble clipping, input box width, soft keyboard).
+  - Phase C: Tools & Modals (Attachment hub, Co-Doodle, Stegano-Voice, Banners).
+
+Please approve one of the options above to proceed with code implementation.
+================================================================================

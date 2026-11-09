@@ -2638,6 +2638,7 @@ function initGhostProtocol() {
   });
 
   const updateGhostUi = (ttl) => {
+  window.resetGhostProtocol = () => updateGhostUi(0);
     window.activeGhostTtl = ttl;
     if (window._chatBannerState) {
       window._chatBannerState.ghostProtocol = (ttl > 0);
