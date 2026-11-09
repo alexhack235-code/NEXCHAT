@@ -5035,12 +5035,19 @@ body[data-active-section="updates"] .top-header {
    ========================================================================= */
 #messages-area.has-custom-wallpaper,
 .app[data-custom-bg="true"] #messages-area {
-  background: transparent !important;
-  background-color: rgba(6, 9, 18, 0.45) !important;
+  background-image: none !important;
+  background-color: rgba(6, 10, 20, 0.40) !important;
 }
 
-.app[data-custom-bg="true"] #chatDetailView {
-  background: transparent !important;
+.chat-detail-view.has-custom-wallpaper,
+#chatDetailView.has-custom-wallpaper,
+.chat-detail-view.chat-background,
+#chatDetailView.chat-background {
+  background-image: var(--chat-wallpaper) !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #0b0f19 !important;
 }
 
 
@@ -5595,11 +5602,6 @@ body.motion-120hz * {
    ========================================================================== */
 
 /* RULE 2: Set background on ALL layers to SAME solid color (#0f0a1e) to eliminate 1-frame blackouts */
-body,
-#root,
-.app,
-.chat-main,
-.chat-list-view,
 :root {
   --chat-wallpaper: none;
 }
@@ -5621,14 +5623,22 @@ body,
 
 .chat-background,
 .chat-detail-view.has-custom-wallpaper,
-#chatDetailView.has-custom-wallpaper,
-.messages-area.has-custom-wallpaper,
-#messages-area.has-custom-wallpaper {
+#chatDetailView.has-custom-wallpaper {
   background-image: var(--chat-wallpaper) !important;
   background-size: cover !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
-  background-color: transparent !important;
+}
+
+#chatDetailView.has-custom-wallpaper[data-wallpaper-type="svg"] {
+  background-size: auto !important;
+  background-repeat: repeat !important;
+}
+
+.messages-area.has-custom-wallpaper,
+#messages-area.has-custom-wallpaper {
+  background-image: none !important;
+  background-color: rgba(6, 10, 20, 0.40) !important;
 }
 
 /* Remove all fade / opacity transitions and blur filters that trigger GPU black frame drops on Intel graphics */
@@ -6001,23 +6011,82 @@ textarea {
   min-width: 0 !important;
 }
 
-/* Time: position: absolute; bottom: 4px; right: 8px; font-size: 11px; white-space: nowrap; flex-shrink: 0; */
+/* Zero-overlay Message Bubble & In-flow Timestamp Layout */
+.message-bubble {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 88px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  padding: 7px 11px 6px 11px !important;
+}
+
+.message-bubble.is-sticker-message,
+.message-bubble.is-clip-message {
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
 .message-time-row,
 .message-timestamp-row,
 .nex-msg-meta,
 .message-time,
 .message-bubble > div:has(.message-time-text) {
-  position: absolute !important;
-  bottom: 4px !important;
-  right: 8px !important;
-  font-size: 11px !important;
+  position: static !important;
+  bottom: auto !important;
+  right: auto !important;
+  align-self: flex-end !important;
+  margin-top: 3px !important;
+  margin-bottom: 0 !important;
+  font-size: 10.5px !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
   float: none !important;
-  margin: 0 !important;
   display: flex !important;
   align-items: center !important;
+  justify-content: flex-end !important;
   gap: 4px !important;
+  opacity: 0.85 !important;
+}
+
+.nex-msg-translate-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: rgba(0, 242, 255, 0.08) !important;
+  border: 1px solid rgba(0, 242, 255, 0.22) !important;
+  border-radius: 6px !important;
+  color: #00f2ff !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  padding: 2px 7px !important;
+  cursor: pointer !important;
+  margin-top: 4px !important;
+  margin-bottom: 2px !important;
+  align-self: flex-start !important;
+  position: static !important;
+  line-height: 1.3 !important;
+}
+
+.nex-msg-translate-btn:hover {
+  background: rgba(0, 242, 255, 0.18) !important;
+  border-color: #00f2ff !important;
+}
+
+.nex-translated-box {
+  margin-top: 5px !important;
+  margin-bottom: 3px !important;
+  padding: 5px 8px !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  border-left: 2.5px solid #00f2ff !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  color: #e2e8f0 !important;
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 /* FIX 3: MESSAGE FIELD - FULL-WIDTH FLEX EXPANSION */

@@ -854,7 +854,12 @@ export async function translateMessageElement(bubbleEl, requestedTarget = null) 
   if (!box) {
     box = document.createElement('div');
     box.className = 'nex-translated-box';
-    bubbleEl.appendChild(box);
+    const timeSpan = bubbleEl.querySelector('.message-time-row, .message-timestamp-row, div[style*="font-size: 11px"], div[style*="font-size: 10.5px"]');
+    if (timeSpan) {
+      bubbleEl.insertBefore(box, timeSpan);
+    } else {
+      bubbleEl.appendChild(box);
+    }
   }
 
   let targetLang = requestedTarget || window.nexPreferredLang || localStorage.getItem('nex_preferred_lang') || 'English';
@@ -918,6 +923,7 @@ export function injectTranslateButtons() {
   const bubbles = document.querySelectorAll('.message-bubble');
   bubbles.forEach(b => {
     if (b.querySelector('.nex-msg-translate-btn')) return;
+    if (b.classList.contains('is-sticker-message') || b.classList.contains('is-clip-message')) return;
 
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -928,7 +934,12 @@ export function injectTranslateButtons() {
       e.stopPropagation();
       translateMessageElement(b);
     });
-    b.appendChild(btn);
+    const timeSpan = b.querySelector('.message-time-row, .message-timestamp-row, div[style*="font-size: 11px"], div[style*="font-size: 10.5px"]');
+    if (timeSpan) {
+      b.insertBefore(btn, timeSpan);
+    } else {
+      b.appendChild(btn);
+    }
   });
 }
 

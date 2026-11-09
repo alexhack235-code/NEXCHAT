@@ -19007,14 +19007,18 @@ body,
 
 .chat-background,
 .chat-detail-view.has-custom-wallpaper,
-#chatDetailView.has-custom-wallpaper,
-.messages-area.has-custom-wallpaper,
-#messages-area.has-custom-wallpaper {
+#chatDetailView.has-custom-wallpaper {
   background-image: var(--chat-wallpaper) !important;
   background-size: cover !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
-  background-color: transparent !important;
+  background-color: #0b0f19 !important;
+}
+
+.messages-area.has-custom-wallpaper,
+#messages-area.has-custom-wallpaper {
+  background-image: none !important;
+  background-color: rgba(6, 10, 20, 0.40) !important;
 }
 
 /* Remove all fade / opacity transitions and blur filters that trigger GPU black frame drops on Intel graphics */

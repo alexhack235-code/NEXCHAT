@@ -771,14 +771,14 @@ function renderCachedDirectChatHistory(messages, messagesDiv) {
 
     return `
       <div class="message-wrapper ${isOwn ? 'sent' : 'received'}" style="display:flex; justify-content:${align}; margin:6px 0; padding:0; overflow:visible;">
-        <div class="message-bubble ${isOwn ? 'sent' : 'received'}" style="position:relative; padding:7px 11px 5px 11px; border-radius:${bubbleRadius}; max-width:calc(75% - 8px); ${isOwn ? 'margin-left:auto; margin-right:8px;' : 'margin-right:auto; margin-left:0;'} min-width:80px; overflow:visible; word-break:break-word; overflow-wrap:anywhere; box-shadow:0 1px 2px rgba(0,0,0,0.35); background:${bubbleBg}; border:${isOwn ? 'none' : '1px solid rgba(255,255,255,0.05)'}; color:${bubbleColor}; font-size:14.5px; line-height:1.45; box-sizing:border-box;">
+        <div class="message-bubble ${isOwn ? 'sent' : 'received'}" style="position:relative; display:flex; flex-direction:column; padding:7px 11px 6px 11px; border-radius:${bubbleRadius}; max-width:calc(75% - 8px); ${isOwn ? 'margin-left:auto; margin-right:8px;' : 'margin-right:auto; margin-left:0;'} min-width:88px; overflow:visible; word-break:break-word; overflow-wrap:anywhere; box-shadow:0 1px 2px rgba(0,0,0,0.35); background:${bubbleBg}; border:${isOwn ? 'none' : '1px solid rgba(255,255,255,0.05)'}; color:${bubbleColor}; font-size:14.5px; line-height:1.45; box-sizing:border-box;">
           ${replyHtml}
-          <div class="message-content" style="margin:0;">
+          <div class="message-content" style="margin:0; width:100%; min-width:0;">
             ${attachmentHtml}
             ${bodyText ? `<div>${bodyText}</div>` : ''}
           </div>
-          <div class="message-time-row" style="font-size:10.5px; margin-top:4px; opacity:0.85; display:flex; align-items:center; justify-content:flex-end; gap:6px;">
-            <span class="e2ee-secure-badge nex-sealed-badge" style="display:inline-flex; align-items:center; opacity:0.85; margin-right:auto; gap:3px;"><span style="color:#00FFC6; font-size:10px;">&#x25CD;</span><span style="font-size:9.5px; color:#00FFC6; font-weight:600; letter-spacing:0.3px;">NEX Sealed</span></span>
+          <div class="message-time-row" style="font-size:10.5px; margin-top:3px; opacity:0.85; display:flex; align-items:center; justify-content:flex-end; gap:4px; align-self:flex-end; position:static;">
+            <span class="e2ee-secure-badge nex-sealed-badge" style="display:inline-flex; align-items:center; opacity:0.9; margin-right:auto;" title="NEX Sealed • AES-256-GCM"><i class="fa-solid fa-lock" style="font-size:8px; color:#00FFC6; filter:drop-shadow(0 0 2px rgba(0,255,198,0.5));"></i></span>
             <span class="message-time-text" style="display:inline-flex; align-items:center; gap:3px; font-size:10.5px; color:#00FFC6;">
               <span>${escapeHtml(formattedTime)}</span>${checkmarkHtml}
             </span>
@@ -8157,7 +8157,7 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   const isDrop = attachment && (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData || attachment.isPredictionPoll || attachment.fileType === 'prediction_poll' || attachment.pollData || attachment.isScratchCard || attachment.fileType === 'scratch_card' || attachment.scratchData || attachment.isBountyContract || attachment.fileType === 'escrow_bounty' || attachment.bountyData || attachment.isSteganoCloak);
   const bubble = document.createElement("div");
   bubble.className = isStk ? "message-bubble sent is-sticker-message" : (isCirc ? "message-bubble sent is-clip-message" : (isDrop ? "message-bubble sent is-drop-message" : "message-bubble sent"));
-  bubble.style.cssText = isStk ? "background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 160px !important;" : ((isCirc || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #005c4b 0%, #059669 100%); border: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); color: #ffffff; padding:7px 11px 18px 11px; border-radius:16px; max-width:calc(75% - 8px); margin-left:auto; margin-right:8px; min-width:80px; overflow:visible; word-break:break-word; overflow-wrap:anywhere; position:relative; box-sizing:border-box;");
+  bubble.style.cssText = isStk ? "background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 160px !important;" : ((isCirc || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #005c4b 0%, #059669 100%); border: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); color: #ffffff; display:flex; flex-direction:column; padding:7px 11px 6px 11px; border-radius:16px; max-width:calc(75% - 8px); margin-left:auto; margin-right:8px; min-width:88px; overflow:visible; word-break:break-word; overflow-wrap:anywhere; position:relative; box-sizing:border-box;");
 
   const stickerUrl = extraMeta?.imageUrl || attachment?.imageUrl || attachment?.downloadURL || attachment?.url || (isStk ? text : null);
   if (isStk && stickerUrl) {
@@ -8188,13 +8188,13 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   }
 
   const timeSpan = document.createElement("div");
-  timeSpan.style.cssText = "position: absolute; bottom: 4px; right: 8px; font-size: 11px; white-space: nowrap; flex-shrink: 0; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px;";
+  timeSpan.style.cssText = "position: static; align-self: flex-end; margin-top: 3px; font-size: 10.5px; white-space: nowrap; flex-shrink: 0; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px;";
 
   // E2EE Lock Icon (Clean & Professional)
   const e2eeBadge = document.createElement("span");
   e2eeBadge.className = "e2ee-secure-badge";
-  e2eeBadge.style.cssText = "display:inline-flex; align-items:center; opacity:0.55; margin-right:auto; cursor:pointer;";
-  e2eeBadge.innerHTML = '<span style="color:#00FFC6; font-size:10px; margin-right:3px;">&#x25CD;</span><span style="font-size:9.5px; color:#00FFC6; font-weight:600; letter-spacing:0.3px;">NEX Sealed</span>';
+  e2eeBadge.style.cssText = "display:inline-flex; align-items:center; opacity:0.9; margin-right:auto; cursor:pointer;";
+  e2eeBadge.innerHTML = '<i class="fa-solid fa-lock" style="font-size:8px; color:#00FFC6; filter:drop-shadow(0 0 2px rgba(0,255,198,0.5));" title="NEX Sealed • AES-256-GCM"></i>';
   e2eeBadge.title = "End-to-End Encrypted (AES-256-GCM Zero-Knowledge)";
   e2eeBadge.addEventListener('click', (ev) => {
     ev.stopPropagation();
@@ -9673,12 +9673,14 @@ function loadMessages() {
         box-shadow: none;
         max-width: 72%;
       ` : `
+        display: flex;
+        flex-direction: column;
         position: relative;
-        padding: 7px 11px 18px 11px;
+        padding: 7px 11px 6px 11px;
         border-radius: 16px;
         max-width: calc(75% - 8px);
         ${isOwn ? 'margin-left: auto; margin-right: 8px;' : 'margin-right: auto; margin-left: 0;'}
-        min-width: 80px;
+        min-width: 88px;
         overflow: visible;
         word-break: break-word;
         overflow-wrap: anywhere;
@@ -9758,13 +9760,13 @@ function loadMessages() {
       }
 
       const timeSpan = document.createElement("div");
-      timeSpan.style.cssText = `position: absolute; bottom: 4px; right: 8px; font-size: 11px; white-space: nowrap; flex-shrink: 0; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px;`;
+      timeSpan.style.cssText = `position: static; align-self: flex-end; margin-top: 3px; font-size: 10.5px; white-space: nowrap; flex-shrink: 0; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px;`;
 
       // E2EE Lock Icon (Clean & Professional)
       const e2eeBadge = document.createElement("span");
       e2eeBadge.className = "e2ee-secure-badge";
-      e2eeBadge.style.cssText = `display:inline-flex; align-items:center; opacity:0.55; margin-right:auto; cursor:pointer;`;
-      e2eeBadge.innerHTML = '<span style="color:#00FFC6; font-size:10px; margin-right:3px;">&#x25CD;</span><span style="font-size:9.5px; color:#00FFC6; font-weight:600; letter-spacing:0.3px;">NEX Sealed</span>';
+      e2eeBadge.style.cssText = `display:inline-flex; align-items:center; opacity:0.9; margin-right:auto; cursor:pointer;`;
+      e2eeBadge.innerHTML = '<i class="fa-solid fa-lock" style="font-size:8px; color:#00FFC6; filter:drop-shadow(0 0 2px rgba(0,255,198,0.5));" title="NEX Sealed • AES-256-GCM"></i>';
       e2eeBadge.title = "AES-256-GCM Zero-Knowledge Enclave Encrypted. Click to inspect ciphertext.";
       e2eeBadge.addEventListener('click', (ev) => {
         ev.stopPropagation();
@@ -10516,21 +10518,12 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   // Extra Bug 19: Apply wallpaper to current chat & persist after reload
   try {
     const globalWallpaper = localStorage.getItem('nexchat_background');
-    const chatWallpaper = localStorage.getItem('chat_bg_' + uid) || globalWallpaper;
+    const cleanUid = String(uid || '').replace(/^@/, '').toLowerCase();
+    const chatWallpaper = localStorage.getItem('chat_bg_' + uid) ||
+                          localStorage.getItem('chat_bg_' + cleanUid) ||
+                          globalWallpaper;
     if (chatWallpaper) {
-      document.documentElement.style.setProperty('--chat-wallpaper', `url('${chatWallpaper}')`);
-      const cdv = document.getElementById('chatDetailView');
-      const ma = document.getElementById('messages-area');
-      if (cdv) {
-        cdv.classList.add('has-custom-wallpaper', 'chat-background');
-        cdv.style.removeProperty('background');
-        cdv.style.removeProperty('background-color');
-      }
-      if (ma) {
-        ma.classList.add('has-custom-wallpaper', 'chat-background');
-        ma.style.removeProperty('background');
-        ma.style.removeProperty('background-color');
-      }
+      applyActiveWallpaper(chatWallpaper);
     } else {
       const cdv = document.getElementById('chatDetailView');
       const ma = document.getElementById('messages-area');
@@ -17445,10 +17438,10 @@ function removeBackgroundImage() {
   updateBackgroundPreview(null);
 }
 
-window.openChatWallpaperPicker = (chatId, chatName, isGroup) => {
+window.openChatWallpaperPicker = (chatId = null, chatName = null, isGroup = false) => {
   openWallpaperModal({
-    chatId: chatId || currentChatUser,
-    chatName: chatName || currentChatName || (isGroup ? 'Group' : 'Chat'),
+    chatId: chatId,
+    chatName: chatName || (chatId ? (currentChatName || 'Chat') : 'All Chats'),
     chatType: isGroup ? 'group' : (currentChatType || 'direct'),
     myUID: myUID,
     db: db,
@@ -24078,6 +24071,9 @@ window.sendGroupMessage = sendGroupMessage;
 window.loadGroupMessages = loadGroupMessages;
 window.renderGroupMessages = loadGroupMessages;
 window.GroupChat = GroupChat;
+window.loadMessages = loadMessages;
+window.renderCachedDirectChatHistory = renderCachedDirectChatHistory;
+window.applyActiveWallpaper = applyActiveWallpaper;
 
 console.log("? Functions exposed to global window");
 

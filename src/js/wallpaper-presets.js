@@ -22,13 +22,14 @@ function escapeHTML(str) {
 }
 
 // SVG Doodle Pattern Generators (Optimized Data URIs)
-const SVG_DOODLE_CLASSIC = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340"><rect width="340" height="340" fill="%230b141a"/><g fill="none" stroke="%23ffffff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.075"><path d="M30 40h40a10 10 0 0 1 10 10v20a10 10 0 0 1-10 10h-25l-12 10v-10h-3a10 10 0 0 1-10-10v-20a10 10 0 0 1 10-10z"/><circle cx="50" cy="60" r="2" fill="%23fff"/><circle cx="60" cy="60" r="2" fill="%23fff"/><path d="M140 50h25v18a10 10 0 0 1-10 10h-5a10 10 0 0 1-10-10z"/><path d="M165 54h6a5 5 0 0 1 0 10h-6"/><rect x="230" y="45" width="34" height="24" rx="4"/><circle cx="247" cy="57" r="6"/><path d="M242 45l2-5h6l2 5"/><path d="M30 150l45 15-20 8 10 15 5-10 18-5z"/><rect x="130" y="130" width="22" height="40" rx="4"/><line x1="138" y1="164" x2="144" y2="164"/><path d="M240 145a5 5 0 0 0-7 7l7 7 7-7a5 5 0 0 0-7-7z"/><path d="M275 130l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/><rect x="40" y="240" width="24" height="18" rx="3"/><path d="M46 240v-8a6 6 0 0 1 12 0v8"/><circle cx="52" cy="249" r="2" fill="%23fff"/><path d="M130 250a16 16 0 0 1 32 0v10h-6v-8h6a10 10 0 0 0-20 0v8h-6z"/><circle cx="245" cy="245" r="14"/><circle cx="240" cy="242" r="1.5" fill="%23fff"/><circle cx="250" cy="242" r="1.5" fill="%23fff"/><path d="M239 250a6 6 0 0 0 12 0"/><path d="M90 300l10-15 10 15-4-2v6h-12v-6z"/><path d="M190 310h20v-10h-20z"/><circle cx="196" cy="305" r="1.5" fill="%23fff"/><circle cx="204" cy="305" r="1.5" fill="%23fff"/></g></svg>`;
+const toSvgDataUri = (svg) => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+const SVG_DOODLE_CLASSIC = toSvgDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340"><rect width="340" height="340" fill="#0b141a"/><g fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.075"><path d="M30 40h40a10 10 0 0 1 10 10v20a10 10 0 0 1-10 10h-25l-12 10v-10h-3a10 10 0 0 1-10-10v-20a10 10 0 0 1 10-10z"/><circle cx="50" cy="60" r="2" fill="#fff"/><circle cx="60" cy="60" r="2" fill="#fff"/><path d="M140 50h25v18a10 10 0 0 1-10 10h-5a10 10 0 0 1-10-10z"/><path d="M165 54h6a5 5 0 0 1 0 10h-6"/><rect x="230" y="45" width="34" height="24" rx="4"/><circle cx="247" cy="57" r="6"/><path d="M242 45l2-5h6l2 5"/><path d="M30 150l45 15-20 8 10 15 5-10 18-5z"/><rect x="130" y="130" width="22" height="40" rx="4"/><line x1="138" y1="164" x2="144" y2="164"/><path d="M240 145a5 5 0 0 0-7 7l7 7 7-7a5 5 0 0 0-7-7z"/><path d="M275 130l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/><rect x="40" y="240" width="24" height="18" rx="3"/><path d="M46 240v-8a6 6 0 0 1 12 0v8"/><circle cx="52" cy="249" r="2" fill="#fff"/><path d="M130 250a16 16 0 0 1 32 0v10h-6v-8h6a10 10 0 0 0-20 0v8h-6z"/><circle cx="245" cy="245" r="14"/><circle cx="240" cy="242" r="1.5" fill="#fff"/><circle cx="250" cy="242" r="1.5" fill="#fff"/><path d="M239 250a6 6 0 0 0 12 0"/><path d="M90 300l10-15 10 15-4-2v6h-12v-6z"/><path d="M190 310h20v-10h-20z"/><circle cx="196" cy="305" r="1.5" fill="#fff"/><circle cx="204" cy="305" r="1.5" fill="#fff"/></g></svg>');
 
-const SVG_DOODLE_EMERALD = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340"><rect width="340" height="340" fill="%23060c11"/><g fill="none" stroke="%2300ff88" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.14"><rect x="25" y="35" width="46" height="30" rx="5"/><path d="M33 46l6 4-6 4"/><line x1="43" y1="54" x2="52" y2="54"/><path d="M140 40l16-6 16 6v14c0 10-16 18-16 18s-16-8-16-18z"/><path d="M235 55a16 16 0 0 1 24 0"/><path d="M240 60a9 9 0 0 1 14 0"/><circle cx="247" cy="65" r="1.5" fill="%2300ff88"/><path d="M45 130l-12 18h10l-4 18 16-22h-10z"/><rect x="135" y="135" width="26" height="26" rx="4"/><rect x="140" y="140" width="16" height="16" fill="%2300ff88" opacity="0.2"/><line x1="148" y1="130" x2="148" y2="135"/><line x1="148" y1="161" x2="148" y2="166"/><line x1="130" y1="148" x2="135" y2="148"/><line x1="161" y1="148" x2="166" y2="148"/><circle cx="240" cy="145" r="7"/><line x1="247" y1="145" x2="265" y2="145"/><line x1="257" y1="145" x2="257" y2="150"/><line x1="262" y1="145" x2="262" y2="148"/><path d="M35 245c0-6 4-10 10-10h14c6 0 10 4 10 10v10l-6 10h-6l-4-6-4 6h-6l-6-10z"/><circle cx="60" cy="245" r="1.5" fill="%2300ff88"/><polygon points="148,230 166,240 148,250 130,240"/><polygon points="130,240 148,250 148,270 130,260"/><polygon points="166,240 148,250 148,270 166,260"/><path d="M235 250l5 5 10-10"/><path d="M243 250l5 5 10-10"/></g></svg>`;
+const SVG_DOODLE_EMERALD = toSvgDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340"><rect width="340" height="340" fill="#060c11"/><g fill="none" stroke="#00ff88" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.14"><rect x="25" y="35" width="46" height="30" rx="5"/><path d="M33 46l6 4-6 4"/><line x1="43" y1="54" x2="52" y2="54"/><path d="M140 40l16-6 16 6v14c0 10-16 18-16 18s-16-8-16-18z"/><path d="M235 55a16 16 0 0 1 24 0"/><path d="M240 60a9 9 0 0 1 14 0"/><circle cx="247" cy="65" r="1.5" fill="#00ff88"/><path d="M45 130l-12 18h10l-4 18 16-22h-10z"/><rect x="135" y="135" width="26" height="26" rx="4"/><rect x="140" y="140" width="16" height="16" fill="#00ff88" opacity="0.2"/><line x1="148" y1="130" x2="148" y2="135"/><line x1="148" y1="161" x2="148" y2="166"/><line x1="130" y1="148" x2="135" y2="148"/><line x1="161" y1="148" x2="166" y2="148"/><circle cx="240" cy="145" r="7"/><line x1="247" y1="145" x2="265" y2="145"/><line x1="257" y1="145" x2="257" y2="150"/><line x1="262" y1="145" x2="262" y2="148"/><path d="M35 245c0-6 4-10 10-10h14c6 0 10 4 10 10v10l-6 10h-6l-4-6-4 6h-6l-6-10z"/><circle cx="60" cy="245" r="1.5" fill="#00ff88"/><polygon points="148,230 166,240 148,250 130,240"/><polygon points="130,240 148,250 148,270 130,260"/><polygon points="166,240 148,250 148,270 166,260"/><path d="M235 250l5 5 10-10"/><path d="M243 250l5 5 10-10"/></g></svg>');
 
-const SVG_MATRIX_STREAM = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 280 280"><rect width="280" height="280" fill="%23050811"/><g fill="%2300ff88" font-family="monospace" font-size="11" opacity="0.12"><text x="20" y="30">0 1 1 0 1</text><text x="20" y="55">1 0 0 1 0</text><text x="20" y="80">0 1 0 1 1</text><text x="20" y="105">N E X C H</text><text x="120" y="45">1 1 0 0 1</text><text x="120" y="70">A E S 2 5</text><text x="120" y="95">6 B I T S</text><text x="120" y="120">0 1 1 0 0</text><text x="200" y="25">E 2 E C R</text><text x="200" y="50">Y P T O K</text><text x="200" y="75">1 0 1 0 1</text><text x="200" y="100">0 0 1 1 0</text><text x="60" y="170">0 1 1 1 0</text><text x="60" y="195">C H A T 1</text><text x="160" y="185">1 0 0 0 1</text><text x="160" y="210">N E U R A</text><text x="220" y="230">0 1 0 1 0</text><text x="100" y="260">1 1 1 0 0</text></g></svg>`;
+const SVG_MATRIX_STREAM = toSvgDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 280 280"><rect width="280" height="280" fill="#050811"/><g fill="#00ff88" font-family="monospace" font-size="11" opacity="0.12"><text x="20" y="30">0 1 1 0 1</text><text x="20" y="55">1 0 0 1 0</text><text x="20" y="80">0 1 0 1 1</text><text x="20" y="105">N E X C H</text><text x="120" y="45">1 1 0 0 1</text><text x="120" y="70">A E S 2 5</text><text x="120" y="95">6 B I T S</text><text x="120" y="120">0 1 1 0 0</text><text x="200" y="25">E 2 E C R</text><text x="200" y="50">Y P T O K</text><text x="200" y="75">1 0 1 0 1</text><text x="200" y="100">0 0 1 1 0</text><text x="60" y="170">0 1 1 1 0</text><text x="60" y="195">C H A T 1</text><text x="160" y="185">1 0 0 0 1</text><text x="160" y="210">N E U R A</text><text x="220" y="230">0 1 0 1 0</text><text x="100" y="260">1 1 1 0 0</text></g></svg>');
 
-const SVG_HEX_MESH = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="104" viewBox="0 0 60 104"><rect width="60" height="104" fill="%23080d1a"/><path d="M30 0l30 17.3v34.7L30 69.3 0 52V17.3zM30 104l30-17.3V52L30 69.3 0 52v34.7z" fill="none" stroke="%2300d4ff" stroke-width="0.8" opacity="0.08"/></svg>`;
+const SVG_HEX_MESH = toSvgDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="104" viewBox="0 0 60 104"><rect width="60" height="104" fill="#080d1a"/><path d="M30 0l30 17.3v34.7L30 69.3 0 52V17.3zM30 104l30-17.3V52L30 69.3 0 52v34.7z" fill="none" stroke="#00d4ff" stroke-width="0.8" opacity="0.08"/></svg>');
 
 // Classic Doodle & Solid Color Presets
 export const CLASSIC_PRESETS = [
@@ -138,6 +139,9 @@ export const SAFE_WALLPAPER_PRESETS = WALLPAPER_PRESETS.filter(p => {
 /**
  * Applies a wallpaper to the active chat screen and messages container.
  */
+if (typeof window !== 'undefined') {
+  window.applyActiveWallpaper = applyActiveWallpaper;
+}
 export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
   const app = document.querySelector('.app');
   const messagesArea = document.getElementById('messages-area');
@@ -145,33 +149,33 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
 
   if (wallpaperUrl) {
     const isSvg = String(wallpaperUrl).startsWith('data:image/svg');
-    const bgSize = isSvg ? 'auto' : '100% 100%';
+    const bgSize = isSvg ? 'auto' : 'cover';
     const bgRepeat = isSvg ? 'repeat' : 'no-repeat';
+    const cleanUrl = String(wallpaperUrl).replace(/[\n\r\t]/g, '');
 
-    if (app) {
-      app.style.backgroundImage = `url('${wallpaperUrl}')`;
-      app.style.backgroundSize = bgSize;
-      app.style.backgroundPosition = 'center center';
-      app.style.backgroundRepeat = bgRepeat;
-      app.style.backgroundColor = 'transparent';
-      app.setAttribute('data-custom-bg', 'true');
-    }
-    document.documentElement.style.setProperty('--chat-wallpaper', `url('${wallpaperUrl}')`);
-    try { localStorage.setItem('nexchat_background', wallpaperUrl); } catch (_) {}
+    document.documentElement.style.setProperty('--chat-wallpaper', `url("${cleanUrl}")`);
+    if (document.body) document.body.style.setProperty('--chat-wallpaper', `url("${cleanUrl}")`);
+    try { localStorage.setItem('nexchat_background', cleanUrl); } catch (_) {}
+
     if (chatDetail) {
-      chatDetail.style.backgroundImage = `url('${wallpaperUrl}')`;
-      chatDetail.style.backgroundSize = bgSize;
-      chatDetail.style.backgroundPosition = 'center center';
-      chatDetail.style.backgroundRepeat = bgRepeat;
-      chatDetail.style.backgroundColor = 'transparent';
       chatDetail.classList.add('has-custom-wallpaper', 'chat-background');
+      chatDetail.style.setProperty('--chat-wallpaper', `url("${cleanUrl}")`);
+      chatDetail.style.setProperty('background-image', `url("${cleanUrl}")`, 'important');
+      chatDetail.style.setProperty('background-size', bgSize, 'important');
+      chatDetail.style.setProperty('background-position', 'center center', 'important');
+      chatDetail.style.setProperty('background-repeat', bgRepeat, 'important');
+      chatDetail.style.removeProperty('background');
+      chatDetail.style.removeProperty('background-color');
       if (isSvg) chatDetail.setAttribute('data-wallpaper-type', 'svg');
       else chatDetail.removeAttribute('data-wallpaper-type');
     }
     if (messagesArea) {
-      messagesArea.classList.add('has-custom-wallpaper');
-      messagesArea.style.backgroundImage = 'none'; // allow chatDetail full-frame wallpaper to show through cleanly
-      messagesArea.style.backgroundColor = 'rgba(6, 9, 18, 0.35)';
+      messagesArea.classList.add('has-custom-wallpaper', 'chat-background');
+      messagesArea.style.setProperty('background-image', 'none', 'important');
+      messagesArea.style.setProperty('background-color', 'rgba(6, 10, 20, 0.40)', 'important');
+    }
+    if (app) {
+      app.setAttribute('data-custom-bg', 'true');
     }
   } else if (solidColor) {
     if (app) {
@@ -216,8 +220,15 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
 export async function setWallpaper(wallpaperUrl, scope = 'chat', chatId = null, chatType = 'direct', myUID = null, db = null) {
   applyActiveWallpaper(wallpaperUrl);
 
-  if (scope === 'chat' && chatId) {
-    localStorage.setItem(`chat_bg_${chatId}`, wallpaperUrl);
+  // Always persist as global fallback so all chats & reload have it
+  try { localStorage.setItem('nexchat_background', wallpaperUrl); } catch (_) {}
+
+  if (chatId) {
+    try {
+      localStorage.setItem(`chat_bg_${chatId}`, wallpaperUrl);
+      const cleanId = String(chatId).replace(/^@/, '').toLowerCase();
+      localStorage.setItem(`chat_bg_${cleanId}`, wallpaperUrl);
+    } catch (_) {}
     if (db && myUID) {
       try {
         const coll = chatType === 'group' ? 'groupBackgrounds' : 'directMessageBackgrounds';
