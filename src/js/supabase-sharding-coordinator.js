@@ -1,13 +1,16 @@
 /**
- * NEXCHAT Supabase 8-Project Sharding Coordinator
+ * NEXCHAT Supabase Multi-Account Distributed Sharding Coordinator
  * 
  * Architecture:
- * - 4 Accounts x 2 Projects = 8 Projects (1,600 Concurrent Realtime Connections)
+ * - 7 Accounts x 2 Projects = 14 Projects (2,800 Concurrent Realtime Connections)
  * - Account 1: Project 1 (nexchat-main: Auth, Profiles, Groups, Shard Registry, Group->Shard Router)
- *             Project 2 (nexchat-chat-1: Messages for shard 1, eu-central-1)
- * - Account 2: Project 3 (nexchat-chat-2: eu-west-1), Project 4 (nexchat-chat-3: eu-west-1)
+ *             Project 2 (nexchat-chat-1: Messages for shard 1, eu-central-1 Frankfurt)
+ * - Account 2: Project 3 (nexchat-chat-2: eu-west-1 Ireland), Project 4 (nexchat-chat-3: eu-west-1 Ireland)
  * - Account 3: Project 5 (nexchat-chat-4: ap-northeast-1 Tokyo), Project 6 (nexchat-chat-5: ap-northeast-1 Tokyo)
  * - Account 4: Project 7 (nexchat-chat-6: us-west-2 Oregon), Project 8 (nexchat-chat-7: us-west-2 Oregon)
+ * - Account 5: Project 9 (nexchat-chat-8: eu-west-1 Ireland), Project 10 (nexchat-chat-9: eu-west-1 Ireland)
+ * - Account 6: Project 11 (nexchat-chat-10: us-east-1 N. Virginia), Project 12 (nexchat-chat-11: us-east-1 N. Virginia)
+ * - Account 7: Project 13 (nexchat-chat-12: ap-northeast-2 Seoul), Project 14 (nexchat-chat-13: ap-northeast-2 Seoul)
  */
 
 import { getActiveSupabaseSettings } from './supabase-config.js';
@@ -351,13 +354,17 @@ export async function subscribeToShardedGroup(groupId, onMessage) {
 }
 
 /**
- * Returns current health and connection statistics across all 8 Supabase projects.
+ * Returns current health and connection statistics across all distributed Supabase projects.
  * @returns {Promise<object>}
  */
 export async function getShardStats() {
   const shards = await getAllShards();
+  const totalProjects = shards.length + 1;
+  const totalAccounts = Math.ceil(totalProjects / 2);
+  const totalCapacity = totalProjects * 200;
+
   return {
-    architecture: '4 Accounts x 2 Projects = 8 Supabase Projects (1,600 Realtime Connections)',
+    architecture: `${totalAccounts} Accounts x 2 Projects = ${totalProjects} Supabase Projects (${totalCapacity.toLocaleString()} Realtime Connections)`,
     mainProject: getActiveSupabaseSettings().url,
     totalShards: shards.length,
     activeShards: shards.map(s => ({

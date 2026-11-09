@@ -1,11 +1,11 @@
 /**
  * NEXCHAT Supabase Realtime High-Performance Chat Engine
  * 
- * Powered by 8-Project Sharding Architecture:
- * - 4 Supabase Accounts x 2 Projects = 8 Projects (1,600 Concurrent Realtime Connections)
+ * Powered by Multi-Account Distributed Sharding Architecture:
+ * - 7 Supabase Accounts x 2 Projects = 14 Projects (2,800 Concurrent Realtime Connections)
  * - Sub-15ms Realtime WebSockets (Phoenix Channels)
  * - Zero-billing ephemeral broadcast for typing indicators and presence
- * - PostgreSQL relational storage distributed across 7 dedicated message shards
+ * - PostgreSQL relational storage distributed across 13 dedicated message shards
  * - Optimistic UI message dispatch with instant DOM rendering
  * - Multi-tier delivery indicators (Pending clock -> Sent check -> Delivered double-check -> Read double-check)
  */
