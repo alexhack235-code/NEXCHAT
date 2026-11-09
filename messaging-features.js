@@ -19,43 +19,32 @@ export const messagingFeatures = {
 
 
   setReplyingToMessage: (msg) => {
-
     activeReply = msg;
+    window.currentReplyTo = msg;
+    window.replyMessageId = msg.messageId || msg.id || msg.docId || msg.clientMsgId || null;
 
     const preview = document.getElementById('replyPreview');
-
     const nameEl = document.getElementById('replyFromName');
-
     const msgEl = document.getElementById('replyMessage');
 
     if (preview && nameEl && msgEl && msg) {
-
       nameEl.textContent = msg.senderName || 'User';
-
       const snippet = msg.text || (msg.attachment ? (msg.attachment.fileName || 'Attachment') : 'Message');
-
-      msgEl.textContent = snippet.length > 80 ? snippet.substring(0, 80) + '...' : snippet;
-
+      msgEl.textContent = snippet;
       preview.style.display = 'flex';
 
       const input = document.getElementById('message-input');
-
       if (input) input.focus();
-
     }
-
   },
 
-
-
   hideReplyPreview: () => {
-
     activeReply = null;
+    window.currentReplyTo = null;
+    window.replyMessageId = null;
 
     const preview = document.getElementById('replyPreview');
-
     if (preview) preview.style.display = 'none';
-
   },
 
 
@@ -343,10 +332,37 @@ export const messagingFeatures = {
 
 
     const actionsGroup = document.createElement('div');
+    actionsGroup.className = 'waveform-actions voice-row-badges';
 
-    actionsGroup.className = 'waveform-actions';
+    // 1. Translate pill button
+    const translateBtn = document.createElement('button');
+    translateBtn.type = 'button';
+    translateBtn.className = 'voice-badge-pill btn-translate-voice';
+    translateBtn.title = 'Translate message';
+    translateBtn.innerHTML = '<i class="fa-solid fa-language"></i> <span>Translate</span>';
+    translateBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof window.tryAIFeature === 'function') {
+        window.tryAIFeature('Translate', { audioUrl: url, container });
+      } else if (typeof window.showNotif === 'function') {
+        window.showNotif('Translating voice note with ChronEX AI...', 'info');
+      }
+    });
 
-
+    // 2. AI Summary pill button
+    const summaryBtn = document.createElement('button');
+    summaryBtn.type = 'button';
+    summaryBtn.className = 'voice-badge-pill btn-summary-voice';
+    summaryBtn.title = 'AI Summary';
+    summaryBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>Summary</span>';
+    summaryBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof window.tryAIFeature === 'function') {
+        window.tryAIFeature('AI Summary', { audioUrl: url, container });
+      } else if (typeof window.showNotif === 'function') {
+        window.showNotif('Generating audio summary with ChronEX AI...', 'info');
+      }
+    });
 
     // Speed pill toggle (1x / 1.5x / 2x)
 
@@ -407,21 +423,28 @@ export const messagingFeatures = {
 
 
 
-    actionsGroup.appendChild(speedBtn);
+    // Neural Voice Badge (flex-shrink: 0, max-width: 90px, ellipsis)
+    const neuralBadge = document.createElement('span');
+    neuralBadge.className = 'neural-voice-badge chronex-voice-core-pill';
+    neuralBadge.innerHTML = '<span class="chronex-neural-dot"></span> <span>NEURAL VOICE</span>';
+    neuralBadge.title = 'ChronEX Neural Voice DSP Engine';
 
+    // Row 1: Play + Waveform (flex:1, min-width:0) + Time (flex-shrink:0) + Speed 1.0x + NEURAL VOICE
+    const rowOne = document.createElement('div');
+    rowOne.className = 'voice-row-main';
+    rowOne.appendChild(playBtn);
+    rowOne.appendChild(waveformContainer);
+    rowOne.appendChild(timeLabel);
+    rowOne.appendChild(speedBtn);
+    rowOne.appendChild(neuralBadge);
+
+    // Row 2 Badges: Transcribe / Translate / AI Summary (max-width: 80px, ellipsis, never overlap)
     actionsGroup.appendChild(transcribeBtn);
+    actionsGroup.appendChild(translateBtn);
+    actionsGroup.appendChild(summaryBtn);
 
-
-
-    metaRow.appendChild(timeLabel);
-
-    metaRow.appendChild(actionsGroup);
-
-
-
-    info.appendChild(waveformContainer);
-
-    info.appendChild(metaRow);
+    container.appendChild(rowOne);
+    container.appendChild(actionsGroup);
 
 
 
@@ -766,9 +789,7 @@ export const messagingFeatures = {
 
 
 
-    container.appendChild(playBtn);
-
-    container.appendChild(info);
+    // Row 1 & Row 2 appended directly to container below
 
 
 

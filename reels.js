@@ -669,6 +669,20 @@ const videoObserver = new IntersectionObserver((entries) => {
       if (video.dataset.userPaused === 'true') {
         return;
       }
+
+      // Strictly ONE video playing at a time: pause all other videos immediately on swipe
+      document.querySelectorAll('.reel-card').forEach(otherCard => {
+        if (otherCard !== entry.target) {
+          const otherVid = otherCard.querySelector('video');
+          if (otherVid && !otherVid.paused) {
+            otherVid.pause();
+          }
+          if (otherCard._customAudio) otherCard._customAudio.pause();
+          const otherDisc = otherCard.querySelector('.reel-sound-disc');
+          if (otherDisc) otherDisc.style.animationPlayState = 'paused';
+        }
+      });
+
       video.muted = isGlobalMuted;
       video.play().then(() => {
         if (disc) disc.style.animationPlayState = 'running';
@@ -680,16 +694,11 @@ const videoObserver = new IntersectionObserver((entries) => {
         startAiAudioVisualizer(entry.target);
       });
 
-      // Super Intelligence Predictive Preloading: buffer next 2 reels
+      // Preload next 1 only, never 2 (prevents network choke and blackout glitches)
       const nextCard = entry.target.nextElementSibling;
       if (nextCard) {
         const nv = nextCard.querySelector('video');
         if (nv && nv.preload !== 'auto') nv.preload = 'auto';
-      }
-      const nextNextCard = nextCard ? nextCard.nextElementSibling : null;
-      if (nextNextCard) {
-        const nnv = nextNextCard.querySelector('video');
-        if (nnv && nnv.preload !== 'auto') nnv.preload = 'auto';
       }
 
       if (customAudio) {

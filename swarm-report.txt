@@ -1,0 +1,1210 @@
+================================================================================
+           BNEXCHAT CODEBASE COMPREHENSIVE BUG REPORT - SWARM 1-6
+================================================================================
+MODE: FIND ONLY - DO NOT FIX YET
+TOTAL BUGS FOUND: 118
+- Overflows: 30
+- Glitches / Blackouts: 17
+- Logic / Typing: 16
+- Layout / Resize: 25
+- Performance / Lag: 20
+- Duplicates: 10
+
+SEVERITY BREAKDOWN:
+- HIGH SEVERITY: 51
+- MEDIUM SEVERITY: 47
+- LOW SEVERITY: 20
+================================================================================
+
+================================================================================
+PART 1: HIGH SEVERITY BUGS (51 BUGS)
+================================================================================
+
+[OVERFLOW #1] (HIGH #1)
+FILE: chat.html:212 / chat.html:270 / css/layout-declutter.css:21
+WHERE: Header / Desktop Actions Toolbar (.desktop-header-actions) & CYBER SUITE Button (#headerCyberHubBtn)
+WHAT: At 1000px viewport, the 17 desktop action buttons (each 38px + 10px gaps) + dark mode toggle (50px) + CYBER SUITE button (140px) require ~960px width. Together with brand and search blocks, total width is ~1260px. The CYBER SUITE button and Settings button overflow the right viewport boundary by ~260px, clipping offscreen.
+WHY: .desktop-header-actions has flex-wrap: nowrap !important; gap: 10px !important; while .header-right-scroll sets overflow: visible !important; without horizontal scroll or adaptive wrapping.
+FIX FILE: css/layout-declutter.css & chat.html
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #2] (HIGH #2)
+FILE: chat.html:802
+WHERE: Avatar / DUTY Contact Placeholder (.chat-avatar.avatar-placeholder)
+WHAT: Circular 52px x 52px avatar placeholder with green border-radius: 50% lacks overflow: hidden. Multi-letter text or icon badge bleeds 8px to 14px outside the circular green border.
+WHY: Missing overflow: hidden on element with border-radius: 50%.
+FIX FILE: chat.html & chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #3] (HIGH #3)
+FILE: chat.css:4192, 4184
+WHERE: Avatar / Global Chat Avatar & Placeholder (.avatar-placeholder, .chat-avatar)
+WHAT: Circular 48px avatar placeholder with green text (color: #00ff88) and border-radius: 50% lacks overflow: hidden. Any fallback text length > 1 letter overflows the circle by 6px to 12px.
+WHY: border-radius: 50% specified without overflow: hidden.
+FIX FILE: chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #4] (HIGH #4)
+FILE: chat.css:1136-1149
+WHERE: Bubble / Message Attachment Container (.message-attachment-container img, .message-attachment-container video)
+WHAT: High-resolution images and videos attached in message bubbles lack max-width: 100% and height: auto. Full-resolution images blow out the message bubble and breach screen bounds by 1000px+ across 600px, 1000px, and 1400px viewports.
+WHY: Missing max-width: 100%; and object-fit: cover; on .message-attachment-container img and video.
+FIX FILE: chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #5] (HIGH #5)
+FILE: chat.css:15838-15846 & chat.js:780-785
+WHERE: Bubble / Message Timestamp Row & Text (.message-time-row, .message-time-text)
+WHAT: Both .message-time-row AND its child .message-time-text are forced to position: absolute !important; bottom: 3px !important; right: 8px !important;. This strips them from normal document flow, causing the timestamp and E2EE badge to collide with each other and directly overlap message body text or media attachments by 14px to 22px.
+WHY: Inappropriate position: absolute !important on both parent row and child span, overriding flexbox layout.
+FIX FILE: chat.css & chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #8] (HIGH #6)
+FILE: chat2.css:3264-3282 & chat2.css:3327-3335
+WHERE: Video / Active Call Control Dock (.active-call-dock)
+WHAT: In active WebRTC calls at 1000px and 1400px viewports, 12 action buttons (each 48px + 14px gaps + padding = 766px) exceed .active-call-dock max-width: min(94vw, 720px). The hangup button and end tools breach 46px to 80px outside the pill background border.
+WHY: .active-call-dock caps max-width at 720px without setting overflow: hidden or overflow-x: auto on non-mobile viewports (>768px).
+FIX FILE: chat2.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #11] (HIGH #7)
+FILE: css/chat-passcode-gate.css:10-14 & css/chat-passcode-gate.css:51
+WHERE: Header / Chat Title Lock Row (.chat-title-lock-row & .lock-status-dot)
+WHAT: Long usernames in #chatName push #btnQuickLockChat and header action icons off-screen by 40px to 80px on 600px viewport. In addition, .lock-status-dot has border-radius: 50% without overflow: hidden.
+WHY: .chat-title-lock-row overrides layout with display: flex !important but lacks min-width: 0 !important;, preventing flex shrink on title children.
+FIX FILE: css/chat-passcode-gate.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #14] (HIGH #8)
+FILE: chat.css:15863-15869 & chat2.css:9209-9220
+WHERE: Bubble / Message Text Content (.message-text-content, .nex-msg-text, .message-bubble p)
+WHAT: Long unbroken words (e.g. "ooooooooooooooood", 64-character SHA hashes, long query URLs) spill out of the message bubble horizontally by 50px to 250px on 600px, 1000px, and 1400px viewports.
+WHY: Missing overflow-wrap: anywhere; and word-break: break-word; on message paragraph/text containers.
+FIX FILE: chat.css & chat2.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #15] (HIGH #9)
+FILE: chat.js:768
+WHERE: Bubble / Cached Attachment Preview (.cached-attachment-preview span)
+WHAT: File attachments with long names (e.g. financial_audit_quarter_presentation_confidential_2026.pdf) do not truncate or wrap, expanding preview bubble 70px to 160px past bubble bounds on 600px viewport.
+WHY: Missing min-width: 0;, white-space: nowrap;, overflow: hidden;, and text-overflow: ellipsis; on .cached-attachment-preview span.
+FIX FILE: chat.js & chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[GLITCH #1] (HIGH #10)
+FILE: chat.html:800 & chat.js:24800
+WHERE: Chat List / DUTY Row Click Delegation
+WHAT: Clicking DUTY triggers openChat('duty') twice simultaneously, causing duplicate Firebase query listeners and double-mount race conditions.
+WHY: The DUTY chat row in chat.html has an inline onclick executing openChat(), while chat.js registers a master delegated click listener on #contactList executing openChat() on the same click.
+FIX FILE: chat.html & chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[GLITCH #2] (HIGH #11)
+FILE: chat.js:9887
+WHERE: Chat Window / updateMessages() Message Render Loop
+WHAT: Every time a new message arrives, message signature updates, or reaction toggles, screen flashes blank/black for 1 frame.
+WHY: In chat.js line 9887, updateMessages() completely wipes the message area via messagesDiv.innerHTML = "" before appending new fragments, destroying all DOM elements, audio players, video elements, and listeners.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[GLITCH #3] (HIGH #12)
+FILE: chat.js:24596
+WHERE: Chat List / loadContacts() Roster Feed
+WHAT: Chat list smears, duplicates, tears, or jumps to the top when messages arrive, typing events occur, or user archives/deletes.
+WHY: loadContacts() wipes the contacts feed completely using contactList.innerHTML = "" before sequentially appending contacts in a loop (lines 4066, 4182, 17707, 17734, 17756, 25005).
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[GLITCH #4] (HIGH #13)
+FILE: src/features/group/components/virtual-scroller.js:106 & 600
+WHERE: Group / Virtual Scroller DOM Setup & Teardown
+WHAT: 1-frame blackout before virtualized nodes are measured and painted when switching conversations.
+WHY: VirtualScroller.destroy() (line 600) and VirtualScroller._setupDOM() (line 106) execute this._container.innerHTML = "", erasing all active message nodes from the DOM container.
+FIX FILE: src/features/group/components/virtual-scroller.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[GLITCH #5] (HIGH #14)
+FILE: src/nexchat-app/components/CenterChat.jsx:361-373
+WHERE: Desktop App Shell / CenterChat Unmount Conditional
+WHAT: Chat window unmounts and remounts from scratch on chat switch, showing black empty state for 1 frame.
+WHY: When activeChat is null or temporarily undefined during transition, CenterChat unmounts the whole chat window tree and renders an empty placeholder div.
+FIX FILE: src/nexchat-app/components/CenterChat.jsx
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[GLITCH #7] (HIGH #15)
+FILE: chat.css:6929 & 6938
+WHERE: Bubble / Glass Frost Theme Backdrop Blur (.my-message, .other-message)
+WHAT: Severe visual smearing and frame rate drops below 15 FPS when scrolling message bubbles on laptop / Dell low GPU.
+WHY: Under theme body.bubble-theme-glass-frost, .my-message and .other-message apply backdrop-filter: blur(14px) !important and -webkit-backdrop-filter: blur(14px) !important on every repeated row.
+FIX FILE: chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[GLITCH #12] (HIGH #16)
+FILE: css/layout-declutter.css:4661, 4666 & chat.css:846
+WHERE: Chat Window / Custom Background Transparent Flash
+WHAT: Before custom wallpaper images finish decoding or during transitions, pure transparent exposes #0A0F0D body, producing a 1-frame blackout flash.
+WHY: .app[data-custom-bg="true"] #messages-area, #chatDetailView, and .nex-virtual-scroller enforce background: transparent !important.
+FIX FILE: css/layout-declutter.css & chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[GLITCH #14] (HIGH #17)
+FILE: chat.js:4245 & 23655
+WHERE: Chat Detail / Display none / flex Toggle on Chat Switching
+WHAT: Black flash and layout reflow on chat selection.
+WHY: chat.js:4245 sets chatDetailView display: none, and line 23655 sets display: flex, unmounting the element from the browser render tree and discarding rasterized textures.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LOGIC #1] (HIGH #18)
+FILE: chat.js:1004
+WHERE: Typing / Document ID Builder (buildTypingDocId)
+WHAT: Typing indicator breaks or fails to sync between users; one user constructs direct_null_userB while other constructs direct_userA_userB.
+WHY: Missing fallback in buildTypingDocId(chatId, chatType): uses myUID directly ([myUID, chatId].sort()) instead of checking effectiveMyUID || myUID || window.myUID || auth.currentUser?.uid.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LOGIC #3] (HIGH #19)
+FILE: src/js/presence.js:25
+WHERE: Presence / Global Presence Channel Fallback (buildPresenceChannelName)
+WHAT: Typing status leaks to all users in the system.
+WHY: Missing chatId guard: buildPresenceChannelName falls back to "presence-global" when !chatId, publishing direct typing events globally across unrelated chats.
+FIX FILE: src/js/presence.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LOGIC #4] (HIGH #20)
+FILE: src/features/group/components/typing-indicator.js:17, 60, 70-71
+WHERE: Typing / Group Typing Indicator Height Collapse
+WHAT: Message input and chat view jump/jitter vertically on typing state changes.
+WHY: Collapsible height: createTypingIndicator initializes with display: none and toggles between display: flex and display: none instead of maintaining fixed container height with visibility: hidden.
+FIX FILE: src/features/group/components/typing-indicator.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LOGIC #6] (HIGH #21)
+FILE: src/features/group/group-store.js:28 & src/features/group/index.js:251-262
+WHERE: Group / Typing State Store Dispatcher
+WHAT: Group typing indicator never updates or displays for remote group members.
+WHY: groupStore.subscribe("typingUsers") listens for typing changes, but neither group-message-service.js nor presence.js ever calls groupStore.setState({ typingUsers: ... }) on remote presence events.
+FIX FILE: src/features/group/group-store.js & src/features/group/services/group-message-service.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LOGIC #7] (HIGH #22)
+FILE: src/js/telegram-whatsapp-presence.js:334-340, 351-364
+WHERE: Header / Presence Engine Active Chat Partner Sync
+WHAT: Status header shows wrong user status / leaks previous direct contact presence into active group chats.
+WHY: When transitioning from direct to group chat, openChat never calls syncActiveChatPartner(null). activePartnerListener remains active on the previous user, overwriting #activeChatStatus and #chatUserStatus.
+FIX FILE: src/js/telegram-whatsapp-presence.js & chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LOGIC #10] (HIGH #23)
+FILE: src/js/supabase-chat.js:324-329, 342-354
+WHERE: Transport / Supabase Room Realtime Broadcast & CDC Listener
+WHAT: Supabase room broadcasts and CDC INSERT events deliver sender own actions back as remote actions.
+WHY: Neither channel.on("broadcast", { event: "new_message" }) nor channel.on("postgres_changes", { event: "INSERT" }) filters out messages where sender_id === currentUserId at transport layer before triggering onNewMessage.
+FIX FILE: src/js/supabase-chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LOGIC #11] (HIGH #24)
+FILE: src/js/supabase-chat.js:324-339, 487-491
+WHERE: Receipts / Realtime Read Receipts Broadcast (messages_read)
+WHAT: Realtime read receipts (messages_read) are dropped / ticks never update via WebSocket broadcast.
+WHY: markSupabaseMessagesRead broadcasts messages_read, but subscribeToSupabaseRoom only attaches broadcast listeners for new_message, message_updated, and reaction; messages_read is unhandled.
+FIX FILE: src/js/supabase-chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LOGIC #12] (HIGH #25)
+FILE: src/js/zk-delivery-receipts.js:134-139
+WHERE: Receipts / ZK Delivery Receipts Proof Dispatch
+WHAT: ZK delivery receipts invoke sendSupabaseMessage with invalid signature, creating bogus empty messages instead of updating delivery state.
+WHY: dispatchProofBatch calls sendSupabaseMessage({ type: "zk_delivery_receipt", proof, roomId }), but sendSupabaseMessage expects { from, to, text, ... }, generating direct_undefined_undefined.
+FIX FILE: src/js/zk-delivery-receipts.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #1] (HIGH #26)
+FILE: chat.css:1423-1434 & css/layout-declutter.css:2270-2280
+WHERE: Input / Bottom Message Input Wrapper Capsule (.message-input-wrapper)
+WHAT: Breaks on 600px (Mobile / Narrow window). Capsule overflows screen horizontally, pushing send/mic FAB off-screen and creating unwanted horizontal scroll.
+WHY: Flex container without min-width: 0 on .message-input-wrapper (flex: 1 / flex: 1 1 auto !important). Children action buttons prevent wrapper from shrinking below content size.
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #2] (HIGH #27)
+FILE: chat.css:1442-1447 & css/layout-declutter.css:2282-2285
+WHERE: Input / Text Input Field (#message-input)
+WHAT: Breaks on 600px. Text input field fails to contract, squeezing adjacent buttons and causing text typed by user to be clipped off at right edge.
+WHY: Missing min-width: 0 on flex child .message-input-wrapper .message-input / .nex-input.
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #3] (HIGH #28)
+FILE: chat.css:19036-19051 & css/layout-declutter.css:5258-5273
+WHERE: Chat View / Message Input Composer Viewport Overflow
+WHAT: Breaks on 1000px and 1400px. Entire message input composer (.message-input-area) at bottom gets pushed 60px below visible viewport, cutting off or completely hiding composer.
+WHY: Height calculation collision: .app has height: 100vh !important; flex-direction: column;, while child .chat-main specifies height: 100vh !important; flex: 1 !important; AND sibling .top-header specifies height: 60px !important; (total = 100vh + 60px).
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #6] (HIGH #29)
+FILE: chat.css:3530-3558 vs 19043-19086
+WHERE: Chat Layout / Conflicting Grid vs Flexbox Architecture
+WHAT: Breaks on 1000px and 1400px. Crossing 900px–1100px resize triggers a 60px blank gap or unintended vertical split line between sidebar and conversation pane.
+WHY: Line 3530 sets .chat-main { display: grid; grid-template-columns: var(--sidebar-width) 1fr; } (380px), while Line 19043 sets .chat-main { display: flex !important; } with 320px sidebar, causing 60px shift and duplicate borders.
+FIX FILE: chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #8] (HIGH #30)
+FILE: chat.html:8384 & chat.css:15631
+WHERE: Deck / Dual-Pane Split Deck Responsive Breakage (#dualPaneSplitDeck)
+WHAT: Breaks on 600px and 1000px. Narrow laptop or mobile screen locks deck to width: 50%; max-width: 600px;, causing input collapse or screen half-cut.
+WHY: Inline style width: 50%; max-width: 600px; in chat.html:8384 conflicts with @media (max-width: 768px) in chat.css:15631.
+FIX FILE: chat.html & chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #9] (HIGH #31)
+FILE: chat.js:21034
+WHERE: Status / Status Updates Feed Avatars (.status-row-avatar)
+WHAT: Breaks on 600px, 1000px, 1400px. Contact avatars render at full native unconstrained resolution (e.g. 1024x1024), blowing out card height and distorting list.
+WHY: chat.js injects <div class="status-row-avatar"><img src="${safeRowAvatar}" /></div> without width or height attributes, and .status-row-avatar has ZERO CSS rules anywhere.
+FIX FILE: chat.js & chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #10] (HIGH #32)
+FILE: chat.html:5982
+WHERE: Status / Voice Status Story Avatar (#statusViewerAudioAvatar)
+WHAT: Breaks on 600px, 1000px, 1400px. Avatar image expands to full native resolution, covering audio spectrum canvas and play button.
+WHY: <img id="statusViewerAudioAvatar" class="status-audio-avatar"> lacks width/height attributes in HTML and .status-audio-avatar has NO CSS rules in any stylesheet.
+FIX FILE: chat.html & chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #13] (HIGH #33)
+FILE: css/layout-declutter.css:531
+WHERE: Bubble / Small Screen Clamp Overflow
+WHAT: Breaks on 600px (<= 360px viewport). Message bubbles blow out of parent wrapper and clip at screen edges.
+WHY: max-width: clamp(260px, 75%, 520px) !important; sets hard minimum bound of 260px. On 320px viewport with padding, 260px exceeds 100% available space.
+FIX FILE: css/layout-declutter.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #15] (HIGH #34)
+FILE: chat.css:8435
+WHERE: Bubble / Code Snippet & Terminal Output (.nexbot-code-block)
+WHAT: Breaks on 600px and 1000px. Code snippets inside messages do not wrap, pushing message bubble far past right edge and forcing horizontal scroll.
+WHY: .nexbot-code-block lacks overflow-x: auto;, white-space: pre-wrap;, and word-break: break-all;.
+FIX FILE: chat.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #22] (HIGH #35)
+FILE: chat.css:9803 vs 9828 & css/layout-declutter.css:65
+WHERE: Header / 769px–899px Tablet Landscape Dead Zone Breakpoint
+WHAT: Breaks on 1000px (between 769px and 899px). Header controls enter broken state where desktop tool buttons collide with contact titles and overflow right edge.
+WHY: chat.css:9803 uses @media (max-width: 768px), whereas chat.css:9828 and css/layout-declutter.css:65 use @media (max-width: 899px), leaving 769px–899px unhandled.
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #25] (HIGH #36)
+FILE: css/layout-declutter.css:2457-2468
+WHERE: App / Mobile Preview Desktop Lockout (.mobile-preview)
+WHAT: Breaks on 1000px and 1400px. If body receives .mobile-preview class, desktop and laptop viewports are hard-locked to an un-resizable 390px column with 1000px+ of black empty void.
+WHY: Hardcoded width: 390px !important; max-width: 390px !important; min-width: 390px !important; on html.mobile-preview, body.mobile-preview, .top-header, .chat-main without desktop media query protection.
+FIX FILE: css/layout-declutter.css
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #1] (HIGH #37)
+FILE: chat.js:9373-9892
+WHERE: Chat Window / Unvirtualized Message Rendering Loop (allMessages.forEach)
+WHAT: Lag when scrolling / opening chat / dropped frames.
+WHY: No virtualization: allMessages.forEach creates unvirtualized DOM nodes for the entire message list (hundreds of messages) and appends them all at once via messagesDiv.appendChild(messageFragment) without viewport windowing, attaching over 10 event listeners per bubble.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #2] (HIGH #38)
+FILE: chat.js:685-790
+WHERE: Chat Window / Cached History Mapping (renderCachedDirectChatHistory)
+WHAT: Lag when opening chat / dropped frames.
+WHY: No virtualization or pagination in cached history: maps across entire array of cached messages from IndexedDB/localStorage and executes messagesDiv.innerHTML = html with all messages at once.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #3] (HIGH #39)
+FILE: chat.js:24300-24320 & 24596-24773
+WHERE: Chat List / Unvirtualized Conversation Roster Loop (loadContacts)
+WHAT: Lag when opening app / loading chats / dropped frames.
+WHY: No virtualization on conversation list: loadContacts() clears contactList.innerHTML = "" and iterates through all contacts and groups creating unvirtualized li.chat-item elements directly in DOM.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #6] (HIGH #40)
+FILE: src/features/group/components/message-bubble.js:335-338
+WHERE: Group / Missing Lazy Loading on Group Message Attachment Images
+WHAT: Lag when scrolling chat / memory spikes.
+WHY: No lazy loading (loading="lazy") on message attachment images (img.nex-attachment-img) rendered in group chat history.
+FIX FILE: src/features/group/components/message-bubble.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #8] (HIGH #41)
+FILE: chat.js:6946-6953
+WHERE: Crypto / Bulk Steganographic Audio Decryption on Chat Open
+WHAT: Lag when opening chat / UI freeze.
+WHY: Steganographic audio decryption (decodeSteganoAudio) and Web Crypto subtle decrypt executed across all audio messages in chat history on open instead of decrypting only visible/played items.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #9] (HIGH #42)
+FILE: chat.js:23126-23129
+WHERE: Search / Zero Debounce on Chat Search Input
+WHAT: Lag when typing in chat search bar.
+WHY: No debounce (0ms) on searchInput input event listener; executes filterChats(query) querying and modifying styles of all chat DOM items on every single keystroke.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #13] (HIGH #43)
+FILE: chat.js:17707 & 17734
+WHERE: Chat List / Complete List Re-render on Message Receipt
+WHAT: Re-rendering chat list on every incoming message / local action.
+WHY: Incoming message snapshot listener calls loadContacts() which completely wipes contactList.innerHTML = "" and queries Firestore for all contacts repeatedly instead of updating a single chat row.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #14] (HIGH #44)
+FILE: chat.js:22795-22800
+WHERE: Input / Synchronous Layout Thrashing in autoResize()
+WHAT: Dropped frames / input lag when typing.
+WHY: Synchronous layout thrashing in autoResize(): assigns messageInput.style.height = "38px" (DOM style write) and immediately reads messageInput.scrollHeight (DOM layout read forcing reflow) synchronously on every input event.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #19] (HIGH #45)
+FILE: chat.js:9476-9878
+WHERE: Bubble / Leaked Event Listeners on Message Bubbles
+WHAT: Memory leak / Garbage Collection stutter on chat switching.
+WHY: Over 10 individual event listeners (contextmenu, click, touchstart, touchend, touchmove, reaction buttons, action buttons) are bound via inline closures directly to each message bubble; when messagesDiv.innerHTML = "" executes, listeners hold closure references.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[PERF #20] (HIGH #46)
+FILE: src/js/chronex-brief-engine.js:200-206 & chat.js:19871
+WHERE: AI / Synchronous Reprocessing of All Messages on Open
+WHAT: Lag when opening chat / dropped frames.
+WHY: ChronexBriefEngine.reprocessAllMessages() loops through every .nex-msg-wrapper, .message-wrapper upon opening a chat, synchronously re-evaluating and modifying text and DOM for all messages.
+FIX FILE: src/js/chronex-brief-engine.js & chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #1] (HIGH #47)
+FILE: chat.html:170-191 & chat.html:991-1010
+WHERE: Header / Top Header vs Chat Detail Header Double Render
+WHAT: Header rendered twice simultaneously (Top Header vs Chat Detail Header).
+WHY: Duplicate DOM elements: When a chat opens, both fixed top bar #activeChatHeader and chat detail panel header .chat-detail-header are populated and set to display: flex at the exact same time by chat.js:10075 and 23655-23671 with identical avatars, names, statuses, and lock buttons.
+FIX FILE: chat.html & chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #4] (HIGH #48)
+FILE: chat.js:12254-12262 & chat.js:23547-23552
+WHERE: Calls / Call & Video Call Double Listener on Header Buttons
+WHAT: Call / Video Call triggers twice on a single click.
+WHY: In chat.js:12256, headerCallBtn has a direct click listener: addEventListener("click", () => startCall(false)). In line 23547, a second click listener is attached: headerCallBtn.addEventListener("click", () => { document.getElementById("callBtn")?.click(); }), which also runs startCall(false). The exact same double-mount exists for headerVideoBtn.
+FIX FILE: chat.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #6] (HIGH #49)
+FILE: chat.html:1358 & 8393
+WHERE: Deck / Same Chat Rendered in 2 Panels (Dual-Pane Split Deck)
+WHAT: Same chat rendered in 2 panels at the same time.
+WHY: When EliteDualPaneMatrix activates dual-pane command deck (#dualPaneSplitDeck), #secondaryChatSelector does not synchronize with currentChatUser changes in chat.js; selecting same contact renders identical chat stream in both #messages-area and #secondaryMessagesArea simultaneously.
+FIX FILE: chat.html & src/js/elite-dual-pane-matrix.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #7] (HIGH #50)
+FILE: chat.js:581, 10315-10335 & src/js/p2p-airdrop-engine.js:138-140
+WHERE: State / Conflicting Active Chat Variables
+WHAT: Active chat identity tracked in multiple conflicting global variables without synchronization.
+WHY: chat.js tracks active chat as string UID in local currentChatUser, window.currentChatUser, and localStorage "selected_chat_id". chat.js:231 expects window.activeChatUser as object. p2p-airdrop-engine.js checks global.currentChatContact and global.activeChatUser as objects. When chat is closed, only local currentChatUser is nulled; window.currentChatUser remains dirty.
+FIX FILE: chat.js & src/js/p2p-airdrop-engine.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #8] (HIGH #51)
+FILE: chat.js:11074-11088, 12058-12088 & src/js/webrtc-call.js:308-335, 436
+WHERE: Calls / Duplicate Calling UI Overlay Systems
+WHAT: Calling Overlay and Incoming Call dialog mounted twice in DOM.
+WHY: chat.html imports both src/js/webrtc-call.js (line 7866) and chat.js (line 9657). Both files independently define full WebRTC calling UI systems: chat.js mounts #call-overlay and #incoming-call-overlay, while webrtc-call.js mounts #activeCallOverlay, #incomingCallModal, and #nexFloatingCallMiniDock.
+FIX FILE: chat.html, chat.js, src/js/webrtc-call.js
+SEVERITY: HIGH
+
+--------------------------------------------------------------------------------
+
+================================================================================
+PART 2: MEDIUM SEVERITY BUGS (47 BUGS)
+================================================================================
+
+[OVERFLOW #6] (MEDIUM #1)
+FILE: chat.css:1364-1377 & css/layout-declutter.css:685-708
+WHERE: Bubble / Reply Preview Bar (.reply-preview, .reply-preview-content, .reply-from)
+WHAT: On 600px viewport, long sender usernames in .reply-from or long text in .reply-message push .cancel-reply-btn off-screen to the right by 25px to 45px.
+WHY: Flex child .reply-preview-text lacks min-width: 0;, and .reply-from lacks white-space: nowrap; overflow: hidden; text-overflow: ellipsis;.
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #7] (MEDIUM #2)
+FILE: chat.css:289-295
+WHERE: Header / Active Chat Status (.active-chat-status)
+WHAT: Long status text (e.g. "ChronEX AI is analyzing neural synthesis vector...", or "online • end-to-end encrypted AES-256-GCM") expands continuously on 600px and 1000px viewports, pushing header action controls 60px to 130px outside the header container.
+WHY: Missing white-space: nowrap; overflow: hidden; text-overflow: ellipsis; and missing min-width: 0; on .active-chat-status.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #9] (MEDIUM #3)
+FILE: chat2.css:3330 & src/js/webrtc-call.js:351
+WHERE: Video / WebRTC Call Action Buttons (.call-dock-btn, #minimizeCallOverlayBtn)
+WHAT: Circular 48px call dock buttons and 38px minimize button have green border/text and border-radius: 50% without overflow: hidden. Glow ripples and inner pseudo-elements bleed 4px to 8px past circle bounds.
+WHY: Missing overflow: hidden on element with border-radius: 50%.
+FIX FILE: chat2.css & src/js/webrtc-call.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #13] (MEDIUM #4)
+FILE: css/nextgen-suite.css:629-633 & 661-667
+WHERE: CYBER SUITE / Spatial Radar Node (.spatial-node & .spatial-node-tag)
+WHAT: 48px circular node with border-radius: 50% lacks overflow: hidden. The child label .spatial-node-tag (white-space: nowrap) breaches radar stage boundary by 25px to 50px when dragged near edges.
+WHY: Missing overflow: hidden on .spatial-node and lack of boundary constraints on .spatial-node-tag.
+FIX FILE: css/nextgen-suite.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #17] (MEDIUM #5)
+FILE: css/status-elite-suite.css:38-46
+WHERE: Status Vault / Audio Status Avatar (.status-audio-avatar, .status-audio-pulse-ring)
+WHAT: 64px circular avatar wrapper with border-radius: 50% lacks overflow: hidden. Animated audio waveform pulse ring bleeds 15px to 30px outside card boundaries.
+WHY: Missing overflow: hidden on circular avatar wrapper.
+FIX FILE: css/status-elite-suite.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #20] (MEDIUM #6)
+FILE: src/features/group/group-chat.css:62 & 809
+WHERE: Group / Member Avatar & Message Avatar (.nex-msg-avatar, .member-avatar)
+WHAT: Group chat circular avatars have border-radius: 50% without overflow: hidden. Non-square member avatars leak square corners outside circle.
+WHY: Missing overflow: hidden on border-radius: 50%.
+FIX FILE: src/features/group/group-chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #21] (MEDIUM #7)
+FILE: chat.css:817 & css/layout-declutter.css:191
+WHERE: Header / Active Chat Header Avatar (.chat-header-profile .header-avatar)
+WHAT: 40px circular header avatar has border-radius: 50% without overflow: hidden. Square source images leak pixel corners outside the 50% radius.
+WHY: Missing overflow: hidden on circular header avatar.
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #23] (MEDIUM #8)
+FILE: chat.css:10807-10833
+WHERE: Settings / Profile Avatar & Edit Overlay (.settings-profile-avatar, .settings-avatar-edit-overlay)
+WHAT: 120px circular settings profile avatar container has border-radius: 50% without overflow: hidden. Edit camera icon overlay breaches outer circle edge by 6px.
+WHY: Missing overflow: hidden on .settings-profile-avatar.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #24] (MEDIUM #9)
+FILE: chat.css:12586-12602
+WHERE: Audio Spaces / Live VC Avatar & Speaking Ring (.live-vc-avatar, .live-vc-avatar-wrap)
+WHAT: Live voice space speaker avatar circle (56px) has border-radius: 50% without overflow: hidden. Speaking ring animation bleeds 14px outside parent container.
+WHY: Missing overflow: hidden on circular wrapper.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #25] (MEDIUM #10)
+FILE: chat.css:4294-4365
+WHERE: Status Vault / My Status Avatar & Card Avatar (.my-status-avatar-wrapper, .status-card-avatar-wrap)
+WHAT: Circular 54px status avatars have border-radius: 50% without overflow: hidden. Plus badge and status ring overflow outside circle bounds.
+WHY: Missing overflow: hidden on circular status wrappers.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #27] (MEDIUM #11)
+FILE: chat.css:16108-16119
+WHERE: Channels / WhatsApp Channel Avatar & Admin Badge (.channel-header-avatar, .channel-avatar-admin-badge)
+WHAT: 44px circular channel avatar has border-radius: 50% without overflow: hidden.
+WHY: Missing overflow: hidden on circular channel avatar.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #30] (MEDIUM #12)
+FILE: chat.css:12488
+WHERE: Chat List / Contact Name (.chat-name)
+WHAT: Rule override for .chat-name has NO text wrapping, NO ellipsis, and NO overflow hidden. Contact names exceeding 220px on 600px viewport breach into the timestamp column.
+WHY: Missing overflow: hidden; text-overflow: ellipsis; white-space: nowrap;.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[GLITCH #6] (MEDIUM #13)
+FILE: src/nexchat-app/app/page.jsx:58-71 & src/nexchat-app/components/LeftSidebar.jsx:172-239
+WHERE: App State / Top-level Chat Mutator
+WHAT: Typing in chat composer or sending a message drops frames and re-renders entire LeftSidebar chat list rows.
+WHY: handleSendMessage mutates top-level chats state via setChats(updatedChats), passed directly to LeftSidebar, re-evaluating deduplicatedChats and re-rendering all rows on keystrokes.
+FIX FILE: src/nexchat-app/app/page.jsx & LeftSidebar.jsx
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[GLITCH #8] (MEDIUM #14)
+FILE: chat.css:1085
+WHERE: Bubble / Message Bubble Pop Animation (.message, .message-bubble)
+WHAT: Dozens of message bubbles trigger pop animation and heavy shadow calculation at once on open.
+WHY: .message, .message-bubble defines animation: bubblePop 0.2s cubic-bezier(0.16, 1, 0.3, 1) and box-shadow: var(--shadow-sm), dropping frames on bulk rendering.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[GLITCH #9] (MEDIUM #15)
+FILE: chat.css:7469-7474
+WHERE: Chat List / ChronEX AI Row Transition (.chat-list-item.chronex-ai-item)
+WHAT: Lag and layout recalculation stutter on hover over AI chat items in sidebar.
+WHY: .chat-list-item.chronex-ai-item applies transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1), forcing layout and paint stages instead of GPU transform/opacity.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[GLITCH #11] (MEDIUM #16)
+FILE: css/layout-declutter.css:1098
+WHERE: Chat List / List Item Background (.chat-list-item)
+WHAT: During list row scrolling, recycling, or hover repaint, parent surface bleeds through, producing 1-frame flicker.
+WHY: .chat-list-item has background: transparent !important instead of a solid matched background.
+FIX FILE: css/layout-declutter.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[GLITCH #13] (MEDIUM #17)
+FILE: chat.css:18982-18983 & css/layout-declutter.css:5203-5204
+WHERE: Modal / OLED Mode Cyber Hub Modal Background
+WHAT: Opening modal flashes pure black #000000 before child nodes render.
+WHY: body.oled-mode .cyber-hub-modal enforces background: #000000 !important, contrasting against #0f0a1e active chat detail background.
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[GLITCH #15] (MEDIUM #18)
+FILE: src/nexchat-app/components/TerminalPanel.jsx:280 & 301
+WHERE: App Shell / Terminal and Log Element Array Index Keys
+WHAT: Terminal and log elements completely re-mount on every event when new logs are appended.
+WHY: history.map((item, idx) => <div key={idx} and logs.map((log, i) => <div key={`log-${i}`} use array index as keys. prev.slice(-30) shifts all indices on trim.
+FIX FILE: src/nexchat-app/components/TerminalPanel.jsx
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[GLITCH #17] (MEDIUM #19)
+FILE: chat.js:10335 & src/nexchat-app/app/page.jsx:15-16
+WHERE: State / Dual Selected Chat ID Tracking
+WHAT: Both handlers fire separately for the same chat selection, causing a dual-open desync bug.
+WHY: selected_chat_id and currentChatUser are tracked independently in chat.js:10335 via localStorage/global, while page.jsx:15 maintains independent React state activeChatId.
+FIX FILE: chat.js & src/nexchat-app/app/page.jsx
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LOGIC #2] (MEDIUM #20)
+FILE: src/js/presence.js:70-72, 87
+WHERE: Presence / subscribeToChatPresence Channel Re-subscription
+WHAT: Duplicate typing channel subscriptions and memory leaks leading to ghost typing listeners.
+WHY: subscribeToChatPresence only calls unsubscribeChatPresence() if activeChatId !== chatId. Re-subscribing to the same chat fails to unsubscribe before reassigning currentChannel.
+FIX FILE: src/js/presence.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LOGIC #5] (MEDIUM #21)
+FILE: chat.js:19854, 19861 & src/features/group/index.js:214
+WHERE: Typing / Group Chat Typing Container DOM Nesting
+WHAT: Typing indicator DOM nesting pollution and height overflow in group chat.
+WHY: chat.js passes document.getElementById("typingIndicator") as options.typingContainer into GroupChat.open, which injects a redundant child <div class="nex-typing-indicator"> inside existing #typingIndicator.
+FIX FILE: chat.js & src/features/group/index.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LOGIC #8] (MEDIUM #22)
+FILE: chat.js:4015-4045
+WHERE: Presence / showChatListView Cleanup Routine
+WHAT: Presence listener continues running and modifying header elements after returning to chat list.
+WHY: showChatListView() cleans up userStatusUnsubscribe and typingStatusUnsubscribe, but omits calling NexPresenceEngine.syncActiveChatPartner(null).
+FIX FILE: chat.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LOGIC #9] (MEDIUM #23)
+FILE: chat.js:1144-1155 & chat.html:187, 1482
+WHERE: Header / Presence Subtitles (activeChatStatus & chatUserStatus)
+WHAT: Header subtitles display stale hardcoded "Online" status for offline users.
+WHY: subscribeUserPresence only updates #statusText, #chatOnlineIndicator, and #infoStatus. #activeChatStatus and #chatUserStatus have hardcoded HTML text "Online" that is never updated.
+FIX FILE: chat.js & chat.html
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LOGIC #13] (MEDIUM #24)
+FILE: src/js/zk-delivery-receipts.js:142
+WHERE: Receipts / Delivery Receipt Tick UI Target
+WHAT: Delivery receipt tick update targets wrong bubble on receiver screen.
+WHY: In dispatchProofBatch, receiver calls this.updateMessageTickUI(proof.messageId, proof) locally. But #tick-${clientMsgId} elements are only rendered on sent messages (.sent), not received messages (.received).
+FIX FILE: src/js/zk-delivery-receipts.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LOGIC #14] (MEDIUM #25)
+FILE: chat.js:10048-10055
+WHERE: Messages / onMessageUpdated Handler Room Scope
+WHAT: Message update event (onMessageUpdated) mutates messages array without filtering by active chat room, leaking cross-chat updates.
+WHY: Missing chatId filter: onMessageUpdated mutates messages1 or messages2 without checking updated.roomId === currentRoomId or updated.from === currentChatUser.
+FIX FILE: chat.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #4] (MEDIUM #26)
+FILE: chat.html:1723
+WHERE: Input / Mobile Input Squeezed Field
+WHAT: Breaks on 600px. Message input is squeezed down to < 90px width when 4 action buttons are present, making typing nearly impossible and truncating placeholder.
+WHY: Fixed button sizes (min-width: 38px !important each) combined with inline Tailwind whitespace-nowrap overflow-hidden truncate directly on the input element.
+FIX FILE: chat.html & chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #7] (MEDIUM #27)
+FILE: chat.html:8401 & 8449
+WHERE: Drawers / Code Sandbox & Knowledge Vault Drawers (#codeSandboxDrawer, #knowledgeVaultDrawer)
+WHAT: Breaks on 600px. Drawers freeze at width: 480px; max-width: 90vw;, leaving an awkward 10vw gap on the left, failing to fill mobile screen.
+WHY: Fixed width hardcoded in inline style without responsive @media (max-width: 600px) width: 100% override.
+FIX FILE: chat.html & chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #11] (MEDIUM #28)
+FILE: chat.html:171 & chat.css:265
+WHERE: Header / Active Chat Header Avatar Shift
+WHAT: Breaks on 600px. Header avatar jumps and shifts contact name during image network load.
+WHY: <img> tag in chat.html has no width="38" or height="38" attributes, and .active-chat-avatar lacks flex-shrink: 0.
+FIX FILE: chat.html & chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #12] (MEDIUM #29)
+FILE: chat.js:23907, 24307, 24631, 24880
+WHERE: Chat List / Contact Avatars Dynamic Injection Layout Shift
+WHAT: Breaks on 600px, 1000px, 1400px. Chat list rows jump and jitter vertically as contact avatars load from network or cache.
+WHY: Missing width and height attributes on dynamically injected <img class="chat-avatar"> tags, causing browser reflow on image load.
+FIX FILE: chat.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #14] (MEDIUM #30)
+FILE: chat.css:1086 vs 16166 vs css/layout-declutter.css:2798
+WHERE: Bubble / Conflicting Bubble Max-Width Rules
+WHAT: Breaks on 1000px resize. Resizing browser between 890px and 910px causes message bubbles to abruptly jump in width from 82% to 75% to 72%.
+WHY: Conflicting max-width rules across media queries: 72% vs 75% !important vs 82% !important under @media (max-width: 899px).
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #16] (MEDIUM #31)
+FILE: chat.css:1376
+WHERE: Composer / Reply Preview Banner Clipping (.reply-message)
+WHAT: Breaks on 600px. Reply preview banner above composer gets clipped or causes horizontal overflow on viewports under 360px.
+WHY: Fixed max-width: 320px; on .reply-message inside .reply-preview-content combined with missing min-width: 0 on flex container.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #17] (MEDIUM #32)
+FILE: chat.css:1415-1420 & css/layout-declutter.css:438-445
+WHERE: Input / Send and Mic Action Button Hover Scale Jitter
+WHAT: Breaks on 600px, 1000px, 1400px. Hovering Send/Mic button causes edge flickering, subpixel blur, and layout jitter against input capsule edge.
+WHY: Hover rule applies transform: scale(1.05) !important; along with heavy spread shadow box-shadow: 0 6px 20px var(--accent-primary-glow) on inline flex child.
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #18] (MEDIUM #33)
+FILE: css/layout-declutter.css:452
+WHERE: Input / AI Polish Button Hover Jitter (.ai-polish-inline-btn)
+WHAT: Breaks on 600px and 1000px. Hovering AI polish button causes input capsule height to jitter and adjacent icons to shift.
+WHY: Over-aggressive transform: scale(1.15) !important; box-shadow: 0 0 10px rgba(0, 242, 255, 0.4) !important; on inline child inside unpadded flex capsule.
+FIX FILE: css/layout-declutter.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #23] (MEDIUM #34)
+FILE: chat.css:3296, 5681, 7543 vs 5805, css/layout-declutter.css:1692
+WHERE: Modals / Inconsistent Mobile Breakpoint Thresholds (600px vs 640px)
+WHAT: Breaks on 600px. Buttons in search filters, modals, and settings fluctuate in padding and font size when dragging window across 600px–640px.
+WHY: Inconsistent breakpoint thresholds: multiple blocks target @media (max-width: 640px) while others target @media (max-width: 600px).
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #24] (MEDIUM #35)
+FILE: chat.css:6606 & 6691
+WHERE: Settings / Settings Pane Double Scrollbar (.settings-layout, .settings-pane-container)
+WHAT: Breaks on 1000px. Content pane overflows right edge and creates an unsightly double scrollbar inside settings modal dialog.
+WHY: Missing min-width: 0 on .settings-layout and .settings-pane-container (flex: 1). Children cards with fixed max-widths force flex item beyond 100% container.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[PERF #4] (MEDIUM #36)
+FILE: chat.js:24307, 24631, 24880
+WHERE: Chat List / Missing Lazy Loading on Contact Avatars
+WHAT: Memory consumption / network congestion / lag when scrolling chat list.
+WHY: Missing loading="lazy" attribute on contact avatars, profile images, and group avatars rendered in #contactList.
+FIX FILE: chat.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[PERF #5] (MEDIUM #37)
+FILE: src/features/group/components/message-bubble.js:204-213
+WHERE: Group / Missing Lazy Loading on Group Message Avatars
+WHAT: Dropped frames / memory consumption / lag when scrolling group messages.
+WHY: No lazy loading (loading="lazy") on user avatars (avatarImg = document.createElement("img")) rendered in group chat messages.
+FIX FILE: src/features/group/components/message-bubble.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[PERF #10] (MEDIUM #38)
+FILE: src/js/predictive-input.js:921-925
+WHERE: Input / Low Debounce Predictive Engine (35ms)
+WHAT: Lag when typing in chat composer.
+WHY: Debounce < 500ms (configured as 35ms in handleTyping()), which triggers full predictive dictionary search, prefix trie lookup, and language detection while typing.
+FIX FILE: src/js/predictive-input.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[PERF #11] (MEDIUM #39)
+FILE: chat.js:5041-5044 & 5345-5349
+WHERE: Search / Low Debounce on Global Search Input
+WHAT: Lag when typing / network spam in search modal.
+WHY: Search input has only 80ms debounce for local filtering and only 250ms debounce before dispatching live backend network queries (performLiveServerSearch).
+FIX FILE: chat.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[PERF #12] (MEDIUM #40)
+FILE: src/features/group/components/mention-autocomplete.js:141-179 & 208
+WHERE: Input / Zero Debounce on Mention Autocomplete Input
+WHAT: Lag when typing "@" mentions in composer.
+WHY: No debounce (0ms) on input listener in mention-autocomplete.js, which searches member array and updates dropdown DOM on every keystroke.
+FIX FILE: src/features/group/components/mention-autocomplete.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[PERF #15] (MEDIUM #41)
+FILE: chat.js:9893
+WHERE: Chat Window / Synchronous Layout Thrashing in loadMessages()
+WHAT: Dropped frames / layout thrashing after rendering messages.
+WHY: Immediately after messagesDiv.innerHTML = "" and messagesDiv.appendChild(messageFragment), reads messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight forcing a synchronous layout reflow.
+FIX FILE: chat.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[PERF #16] (MEDIUM #42)
+FILE: chat.css:18930 & 18972
+WHERE: Stickers / Heavy Multi-layered Drop Shadow Filters
+WHAT: Lag when scrolling / dropped frames across sticker items.
+WHY: Heavy multi-layered drop-shadow (filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.45))) applied on .message-sticker-img and repeated across chat message items.
+FIX FILE: chat.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[PERF #17] (MEDIUM #43)
+FILE: css/layout-declutter.css:2218-2219
+WHERE: Bubble / Heavy Backdrop Filter on Repeated System Pills
+WHAT: Lag when scrolling chat history.
+WHY: Heavy backdrop-filter: blur(8px) !important; combined with box-shadow applied on .nex-system-pill, .system-pill-badge repeated inside message scroll container.
+FIX FILE: css/layout-declutter.css
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #2] (MEDIUM #44)
+FILE: chat.html:799-815 & chat2.js:284-291, 352-358
+WHERE: Chat List / DUTY Preloaded Contact Double Mount
+WHAT: DUTY and preloaded contacts mounted twice in #contactList.
+WHY: DUTY (data-chat-id="duty") is hardcoded directly into static HTML DOM in chat.html:800. In chat2.js:352-358, syncLocalChatsToDOM() iterates over defaultChats (containing DUTY) and appends items. chat.js:24286-24320 (loadContacts) also caches and appends contacts, creating duplicate contact cards.
+FIX FILE: chat.html, chat2.js, chat.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #3] (MEDIUM #45)
+FILE: chat.html:800 & chat.js:10430
+WHERE: Chat Detail / Double showChatDetailView Call on Click
+WHAT: DUTY / Chat detail view opened twice on click.
+WHY: In chat.html:800, inline handler executes: openChat("duty", "DUTY", "", "direct"); if(typeof showChatDetailView==="function")showChatDetailView();. Inside chat.js:10430, openChat() internally calls showChatDetailView(), triggering redundant history.pushState calls and double-toggling DOM visibility.
+FIX FILE: chat.html
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #5] (MEDIUM #46)
+FILE: chat.html:995-1008 & chat.html:1477-1485
+WHERE: Chat Detail / Duplicate User Profile Info Card in Detail View
+WHAT: Avatar / Name / Status card rendered twice inside the same chat detail view.
+WHY: Inside #chatDetailView, top section renders .chat-detail-header (#chatProfilePic, #chatName, #statusText). Directly above message composer at lines 1477-1485, #chatUserProfile is also mounted with #chatUserAvatar, #chatUserName, and #chatUserStatus.
+FIX FILE: chat.html
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #9] (MEDIUM #47)
+FILE: chat.html:270, 7939-7946 & chat.html:259, 5377-5405
+WHERE: CYBER SUITE / Cyber Suite Panel Mounted in 2 Places at Once
+WHAT: Cyber Suite panel mounted in 2 places at once (Modal vs Settings Tab Pane).
+WHY: Cyber Suite is mounted as a floating full-screen modal (#nexCyberHubModal triggered by #headerCyberHubBtn) and simultaneously as an embedded settings tab pane (#tab-cyber-features-matrix / #cyberMatrixContentArea triggered by #cyberMatrixBtnHeader).
+FIX FILE: chat.html & chat.js
+SEVERITY: MEDIUM
+
+--------------------------------------------------------------------------------
+
+================================================================================
+PART 3: LOW SEVERITY BUGS (20 BUGS)
+================================================================================
+
+[OVERFLOW #10] (LOW #1)
+FILE: chat2.css:9539-9560 & chat2.css:9607
+WHERE: Video / Floating Call Mini-Dock (.nex-floating-call-dock .mini-dock-live-dot, .mini-dock-btn)
+WHAT: Pulsing green live dot (9px) and mini-dock control buttons (34px) have border-radius: 50% without overflow: hidden. The miniDockPulse animation scale (1.2x) breaches dot boundaries.
+WHY: Missing overflow: hidden on border-radius: 50%.
+FIX FILE: chat2.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #12] (LOW #2)
+FILE: css/cyber-suite.css:191-202
+WHERE: CYBER SUITE / Audio Recording Control Buttons (.audio-control-btn)
+WHAT: 38px circular action buttons with border-radius: 50% lack overflow: hidden. Active touch transform (scale(1.25)) and tap highlight bleed outside circle bounds by 5px.
+WHY: Missing overflow: hidden on border-radius: 50%.
+FIX FILE: css/cyber-suite.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #16] (LOW #3)
+FILE: css/quantum-airgap.css:252-275
+WHERE: Airgap / Peek Header Avatar & Status Dot (.peek-avatar-img, .peek-status-dot)
+WHAT: 44px circular avatar image and 11px status dot have border-radius: 50% without overflow: hidden. Non-square image sources bleed 3px to 5px outside cyan border ring.
+WHY: Missing overflow: hidden on elements with border-radius: 50%.
+FIX FILE: css/quantum-airgap.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #18] (LOW #4)
+FILE: css/thread-side-rail.css:17 & 488
+WHERE: Thread Rail / Thread Avatars & Send Button (.thread-avatar-tiny, .thread-msg-avatar, .thread-send-btn)
+WHAT: 24px and 36px circular thread avatars and send buttons have border-radius: 50% without overflow: hidden.
+WHY: Missing overflow: hidden on border-radius: 50%.
+FIX FILE: css/thread-side-rail.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #19] (LOW #5)
+FILE: extension-hub.css:692
+WHERE: Header / Extension Hub Notification Beacon (.extension-pulse-dot)
+WHAT: Circular pulse dot has border-radius: 50% without overflow: hidden. Pulsing animation expands outside header button clipping bounds.
+WHY: Missing overflow: hidden on circular pulsing element.
+FIX FILE: extension-hub.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #22] (LOW #6)
+FILE: chat.css:1157 & 1338
+WHERE: Bubble / Scroll Down FAB & Input Action Circle (.chat-scroll-down-btn, .fab-circle-btn)
+WHAT: Circular 40px floating buttons have border-radius: 50% without overflow: hidden. Unread counter badges and glow pseudo-elements breach outer circle boundaries.
+WHY: Missing overflow: hidden on circular button containers.
+FIX FILE: chat.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #26] (LOW #7)
+FILE: chat.css:9804 & 10090
+WHERE: Calls / Dial Pad Buttons & Action Circles (.calls-action-circle, .calls-dial-key, .calls-dial-call-btn)
+WHAT: Circular 54px dial pad buttons have border-radius: 50% without overflow: hidden. Active hover ripple and border highlight clip outside circle.
+WHY: Missing overflow: hidden on dial pad buttons.
+FIX FILE: chat.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #28] (LOW #8)
+FILE: css/aegis-omni-cloak.css:77
+WHERE: Header / Aegis HUD Beacon (.aegis-hud-beacon)
+WHAT: 10px circular pulsing beacon has border-radius: 50% without overflow: hidden.
+WHY: Missing overflow: hidden on pulsing beacon.
+FIX FILE: css/aegis-omni-cloak.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[OVERFLOW #29] (LOW #9)
+FILE: css/chat-vanish.css:134-163
+WHERE: Vanish Mode / Vanish Pin Halo & Dot (.vanish-pin-halo, .vanish-pin-dot)
+WHAT: Circular passcode pin dots have border-radius: 50% without overflow: hidden.
+WHY: Missing overflow: hidden on circular passcode dots.
+FIX FILE: css/chat-vanish.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[GLITCH #10] (LOW #10)
+FILE: chat.css:1238
+WHERE: Bubble / Message Reaction Badge Transition (.message-reaction-badge)
+WHAT: Style recalculation stutter across all messages on reaction hover or tap.
+WHY: .message-reaction-badge applies transition: all 0.15s ease across dozens of rendered badges in the chat view.
+FIX FILE: chat.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[GLITCH #16] (LOW #11)
+FILE: src/nexchat-app/components/CenterChat.jsx:599 & 651
+WHERE: Bubble / Poll Options & Reactions Array Index Keys
+WHAT: Entire option or reaction row re-renders rather than updating the mutated element.
+WHY: msg.options.map((opt, i) => <button key={i} and msg.reactions.map((r, i) => <span key={i} use array index as keys.
+FIX FILE: src/nexchat-app/components/CenterChat.jsx
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[LOGIC #15] (LOW #12)
+FILE: chat.js:9363-9366
+WHERE: Receipts / Firestore Batch Mark-As-Read
+WHAT: Firestore batch mark-as-read sets { read: true } but leaves status in "sent" or "delivered".
+WHY: batch.update(doc(db, "messages", docId), { read: true }) does not update status: "read", leaving UI tick checks relying on m.status === "read" stuck.
+FIX FILE: chat.js
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[LOGIC #16] (LOW #13)
+FILE: chat.js:1098, 1118-1119
+WHERE: Typing / hideTypingIndicator Container Cleanup
+WHAT: hideTypingIndicator sets innerHTML = "" while keeping display: inline-flex, causing empty line artifact or collapsed spacing.
+WHY: showTypingIndicator sets indicator.style.display = "inline-flex", but hideTypingIndicator sets visibility = "hidden"; innerHTML = "" without resetting container display or fixed dimensions.
+FIX FILE: chat.js
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #5] (LOW #14)
+FILE: chat.css:498 & css/layout-declutter.css:810
+WHERE: Sidebar / Stray Vertical Border in Mobile View (.chat-list-view)
+WHAT: Breaks on 600px. Faint 1px vertical border line appears along far right edge of mobile viewport during chat list view.
+WHY: .chat-list-view has border-right: 1px solid rgba(255, 255, 255, 0.06) !important; outside desktop media queries.
+FIX FILE: chat.css & css/layout-declutter.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #19] (LOW #15)
+FILE: chat.css:4715 & 4825
+WHERE: Status / Status Badge and Camera FAB Hover Scale
+WHAT: Breaks on 600px. Hovering/tapping Status Plus Badge (.status-plus-badge) or Camera FAB (.status-fab-main) causes visible pixelation and jumpy layout shifts.
+WHY: transform: scale(1.15) on .status-plus-badge:hover and scale(1.06) !important with heavy box-shadows on .status-fab-main:hover.
+FIX FILE: chat.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #20] (LOW #16)
+FILE: chat.css:6380
+WHERE: Calls / Call Floating Action Button Hover (.calls-fab)
+WHAT: Breaks on 600px and 1000px. Hovering call floating button causes edge jitter and blur on high-DPI displays.
+WHY: transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 28px rgba(34, 197, 94, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);.
+FIX FILE: chat.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[LAYOUT #21] (LOW #17)
+FILE: chat2.css:2801, 2935, 3110
+WHERE: Tiles / Sticker Tiles & Control Buttons Hover Scale
+WHAT: Breaks on 600px, 1000px, 1400px. Hovering sticker tiles, audio send buttons, or call controls causes neighboring elements to jump.
+WHY: transform: scale(1.08) and scale(1.1) without hardware acceleration or fixed container isolation, triggering clipping on parent.
+FIX FILE: chat2.css
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[PERF #7] (LOW #18)
+FILE: chat.js:5390
+WHERE: Search / Missing Lazy Loading on Search Result Avatars
+WHAT: Lag when scrolling / typing in search modal.
+WHY: Missing loading="lazy" on user profile avatars (<img class="search-card-avatar">) rendered in search results modal cards.
+FIX FILE: chat.js
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[PERF #18] (LOW #19)
+FILE: chat.js:24247-24254
+WHERE: Unread / Unbounded Background Realtime Poll Interval
+WHAT: Memory leak / CPU consumption in background.
+WHY: Unbounded global interval window._realtimePollInterval = setInterval(..., 2500) repeatedly queries all .unread-badge elements across DOM without ever being cleared or paused.
+FIX FILE: chat.js
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+
+[DUPLICATE #10] (LOW #20)
+FILE: chat.js:4363-4371 & chat.js:4416
+WHERE: Menu / Leaked Chat Context Menu Appends on Repeated Clicks
+WHAT: Chat Context Menu created and appended to document.body multiple times on repeated clicks.
+WHY: In chat.js:showChatContextMenu, if chatItem cannot be found, execution calls document.body.appendChild(menu) and returns immediately without attaching handlers or dismiss listeners, leaving multiple orphaned .chat-context-menu elements permanently in DOM.
+FIX FILE: chat.js
+SEVERITY: LOW
+
+--------------------------------------------------------------------------------
+

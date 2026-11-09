@@ -1347,11 +1347,30 @@
             </div>
           </div>
         </div>
-        <!-- Tactical Off-Grid P2P Mesh Banner -->
-        <div id="tacticalMeshBanner" class="tactical-mesh-banner direct-chat-hidden" style="display: none !important;">
-          <div class="mesh-banner-inner">
-            <i class="fa-solid fa-tower-broadcast"></i>
-            <span>OFF-GRID LOCAL P2P MESH ACTIVE • ZERO-CLOUD DIRECT RELAY</span>
+        <!-- In-Chat Dedicated Banners Container (Pushes list down, never overlays chat bubbles) -->
+        <div id="chatBannersContainer" class="chat-banners-container">
+          <!-- Tactical Off-Grid P2P Mesh Banner -->
+          <div id="tacticalMeshBanner" class="tactical-mesh-banner direct-chat-hidden" style="display: none !important;">
+            <div class="mesh-banner-inner">
+              <i class="fa-solid fa-tower-broadcast"></i>
+              <span>OFF-GRID LOCAL P2P MESH ACTIVE • ZERO-CLOUD DIRECT RELAY</span>
+            </div>
+          </div>
+          <!-- Self-Healing Banner -->
+          <div id="selfHealingBanner" class="self-healing-banner" style="display: none;">
+            <div class="chat-banner-content">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color: #00ff88;"></i>
+              <span id="selfHealingBannerText">Self-Healing sweep completed • System verified</span>
+            </div>
+            <button type="button" class="close-banner-btn" onclick="document.getElementById('selfHealingBanner').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <!-- Attachment Removed Banner -->
+          <div id="attachmentRemovedBanner" class="attachment-removed-banner" style="display: none;">
+            <div class="chat-banner-content">
+              <i class="fa-solid fa-paperclip" style="color: #00f2fe;"></i>
+              <span id="attachmentRemovedBannerText">Attachment removed from draft</span>
+            </div>
+            <button type="button" class="close-banner-btn" onclick="document.getElementById('attachmentRemovedBanner').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -1393,16 +1412,7 @@
           <button id="deleteBtn" class="option-item danger" onclick="if(typeof window.deleteChat === 'function' && window.currentChatUser) { window.deleteChat(window.currentChatUser, window.currentChatType); } window.closeChatOptionsMenu?.();"><i class="fa-solid fa-trash" style="margin-right: 8px;"></i>Delete Chat</button>
         </div>
 
-        <!-- Reply Preview -->
-        <div id="replyPreview" class="reply-preview" style="display: none;">
-          <div class="reply-preview-content">
-            <div class="reply-preview-text">
-              <p class="reply-from">Replying to <span id="replyFromName"></span></p>
-              <p class="reply-message" id="replyMessage"></p>
-            </div>
-            <button type="button" id="cancelReplyBtn" class="cancel-reply-btn" title="Cancel reply"><i class="fa-solid fa-xmark"></i></button>
-          </div>
-        </div>
+
         <!-- ========================================================================= -->
         <!-- NEXCHAT SMART THREAD ANCHORS & COLLAPSIBLE SIDE-RAIL                     -->
         <!-- ========================================================================= -->
@@ -1703,6 +1713,17 @@
           <div id="groupAdminOnlyBanner" class="group-admin-only-banner" style="display: none;">
             <i class="fa-solid fa-lock"></i>
             <span>Only group admins and moderators can send messages here</span>
+          </div>
+
+          <!-- Reply Preview (Directly above input bar, 44px fixed height) -->
+          <div id="replyPreview" class="reply-preview" style="display: none;">
+            <div class="reply-preview-content">
+              <div class="reply-preview-text">
+                <span class="reply-from" id="replyFromWrap">Replying to <span id="replyFromName"></span></span>
+                <span class="reply-message" id="replyMessage"></span>
+              </div>
+              <button type="button" id="cancelReplyBtn" class="cancel-reply-btn" title="Cancel reply"><i class="fa-solid fa-xmark"></i></button>
+            </div>
           </div>
 
           <!-- Unique NEXCHAT Terminal Hash Typing Indicator (Above Input Box - Fixed 20px Container) -->

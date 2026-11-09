@@ -5544,8 +5544,50 @@ async function sendMessage() {
     return;
   }
 
+  if (window._sendThrottled) return;
+
   const messageText = document.getElementById("message-input");
   let text = messageText?.value.trim();
+
+  if (!text && !selectedFile) {
+    showNotif("[Error] Message or file attachment required", "error");
+    return;
+  }
+
+  // Same-Tick Cleanup & 500ms Send Throttle
+  window._sendThrottled = true;
+  if (messageText) {
+    messageText.value = '';
+    messageText.style.height = '48px';
+    if (typeof autoResize === 'function') autoResize();
+    if (typeof updateSendButtons === 'function') updateSendButtons();
+  }
+
+  const capturedReplyTo = window.currentReplyTo || (window.messagingFeatures && window.messagingFeatures.replyingToMessage ? window.messagingFeatures.replyingToMessage() : null);
+  const activeReplyId = capturedReplyTo ? (capturedReplyTo.messageId || capturedReplyTo.id || capturedReplyTo.docId || capturedReplyTo.clientMsgId || null) : null;
+  window.currentReplyTo = null;
+  window.replyMessageId = null;
+  if (window.messagingFeatures && typeof window.messagingFeatures.hideReplyPreview === 'function') {
+    window.messagingFeatures.hideReplyPreview();
+  }
+  const replyPreviewEl = document.getElementById('replyPreview');
+  if (replyPreviewEl) replyPreviewEl.style.display = 'none';
+
+  const sendBtnEl = document.getElementById('sendBtn');
+  if (sendBtnEl) {
+    sendBtnEl.disabled = true;
+    sendBtnEl.style.pointerEvents = 'none';
+    sendBtnEl.style.opacity = '0.5';
+  }
+  setTimeout(() => {
+    window._sendThrottled = false;
+    if (sendBtnEl) {
+      sendBtnEl.disabled = false;
+      sendBtnEl.style.pointerEvents = '';
+      sendBtnEl.style.opacity = '';
+      if (typeof updateSendButtons === 'function') updateSendButtons();
+    }
+  }, 500);
 
   // Instant 0ms Multilingual Auto-Correct & Typo Synthesizer (Works in Direct & Group Chats)
   if (text && localStorage.getItem('nexchat_instant_polish') !== 'false') {
@@ -5858,7 +5900,7 @@ async function sendMessage() {
         attachment: attachment,
         envelope: e2eeEnvelope,
         isEncrypted: !!e2eeEnvelope,
-        replyTo: window.messagingFeatures && window.messagingFeatures.replyingToMessage ? window.messagingFeatures.replyingToMessage() : null,
+        replyTo: capturedReplyTo ? { ...capturedReplyTo, id: (typeof activeReplyId !== 'undefined' ? activeReplyId : null) } : null,
         chatType: 'direct',
       }).then(() => {
         updateLocalSentMessageStatus(clientMsgId, 'sent');
@@ -5887,10 +5929,14 @@ async function sendMessage() {
         clientMsgId: clientMsgId,
         isEncrypted: !!e2eeEnvelope,
         ...(e2eeEnvelope ? { envelope: e2eeEnvelope } : {}),
-        ...(window.messagingFeatures && window.messagingFeatures.replyingToMessage && window.messagingFeatures.replyingToMessage() ? {
+        replyToId: (typeof activeReplyId !== 'undefined' && activeReplyId) ? activeReplyId : null,
+        ...(capturedReplyTo ? {
           replyTo: {
-            text: window.messagingFeatures.replyingToMessage().text,
-            senderName: window.messagingFeatures.replyingToMessage().senderName,
+            id: activeReplyId || '',
+            messageId: activeReplyId || '',
+            text: capturedReplyTo.text || '',
+            senderName: capturedReplyTo.senderName || '',
+            senderId: capturedReplyTo.senderId || '',
             timestamp: new Date().toISOString()
           }
         } : {})
@@ -8000,9 +8046,15 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   if (!messagesContainer) return;
 
   const id = clientMsgId || `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  // Ghost Guard: Skip if already rendered in DOM
+  if (document.getElementById(`msg-wrapper-${id}`) || document.getElementById(`wrapper-${id}`)) {
+    return id;
+  }
   const wrapper = document.createElement("div");
   wrapper.className = "message-wrapper sent optimistic";
-  wrapper.id = `wrapper-${id}`;
+  wrapper.id = `msg-wrapper-${id}`;
+  wrapper.dataset.messageId = id;
+  wrapper.dataset.clientMsgId = id;
   wrapper.style.cssText = "display:flex; justify-content:flex-end; margin:8px 0; padding:0 12px; flex-direction: column; align-items: flex-end;";
 
   const isStk = (extraMeta && extraMeta.type === 'sticker') || (attachment && (attachment.isSticker || attachment.fileType === 'sticker'));
@@ -8010,7 +8062,7 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   const isDrop = attachment && (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData || attachment.isPredictionPoll || attachment.fileType === 'prediction_poll' || attachment.pollData || attachment.isScratchCard || attachment.fileType === 'scratch_card' || attachment.scratchData || attachment.isBountyContract || attachment.fileType === 'escrow_bounty' || attachment.bountyData || attachment.isSteganoCloak);
   const bubble = document.createElement("div");
   bubble.className = isStk ? "message-bubble sent is-sticker-message" : (isCirc ? "message-bubble sent is-clip-message" : (isDrop ? "message-bubble sent is-drop-message" : "message-bubble sent"));
-  bubble.style.cssText = isStk ? "background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 160px !important;" : ((isCirc || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #005c4b 0%, #059669 100%); border: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); color: #ffffff; padding:7px 11px 5px 11px; border-radius:12px 2px 12px 12px; max-width:72%; word-wrap:break-word;");
+  bubble.style.cssText = isStk ? "background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 160px !important;" : ((isCirc || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #005c4b 0%, #059669 100%); border: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); color: #ffffff; padding:7px 11px 18px 11px; border-radius:16px; max-width:80%; min-width:0; overflow:hidden; word-break:break-word; overflow-wrap:anywhere; position:relative;");
 
   const stickerUrl = extraMeta?.imageUrl || attachment?.imageUrl || attachment?.downloadURL || attachment?.url || (isStk ? text : null);
   if (isStk && stickerUrl) {
@@ -8041,7 +8093,7 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   }
 
   const timeSpan = document.createElement("div");
-  timeSpan.style.cssText = "font-size: 10.5px; margin-top:4px; opacity:0.85; display:flex; align-items:center; justify-content:flex-end; gap:6px;";
+  timeSpan.style.cssText = "position: absolute; bottom: 4px; right: 8px; font-size: 11px; white-space: nowrap; flex-shrink: 0; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px;";
 
   // E2EE Lock Icon (Clean & Professional)
   const e2eeBadge = document.createElement("span");
@@ -8077,6 +8129,9 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   wrapper.appendChild(bubble);
   if (window.activeGhostTtl > 0 && typeof attachGhostCountdown === 'function') {
     attachGhostCountdown(wrapper, window.activeGhostTtl);
+  }
+  if (typeof attachSwipeToReply === 'function') {
+    attachSwipeToReply(wrapper, bubble, { text, from: myUID, id, senderName: 'You' }, true);
   }
   messagesContainer.appendChild(wrapper);
   requestAnimationFrame(() => {
@@ -9237,36 +9292,7 @@ function loadMessages() {
     const dbMessages = [...messages1, ...messages2];
     const hiddenMsgIds = JSON.parse(localStorage.getItem('nex_hidden_msg_ids') || '[]');
     const hiddenSet = new Set([...hiddenMsgIds, ...(window.deletedMessageIds || [])]);
-    const uniqueMessagesMap = new Map();
-    dbMessages.forEach((msg) => {
-      const idKey = String(msg.docId || msg.id || msg.clientMsgId || msg._id || '');
-      if (idKey && !hiddenSet.has(idKey)) {
-        if (!msg.isDeleted || msg.deletedForEveryone) {
-          if (!msg.deletedFor || !myUID || !msg.deletedFor.includes(myUID)) {
-            uniqueMessagesMap.set(idKey, msg);
-          }
-        }
-      }
-    });
-
-    if (isInitialLoadComplete) {
-      completeChatReloadOverlay();
-    }
-    const uniqueDbMessages = Array.from(uniqueMessagesMap.values());
-
-    const uniqueLocalAiMessages = localAiMessages.filter(localMsg => {
-      const isDuplicate = uniqueDbMessages.some(dbMsg => {
-        if (localMsg.clientId && dbMsg.clientId && localMsg.clientId === dbMsg.clientId) {
-          return true;
-        }
-
-        const dbTime = dbMsg.time?.toMillis ? dbMsg.time.toMillis() : (dbMsg.time || 0);
-        const localTime = localMsg.time?.toMillis ? localMsg.time.toMillis() : (localMsg.time?.toDate ? localMsg.time.toDate().getTime() : Date.now());
-        return dbMsg.text === localMsg.text && Math.abs(dbTime - localTime) < 10000;
-      });
-      return !isDuplicate;
-    });
-
+// Hoisted resolveMsgTime
     const resolveMsgTime = (m) => {
       if (!m) return Date.now();
       if (m.time?.toMillis) return m.time.toMillis();
@@ -9296,6 +9322,59 @@ function loadMessages() {
       }
       return Date.now();
     };
+    const uniqueMessagesMap = new Map();
+    const seenSignatures = new Set();
+    const clientToDocMap = new Map();
+
+    // Map clientMsgId to Firestore docId
+    dbMessages.forEach((msg) => {
+      if (msg && msg.clientMsgId && msg.docId) {
+        clientToDocMap.set(String(msg.clientMsgId).trim(), String(msg.docId).trim());
+      }
+    });
+
+    dbMessages.forEach((msg) => {
+      if (!msg) return;
+      const docId = msg.docId ? String(msg.docId).trim() : '';
+      const clientMsgId = msg.clientMsgId ? String(msg.clientMsgId).trim() : '';
+      const canonicalId = (clientMsgId && clientToDocMap.has(clientMsgId)) ? clientToDocMap.get(clientMsgId) : (docId || clientMsgId || String(msg.id || msg._id || '').trim());
+      if (!canonicalId || hiddenSet.has(canonicalId)) return;
+      if (msg.deletedFor && Array.isArray(msg.deletedFor) && myUID && msg.deletedFor.includes(myUID)) return;
+
+      const mTime = resolveMsgTime(msg);
+      const timeBucket = Math.floor(mTime / 3000);
+      const signature = `${msg.senderId || msg.from || ''}:${(msg.text || '').trim()}:${timeBucket}`;
+
+      if (uniqueMessagesMap.has(canonicalId)) {
+        return; // Skip duplicate ID
+      }
+      if (signature && (msg.text || '').trim() && seenSignatures.has(signature)) {
+        return; // Skip ghost duplicate
+      }
+
+      uniqueMessagesMap.set(canonicalId, msg);
+      if (signature && (msg.text || '').trim()) seenSignatures.add(signature);
+    });
+
+    if (isInitialLoadComplete) {
+      completeChatReloadOverlay();
+    }
+    const uniqueDbMessages = Array.from(uniqueMessagesMap.values());
+
+    const uniqueLocalAiMessages = localAiMessages.filter(localMsg => {
+      const isDuplicate = uniqueDbMessages.some(dbMsg => {
+        if (localMsg.clientId && dbMsg.clientId && localMsg.clientId === dbMsg.clientId) {
+          return true;
+        }
+
+        const dbTime = dbMsg.time?.toMillis ? dbMsg.time.toMillis() : (dbMsg.time || 0);
+        const localTime = localMsg.time?.toMillis ? localMsg.time.toMillis() : (localMsg.time?.toDate ? localMsg.time.toDate().getTime() : Date.now());
+        return dbMsg.text === localMsg.text && Math.abs(dbTime - localTime) < 10000;
+      });
+      return !isDuplicate;
+    });
+
+
     const localAiPayload = currentChatType === 'ai' ? uniqueLocalAiMessages : [];
     const allMessages = [...uniqueDbMessages, ...localAiPayload].sort((a, b) => {
       return resolveMsgTime(a) - resolveMsgTime(b);
@@ -9499,10 +9578,13 @@ function loadMessages() {
         max-width: 72%;
       ` : `
         position: relative;
-        padding: 7px 11px 5px 11px;
-        border-radius: ${isOwn ? "12px 2px 12px 12px" : "2px 12px 12px 12px"};
-        max-width: 72%;
-        word-wrap: break-word;
+        padding: 7px 11px 18px 11px;
+        border-radius: 16px;
+        max-width: 80%;
+        min-width: 0;
+        overflow: hidden;
+        word-break: break-word;
+        overflow-wrap: anywhere;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
         background: ${isOwn ? "linear-gradient(135deg, #005c4b 0%, #059669 100%)" : "#1f2c34"};
         border: ${isOwn ? "none" : "1px solid rgba(255, 255, 255, 0.05)"};
@@ -9578,7 +9660,7 @@ function loadMessages() {
       }
 
       const timeSpan = document.createElement("div");
-      timeSpan.style.cssText = `font-size: 10.5px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 6px;`;
+      timeSpan.style.cssText = `position: absolute; bottom: 4px; right: 8px; font-size: 11px; white-space: nowrap; flex-shrink: 0; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px;`;
 
       // E2EE Lock Icon (Clean & Professional)
       const e2eeBadge = document.createElement("span");
@@ -12709,6 +12791,11 @@ function removeAttachment() {
   const preview = document.getElementById("attachment-preview");
   if (preview) preview.style.display = "none";
 
+  const removedBanner = document.getElementById('attachmentRemovedBanner');
+  if (removedBanner) {
+    removedBanner.style.display = 'flex';
+    setTimeout(() => { if (removedBanner) removedBanner.style.display = 'none'; }, 2200);
+  }
   showNotif("Attachment removed", "info", 1000);
   try { document.dispatchEvent(new CustomEvent('selectedFileChanged')); } catch (e) { }
 }
@@ -26284,7 +26371,63 @@ if (typeof document !== 'undefined') {
    WHATSAPP POLISH SUITE: SWIPE-TO-REPLY, 22-HUB ACTIONS & AI POLISH WAND
    ========================================================================== */
 
-// Swipe to Reply Implementation (Universal Touch + Pointer Drag with Dynamic Alignment)
+// Swipe to Reply Implementation (Exact WhatsApp Threshold: dx > 80px, dy < 30px)
+function openReplyForMessage(msg, isOwn) {
+  const senderTitle = isOwn ? 'You' : (msg.senderName || currentChatName || 'Friend');
+  const snippet = msg.text || (msg.attachment ? (msg.attachment.fileName || 'Attachment') : 'Message');
+  const replyData = {
+    messageId: msg.docId || msg.id || msg.clientMsgId || '',
+    senderId: msg.senderId || msg.from || (isOwn ? myUID : ''),
+    senderName: senderTitle,
+    text: snippet
+  };
+
+  window.currentReplyTo = replyData;
+  window.replyMessageId = replyData.messageId;
+
+  if (window.messagingFeatures && typeof window.messagingFeatures.setReplyingToMessage === 'function') {
+    window.messagingFeatures.setReplyingToMessage(replyData);
+  } else {
+    const preview = document.getElementById('replyPreview');
+    const nameEl = document.getElementById('replyFromName');
+    const msgEl = document.getElementById('replyMessage');
+    if (preview && nameEl && msgEl) {
+      nameEl.textContent = senderTitle;
+      msgEl.textContent = snippet;
+      preview.style.display = 'flex';
+    }
+  }
+
+  const messageInput = document.getElementById('message-input');
+  if (messageInput) {
+    messageInput.focus();
+  }
+}
+window.openReplyForMessage = openReplyForMessage;
+window.setReplyingTo = function(val) {
+  window.currentReplyTo = val;
+  window.replyMessageId = val ? (val.id || val.messageId) : null;
+  if (!val) {
+    if (window.messagingFeatures && typeof window.messagingFeatures.hideReplyPreview === 'function') {
+      window.messagingFeatures.hideReplyPreview();
+    }
+    const preview = document.getElementById('replyPreview');
+    if (preview) preview.style.display = 'none';
+    document.querySelectorAll('.message-bubble').forEach(b => {
+      b.style.transform = 'translateX(0px)';
+    });
+  }
+};
+document.addEventListener('DOMContentLoaded', () => {
+  const cancelBtn = document.getElementById('cancelReplyBtn');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.setReplyingTo(null);
+    });
+  }
+});
+
 function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
   if (!wrapper || !bubble) return;
   if (bubble.dataset.swipeBound === 'true') return;
@@ -26298,127 +26441,105 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
     wrapper.appendChild(replyIndicator);
   }
 
-  // Align indicator dynamically based on message origin (sent vs received)
-  if (isOwn) {
-    replyIndicator.style.setProperty('left', 'auto', 'important');
-    replyIndicator.style.setProperty('right', '12px', 'important');
-  } else {
-    replyIndicator.style.setProperty('left', '12px', 'important');
-    replyIndicator.style.setProperty('right', 'auto', 'important');
-  }
+  replyIndicator.style.setProperty('left', '12px', 'important');
+  replyIndicator.style.setProperty('right', 'auto', 'important');
+  replyIndicator.style.opacity = '0';
+  replyIndicator.style.transform = 'translateY(-50%) scale(0.5)';
 
   let startX = 0;
   let startY = 0;
   let isSwiping = false;
   let isLockedHorizontal = false;
-  let hasTriggeredHaptic = false;
-  const THRESHOLD = 38;
+  let hasTriggered = false;
 
-  const onDragStart = (e) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    startX = clientX;
-    startY = clientY;
+  // GESTURE - COPY WHATSAPP THRESHOLD:
+  // Swipe ONLY if horizontal > 80px AND vertical < 30px
+  // If vertical > 30px, cancel swipe, allow scroll. No fight.
+  // 1 swipe = 1 reply open. No 2-3 swipes.
+  const HORIZONTAL_THRESHOLD = 80;
+  const VERTICAL_CANCEL_THRESHOLD = 30;
+
+  const onTouchStart = (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
     isSwiping = true;
     isLockedHorizontal = false;
-    hasTriggeredHaptic = false;
+    hasTriggered = false;
+    bubble.style.transition = 'none';
   };
 
-  const onDragMove = (e) => {
-    if (!isSwiping) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    const rawDx = clientX - startX;
-    const dy = clientY - startY;
+  const onTouchMove = (e) => {
+    if (!isSwiping || hasTriggered) return;
+    if (!e.touches || e.touches.length !== 1) return;
+
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const dx = currentX - startX;
+    const dy = currentY - startY;
+
+    // Rule: If vertical > 30px, cancel swipe, allow scroll. No fight.
+    if (Math.abs(dy) > VERTICAL_CANCEL_THRESHOLD) {
+      isSwiping = false;
+      isLockedHorizontal = false;
+      bubble.style.transition = 'transform 0.2s ease';
+      bubble.style.transform = 'translateX(0px)';
+      replyIndicator.style.opacity = '0';
+      return;
+    }
 
     if (!isLockedHorizontal) {
-      if (Math.abs(dy) > Math.abs(rawDx) + 4) {
+      if (dx > 12 && Math.abs(dy) < 15) {
+        isLockedHorizontal = true;
+      } else if (dx < -12) {
         isSwiping = false;
         return;
       }
-      if (Math.abs(rawDx) > 5) {
-        isLockedHorizontal = true;
-      }
     }
 
-    if (isLockedHorizontal) {
-      // In WhatsApp: sent messages swipe left, received messages swipe right
-      const dx = isOwn ? (rawDx < 0 ? -rawDx : rawDx * 0.4) : rawDx;
-      if (dx > 0) {
-        if (e.cancelable) e.preventDefault();
-        const translate = Math.min(65, Math.pow(dx, 0.85));
-        const dir = (isOwn && rawDx < 0) ? -1 : 1;
-        bubble.style.transform = `translateX(${dir * translate}px)`;
-        bubble.style.transition = 'none';
+    if (isLockedHorizontal && dx > 0) {
+      if (e.cancelable) e.preventDefault();
 
-        const progress = Math.min(1, translate / THRESHOLD);
-        replyIndicator.style.opacity = String(progress);
-        replyIndicator.style.transform = `translateY(-50%) scale(${0.5 + progress * 0.5})`;
+      const translate = Math.min(40, dx * 0.5);
+      bubble.style.transform = `translateX(${translate}px)`;
 
-        if (translate >= THRESHOLD && !hasTriggeredHaptic) {
-          hasTriggeredHaptic = true;
-          replyIndicator.classList.add('active');
-          if (navigator.vibrate) navigator.vibrate(20);
-          if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
-        } else if (translate < THRESHOLD && hasTriggeredHaptic) {
-          hasTriggeredHaptic = false;
-          replyIndicator.classList.remove('active');
-        }
+      const progress = Math.min(1, Math.max(0, dx / HORIZONTAL_THRESHOLD));
+      replyIndicator.style.opacity = String(progress);
+      replyIndicator.style.transform = `translateY(-50%) scale(${0.5 + progress * 0.5})`;
+
+      // Trigger condition: horizontal > 80px AND vertical < 30px (1 swipe = 1 reply open)
+      if (dx >= HORIZONTAL_THRESHOLD && Math.abs(dy) < VERTICAL_CANCEL_THRESHOLD && !hasTriggered) {
+        hasTriggered = true;
+        replyIndicator.classList.add('active');
+        if (navigator.vibrate) navigator.vibrate(25);
+        if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
+        openReplyForMessage(msg, isOwn);
       }
     }
   };
 
-  const onDragEnd = () => {
+  const onTouchEnd = () => {
     if (!isSwiping && !isLockedHorizontal) return;
     isSwiping = false;
     isLockedHorizontal = false;
 
-    bubble.style.transition = 'transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    bubble.style.transition = 'transform 0.15s ease';
     bubble.style.transform = 'translateX(0px)';
-
-    if (hasTriggeredHaptic) {
-      const senderTitle = isOwn ? 'You' : (currentChatName || 'Friend');
-      const snippet = msg.text || (msg.attachment ? (msg.attachment.fileName || 'Attachment') : 'Message');
-
-      if (window.messagingFeatures && typeof window.messagingFeatures.setReplyingToMessage === 'function') {
-        window.messagingFeatures.setReplyingToMessage({
-          text: snippet,
-          senderName: senderTitle
-        });
-      } else {
-        const preview = document.getElementById('replyPreview');
-        const nameEl = document.getElementById('replyFromName');
-        const msgEl = document.getElementById('replyMessage');
-        if (preview && nameEl && msgEl) {
-          nameEl.textContent = senderTitle;
-          msgEl.textContent = snippet.length > 80 ? snippet.substring(0, 80) + '...' : snippet;
-          preview.style.display = 'flex';
-        }
-      }
-
-      const messageInput = document.getElementById('message-input');
-      if (messageInput) {
-        messageInput.focus();
-      }
-    }
 
     setTimeout(() => {
       replyIndicator.style.opacity = '0';
       replyIndicator.classList.remove('active');
-      replyIndicator.style.transform = 'translateY(-50%) scale(0.6)';
-    }, 200);
+      replyIndicator.style.transform = 'translateY(-50%) scale(0.5)';
+    }, 150);
+
+    startX = 0;
+    startY = 0;
   };
 
-  bubble.addEventListener('touchstart', onDragStart, { passive: true });
-  bubble.addEventListener('touchmove', onDragMove, { passive: false });
-  bubble.addEventListener('touchend', onDragEnd, { passive: true });
-  bubble.addEventListener('touchcancel', onDragEnd, { passive: true });
-
-  bubble.addEventListener('pointerdown', onDragStart, { passive: true });
-  bubble.addEventListener('pointermove', onDragMove, { passive: false });
-  bubble.addEventListener('pointerup', onDragEnd, { passive: true });
-  bubble.addEventListener('pointercancel', onDragEnd, { passive: true });
+  bubble.addEventListener('touchstart', onTouchStart, { passive: true });
+  bubble.addEventListener('touchmove', onTouchMove, { passive: false });
+  bubble.addEventListener('touchend', onTouchEnd, { passive: true });
+  bubble.addEventListener('touchcancel', onTouchEnd, { passive: true });
 }
 
 // AI Polish Wand Functionality (Ultra-Fast 0ms Local + Asynchronous Cloud AI)

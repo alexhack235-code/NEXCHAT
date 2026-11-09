@@ -8,83 +8,116 @@ let activeReplyTarget = null;
 let isReplyModeActive = false;
 let startX = 0;
 let currentX = 0;
-const SWIPE_THRESHOLD = 50;
+let startY = 0;
+let currentY = 0;
+const HORIZONTAL_THRESHOLD = 80;
+const VERTICAL_CANCEL_THRESHOLD = 30;
 
 /**
  * Attaches swipe-to-reply gesture to a message element.
+ * Threshold: Swipe ONLY if horizontal > 80px AND vertical < 30px.
+ * If vertical > 30px, cancel swipe, allow scroll. 1 swipe = 1 reply open.
  * @param {HTMLElement} element The message DOM element
  * @param {Object} message The message data object
  * @param {Function} onReply Callback when swipe threshold is reached
  */
 export function attachSwipeToReply(element, message, onReply) {
-  const isSent = element.classList.contains('nex-msg-sent');
-  const icon = document.createElement('div');
-  icon.className = 'nex-reply-icon';
-  icon.innerHTML = '<i class="fa-solid fa-reply"></i>';
-  icon.style.position = 'absolute';
-  icon.style.top = '50%';
-  icon.style.transform = 'translateY(-50%) scale(0)';
-  icon.style.transition = 'transform 0.2s';
-  icon.style.opacity = '0';
-  
-  if (isSent) {
-    icon.style.right = '-40px';
-  } else {
-    icon.style.left = '-40px';
+  if (!element || element.dataset.swipeBound === 'true') return;
+  element.dataset.swipeBound = 'true';
+
+  let icon = element.querySelector('.nex-reply-icon');
+  if (!icon) {
+    icon = document.createElement('div');
+    icon.className = 'nex-reply-icon';
+    icon.innerHTML = '<i class="fa-solid fa-reply"></i>';
+    icon.style.position = 'absolute';
+    icon.style.top = '50%';
+    icon.style.left = '12px';
+    icon.style.transform = 'translateY(-50%) scale(0.5)';
+    icon.style.opacity = '0';
+    icon.style.pointerEvents = 'none';
+    icon.style.zIndex = '5';
+    element.appendChild(icon);
   }
-  
-  element.style.position = 'relative';
-  element.appendChild(icon);
 
   let isDragging = false;
+  let isLockedHorizontal = false;
+  let hasTriggered = false;
 
   element.addEventListener('touchstart', (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
     startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
     isDragging = true;
+    isLockedHorizontal = false;
+    hasTriggered = false;
     element.style.transition = 'none';
   }, { passive: true });
 
   element.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    
+    if (!isDragging || hasTriggered) return;
+    if (!e.touches || e.touches.length !== 1) return;
+
     currentX = e.touches[0].clientX;
-    const diff = currentX - startX;
-    
-    // Swipe left for sent, right for received
-    if ((isSent && diff < 0) || (!isSent && diff > 0)) {
-      const absDiff = Math.abs(diff);
-      const move = isSent ? Math.max(-100, diff) : Math.min(100, diff);
-      
-      element.style.transform = `translateX(${move}px)`;
-      
-      if (absDiff > 20) {
-        icon.style.opacity = Math.min(1, absDiff / 50).toString();
-        const scale = Math.min(1, absDiff / SWIPE_THRESHOLD);
-        icon.style.transform = `translateY(-50%) scale(${scale})`;
+    currentY = e.touches[0].clientY;
+    const diffX = currentX - startX;
+    const diffY = currentY - startY;
+
+    // Rule: If vertical > 30px, cancel swipe, allow scroll. No fight.
+    if (Math.abs(diffY) > VERTICAL_CANCEL_THRESHOLD) {
+      isDragging = false;
+      isLockedHorizontal = false;
+      element.style.transition = 'transform 0.2s ease';
+      element.style.transform = 'translateX(0px)';
+      icon.style.opacity = '0';
+      return;
+    }
+
+    if (!isLockedHorizontal) {
+      if (diffX > 12 && Math.abs(diffY) < 15) {
+        isLockedHorizontal = true;
+      } else if (diffX < -12) {
+        isDragging = false;
+        return;
       }
     }
-  }, { passive: true });
 
-  element.addEventListener('touchend', (e) => {
-    if (!isDragging) return;
-    isDragging = false;
-    
-    const diff = currentX - startX;
-    const absDiff = Math.abs(diff);
-    
-    element.style.transition = 'transform 0.3s ease';
-    element.style.transform = 'translateX(0)';
-    icon.style.transition = 'all 0.3s ease';
-    icon.style.transform = 'translateY(-50%) scale(0)';
-    icon.style.opacity = '0';
-    
-    if (absDiff > SWIPE_THRESHOLD && ((isSent && diff < 0) || (!isSent && diff > 0))) {
-      onReply(message);
+    if (isLockedHorizontal && diffX > 0) {
+      if (e.cancelable) e.preventDefault();
+      const move = Math.min(40, diffX * 0.5);
+      element.style.transform = `translateX(${move}px)`;
+
+      const progress = Math.min(1, diffX / HORIZONTAL_THRESHOLD);
+      icon.style.opacity = String(progress);
+      icon.style.transform = `translateY(-50%) scale(${0.5 + progress * 0.5})`;
+
+      // Trigger condition: horizontal > 80px AND vertical < 30px
+      if (diffX >= HORIZONTAL_THRESHOLD && Math.abs(diffY) < VERTICAL_CANCEL_THRESHOLD && !hasTriggered) {
+        hasTriggered = true;
+        if (navigator.vibrate) navigator.vibrate(25);
+        if (onReply) onReply(message);
+      }
     }
-    
+  }, { passive: false });
+
+  element.addEventListener('touchend', () => {
+    if (!isDragging && !isLockedHorizontal) return;
+    isDragging = false;
+    isLockedHorizontal = false;
+
+    element.style.transition = 'transform 0.15s ease';
+    element.style.transform = 'translateX(0)';
+
+    setTimeout(() => {
+      icon.style.opacity = '0';
+      icon.style.transform = 'translateY(-50%) scale(0.5)';
+    }, 200);
+
     startX = 0;
+    startY = 0;
     currentX = 0;
-  });
+    currentY = 0;
+  }, { passive: true });
 }
 
 /**
