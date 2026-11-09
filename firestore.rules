@@ -110,7 +110,7 @@ service cloud.firestore {
     //   - creatorId: string (required, immutable)
     //   - name: string (required, max 128 chars)
     //   - description: string (optional, max 1000 chars)
-    //   - members: list of strings (required, group member UIDs, max 1000 items)
+    //   - members: list of strings (required, group member UIDs, max 100 items)
     //   - admins: list of strings (required, group admin UIDs, max 100 items)
     //   - moderators: list of strings (optional, max 100 items)
     // Subcollection: messages/{msgId}
@@ -1137,8 +1137,8 @@ service cloud.firestore {
       );
       allow create: if isAuthenticated() && (
         isChatParticipant(chatId) ||
-        (request.resource.data.participants is list && request.auth.uid in request.resource.data.participants) ||
-        (request.resource.data.members is list && request.auth.uid in request.resource.data.members) ||
+        (request.resource.data.participants is list && request.auth.uid in request.resource.data.participants && isValidList(request.resource.data.participants, 100)) ||
+        (request.resource.data.members is list && request.auth.uid in request.resource.data.members && isValidList(request.resource.data.members, 100)) ||
         request.resource.data.creatorId == request.auth.uid ||
         request.resource.data.userId == request.auth.uid ||
         isSuperAdmin()
@@ -1317,7 +1317,7 @@ service cloud.firestore {
                        request.auth.uid in request.resource.data.admins &&
                        validStringLength('name', 1, 128) &&
                        isValidOptionalString('description', 0, 1000) &&
-                       isValidList(request.resource.data.members, 1000) &&
+                       isValidList(request.resource.data.members, 100) &&
                        isValidList(request.resource.data.admins, 100);
 
       allow update: if isAuthenticated() && (
@@ -1326,7 +1326,7 @@ service cloud.firestore {
           areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
           isValidOptionalString('name', 1, 128) &&
           isValidOptionalString('description', 0, 1000) &&
-          isValidOptionalList('members', 1000) &&
+          isValidOptionalList('members', 100) &&
           isValidOptionalList('admins', 100) &&
           isValidOptionalList('moderators', 100)
         ) ||
@@ -1334,6 +1334,13 @@ service cloud.firestore {
           isGroupModerator(groupId) &&
           areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinnedMessages', 'mutedMembers'])
+        ) ||
+        (
+          isGroupMember(groupId) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'admins', 'moderators']) &&
+          !(request.auth.uid in request.resource.data.members) &&
+          isValidOptionalList('members', 100)
         ) ||
         (
           isGroupMember(groupId) &&
@@ -2089,9 +2096,10 @@ service cloud.firestore {
     // ===============================================================
     match /clans/{clanId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && request.resource.data.leaderId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.leaderId == request.auth.uid &&
+                       (!('members' in request.resource.data) || isValidList(request.resource.data.members, 100));
       allow update: if isAuthenticated() && (
-        request.auth.uid == resource.data.leaderId ||
+        (request.auth.uid == resource.data.leaderId && (!('members' in request.resource.data) || isValidList(request.resource.data.members, 100))) ||
         request.auth.uid in resource.data.members ||
         isSuperAdmin()
       );
