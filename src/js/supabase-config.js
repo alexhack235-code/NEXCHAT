@@ -4,8 +4,8 @@
  */
 
 export const SUPABASE_DEFAULTS = {
-  url: 'https://ohsrsevoudwttudpvtpu.supabase.co',
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oc3JzZXZvdWR3dHR1ZHB2dHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyODgyMTUsImV4cCI6MjEwNjg2NDIxNX0.j5xCe7U2NCqVAEEPc6d40WIGKpbfRFj81RVueDkO4IU',
+  url: 'https://awsqgcfsvnweffhfqacr.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF3c3FnY2Zzdm53ZWZmaGZxYWNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQxODY3NzYsImV4cCI6MjEwOTc2Mjc3Nn0.SrKuYqYkLNMo73VQe1rQibGop8Q6fpCGUna-7vDNPj4',
   publishableKey: 'sb_publishable_nYCpNXPPn6irP_fe4sYPww_-246rL81',
 };
 

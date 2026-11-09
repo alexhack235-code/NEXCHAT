@@ -171,7 +171,8 @@ BEGIN
 
     -- Insert into group_shards router
     INSERT INTO public.group_shards (group_id, shard_name, allocated_at, last_activity_at)
-    VALUES (NEW.id, target_shard, now(), now());
+    VALUES (NEW.id, target_shard, now(), now())
+    ON CONFLICT (group_id) DO UPDATE SET shard_name = EXCLUDED.shard_name;
 
     -- Increment group count on the allocated shard
     UPDATE public.shards
@@ -280,23 +281,27 @@ ALTER TABLE public.group_shards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.direct_chat_shards ENABLE ROW LEVEL SECURITY;
 
 -- Shards: Anyone authenticated can view shards registry to resolve connection endpoints
+DROP POLICY IF EXISTS "Authenticated users can read shards" ON public.shards;
 CREATE POLICY "Authenticated users can read shards"
     ON public.shards FOR SELECT
-    TO authenticated
+    TO authenticated, anon
     USING (true);
 
 -- Profiles: Public read, owner update
+DROP POLICY IF EXISTS "Profiles are readable by authenticated users" ON public.profiles;
 CREATE POLICY "Profiles are readable by authenticated users"
     ON public.profiles FOR SELECT
-    TO authenticated
+    TO authenticated, anon
     USING (true);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile"
     ON public.profiles FOR UPDATE
     TO authenticated
     USING (auth.uid() = id);
 
 -- Contacts: User can read and manage their own contact book
+DROP POLICY IF EXISTS "Users can manage own contacts" ON public.contacts;
 CREATE POLICY "Users can manage own contacts"
     ON public.contacts FOR ALL
     TO authenticated
@@ -304,6 +309,7 @@ CREATE POLICY "Users can manage own contacts"
     WITH CHECK (auth.uid() = user_id);
 
 -- Groups: Members can read group info
+DROP POLICY IF EXISTS "Group members can view group" ON public.groups;
 CREATE POLICY "Group members can view group"
     ON public.groups FOR SELECT
     TO authenticated
@@ -314,11 +320,13 @@ CREATE POLICY "Group members can view group"
         )
     );
 
+DROP POLICY IF EXISTS "Authenticated users can create groups" ON public.groups;
 CREATE POLICY "Authenticated users can create groups"
     ON public.groups FOR INSERT
     TO authenticated
     WITH CHECK (auth.uid() = creator_id);
 
+DROP POLICY IF EXISTS "Admins can update group" ON public.groups;
 CREATE POLICY "Admins can update group"
     ON public.groups FOR UPDATE
     TO authenticated
@@ -332,6 +340,7 @@ CREATE POLICY "Admins can update group"
     );
 
 -- Group Members: Members can read member roster
+DROP POLICY IF EXISTS "Members can view member roster" ON public.group_members;
 CREATE POLICY "Members can view member roster"
     ON public.group_members FOR SELECT
     TO authenticated
@@ -342,6 +351,7 @@ CREATE POLICY "Members can view member roster"
         )
     );
 
+DROP POLICY IF EXISTS "Admins and creators can manage group members" ON public.group_members;
 CREATE POLICY "Admins and creators can manage group members"
     ON public.group_members FOR ALL
     TO authenticated
@@ -355,32 +365,40 @@ CREATE POLICY "Admins and creators can manage group members"
     );
 
 -- Group Shards: Group members can read their group's shard location
+DROP POLICY IF EXISTS "Group members can read shard mapping" ON public.group_shards;
 CREATE POLICY "Group members can read shard mapping"
     ON public.group_shards FOR SELECT
-    TO authenticated
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.group_members gm
-            WHERE gm.group_id = group_id AND gm.user_id = auth.uid()
-        )
-    );
+    TO authenticated, anon
+    USING (true);
 
 -- Direct Chat Shards: Participants can read their direct chat shard
+DROP POLICY IF EXISTS "Participants can read direct chat shard" ON public.direct_chat_shards;
 CREATE POLICY "Participants can read direct chat shard"
     ON public.direct_chat_shards FOR SELECT
-    TO authenticated
+    TO authenticated, anon
     USING (true);
 
 -- ==============================================================================
 -- 12. SUPABASE REALTIME REPLICATION SETUP
--- Enables live sync on nexchat-main for profiles, contacts, groups, and membership
 -- ==============================================================================
-ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.groups;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.group_members;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.group_shards;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.contacts;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'profiles') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'groups') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.groups;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'group_members') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.group_members;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'group_shards') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.group_shards;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'contacts') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.contacts;
+    END IF;
+END $$;
 
--- Output confirmation
 COMMENT ON TABLE public.shards IS 'Registry of the 7 chat message shards across 4 Supabase accounts';
 COMMENT ON TABLE public.group_shards IS 'Group-to-shard mapping routing table for NEXCHAT sharded architecture';
