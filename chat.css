@@ -18987,22 +18987,34 @@ body.motion-120hz * {
    FIX: BLACKOUTS + CHAT LIST GLITCH / TEARING + TYPING NAME BUG + INPUT SMEAR
    ========================================================================== */
 
-/* RULE 2: Set background on ALL layers to SAME solid color (#0f0a1e) to eliminate 1-frame blackouts */
+/* RULE 2: Set background on ALL layers to SAME solid color (#0f0a1e) while allowing custom wallpaper */
 body,
 #root,
 .app,
 .chat-main,
 .chat-list-view,
 #chatListView,
-.chat-detail-view,
-#chatDetailView,
 .chat-welcome-panel,
 #chatWelcomePanel,
-.messages-area,
-#messages-area,
-#messagesContainer {
+.chat-detail-view:not(.has-custom-wallpaper),
+#chatDetailView:not(.has-custom-wallpaper),
+.messages-area:not(.has-custom-wallpaper),
+#messages-area:not(.has-custom-wallpaper),
+#messagesContainer:not(.has-custom-wallpaper) {
   background: #0f0a1e !important;
   background-color: #0f0a1e !important;
+}
+
+.chat-background,
+.chat-detail-view.has-custom-wallpaper,
+#chatDetailView.has-custom-wallpaper,
+.messages-area.has-custom-wallpaper,
+#messages-area.has-custom-wallpaper {
+  background-image: var(--chat-wallpaper) !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: transparent !important;
 }
 
 /* Remove all fade / opacity transitions and blur filters that trigger GPU black frame drops on Intel graphics */
@@ -19042,18 +19054,17 @@ body,
     background: #0f0a1e !important;
   }
 
-  /* Chat list pane: fixed 320px width, isolated GPU layer, no horizontal overflow */
-  .chat-list,
+  /* Chat list pane: fixed 340px width, isolated GPU layer, no horizontal overflow */
   .chat-list-view,
   #chatListView {
-    width: 320px !important;
-    min-width: 320px !important;
-    max-width: 320px !important;
+    width: 340px !important;
+    min-width: 340px !important;
+    max-width: 340px !important;
+    flex: 0 0 340px !important;
     flex-shrink: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    overscroll-behavior: contain !important;
-    contain: layout style !important;
+    overflow: hidden !important;
+    overscroll-behavior: auto !important;
+    contain: none !important;
     will-change: auto !important;
     transform: translateZ(0) !important;
     background: #0f0a1e !important;
@@ -19061,27 +19072,101 @@ body,
     border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
     z-index: 2 !important;
     display: flex !important;
+    flex-direction: column !important;
   }
 
-  /* Chat window pane: fills remaining space, NEVER unmounts, swaps content smoothly */
+  /* Chat window pane: fills remaining space when active */
   .chat-window,
   .chat-detail-view,
   #chatDetailView {
-    flex: 1 !important;
+    flex: 1 1 0% !important;
     min-width: 0 !important;
-    display: flex !important;
+    width: auto !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    display: none;
     flex-direction: column !important;
     overflow: hidden !important;
-    background: #0f0a1e !important;
     border-left: none !important;
     z-index: 1 !important;
   }
 
-  /* Hide empty welcome screen when active conversation exists or is persisted */
+  /* Desktop Welcome Panel: fills right pane when NO conversation is open */
+  .chat-welcome-panel,
+  #chatWelcomePanel {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #0f0a1e !important;
+    color: var(--text-secondary, #94a3b8) !important;
+    z-index: 1 !important;
+  }
+
+  /* When NO conversation is active on desktop, HIDE chat detail view */
+  .chat-main[data-layout="list"]:not(.in-conversation) .chat-detail-view,
+  .chat-main[data-layout="list"]:not(.in-conversation) #chatDetailView,
+  body:not(.in-conversation) .chat-main[data-layout="list"] .chat-detail-view,
+  body:not(.in-conversation) .chat-main[data-layout="list"] #chatDetailView,
+  #chatDetailView.hidden {
+    display: none !important;
+  }
+
+  /* When a conversation IS active on desktop, HIDE welcome panel and SHOW chat detail view */
   .chat-main[data-layout="conversation"] .chat-welcome-panel,
   body.in-conversation .chat-welcome-panel,
+  #chatWelcomePanel.hidden,
   #chatWelcomePanel[style*="display: none"] {
     display: none !important;
+  }
+
+  .chat-main[data-layout="conversation"] .chat-detail-view,
+  .chat-main[data-layout="conversation"] #chatDetailView,
+  body.in-conversation .chat-detail-view,
+  body.in-conversation #chatDetailView,
+  .chat-detail-view.visible,
+  #chatDetailView.visible {
+    display: flex !important;
+  }
+
+  /* Desktop Header: Brand logo always visible above 340px sidebar, activeChatHeader hidden from top bar */
+  #headerLogoContainer {
+    display: flex !important;
+  }
+  .top-header #activeChatHeader {
+    display: none !important;
+  }
+
+  /* Desktop Chat Detail Header: back button hidden in 2-column view */
+  .chat-detail-header .back-btn,
+  #backBtn {
+    display: none !important;
+  }
+
+  .chat-detail-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    padding: 0 16px !important;
+    background: rgba(15, 10, 30, 0.95) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    z-index: 5 !important;
+  }
+
+  /* Desktop Toast Notifications: Pin to top-right so they never obscure headers or active conversation */
+  .notification-container {
+    top: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    transform: none !important;
+    max-width: 380px !important;
+    z-index: 100050 !important;
   }
 }
 

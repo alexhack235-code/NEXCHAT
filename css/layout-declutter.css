@@ -5668,14 +5668,13 @@ body,
     background: #0f0a1e !important;
   }
 
-  /* Chat list pane: fixed 320px width, isolated GPU layer, no horizontal overflow */
-  .chat-list,
+  /* Chat list pane: fixed 340px width, isolated GPU layer, no horizontal overflow */
   .chat-list-view,
   #chatListView {
-    width: 320px !important;
-    min-width: 320px !important;
-    max-width: 320px !important;
-    flex: 0 0 320px !important;
+    width: 340px !important;
+    min-width: 340px !important;
+    max-width: 340px !important;
+    flex: 0 0 340px !important;
     flex-shrink: 0 !important;
     overflow: hidden !important;
     overscroll-behavior: auto !important;
@@ -5687,9 +5686,10 @@ body,
     border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
     z-index: 2 !important;
     display: flex !important;
+    flex-direction: column !important;
   }
 
-  /* Chat window pane: fills remaining space, NEVER unmounts, swaps content smoothly */
+  /* Chat window pane: fills remaining space when active */
   .chat-window,
   .chat-detail-view,
   #chatDetailView {
@@ -5699,25 +5699,88 @@ body,
     position: relative !important;
     top: auto !important;
     left: auto !important;
-    display: flex !important;
+    display: none;
     flex-direction: column !important;
     overflow: hidden !important;
-    background: #0f0a1e !important;
     border-left: none !important;
     z-index: 1 !important;
   }
 
-  /* Bottom nav must NEVER appear on desktop */
-  .bottom-nav,
-  #bottomNav {
+  /* Desktop Welcome Panel: fills right pane when NO conversation is open */
+  .chat-welcome-panel,
+  #chatWelcomePanel {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #0f0a1e !important;
+    color: var(--text-secondary, #94a3b8) !important;
+    z-index: 1 !important;
+  }
+
+  /* When NO conversation is active on desktop, HIDE chat detail view */
+  .chat-main[data-layout="list"]:not(.in-conversation) .chat-detail-view,
+  .chat-main[data-layout="list"]:not(.in-conversation) #chatDetailView,
+  body:not(.in-conversation) .chat-main[data-layout="list"] .chat-detail-view,
+  body:not(.in-conversation) .chat-main[data-layout="list"] #chatDetailView,
+  #chatDetailView.hidden {
     display: none !important;
   }
 
-  /* Hide empty welcome screen when active conversation exists or is persisted */
+  /* When a conversation IS active on desktop, HIDE welcome panel and SHOW chat detail view */
   .chat-main[data-layout="conversation"] .chat-welcome-panel,
   body.in-conversation .chat-welcome-panel,
+  #chatWelcomePanel.hidden,
   #chatWelcomePanel[style*="display: none"] {
     display: none !important;
+  }
+
+  .chat-main[data-layout="conversation"] .chat-detail-view,
+  .chat-main[data-layout="conversation"] #chatDetailView,
+  body.in-conversation .chat-detail-view,
+  body.in-conversation #chatDetailView,
+  .chat-detail-view.visible,
+  #chatDetailView.visible {
+    display: flex !important;
+  }
+
+  /* Desktop Header: Brand logo always visible above 340px sidebar, activeChatHeader hidden from top bar */
+  #headerLogoContainer {
+    display: flex !important;
+  }
+  .top-header #activeChatHeader {
+    display: none !important;
+  }
+
+  /* Desktop Chat Detail Header: back button hidden in 2-column view */
+  .chat-detail-header .back-btn,
+  #backBtn {
+    display: none !important;
+  }
+
+  .chat-detail-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    padding: 0 16px !important;
+    background: rgba(15, 10, 30, 0.95) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    z-index: 5 !important;
+  }
+
+  /* Desktop Toast Notifications: Pin to top-right so they never obscure headers or active conversation */
+  .notification-container {
+    top: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    transform: none !important;
+    max-width: 380px !important;
+    z-index: 100050 !important;
   }
 }
 

@@ -4061,11 +4061,17 @@ function showChatListView() {
       detailView.style.setProperty("display", "none", "important");
       detailView.style.zIndex = "0";
     } else {
-      // Desktop: Keep outer container mounted with solid #0f0a1e background (Rule 2)
-      detailView.classList.remove("hidden", "entering");
-      detailView.classList.add("visible");
-      detailView.style.setProperty("display", "flex", "important");
-      detailView.style.setProperty("background", "#0f0a1e", "important");
+      // Desktop: If no active chat, show welcome panel and hide detail view cleanly
+      const welcomePanel = document.getElementById("chatWelcomePanel");
+      if (!currentChatUser) {
+        detailView.classList.add("hidden");
+        detailView.classList.remove("visible", "entering");
+        detailView.style.setProperty("display", "none", "important");
+        if (welcomePanel) {
+          welcomePanel.style.removeProperty("display");
+          welcomePanel.classList.remove("hidden");
+        }
+      }
     }
   }
   if (groupsContainer) {
@@ -10515,8 +10521,21 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
       document.documentElement.style.setProperty('--chat-wallpaper', `url('${chatWallpaper}')`);
       const cdv = document.getElementById('chatDetailView');
       const ma = document.getElementById('messages-area');
-      if (cdv) cdv.classList.add('has-custom-wallpaper', 'chat-background');
-      if (ma) ma.classList.add('has-custom-wallpaper', 'chat-background');
+      if (cdv) {
+        cdv.classList.add('has-custom-wallpaper', 'chat-background');
+        cdv.style.removeProperty('background');
+        cdv.style.removeProperty('background-color');
+      }
+      if (ma) {
+        ma.classList.add('has-custom-wallpaper', 'chat-background');
+        ma.style.removeProperty('background');
+        ma.style.removeProperty('background-color');
+      }
+    } else {
+      const cdv = document.getElementById('chatDetailView');
+      const ma = document.getElementById('messages-area');
+      if (cdv) cdv.classList.remove('has-custom-wallpaper', 'chat-background');
+      if (ma) ma.classList.remove('has-custom-wallpaper', 'chat-background');
     }
   } catch (_) {}
 
@@ -23880,7 +23899,12 @@ function showChatDetailView() {
 
   if (chatDetailView) {
     chatDetailView.style.setProperty('display', 'flex', 'important');
-    chatDetailView.style.setProperty('background', '#0f0a1e', 'important');
+    if (!chatDetailView.classList.contains('has-custom-wallpaper')) {
+      chatDetailView.style.setProperty('background', '#0f0a1e', 'important');
+    } else {
+      chatDetailView.style.removeProperty('background');
+      chatDetailView.style.removeProperty('background-color');
+    }
     chatDetailView.classList.remove('hidden', 'entering');
     chatDetailView.classList.add('visible');
   }
@@ -23893,10 +23917,16 @@ function showChatDetailView() {
     bottomNav.style.setProperty('display', 'none', 'important');
   }
   
+  const isDesktop = window.innerWidth >= 900;
   const activeChatHeader = document.getElementById('activeChatHeader');
   const headerLogoContainer = document.getElementById('headerLogoContainer');
-  if (activeChatHeader) activeChatHeader.style.setProperty('display', 'flex', 'important');
-  if (headerLogoContainer) headerLogoContainer.style.setProperty('display', 'none', 'important');
+  if (isDesktop) {
+    if (activeChatHeader) activeChatHeader.style.setProperty('display', 'none', 'important');
+    if (headerLogoContainer) headerLogoContainer.style.setProperty('display', 'flex', 'important');
+  } else {
+    if (activeChatHeader) activeChatHeader.style.setProperty('display', 'flex', 'important');
+    if (headerLogoContainer) headerLogoContainer.style.setProperty('display', 'none', 'important');
+  }
 
   const fab = document.getElementById('mobileFabNewChat');
   if (fab) fab.style.setProperty('display', 'none', 'important');

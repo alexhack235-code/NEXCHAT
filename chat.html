@@ -51,6 +51,29 @@
       }
     })();
   </script>
+  <script>
+    (function() {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('test_auth') === 'true' || p.get('preview') === 'true') {
+        window.authRedirectDisabled = true;
+        sessionStorage.setItem('disable_auth_redirect', 'true');
+        const testUid = p.get('uid') || 'hLbqt1sBP3aS5DZnwJaW1Hrpiko2';
+        const testName = p.get('name') || 'Александр';
+        window.myUID = testUid;
+        localStorage.setItem('auth_uid', testUid);
+        localStorage.setItem('auth_name', testName);
+        localStorage.setItem('auth_email', 'demonalexander526@gmail.com');
+        if (p.get('chat')) {
+          localStorage.setItem('selected_chat_id', p.get('chat'));
+          if (p.get('chatName')) localStorage.setItem('selected_chat_name', p.get('chatName'));
+          if (p.get('chatType')) localStorage.setItem('selected_chat_type', p.get('chatType'));
+        }
+        if (p.get('wallpaper')) {
+          localStorage.setItem('nexchat_background', p.get('wallpaper'));
+        }
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="styles/theme.css">
   <link rel="stylesheet" href="chat.css?v=10.0">
   <link rel="stylesheet" href="chat2.css?v=10.0">
