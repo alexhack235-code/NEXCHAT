@@ -6582,9 +6582,29 @@ window.runVoiceUnifiedPipeline = async function(optionsOrUrl, ...rest) {
 
   const { audioUrl, audioEl, msgId, container, resultCard, actionBtn, mode = 'transcribe', targetLang = 'en' } = opts;
   if (!resultCard || !audioUrl) return;
+  if (resultCard.dataset.pipelineRunning === 'true') return;
+  resultCard.dataset.pipelineRunning = 'true';
 
   const actionRow = container?.querySelector('.voice-actions-row');
   const allActionBtns = actionRow ? actionRow.querySelectorAll('button') : (actionBtn ? [actionBtn] : []);
+
+  // AI Assistant Mode Cryptographic Gatekeeper (Never send encrypted audio, never silent empty)
+  const activeFeature = (mode === 'summary') ? 'AI Summary' : ((mode === 'translate') ? 'Translate' : 'Transcribe');
+  const targetChat = (typeof currentChatUser !== 'undefined' && currentChatUser) ? currentChatUser : (msgId || 'voice_chat');
+
+  if (typeof window.tryAIFeature === 'function') {
+    const isAllowed = await window.tryAIFeature({
+      featureName: activeFeature,
+      chatId: targetChat,
+      container: resultCard,
+      executeFn: () => window.runVoiceUnifiedPipeline(opts)
+    });
+    if (!isAllowed) {
+      allActionBtns.forEach(b => { b.disabled = false; });
+      return;
+    }
+  }
+
   allActionBtns.forEach(b => { b.disabled = true; });
 
   const cacheKey = msgId || audioUrl;
@@ -6860,6 +6880,13 @@ window.runVoiceUnifiedPipeline = async function(optionsOrUrl, ...rest) {
     console.error('[VoicePipeline] General error:', err);
     renderVoiceRetryBox(resultCard, () => window.runVoiceUnifiedPipeline(opts));
   } finally {
+    if (window.AIAssistantMode) {
+      if (typeof blob !== 'undefined' && blob) window.AIAssistantMode.scheduleBufferPurge(blob, 10000);
+      if (window.AIAssistantMode.getMode() === 'once') {
+        window.AIAssistantMode.setMode('off');
+      }
+    }
+    if (resultCard) resultCard.dataset.pipelineRunning = 'false';
     allActionBtns.forEach(b => { b.disabled = false; });
   }
 };
@@ -7799,11 +7826,26 @@ async function handleInlineMessageTranslate(bubble, m) {
   }
 
   let currentTranslatedText = '';
+  let activeTranslateReqId = 0;
 
   const doTranslate = async (target) => {
+    const currentReqId = ++activeTranslateReqId;
     activeTargetLang = target;
     const contentEl = card.querySelector('.inline-trans-content');
     const labelEl = card.querySelector('.inline-trans-label');
+
+    // AI Assistant Mode Gatekeeper
+    if (typeof window.tryAIFeature === 'function') {
+      const targetChat = (typeof currentChatUser !== 'undefined' && currentChatUser) ? currentChatUser : (m.from || m.to || 'chat');
+      const isAllowed = await window.tryAIFeature({
+        featureName: 'Translate',
+        chatId: targetChat,
+        container: contentEl,
+        executeFn: () => doTranslate(target)
+      });
+      if (!isAllowed) return;
+    }
+
     if (contentEl) contentEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Translating...';
     if (labelEl) labelEl.textContent = `Translated (${target.toUpperCase()})`;
 
@@ -7825,6 +7867,7 @@ async function handleInlineMessageTranslate(bubble, m) {
           currentTranslatedText = rawText;
         }
       }
+      if (currentReqId !== activeTranslateReqId) return;
       if (contentEl) contentEl.textContent = currentTranslatedText;
     } catch (e) {
       if (contentEl) contentEl.textContent = "Translation temporarily unavailable.";
@@ -8125,6 +8168,27 @@ async function generateChronexAIResponse(text, imagePayload = null) {
 
   // Extract active conversation history from messages-area so Chronex AI is strictly context-aware
   let activeHistory = [];
+
+  // AI Assistant Mode Gatekeeper for In-Chat Context Analysis
+  if (typeof window.tryAIFeature === 'function') {
+    const targetChat = (typeof currentChatUser !== 'undefined' && currentChatUser) ? currentChatUser : null;
+    if (targetChat && targetChat !== 'chronex-ai') {
+      const isAllowed = window.AIAssistantMode?.isFeatureAllowed('Ask ChronEX AI about this chat', targetChat);
+      if (!isAllowed) {
+        return new Promise((resolve) => {
+          window.AIAssistantMode.openEnableModal('Ask ChronEX AI about this chat', targetChat, async () => {
+            try {
+              const res = await generateChronexAIResponse(text, targetLang, imagePayload);
+              resolve(res);
+            } catch (e) {
+              resolve("Unable to analyze encrypted chat.");
+            }
+          });
+        });
+      }
+    }
+  }
+
   try {
     const messagesDiv = document.getElementById('messages-area');
     if (messagesDiv) {
@@ -25824,6 +25888,20 @@ function clearInChatSearchHighlights() {
 function executeInChatSearch(query) {
   clearInChatSearchHighlights();
   const matchCount = document.getElementById('chatSearchMatchCount');
+
+  // AI Assistant Mode: Check if searching encrypted chat messages
+  if (typeof window.tryAIFeature === 'function') {
+    const targetChat = (typeof currentChatUser !== 'undefined' && currentChatUser) ? currentChatUser : null;
+    if (targetChat && !window.AIAssistantMode?.isFeatureAllowed('Search in encrypted chats', targetChat)) {
+      const encryptedBubbles = document.querySelectorAll('#messages-area .message-bubble.is-encrypted, #messages-area [data-encrypted="true"]');
+      if (encryptedBubbles.length > 0) {
+        window.AIAssistantMode.openEnableModal('Search in encrypted chats', targetChat, () => {
+          executeInChatSearch(query);
+        });
+        return;
+      }
+    }
+  }
   activeInChatMatches = [];
   activeInChatMatchIndex = -1;
 

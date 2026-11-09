@@ -13,6 +13,18 @@
 
   const NexChronexxSummarizer = {
     triggerGroupCatchUp() {
+      // AI Assistant Mode Cryptographic Gatekeeper
+      if (typeof window.tryAIFeature === 'function') {
+        const targetChat = window.currentChatUser || window.activeRoomId || 'group_chat';
+        const isAllowed = window.AIAssistantMode?.isFeatureAllowed('AI Summary', targetChat);
+        if (!isAllowed) {
+          window.AIAssistantMode.openEnableModal('AI Summary', targetChat, () => {
+            NexChronexxSummarizer.triggerGroupCatchUp();
+          });
+          return;
+        }
+      }
+
       // 1. If ChronEX Brief Engine HUD is mounted, invoke it directly
       if (window.chronexBriefEngine && typeof window.chronexBriefEngine.triggerBrief === 'function') {
         window.chronexBriefEngine.triggerBrief();

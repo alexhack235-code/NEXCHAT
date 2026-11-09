@@ -426,6 +426,13 @@
     }
 
     startSpeechRecognition() {
+      // AI Assistant Mode Gatekeeper for Voice Memo to text
+      if (typeof window.AIAssistantMode !== 'undefined' && window.AIAssistantMode) {
+        const targetChat = (typeof window.currentChatUser !== 'undefined' ? window.currentChatUser : null);
+        if (!window.AIAssistantMode.isFeatureAllowed('Voice Memo to text', targetChat)) {
+          return;
+        }
+      }
       this.speechTranscript = '';
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRec) {

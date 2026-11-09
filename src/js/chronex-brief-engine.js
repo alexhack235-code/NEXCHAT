@@ -531,6 +531,19 @@ class ChronexBriefEngine {
   // ---------------------------------------------------------------------------
   async triggerBrief(customSliceCount = null) {
     if (this.isSummarizing) return;
+
+    // AI Assistant Mode Cryptographic Gatekeeper
+    if (typeof window.tryAIFeature === 'function') {
+      const targetChat = window.currentChatUser || window.activeRoomId || 'group_chat';
+      const isAllowed = window.AIAssistantMode?.isFeatureAllowed('AI Summary', targetChat);
+      if (!isAllowed) {
+        window.AIAssistantMode.openEnableModal('AI Summary', targetChat, () => {
+          this.triggerBrief(customSliceCount);
+        });
+        return;
+      }
+    }
+
     this.isSummarizing = true;
 
     // Render HUD Modal

@@ -206,6 +206,18 @@
         return;
       }
 
+      // AI Assistant Mode Gatekeeper
+      if (window.AIAssistantMode && !window.AIAssistantMode.isFeatureAllowed('Cyber Scribe AI', window.currentChatUser)) {
+        window.AIAssistantMode.renderUnlockButton(resultBox, 'Cyber Scribe AI', () => {
+          this.transformDraft(rawText, persona);
+        }, window.currentChatUser);
+        if (statusTag) {
+          statusTag.innerHTML = '<i class="fa-solid fa-lock"></i> Mode OFF';
+          statusTag.style.color = '#94a3b8';
+        }
+        return;
+      }
+
       if (statusTag) {
         statusTag.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Polishing...';
         statusTag.style.color = '#00f2ff';

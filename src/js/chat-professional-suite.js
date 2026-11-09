@@ -760,6 +760,29 @@
       if (modal) modal.classList.add('active');
     }
 
+    openAiPromptsModal() {
+      if (window.AIAssistantMode) {
+        window.AIAssistantMode.tryAIFeature({
+          featureName: 'Ask ChronEX AI',
+          chatId: window.currentChatUser,
+          executeFn: () => {
+            const msgInput = document.getElementById('messageInput') || document.getElementById('message-input');
+            if (msgInput) {
+              msgInput.value = '@chronex ';
+              msgInput.focus();
+              if (typeof window.adjustTextareaHeight === 'function') window.adjustTextareaHeight();
+            }
+          }
+        });
+      } else {
+        const msgInput = document.getElementById('messageInput') || document.getElementById('message-input');
+        if (msgInput) {
+          msgInput.value = '@chronex ';
+          msgInput.focus();
+        }
+      }
+    }
+
     dispatchCodeSnippet(title, lang, code) {
       // Format as markdown code block for standard chat dispatch
       const formatted = `\`\`\`${lang} [${title}]\n${code}\n\`\`\``;
@@ -2921,6 +2944,15 @@ ${text}`;
         });
 
         if (matches.length === 0) {
+          if (window.AIAssistantMode && !window.AIAssistantMode.isFeatureAllowed('Search in encrypted chats', window.currentChatUser)) {
+            const hasEncrypted = document.querySelectorAll('#messages-area .message-bubble.is-encrypted, #messages-area [data-encrypted="true"]').length > 0;
+            if (hasEncrypted) {
+              window.AIAssistantMode.renderUnlockButton(container, 'Search in encrypted chats', () => {
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+              }, window.currentChatUser);
+              return;
+            }
+          }
           container.innerHTML = `<div style="font-size: 11.5px; color: #94a3b8; text-align: center; padding: 20px;">No messages matching "${escapeHtml(query)}"</div>`;
           return;
         }
