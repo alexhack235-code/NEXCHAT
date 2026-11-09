@@ -2536,8 +2536,9 @@
                   <span>Themes &amp; Wallpapers</span>
                 </button>
                 <button type="button" class="settings-nav-tab" data-tab="tab-sounds">
-                  <i class="fa-solid fa-volume-high"></i>
-                  <span>Sounds &amp; Alerts</span>
+                  <i class="fa-solid fa-bell"></i>
+                  <span>Notifications &amp; Alerts</span>
+                  <span class="settings-tab-microbadge" style="background: rgba(0, 242, 254, 0.15); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4);">POPUPS &amp; FX</span>
                 </button>
                 <button type="button" class="settings-nav-tab" data-tab="tab-language">
                   <i class="fa-solid fa-language" style="color: #38bdf8;"></i>
@@ -3291,13 +3292,93 @@
 
               </div>
 
-              <!-- TAB 4: SOUNDS & ALERTS -->
+              <!-- TAB 4: NOTIFICATIONS & ALERTS -->
               <div class="settings-tab-pane" id="tab-sounds">
                 <div class="settings-pane-header">
-                  <h3><i class="fa-solid fa-volume-high"></i> Sounds & Haptics</h3>
-                  <p>Fine-tune message pops, incoming rings, and tactile feedback.</p>
+                  <h3><i class="fa-solid fa-bell"></i> Notifications &amp; Alerts</h3>
+                  <p>Fine-tune in-app pop-ups, alert dialogs, message banners, ringtones, and tactile feedback.</p>
                 </div>
 
+                <!-- SECTION 1: MASTER NOTIFICATION & POPUP CONTROLS -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 242, 254, 0.35); background: rgba(0, 242, 254, 0.03);">
+                  <div style="margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong style="color: #00f2fe; font-size: 14px;"><i class="fa-solid fa-bell-concierge" style="margin-right: 6px;"></i>Pop-up Notifications &amp; Alert Controls</strong>
+                      <p style="font-size: 12px; color: #8b949e; margin: 3px 0 0 0;">Toggle in-app pop-ups, toast banners, and system alert dialogs.</p>
+                    </div>
+                  </div>
+
+                  <!-- 1. POP-UP NOTIFICATIONS TOGGLE -->
+                  <div class="luxury-toggle-row" style="margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                    <div style="padding-right: 12px;">
+                      <strong style="font-size: 13.5px; color: #fff;"><i class="fa-solid fa-comment-dots" style="color: #00f2fe; margin-right: 6px;"></i>Pop-up Notifications</strong>
+                      <p style="font-size: 11.5px; color: #94a3b8; margin-top: 3px; line-height: 1.4;">Show floating toast popups on screen for new messages, reactions, and updates. <em>Turn OFF to suppress all in-app pop-up notifications.</em></p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <button type="button" id="testPopupNotifBtn" class="btn-secondary" style="font-size: 11px; padding: 4px 8px; white-space: nowrap;"><i class="fa-solid fa-play"></i> Test</button>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="popupNotifsToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- 2. ALERT POP-UPS & DIALOGS TOGGLE -->
+                  <div class="luxury-toggle-row" style="margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                    <div style="padding-right: 12px;">
+                      <strong style="font-size: 13.5px; color: #fff;"><i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b; margin-right: 6px;"></i>Alert Pop-ups &amp; System Dialogs</strong>
+                      <p style="font-size: 11.5px; color: #94a3b8; margin-top: 3px; line-height: 1.4;">Show modal alert popups, prompts, and system warning dialogs. <em>Turn OFF to suppress all alert pop-up windows.</em></p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <button type="button" id="testAlertPopupBtn" class="btn-secondary" style="font-size: 11px; padding: 4px 8px; white-space: nowrap;"><i class="fa-solid fa-play"></i> Test</button>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="alertPopupsToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- 3. IN-APP FLOATING BANNER ALERTS -->
+                  <div class="luxury-toggle-row" style="margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                    <div style="padding-right: 12px;">
+                      <strong style="font-size: 13px; color: #e2e8f0;">In-App Floating Banner Alerts</strong>
+                      <p style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Display top floating banner when a message arrives while browsing another chat.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="inAppBannersToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <!-- 4. DESKTOP & PUSH NOTIFICATIONS -->
+                  <div class="luxury-toggle-row" style="margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                    <div style="padding-right: 12px;">
+                      <strong style="font-size: 13px; color: #e2e8f0;">Desktop &amp; Push Notifications</strong>
+                      <p style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Show browser push notifications in the notification center when messages arrive.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="notifToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <!-- 5. MESSAGE CONTENT PREVIEW IN ALERTS -->
+                  <div class="luxury-toggle-row">
+                    <div style="padding-right: 12px;">
+                      <strong style="font-size: 13px; color: #e2e8f0;">Message Content Preview in Alerts</strong>
+                      <p style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Show sender name and message preview snippet in notification alerts.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="messagePreviewInNotifsToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <!-- HIDDEN COMPATIBILITY ALIAS FOR MUTE TOGGLE -->
+                  <input type="checkbox" id="muteInAppAlertsToggle" style="display: none;">
+                </div>
+
+                <!-- SECTION 2: AUDIO FX & SOUND EFFECTS -->
                 <div class="settings-card">
                   <div class="luxury-toggle-row">
                     <div>
@@ -3314,11 +3395,24 @@
                 <div class="settings-card">
                   <div class="luxury-toggle-row">
                     <div>
-                      <strong>Desktop Notifications</strong>
-                      <p>Show push banner notifications when messages arrive.</p>
+                      <strong>In-Chat Conversation Tones</strong>
+                      <p>Play subtle mechanical clicks when sending and receiving inside active chat.</p>
                     </div>
                     <label class="luxury-switch">
-                      <input type="checkbox" id="notifToggle" checked>
+                      <input type="checkbox" id="conversationTonesToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Reaction Audio Pops &amp; Haptics</strong>
+                      <p>Play tactile feedback pop when an emoji reaction is tapped or received.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="reactionAudioHapticsToggle" checked>
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -3351,69 +3445,6 @@
                     <button type="button" id="testVolumePopBtn" class="btn-secondary" style="font-size: 11px; padding: 2px 8px;"><i class="fa-solid fa-volume-high"></i> Pop</button>
                   </div>
                   <input type="range" id="soundVolumeSlider" min="0" max="100" value="85" step="5" class="cyber-range-slider" style="width: 100%; margin-top: 8px;">
-                </div>
-
-                <!-- IN-APP BANNERS & CONVERSATION TONES -->
-                <div class="settings-card" style="border: 1px solid rgba(0, 242, 254, 0.25); background: rgba(0, 242, 254, 0.02);">
-                  <div style="margin-bottom: 10px;">
-                    <strong style="color: #00f2fe; font-size: 13.5px;"><i class="fa-solid fa-bell"></i> Message Alerts &amp; Preview Privacy</strong>
-                    <p style="font-size: 12px; color: #8b949e; margin: 2px 0 0 0;">Control how incoming notifications and in-chat audio effects behave.</p>
-                  </div>
-
-                  <div class="luxury-toggle-row" style="margin-bottom: 8px;">
-                    <div>
-                      <strong style="font-size: 12.5px;">In-App Floating Banner Alerts</strong>
-                      <p style="font-size: 11px; margin-top: 2px;">Display top banner when a new message arrives while viewing another room.</p>
-                    </div>
-                    <label class="luxury-switch">
-                      <input type="checkbox" id="inAppBannersToggle" checked>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="luxury-toggle-row" style="margin-bottom: 8px;">
-                    <div>
-                      <strong style="font-size: 12.5px;">Mute In-App Pop-up Toast Alerts</strong>
-                      <p style="font-size: 11px; margin-top: 2px;">Silence and suppress floating notification alert popups across the screen.</p>
-                    </div>
-                    <label class="luxury-switch">
-                      <input type="checkbox" id="muteInAppAlertsToggle">
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="luxury-toggle-row" style="margin-bottom: 8px;">
-                    <div>
-                      <strong style="font-size: 12.5px;">Message Content Preview in Alerts</strong>
-                      <p style="font-size: 11px; margin-top: 2px;">Show sender name and message snippet in push banner notifications.</p>
-                    </div>
-                    <label class="luxury-switch">
-                      <input type="checkbox" id="messagePreviewInNotifsToggle" checked>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="luxury-toggle-row" style="margin-bottom: 8px;">
-                    <div>
-                      <strong style="font-size: 12.5px;">In-Chat Conversation Tones</strong>
-                      <p style="font-size: 11px; margin-top: 2px;">Play subtle mechanical clicks when sending and receiving inside active chat.</p>
-                    </div>
-                    <label class="luxury-switch">
-                      <input type="checkbox" id="conversationTonesToggle" checked>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-
-                  <div class="luxury-toggle-row">
-                    <div>
-                      <strong style="font-size: 12.5px;">Reaction Audio Pops &amp; Haptics</strong>
-                      <p style="font-size: 11px; margin-top: 2px;">Play tactile feedback pop when an emoji reaction is tapped or received.</p>
-                    </div>
-                    <label class="luxury-switch">
-                      <input type="checkbox" id="reactionAudioHapticsToggle" checked>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
                 </div>
 
                 <!-- NOTIFICATION CHIME PACK -->

@@ -1556,6 +1556,9 @@ function showWhatsAppStyleSystemNotification({ title, body, chatId, avatar }) {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
     return;
   }
+  if (typeof isNotificationsMuted === 'function' && isNotificationsMuted()) {
+    return;
+  }
 
   const iconUrl = avatar || '/nex-logo.png';
   const tag = chatId || 'nex_chat_group';
@@ -1610,6 +1613,7 @@ window.showWhatsAppStyleSystemNotification = showWhatsAppStyleSystemNotification
  * Never stacks! Auto-dismisses in 3 seconds.
  */
 function showSingleMessageToast(senderName, textPreview, chatId) {
+  if (typeof isNotificationsMuted === 'function' && isNotificationsMuted()) return;
   const container = document.getElementById('notificationContainer');
   if (!container) return;
 
@@ -2615,6 +2619,7 @@ function removeMaximizedView() {
 
 function isNotificationsMuted() {
   try {
+    if (localStorage.getItem('nex_popup_notifications_enabled') === 'false') return true;
     if (localStorage.getItem('nex_mute_in_app_alerts') === 'true') return true;
     if (localStorage.getItem('nexchat_inapp_banners') === 'false') return true;
     const prefs = JSON.parse(localStorage.getItem('nexchat_settings') || '{}');
@@ -2623,9 +2628,16 @@ function isNotificationsMuted() {
   return false;
 }
 
+function isAlertPopupsMuted() {
+  try {
+    if (localStorage.getItem('nex_alert_popups_enabled') === 'false') return true;
+    if (localStorage.getItem('nex_mute_alert_popups') === 'true') return true;
+  } catch (_) {}
+  return false;
+}
+
 function isNotificationSoundMuted() {
   try {
-    if (localStorage.getItem('nex_mute_in_app_alerts') === 'true') return true;
     if (localStorage.getItem('nex_mute_notification_sounds') === 'true') return true;
     const prefs = JSON.parse(localStorage.getItem('nexchat_settings') || '{}');
     if (prefs.sound === false || prefs.notifications === false) return true;
@@ -2633,9 +2645,22 @@ function isNotificationSoundMuted() {
   return false;
 }
 
+// Global Alert Pop-up Interceptor for Modal Alert Dialogs
+if (typeof window !== 'undefined' && !window._nexAlertSuppressionInstalled) {
+  window._nexAlertSuppressionInstalled = true;
+  const _origNativeAlert = window.alert;
+  window.alert = function(msg) {
+    if (typeof isAlertPopupsMuted === 'function' && isAlertPopupsMuted()) {
+      console.warn('[Alert Pop-up Suppressed by User Settings]:', msg);
+      return;
+    }
+    return _origNativeAlert.apply(window, arguments);
+  };
+}
+
 function showNotif(msg, type = "info", duration = 3000) {
-  // If user muted in-app alert popups in Settings, suppress the toast popup
-  if (isNotificationsMuted() && type !== 'error') {
+  // If user disabled popup notifications in Settings, suppress the toast popup
+  if (isNotificationsMuted()) {
     return;
   }
   const container = document.getElementById("notificationContainer");
@@ -14923,6 +14948,81 @@ function setupEnhancedSoundAlertListeners() {
   const convoTones = document.getElementById('conversationTonesToggle');
   const reactionHaptics = document.getElementById('reactionAudioHapticsToggle');
   const muteInAppAlerts = document.getElementById('muteInAppAlertsToggle');
+  const popupNotifs = document.getElementById('popupNotifsToggle');
+  const alertPopups = document.getElementById('alertPopupsToggle');
+  const testPopupBtn = document.getElementById('testPopupNotifBtn');
+  const testAlertBtn = document.getElementById('testAlertPopupBtn');
+
+  // 1. Pop-up Notifications (Default: Enabled / True)
+  if (popupNotifs && !popupNotifs.dataset.bound) {
+    popupNotifs.dataset.bound = 'true';
+    const storedPopup = localStorage.getItem('nex_popup_notifications_enabled');
+    if (storedPopup !== null) {
+      popupNotifs.checked = storedPopup === 'true';
+    } else if (localStorage.getItem('nex_mute_in_app_alerts') === 'true') {
+      popupNotifs.checked = false;
+    } else {
+      popupNotifs.checked = true;
+    }
+    popupNotifs.addEventListener('change', () => {
+      const enabled = popupNotifs.checked;
+      localStorage.setItem('nex_popup_notifications_enabled', enabled ? 'true' : 'false');
+      localStorage.setItem('nex_mute_in_app_alerts', enabled ? 'false' : 'true');
+      if (muteInAppAlerts) muteInAppAlerts.checked = !enabled;
+      if (enabled && typeof showNotif === 'function') {
+        showNotif('Pop-up notifications enabled', 'success', 2000);
+      }
+    });
+  }
+
+  // 2. Alert Pop-ups & Modals (Default: Enabled / True)
+  if (alertPopups && !alertPopups.dataset.bound) {
+    alertPopups.dataset.bound = 'true';
+    const storedAlerts = localStorage.getItem('nex_alert_popups_enabled');
+    if (storedAlerts !== null) {
+      alertPopups.checked = storedAlerts === 'true';
+    } else if (localStorage.getItem('nex_mute_alert_popups') === 'true') {
+      alertPopups.checked = false;
+    } else {
+      alertPopups.checked = true;
+    }
+    alertPopups.addEventListener('change', () => {
+      const enabled = alertPopups.checked;
+      localStorage.setItem('nex_alert_popups_enabled', enabled ? 'true' : 'false');
+      localStorage.setItem('nex_mute_alert_popups', enabled ? 'false' : 'true');
+      if (enabled && typeof showNotif === 'function' && !isNotificationsMuted()) {
+        showNotif('Alert pop-ups enabled', 'success', 2000);
+      }
+    });
+  }
+
+  // 3. Test Pop-up Notification Button
+  if (testPopupBtn && !testPopupBtn.dataset.bound) {
+    testPopupBtn.dataset.bound = 'true';
+    testPopupBtn.addEventListener('click', () => {
+      if (isNotificationsMuted()) {
+        alert('Pop-up notifications are currently turned OFF. Turn the toggle ON to enable pop-ups.');
+      } else {
+        showNotif('Test Pop-up Notification: Working smoothly!', 'success', 2500);
+      }
+    });
+  }
+
+  // 4. Test Alert Pop-up Button
+  if (testAlertBtn && !testAlertBtn.dataset.bound) {
+    testAlertBtn.dataset.bound = 'true';
+    testAlertBtn.addEventListener('click', () => {
+      if (isAlertPopupsMuted()) {
+        if (!isNotificationsMuted()) {
+          showNotif('Alert Pop-ups are currently turned OFF (suppressed)!', 'warning', 2500);
+        } else {
+          console.warn('[Test Alert]: Alert popups are currently muted.');
+        }
+      } else {
+        alert('Test Alert Pop-up: Modal dialog alerts are active and working!');
+      }
+    });
+  }
 
   const alerts = [
     { el: inAppBanners, key: 'nexchat_inapp_banners' },
@@ -14939,6 +15039,11 @@ function setupEnhancedSoundAlertListeners() {
       if (stored !== null) item.el.checked = stored === 'true';
       item.el.addEventListener('change', () => {
         localStorage.setItem(item.key, item.el.checked ? 'true' : 'false');
+        if (item.key === 'nex_mute_in_app_alerts') {
+          const popupToggle = document.getElementById('popupNotifsToggle');
+          if (popupToggle) popupToggle.checked = !item.el.checked;
+          localStorage.setItem('nex_popup_notifications_enabled', item.el.checked ? 'false' : 'true');
+        }
       });
     }
   });
@@ -15971,6 +16076,16 @@ function loadSettingsPreferences() {
     if (soundEl) soundEl.checked = prefs.sound !== false;
     const muteInAppEl = document.getElementById("muteInAppAlertsToggle");
     if (muteInAppEl) muteInAppEl.checked = localStorage.getItem("nex_mute_in_app_alerts") === "true";
+    const popupNotifsEl = document.getElementById("popupNotifsToggle");
+    if (popupNotifsEl) {
+      const storedPopup = localStorage.getItem("nex_popup_notifications_enabled");
+      popupNotifsEl.checked = storedPopup !== null ? storedPopup === "true" : localStorage.getItem("nex_mute_in_app_alerts") !== "true";
+    }
+    const alertPopupsEl = document.getElementById("alertPopupsToggle");
+    if (alertPopupsEl) {
+      const storedAlerts = localStorage.getItem("nex_alert_popups_enabled");
+      alertPopupsEl.checked = storedAlerts !== null ? storedAlerts === "true" : localStorage.getItem("nex_mute_alert_popups") !== "true";
+    }
     if (onlineEl) onlineEl.checked = prefs.onlineStatus !== false;
     if (readEl) readEl.checked = prefs.readReceipts !== false;
     if (antiReloadEl) antiReloadEl.checked = prefs.antiReload === true;
@@ -16323,6 +16438,16 @@ function saveSettingsPreferences() {
 
     const muteInAppSaveEl = document.getElementById("muteInAppAlertsToggle");
     if (muteInAppSaveEl) localStorage.setItem("nex_mute_in_app_alerts", muteInAppSaveEl.checked ? "true" : "false");
+    const popupNotifsSaveEl = document.getElementById("popupNotifsToggle");
+    if (popupNotifsSaveEl) {
+      localStorage.setItem("nex_popup_notifications_enabled", popupNotifsSaveEl.checked ? "true" : "false");
+      localStorage.setItem("nex_mute_in_app_alerts", popupNotifsSaveEl.checked ? "false" : "true");
+    }
+    const alertPopupsSaveEl = document.getElementById("alertPopupsToggle");
+    if (alertPopupsSaveEl) {
+      localStorage.setItem("nex_alert_popups_enabled", alertPopupsSaveEl.checked ? "true" : "false");
+      localStorage.setItem("nex_mute_alert_popups", alertPopupsSaveEl.checked ? "false" : "true");
+    }
     const prefs = {
       notifications: notifEl?.checked ?? true,
       sound: soundEl?.checked ?? true,
