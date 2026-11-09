@@ -1111,16 +1111,7 @@
           </div>
         </div>
 
-        <!-- Ghost Protocol Active Banner -->
-        <div id="ghostActiveBanner" class="ghost-active-banner" style="display: none;">
-          <div class="ghost-banner-content">
-            <i class="fa-solid fa-ghost" style="color: #c084fc;"></i>
-            <span>GHOST PROTOCOL ENGAGED • Disintegrating in <strong id="ghostTtlLabel">30s</strong></span>
-          </div>
-          <button type="button" id="closeGhostBannerBtn" class="close-ghost-banner-btn" title="Disable Ghost Mode">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
+
 
 
         <!-- Messages Area -->
@@ -1673,16 +1664,7 @@
             </div>
           </div>
 
-          <!-- Scheduled Messages Active Queue Banner -->
-          <div id="scheduledMessagesBanner" class="scheduled-messages-banner" style="display: none; align-items: center; justify-content: space-between; padding: 6px 14px; margin-bottom: 6px; background: rgba(0, 242, 254, 0.08); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: 20px; font-size: 11.5px;">
-            <div style="display: flex; align-items: center; gap: 8px; color: #00f2fe;">
-              <i class="fa-solid fa-clock-rotate-left"></i>
-              <span id="scheduledBannerText" style="font-weight: 600;">1 Scheduled Message Queued for this Chat</span>
-            </div>
-            <button type="button" id="openScheduledQueueBtn" style="background: rgba(0, 242, 254, 0.15); border: 1px solid #00f2fe; color: #00f2fe; font-size: 11px; padding: 3px 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-              <i class="fa-solid fa-list-check"></i> View Queue
-            </button>
-          </div>
+
           <!-- Slash Commands Power Palette -->
           <div id="slashCommandPalette" class="slash-command-palette" style="display: none; position: absolute; bottom: 65px; left: 16px; right: 16px; max-width: 460px; background: rgba(11, 17, 24, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 254, 0.35); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(0, 242, 254, 0.2); z-index: 100; overflow: hidden;">
             <div style="padding: 8px 12px; background: rgba(0, 242, 254, 0.08); border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between;">
@@ -1709,10 +1691,35 @@
             </div>
           </div>
 
-          <!-- Group Admin-Only Sending Notice Banner -->
-          <div id="groupAdminOnlyBanner" class="group-admin-only-banner" style="display: none;">
-            <i class="fa-solid fa-lock"></i>
-            <span>Only group admins and moderators can send messages here</span>
+          <!-- In-Chat Banner Stack (Strictly ONE 36px banner visible at a time: Ghost Protocol > Admin-only > Scheduled) -->
+          <div id="composerBannerStack" class="banner-stack composer-banner-stack">
+            <!-- 1. Ghost Protocol (Priority 1) -->
+            <div id="ghostActiveBanner" class="ghost-active-banner" style="display: none;">
+              <div class="ghost-banner-content">
+                <i class="fa-solid fa-ghost" style="color: #c084fc;"></i>
+                <span>GHOST PROTOCOL ENGAGED • Disintegrating in <strong id="ghostTtlLabel">30s</strong></span>
+              </div>
+              <button type="button" id="closeGhostBannerBtn" class="close-ghost-banner-btn" title="Disable Ghost Mode">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <!-- 2. Group Admin-Only Sending Notice Banner (Priority 2) -->
+            <div id="groupAdminOnlyBanner" class="group-admin-only-banner direct-chat-hidden" style="display: none !important;">
+              <i class="fa-solid fa-lock"></i>
+              <span>Only group admins and moderators can send messages here</span>
+            </div>
+
+            <!-- 3. Scheduled Messages Active Queue Banner (Priority 3) -->
+            <div id="scheduledMessagesBanner" class="scheduled-messages-banner" style="display: none;">
+              <div style="display: flex; align-items: center; gap: 8px; color: #00f2fe;">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span id="scheduledBannerText" style="font-weight: 600;"></span>
+              </div>
+              <button type="button" id="openScheduledQueueBtn" style="background: rgba(0, 242, 254, 0.15); border: 1px solid #00f2fe; color: #00f2fe; font-size: 11px; padding: 3px 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <i class="fa-solid fa-list-check"></i> View Queue
+              </button>
+            </div>
           </div>
 
           <!-- Reply Preview (Directly above input bar, 44px fixed height) -->

@@ -770,8 +770,8 @@ function renderCachedDirectChatHistory(messages, messagesDiv) {
     }
 
     return `
-      <div class="message-wrapper ${isOwn ? 'sent' : 'received'}" style="display:flex; justify-content:${align}; margin:6px 0; padding:0 12px;">
-        <div class="message-bubble ${isOwn ? 'sent' : 'received'}" style="position:relative; padding:7px 11px 5px 11px; border-radius:${bubbleRadius}; max-width:72%; word-wrap:break-word; box-shadow:0 1px 2px rgba(0,0,0,0.35); background:${bubbleBg}; border:${isOwn ? 'none' : '1px solid rgba(255,255,255,0.05)'}; color:${bubbleColor}; font-size:14.5px; line-height:1.45;">
+      <div class="message-wrapper ${isOwn ? 'sent' : 'received'}" style="display:flex; justify-content:${align}; margin:6px 0; padding:0; overflow:visible;">
+        <div class="message-bubble ${isOwn ? 'sent' : 'received'}" style="position:relative; padding:7px 11px 5px 11px; border-radius:${bubbleRadius}; max-width:calc(75% - 8px); ${isOwn ? 'margin-left:auto; margin-right:8px;' : 'margin-right:auto; margin-left:0;'} min-width:80px; overflow:visible; word-break:break-word; overflow-wrap:anywhere; box-shadow:0 1px 2px rgba(0,0,0,0.35); background:${bubbleBg}; border:${isOwn ? 'none' : '1px solid rgba(255,255,255,0.05)'}; color:${bubbleColor}; font-size:14.5px; line-height:1.45; box-sizing:border-box;">
           ${replyHtml}
           <div class="message-content" style="margin:0;">
             ${attachmentHtml}
@@ -2818,6 +2818,72 @@ window._currentGroupId = null;
 window._activeGroupSlowMode = null;
 window._slowModeTimerInterval = null;
 
+// Central Banner Priority Registry & Coordinator
+window._chatBannerState = {
+  ghostProtocol: false,    // Priority 1
+  adminOnly: false,        // Priority 2
+  scheduledQueue: false,   // Priority 3
+  tacticalMesh: false,     // Priority 4
+  attachmentRemoved: false,// Priority 5
+  selfHealing: false       // Priority 6
+};
+
+export function updateActiveChatBanner() {
+  const isGhostActive = Boolean(window.activeGhostTtl > 0);
+  const isAdminOnly = Boolean(window._chatBannerState && window._chatBannerState.adminOnly);
+  const isScheduled = Boolean(window._chatBannerState && window._chatBannerState.scheduledQueue);
+  const isMesh = Boolean(window._chatBannerState && window._chatBannerState.tacticalMesh);
+  const isAttRemoved = Boolean(window._chatBannerState && window._chatBannerState.attachmentRemoved);
+  const isSelfHealing = Boolean(window._chatBannerState && window._chatBannerState.selfHealing);
+
+  // Strict Priority Hierarchy: Ghost Protocol > Admin-only > Scheduled Queue > Mesh > Transient
+  let winner = null;
+  if (isGhostActive) {
+    winner = 'ghostActiveBanner';
+  } else if (isAdminOnly) {
+    winner = 'groupAdminOnlyBanner';
+  } else if (isScheduled) {
+    winner = 'scheduledMessagesBanner';
+  } else if (isMesh) {
+    winner = 'tacticalMeshBanner';
+  } else if (isAttRemoved) {
+    winner = 'attachmentRemovedBanner';
+  } else if (isSelfHealing) {
+    winner = 'selfHealingBanner';
+  }
+
+  const allBanners = [
+    'ghostActiveBanner',
+    'groupAdminOnlyBanner',
+    'scheduledMessagesBanner',
+    'tacticalMeshBanner',
+    'attachmentRemovedBanner',
+    'selfHealingBanner'
+  ];
+
+  allBanners.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id === winner) {
+      el.style.setProperty('display', 'flex', 'important');
+      el.classList.add('banner-active');
+      el.classList.remove('direct-chat-hidden');
+    } else {
+      el.style.setProperty('display', 'none', 'important');
+      el.classList.remove('banner-active');
+      if (id === 'groupAdminOnlyBanner') {
+        el.classList.add('direct-chat-hidden');
+      }
+    }
+  });
+
+  const composerStack = document.getElementById('composerBannerStack');
+  if (composerStack) {
+    composerStack.style.display = (winner === 'ghostActiveBanner' || winner === 'groupAdminOnlyBanner' || winner === 'scheduledMessagesBanner') ? 'flex' : 'none';
+  }
+}
+window.updateActiveChatBanner = updateActiveChatBanner;
+
 function applyGroupChatRestrictions(groupData, groupId) {
   if (!groupData) return;
   window._currentGroupData = groupData;
@@ -2841,8 +2907,15 @@ function applyGroupChatRestrictions(groupData, groupId) {
   const audioBtn = document.getElementById('audio-record-btn');
   const attachBtn = document.getElementById('btnToggleAttachmentHub');
 
-  if (whoCanSend === 'admins' && !isStaff) {
-    if (adminOnlyBanner) adminOnlyBanner.style.display = 'flex';
+  const isAdminRestricted = (whoCanSend === 'admins' && !isStaff);
+  if (window._chatBannerState) {
+    window._chatBannerState.adminOnly = isAdminRestricted;
+  }
+  if (typeof window.updateActiveChatBanner === 'function') {
+    window.updateActiveChatBanner();
+  }
+
+  if (isAdminRestricted) {
     if (messageInput) {
       messageInput.disabled = true;
       messageInput.placeholder = 'Only group admins can send messages here';
@@ -2851,7 +2924,6 @@ function applyGroupChatRestrictions(groupData, groupId) {
     if (audioBtn) audioBtn.style.pointerEvents = 'none';
     if (attachBtn) attachBtn.style.pointerEvents = 'none';
   } else {
-    if (adminOnlyBanner) adminOnlyBanner.style.display = 'none';
     if (messageInput) {
       messageInput.disabled = false;
       messageInput.placeholder = 'Message';
@@ -2877,8 +2949,18 @@ function clearGroupChatRestrictions() {
   window._currentGroupId = null;
   window._activeGroupSlowMode = null;
 
-  const adminOnlyBanner = document.getElementById('groupAdminOnlyBanner');
-  if (adminOnlyBanner) adminOnlyBanner.style.display = 'none';
+  if (window._chatBannerState) {
+    window._chatBannerState.adminOnly = false;
+  }
+  if (typeof window.updateActiveChatBanner === 'function') {
+    window.updateActiveChatBanner();
+  } else {
+    const adminOnlyBanner = document.getElementById('groupAdminOnlyBanner');
+    if (adminOnlyBanner) {
+      adminOnlyBanner.style.setProperty('display', 'none', 'important');
+      adminOnlyBanner.classList.add('direct-chat-hidden');
+    }
+  }
 
   const slowModeCountdownBar = document.getElementById('slowModeCountdownBar');
   if (slowModeCountdownBar) slowModeCountdownBar.style.display = 'none';
@@ -8055,14 +8137,14 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   wrapper.id = `msg-wrapper-${id}`;
   wrapper.dataset.messageId = id;
   wrapper.dataset.clientMsgId = id;
-  wrapper.style.cssText = "display:flex; justify-content:flex-end; margin:8px 0; padding:0 12px; flex-direction: column; align-items: flex-end;";
+  wrapper.style.cssText = "display:flex; justify-content:flex-end; margin:8px 0; padding:0; flex-direction: column; align-items: flex-end; overflow:visible;";
 
   const isStk = (extraMeta && extraMeta.type === 'sticker') || (attachment && (attachment.isSticker || attachment.fileType === 'sticker'));
   const isCirc = attachment && (attachment.isCircularVideo || attachment.fileType === 'video_note');
   const isDrop = attachment && (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData || attachment.isPredictionPoll || attachment.fileType === 'prediction_poll' || attachment.pollData || attachment.isScratchCard || attachment.fileType === 'scratch_card' || attachment.scratchData || attachment.isBountyContract || attachment.fileType === 'escrow_bounty' || attachment.bountyData || attachment.isSteganoCloak);
   const bubble = document.createElement("div");
   bubble.className = isStk ? "message-bubble sent is-sticker-message" : (isCirc ? "message-bubble sent is-clip-message" : (isDrop ? "message-bubble sent is-drop-message" : "message-bubble sent"));
-  bubble.style.cssText = isStk ? "background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 160px !important;" : ((isCirc || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #005c4b 0%, #059669 100%); border: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); color: #ffffff; padding:7px 11px 18px 11px; border-radius:16px; max-width:80%; min-width:0; overflow:hidden; word-break:break-word; overflow-wrap:anywhere; position:relative;");
+  bubble.style.cssText = isStk ? "background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 160px !important;" : ((isCirc || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #005c4b 0%, #059669 100%); border: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); color: #ffffff; padding:7px 11px 18px 11px; border-radius:16px; max-width:calc(75% - 8px); margin-left:auto; margin-right:8px; min-width:80px; overflow:visible; word-break:break-word; overflow-wrap:anywhere; position:relative; box-sizing:border-box;");
 
   const stickerUrl = extraMeta?.imageUrl || attachment?.imageUrl || attachment?.downloadURL || attachment?.url || (isStk ? text : null);
   if (isStk && stickerUrl) {
@@ -9535,7 +9617,8 @@ function loadMessages() {
         display: flex;
         justify-content: ${isOwn ? "flex-end" : "flex-start"};
         margin: 6px 0;
-        padding: 0 12px;
+        padding: 0;
+        overflow: visible;
       `;
 
       const msgDate = m.time?.toDate?.() || new Date();
@@ -9580,9 +9663,10 @@ function loadMessages() {
         position: relative;
         padding: 7px 11px 18px 11px;
         border-radius: 16px;
-        max-width: 80%;
-        min-width: 0;
-        overflow: hidden;
+        max-width: calc(75% - 8px);
+        ${isOwn ? 'margin-left: auto; margin-right: 8px;' : 'margin-right: auto; margin-left: 0;'}
+        min-width: 80px;
+        overflow: visible;
         word-break: break-word;
         overflow-wrap: anywhere;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -9593,6 +9677,7 @@ function loadMessages() {
         font-size: 14.5px;
         line-height: 1.45;
         transition: transform 0.15s ease;
+        box-sizing: border-box;
       `);
 
       // WhatsApp-Style Swipe to Reply Gesture
@@ -10463,6 +10548,11 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   if (chatDetailHeader) {
     chatDetailHeader.classList.toggle('group-chat', chatType === 'group');
     chatDetailHeader.classList.toggle('ai-chat', chatType === 'ai');
+  }
+
+  // Synchronously purge group restrictions when opening a direct or AI chat
+  if (chatType !== 'group') {
+    clearGroupChatRestrictions();
   }
 
   // Trigger Passcode Gate Check if Chat is Locked Behind Code

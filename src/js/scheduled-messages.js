@@ -286,11 +286,16 @@
       if (!banner || !textEl) return;
 
       const pending = this.getPendingForChat(chatId);
-      if (pending.length > 0) {
-        banner.style.display = 'flex';
+      if (window._chatBannerState) {
+        window._chatBannerState.scheduledQueue = (pending.length > 0);
+      }
+      if (textEl && pending.length > 0) {
         textEl.textContent = `${pending.length} Message${pending.length > 1 ? 's' : ''} Scheduled for this Chat`;
+      }
+      if (typeof window.updateActiveChatBanner === 'function') {
+        window.updateActiveChatBanner();
       } else {
-        banner.style.display = 'none';
+        banner.style.display = (pending.length > 0) ? 'flex' : 'none';
       }
     }
 

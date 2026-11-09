@@ -799,7 +799,8 @@ opacity: 0.95 !important;
 .scheduled-messages-banner,
 #scheduledMessagesBanner,
 .group-admin-only-banner,
-#groupAdminOnlyBanner {
+#groupAdminOnlyBanner,
+.banner-stack > div {
   position: static !important;
   height: 36px !important;
   min-height: 36px !important;
@@ -808,7 +809,6 @@ opacity: 0.95 !important;
   flex-shrink: 0 !important;
   width: 100% !important;
   overflow: hidden !important;
-  display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   padding: 0 16px !important;
@@ -817,11 +817,51 @@ opacity: 0.95 !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
+.self-healing-banner.banner-active,
+#selfHealingBanner.banner-active,
+.attachment-removed-banner.banner-active,
+#attachmentRemovedBanner.banner-active,
+.ghost-active-banner.banner-active,
+#ghostActiveBanner.banner-active,
+.tactical-mesh-banner.banner-active,
+#tacticalMeshBanner.banner-active,
+.scheduled-messages-banner.banner-active,
+#scheduledMessagesBanner.banner-active,
+.group-admin-only-banner.banner-active,
+#groupAdminOnlyBanner.banner-active {
+  display: flex !important;
+}
+
 .self-healing-banner[style*="display: none"],
 #selfHealingBanner[style*="display: none"],
 .attachment-removed-banner[style*="display: none"],
-#attachmentRemovedBanner[style*="display: none"] {
+#attachmentRemovedBanner[style*="display: none"],
+.ghost-active-banner[style*="display: none"],
+#ghostActiveBanner[style*="display: none"],
+.tactical-mesh-banner[style*="display: none"],
+#tacticalMeshBanner[style*="display: none"],
+.scheduled-messages-banner[style*="display: none"],
+#scheduledMessagesBanner[style*="display: none"],
+.group-admin-only-banner[style*="display: none"],
+#groupAdminOnlyBanner[style*="display: none"],
+.direct-chat-hidden,
+.banner-stack > div[style*="display: none"],
+.chat-detail-view:not(.group-chat) #groupAdminOnlyBanner,
+#chatDetailView:not(.group-chat) #groupAdminOnlyBanner {
   display: none !important;
+}
+
+/* Banner Stack container */
+.banner-stack {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.banner-stack > div:not(:first-child) {
+  display: none;
 }
 
 .self-healing-banner {
@@ -3131,16 +3171,21 @@ margin: 3px 0 !important;
 }
 
 .message-bubble {
-max-width: 82% !important;
+max-width: calc(75% - 8px) !important;
 box-sizing: border-box !important;
 word-break: break-word !important;
-overflow-wrap: break-word !important;
+overflow-wrap: anywhere !important;
+overflow: visible !important;
+min-width: 80px !important;
 }
 
 .message-bubble.sent {
-margin-right: 0 !important;
+margin-left: auto !important;
+margin-right: 8px !important;
+max-width: calc(75% - 8px) !important;
 border-radius: 12px 2px 12px 12px !important;
 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+overflow: visible !important;
 }
 
 }
@@ -5754,37 +5799,86 @@ textarea {
 
 /* ==========================================================================
    PART 1 & PART 3 - FULL FIX FOR CHAT LIST, BUBBLES, TIME, INPUT & BANNERS
+   REVERT OVERFLOW RULE & RIGHT-EDGE BUBBLE RESTORATION
    ========================================================================== */
 
-/* Message List: flex: 1; overflow-y: auto; overflow-x: hidden; */
-.messages-container,
+/* Chat list container: width 100%, max-width 100%, overflow-x hidden, padding 8px */
+.chat-messages,
+.messages-area,
 #messages-area,
-#messagesContainer {
+#messagesContainer,
+.messages-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  box-sizing: border-box !important;
   flex: 1 !important;
   min-width: 0 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
 }
 
-/* Message container: max-width: 100%; min-width: 0; overflow: hidden; word-break: break-word; overflow-wrap: anywhere; */
+/* Message container: overflow visible, max-width 100% */
 .message-wrapper {
   max-width: 100% !important;
   min-width: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
 }
 
-/* Bubble: max-width: 80%; min-width: 0; overflow: hidden; border-radius: 16px; padding-bottom: 18px; (room for time) */
+/* Bubble base: max-width calc(75% - 8px), overflow visible */
 .message-bubble {
-  max-width: 80% !important;
-  min-width: 0 !important;
-  overflow: hidden !important;
+  max-width: calc(75% - 8px) !important;
+  min-width: 80px !important;
+  overflow: visible !important;
   border-radius: 16px !important;
   padding-bottom: 18px !important;
   position: relative !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
+  box-sizing: border-box !important;
+}
+
+/* Outgoing bubble: margin-left auto, margin-right 8px, max-width calc(75% - 8px), overflow visible */
+.message.outgoing,
+.message.sent,
+.message-bubble.sent,
+.message-wrapper.sent .message-bubble,
+.nex-msg-wrapper.sent .nex-msg-bubble {
+  margin-left: auto !important;
+  margin-right: 8px !important;
+  max-width: calc(75% - 8px) !important;
+  min-width: 80px !important;
+  align-self: flex-end !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+/* Received bubble: margin-right auto, margin-left 0, max-width calc(75% - 8px), overflow visible */
+.message.received,
+.message-bubble.received,
+.message-wrapper.received .message-bubble,
+.nex-msg-wrapper.received .nex-msg-bubble {
+  margin-right: auto !important;
+  margin-left: 0 !important;
+  max-width: calc(75% - 8px) !important;
+  min-width: 80px !important;
+  align-self: flex-start !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+}
+
+.message-bubble.has-voice,
+.message-bubble:has(.nex-voice-card-wrapper) {
+  max-width: calc(75% - 8px) !important;
+  overflow: visible !important;
+  position: relative !important;
+  padding-bottom: 18px !important;
+  box-sizing: border-box !important;
 }
 
 .message-bubble.is-sticker-message,
@@ -5821,53 +5915,142 @@ textarea {
   flex-shrink: 0 !important;
   float: none !important;
   margin: 0 !important;
-}
-
-/* Input bar: position: sticky; bottom: 0; min-height: 56px; max-height: 120px; display: flex; align-items: center; gap: 6px; width: 100%; min-width: 0; overflow: hidden; */
-.chat-input-wrapper,
-.chat-input-container,
-.input-area {
-  position: sticky !important;
-  bottom: 0 !important;
-  min-height: 56px !important;
-  max-height: 120px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 6px !important;
+  gap: 4px !important;
+}
+
+/* FIX 3: MESSAGE FIELD - FULL-WIDTH FLEX EXPANSION */
+.message-input-area,
+.chat-input-container,
+.input-area {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 30 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.message-form,
+#message-form,
+#messageForm {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
   width: 100% !important;
   min-width: 0 !important;
-  overflow: hidden !important;
+  max-width: none !important;
   box-sizing: border-box !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  flex-wrap: nowrap !important;
 }
 
-/* Text input: flex: 1; min-width: 0; overflow: hidden; */
-#message-input,
-.message-input {
-  flex: 1 !important;
+.message-input-wrapper,
+.chat-input-wrapper,
+.message-input-bar {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  flex: 1 1 0% !important;
+  width: 100% !important;
   min-width: 0 !important;
+  max-width: none !important;
+  min-height: 48px !important;
+  box-sizing: border-box !important;
+  gap: 4px !important;
+  padding: 0 10px !important;
+  border-radius: 24px !important;
   overflow: hidden !important;
 }
 
-/* Icons: each flex-shrink: 0; min-width: 32px; width: 32px; height: 32px; */
+#message-input,
+.message-input,
+.chat-input,
+.nex-input {
+  display: block !important;
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  line-height: 44px !important;
+  box-sizing: border-box !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  padding: 0 6px !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.message-input-wrapper button,
 .chat-input-wrapper button,
-.chat-input-container button,
-.chat-input-wrapper .input-btn,
-.chat-input-container .input-btn,
-.input-action-btn {
+.message-form button:not(.fab-circle-btn):not(.mic-action-btn):not(.send-btn),
+.input-inline-btn,
+#emoji-btn,
+#camera-btn,
+#btnToggleAttachmentHub,
+#attach-btn,
+.ai-polish-inline-btn,
+.sticker-toggle-btn {
   flex-shrink: 0 !important;
   min-width: 32px !important;
   width: 32px !important;
   height: 32px !important;
+  box-sizing: border-box !important;
 }
 
-/* Banners: position: static; height: 36px; width: 100%; overflow: hidden; */
-.chat-banners-container,
+.fab-circle-btn,
+.mic-action-btn,
+.send-btn,
+#audio-record-btn,
+#voice-record-btn,
+#audio-send-btn,
+#sendBtn {
+  flex-shrink: 0 !important;
+  min-width: 44px !important;
+  width: 44px !important;
+  height: 44px !important;
+  box-sizing: border-box !important;
+}
+
+/* FIX 2: BANNERS - OWN CONTAINER (PUSHES DOWN, STRICTLY 1 AT A TIME) */
+.banner-stack,
+.chat-banners-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  position: static !important;
+}
+
+.banner-stack > div,
+.chat-banners-container > div,
 .self-healing-banner,
-.attachment-removed-banner {
+.attachment-removed-banner,
+.ghost-active-banner,
+.tactical-mesh-banner,
+.scheduled-messages-banner,
+.group-admin-only-banner {
   position: static !important;
   height: 36px !important;
   min-height: 36px !important;
   max-height: 36px !important;
   width: 100% !important;
+  box-sizing: border-box !important;
+  line-height: 36px !important;
   overflow: hidden !important;
+}
+
+.banner-stack > div:not(:first-child) {
+  display: none;
 }

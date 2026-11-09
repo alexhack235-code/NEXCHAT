@@ -2639,15 +2639,19 @@ function initGhostProtocol() {
 
   const updateGhostUi = (ttl) => {
     window.activeGhostTtl = ttl;
+    if (window._chatBannerState) {
+      window._chatBannerState.ghostProtocol = (ttl > 0);
+    }
+    if (typeof window.updateActiveChatBanner === 'function') {
+      window.updateActiveChatBanner();
+    }
     if (ttl > 0) {
       ghostBtn.classList.add('active');
-      if (ghostBanner) ghostBanner.style.display = 'flex';
       if (ghostTtlLabel) ghostTtlLabel.textContent = ttl + 's';
       if (messageInput) messageInput.style.borderColor = 'rgba(192, 132, 252, 0.6)';
       showNotif(`Ghost Protocol Engaged: ${ttl}s self-destruct`, 'info', 2500);
     } else {
       ghostBtn.classList.remove('active');
-      if (ghostBanner) ghostBanner.style.display = 'none';
       if (messageInput) messageInput.style.borderColor = '';
       showNotif('Ghost Protocol Disengaged: standard persistent messages', 'info', 2000);
     }

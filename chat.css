@@ -15810,12 +15810,19 @@ body:not(.group-active) #tacticalMeshBanner {
 }
 
 .nex-msg-meta,
-.message-time-row,
-.message-time-text {
+.message-time-row {
   position: absolute !important;
   bottom: 3px !important;
   right: 8px !important;
   margin: 0 !important;
+  line-height: 1 !important;
+}
+
+.message-time-text {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  position: static !important;
   line-height: 1 !important;
 }
 
@@ -16104,54 +16111,62 @@ body:not(.group-active) #tacticalMeshBanner {
   display: flex !important;
   width: 100% !important;
   margin: 3px 0 !important;
-  padding: 0 10px !important;
+  padding: 0 !important;
   box-sizing: border-box !important;
   position: relative !important;
+  overflow: visible !important;
 }
 
 .nex-msg-wrapper.sent,
 .message-wrapper.sent {
   justify-content: flex-end !important;
   align-items: flex-end !important;
+  overflow: visible !important;
 }
 
 .nex-msg-wrapper.received,
 .message-wrapper.received {
   justify-content: flex-start !important;
   align-items: flex-start !important;
+  overflow: visible !important;
 }
 
 .nex-msg-content-area {
   display: flex !important;
   flex-direction: column !important;
-  max-width: 75% !important;
+  max-width: calc(75% - 8px) !important;
   min-width: 0 !important;
   position: relative !important;
+  overflow: visible !important;
 }
 
 .nex-msg-wrapper.sent .nex-msg-content-area,
 .message-wrapper.sent .nex-msg-content-area {
   align-items: flex-end !important;
+  overflow: visible !important;
 }
 
 .nex-msg-wrapper.received .nex-msg-content-area,
 .message-wrapper.received .nex-msg-content-area {
   align-items: flex-start !important;
+  overflow: visible !important;
 }
 
 .nex-msg-bubble,
 .message-bubble {
-  max-width: 75% !important;
+  max-width: calc(75% - 8px) !important;
+  min-width: 80px !important;
   width: fit-content !important;
   padding: 8px 10px 6px 10px !important;
   border-radius: 12px !important;
   position: relative !important;
   word-break: break-word !important;
-  overflow-wrap: break-word !important;
+  overflow-wrap: anywhere !important;
   box-sizing: border-box !important;
   font-size: 14px !important;
   line-height: 1.42 !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+  overflow: visible !important;
 }
 
 /* Sent Messages (My Messages) */
@@ -16163,6 +16178,9 @@ body:not(.group-active) #tacticalMeshBanner {
   border-radius: 12px 2px 12px 12px !important;
   border: 1px solid rgba(0, 255, 136, 0.22) !important;
   margin-left: auto !important;
+  margin-right: 8px !important;
+  max-width: calc(75% - 8px) !important;
+  overflow: visible !important;
 }
 
 /* Received Messages (Other People) */
