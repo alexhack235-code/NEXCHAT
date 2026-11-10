@@ -1,4 +1,23 @@
-import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, handleCors, verifyFirebaseIdToken, constantTimeSafeEqual } from './_security.js';
+
+// In-memory per-recipient rate limiter to prevent email-bombing (Max 3 emails per recipient per 15 minutes)
+const recipientRateLimitMap = new Map();
+function checkRecipientRateLimit(email) {
+  if (!email) return false;
+  const normalized = String(email).toLowerCase().trim();
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000;
+  const existing = recipientRateLimitMap.get(normalized);
+  if (!existing || now > existing.resetAt) {
+    recipientRateLimitMap.set(normalized, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (existing.count >= 3) {
+    return false;
+  }
+  existing.count++;
+  return true;
+}
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
@@ -49,18 +68,44 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, error: 'Method not allowed. Use POST.' });
   }
 
-  if (!enforceRateLimit(req, res, 30)) {
+  // Stricter IP rate limit on email sending: max 10 requests per minute
+  if (!enforceRateLimit(req, res, 10)) {
     return;
   }
 
   try {
     const body = req.body || {};
     const type = body.type;
-    const toEmail = body.toEmail || body.to || body.recipient;
+    const toEmail = (body.toEmail || body.to || body.recipient || '').toLowerCase().trim();
     const data = body.data || body.details || {};
 
-    if (!toEmail || !toEmail.includes('@')) {
+    if (!toEmail || !toEmail.includes('@') || toEmail.length > 254) {
       return res.status(400).json({ success: false, error: 'Valid recipient email is required.' });
+    }
+
+    // Per-recipient anti-bombing guard
+    if (!checkRecipientRateLimit(toEmail)) {
+      return res.status(429).json({
+        success: false,
+        error: 'Too many email dispatches requested for this address. Please wait 15 minutes before requesting again.',
+        code: 'RECIPIENT_RATE_LIMITED'
+      });
+    }
+
+    // Security Gate: Non-reset alerts (extensions, device links, telemetry) require auth or app secret
+    if (type !== 'password_reset') {
+      const authUser = await verifyFirebaseIdToken(req);
+      const appSecret = req.headers['x-nexchat-secret'] || '';
+      const expectedSecret = process.env.NEXCHAT_SECRET || 'NEXCHAT_ULTRA_12345';
+      const hasValidSecret = constantTimeSafeEqual(String(appSecret), String(expectedSecret));
+
+      if (!authUser && !hasValidSecret) {
+        return res.status(401).json({
+          success: false,
+          error: 'Unauthorized. Authentication or app signature required to dispatch this email alert type.',
+          code: 'AUTH_REQUIRED'
+        });
+      }
     }
 
     const timestamp = new Date().toUTCString();

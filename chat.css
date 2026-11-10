@@ -19335,8 +19335,7 @@ body,
 
 /* RULE 5: Fix Input Box Smear & Horizontal Drift */
 .message-input-wrap,
-.message-input-wrapper,
-.message-input-area {
+.message-input-wrapper {
   min-height: 56px !important;
   overflow: hidden !important;
   transform: translateZ(0) !important;
@@ -19353,3 +19352,239 @@ textarea {
   flex: 1 !important;
 }
 
+
+
+
+/* ==========================================================================
+   FIX FOR BUG 1: SWIPE TO REPLY PREVIEW BAR & INPUT WRAPPER
+   ========================================================================== */
+.chat-input-wrapper {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #0f0f1a !important;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  z-index: 50 !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.reply-preview {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background: #1e2a3a !important;
+  border-left: 3px solid #00e676 !important;
+  padding: 8px 10px !important;
+  border-radius: 10px 10px 0 0 !important;
+  margin-bottom: 6px !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  height: auto !important;
+  min-height: 44px !important;
+  max-height: none !important;
+  position: relative !important;
+  z-index: 55 !important;
+}
+
+.reply-preview[style*="display: none"] {
+  display: none !important;
+}
+
+.reply-preview div,
+.reply-preview-info,
+.reply-preview-content {
+  flex: 1 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.reply-preview span,
+.reply-from {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #00e676 !important;
+  display: block !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.reply-preview p,
+.reply-message {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 13px !important;
+  color: #d1d5db !important;
+  margin: 2px 0 0 0 !important;
+  display: block !important;
+  line-height: 1.3 !important;
+}
+
+.reply-preview button,
+.reply-preview .cancel-reply-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #9ca3af !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  padding: 6px !important;
+  margin-left: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  transition: all 0.15s ease !important;
+}
+
+.reply-preview button:hover,
+.reply-preview .cancel-reply-btn:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+.chat-messages,
+.messages-area {
+  padding-bottom: 140px !important;
+}
+
+/* ==========================================================================
+   FIX FOR BUG 2: ATTACHMENT (PAPERCLIP) POPUP MENU
+   ========================================================================== */
+.attach-menu {
+  position: fixed !important;
+  bottom: 85px !important;
+  left: 12px !important;
+  right: 12px !important;
+  background: #1c1c2e !important;
+  border-radius: 18px !important;
+  padding: 12px !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px !important;
+  z-index: 9999 !important;
+  box-shadow: 0 -5px 30px rgba(0,0,0,0.5) !important;
+  animation: slideUp 0.2s ease !important;
+  max-height: min(400px, 55vh) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  box-sizing: border-box !important;
+}
+
+.attach-menu[style*="display: none"],
+.attachment-popup-hub[style*="display: none"] {
+  display: none !important;
+}
+
+.attach-menu button,
+.attach-menu .attach-hub-item,
+.attachment-popup-hub button,
+.attachment-popup-hub .attach-hub-item {
+  background: #2a2a3f !important;
+  border: none !important;
+  color: white !important;
+  padding: 14px 5px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  transition: all 0.15s ease !important;
+  min-height: 60px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.attach-menu button:hover,
+.attach-menu button:active,
+.attach-menu .attach-hub-item:hover,
+.attach-menu .attach-hub-item:active,
+.attachment-popup-hub button:hover,
+.attachment-popup-hub button:active,
+.attachment-popup-hub .attach-hub-item:hover,
+.attachment-popup-hub .attach-hub-item:active {
+  background: #383854 !important;
+  transform: translateY(-2px) !important;
+}
+
+.attach-menu .attach-hub-icon,
+.attachment-popup-hub .attach-hub-icon {
+  font-size: 20px !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.attach-menu span,
+.attachment-popup-hub span {
+  font-size: 11px !important;
+  color: #ffffff !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+  text-align: center !important;
+  display: block !important;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* 360px Mobile Chrome & Virtual Keyboard Support */
+@media (max-width: 380px) {
+  .attach-menu {
+    gap: 8px !important;
+    padding: 10px !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 80px !important;
+  }
+  .attach-menu button,
+  .attach-menu .attach-hub-item {
+    padding: 10px 4px !important;
+    min-height: 54px !important;
+  }
+}
+
+/* ==========================================================================
+   GENERAL RULES: NO OVERFLOW HIDDEN ON POPUP PARENTS OR MESSAGE BUBBLES
+   ========================================================================== */
+.chat-page,
+.chat-container,
+.chat-detail-view,
+.chat-input-wrapper,
+.message-input-area {
+  overflow: visible !important;
+}
+
+.message-bubble,
+.message-wrapper,
+.nex-msg-bubble {
+  overflow: visible !important;
+}

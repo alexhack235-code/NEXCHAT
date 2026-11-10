@@ -715,13 +715,13 @@ async function handleAdSubmit(e) {
   if (window.fortressGuard) {
     const nameCheck = window.fortressGuard(productName, 'Marketplace Product Title');
     if (!nameCheck.safe) {
-      showNotification('Product title blocked by FORTRESS: ' + nameCheck.threats.join(', '), 'error');
+      showNotification('Product title contains prohibited content.', 'error');
       return;
     }
     if (productDescription) {
       const descCheck = window.fortressGuard(productDescription, 'Marketplace Product Description');
       if (!descCheck.safe) {
-        showNotification('Product description blocked by FORTRESS: ' + descCheck.threats.join(', '), 'error');
+        showNotification('Product description contains prohibited content.', 'error');
         return;
       }
     }

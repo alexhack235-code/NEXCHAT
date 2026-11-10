@@ -86,31 +86,17 @@ export default async function handler(req, res) {
   const uploadType = req.headers['x-upload-type'] || req.query.type || 'media';
   const vaultParam = req.headers['x-vault-index'] !== undefined ? req.headers['x-vault-index'] : req.query.vault;
 
-  const isReels = (uploadType === 'reels' || uploadType === 'reel');
-
-  // Reels allow public stream sharing; private or account uploads require authentication
-  if (!authenticatedUser && !isReels) {
-    return res.status(401).json({ error: 'Sign in is required to upload files.' });
+  // 1. Mandatory Authentication Guard: All uploads (media, reels, profiles, vaults) require valid Firebase Auth
+  if (!authenticatedUser) {
+    return res.status(401).json({ 
+      error: 'Sign in is required to upload files. Anonymous uploads are blocked to protect storage quotas.',
+      code: 'UNAUTHENTICATED'
+    });
   }
 
-  // Prevent path / user spoofing: authenticated users must upload to their own UID path
-  if (authenticatedUser && !rawFilename.split('/').includes(authenticatedUser.uid)) {
+  // 2. Prevent path / user spoofing: authenticated users must upload to their own UID path
+  if (!rawFilename.split('/').includes(authenticatedUser.uid)) {
     return res.status(403).json({ error: 'Uploads must be stored under the signed-in user ID.' });
-  }
-
-  // Strict hardening for anonymous reels uploads
-  if (!authenticatedUser && isReels) {
-    if (!rawFilename.startsWith('reels/anon/') && !rawFilename.includes('/anon/')) {
-      return res.status(403).json({ error: 'Anonymous reels uploads must be routed under reels/anon/ path.' });
-    }
-    const ALLOWED_REEL_EXTENSIONS = /\.(mp4|webm|mov)$/i;
-    if (!ALLOWED_REEL_EXTENSIONS.test(rawFilename)) {
-      return res.status(400).json({ error: 'Anonymous reels uploads must be valid video files (.mp4, .webm, .mov).' });
-    }
-    const reqContentType = (req.headers['content-type'] || '').toLowerCase();
-    if (reqContentType && !reqContentType.startsWith('video/')) {
-      return res.status(415).json({ error: 'Anonymous reels uploads must have a video MIME type.' });
-    }
   }
 
   try {

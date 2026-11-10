@@ -656,7 +656,7 @@ class FortressSecurityShield {
     if (!res.safe) {
       console.warn(`[FORTRESS INTERCEPTED @ ${moduleName}]`, res.threats);
       
-      let msg = `Blocked by FORTRESS Security [${moduleName}]: ${res.threats.join(', ')}`;
+      let msg = "Security Notice: Prohibited or unsafe content detected.";
       if (res.threats.includes('AUTONOMOUS_AI_ATTACK_NEUTRALIZED')) {
         msg = `[FORTRESS Layer 33 Anti-AI] Intercepted Autonomous AI Agent (${moduleName}). ReAct Loop neutralized & Cognitive Poison deployed.`;
       }

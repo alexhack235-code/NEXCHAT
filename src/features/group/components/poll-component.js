@@ -48,12 +48,12 @@ export async function createPoll(db, groupId, creatorId, question, optionTexts) 
   // [FORTRESS AI Cloud Defender: Poll Creation Guard]
   if (window.fortressGuard) {
     const qCheck = window.fortressGuard(question, 'Poll Question');
-    if (!qCheck.safe) throw new Error('Poll question blocked by FORTRESS Security: ' + qCheck.threats.join(', '));
+    if (!qCheck.safe) throw new Error('Poll question contains prohibited content: ' + qCheck.threats.join(', '));
     if (Array.isArray(optionTexts)) {
       for (const opt of optionTexts) {
         if (opt) {
           const optCheck = window.fortressGuard(opt, 'Poll Option');
-          if (!optCheck.safe) throw new Error('Poll option blocked by FORTRESS Security: ' + optCheck.threats.join(', '));
+          if (!optCheck.safe) throw new Error('Poll option contains prohibited content: ' + optCheck.threats.join(', '));
         }
       }
     }

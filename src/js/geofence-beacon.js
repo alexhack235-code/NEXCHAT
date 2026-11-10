@@ -21,7 +21,7 @@
       } else {
         this.bindDOM();
       }
-      this.pollGeolocation();
+      // Do not auto-poll geolocation on page load to prevent disruptive browser permission prompts
     }
 
     pollGeolocation() {

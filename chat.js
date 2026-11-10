@@ -5754,7 +5754,7 @@ async function sendMessage() {
     const inspection = window.fortressShield.inspectText(text);
     if (!inspection.safe) {
       playLuxuryPopSound();
-      showNotif(`Blocked by FORTRESS Security: ${inspection.threats.join(', ')}`, "error", 4500);
+      showNotif("Message blocked: Contains prohibited or unsafe content", "error", 4500);
       console.warn('[FORTRESS BLOCKED ATTACK]', inspection.threats);
       return;
     }
@@ -8320,7 +8320,7 @@ async function generateChronexAIResponse(text, imagePayload = null) {
   if (text && window.fortressShield) {
     const guard = window.fortressShield.guardAIPrompt(text);
     if (!guard.allowed) {
-      showNotif(`Prompt Injection Blocked by FORTRESS LLM Guard`, 'error', 4500);
+      showNotif("Action blocked: Request contains unsupported directives", "error", 4500);
       throw new Error(guard.reason);
     }
   }
@@ -19299,7 +19299,7 @@ async function createGroup(e) {
         resultDiv.style.display = 'block';
         resultDiv.style.background = '#ff6b6b';
         resultDiv.style.color = '#fff';
-        resultDiv.textContent = 'Blocked by FORTRESS: ' + nameCheck.threats.join(', ');
+        resultDiv.textContent = 'Prohibited content detected in product title';
       }
       return;
     }
@@ -19310,7 +19310,7 @@ async function createGroup(e) {
           resultDiv.style.display = 'block';
           resultDiv.style.background = '#ff6b6b';
           resultDiv.style.color = '#fff';
-          resultDiv.textContent = 'Blocked by FORTRESS: ' + descCheck.threats.join(', ');
+          resultDiv.textContent = 'Prohibited content detected in product description';
         }
         return;
       }
@@ -23031,17 +23031,22 @@ function initializeBasicUI() {
       }
 
       if (len < lastTextLength) {
-        messageInput.style.height = '38px';
+        if (lastAssignedHeight > 38) {
+          messageInput.style.height = '38px';
+          const scrollH = messageInput.scrollHeight;
+          const clampedHeight = Math.min(Math.max(scrollH, 38), 100);
+          messageInput.style.height = clampedHeight + 'px';
+          lastAssignedHeight = clampedHeight;
+        }
+      } else {
+        const scrollH = messageInput.scrollHeight;
+        const clampedHeight = Math.min(Math.max(scrollH, 38), 100);
+        if (clampedHeight !== lastAssignedHeight) {
+          messageInput.style.height = clampedHeight + 'px';
+          lastAssignedHeight = clampedHeight;
+        }
       }
       lastTextLength = len;
-
-      const scrollH = messageInput.scrollHeight;
-      const clampedHeight = Math.min(Math.max(scrollH, 38), 100);
-
-      if (clampedHeight !== lastAssignedHeight) {
-        messageInput.style.height = `${clampedHeight}px`;
-        lastAssignedHeight = clampedHeight;
-      }
     };
     window.adjustTextareaHeight = autoResize;
 
@@ -23362,9 +23367,13 @@ function initializeBasicUI() {
 
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
+    let searchDebounceTimer = null;
     searchInput.addEventListener("input", (e) => {
       const query = e.target.value.toLowerCase().trim();
-      filterChats(query);
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        filterChats(query);
+      }, 150);
     });
     searchInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
@@ -26536,32 +26545,44 @@ if (typeof document !== 'undefined') {
    ========================================================================== */
 
 // Swipe to Reply Implementation (Exact WhatsApp Threshold: dx > 80px, dy < 30px)
-function openReplyForMessage(msg, isOwn) {
-  const senderTitle = isOwn ? 'You' : (msg.senderName || currentChatName || 'Friend');
-  const rawText = msg.text || (msg.attachment ? (msg.attachment.fileName || 'Attachment') : 'Message');
-  const snippet = rawText.length > 40 ? rawText.substring(0, 40) + '...' : rawText;
-  const replyData = {
-    messageId: msg.docId || msg.id || msg.clientMsgId || '',
-    senderId: msg.senderId || msg.from || (isOwn ? myUID : ''),
-    senderName: senderTitle,
-    text: snippet
-  };
-
-  window.currentReplyTo = replyData;
-  window.replyMessageId = replyData.messageId;
-
+function setReplyTo(val) {
+  window.currentReplyTo = val;
+  window.replyMessageId = val ? (val.id || val.messageId || val.docId || null) : null;
   const preview = document.getElementById('replyPreview');
   const nameEl = document.getElementById('replyFromName');
   const msgEl = document.getElementById('replyMessage');
-  if (preview && nameEl && msgEl) {
-    nameEl.textContent = senderTitle;
-    msgEl.textContent = snippet;
+
+  if (!val) {
+    if (window.messagingFeatures && typeof window.messagingFeatures.hideReplyPreview === 'function') {
+      try { window.messagingFeatures.hideReplyPreview(); } catch (_) {}
+    }
+    if (preview) {
+      preview.style.display = 'none';
+      preview.style.setProperty('display', 'none', 'important');
+    }
+    document.querySelectorAll('.message-bubble').forEach(b => {
+      b.style.transform = 'translateX(0px)';
+    });
+    return;
+  }
+
+  const sender = val.sender || val.senderName || (val.isOwn ? 'You' : (currentChatName || 'Friend'));
+  const rawText = val.text || (val.attachment ? (val.attachment.fileName || 'Attachment') : 'Message');
+  const snippet = rawText.length > 70 ? rawText.substring(0, 70) + '...' : rawText;
+
+  val.sender = sender;
+  val.senderName = sender;
+  val.text = snippet;
+
+  if (nameEl) nameEl.textContent = sender;
+  if (msgEl) msgEl.textContent = snippet;
+  if (preview) {
     preview.style.display = 'flex';
     preview.style.setProperty('display', 'flex', 'important');
   }
 
   if (window.messagingFeatures && typeof window.messagingFeatures.setReplyingToMessage === 'function') {
-    try { window.messagingFeatures.setReplyingToMessage(replyData); } catch (_) {}
+    try { window.messagingFeatures.setReplyingToMessage(val); } catch (_) {}
   }
 
   const messageInput = document.getElementById('message-input');
@@ -26569,41 +26590,32 @@ function openReplyForMessage(msg, isOwn) {
     messageInput.focus();
   }
 }
+window.setReplyTo = setReplyTo;
+window.setReplyingTo = setReplyTo;
+
+function openReplyForMessage(msg, isOwn) {
+  const senderTitle = isOwn ? 'You' : (msg.senderName || currentChatName || 'Friend');
+  const rawText = msg.text || (msg.attachment ? (msg.attachment.fileName || 'Attachment') : 'Message');
+  const snippet = rawText.length > 70 ? rawText.substring(0, 70) + '...' : rawText;
+  const replyData = {
+    messageId: msg.docId || msg.id || msg.clientMsgId || '',
+    senderId: msg.senderId || msg.from || (isOwn ? myUID : ''),
+    senderName: senderTitle,
+    sender: senderTitle,
+    text: snippet,
+    isOwn: !!isOwn
+  };
+  setReplyTo(replyData);
+}
 window.openReplyForMessage = openReplyForMessage;
-window.setReplyingTo = function(val) {
-  window.currentReplyTo = val;
-  window.replyMessageId = val ? (val.id || val.messageId) : null;
-  if (!val) {
-    if (window.messagingFeatures && typeof window.messagingFeatures.hideReplyPreview === 'function') {
-      window.messagingFeatures.hideReplyPreview();
-    }
-    const preview = document.getElementById('replyPreview');
-    if (preview) preview.style.display = 'none';
-    document.querySelectorAll('.message-bubble').forEach(b => {
-      b.style.transform = 'translateX(0px)';
-    });
-  }
-};
+
 document.addEventListener('DOMContentLoaded', () => {
   const cancelBtn = document.getElementById('cancelReplyBtn');
   if (cancelBtn) {
     cancelBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      window.setReplyingTo(null);
-      window.currentReplyTo = null;
-      window.replyMessageId = null;
-      if (window.messagingFeatures && typeof window.messagingFeatures.hideReplyPreview === 'function') {
-        window.messagingFeatures.hideReplyPreview();
-      }
-      const preview = document.getElementById('replyPreview');
-      if (preview) {
-        preview.style.display = 'none';
-        preview.style.setProperty('display', 'none', 'important');
-      }
-      document.querySelectorAll('.message-bubble').forEach(b => {
-        b.style.transform = 'translateX(0px)';
-      });
+      setReplyTo(null);
     };
   }
 });
@@ -26612,6 +26624,10 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
   if (!wrapper || !bubble) return;
   if (bubble.dataset.swipeBound === 'true') return;
   bubble.dataset.swipeBound = 'true';
+
+  // Do NOT use overflow:hidden on message bubble or wrapper so reply icon isn't cut
+  bubble.style.overflow = 'visible';
+  wrapper.style.overflow = 'visible';
 
   let replyIndicator = wrapper.querySelector('.swipe-reply-indicator');
   if (!replyIndicator) {
@@ -26632,10 +26648,6 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
   let isLockedHorizontal = false;
   let hasTriggered = false;
 
-  // GESTURE - COPY WHATSAPP THRESHOLD:
-  // Swipe ONLY if horizontal > 80px AND vertical < 30px
-  // If vertical > 30px, cancel swipe, allow scroll. No fight.
-  // 1 swipe = 1 reply open. No 2-3 swipes.
   const HORIZONTAL_THRESHOLD = 80;
   const VERTICAL_CANCEL_THRESHOLD = 30;
 
@@ -26658,7 +26670,7 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
     const dx = currentX - startX;
     const dy = currentY - startY;
 
-    // Rule: If vertical > 30px, cancel swipe, allow scroll. No fight.
+    // If vertical > 30px, cancel swipe, allow scroll
     if (Math.abs(dy) > VERTICAL_CANCEL_THRESHOLD) {
       isSwiping = false;
       isLockedHorizontal = false;
@@ -26680,14 +26692,14 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
     if (isLockedHorizontal && dx > 0) {
       if (e.cancelable) e.preventDefault();
 
-      const translate = Math.min(40, dx * 0.5);
+      const translate = Math.min(45, dx * 0.45);
       bubble.style.transform = `translateX(${translate}px)`;
 
       const progress = Math.min(1, Math.max(0, dx / HORIZONTAL_THRESHOLD));
       replyIndicator.style.opacity = String(progress);
       replyIndicator.style.transform = `translateY(-50%) scale(${0.5 + progress * 0.5})`;
 
-      // Trigger condition: horizontal > 80px AND vertical < 30px (1 swipe = 1 reply open)
+      // Trigger condition: horizontal > 80px AND vertical < 30px
       if (dx >= HORIZONTAL_THRESHOLD && Math.abs(dy) < VERTICAL_CANCEL_THRESHOLD && !hasTriggered) {
         hasTriggered = true;
         replyIndicator.classList.add('active');
@@ -26698,8 +26710,17 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
     }
   };
 
-  const onTouchEnd = () => {
-    if (!isSwiping && !isLockedHorizontal) return;
+  const onTouchEnd = (e) => {
+    if (isSwiping || isLockedHorizontal) {
+      const clientX = (e && e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : 0;
+      if (clientX && (clientX - startX > 80) && !hasTriggered) {
+        hasTriggered = true;
+        replyIndicator.classList.add('active');
+        if (navigator.vibrate) navigator.vibrate(25);
+        if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
+        openReplyForMessage(msg, isOwn);
+      }
+    }
     isSwiping = false;
     isLockedHorizontal = false;
 
@@ -27020,6 +27041,20 @@ function initAttachmentHubActions() {
     }
   });
 
+  window.openAttachmentHub = function() {
+    const hubEl = document.getElementById('attachmentPopupHub');
+    if (!hubEl) return;
+    hubEl.classList.add('active', 'is-open');
+    hubEl.style.setProperty('display', 'grid', 'important');
+  };
+
+  window.closeAttachmentHub = function() {
+    const hubEl = document.getElementById('attachmentPopupHub');
+    if (!hubEl) return;
+    hubEl.classList.remove('active', 'is-open');
+    hubEl.style.setProperty('display', 'none', 'important');
+  };
+
   // Wire Paperclip Toggle Button for Attachment Hub
   window.toggleAttachmentHub = function(e) {
     if (e) {
@@ -27037,11 +27072,9 @@ function initAttachmentHubActions() {
 
     const isOpen = hubEl.classList.contains('active') || hubEl.classList.contains('is-open') || (hubEl.style.display && hubEl.style.display !== 'none');
     if (isOpen) {
-      hubEl.classList.remove('active', 'is-open');
-      hubEl.style.setProperty('display', 'none', 'important');
+      window.closeAttachmentHub();
     } else {
-      hubEl.classList.add('active', 'is-open');
-      hubEl.style.setProperty('display', 'grid', 'important');
+      window.openAttachmentHub();
     }
   };
 
@@ -27053,17 +27086,25 @@ function initAttachmentHubActions() {
   // Auto-dismiss hub on action item click
   hub.querySelectorAll('.attach-hub-item').forEach(item => {
     item.addEventListener('click', () => {
-      hub.classList.remove('active', 'is-open');
-      hub.style.setProperty('display', 'none', 'important');
+      window.closeAttachmentHub();
     });
   });
 
+  // Clicking on chat messages closes attachment menu
+  const messagesArea = document.getElementById('messages-area');
+  if (messagesArea) {
+    messagesArea.addEventListener('click', () => {
+      window.closeAttachmentHub();
+    });
+  }
+
   // Dismiss attachment hub when clicking outside
   document.addEventListener('click', (e) => {
-    if (hub && (hub.classList.contains('active') || hub.classList.contains('is-open') || hub.style.display === 'grid')) {
-      if (!hub.contains(e.target) && e.target !== toggleBtn && (!toggleBtn || !toggleBtn.contains(e.target))) {
-        hub.classList.remove('active', 'is-open');
-        hub.style.setProperty('display', 'none', 'important');
+    const hubEl = document.getElementById('attachmentPopupHub');
+    const toggleBtnEl = document.getElementById('btnToggleAttachmentHub');
+    if (hubEl && (hubEl.classList.contains('active') || hubEl.classList.contains('is-open') || hubEl.style.display === 'grid')) {
+      if (!hubEl.contains(e.target) && e.target !== toggleBtnEl && (!toggleBtnEl || !toggleBtnEl.contains(e.target))) {
+        window.closeAttachmentHub();
       }
     }
   });

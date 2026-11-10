@@ -1037,11 +1037,30 @@ export function initChat2() {
     });
   }
 
-  // 5. Periodic Scanner & Mutation Observer for dynamic elements
-  setInterval(() => {
+  // 5. Reactive Event-Driven Scanner & Mutation Observer for dynamic elements (replaces CPU-heavy 1000ms polling)
+  syncLocalChatsToDOM();
+  injectTranslateButtons();
+
+  // Watch for newly appended messages reactively instead of polling every second
+  const messagesArea = document.getElementById('messages-area') || document.querySelector('.chat-messages');
+  if (messagesArea && window.MutationObserver) {
+    let translateScheduled = false;
+    const msgObserver = new MutationObserver(() => {
+      if (!translateScheduled) {
+        translateScheduled = true;
+        requestAnimationFrame(() => {
+          injectTranslateButtons();
+          translateScheduled = false;
+        });
+      }
+    });
+    msgObserver.observe(messagesArea, { childList: true, subtree: true });
+  }
+
+  // React to local chats change via custom event
+  window.addEventListener('nexchat:chatsUpdated', () => {
     syncLocalChatsToDOM();
-    injectTranslateButtons();
-  }, 1000);
+  });
 
       // 6. Boot migrated modular subsystems
     try { initNexbotStudio(); } catch (_) {}

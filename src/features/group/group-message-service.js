@@ -257,7 +257,7 @@ export async function sendMessage(params = {}) {
   if (text && window.fortressGuard) {
     const inspection = window.fortressGuard(text, 'Group Service Dispatch');
     if (!inspection.safe) {
-      throw new Error('Blocked by FORTRESS Security: ' + inspection.threats.join(', '));
+      throw new Error('Message contains prohibited content: ' + inspection.threats.join(', '));
     }
   }
 
@@ -566,7 +566,7 @@ export async function editMessage(messageId, newText) {
   if (newText && window.fortressGuard) {
     const inspection = window.fortressGuard(newText, 'Group Message Edit');
     if (!inspection.safe) {
-      throw new Error('Blocked by FORTRESS Security: ' + inspection.threats.join(', '));
+      throw new Error('Message contains prohibited content: ' + inspection.threats.join(', '));
     }
   }
 

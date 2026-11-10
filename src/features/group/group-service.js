@@ -30,11 +30,11 @@ export async function createGroup(params) {
     if (window.fortressGuard) {
       if (params.name) {
         const check = window.fortressGuard(params.name, 'Group Service Name');
-        if (!check.safe) throw new Error('Group name blocked by FORTRESS Security: ' + check.threats.join(', '));
+        if (!check.safe) throw new Error('Group name contains prohibited content: ' + check.threats.join(', '));
       }
       if (params.description) {
         const check = window.fortressGuard(params.description, 'Group Service Description');
-        if (!check.safe) throw new Error('Group description blocked by FORTRESS Security: ' + check.threats.join(', '));
+        if (!check.safe) throw new Error('Group description contains prohibited content: ' + check.threats.join(', '));
       }
     }
 
@@ -130,11 +130,11 @@ export async function updateGroupInfo(groupId, updates) {
     if (window.fortressGuard) {
       if (updates.name) {
         const check = window.fortressGuard(updates.name, 'Group Update Name');
-        if (!check.safe) throw new Error('Group name blocked by FORTRESS Security: ' + check.threats.join(', '));
+        if (!check.safe) throw new Error('Group name contains prohibited content: ' + check.threats.join(', '));
       }
       if (updates.description) {
         const check = window.fortressGuard(updates.description, 'Group Update Description');
-        if (!check.safe) throw new Error('Group description blocked by FORTRESS Security: ' + check.threats.join(', '));
+        if (!check.safe) throw new Error('Group description contains prohibited content: ' + check.threats.join(', '));
       }
     }
 

@@ -5588,8 +5588,10 @@ body.oled-mode .cyber-hub-modal {
   background-color: #000000 !important;
 }
 
-/* ProMotion 120Hz Hyper-Smooth Motion */
-body.motion-120hz * {
+/* ProMotion 120Hz Hyper-Smooth Motion (targeted to scroll containers to prevent mobile GPU VRAM saturation) */
+body.motion-120hz #messages-area,
+body.motion-120hz #contactList,
+body.motion-120hz .chat-messages {
   scroll-behavior: smooth;
   backface-visibility: hidden;
   transform: translateZ(0);
@@ -6171,7 +6173,6 @@ html[data-chat-size="small"] .message-time-text {
 }
 
 .message-input-wrapper,
-.chat-input-wrapper,
 .message-input-bar {
   display: flex !important;
   flex-direction: row !important;
@@ -6212,7 +6213,6 @@ html[data-chat-size="small"] .message-time-text {
 }
 
 .message-input-wrapper button,
-.chat-input-wrapper button,
 .message-form button:not(.fab-circle-btn):not(.mic-action-btn):not(.send-btn),
 .input-inline-btn,
 #emoji-btn,

@@ -1,5 +1,5 @@
 import { getNextKey, markKeyDead, markKeyHealthy, callGroqAI, callGeminiAI } from '../lib/translator.js';
-import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, handleCors, verifyFirebaseIdToken, constantTimeSafeEqual } from './_security.js';
 
 /**
  * NEXCHAT /api/chat & /api/ai Gateway
@@ -22,7 +22,29 @@ export default async function handler(req, res) {
   applySecurityHeaders(res);
   if (handleCors(req, res)) return;
 
-  if (!enforceRateLimit(req, res, 40)) {
+  // 1. Fast-Path App Signature Gate (< 0.01ms instant check)
+  const appSecret = req.headers['x-nexchat-secret'] || '';
+  const expectedSecret = process.env.NEXCHAT_SECRET || 'NEXCHAT_ULTRA_12345';
+  const hasValidSecret = constantTimeSafeEqual(String(appSecret), String(expectedSecret));
+
+  // If client supplies Authorization header, verify token (cached in memory: 0.02ms)
+  let user = null;
+  if (req.headers.authorization) {
+    user = await verifyFirebaseIdToken(req);
+  }
+
+  // If neither a logged-in user nor a valid NEXCHAT client secret is provided, block external bot scraper loops
+  if (!user && !hasValidSecret) {
+    return res.status(401).json({
+      error: 'Unauthorized. Authentication or valid app signature required to access ChronEX AI Gateway.',
+      code: 'AUTH_REQUIRED',
+      success: false
+    });
+  }
+
+  // 2. Dynamic rate-limiting: 60/min for authenticated users, 20/min for app-secret clients
+  const maxQuota = user ? 60 : 20;
+  if (!enforceRateLimit(req, res, maxQuota)) {
     return;
   }
 
