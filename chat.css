@@ -18429,9 +18429,24 @@ body {
   display: none !important;
 }
 
+/* Always hide legacy #activeChatHeader when in-conversation; .chat-detail-header is the sole header */
+#activeChatHeader,
 .chat-main[data-layout="conversation"] #activeChatHeader,
 body.in-conversation #activeChatHeader {
-  display: flex !important;
+  display: none !important;
+}
+
+@media (max-width: 899px) {
+  body.in-conversation header.chat-header,
+  body.in-conversation .chat-header,
+  .chat-main[data-layout="conversation"] header.chat-header,
+  .app[data-subview="conversation"] header.chat-header {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
 }
 
 #headerLogoContainer {

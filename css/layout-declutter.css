@@ -3064,15 +3064,26 @@ padding-right: 14px !important;
 margin-right: 4px !important;
 }
 
-/* Hide top-header on direct & group conversations */
-body[data-active-section="chat"] .top-header,
-.app[data-active-section="chat"] .top-header,
-body.in-conversation .top-header,
-.app.in-conversation .top-header,
-body[data-subview="conversation"] .top-header,
-body.mobile-preview[data-active-section="chat"] .top-header,
-body.mobile-preview.in-conversation .top-header {
-display: none !important;
+/* Hide top-header and chat-header on direct & group conversations */
+@media (max-width: 899px) {
+  body[data-active-section="chat"] .chat-header,
+  body[data-active-section="chat"] .top-header,
+  .app[data-active-section="chat"] .chat-header,
+  .app[data-active-section="chat"] .top-header,
+  body.in-conversation .chat-header,
+  body.in-conversation .top-header,
+  .app.in-conversation .chat-header,
+  .app.in-conversation .top-header,
+  body[data-subview="conversation"] .chat-header,
+  body[data-subview="conversation"] .top-header,
+  body.mobile-preview[data-active-section="chat"] .chat-header,
+  body.mobile-preview.in-conversation .chat-header,
+  body.mobile-preview.in-conversation .top-header {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
 }
 
 /* Strictly eliminate injected dock buttons next to the WhatsApp input action FAB */

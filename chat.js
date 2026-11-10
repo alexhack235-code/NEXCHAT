@@ -4047,6 +4047,12 @@ function showChatListView() {
     delete app.dataset.subview;
   }
   document.body.classList.remove('in-conversation');
+  const globalChatHeader = document.querySelector('header.chat-header');
+  if (globalChatHeader) globalChatHeader.style.removeProperty('display');
+  const headerLogoCont = document.getElementById('headerLogoContainer');
+  if (headerLogoCont) headerLogoCont.style.setProperty('display', 'flex', 'important');
+  const actChatHdr = document.getElementById('activeChatHeader');
+  if (actChatHdr) actChatHdr.style.setProperty('display', 'none', 'important');
 
   if (listView) {
     listView.classList.remove("hidden");
@@ -23922,11 +23928,15 @@ function showChatDetailView() {
   const isDesktop = window.innerWidth >= 900;
   const activeChatHeader = document.getElementById('activeChatHeader');
   const headerLogoContainer = document.getElementById('headerLogoContainer');
+  const globalHeader = document.querySelector('header.chat-header');
   if (isDesktop) {
     if (activeChatHeader) activeChatHeader.style.setProperty('display', 'none', 'important');
     if (headerLogoContainer) headerLogoContainer.style.setProperty('display', 'flex', 'important');
+    if (globalHeader) globalHeader.style.removeProperty('display');
   } else {
-    if (activeChatHeader) activeChatHeader.style.setProperty('display', 'flex', 'important');
+    // Mobile: .chat-detail-header is the sole conversation header. Unmount/hide global chat-header.
+    if (globalHeader) globalHeader.style.setProperty('display', 'none', 'important');
+    if (activeChatHeader) activeChatHeader.style.setProperty('display', 'none', 'important');
     if (headerLogoContainer) headerLogoContainer.style.setProperty('display', 'none', 'important');
   }
 
