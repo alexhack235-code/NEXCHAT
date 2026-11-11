@@ -1421,6 +1421,9 @@
           <button id="menuTacticalScreenBtn" class="option-item" onclick="window.NexTacticalScreenShare?.startScreenShare?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-display" style="margin-right: 8px; color: #c084fc;"></i>Tactical Screen Share &amp; Telestrator</button>
           <button id="menuGroupStageBtn" class="option-item" onclick="window.NexGroupAudioStage?.toggleStage?.('current'); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-podcast" style="margin-right: 8px; color: #00f3ff;"></i>Live Cyber Audio Stage</button>
           <button id="menuChronexxSummaryBtn" class="option-item" onclick="window.NexChronexxSummarizer?.triggerGroupCatchUp?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-microchip" style="margin-right: 8px; color: #ffd700;"></i>Chronexx Group Catch-Up Briefing</button>
+          <button id="menuChronexxAllSummaryBtn" class="option-item" onclick="window.NexChronexxSummarizer?.triggerGroupCatchUp?.({ fullHistory: true }); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-layer-group" style="margin-right: 8px; color: #a855f7;"></i>Chronexx Full History Summary (/summarize all)</button>
+          <button id="menuCompanionToggleBtn" class="option-item" onclick="window.NexWorkflowCompanion?.toggle?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-robot" style="margin-right: 8px; color: #10b981;"></i>AI Workflow Companion &amp; Mood Sentinel</button>
+          <button id="menuTrackRecordBtn" class="option-item" onclick="window.NexWorkflowCompanion?.showTrackRecord?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-chart-pie" style="margin-right: 8px; color: #f59e0b;"></i>Usage Track Record &amp; Habits</button>
           <button id="menuVoicePersonasBtn" class="option-item" onclick="window.NexChronexxVoicePersonas?.openPersonaModal?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-microphone-lines" style="margin-right: 8px; color: #38bdf8;"></i>Chronexx Neural Voice Personas</button>
           <button id="reportBtn" class="option-item danger">Report User</button>
           <button id="deleteBtn" class="option-item danger" onclick="if(typeof window.deleteChat === 'function' && window.currentChatUser) { window.deleteChat(window.currentChatUser, window.currentChatType); } window.closeChatOptionsMenu?.();"><i class="fa-solid fa-trash" style="margin-right: 8px;"></i>Delete Chat</button>
@@ -1517,6 +1520,10 @@
           <button type="button" class="attach-hub-item" id="hubActionVoice">
             <div class="attach-hub-icon icon-voice"><i class="fa-solid fa-microphone"></i></div>
             <span>Audio</span>
+          </button>
+          <button type="button" class="attach-hub-item" id="hubActionVoiceToText" onclick="if(window.voiceTranscriberEngine &amp;&amp; window.voiceTranscriberEngine.startVoiceToInput) window.voiceTranscriberEngine.startVoiceToInput();">
+            <div class="attach-hub-icon" style="color: #00f2fe;"><i class="fa-solid fa-microphone-lines"></i></div>
+            <span>Voice to Text</span>
           </button>
           <button type="button" class="attach-hub-item" id="hubActionAirDrop" onclick="if(window.NexAirDropMesh) window.NexAirDropMesh.openRadar();">
             <div class="attach-hub-icon" style="color: #00ff66;"><i class="fa-solid fa-satellite-dish"></i></div>
@@ -1760,6 +1767,7 @@
               <button type="button" id="emoji-btn" class="input-inline-btn emoji-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
               <button type="button" id="sticker-btn" class="input-inline-btn sticker-toggle-btn" title="Stickers" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
               <input type="text" id="message-input" class="message-input nex-input flex-1 min-w-0 w-full h-[48px] min-h-[48px] px-4 py-3 text-[15px] leading-[48px] whitespace-nowrap overflow-hidden truncate rounded-full bg-[#2a3942] text-white placeholder:text-[#8696a0] outline-none" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" />
+              <button type="button" id="voiceDictateBtn" class="input-inline-btn voice-dictate-btn" title="Voice to Text &amp; Translate"><i class="fa-solid fa-microphone-lines"></i></button>
               <button type="button" id="btnToggleAttachmentHub" class="input-inline-btn" title="Attachment Hub" style="color: #cbd5e1;" onclick="window.toggleAttachmentHub(event);"><i class="fa-solid fa-paperclip"></i></button>
               <button type="button" id="camera-btn" class="input-inline-btn chat-camera-inline-btn" title="Take photo or video" onclick="document.getElementById('file-input')?.click();"><i class="fa-solid fa-camera"></i></button>
               <button type="button" id="aiPolishInputBtn" class="input-inline-btn ai-polish-inline-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
@@ -1792,6 +1800,7 @@
               </div>
               <div class="audio-record-actions">
                 <button type="button" id="btnToggleViewOnceAudio" class="audio-control-btn vo-audio-toggle-btn" title="Toggle View-Once Voice Note (Self-destructs)"><span class="vo-circle-one">1</span></button>
+                <button type="button" id="audioTranscribeToInputBtn" class="audio-control-btn transcribe-btn" title="Transcribe &amp; Translate to Message Input"><i class="fa-solid fa-file-lines"></i></button>
                 <button type="button" id="audioCancelBtn" class="audio-control-btn cancel-btn" title="Cancel recording"><i class="fa-solid fa-xmark"></i></button>
                 <button type="button" id="audioStopBtn" class="audio-control-btn stop-btn" title="Stop"><i class="fa-solid fa-stop"></i></button>
                 <button type="button" id="audioSendNowBtn" class="audio-control-btn send-btn" title="Send voice note"><i class="fa-solid fa-paper-plane"></i></button>
@@ -2189,7 +2198,7 @@
             </div>
           </div>
 
-          <!-- Contact Management Section (Telegram Privacy Mode) -->
+          <!-- Contact Management Section (Zero-Trust Privacy Mode) -->
           <div class="info-section" id="infoContactSection" style="display: none;">
             <div class="section-item" id="infoSaveContactRow" style="cursor: pointer; color: var(--accent-primary); display: none;">
               <span class="section-icon" style="color: var(--accent-primary);"><i class="fa-solid fa-user-plus"></i></span>
@@ -5251,7 +5260,7 @@
 
                   <div class="luxury-toggle-row">
                     <div>
-                      <strong>Telegram / TGN 1.2s Dissolve Pace</strong>
+                      <strong>NEX Quantum 1.2s Dissolve Pace</strong>
                       <p>Paces message deletion at a cinematic 1.2 seconds with ember glow, charcoal burn, and upward ash dissipation.</p>
                     </div>
                     <label class="luxury-switch">
@@ -7794,6 +7803,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script defer src="./src/js/elite-code-sandbox-drawer.js"></script>
   <script defer src="./src/js/elite-confidential-scratchpad.js"></script>
   <script defer src="./src/js/elite-slash-commands.js"></script>
+  <script defer src="./src/js/nex-workflow-companion.js"></script>
   <script defer src="./src/js/elite-knowledge-drawer.js"></script>
   <script defer src="./src/js/elite-safety-numbers.js"></script>
   <script defer src="./src/js/scheduled-messages.js"></script>

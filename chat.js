@@ -5744,6 +5744,13 @@ async function sendMessage() {
   const messageText = document.getElementById("message-input");
   let text = messageText?.value.trim();
 
+  // Elite Slash Commands Interception
+  if (text && text.startsWith('/') && !selectedFile && window.eliteSlashCommands) {
+    window.eliteSlashCommands.handleDirectCommand(text);
+    isSendingMessageLock = false;
+    return;
+  }
+
   if (!text && !selectedFile) {
     showNotif("[Error] Message or file attachment required", "error");
     return;
@@ -5817,6 +5824,13 @@ async function sendMessage() {
       hasAttachment: !!selectedFile
     });
   }
+
+  // AI Workflow Companion & Usage Tracking Event Dispatch
+  try {
+    window.dispatchEvent(new CustomEvent('nexMessageSent', {
+      detail: { text: text || '', chatUser: currentChatUser, chatType: currentChatType || 'direct' }
+    }));
+  } catch (_) {}
 
   // Autonomous Offline P2P Mesh Dispatch & IndexedDB Queue Routing
   if (!navigator.onLine) {
