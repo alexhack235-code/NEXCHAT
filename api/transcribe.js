@@ -26,6 +26,8 @@ function getApiKeys() {
   return keys;
 }
 
+let globalKeyCounter = 0;
+
 const CANDIDATE_MODELS = [
   'gemini-2.0-flash',
   'gemini-1.5-flash'

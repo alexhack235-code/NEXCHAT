@@ -162,5 +162,6 @@
   }
 
   window.NexQuantumDeadDrop = new NexQuantumDeadDropEngine();
+  window.NexQuantumDeaddrop = window.NexQuantumDeadDrop;
 
 })(typeof window !== 'undefined' ? window : this);

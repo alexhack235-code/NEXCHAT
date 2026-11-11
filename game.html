@@ -16521,16 +16521,37 @@
     function updateCityCitizens(delta, now) {
       if (!cityCitizens || cityCitizens.length === 0) return;
       const playerPos = player && player.pos ? player.pos : null;
+      const pX = playerPos ? playerPos.x : 0;
+      const pZ = playerPos ? playerPos.z : 0;
 
-      cityCitizens.forEach(c => {
-        // Distance Culling for Low-End GPUs
+      if (typeof window._citizenFrameCount === 'undefined') window._citizenFrameCount = 0;
+      window._citizenFrameCount++;
+      const frameBucket = window._citizenFrameCount % 3;
+
+      for (let i = 0; i < cityCitizens.length; i++) {
+        const c = cityCitizens[i];
+        const cPos = c.group.position;
+
+        // Fast squared distance culling (Zero square root allocations)
         if (playerPos) {
-          const dist = c.group.position.distanceTo(playerPos);
-          if (gameState.settings && gameState.settings.lowEndTurbo && dist > 180) {
+          const dx = cPos.x - pX;
+          const dz = cPos.z - pZ;
+          const distSq = dx * dx + dz * dz;
+
+          // Cull beyond 140m
+          if (distSq > 19600) {
             c.group.visible = false;
-            return;
-          } else {
-            c.group.visible = true;
+            continue;
+          }
+          c.group.visible = true;
+
+          // Proximity interaction with player (3.2m -> distSq < 10.24)
+          if (distSq < 10.24 && !c._saidHello) {
+            c._saidHello = true;
+            c.head.lookAt(pX, c.head.position.y + cPos.y, pZ);
+            showStoreNotification(`${c.name}: "${c.quote}"`);
+            cyberAudio.playAIChirp();
+            setTimeout(() => { c._saidHello = false; }, 12000);
           }
         }
 
@@ -16541,29 +16562,28 @@
         }
 
         if (c.isWalking) {
-          c.group.position.addScaledVector(c.walkDir, c.speed * delta);
+          cPos.addScaledVector(c.walkDir, c.speed * delta);
           c.group.rotation.y = Math.atan2(c.walkDir.x, c.walkDir.z);
 
-          // Building Collision & Obstacle Avoidance for Citizens
-          if (typeof getNearbyCityColliders === 'function') {
-            const nearby = getNearbyCityColliders(c.group.position.x, c.group.position.z);
+          // Interleaved building collisions: only 1/3 of citizens check per frame
+          if (i % 3 === frameBucket && typeof getNearbyCityColliders === 'function') {
+            const nearby = getNearbyCityColliders(cPos.x, cPos.z);
             for (let ci = 0; ci < nearby.length; ci++) {
               const b = nearby[ci];
               const cWorld = b.world || 'earth';
               if (cWorld !== gameState.currentWorld) continue;
-              const dx = c.group.position.x - b.x;
-              const dz = c.group.position.z - b.z;
+              const dx = cPos.x - b.x;
+              const dz = cPos.z - b.z;
               const pad = 0.65;
               const overlapX = (b.hw + pad) - Math.abs(dx);
               const overlapZ = (b.hd + pad) - Math.abs(dz);
 
               if (overlapX > 0 && overlapZ > 0) {
-                // Collided with building: push citizen out and deflect walking direction
                 if (overlapX < overlapZ) {
-                  c.group.position.x = b.x + Math.sign(dx) * (b.hw + pad + 0.05);
+                  cPos.x = b.x + Math.sign(dx) * (b.hw + pad + 0.05);
                   c.walkDir.x = -c.walkDir.x;
                 } else {
-                  c.group.position.z = b.z + Math.sign(dz) * (b.hd + pad + 0.05);
+                  cPos.z = b.z + Math.sign(dz) * (b.hd + pad + 0.05);
                   c.walkDir.z = -c.walkDir.z;
                 }
                 c.walkDir.normalize();
@@ -16579,8 +16599,10 @@
           c.armL.rotation.x = -swing * 0.8;
           c.armR.rotation.x = swing * 0.8;
 
-          // Wrap / turn around if exceeding patrol radius
-          if (c.group.position.distanceTo(c.origin) > c.patrolRadius) {
+          // Wrap / turn around if exceeding patrol radius (squared distance)
+          const ox = cPos.x - c.origin.x;
+          const oz = cPos.z - c.origin.z;
+          if (ox * ox + oz * oz > c.patrolRadius * c.patrolRadius) {
             c.walkDir.multiplyScalar(-1);
           }
         } else {
@@ -16589,19 +16611,7 @@
           c.armL.rotation.x = -0.1 + breathe;
           c.armR.rotation.x = -0.1 - breathe;
         }
-
-        // Proximity interaction with player
-        if (playerPos) {
-          const dist = c.group.position.distanceTo(playerPos);
-          if (dist < 3.2 && !c._saidHello) {
-            c._saidHello = true;
-            c.head.lookAt(playerPos.x, c.head.position.y + c.group.position.y, playerPos.z);
-            showStoreNotification(`${c.name}: "${c.quote}"`);
-            cyberAudio.playAIChirp();
-            setTimeout(() => { c._saidHello = false; }, 12000);
-          }
-        }
-      });
+      }
     }
 
     // ============================================================
@@ -16799,11 +16809,16 @@
       }
     });
 
+    const _bulletSharedGeo = new THREE.SphereGeometry(0.12, 8, 8);
+    const _bulletMatCache = {};
     function spawnProjectile(pos, dir, type) {
       if (!scene) return;
-      const geo = new THREE.SphereGeometry(0.12, 8, 8);
-      const mat = new THREE.MeshBasicMaterial({ color: type === 'railgun' ? 0x00f2ff : (type === 'plasma' ? 0x00ff88 : (type === 'rpg' ? 0xff7700 : (type === 'disintegrator' ? 0xbf00ff : 0xffdd44))) });
-      const bullet = new THREE.Mesh(geo, mat);
+      if (!_bulletMatCache[type]) {
+        _bulletMatCache[type] = new THREE.MeshBasicMaterial({
+          color: type === 'railgun' ? 0x00f2ff : (type === 'plasma' ? 0x00ff88 : (type === 'rpg' ? 0xff7700 : (type === 'disintegrator' ? 0xbf00ff : 0xffdd44)))
+        });
+      }
+      const bullet = new THREE.Mesh(_bulletSharedGeo, _bulletMatCache[type]);
       bullet.position.copy(pos);
       scene.add(bullet);
 
@@ -16872,10 +16887,13 @@
       }
       else cyberAudio.playGunshot();
 
-      // Raycast for Pinpoint Aiming Accuracy in both 1P and 3P
-      const raycaster = new THREE.Raycaster();
-      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-      const aimDir = raycaster.ray.direction.clone().normalize();
+      // Raycast for Pinpoint Aiming Accuracy in both 1P and 3P (Zero Allocation)
+      if (!window._shootRaycaster) {
+        window._shootRaycaster = new THREE.Raycaster();
+        window._shootAimCenter = new THREE.Vector2(0, 0);
+      }
+      window._shootRaycaster.setFromCamera(window._shootAimCenter, camera);
+      const aimDir = window._shootRaycaster.ray.direction.clone().normalize();
 
       let spawnPos;
       if (gameState.cameraMode === '1P') {

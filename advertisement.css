@@ -81,23 +81,28 @@ html, body {
   position: sticky;
   top: 0;
   z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   height: var(--header-height);
-  padding: 0 16px;
-  padding-top: env(safe-area-inset-top, 0px);
+  padding: 0 12px !important;
+  padding-top: env(safe-area-inset-top, 0px) !important;
   background: var(--bg-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
-  gap: 12px;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
 }
 
 .header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
   min-width: 0;
 }
 
@@ -124,9 +129,10 @@ html, body {
 }
 
 .nex-logo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
   cursor: pointer;
   user-select: none;
 }
@@ -141,6 +147,7 @@ html, body {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 0 10px rgba(0, 240, 118, 0.4));
+  flex-shrink: 0 !important;
 }
 
 .market-subtext {
@@ -154,34 +161,44 @@ html, body {
   padding: 2px 6px;
   border-radius: var(--radius-xs);
   text-transform: uppercase;
+  flex-shrink: 0 !important;
 }
 
 .header-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  margin-left: auto !important;
+  flex-shrink: 1 !important;
+  min-width: 0 !important;
+  position: static !important;
 }
 
-.token-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.token-pill,
+#tokenBadge {
+  position: static !important;
+  margin-left: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
   background: rgba(255, 165, 2, 0.12);
   border: 1px solid rgba(255, 165, 2, 0.35);
   color: #ffbe2e;
-  padding: 5px 12px;
+  padding: 5px 10px !important;
   border-radius: var(--radius-pill);
   font-weight: 700;
   font-size: 12.5px;
   font-family: var(--font-sub);
   letter-spacing: 0.5px;
   box-shadow: 0 0 12px rgba(255, 165, 2, 0.1);
-  white-space: nowrap;
+  white-space: nowrap !important;
+  flex-shrink: 1 !important;
+  min-width: 0 !important;
 }
 
 .token-pill i {
   color: #ffbe2e;
   font-size: 13px;
+  flex-shrink: 0 !important;
 }
 
 .token-unit {
@@ -191,9 +208,11 @@ html, body {
 }
 
 .header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important;
+  margin-left: 0 !important;
 }
 
 .desktop-nav-tabs {
@@ -238,11 +257,12 @@ html, body {
   width: 40px;
   height: 40px;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0 !important;
 }
 
 #cartHeaderBtn:hover,
@@ -1703,28 +1723,88 @@ html, body {
   }
 }
 
-/* 360px Small Mobile Viewports */
-@media (max-width: 380px) {
+/* Mobile Viewports: Flex Row Lock, Hide 'Tokens' Word Under 400px, Lock Logo & Cart from Compression */
+@media (max-width: 400px) {
   .top-header {
-    padding: 0 10px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 0 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .header-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+    min-width: 0 !important;
+  }
+
+  .back-button {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    font-size: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .nex-logo {
+    flex-shrink: 0 !important;
   }
 
   .nex-text {
-    font-size: 15px;
+    font-size: 15px !important;
+    letter-spacing: 0.8px !important;
+    flex-shrink: 0 !important;
   }
 
   .market-subtext {
-    font-size: 9.5px;
-    padding: 1px 4px;
+    font-size: 9px !important;
+    padding: 1px 4px !important;
+    flex-shrink: 0 !important;
   }
 
-  .token-pill {
-    padding: 4px 8px;
-    font-size: 11px;
+  .header-center {
+    display: flex !important;
+    align-items: center !important;
+    margin-left: auto !important;
+    flex-shrink: 1 !important;
+    min-width: 0 !important;
+    position: static !important;
   }
 
-  .token-unit {
-    display: none;
+  .token-pill,
+  #tokenBadge {
+    position: static !important;
+    margin-left: auto !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Under 400px: Hide word 'Tokens', show only token count (e.g. 92) */
+  .token-unit,
+  .token-pill .token-unit,
+  #tokenBadge .token-unit {
+    display: none !important;
+  }
+
+  .header-right {
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  #cartHeaderBtn,
+  .cart-btn-top {
+    flex-shrink: 0 !important;
+    width: 36px !important;
+    height: 36px !important;
   }
 
   .ads-grid {

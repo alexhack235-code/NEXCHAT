@@ -24,70 +24,91 @@
     }
 
     bindDOM() {
-      this.injectDictationButton();
+      this.bindDictationButton();
       this.observeVoiceMessages();
     }
 
-    // 1. Direct Live Voice Dictation in Message Input
-    injectDictationButton() {
+    // 1. Direct Live Voice Dictation & Translation in Message Input
+    bindDictationButton() {
+      let dictateBtn = document.getElementById('voiceDictateBtn');
       const inputWrap = document.querySelector('.message-input-wrapper');
-      if (inputWrap && !document.getElementById('voiceDictateBtn')) {
-        const dictateBtn = document.createElement('button');
+      
+      if (!dictateBtn && inputWrap) {
+        dictateBtn = document.createElement('button');
         dictateBtn.type = 'button';
         dictateBtn.id = 'voiceDictateBtn';
         dictateBtn.className = 'input-inline-btn voice-dictate-btn';
-        dictateBtn.title = 'ChronEX Neural Speech-to-Text Dictation';
+        dictateBtn.title = 'Voice to Text & Translate';
         dictateBtn.innerHTML = `<i class="fa-solid fa-microphone-lines"></i>`;
         
+        const input = document.getElementById('message-input') || document.getElementById('messageInput');
+        if (input && input.nextSibling) {
+          inputWrap.insertBefore(dictateBtn, input.nextSibling);
+        } else {
+          inputWrap.appendChild(dictateBtn);
+        }
+      }
+
+      if (dictateBtn && !dictateBtn.dataset.vttBound) {
+        dictateBtn.dataset.vttBound = 'true';
         dictateBtn.addEventListener('click', (e) => {
           e.preventDefault();
+          e.stopPropagation();
           this.toggleDictation();
         });
-
-        inputWrap.appendChild(dictateBtn);
       }
     }
 
-    toggleDictation() {
+    startVoiceToInput() {
+      if (this.isDictating) {
+        this.stopDictation();
+        return;
+      }
+      this.toggleDictation();
+    }
+
+    async toggleDictation() {
       const btn = document.getElementById('voiceDictateBtn');
-      const input = document.getElementById('message-input');
+      const input = document.getElementById('message-input') || document.getElementById('messageInput');
 
       if (this.isDictating) {
         this.stopDictation();
         return;
       }
 
+      // If Web Speech Recognition is not supported, use fallback recorder
       if (!this.SpeechRecognition) {
-        if (typeof window.showNotif === 'function') {
-          window.showNotif('Speech recognition not supported in this browser. Type message manually.', 'warning');
-        }
+        this.startFallbackAudioDictation(btn, input);
         return;
       }
 
       try {
         this.activeRecognizer = new this.SpeechRecognition();
-        this.activeRecognizer.continuous = true;
+        // High-performance real-time setup: continuous false for instant natural finish, interimResults for 0-latency live streaming
+        this.activeRecognizer.continuous = false;
         this.activeRecognizer.interimResults = true;
+        this.activeRecognizer.maxAlternatives = 1;
+
         const langMap = {
           'en': 'en-US', 'es': 'es-ES', 'fr': 'fr-FR', 'ru': 'ru-RU',
           'ar': 'ar-SA', 'hi': 'hi-IN', 'tr': 'tr-TR', 'sw': 'sw-KE',
           'tl': 'fil-PH', 'id': 'id-ID', 'zh': 'zh-CN', 'ja': 'ja-JP',
           'ko': 'ko-KR', 'de': 'de-DE', 'pt': 'pt-BR', 'it': 'it-IT'
         };
-        const activeLangKey = (window.autoCorrectEngine && window.autoCorrectEngine.currentPrimaryLanguage) ||
-                              (window.CyberFeatures && window.CyberFeatures.translator && window.CyberFeatures.translator.autoTranslateTargetLang) ||
-                              'en';
-        this.activeRecognizer.lang = langMap[activeLangKey] || 'en-US';
+        const spokenLangSetting = localStorage.getItem('nex_voice_input_lang') || navigator.language || 'en-US';
+        const spokenShort = spokenLangSetting.split('-')[0].toLowerCase();
+        this.activeRecognizer.lang = langMap[spokenShort] || spokenLangSetting;
 
         const initialInputValue = input ? input.value : '';
         const initialPrefix = initialInputValue ? initialInputValue.trim() + ' ' : '';
         let finalAccumulated = '';
+        let finalized = false;
 
         this.activeRecognizer.onstart = () => {
           this.isDictating = true;
           if (btn) btn.classList.add('dictating');
           if (typeof window.showNotif === 'function') {
-            window.showNotif('Listening... Speak naturally to transcribe', 'info', 2000);
+            window.showNotif('Listening... Speak now to transcribe', 'info', 1600);
           }
           if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
         };
@@ -102,26 +123,165 @@
               interimTranscript += piece;
             }
           }
+          // Real-time 0-latency stream directly into input box as words are spoken
           if (input) {
             input.value = initialPrefix + finalAccumulated + interimTranscript;
             input.dispatchEvent(new Event('input', { bubbles: true }));
           }
         };
 
+        const processFinalTranscript = async () => {
+          if (finalized) return;
+          finalized = true;
+
+          const rawText = finalAccumulated.trim();
+          if (rawText && input) {
+            const targetLang = localStorage.getItem('nex_auto_translate_target_lang') ||
+                               localStorage.getItem('nexchat_preferred_language') ||
+                               (window.CyberFeatures && window.CyberFeatures.translator && window.CyberFeatures.translator.autoTranslateTargetLang);
+
+            const targetShort = targetLang ? targetLang.split('-')[0].toLowerCase() : '';
+            if (targetShort && targetShort !== 'off' && targetShort !== spokenShort) {
+              let translated = rawText;
+              // 1. Instant 0ms synchronous dictionary translation
+              if (typeof window.fastTranslateSync === 'function') {
+                const syncHit = window.fastTranslateSync(rawText, targetShort);
+                if (syncHit) translated = syncHit;
+              }
+              // 2. Speculative fast async translation
+              if (translated === rawText && typeof window.fastTranslateAsync === 'function') {
+                try {
+                  const asyncHit = await window.fastTranslateAsync(rawText, targetShort);
+                  if (asyncHit) translated = asyncHit;
+                } catch (_) {}
+              } else if (translated === rawText && window.CyberFeatures && window.CyberFeatures.translator) {
+                try {
+                  translated = await window.CyberFeatures.translator.translateText(rawText, targetShort);
+                } catch (_) {}
+              }
+
+              input.value = (initialPrefix + translated).trim();
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            input.focus();
+            if (typeof input.setSelectionRange === 'function') {
+              input.setSelectionRange(input.value.length, input.value.length);
+            }
+            if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
+          }
+
+          this.stopDictation();
+        };
+
         this.activeRecognizer.onerror = (e) => {
-          console.warn('Speech recognition error:', e.error);
+          console.warn('[VTT] Speech recognition notice:', e.error);
           this.stopDictation();
         };
 
         this.activeRecognizer.onend = () => {
-          this.stopDictation();
+          processFinalTranscript();
         };
 
         this.activeRecognizer.start();
 
       } catch (err) {
-        console.warn('Dictation init error:', err);
+        console.warn('[VTT] Speech recognition start error:', err);
         this.stopDictation();
+      }
+    }
+
+    async startFallbackAudioDictation(btn, input) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (typeof window.showNotif === 'function') {
+          window.showNotif('Speech recognition not supported in this browser.', 'warning');
+        }
+        return;
+      }
+
+      try {
+        this.fallbackAudioChunks = [];
+        this.fallbackStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.mediaRecorderFallback = new MediaRecorder(this.fallbackStream);
+
+        this.mediaRecorderFallback.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) this.fallbackAudioChunks.push(e.data);
+        };
+
+        this.isDictating = true;
+        if (btn) btn.classList.add('dictating');
+        if (typeof window.showNotif === 'function') {
+          window.showNotif('Recording speech... Tap again when finished to transcribe', 'info', 2200);
+        }
+
+        this.mediaRecorderFallback.start(100);
+      } catch (err) {
+        console.warn('[VTT] Fallback audio capture failed:', err);
+        this.stopDictation();
+      }
+    }
+
+    async stopFallbackAudioDictation() {
+      if (!this.mediaRecorderFallback) return;
+
+      const chunks = [...this.fallbackAudioChunks];
+      this.fallbackAudioChunks = [];
+
+      try {
+        if (this.mediaRecorderFallback.state !== 'inactive') {
+          this.mediaRecorderFallback.stop();
+        }
+      } catch (_) {}
+      this.mediaRecorderFallback = null;
+
+      if (this.fallbackStream) {
+        try {
+          this.fallbackStream.getTracks().forEach(t => t.stop());
+        } catch (_) {}
+        this.fallbackStream = null;
+      }
+
+      const input = document.getElementById('message-input') || document.getElementById('messageInput');
+      if (!input || chunks.length === 0) return;
+
+      const targetLang = localStorage.getItem('nex_auto_translate_target_lang') ||
+                         localStorage.getItem('nexchat_preferred_language') ||
+                         (window.CyberFeatures && window.CyberFeatures.translator && window.CyberFeatures.translator.autoTranslateTargetLang) ||
+                         'en';
+
+      if (typeof window.showNotif === 'function') {
+        window.showNotif('Transcribing speech...', 'info', 1800);
+      }
+
+      try {
+        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+        const base64Audio = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(audioBlob);
+        });
+
+        if (base64Audio) {
+          const resp = await fetch('/api/transcribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audio: base64Audio, targetLang: targetLang || 'en' })
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            const text = (data.result || data.response || data.transcript || '').trim();
+            if (text && !text.toLowerCase().includes('not clear enough')) {
+              const prev = input.value.trim();
+              input.value = prev ? `${prev} ${text}` : text;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              input.focus();
+              if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[VTT] Server transcribe error:', err);
       }
     }
 
@@ -129,9 +289,14 @@
       this.isDictating = false;
       const btn = document.getElementById('voiceDictateBtn');
       if (btn) btn.classList.remove('dictating');
+
       if (this.activeRecognizer) {
         try { this.activeRecognizer.stop(); } catch (e) {}
         this.activeRecognizer = null;
+      }
+
+      if (this.mediaRecorderFallback) {
+        this.stopFallbackAudioDictation();
       }
     }
 
@@ -339,5 +504,9 @@
     }
   }
 
-  window.voiceTranscriberEngine = new VoiceTranscriberEngine();
+  const engine = new VoiceTranscriberEngine();
+  window.VoiceTranscriberEngine = VoiceTranscriberEngine;
+  window.voiceTranscriberEngine = engine;
+  window.startVoiceToInput = () => engine.startVoiceToInput();
+  window.toggleVoiceDictation = () => engine.toggleDictation();
 })();

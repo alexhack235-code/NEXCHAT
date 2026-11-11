@@ -2204,11 +2204,14 @@ class NexTranslator {
     if (!rawText || !rawText.trim()) return '';
     const clean = rawText.trim();
     const lower = clean.toLowerCase();
-    const cacheKey = `${targetLang}:${lower}`;
+    const normLang = (typeof window !== 'undefined' && typeof window.normalizeLangCode === 'function')
+      ? window.normalizeLangCode(targetLang)
+      : (targetLang || 'es').toLowerCase();
+    const cacheKey = `${normLang}:${lower}`;
 
     // Tier 0: In-Memory Fast LRU Cache (< 0.001 ms)
-    if (this.lruCache && this.lruCache.has(cacheKey)) {
-      return this.lruCache.get(cacheKey);
+    if (this.lruCache && (this.lruCache.has(cacheKey) || this.lruCache.has(`${targetLang}:${lower}`))) {
+      return this.lruCache.get(cacheKey) || this.lruCache.get(`${targetLang}:${lower}`);
     }
 
     // Tier 1: Fast Sync Lexicon (0ms Local Match)

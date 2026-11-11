@@ -19,6 +19,45 @@
   <link rel="icon" type="image/x-icon" href="logo.jpg">
   <link rel="apple-touch-icon" href="logo.jpg">
   <style>
+    .top-header {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      gap: 8px !important;
+      padding: 0 12px !important;
+      padding-top: env(safe-area-inset-top, 0px) !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      flex-wrap: nowrap !important;
+    }
+    .header-left, .header-left .nex-logo, .nex-logo, .market-subtext {
+      flex-shrink: 0 !important;
+    }
+    .header-center {
+      display: flex !important;
+      align-items: center !important;
+      margin-left: auto !important;
+      flex-shrink: 1 !important;
+      min-width: 0 !important;
+      position: static !important;
+    }
+    .token-pill, #tokenBadge {
+      position: static !important;
+      margin-left: auto !important;
+      flex-shrink: 1 !important;
+      min-width: 0 !important;
+      white-space: nowrap !important;
+    }
+    .header-right, #cartHeaderBtn, .cart-btn-top {
+      flex-shrink: 0 !important;
+      margin-left: 0 !important;
+    }
+    @media (max-width: 400px) {
+      .token-unit, .token-pill .token-unit, #tokenBadge .token-unit {
+        display: none !important;
+      }
+    }
     #cartHeaderBtn,
     .cart-btn-top {
       background: rgba(0, 240, 118, 0.12) !important;

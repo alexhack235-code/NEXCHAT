@@ -389,6 +389,45 @@ service cloud.firestore {
     //   - longitude: number (required, -180 to 180)
     //   - updatedAt: timestamp or request.time (optional/update timestamp)
     //   - active: bool (required, radar visibility status)
+    //
+    // Collection: scheduled_messages & scheduledMessages
+    // Document ID: {messageId} (Auto-generated or sched_*)
+    // Fields:
+    //   - senderId / from: string (required, sender UID, immutable)
+    //   - chatId / to / receiverId / groupId: string (required, recipient UID or group ID, max 128 chars, immutable)
+    //   - chatType: string (optional, 'direct' | 'group' | 'channel' | 'ai', max 50 chars)
+    //   - text / content: string (required, 1 to 10000 chars)
+    //   - chatName: string (optional, max 100 chars)
+    //   - createdAt: timestamp/number (optional, immutable)
+    //   - targetTime / scheduledAt: timestamp/number (required epoch or timestamp)
+    //   - triggerMode: string (optional, 'datetime' | 'when_online' | 'timer')
+    //   - isSilent: bool (optional)
+    //   - selfDestructSec / burnTimeout: number (optional, >= 0)
+    //   - recurring: string (optional, 'none' | 'daily' | 'weekly' | 'monthly')
+    //   - status: string (required, 'pending' | 'dispatched' | 'cancelled' | 'failed')
+    //
+    // Collection: dead_drops & deadDrops & ephemeral_dead_drops
+    // Document ID: {dropId} (Auto-generated or qdrop_*)
+    // Fields:
+    //   - creatorId / senderId / from: string (required, creator UID, immutable)
+    //   - recipientId / to: string (optional, recipient UID, max 128 chars)
+    //   - chatId / groupId: string (optional, max 128 chars)
+    //   - secret / ciphertext / payload: string (required, encrypted/obfuscated payload, 1 to 10000 chars, immutable)
+    //   - burnTimeout / burnoutSeconds / ttl: number (optional, 1 to 86400 seconds)
+    //   - status: string (required, 'ready' | 'revealed' | 'burned' | 'expired')
+    //   - revealedAt / burnedAt / expiredAt / updatedAt: timestamp/number (optional)
+    //   - createdAt / timestamp: timestamp/number (optional, immutable)
+    //
+    // Collection: user_usage_metrics & userUsageMetrics
+    // Document ID: {metricId} / {uid} (Firebase Auth UID or auto-generated)
+    // Fields:
+    //   - userId / uid: string (required, owner UID, immutable)
+    //   - totalBytes: number (optional, >= 0)
+    //   - storageBytes / chatsBytes / mediaBytes / audioBytes / cacheBytes: number (optional, >= 0)
+    //   - networkSentMb / networkRecvMb: number (optional, >= 0)
+    //   - messageCount / mediaCount: number (optional, >= 0)
+    //   - lastCalculatedAt / updatedAt: timestamp/number (optional)
+    //   - createdAt: timestamp/number (optional, immutable)
     // ===============================================================
 
     // ===============================================================
@@ -516,6 +555,14 @@ service cloud.firestore {
       return !(field in request.resource.data) ||
              request.resource.data[field] == null ||
              isValidUrl(request.resource.data[field]);
+    }
+
+    // 10b. Email Format Validation Helper
+    function isValidEmail(email) {
+      return email is string &&
+             email.size() >= 3 &&
+             email.size() <= 255 &&
+             email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     }
 
     // 11. List Size Validation Helper
@@ -1123,6 +1170,232 @@ service cloud.firestore {
              ('active' in data && data.active is bool);
     }
 
+    // Quantum Scheduled Message Create Validator (/scheduled_messages/{messageId})
+    function isValidScheduledMessageCreate(data) {
+      return (
+               ('senderId' in data && data.senderId == request.auth.uid) ||
+               ('from' in data && data.from == request.auth.uid)
+             ) &&
+             (
+               ('chatId' in data && data.chatId is string && data.chatId.size() >= 1 && data.chatId.size() <= 128) ||
+               ('to' in data && data.to is string && data.to.size() >= 1 && data.to.size() <= 128) ||
+               ('receiverId' in data && data.receiverId is string && data.receiverId.size() >= 1 && data.receiverId.size() <= 128) ||
+               ('groupId' in data && data.groupId is string && data.groupId.size() >= 1 && data.groupId.size() <= 128)
+             ) &&
+             (
+               validStringLength('text', 1, 10000) ||
+               validStringLength('content', 1, 10000)
+             ) &&
+             ('status' in data && data.status is string && data.status in ['pending', 'dispatched', 'cancelled', 'failed']) &&
+             (!('targetTime' in data) || isValidTimestampOrNumber(data.targetTime)) &&
+             (!('scheduledAt' in data) || isValidTimestampOrNumber(data.scheduledAt)) &&
+             isValidOptionalString('chatName', 0, 100) &&
+             isValidOptionalString('chatType', 0, 50) &&
+             isValidOptionalString('triggerMode', 0, 50) &&
+             isValidOptionalString('recurring', 0, 50) &&
+             (!('isSilent' in data) || data.isSilent is bool) &&
+             (!('selfDestructSec' in data) || (data.selfDestructSec is number && data.selfDestructSec >= 0)) &&
+             (!('burnTimeout' in data) || (data.burnTimeout is number && data.burnTimeout >= 0)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt));
+    }
+
+    // Quantum Scheduled Message Update Validator
+    function isValidScheduledMessageUpdate(data, prev) {
+      return (
+               (
+                 (('senderId' in prev && prev.senderId == request.auth.uid) || ('from' in prev && prev.from == request.auth.uid)) &&
+                 areImmutableFieldsUnchanged(['senderId', 'from', 'chatId', 'to', 'receiverId', 'groupId', 'createdAt']) &&
+                 isValidOptionalString('text', 0, 10000) &&
+                 isValidOptionalString('content', 0, 10000) &&
+                 (!('targetTime' in data) || isValidTimestampOrNumber(data.targetTime)) &&
+                 (!('scheduledAt' in data) || isValidTimestampOrNumber(data.scheduledAt)) &&
+                 (!('status' in data) || (data.status is string && data.status in ['pending', 'dispatched', 'cancelled', 'failed'])) &&
+                 (!('isSilent' in data) || data.isSilent is bool) &&
+                 (!('selfDestructSec' in data) || (data.selfDestructSec is number && data.selfDestructSec >= 0))
+               ) ||
+               isSuperAdmin()
+             );
+    }
+
+    // Ephemeral Dead Drop Create Validator (/dead_drops/{dropId})
+    function isValidDeadDropCreate(data) {
+      return (
+               ('creatorId' in data && data.creatorId == request.auth.uid) ||
+               ('senderId' in data && data.senderId == request.auth.uid) ||
+               ('from' in data && data.from == request.auth.uid)
+             ) &&
+             (
+               validStringLength('secret', 1, 10000) ||
+               validStringLength('ciphertext', 1, 10000) ||
+               validStringLength('payload', 1, 10000)
+             ) &&
+             ('status' in data && data.status is string && data.status in ['ready', 'revealed', 'burned', 'expired']) &&
+             isValidOptionalString('recipientId', 0, 128) &&
+             isValidOptionalString('to', 0, 128) &&
+             isValidOptionalString('chatId', 0, 128) &&
+             isValidOptionalString('groupId', 0, 128) &&
+             (!('burnTimeout' in data) || (data.burnTimeout is number && data.burnTimeout >= 1 && data.burnTimeout <= 86400)) &&
+             (!('burnoutSeconds' in data) || (data.burnoutSeconds is number && data.burnoutSeconds >= 1 && data.burnoutSeconds <= 86400)) &&
+             (!('ttl' in data) || (data.ttl is number && data.ttl >= 1 && data.ttl <= 86400)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt));
+    }
+
+    // Ephemeral Dead Drop Update Validator (State transition: ready -> revealed -> burned)
+    function isValidDeadDropUpdate(data, prev) {
+      return (
+               // Creator can cancel / burn dead drop
+               (
+                 (('creatorId' in prev && prev.creatorId == request.auth.uid) ||
+                  ('senderId' in prev && prev.senderId == request.auth.uid) ||
+                  ('from' in prev && prev.from == request.auth.uid)) &&
+                 areImmutableFieldsUnchanged(['creatorId', 'senderId', 'from', 'createdAt', 'secret', 'ciphertext', 'payload']) &&
+                 data.diff(prev).affectedKeys().hasOnly(['status', 'burnedAt', 'expiredAt', 'updatedAt']) &&
+                 ('status' in data && data.status in ['burned', 'expired'])
+               ) ||
+               // Recipient can trigger reveal countdown or burn upon expiration
+               (
+                 (('recipientId' in prev && prev.recipientId == request.auth.uid) ||
+                  ('to' in prev && prev.to == request.auth.uid) ||
+                  ('chatId' in prev && isChatParticipant(prev.chatId)) ||
+                  ('groupId' in prev && isGroupMember(prev.groupId))) &&
+                 areImmutableFieldsUnchanged(['creatorId', 'senderId', 'from', 'createdAt', 'secret', 'ciphertext', 'payload', 'burnTimeout', 'burnoutSeconds']) &&
+                 data.diff(prev).affectedKeys().hasOnly(['status', 'revealedAt', 'burnedAt', 'expiredAt', 'updatedAt']) &&
+                 ('status' in data && data.status in ['revealed', 'burned', 'expired'])
+               ) ||
+               isSuperAdmin()
+             );
+    }
+
+    // User Usage Metrics Validator (Storage, Network & Media Intelligence)
+    function isValidUserUsageMetrics(data, uid) {
+      return (
+               ('userId' in data && data.userId == uid && data.userId == request.auth.uid) ||
+               ('uid' in data && data.uid == uid && data.uid == request.auth.uid) ||
+               isSuperAdmin()
+             ) &&
+             (!('totalBytes' in data) || (data.totalBytes is number && data.totalBytes >= 0)) &&
+             (!('storageBytes' in data) || (data.storageBytes is number && data.storageBytes >= 0)) &&
+             (!('chatsBytes' in data) || (data.chatsBytes is number && data.chatsBytes >= 0)) &&
+             (!('mediaBytes' in data) || (data.mediaBytes is number && data.mediaBytes >= 0)) &&
+             (!('audioBytes' in data) || (data.audioBytes is number && data.audioBytes >= 0)) &&
+             (!('cacheBytes' in data) || (data.cacheBytes is number && data.cacheBytes >= 0)) &&
+             (!('networkSentMb' in data) || (data.networkSentMb is number && data.networkSentMb >= 0)) &&
+             (!('networkRecvMb' in data) || (data.networkRecvMb is number && data.networkRecvMb >= 0)) &&
+             (!('messageCount' in data) || (data.messageCount is number && data.messageCount >= 0)) &&
+             (!('mediaCount' in data) || (data.mediaCount is number && data.mediaCount >= 0)) &&
+             (!('lastCalculatedAt' in data) || isValidTimestampOrNumber(data.lastCalculatedAt)) &&
+             (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt));
+    }
+
+    // Incident Report Validator (/reports/{reportId})
+    function isValidReport(data) {
+      return ('reportedBy' in data && data.reportedBy is string && data.reportedBy == request.auth.uid) &&
+             isValidOptionalString('reportedUser', 0, 128) &&
+             isValidOptionalString('targetId', 0, 128) &&
+             isValidOptionalString('targetUid', 0, 128) &&
+             isValidOptionalString('reporterUsername', 0, 100) &&
+             isValidOptionalString('reportedUsername', 0, 100) &&
+             isValidOptionalString('category', 0, 100) &&
+             isValidOptionalString('reason', 0, 100) &&
+             isValidOptionalString('severity', 0, 50) &&
+             isValidOptionalString('description', 0, 5000) &&
+             isValidOptionalUrl('evidenceUrl') &&
+             isValidOptionalUrl('attachmentUrl') &&
+             (!('status' in data) || data.status == 'pending' || isSuperAdmin()) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt));
+    }
+
+    // Spam Report Validator (/spamReports/{reportId})
+    function isValidSpamReport(data) {
+      return (!('reportedBy' in data) || data.reportedBy == request.auth.uid || isSuperAdmin()) &&
+             isValidOptionalString('targetId', 0, 128) &&
+             isValidOptionalString('targetUid', 0, 128) &&
+             isValidOptionalString('reason', 0, 500) &&
+             isValidOptionalString('details', 0, 2000) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp));
+    }
+
+    // Group Message Create Validator
+    function isValidGroupMessage(data) {
+      return (
+               ('senderId' in data && data.senderId == request.auth.uid) ||
+               ('from' in data && data.from == request.auth.uid) ||
+               ('from' in data && data.from == 'group_defense_bot') ||
+               isSuperAdmin()
+             ) &&
+             isValidOptionalString('text', 0, 10000) &&
+             isValidOptionalString('content', 0, 10000) &&
+             isValidOptionalString('message', 0, 10000) &&
+             isValidOptionalString('senderName', 0, 100) &&
+             isValidOptionalString('senderUsername', 0, 100) &&
+             isValidOptionalUrl('senderAvatar') &&
+             isValidOptionalUrl('senderProfilePic') &&
+             isValidOptionalString('type', 0, 50) &&
+             isValidOptionalString('status', 0, 50) &&
+             isValidOptionalString('clientMsgId', 0, 128) &&
+             isValidOptionalString('replyToId', 0, 128) &&
+             isValidOptionalUrl('attachmentUrl') &&
+             isValidOptionalUrl('imageUrl') &&
+             isValidOptionalUrl('mediaUrl') &&
+             isValidOptionalReactions('reactions') &&
+             isValidOptionalList('deletedFor', 500) &&
+             (!('isEdited' in data) || data.isEdited is bool) &&
+             (!('isDeleted' in data) || data.isDeleted is bool) &&
+             (!('deletedForEveryone' in data) || data.deletedForEveryone is bool) &&
+             (!('isScheduledDelivery' in data) || data.isScheduledDelivery is bool) &&
+             (!('isSilent' in data) || data.isSilent is bool) &&
+             (!('replyTo' in data) || data.replyTo == null || data.replyTo is map) &&
+             (!('envelope' in data) || data.envelope == null || data.envelope is map) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt));
+    }
+
+    // Group Message Update Validator
+    function isValidGroupMessageUpdate(data, prev, groupId) {
+      return (
+               // Sender editing content, reactions, deletedFor
+               (
+                 (('senderId' in prev && prev.senderId == request.auth.uid) || ('from' in prev && prev.from == request.auth.uid)) &&
+                 areImmutableFieldsUnchanged(['senderId', 'from', 'groupId', 'createdAt', 'timestamp']) &&
+                 isValidOptionalString('text', 0, 10000) &&
+                 isValidOptionalString('content', 0, 10000) &&
+                 isValidOptionalString('message', 0, 10000) &&
+                 isValidOptionalReactions('reactions') &&
+                 isValidOptionalList('deletedFor', 500)
+               ) ||
+               // Sender or group moderator tombstoning message
+               (
+                 (('senderId' in prev && prev.senderId == request.auth.uid) ||
+                  ('from' in prev && prev.from == request.auth.uid) ||
+                  isGroupModerator(groupId)) &&
+                 areImmutableFieldsUnchanged(['senderId', 'from', 'groupId', 'createdAt', 'timestamp']) &&
+                 (
+                   data.diff(prev).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
+                   (
+                     data.diff(prev).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content', 'message']) &&
+                     (('isDeleted' in data && data.isDeleted == true) || ('deletedForEveryone' in data && data.deletedForEveryone == true))
+                   )
+                 ) &&
+                 isValidOptionalString('text', 0, 10000) &&
+                 isValidOptionalString('content', 0, 10000) &&
+                 isValidOptionalList('deletedFor', 500)
+               ) ||
+               // Group members updating reactions, readBy, readAt, deletedFor
+               (
+                 isGroupMember(groupId) &&
+                 areImmutableFieldsUnchanged(['senderId', 'from', 'groupId', 'createdAt', 'timestamp']) &&
+                 data.diff(prev).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor', 'status', 'read']) &&
+                 isValidOptionalReactions('reactions') &&
+                 isValidOptionalList('deletedFor', 500)
+               ) ||
+               isGroupModerator(groupId) ||
+               isSuperAdmin()
+             );
+    }
+
     // ===============================================================
     // 1. USERS COLLECTION & LINKED DEVICES & EXTENSIONS
     // ===============================================================
@@ -1163,6 +1436,40 @@ service cloud.firestore {
         allow update: if (isOwner(uid) || isSuperAdmin()) &&
                          areImmutableFieldsUnchanged(['extensionId', 'createdAt']) &&
                          isValidAuthorizedExtension(request.resource.data, extensionId);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // User Usage & Storage Intelligence Metrics Subcollection
+      match /usage_metrics/{metricId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create, update: if (isOwner(uid) || isSuperAdmin()) &&
+                                 isValidUserUsageMetrics(request.resource.data, uid);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      match /usageMetrics/{metricId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create, update: if (isOwner(uid) || isSuperAdmin()) &&
+                                 isValidUserUsageMetrics(request.resource.data, uid);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // User Scheduled Messages Queue Subcollection
+      match /scheduled_messages/{messageId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidScheduledMessageCreate(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidScheduledMessageUpdate(request.resource.data, resource.data);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      match /scheduledMessages/{messageId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidScheduledMessageCreate(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidScheduledMessageUpdate(request.resource.data, resource.data);
         allow delete: if isOwner(uid) || isSuperAdmin();
       }
     }
@@ -1314,56 +1621,12 @@ service cloud.firestore {
       allow create: if isAuthenticated() &&
                        request.resource.data.groupId is string &&
                        isGroupMember(request.resource.data.groupId) &&
-                       (
-                         request.resource.data.from == request.auth.uid ||
-                         request.resource.data.senderId == request.auth.uid ||
-                         (request.resource.data.from == 'group_defense_bot' && isGroupMember(request.resource.data.groupId)) ||
-                         isSuperAdmin()
-                       ) &&
-                       isValidOptionalString('text', 0, 10000) &&
-                       isValidOptionalString('content', 0, 10000) &&
-                       isValidOptionalString('message', 0, 10000) &&
-                       isValidOptionalReactions('reactions');
+                       isValidGroupMessage(request.resource.data);
 
       // Sender can edit text/reactions; group members can update reactions/readBy/deletedFor; sender/moderator can update tombstone fields
-      allow update: if isAuthenticated() && (
-        (
-          (request.auth.uid == resource.data.from || request.auth.uid == resource.data.senderId) &&
-          areImmutableFieldsUnchanged(['from', 'senderId', 'groupId', 'createdAt', 'timestamp']) &&
-          isValidOptionalString('text', 0, 10000) &&
-          isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalString('message', 0, 10000) &&
-          isValidOptionalReactions('reactions') &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        (
-          (
-            request.auth.uid == resource.data.from ||
-            request.auth.uid == resource.data.senderId ||
-            isGroupModerator(resource.data.groupId)
-          ) &&
-          areImmutableFieldsUnchanged(['from', 'senderId', 'groupId', 'createdAt', 'timestamp']) &&
-          (
-            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
-            (
-              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content', 'message']) &&
-              (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
-            )
-          ) &&
-          isValidOptionalString('text', 0, 10000) &&
-          isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalString('message', 0, 10000) &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        isGroupModerator(resource.data.groupId) ||
-        (
-          isGroupMember(resource.data.groupId) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor']) &&
-          isValidOptionalReactions('reactions') &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        isSuperAdmin()
-      );
+      allow update: if isAuthenticated() &&
+                       isGroupMember(resource.data.groupId) &&
+                       isValidGroupMessageUpdate(request.resource.data, resource.data, resource.data.groupId);
 
       allow delete: if isAuthenticated() && (
         request.auth.uid == resource.data.from ||
@@ -1432,53 +1695,12 @@ service cloud.firestore {
 
       match /messages/{messageId} {
         allow read: if isAuthenticated() && (isGroupMember(groupId) || isSuperAdmin());
-        allow create: if isAuthenticated() && isGroupMember(groupId) &&
-                         (
-                           ('senderId' in request.resource.data && request.resource.data.senderId == request.auth.uid) ||
-                           ('from' in request.resource.data && request.resource.data.from == request.auth.uid)
-                         ) &&
-                         isValidOptionalString('text', 0, 10000) &&
-                         isValidOptionalString('content', 0, 10000) &&
-                         isValidOptionalString('senderName', 0, 100) &&
-                         isValidOptionalString('type', 0, 50) &&
-                         isValidOptionalReactions('reactions') &&
-                         isValidOptionalList('deletedFor', 500);
-        allow update: if isAuthenticated() && (
-          (
-            (('senderId' in resource.data && request.auth.uid == resource.data.senderId) || ('from' in resource.data && request.auth.uid == resource.data.from)) &&
-            areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
-            isValidOptionalString('text', 0, 10000) &&
-            isValidOptionalString('content', 0, 10000) &&
-            isValidOptionalReactions('reactions') &&
-            isValidOptionalList('deletedFor', 500)
-          ) ||
-          (
-            (
-              ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
-              ('from' in resource.data && request.auth.uid == resource.data.from) ||
-              isGroupAdmin(groupId)
-            ) &&
-            areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
-            (
-              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
-              (
-                request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content']) &&
-                (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
-              )
-            ) &&
-            isValidOptionalString('text', 0, 10000) &&
-            isValidOptionalString('content', 0, 10000) &&
-            isValidOptionalList('deletedFor', 500)
-          ) ||
-          isGroupAdmin(groupId) ||
-          (
-            isGroupMember(groupId) &&
-            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor', 'status', 'read']) &&
-            isValidOptionalReactions('reactions') &&
-            isValidOptionalList('deletedFor', 500)
-          ) ||
-          isSuperAdmin()
-        );
+        allow create: if isAuthenticated() &&
+                         isGroupMember(groupId) &&
+                         isValidGroupMessage(request.resource.data);
+        allow update: if isAuthenticated() &&
+                         isGroupMember(groupId) &&
+                         isValidGroupMessageUpdate(request.resource.data, resource.data, groupId);
         allow delete: if isAuthenticated() && (
           ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
           ('from' in resource.data && request.auth.uid == resource.data.from) ||
@@ -1960,7 +2182,15 @@ service cloud.firestore {
         request.auth.uid == resource.data.recipientId ||
         isSuperAdmin()
       );
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (
+          ('senderId' in request.resource.data && request.resource.data.senderId == request.auth.uid) &&
+          ('amount' in request.resource.data && request.resource.data.amount is number && request.resource.data.amount > 0) &&
+          isValidOptionalString('recipientId', 0, 128) &&
+          isValidOptionalString('type', 0, 50)
+        )
+      );
       allow update, delete: if isSuperAdmin();
     }
 
@@ -2167,11 +2397,26 @@ service cloud.firestore {
     // ===============================================================
     match /clans/{clanId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && request.resource.data.leaderId == request.auth.uid &&
+      allow create: if isAuthenticated() &&
+                       request.resource.data.leaderId == request.auth.uid &&
+                       validStringLength('name', 1, 100) &&
+                       isValidOptionalString('description', 0, 1000) &&
                        (!('members' in request.resource.data) || isValidList(request.resource.data.members, 100));
       allow update: if isAuthenticated() && (
-        (request.auth.uid == resource.data.leaderId && (!('members' in request.resource.data) || isValidList(request.resource.data.members, 100))) ||
-        request.auth.uid in resource.data.members ||
+        (
+          request.auth.uid == resource.data.leaderId &&
+          areImmutableFieldsUnchanged(['leaderId', 'createdAt']) &&
+          isValidOptionalString('name', 1, 100) &&
+          isValidOptionalString('description', 0, 1000) &&
+          (!('members' in request.resource.data) || isValidList(request.resource.data.members, 100))
+        ) ||
+        (
+          // Clan members can only join or leave members list without modifying clan metadata or ownership
+          request.auth.uid in resource.data.members &&
+          areImmutableFieldsUnchanged(['leaderId', 'createdAt', 'name']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']) &&
+          isValidList(request.resource.data.members, 100)
+        ) ||
         isSuperAdmin()
       );
       allow delete: if isAuthenticated() && (
@@ -2317,7 +2562,10 @@ service cloud.firestore {
     }
 
     match /userActivity/{activityId} {
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       isValidOptionalString('activityType', 0, 100) &&
+                       isValidOptionalString('details', 0, 2000);
       allow read: if isOwner(resource.data.userId) || isSuperAdmin();
       allow update, delete: if isSuperAdmin();
     }
@@ -2360,7 +2608,59 @@ service cloud.firestore {
 
     match /userStats/{uid} {
       allow read: if isOwner(uid) || isSuperAdmin();
-      allow write: if isSuperAdmin();
+      allow create, update: if (isOwner(uid) && isValidUserUsageMetrics(request.resource.data, uid)) || isSuperAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    // User Storage, Network & Media Intelligence Metrics
+    match /user_usage_metrics/{metricId} {
+      allow read: if isAuthenticated() && (
+        isOwner(metricId) ||
+        isOwner(resource.data.userId) ||
+        isOwner(resource.data.uid) ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() &&
+                       isValidUserUsageMetrics(request.resource.data, metricId);
+      allow update: if isAuthenticated() && (
+        (
+          (isOwner(metricId) || isOwner(resource.data.userId) || isOwner(resource.data.uid)) &&
+          areImmutableFieldsUnchanged(['userId', 'uid', 'createdAt']) &&
+          isValidUserUsageMetrics(request.resource.data, metricId)
+        ) ||
+        isSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        isOwner(metricId) ||
+        isOwner(resource.data.userId) ||
+        isOwner(resource.data.uid) ||
+        isSuperAdmin()
+      );
+    }
+
+    match /userUsageMetrics/{metricId} {
+      allow read: if isAuthenticated() && (
+        isOwner(metricId) ||
+        isOwner(resource.data.userId) ||
+        isOwner(resource.data.uid) ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() &&
+                       isValidUserUsageMetrics(request.resource.data, metricId);
+      allow update: if isAuthenticated() && (
+        (
+          (isOwner(metricId) || isOwner(resource.data.userId) || isOwner(resource.data.uid)) &&
+          areImmutableFieldsUnchanged(['userId', 'uid', 'createdAt']) &&
+          isValidUserUsageMetrics(request.resource.data, metricId)
+        ) ||
+        isSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        isOwner(metricId) ||
+        isOwner(resource.data.userId) ||
+        isOwner(resource.data.uid) ||
+        isSuperAdmin()
+      );
     }
 
     match /groupStats/{groupId} {
@@ -2419,15 +2719,12 @@ service cloud.firestore {
     }
 
     match /reports/{reportId} {
-      allow create: if isAuthenticated() && (
-        request.resource.data.reportedBy == request.auth.uid ||
-        isSuperAdmin()
-      );
+      allow create: if isAuthenticated() && isValidReport(request.resource.data);
       allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.reportedBy ||
         isSuperAdmin()
       );
-      allow write: if isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
     }
 
     match /blockedUsers/{blockId} {
@@ -2452,7 +2749,7 @@ service cloud.firestore {
     }
 
     match /spamReports/{reportId} {
-      allow create: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidSpamReport(request.resource.data);
       allow read, write: if isSuperAdmin();
     }
 
@@ -2545,16 +2842,23 @@ service cloud.firestore {
     match /offlineMessageQueue/{queueId} {
       allow read: if isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
+        resource.data.from == request.auth.uid ||
         isSuperAdmin()
       );
 
       allow create: if isAuthenticated() && (
         request.resource.data.userId == request.auth.uid ||
+        request.resource.data.from == request.auth.uid ||
         isSuperAdmin()
-      );
+      ) &&
+      isValidOptionalString('text', 0, 10000) &&
+      isValidOptionalString('content', 0, 10000) &&
+      isValidOptionalString('chatId', 0, 128) &&
+      isValidOptionalString('to', 0, 128);
 
       allow update, delete: if isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
+        resource.data.from == request.auth.uid ||
         isSuperAdmin()
       );
     }
@@ -2680,12 +2984,17 @@ service cloud.firestore {
     }
 
     match /userFeedback/{feedbackId} {
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       (validStringLength('feedback', 1, 5000) || validStringLength('message', 1, 5000) || validStringLength('text', 1, 5000));
       allow read, write: if isSuperAdmin();
     }
 
     match /supportTickets/{ticketId} {
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       validStringLength('subject', 1, 200) &&
+                       validStringLength('message', 1, 5000);
       allow read: if isOwner(resource.data.userId) || isSuperAdmin();
       allow update, delete: if isSuperAdmin();
     }
@@ -3035,7 +3344,29 @@ service cloud.firestore {
     // ===============================================================
     match /groupStages/{stageId} {
       allow read: if isAuthenticated();
-      allow create, update: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+                       ('hostUid' in request.resource.data && request.resource.data.hostUid == request.auth.uid) &&
+                       validStringLength('title', 1, 128) &&
+                       isValidOptionalString('status', 0, 50) &&
+                       isValidOptionalList('participants', 100) &&
+                       isValidOptionalList('speakers', 50);
+      allow update: if isAuthenticated() && (
+        (
+          resource.data.hostUid == request.auth.uid &&
+          areImmutableFieldsUnchanged(['hostUid', 'createdAt']) &&
+          isValidOptionalString('title', 1, 128) &&
+          isValidOptionalString('status', 0, 50) &&
+          isValidOptionalList('participants', 100) &&
+          isValidOptionalList('speakers', 50)
+        ) ||
+        (
+          // Participants can join or leave stage speakers/participants without changing host or metadata
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['participants', 'speakers', 'listeners']) &&
+          isValidOptionalList('participants', 100) &&
+          isValidOptionalList('speakers', 50)
+        ) ||
+        isSuperAdmin()
+      );
       allow delete: if isSuperAdmin() || (isAuthenticated() && resource.data.hostUid == request.auth.uid);
     }
 
@@ -3095,14 +3426,25 @@ service cloud.firestore {
       // Subcollection: match /channels/{channelId}/posts/{postId}
       match /posts/{postId} {
         allow read: if isAuthenticated();
-        allow create, update: if isAuthenticated() && (
+        allow create: if isAuthenticated() && (
           (exists(/databases/$(database)/documents/channels/$(channelId)) &&
            get(/databases/$(database)/documents/channels/$(channelId)).data.creatorId == request.auth.uid) ||
-          request.resource.data.authorId == request.auth.uid ||
           isSuperAdmin()
         ) && (
-          isValidOptionalString('text', 0, 10000) ||
-          isValidOptionalString('content', 0, 10000)
+          validStringLength('text', 1, 10000) ||
+          validStringLength('content', 1, 10000)
+        );
+        allow update: if isAuthenticated() && (
+          (
+            (
+              (exists(/databases/$(database)/documents/channels/$(channelId)) &&
+               get(/databases/$(database)/documents/channels/$(channelId)).data.creatorId == request.auth.uid) ||
+              resource.data.authorId == request.auth.uid
+            ) &&
+            areImmutableFieldsUnchanged(['authorId', 'createdAt', 'channelId']) &&
+            (isValidOptionalString('text', 0, 10000) || isValidOptionalString('content', 0, 10000))
+          ) ||
+          isSuperAdmin()
         );
         allow delete: if isAuthenticated() && (
           (exists(/databases/$(database)/documents/channels/$(channelId)) &&
@@ -3138,7 +3480,115 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // 24. ZERO-TRUST DEFAULT DENY BARRIER
+    // 24. QUANTUM SCHEDULED MESSAGES (Queue, Dispatch & Timers)
+    // ===============================================================
+    match /scheduled_messages/{messageId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        request.auth.uid == resource.data.receiverId ||
+        ('chatId' in resource.data && isChatParticipant(resource.data.chatId)) ||
+        ('groupId' in resource.data && isGroupMember(resource.data.groupId)) ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && isValidScheduledMessageCreate(request.resource.data);
+      allow update: if isAuthenticated() && isValidScheduledMessageUpdate(request.resource.data, resource.data);
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        isSuperAdmin()
+      );
+    }
+
+    match /scheduledMessages/{messageId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        request.auth.uid == resource.data.receiverId ||
+        ('chatId' in resource.data && isChatParticipant(resource.data.chatId)) ||
+        ('groupId' in resource.data && isGroupMember(resource.data.groupId)) ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && isValidScheduledMessageCreate(request.resource.data);
+      allow update: if isAuthenticated() && isValidScheduledMessageUpdate(request.resource.data, resource.data);
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        isSuperAdmin()
+      );
+    }
+
+    // ===============================================================
+    // 25. EPHEMERAL DEAD DROPS (Quantum Vault & Anti-Shoulder-Surfing)
+    // ===============================================================
+    match /dead_drops/{dropId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.creatorId ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.recipientId ||
+        request.auth.uid == resource.data.to ||
+        ('chatId' in resource.data && isChatParticipant(resource.data.chatId)) ||
+        ('groupId' in resource.data && isGroupMember(resource.data.groupId)) ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && isValidDeadDropCreate(request.resource.data);
+      allow update: if isAuthenticated() && isValidDeadDropUpdate(request.resource.data, resource.data);
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.creatorId ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        isSuperAdmin() ||
+        (resource.data.status in ['burned', 'expired'])
+      );
+    }
+
+    match /deadDrops/{dropId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.creatorId ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.recipientId ||
+        request.auth.uid == resource.data.to ||
+        ('chatId' in resource.data && isChatParticipant(resource.data.chatId)) ||
+        ('groupId' in resource.data && isGroupMember(resource.data.groupId)) ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && isValidDeadDropCreate(request.resource.data);
+      allow update: if isAuthenticated() && isValidDeadDropUpdate(request.resource.data, resource.data);
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.creatorId ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        isSuperAdmin() ||
+        (resource.data.status in ['burned', 'expired'])
+      );
+    }
+
+    match /ephemeral_dead_drops/{dropId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.creatorId ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.recipientId ||
+        request.auth.uid == resource.data.to ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && isValidDeadDropCreate(request.resource.data);
+      allow update: if isAuthenticated() && isValidDeadDropUpdate(request.resource.data, resource.data);
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.creatorId ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.from ||
+        isSuperAdmin() ||
+        (resource.data.status in ['burned', 'expired'])
+      );
+    }
+
+    // ===============================================================
+    // 26. ZERO-TRUST DEFAULT DENY BARRIER
     // ===============================================================
     match /{document=**} {
       allow read, write: if false;

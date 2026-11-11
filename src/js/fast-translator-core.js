@@ -544,8 +544,74 @@ export const EXPANDED_MULTILINGUAL_DICTIONARY = {
     'poa sana': 'Very cool / Doing great',
     'hakuna matata': 'No trouble / No worries',
     'uko wapi': 'Where are you located?'
+  },
+  // English -> Nigerian Pidgin
+  'pcm': {
+    'hello': 'How far!',
+    'hello!': 'How far!',
+    'hi': 'How far!',
+    'good morning': 'Good morning o',
+    'good afternoon': 'Good afternoon o',
+    'good evening': 'Good evening o',
+    'good night': 'Good night o',
+    'welcome': 'Welcome o',
+    'how are you': 'How you dey?',
+    'how are you?': 'How you dey?',
+    'how are you doing': 'How body?',
+    'how is it going': 'Wetin dey happen?',
+    'what\'s up': 'Wetin dey happen?',
+    'what is up': 'Wetin dey sup?',
+    'thank you': 'Thank you well well',
+    'thank you very much': 'Thank you well well',
+    'thanks': 'Thank you well well',
+    'you\'re welcome': 'No wahala',
+    'you are welcome': 'No wahala',
+    'no problem': 'No wahala',
+    'please': 'Abeg',
+    'sorry': 'E pele / Sorry o',
+    'i am sorry': 'Sorry o',
+    'don\'t worry': 'No shake',
+    'yes': 'Yes na',
+    'no': 'No o',
+    'goodbye': 'Later na',
+    'bye': 'Later na',
+    'see you later': 'See you later na',
+    'where are you': 'Which side you dey?',
+    'what are you doing': 'Wetin you dey do?',
+    'i am fine': 'I dey kampe',
+    'i am here': 'I dey here',
+    'let\'s go': 'Make we go',
+    'let us go': 'Make we go'
   }
 };
+
+// ---------------------------------------------------------------------------
+// LANGUAGE CODE NORMALIZER (< 0.001ms)
+// ---------------------------------------------------------------------------
+export function normalizeLangCode(lang) {
+  if (!lang || typeof lang !== 'string') return 'es';
+  const l = lang.trim().toLowerCase();
+  const map = {
+    'spanish': 'es', 'es': 'es', 'español': 'es',
+    'french': 'fr', 'fr': 'fr', 'français': 'fr',
+    'german': 'de', 'de': 'de', 'deutsch': 'de',
+    'italian': 'it', 'it': 'it', 'italiano': 'it',
+    'portuguese': 'pt', 'pt': 'pt', 'português': 'pt',
+    'english': 'en', 'en': 'en',
+    'russian': 'ru', 'ru': 'ru',
+    'arabic': 'ar', 'ar': 'ar',
+    'hindi': 'hi', 'hi': 'hi',
+    'chinese': 'zh', 'zh': 'zh', 'chinese (mandarin)': 'zh',
+    'japanese': 'ja', 'ja': 'ja',
+    'nigerian pidgin': 'pcm', 'pidgin': 'pcm', 'pcm': 'pcm',
+    'yoruba': 'yo', 'yo': 'yo',
+    'hausa': 'ha', 'ha': 'ha',
+    'igbo': 'ig', 'ig': 'ig',
+    'swahili': 'sw', 'sw': 'sw',
+    'tagalog': 'tl', 'tl': 'tl'
+  };
+  return map[l] || l;
+}
 
 // ---------------------------------------------------------------------------
 // TIER 1 FAST DIRECT TRANSLATE (0ms SYNCHRONOUS RESOLUTION)
@@ -555,14 +621,15 @@ export function fastTranslateSync(rawText, targetLang = 'es') {
   const clean = rawText.trim();
   if (!clean) return '';
 
-  const cacheKey = `${targetLang}:${clean.toLowerCase()}`;
-  const cached = translationLRU.get(cacheKey);
+  const normLang = normalizeLangCode(targetLang);
+  const cacheKey = `${normLang}:${clean.toLowerCase()}`;
+  const cached = translationLRU.get(cacheKey) || translationLRU.get(`${targetLang}:${clean.toLowerCase()}`);
   if (cached) return cached;
 
   const lower = clean.toLowerCase();
   const stripped = lower.replace(/[¡!¿?.,]/g, '').trim();
 
-  const dict = EXPANDED_MULTILINGUAL_DICTIONARY[targetLang];
+  const dict = EXPANDED_MULTILINGUAL_DICTIONARY[normLang] || EXPANDED_MULTILINGUAL_DICTIONARY[targetLang];
   if (dict) {
     if (dict[lower]) {
       translationLRU.set(cacheKey, dict[lower]);
@@ -585,18 +652,19 @@ const inFlightTranslations = new Map();
 export async function fastTranslateAsync(rawText, targetLang = 'es') {
   if (!rawText || !rawText.trim()) return '';
   const clean = rawText.trim();
+  const normLang = normalizeLangCode(targetLang);
 
   // Step 1: Check 0ms Instant Cache & Lexicon
-  const syncMatch = fastTranslateSync(clean, targetLang);
+  const syncMatch = fastTranslateSync(clean, normLang);
   if (syncMatch) return syncMatch;
 
-  const cacheKey = `${targetLang}:${clean.toLowerCase()}`;
+  const cacheKey = `${normLang}:${clean.toLowerCase()}`;
   const existingInFlight = inFlightTranslations.get(cacheKey);
   if (existingInFlight) return existingInFlight;
 
   const translationPromise = (async () => {
     // Check LRU again in case it was resolved in another tick
-    const cached = translationLRU.get(cacheKey);
+    const cached = translationLRU.get(cacheKey) || translationLRU.get(`${targetLang}:${clean.toLowerCase()}`);
     if (cached) return cached;
 
     const langNameMap = {
@@ -606,14 +674,14 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
       'pcm': 'Nigerian Pidgin', 'tl': 'Tagalog', 'sw': 'Swahili', 'yo': 'Yoruba',
       'ha': 'Hausa', 'ig': 'Igbo', 'tr': 'Turkish'
     };
-    const langName = langNameMap[targetLang] || targetLang;
+    const langName = langNameMap[normLang] || langNameMap[targetLang] || targetLang;
 
     // Fast Runner 1: Direct Neural Google GTX (< 150ms). Skip for non-ISO codes like pcm/pidgin
-    if (typeof fetch === 'function' && targetLang !== 'pcm' && targetLang !== 'pidgin') {
+    if (typeof fetch === 'function' && normLang !== 'pcm' && normLang !== 'pidgin') {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 3500);
-        const apiTarget = targetLang === 'en' ? 'en' : targetLang;
+        const timer = setTimeout(() => controller.abort(), 2500);
+        const apiTarget = normLang === 'en' ? 'en' : normLang;
         const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(apiTarget)}&dt=t&q=${encodeURIComponent(clean)}`, {
           signal: controller.signal
         });
@@ -635,8 +703,8 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
     if (typeof fetch === 'function' && typeof AbortController !== 'undefined') {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 3000);
-        const apiTarget = (targetLang === 'pcm' || targetLang === 'pidgin') ? 'en' : targetLang;
+        const timer = setTimeout(() => controller.abort(), 2500);
+        const apiTarget = (normLang === 'pcm' || normLang === 'pidgin') ? 'en' : normLang;
         const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=autodetect|${encodeURIComponent(apiTarget)}`, {
           signal: controller.signal
         });
@@ -657,12 +725,12 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
       try {
         let cleanAi = '';
         if (window.chronexAI && typeof window.chronexAI.translateText === 'function') {
-          cleanAi = await window.chronexAI.translateText(clean, targetLang || langName);
+          cleanAi = await window.chronexAI.translateText(clean, langName);
         } else if (typeof fetch === 'function') {
           const transResp = await fetch('/api/translate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: clean, targetLang: targetLang || langName })
+            body: JSON.stringify({ text: clean, targetLang: langName, sourceLang: 'auto' })
           });
           if (transResp.ok) {
             const data = await transResp.json();
@@ -692,6 +760,7 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
 if (typeof window !== 'undefined') {
   window.fastTranslateSync = fastTranslateSync;
   window.fastTranslateAsync = fastTranslateAsync;
+  window.normalizeLangCode = normalizeLangCode;
   window.translationLRU = translationLRU;
   window.EXPANDED_MULTILINGUAL_DICTIONARY = EXPANDED_MULTILINGUAL_DICTIONARY;
 }

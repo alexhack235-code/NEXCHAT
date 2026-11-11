@@ -862,16 +862,45 @@ export async function translateMessageElement(bubbleEl, requestedTarget = null) 
     }
   }
 
-  let targetLang = requestedTarget || window.nexPreferredLang || localStorage.getItem('nex_preferred_lang') || 'English';
+  let preferred = window.nexPreferredLang || localStorage.getItem('nex_auto_translate_target_lang') || localStorage.getItem('nex_preferred_lang');
+  let targetLang = requestedTarget || preferred;
+  if (!targetLang) {
+    const lower = rawText.toLowerCase();
+    const isCommonSpanish = /^(hola|buenos|buenas|cómo estás|como estas|qué tal|que tal|gracias|de nada|por favor|adiós|chao|sí|si)\b/.test(lower);
+    targetLang = isCommonSpanish ? 'English' : 'Spanish';
+  }
   const cacheKey = `${targetLang.toLowerCase()}:${rawText}`;
 
-  // Tier 0: 0ms Instant Memory Cache
+  // Tier 0: 0ms Instant Memory Cache (< 0.05ms)
   if (clientTranslationCache.has(cacheKey)) {
     const hit = clientTranslationCache.get(cacheKey);
     renderTranslationBox(box, bubbleEl, hit.translated, hit.detected, hit.target);
     return;
   }
 
+  // Tier 1: 0ms Synchronous Phrase Dictionary & Lexicon Match (< 0.1ms)
+  if (typeof window !== 'undefined' && typeof window.fastTranslateSync === 'function') {
+    const syncHit = window.fastTranslateSync(rawText, targetLang);
+    if (syncHit) {
+      clientTranslationCache.set(cacheKey, { translated: syncHit, detected: 'Auto', target: targetLang });
+      renderTranslationBox(box, bubbleEl, syncHit, 'Auto', targetLang);
+      return;
+    }
+  }
+
+  // Tier 2: Speculative Client-Side Fast Translation (< 150ms via Google GTX / Edge MT)
+  if (typeof window !== 'undefined' && typeof window.fastTranslateAsync === 'function') {
+    try {
+      const fastResult = await window.fastTranslateAsync(rawText, targetLang);
+      if (fastResult && fastResult.trim() && fastResult.trim().toLowerCase() !== rawText.toLowerCase()) {
+        clientTranslationCache.set(cacheKey, { translated: fastResult.trim(), detected: 'Auto', target: targetLang });
+        renderTranslationBox(box, bubbleEl, fastResult.trim(), 'Auto', targetLang);
+        return;
+      }
+    } catch (_) {}
+  }
+
+  // Tier 3: Sub-Second Server Fallback (/api/translate - single non-redundant call)
   box.innerHTML = `<span class="nex-trans-label"><i class="fa-solid fa-spinner fa-spin"></i> Translating...</span>`;
 
   try {
@@ -889,25 +918,9 @@ export async function translateMessageElement(bubbleEl, requestedTarget = null) 
     });
 
     const data = await res.json();
-    let translated = data.translatedText || data.result || data.response || 'Translation unavailable';
+    let translated = data.translatedText || data.result || data.response || rawText;
     let detected = data.detectedLang || 'Auto';
     let target = data.targetLang || targetLang;
-
-    // Smart auto-alternate: if detected language matches target (e.g. English -> English), translate to Spanish
-    if (!requestedTarget && (detected.toLowerCase().includes(target.toLowerCase()) || target.toLowerCase().includes(detected.toLowerCase()))) {
-      const alternateTarget = target.toLowerCase().includes('english') ? 'Spanish' : 'English';
-      const resAlt = await fetch('/api/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-nexchat-secret': NEXCHAT_SECRET },
-        body: JSON.stringify({ text: rawText, targetLang: alternateTarget, sourceLang: 'auto' })
-      });
-      const dataAlt = await resAlt.json();
-      if (dataAlt && dataAlt.translatedText) {
-        translated = dataAlt.translatedText;
-        target = dataAlt.targetLang || alternateTarget;
-        detected = dataAlt.detectedLang || detected;
-      }
-    }
 
     clientTranslationCache.set(cacheKey, { translated, detected, target });
     renderTranslationBox(box, bubbleEl, translated, detected, target);

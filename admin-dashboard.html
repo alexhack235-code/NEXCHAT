@@ -2073,6 +2073,1061 @@
       }
     }
 
+    /* ========================================================================= */
+    /* ULTRA-RESPONSIVE ANDROID VIEWPORT & OVERFLOW REMEDIATION (<= 768px)       */
+    /* ========================================================================= */
+    @media (max-width: 768px) {
+      /* 1. Prevent Flexbox Centering Clipping Bug on Auth Gate */
+      #adminAuthGateModal {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        padding: 16px !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-direction: column !important;
+      }
+
+      .auth-gate-card {
+        width: 100% !important;
+        max-width: calc(100vw - 36px) !important;
+        padding: 24px 16px !important;
+        margin: auto !important;
+        box-sizing: border-box !important;
+        border-radius: 18px !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 242, 255, 0.2) !important;
+      }
+
+      .auth-gate-card h2 {
+        font-size: 15px !important;
+        letter-spacing: 0.5px !important;
+        line-height: 1.3 !important;
+        word-break: break-word !important;
+      }
+
+      .auth-gate-card input.auth-input {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        font-size: 12px !important;
+        padding: 10px 12px !important;
+      }
+
+      /* 2. Global Containers: Zero Horizontal Drift */
+      html, body {
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        position: relative !important;
+      }
+
+      .admin-container,
+      .admin-main-container,
+      #adminMainContainer {
+        width: 100% !important;
+        max-width: 100vw !important;
+        padding: 8px 8px calc(80px + env(safe-area-inset-bottom, 10px)) !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+      }
+
+      /* 3. Header & Session Bar Fluid Stacking */
+      .admin-header {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .admin-header-actions {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        width: 100% !important;
+        margin-top: 8px !important;
+      }
+
+      .admin-header-actions .admin-btn,
+      .admin-header-actions a.admin-btn {
+        flex: 1 1 calc(50% - 6px) !important;
+        min-width: 120px !important;
+        justify-content: center !important;
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+      }
+
+      .superadmin-session-bar {
+        padding: 10px 12px !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .session-info {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        font-size: 11px !important;
+        word-break: break-all !important;
+      }
+
+      /* 4. Complete Flattening of All Inline Multi-Column Grids */
+      div[style*="grid-template-columns"],
+      section[style*="grid-template-columns"],
+      .control-deck-grid,
+      .metrics-grid,
+      .hud-metrics-grid,
+      .admin-grid,
+      .panel-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* 5. Fluid Bounding of Rigid Min-Width Elements */
+      [style*="min-width"],
+      .admin-panel,
+      .tab-pane,
+      .control-unit-card,
+      .admin-card {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* 6. Form Inputs & Actions Stack Responsively */
+      .admin-input,
+      input.admin-input,
+      select.admin-select,
+      textarea.admin-textarea {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .control-deck-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+      }
+
+      .control-deck-header > div:last-child {
+        width: 100% !important;
+        flex-wrap: wrap !important;
+      }
+
+      .control-deck-header .admin-btn,
+      .control-deck-header .deck-nav-pill {
+        flex: 1 1 calc(50% - 6px) !important;
+        font-size: 10.5px !important;
+        padding: 5px 8px !important;
+        text-align: center !important;
+        justify-content: center !important;
+      }
+
+      /* 7. Tables: Smooth Touch Scroll Container */
+      .admin-table-wrapper,
+      .table-responsive,
+      div:has(> table) {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        display: block !important;
+        margin-bottom: 12px !important;
+      }
+
+      table.admin-table,
+      table.cyber-table {
+        min-width: 500px !important;
+      }
+
+      /* 8. WebGL Threat Globe Adaptive Canvas */
+      .globe-stage-wrapper {
+        height: 220px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      /* 9. Navigation Tabs Horizontal Swipe */
+      .admin-tabs-carousel {
+        padding: 0 4px !important;
+      }
+
+      .admin-tabs,
+      .tabs-container {
+        display: flex !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+        padding-bottom: 6px !important;
+      }
+
+      .admin-tabs::-webkit-scrollbar,
+      .tabs-container::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      .tab-btn {
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        font-size: 11px !important;
+        padding: 6px 10px !important;
+      }
+
+      /* 10. Modals Fluid Scaling on Mobile */
+      .admin-modal-card {
+        width: 100% !important;
+        max-width: calc(100vw - 20px) !important;
+        padding: 14px 12px !important;
+        margin: 10px auto !important;
+        border-radius: 14px !important;
+      }
+
+      .admin-modal-card.wide {
+        max-width: calc(100vw - 16px) !important;
+      }
+    }
+
+  
+    /* ==========================================================================
+       NEXCHAT PRODUCTION ANDROID & MOBILE RIGID RESPONSIVE ENGINE (360px - 414px)
+       Strict Zero-Overflow, 100% Fluid Obsidian Layout, Zero Cut-offs
+       ========================================================================== */
+
+    @media (max-width: 768px) {
+      *, *::before, *::after {
+        box-sizing: border-box !important;
+      }
+
+      html, body {
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        position: relative !important;
+        touch-action: pan-y !important;
+        overscroll-behavior-x: none !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      .admin-container,
+      .admin-main-container,
+      #adminMainContainer {
+        width: 100% !important;
+        max-width: 100vw !important;
+        padding: 10px 10px calc(80px + env(safe-area-inset-bottom, 12px)) !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+      }
+
+      .admin-panel,
+      .tab-pane {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 14px 12px !important;
+        border-radius: 14px !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+      }
+
+      /* 2. Strict Passkey Access Gate Modal & Flex Centering Fix */
+      #adminAuthGateModal {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        padding: 14px 10px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        box-sizing: border-box !important;
+        z-index: 100000 !important;
+      }
+
+      .auth-gate-card,
+      #adminAuthGateModal .auth-gate-card {
+        width: calc(100vw - 28px) !important;
+        max-width: 340px !important;
+        margin: auto !important;
+        padding: 22px 14px !important;
+        border-radius: 18px !important;
+        max-height: calc(100dvh - 28px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+      }
+
+      .auth-gate-icon {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 20px !important;
+        margin: 0 auto 12px !important;
+      }
+
+      .auth-gate-card h2 {
+        font-size: clamp(14px, 4vw, 17px) !important;
+        letter-spacing: 0.5px !important;
+        line-height: 1.3 !important;
+        word-break: break-word !important;
+      }
+
+      .auth-gate-card p {
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+        margin-top: 6px !important;
+      }
+
+      .auth-input,
+      #adminPasskeyInput {
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: 12px !important;
+        letter-spacing: 1px !important;
+        padding: 11px 10px !important;
+        margin: 14px 0 12px !important;
+        box-sizing: border-box !important;
+      }
+
+      .auth-input::placeholder,
+      #adminPasskeyInput::placeholder {
+        letter-spacing: 0.3px !important;
+        font-size: 10.5px !important;
+      }
+
+      #unlockAdminBtn {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        font-size: 12px !important;
+        padding: 12px 8px !important;
+      }
+
+      .auth-gate-card > div:last-child {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+        margin-top: 14px !important;
+        font-size: 11px !important;
+      }
+
+      /* 3. Header & Brand App Bar */
+      .admin-header {
+        padding: 10px 12px !important;
+        border-radius: 14px !important;
+        margin-bottom: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .admin-header-main-row {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+      }
+
+      .admin-header-brand {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
+
+      .admin-shield-icon {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        font-size: 18px !important;
+        border-radius: 10px !important;
+        flex-shrink: 0 !important;
+      }
+
+      .admin-brand-text {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
+
+      .admin-title {
+        font-size: clamp(11.5px, 3.4vw, 13.5px) !important;
+        letter-spacing: 0.5px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+        line-height: 1.25 !important;
+      }
+
+      .admin-subtitle {
+        font-size: 9px !important;
+        letter-spacing: 0.3px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        opacity: 0.8 !important;
+        display: block !important;
+        margin-top: 2px !important;
+      }
+
+      .admin-mobile-toggle-btn {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        display: inline-flex !important;
+        flex-shrink: 0 !important;
+      }
+
+      .admin-header-actions {
+        display: none !important;
+        width: 100% !important;
+        padding-top: 10px !important;
+        margin-top: 10px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        gap: 8px !important;
+        flex-direction: column !important;
+      }
+
+      .admin-header-actions.mobile-open {
+        display: flex !important;
+      }
+
+      .admin-header-actions .admin-chip,
+      .admin-header-actions .admin-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        min-height: 42px !important;
+        font-size: 12px !important;
+      }
+
+      /* 4. SuperAdmin Session Bar & Grid Alignment Fix */
+      .superadmin-session-bar {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        margin-bottom: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .session-info {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 6px !important;
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+      }
+
+      #adminUserIdentity {
+        word-break: break-all !important;
+        overflow-wrap: anywhere !important;
+        color: #fff !important;
+        font-size: 11px !important;
+      }
+
+      .superadmin-session-bar > div:last-child {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
+
+      #sessionTimerText {
+        width: 100% !important;
+        text-align: center !important;
+        font-size: 11px !important;
+        padding: 3px 0 !important;
+        display: block !important;
+      }
+
+      .superadmin-session-bar .admin-btn {
+        width: 100% !important;
+        min-height: 42px !important;
+        justify-content: center !important;
+        padding: 8px 12px !important;
+        font-size: 11.5px !important;
+        box-sizing: border-box !important;
+      }
+
+      /* 5. Fluid Carousel Tabs System */
+      .admin-tabs-carousel-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 14px !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+      }
+
+      .admin-tabs-nav {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scroll-snap-type: x proximity !important;
+        touch-action: pan-x !important;
+        overscroll-behavior-x: contain !important;
+        padding: 8px 10px !important;
+        gap: 7px !important;
+        margin-bottom: 4px !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+
+      .admin-tabs-nav::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      .admin-tab-btn {
+        flex: 0 0 auto !important;
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        min-height: 42px !important;
+        padding: 8px 12px !important;
+        font-size: 11.5px !important;
+        box-sizing: border-box !important;
+        touch-action: pan-x !important;
+      }
+
+      .admin-tabs-carousel-indicator {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        padding: 4px 6px !important;
+      }
+
+      .tabs-carousel-hint {
+        font-size: 10px !important;
+        white-space: nowrap !important;
+      }
+
+      /* 6. Metrics Grid & Metric Cards System */
+      .hud-metrics-grid,
+      .metrics-grid,
+      .metrics-grid[style*="grid-template-columns: repeat(4, 1fr)"] {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        margin-bottom: 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .hud-card,
+      .stat-card,
+      .metric-card,
+      .hud-metrics-grid .metric-card,
+      .metrics-grid .metric-card {
+        padding: 10px 10px !important;
+        border-radius: 12px !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+      }
+
+      .metric-card-header {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        margin-bottom: 6px !important;
+        min-width: 0 !important;
+      }
+
+      .metric-card-title,
+      .hud-metrics-grid .metric-card-title,
+      .metrics-grid .metric-card-title,
+      .metric-label,
+      .stat-label {
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.4px !important;
+        color: var(--text-dim) !important;
+        text-transform: uppercase !important;
+        line-height: 1.25 !important;
+        word-break: break-word !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
+
+      .metric-card-header i {
+        flex-shrink: 0 !important;
+        font-size: 13px !important;
+        margin-top: 1px !important;
+      }
+
+      .metric-card-value,
+      .hud-metrics-grid .metric-card-value,
+      .metrics-grid .metric-card-value,
+      .metric-value,
+      .stat-val,
+      .stat-value {
+        font-family: 'Orbitron', monospace !important;
+        font-size: clamp(15px, 4vw, 19px) !important;
+        font-weight: 800 !important;
+        color: #fff !important;
+        line-height: 1.2 !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
+        margin: 4px 0 !important;
+      }
+
+      .metric-card-footer,
+      .hud-metrics-grid .metric-card-footer,
+      .metrics-grid .metric-card-footer,
+      .metric-sub,
+      .stat-sub {
+        font-size: 9.5px !important;
+        color: var(--text-dim) !important;
+        line-height: 1.3 !important;
+        word-break: break-word !important;
+        white-space: normal !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        margin-top: 4px !important;
+      }
+
+      /* 7. SuperAdmin Master Cyber Control Deck */
+      .admin-control-deck {
+        padding: 12px 10px !important;
+        border-radius: 14px !important;
+        margin-bottom: 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .control-deck-header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        margin-bottom: 12px !important;
+        padding-bottom: 10px !important;
+      }
+
+      .control-deck-header > div:last-child {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        gap: 6px !important;
+        width: 100% !important;
+        padding-bottom: 4px !important;
+      }
+
+      .control-deck-header > div:last-child::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      .deck-nav-pill,
+      .control-deck-header .admin-btn {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+        min-height: 38px !important;
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+      }
+
+      .control-deck-grid,
+      .switchboard-grid,
+      .security-matrix-grid,
+      .grid-2col,
+      .grid-3col,
+      .advanced-stat-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .control-unit-card {
+        padding: 12px 12px !important;
+        border-radius: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+      }
+
+      .control-unit-header {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        margin-bottom: 8px !important;
+      }
+
+      .control-unit-title {
+        font-size: 12px !important;
+        line-height: 1.3 !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        word-break: break-word !important;
+      }
+
+      .control-unit-desc {
+        font-size: 11px !important;
+        line-height: 1.4 !important;
+        margin-bottom: 10px !important;
+      }
+
+      /* Cyber Segmented Controls Horizontal Pan */
+      .cyber-segmented-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        gap: 4px !important;
+        padding: 3px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .cyber-segmented-group::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      .cyber-seg-btn {
+        flex: 1 0 auto !important;
+        min-height: 38px !important;
+        padding: 6px 10px !important;
+        font-size: 10.5px !important;
+        white-space: nowrap !important;
+      }
+
+      /* Hardware Telemetry Meters */
+      .telemetry-meters-bar {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        padding: 10px !important;
+        margin-top: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* 8. Universal 1-Column Auto-Stack for All Multi-Column Grids */
+      div[style*="grid-template-columns: 1fr 1fr"],
+      div[style*="grid-template-columns: 1.2fr 1fr"],
+      div[style*="grid-template-columns: 1fr 1.2fr"],
+      div[style*="grid-template-columns: 1.15fr 0.85fr"],
+      div[style*="grid-template-columns: 1.1fr 0.9fr"],
+      div[style*="grid-template-columns: 1.2fr 0.8fr"],
+      div[style*="grid-template-columns: 280px 1fr"],
+      div[style*="grid-template-columns: repeat(auto-fit"],
+      div[style*="grid-template-columns: repeat(auto-fill"],
+      .tab-pane > div[style*="grid-template-columns"],
+      .admin-panel div[style*="grid-template-columns"],
+      #tab-switchboard div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* 9. Universal Data Table Containment & Smooth Touch Scrolling */
+      .table-container,
+      .admin-table-wrapper,
+      .admin-table-wrap,
+      .table-responsive,
+      .table-scroll-container,
+      .cyber-table-container,
+      div[style*="overflow-x: auto"] {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
+        overscroll-behavior-x: contain !important;
+        border-radius: 10px !important;
+        margin-bottom: 12px !important;
+        box-sizing: border-box !important;
+      }
+
+      .admin-table,
+      table.admin-table,
+      table.cyber-table,
+      table.data-table,
+      table#ipRegistrationsTable,
+      table#usersTable,
+      table#adminReelsTable,
+      table#adminGroupsTable,
+      table#adminAdvertsTable,
+      table#adminAiConsumersTable,
+      div[style*="overflow-x: auto"] > table {
+        min-width: 620px !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+
+      .admin-table th,
+      .admin-table td,
+      table#ipRegistrationsTable th,
+      table#ipRegistrationsTable td {
+        padding: 8px 10px !important;
+        font-size: 11px !important;
+        line-height: 1.35 !important;
+        word-break: break-word !important;
+      }
+
+      /* Table Action Buttons Container */
+      .admin-table td > div[style*="display: flex"] {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 5px !important;
+        min-width: 140px !important;
+      }
+
+      .admin-table td .admin-btn {
+        min-height: 34px !important;
+        padding: 4px 8px !important;
+        font-size: 10.5px !important;
+      }
+
+      /* 10. Form Controls, Search Filter Bars & Action Rows */
+      .filter-search,
+      div[style*="flex: 1; min-width: 2"],
+      div[style*="flex: 1; min-width: 1"] {
+        min-width: 0 !important;
+        width: 100% !important;
+        flex: 1 1 100% !important;
+      }
+
+      div[style*="display: flex"][style*="gap: 10px"],
+      div[style*="display: flex"][style*="gap: 8px"],
+      div[style*="display: flex"][style*="justify-content: space-between"],
+      .panel-header {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+
+      .panel-header {
+        align-items: stretch !important;
+        padding-bottom: 10px !important;
+        margin-bottom: 12px !important;
+      }
+
+      .panel-title {
+        font-size: clamp(12.5px, 3.5vw, 14.5px) !important;
+        line-height: 1.3 !important;
+        flex: 1 1 100% !important;
+        word-break: break-word !important;
+      }
+
+      /* Fix the Security IP Quotas overflow */
+      #userIpQuotaMonitorSection div[style*="display: flex; gap: 8px; align-items: center"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+      }
+
+      #filterIpRegistrationsInput,
+      #filterIpStatusSelect,
+      #userSearchInput,
+      #userRoleFilter,
+      #reelsSearchInput,
+      #reelsStatusFilter,
+      #reelsSortSelect,
+      #newIpAddressInput,
+      #newIpLabelInput,
+      #adminGroupSearchInput,
+      #adminGroupPrivacyFilter,
+      #adminAdSearchInput,
+      #adminAdStatusFilter {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+      }
+
+      /* 11. Overlapping Card Labels & Headers */
+      #tab-switchboard div[style*="display: flex; align-items: center; justify-content: space-between"],
+      #tab-algo div[style*="display: flex; justify-content: space-between; align-items: center"],
+      #tab-storage div[style*="display: flex; justify-content: space-between; font-size: 12px"],
+      #replayViewportStage > div,
+      #tab-geowar div[style*="display: flex; justify-content: space-between; align-items: center"] {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 6px !important;
+        width: 100% !important;
+      }
+
+      #tab-storage div[style*="display: flex; justify-content: space-between; font-size: 12px"] > span:first-child {
+        flex: 1 1 100% !important;
+        font-weight: 700 !important;
+        word-break: break-word !important;
+      }
+
+      #tab-storage div[style*="display: flex; justify-content: space-between; font-size: 12px"] > span:last-child {
+        font-size: 11px !important;
+        margin-left: auto !important;
+      }
+
+      /* 12. Monospace Streams & Terminal Output */
+      .admin-terminal-stream,
+      #treasuryRecentTxStream,
+      #powBenchmarkResult,
+      #aiQuotaResultDisplay {
+        word-break: break-all !important;
+        overflow-wrap: anywhere !important;
+        white-space: pre-wrap !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* 13. Canvas & WebGL Stages Mobile Fit */
+      .globe-stage-wrapper {
+        height: 280px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .globe-hud-overlay {
+        top: 8px !important;
+        left: 8px !important;
+        padding: 5px 8px !important;
+        font-size: 9px !important;
+        max-width: calc(100% - 16px) !important;
+      }
+
+      .globe-controls-overlay {
+        bottom: 8px !important;
+        right: 8px !important;
+        gap: 6px !important;
+      }
+
+      .globe-controls-overlay .admin-btn {
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+        min-height: 34px !important;
+      }
+
+      #cyberWarMapCanvas {
+        height: 240px !important;
+      }
+
+      /* Canvas floating radar header on 360px screens */
+      div[style*="position: absolute; top: 10px; left: 14px"] {
+        top: 8px !important;
+        left: 8px !important;
+        right: 8px !important;
+        max-width: calc(100% - 16px) !important;
+        padding: 4px 8px !important;
+        font-size: 9.5px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+      }
+
+      /* 14. Modals (Sanctions, Badge, Reels Video) */
+      .admin-modal-card,
+      .admin-modal-card.wide,
+      #adminReelVideoModal > div,
+      #adminUserSanctionsModal > div,
+      #adminVerificationBadgeModal > div {
+        width: calc(100vw - 20px) !important;
+        max-width: calc(100vw - 20px) !important;
+        max-height: calc(100dvh - 24px) !important;
+        padding: 16px 12px !important;
+        border-radius: 16px !important;
+        overflow-y: auto !important;
+        box-sizing: border-box !important;
+        margin: auto !important;
+      }
+
+      .admin-modal-header {
+        margin-bottom: 12px !important;
+        padding-bottom: 8px !important;
+      }
+
+      .admin-modal-header h3 {
+        font-size: 13.5px !important;
+        line-height: 1.3 !important;
+      }
+
+      #modalUserEmail, #modalUserUid, #modalBadgeUserUid, #modalBadgeUserHandle {
+        word-break: break-all !important;
+        overflow-wrap: anywhere !important;
+      }
+
+      /* Modal Bottom Action Button Rows Stack */
+      div[style*="display: flex; gap: 10px; margin-top: 6px"],
+      div[style*="display: flex; gap: 10px"]:has(#btnSaveAdminVerificationBadge),
+      div[style*="display: flex; gap: 10px"]:has(#modalSaveSanctionsBtn) {
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 8px !important;
+      }
+
+      #modalSaveSanctionsBtn,
+      #modalCancelSanctionsBtn,
+      #btnSaveAdminVerificationBadge,
+      #btnCancelAdminVerificationBadge {
+        width: 100% !important;
+        min-height: 44px !important;
+        justify-content: center !important;
+        font-size: 12px !important;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .hud-metrics-grid,
+      .metrics-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .admin-title {
+        font-size: 11px !important;
+        letter-spacing: 0.3px !important;
+      }
+
+      .admin-shield-icon {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+        font-size: 16px !important;
+      }
+
+      .admin-mobile-toggle-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2100,7 +3155,7 @@
         <i class="fa-solid fa-shield-halved"></i> Verify &amp; Unlock Console
       </button>
 
-      <div style="margin-top: 18px; display: flex; justify-content: space-between; font-size: 11.5px;">
+      <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 11.5px;">
         <a href="chat.html" style="color: var(--text-dim); text-decoration: none;">
           <i class="fa-solid fa-arrow-left"></i> Exit to Chat
         </a>
@@ -2282,6 +3337,9 @@
           </button>
           <button type="button" class="admin-btn secondary deck-nav-pill" data-target-tab="tab-fulfillment" style="font-size: 11px; padding: 6px 11px; border-color: rgba(37, 211, 102, 0.45); color: #25d366;">
             <i class="fa-brands fa-whatsapp"></i> WhatsApp Fulfillment
+          </button>
+          <button type="button" id="toggleControlDeckBtn" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px;" title="Toggle Deck View">
+            <i class="fa-solid fa-chevron-up" id="toggleControlDeckIcon"></i> <span id="toggleControlDeckText">Collapse Deck</span>
           </button>
           <button type="button" id="btnDeckFlushCache" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px;">
             <i class="fa-solid fa-broom"></i> Flush Edge Cache
@@ -3095,7 +4153,7 @@
             </div>
           </div>
 
-          <form id="broadcastDispatchForm" onsubmit="return false;">
+          <form id="broadcastDispatchForm" onsubmit="event.preventDefault(); window.dispatchBroadcastAnnouncement && window.dispatchBroadcastAnnouncement();">
             <div style="margin-bottom: 14px;">
               <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase;">
                 Announcement Headline
@@ -3247,9 +4305,9 @@
             <p style="font-size: 12px; color: var(--text-dim); margin: 0; line-height: 1.5; flex: 1; min-width: 280px;">
               Autonomous Sybil Prevention strictly enforces a <strong>hard limit of 2 accounts per IP address</strong> in <code style="color: var(--neon-cyan); font-family: monospace;">ip_registrations/{ipKey}</code>. SuperAdmins can inspect registration clusters, reset limits, grant exemptions to foreign developer nodes, or block abusive networks.
             </p>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <input type="text" id="filterIpRegistrationsInput" class="admin-input" placeholder="Search IP, email, or username..." style="font-size: 11.5px; width: 220px;" />
-              <select id="filterIpStatusSelect" class="admin-input" style="font-size: 11.5px; width: 140px;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; width: 100%; max-width: 100%;">
+              <input type="text" id="filterIpRegistrationsInput" class="admin-input" placeholder="Search IP, email, or username..." style="font-size: 11.5px; flex: 1 1 180px; min-width: 140px;" />
+              <select id="filterIpStatusSelect" class="admin-input" style="font-size: 11.5px; flex: 1 1 140px; min-width: 120px;">
                 <option value="all">All Statuses</option>
                 <option value="max_reached">Max Reached (2/2)</option>
                 <option value="within_limit">Within Limit (1/2)</option>
@@ -3261,8 +4319,8 @@
         </div>
 
         <!-- Table of IP Registrations -->
-        <div style="overflow-x: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;" id="ipRegistrationsTable">
+        <div class="admin-table-wrapper table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; width: 100%;">
+          <table class="admin-table cyber-table" style="width: 100%; min-width: 620px; border-collapse: collapse; font-size: 12px; text-align: left;" id="ipRegistrationsTable">
             <thead>
               <tr style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-dim);">
                 <th style="padding: 12px 14px;">IP Address / Geo</th>
@@ -3631,6 +4689,14 @@
             1.4x Active Lift
           </div>
           <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Trending Audio Synergy</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">SHADOW GOVERNOR DAMPENER</div>
+          <div class="stat-val" id="telemetryShadowGov" style="color: var(--neon-gold); font-size: 15px;">
+            STANDBY
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Soft Distribution Cap</div>
         </div>
       </div>
 
@@ -4182,7 +5248,7 @@
             <span class="badge" style="background: rgba(0, 255, 102, 0.15); color: var(--neon-green);">Root Authority</span>
           </div>
 
-          <form id="treasuryOpForm" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
+          <form id="treasuryOpForm" onsubmit="event.preventDefault();" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
             <div>
               <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
                 Target User UID or Email:
@@ -6226,9 +7292,59 @@
       }
 
       async function computeKeyHash(str) {
-        if (!crypto?.subtle) return '';
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str || ''));
-        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        if (!str) return '';
+        if (window.crypto && window.crypto.subtle) {
+          try {
+            const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+          } catch (_) {}
+        }
+        // Pure JavaScript SHA-256 fallback for non-secure contexts (HTTP / local network)
+        function sha256Fallback(ascii) {
+          function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
+          const mathPow = Math.pow;
+          const maxWord = mathPow(2, 32);
+          let i, j;
+          const words = [];
+          const asciiBitLength = ascii.length * 8;
+          let hash = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+          const k = [
+            0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+            0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+            0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+            0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+            0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+            0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+            0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+            0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+          ];
+          for (i = 0; i < ascii.length; i++) words[i >> 2] |= (ascii.charCodeAt(i) & 255) << (24 - (i % 4) * 8);
+          words[asciiBitLength >> 5] |= 0x80 << (24 - (asciiBitLength % 32));
+          words[(((asciiBitLength + 64) >> 9) << 4) + 15] = asciiBitLength;
+          for (i = 0; i < words.length; i += 16) {
+            const w = words.slice(i, i + 16);
+            const oldHash = hash.slice(0);
+            for (j = 16; j < 64; j++) {
+              const s0 = rightRotate(w[j - 15], 7) ^ rightRotate(w[j - 15], 18) ^ (w[j - 15] >>> 3);
+              const s1 = rightRotate(w[j - 2], 17) ^ rightRotate(w[j - 2], 19) ^ (w[j - 2] >>> 10);
+              w[j] = (w[j - 16] + s0 + w[j - 7] + s1) | 0;
+            }
+            let a = hash[0], b = hash[1], c = hash[2], d = hash[3], e = hash[4], f = hash[5], g = hash[6], h = hash[7];
+            for (j = 0; j < 64; j++) {
+              const S1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
+              const ch = (e & f) ^ ((~e) & g);
+              const temp1 = (h + S1 + ch + k[j] + w[j]) | 0;
+              const S0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
+              const maj = (a & b) ^ (a & c) ^ (b & c);
+              const temp2 = (S0 + maj) | 0;
+              h = g; g = f; f = e; e = (d + temp1) | 0; d = c; c = b; b = a; a = (temp1 + temp2) | 0;
+            }
+            hash[0] = (hash[0] + a) | 0; hash[1] = (hash[1] + b) | 0; hash[2] = (hash[2] + c) | 0; hash[3] = (hash[3] + d) | 0;
+            hash[4] = (hash[4] + e) | 0; hash[5] = (hash[5] + f) | 0; hash[6] = (hash[6] + g) | 0; hash[7] = (hash[7] + h) | 0;
+          }
+          return hash.map(h => (h >>> 0).toString(16).padStart(8, '0')).join('');
+        }
+        return sha256Fallback(str);
       }
 
       unlockBtn.addEventListener('click', async () => {
@@ -6444,14 +7560,14 @@
       // Wire Desktop Carousel Chevrons
       const scrollPrevBtn = document.getElementById('tabsScrollPrev');
       const scrollNextBtn = document.getElementById('tabsScrollNext');
-      if (scrollPrevBtn && adminTabsNav) {
+      if (scrollPrevBtn && adminTabsNavEl) {
         scrollPrevBtn.addEventListener('click', () => {
-          adminTabsNav.scrollBy({ left: -260, behavior: 'smooth' });
+          adminTabsNavEl.scrollBy({ left: -260, behavior: 'smooth' });
         });
       }
-      if (scrollNextBtn && adminTabsNav) {
+      if (scrollNextBtn && adminTabsNavEl) {
         scrollNextBtn.addEventListener('click', () => {
-          adminTabsNav.scrollBy({ left: 260, behavior: 'smooth' });
+          adminTabsNavEl.scrollBy({ left: 260, behavior: 'smooth' });
         });
       }
 
@@ -9182,6 +10298,8 @@ For support or further inquiries, reply directly to this chat.`;
 
       //  3. GLOBAL BROADCAST DISPATCHER 
       const broadcastForm = document.getElementById('broadcastDispatchForm');
+      const sendBroadcastBtn = document.getElementById('sendBroadcastBtn');
+      sendBroadcastBtn?.addEventListener('click', () => broadcastForm?.dispatchEvent(new Event('submit')));
       broadcastForm?.addEventListener('submit', async () => {
         const title = document.getElementById('broadcastTitleInput').value.trim();
         const body = document.getElementById('broadcastBodyInput').value.trim();
@@ -11560,7 +12678,15 @@ Status: ${rep.status}`;
         if (typeof logAudit === 'function') logAudit(`Elevated ${uid} to UNLIMITED VIP AI Tier`, 'ok');
       });
 
-      document.getElementById('btnResetAiDailyCooldown')?.addEventListener('click', () => {
+      const handleResetAiCooldown = () => {
+        const uid = targetInput?.value.trim() || 'default';
+        localStorage.removeItem(`nexchat_ai_daily_quota_${uid}`);
+        showResult(`[SUCCESS] Daily quota cooldown cleared for <strong>${uid}</strong>. Fresh 100/100 requests available immediately.`);
+        if (typeof logAudit === 'function') logAudit(`Reset 24h AI quota cooldown for ${uid}`, 'ok');
+      };
+      document.getElementById('btnResetAiDailyCooldown')?.addEventListener('click', handleResetAiCooldown);
+      document.getElementById('btnResetAiQuotaCooldown')?.addEventListener('click', handleResetAiCooldown);
+      if (false) document.getElementById('btnResetAiDailyCooldown')?.addEventListener('click', () => {
         const uid = targetInput?.value.trim() || 'default';
         localStorage.removeItem(`nexchat_ai_daily_quota_${uid}`);
         showResult(`[SUCCESS] Daily quota cooldown cleared for <strong>${uid}</strong>. Fresh 100/100 requests available immediately.`);

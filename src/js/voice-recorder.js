@@ -79,6 +79,7 @@
       this.cancelBtn = document.getElementById('audioCancelBtn');
       this.stopBtn = document.getElementById('audioStopBtn');
       this.sendBtn = document.getElementById('audioSendNowBtn');
+      this.transcribeToInputBtn = document.getElementById('audioTranscribeToInputBtn');
       this.audioSendBtn = document.getElementById('audio-send-btn');
       this.messageForm = document.getElementById('message-form');
 
@@ -230,6 +231,15 @@
           this.cancelRecording();
         }
       });
+
+      // Transcribe to message input button
+      if (this.transcribeToInputBtn) {
+        this.transcribeToInputBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.transcribeToMessageInput();
+        });
+      }
 
       // Cancel button
       if (this.cancelBtn) {
@@ -459,6 +469,132 @@
         this.speechRecognizer.start();
       } catch (e) {
         console.warn('[VoiceRecorder] SpeechRecognition start warning:', e);
+      }
+    }
+
+    async transcribeToMessageInput() {
+      if (!this.isRecording && !this.isStarting) return;
+
+      this.isCancelled = true;
+      this.isRecording = false;
+      this.isStarting = false;
+      this.isPressedOnMic = false;
+      this.isUserGestureActive = false;
+
+      if (this.holdTimer) {
+        clearTimeout(this.holdTimer);
+        this.holdTimer = null;
+      }
+
+      if (this.speechRecognizer) {
+        try { this.speechRecognizer.stop(); } catch (e) {}
+        this.speechRecognizer = null;
+      }
+
+      let capturedText = (this.speechTranscript || '').trim();
+      const chunks = this.audioChunks ? [...this.audioChunks] : [];
+      this.speechTranscript = '';
+
+      if (this.mediaRecorder) {
+        this.mediaRecorder.onstop = null;
+        this.mediaRecorder.ondataavailable = null;
+        try {
+          if (this.mediaRecorder.state !== 'inactive') {
+            this.mediaRecorder.stop();
+          }
+        } catch (_) {}
+        this.mediaRecorder = null;
+      }
+
+      this.audioChunks = [];
+      this.cleanupMedia();
+      this.resetUI();
+
+      const input = document.getElementById('message-input') || document.getElementById('messageInput');
+      if (!input) return;
+
+      const targetLang = localStorage.getItem('nex_auto_translate_target_lang') ||
+                         localStorage.getItem('nexchat_preferred_language') ||
+                         (window.CyberFeatures && window.CyberFeatures.translator && window.CyberFeatures.translator.autoTranslateTargetLang);
+
+      // Fallback: If on-device speech recognition was empty, transcribe the recorded audio chunks via /api/transcribe
+      if (!capturedText && chunks.length > 0) {
+        try {
+          if (typeof window.showNotif === 'function') {
+            window.showNotif('Transcribing voice note...', 'info', 1800);
+          }
+          const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+          const base64Audio = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = () => resolve('');
+            reader.readAsDataURL(audioBlob);
+          });
+
+          if (base64Audio) {
+            const resp = await fetch('/api/transcribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                audio: base64Audio,
+                targetLang: targetLang || 'English'
+              })
+            });
+            if (resp.ok) {
+              const data = await resp.json();
+              const serverTranscript = (data.result || data.response || data.transcript || '').trim();
+              if (serverTranscript && !serverTranscript.toLowerCase().includes('not clear enough')) {
+                capturedText = serverTranscript;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('[VoiceRecorder] Transcribe audio fallback error:', err);
+        }
+      }
+
+      if (!capturedText) {
+        if (typeof window.showNotif === 'function') {
+          window.showNotif('No intelligible speech detected to transcribe', 'warning', 2000);
+        }
+        return;
+      }
+
+      // Fast Translation
+      let finalText = capturedText;
+      const spokenLang = localStorage.getItem('nex_voice_input_lang') || navigator.language || 'en';
+      const spokenCode = spokenLang.split('-')[0].toLowerCase();
+
+      if (targetLang && targetLang !== 'off' && targetLang.toLowerCase() !== spokenCode) {
+        try {
+          // Tier 1: 0ms sync translation check
+          if (typeof window.fastTranslateSync === 'function') {
+            const hit = window.fastTranslateSync(capturedText, targetLang);
+            if (hit) finalText = hit;
+          }
+          // Tier 2: Speculative async translation
+          if (finalText === capturedText && typeof window.fastTranslateAsync === 'function') {
+            const asyncHit = await window.fastTranslateAsync(capturedText, targetLang);
+            if (asyncHit) finalText = asyncHit;
+          } else if (finalText === capturedText && window.CyberFeatures && window.CyberFeatures.translator) {
+            finalText = await window.CyberFeatures.translator.translateText(capturedText, targetLang);
+          }
+        } catch (transErr) {
+          console.warn('[VoiceRecorder] Translation notice:', transErr);
+        }
+      }
+
+      const existingVal = input.value.trim();
+      input.value = existingVal ? `${existingVal} ${finalText}` : finalText;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.focus();
+      if (typeof input.setSelectionRange === 'function') {
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+
+      if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
+      if (typeof window.showNotif === 'function') {
+        window.showNotif('Voice transcribed & translated to message input', 'success', 2000);
       }
     }
 

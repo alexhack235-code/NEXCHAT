@@ -6500,36 +6500,42 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
 }
 
 .lightbox-stage {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  overflow: hidden;
+  position: relative !important;
+  z-index: 1 !important;
+  flex: 1 !important;
+  width: 100% !important;
+  height: calc(100% - 64px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  overflow: auto !important;
 }
 
 .lightbox-stage img {
-  max-width: 92vw;
-  max-height: 84vh;
-  object-fit: contain;
-  border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 35px rgba(0, 255, 102, 0.15);
+  max-width: 96vw !important;
+  max-height: 88vh !important;
+  min-width: min(85vw, 680px) !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 70px rgba(0,0,0,0.9), 0 0 35px rgba(0, 255, 102, 0.2) !important;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
 .lightbox-stage video {
-  max-width: 90vw;
-  max-height: 82vh;
-  border-radius: 12px;
+  max-width: 94vw !important;
+  max-height: 86vh !important;
+  min-width: min(80vw, 600px) !important;
+  border-radius: 12px !important;
   box-shadow: 0 20px 60px rgba(0,0,0,0.85);
   outline: none;
 }
 
 /* ==========================================================================
-   LUXURY SETTINGS SUITE (11-TAB TELEGRAM/DISCORD CALIBER CONTROL CENTER)
+   LUXURY SETTINGS SUITE (11-TAB ZERO-TRUST CALIBER CONTROL CENTER)
    ========================================================================== */
 .settings-modal {
   z-index: 9990 !important;
@@ -6559,6 +6565,17 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
+  position: relative;
+}
+
+.luxury-settings-suite .settings-header #closeSettingsBtn,
+.settings-modal .settings-header #closeSettingsBtn {
+  position: static !important;
+  margin-left: 12px !important;
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .settings-header-left h2 {
@@ -14970,29 +14987,29 @@ body:not(.group-active) #tacticalMeshBanner {
   display: none !important;
 }
 
-/* 6. Attachment Hub Matrix (4-Column Responsive Grid) */
+/* 6. Attachment Hub Matrix (Full Responsive Super-App Grid) */
 .attachment-popup-hub {
   display: none !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-  gap: 6px !important;
-  left: 8px !important;
-  right: 8px !important;
+  gap: 10px 8px !important;
+  left: 10px !important;
+  right: 10px !important;
   width: auto !important;
-  max-width: 380px !important;
+  max-width: min(520px, calc(100vw - 20px)) !important;
   margin: 0 auto !important;
-  max-height: min(340px, 48vh) !important;
-  padding: 10px 8px !important;
+  max-height: min(520px, 72vh) !important;
+  padding: 16px 12px !important;
   box-sizing: border-box !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch !important;
   overscroll-behavior: contain !important;
   touch-action: pan-y !important;
-  bottom: 74px !important;
-  border-radius: 16px !important;
-  background-color: rgba(10, 15, 26, 0.98) !important;
-  border: 1px solid rgba(0, 240, 118, 0.35) !important;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(0, 240, 118, 0.15) !important;
+  bottom: 80px !important;
+  border-radius: 20px !important;
+  background-color: rgba(14, 20, 32, 0.98) !important;
+  border: 1px solid rgba(0, 240, 118, 0.45) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 240, 118, 0.2) !important;
   z-index: 1000 !important;
 }
 
@@ -18439,7 +18456,14 @@ body.in-conversation #activeChatHeader {
 @media (max-width: 899px) {
   body.in-conversation header.chat-header,
   body.in-conversation .chat-header,
+  body.in-conversation header.top-header,
+  body.in-conversation .top-header,
+  .chat-main[data-layout="conversation"] header.top-header,
+  .chat-main[data-layout="conversation"] .top-header,
   .chat-main[data-layout="conversation"] header.chat-header,
+  .chat-main[data-layout="conversation"] .chat-header,
+  .app[data-subview="conversation"] header.top-header,
+  .app[data-subview="conversation"] .top-header,
   .app[data-subview="conversation"] header.chat-header {
     display: none !important;
     visibility: hidden !important;
@@ -18524,8 +18548,8 @@ body.in-conversation #bottomNav {
 
 
 /* ==========================================================================
-   GLOBAL TELEGRAM MOBILE FULL SCREEN PAGE SYSTEM
-   Enforces 100% full-screen pages like Telegram Mobile across all detail/settings/info modals.
+   GLOBAL MOBILE FULL SCREEN PAGE SYSTEM
+   Enforces 100% full-screen pages across all detail/settings/info modals.
    ========================================================================== */
 
 @keyframes tgSlideUp {
@@ -19374,14 +19398,17 @@ textarea {
    FIX FOR BUG 1: SWIPE TO REPLY PREVIEW BAR & INPUT WRAPPER
    ========================================================================== */
 .chat-input-wrapper {
-  position: fixed !important;
+  position: relative !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
   display: flex !important;
   flex-direction: column !important;
   background: #0f0f1a !important;
-  padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  padding: 8px 10px !important;
+  margin: 0 !important;
+  margin-bottom: 0 !important;
+  flex-shrink: 0 !important;
   z-index: 50 !important;
   overflow: visible !important;
   box-sizing: border-box !important;
@@ -19476,7 +19503,8 @@ textarea {
 
 .chat-messages,
 .messages-area {
-  padding-bottom: 140px !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 0 !important;
 }
 
 /* ==========================================================================
@@ -19602,4 +19630,221 @@ textarea {
 .message-wrapper,
 .nex-msg-bubble {
   overflow: visible !important;
+}
+
+/* ==========================================================================
+   USER-TO-USER CHAT FULL-HEIGHT CONTAINER & STICKY HEADER SPEC
+   ========================================================================== */
+.chat-detail-view,
+#chatDetailView,
+.chat-page.chat-container {
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  padding: 0 !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+
+body.in-conversation .chat-main,
+.chat-main[data-layout="conversation"] {
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: 100vh !important;
+  max-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.chat-detail-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.chat-detail-header .chat-header-profile {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  cursor: pointer !important;
+}
+
+.chat-messages,
+.messages-area,
+#messages-area {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding-bottom: 8px !important;
+  margin: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.chat-input-wrapper,
+.message-input-area,
+#messageInputArea {
+  position: relative !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #0f0f1a !important;
+  padding: 8px 10px !important;
+  margin: 0 !important;
+  margin-bottom: 0 !important;
+  flex-shrink: 0 !important;
+  z-index: 50 !important;
+  overflow: visible !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Ensure #chatUserProfile inside composer never introduces phantom height/margin */
+.chat-input-wrapper #chatUserProfile,
+#messageInputArea #chatUserProfile,
+.chat-user-profile {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+@media (max-width: 899px) {
+  body.in-conversation header.top-header,
+  body.in-conversation .top-header,
+  .chat-main[data-layout="conversation"] header.top-header,
+  .chat-main[data-layout="conversation"] .top-header,
+  .app[data-subview="conversation"] header.top-header,
+  .app[data-subview="conversation"] .top-header {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .chat-detail-view,
+  #chatDetailView {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    z-index: 500 !important;
+  }
+}
+
+/* Header Flex Row & Token Pill Adaptability Under 400px */
+.top-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.header-left,
+#headerLogoContainer,
+.nex-logo {
+  flex-shrink: 0 !important;
+}
+
+.token-display,
+#tokenDisplay {
+  margin-left: auto !important;
+  flex-shrink: 1 !important;
+  min-width: 0 !important;
+}
+
+@media (max-width: 400px) {
+  .token-display .token-label,
+  #tokenDisplay .token-label {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   UNIVERSAL CARD & TEXT OVERFLOW / ANTI-OVERLAY HARDENING ENGINE
+   Prevents cards from overlaying each other and text from spilling out of div blocks.
+   ========================================================================== */
+.settings-card,
+.stealth-enclave-card,
+.info-section,
+.modal-card,
+.cyber-card,
+.ad-card,
+.status-story-card {
+  position: relative !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  margin-bottom: 12px !important;
+  float: none !important;
+  clear: both !important;
+}
+
+.settings-card *,
+.stealth-enclave-card *,
+.info-section *,
+.modal-card * {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+}
+
+.luxury-toggle-row,
+.settings-toggle-row,
+.settings-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  margin-bottom: 8px !important;
+}
+
+.luxury-toggle-row > div:first-child,
+.settings-toggle-row > div:first-child {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+.luxury-switch,
+.settings-switch,
+.switch {
+  flex-shrink: 0 !important;
+}
+
+.message-bubble,
+.nex-msg-bubble,
+.bubble-content {
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
 }
