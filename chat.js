@@ -1,4 +1,18 @@
 
+// Universal message-input / messageInput element resolver
+(function() {
+  if (typeof document !== 'undefined' && document.getElementById) {
+    const origGetById = document.getElementById.bind(document);
+    document.getElementById = function(id) {
+      const el = origGetById(id);
+      if (!el && id === 'messageInput') {
+        return origGetById('message-input');
+      }
+      return el;
+    };
+  }
+})();
+
 // CYBER LAB: Sticker Element Factory with Contrast Die-Cut & Spoiler Blur
 function createCyberStickerElement(url, altText, isOwn) {
   const stkWrap = document.createElement("div");
@@ -4047,7 +4061,7 @@ function showChatListView() {
     delete app.dataset.subview;
   }
   document.body.classList.remove('in-conversation');
-  const globalChatHeader = document.querySelector('header.chat-header');
+  const globalChatHeader = document.querySelector('header.chat-header, header.top-header, .top-header');
   if (globalChatHeader) globalChatHeader.style.removeProperty('display');
   const headerLogoCont = document.getElementById('headerLogoContainer');
   if (headerLogoCont) headerLogoCont.style.setProperty('display', 'flex', 'important');
@@ -4451,6 +4465,88 @@ function handleNavigation(section) {
 }
 if (typeof window !== "undefined") {
   window.handleNavigation = handleNavigation;
+}
+
+// WhatsApp-style Horizontal Tab Swipe Gesture Navigation
+function initWhatsAppTabSwipeNavigation() {
+  const tabs = ['chats', 'updates', 'communities', 'calls'];
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartTime = 0;
+
+  const appEl = document.querySelector('.app') || document.body;
+
+  appEl.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    if (document.body.classList.contains('in-conversation')) return;
+    const target = e.target;
+    if (target.closest('.modal, .bottom-drawer, .media-lightbox-modal, .status-viewer-modal, #messages-area, input, textarea, select')) return;
+
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
+  }, { passive: true });
+
+  appEl.addEventListener('touchend', (e) => {
+    if (document.body.classList.contains('in-conversation')) return;
+    if (!touchStartTime || Date.now() - touchStartTime > 450) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+
+    const dx = touchEndX - touchStartX;
+    const dy = touchEndY - touchStartY;
+
+    if (Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy) * 2.0) {
+      const activeNav = document.querySelector('.bottom-nav .nav-item.active');
+      let currentSection = activeNav ? activeNav.getAttribute('data-nav') : 'chats';
+      if (currentSection === 'reels' || currentSection === 'marketplace' || currentSection === 'announcements') {
+        currentSection = 'communities';
+      }
+
+      let currentIndex = tabs.indexOf(currentSection);
+      if (currentIndex === -1) currentIndex = 0;
+
+      if (dx < 0 && currentIndex < tabs.length - 1) {
+        const nextSection = tabs[currentIndex + 1];
+        if (typeof handleNavigation === 'function') {
+          handleNavigation(nextSection);
+        }
+      } else if (dx > 0 && currentIndex > 0) {
+        const prevSection = tabs[currentIndex - 1];
+        if (typeof handleNavigation === 'function') {
+          handleNavigation(prevSection);
+        }
+      }
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchstart', (e) => {
+    if (!document.body.classList.contains('in-conversation')) return;
+    if (e.touches.length === 1 && e.touches[0].clientX < 45) {
+      window._edgeBackStartX = e.touches[0].clientX;
+      window._edgeBackStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!document.body.classList.contains('in-conversation') || !window._edgeBackStartX) return;
+    const dx = e.changedTouches[0].clientX - window._edgeBackStartX;
+    const dy = Math.abs(e.changedTouches[0].clientY - (window._edgeBackStartY || 0));
+    window._edgeBackStartX = null;
+    if (dx > 70 && dx > dy * 1.8) {
+      document.body.classList.remove('in-conversation');
+      const backBtn = document.getElementById('backToChatListBtn') || document.querySelector('.back-btn');
+      if (backBtn) backBtn.click();
+    }
+  }, { passive: true });
+}
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWhatsAppTabSwipeNavigation);
+  } else {
+    initWhatsAppTabSwipeNavigation();
+  }
 }
 
 async function showChatContextMenu(event, chatId) {
@@ -5606,6 +5702,11 @@ function goBack() {
 function goBackToDashboard() {
   clearGroupChatRestrictions();
   currentChatUser = null;
+  try {
+    localStorage.removeItem('selected_chat_id');
+    localStorage.removeItem('selected_chat_name');
+    localStorage.removeItem('selected_chat_type');
+  } catch (_) {}
   if (window.scheduledMessageEngine) {
     window.scheduledMessageEngine.updateComposerBanner(null);
   }
@@ -6258,11 +6359,15 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec, tran
   const targetVoiceLang = localStorage.getItem('nex_auto_translate_target_lang') || localStorage.getItem('nexchat_preferred_language') || 'en';
   if (transcript && transcript.trim()) {
     try {
-      if (window.CyberFeatures && window.CyberFeatures.translator) {
-        translatedVoiceText = await window.CyberFeatures.translator.translateText(transcript.trim(), targetVoiceLang);
-      } else if (typeof window.fastTranslateAsync === 'function') {
+      if (typeof window.fastTranslateSync === 'function') {
+        const syncMatch = window.fastTranslateSync(transcript.trim(), targetVoiceLang);
+        if (syncMatch) translatedVoiceText = syncMatch;
+      }
+      if (!translatedVoiceText && typeof window.fastTranslateAsync === 'function') {
         translatedVoiceText = await window.fastTranslateAsync(transcript.trim(), targetVoiceLang);
-      } else {
+      } else if (!translatedVoiceText && window.CyberFeatures && window.CyberFeatures.translator) {
+        translatedVoiceText = await window.CyberFeatures.translator.translateText(transcript.trim(), targetVoiceLang);
+      } else if (!translatedVoiceText) {
         const transResp = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -6270,7 +6375,7 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec, tran
         });
         if (transResp.ok) {
           const transData = await transResp.json();
-          translatedVoiceText = transData.result || transData.response || '';
+          translatedVoiceText = transData.translatedText || transData.result || transData.response || '';
         }
       }
     } catch (e) {
@@ -6948,9 +7053,26 @@ window.runVoiceUnifiedPipeline = async function(optionsOrUrl, ...rest) {
       let transAttempts = 0;
       let transSuccess = false;
 
+      // Tier 0 & 1: 0ms Synchronous Fast Translator match (< 0.1ms)
+      if (typeof window.fastTranslateSync === 'function') {
+        const syncVoice = window.fastTranslateSync(transcribedText, targetLang);
+        if (syncVoice) {
+          finalTranslatedText = syncVoice;
+          transSuccess = true;
+        }
+      }
+
       while (transAttempts < 3 && !transSuccess) {
         transAttempts++;
         try {
+          if (typeof window.fastTranslateAsync === 'function') {
+            const asyncHit = await window.fastTranslateAsync(transcribedText, targetLang);
+            if (asyncHit && asyncHit.trim() && asyncHit.trim().toLowerCase() !== transcribedText.trim().toLowerCase()) {
+              finalTranslatedText = asyncHit.trim();
+              transSuccess = true;
+              break;
+            }
+          }
           if (window.chronexAI && typeof window.chronexAI.translateText === 'function') {
             finalTranslatedText = await window.chronexAI.translateText(transcribedText, targetLang);
             if (finalTranslatedText) transSuccess = true;
@@ -6965,8 +7087,8 @@ window.runVoiceUnifiedPipeline = async function(optionsOrUrl, ...rest) {
             });
             if (aiResp.ok) {
               const aiData = await aiResp.json();
-              if (aiData.result || aiData.response) {
-                finalTranslatedText = (aiData.result || aiData.response).trim().replace(/^["'“”‘’]+|["'“”‘’]+$/g, '').trim();
+              if (aiData.translatedText || aiData.result || aiData.response) {
+                finalTranslatedText = (aiData.translatedText || aiData.result || aiData.response).trim().replace(/^["'“”‘’]+|["'“”‘’]+$/g, '').trim();
                 transSuccess = true;
               }
             }
@@ -8011,10 +8133,35 @@ async function handleInlineMessageTranslate(bubble, m) {
       if (!isAllowed) return;
     }
 
+    // Tier 0 & 1: 0ms Synchronous Cache & Lexicon Match (< 0.1ms)
+    if (typeof window.fastTranslateSync === 'function') {
+      const syncMatch = window.fastTranslateSync(rawText, target);
+      if (syncMatch) {
+        if (currentReqId !== activeTranslateReqId) return;
+        currentTranslatedText = syncMatch;
+        if (labelEl) labelEl.textContent = `Translated (${target.toUpperCase()})`;
+        if (contentEl) contentEl.textContent = currentTranslatedText;
+        return;
+      }
+    }
+
     if (contentEl) contentEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Translating...';
     if (labelEl) labelEl.textContent = `Translated (${target.toUpperCase()})`;
 
     try {
+      // Tier 2: Speculative Client-Side Fast Translation (< 150ms)
+      if (typeof window.fastTranslateAsync === 'function') {
+        try {
+          const fastRes = await window.fastTranslateAsync(rawText, target);
+          if (fastRes && fastRes.trim() && fastRes.trim().toLowerCase() !== rawText.trim().toLowerCase()) {
+            if (currentReqId !== activeTranslateReqId) return;
+            currentTranslatedText = fastRes.trim();
+            if (contentEl) contentEl.textContent = currentTranslatedText;
+            return;
+          }
+        } catch (_) {}
+      }
+
       if (window.chronexAI && typeof window.chronexAI.translateText === 'function') {
         currentTranslatedText = await window.chronexAI.translateText(rawText, target);
       } else if (window.CyberFeatures && window.CyberFeatures.translator) {
@@ -8027,7 +8174,7 @@ async function handleInlineMessageTranslate(bubble, m) {
         });
         if (res.ok) {
           const data = await res.json();
-          currentTranslatedText = data.result || data.response || rawText;
+          currentTranslatedText = data.translatedText || data.result || data.response || rawText;
         } else {
           currentTranslatedText = rawText;
         }
@@ -23928,7 +24075,7 @@ function showChatDetailView() {
   const isDesktop = window.innerWidth >= 900;
   const activeChatHeader = document.getElementById('activeChatHeader');
   const headerLogoContainer = document.getElementById('headerLogoContainer');
-  const globalHeader = document.querySelector('header.chat-header');
+  const globalHeader = document.querySelector('header.chat-header, header.top-header, .top-header');
   if (isDesktop) {
     if (activeChatHeader) activeChatHeader.style.setProperty('display', 'none', 'important');
     if (headerLogoContainer) headerLogoContainer.style.setProperty('display', 'flex', 'important');
@@ -26893,6 +27040,13 @@ function initAttachmentHubActions() {
     hubActionVoice: () => {
       document.getElementById('audio-record-btn')?.click();
     },
+    hubActionVoiceToText: () => {
+      if (window.voiceTranscriberEngine && typeof window.voiceTranscriberEngine.startVoiceToInput === 'function') {
+        window.voiceTranscriberEngine.startVoiceToInput();
+      } else {
+        document.getElementById('voiceDictateBtn')?.click();
+      }
+    },
     hubActionCanvas: () => {
       if (window.liveCanvasEngine && typeof window.liveCanvasEngine.openModal === 'function') {
         window.liveCanvasEngine.openModal();
@@ -27289,13 +27443,22 @@ if (typeof window !== 'undefined') {
 
 function restorePersistedSelectedChat() {
   try {
+    const isMobile = window.innerWidth < 900;
     const p = new URLSearchParams(window.location.search);
-    const cId = p.get('chat') || p.get('chatId') || localStorage.getItem('selected_chat_id');
-    if (!cId) return;
+    // On mobile (< 900px / Android APK), ALWAYS land on the chat list by default!
+    // Never auto-jump into a previous user conversation from localStorage on initial startup.
+    // Only open a chat if explicitly requested via URL parameter (e.g., deep link or push notification).
+    const cId = p.get('chat') || p.get('chatId') || (!isMobile ? localStorage.getItem('selected_chat_id') : null);
+    if (!cId) {
+      if (isMobile && typeof showChatListView === 'function') {
+        showChatListView();
+      }
+      return;
+    }
 
-    const cName = p.get('chatName') || localStorage.getItem('selected_chat_name') || 'Chat';
-    const cPic = localStorage.getItem('selected_chat_pic') || 'logo.jpg';
-    const cType = p.get('chatType') || localStorage.getItem('selected_chat_type') || 'direct';
+    const cName = p.get('chatName') || (!isMobile ? localStorage.getItem('selected_chat_name') : null) || 'Chat';
+    const cPic = (!isMobile ? localStorage.getItem('selected_chat_pic') : null) || 'logo.jpg';
+    const cType = p.get('chatType') || (!isMobile ? localStorage.getItem('selected_chat_type') : null) || 'direct';
 
     // Pre-mount chatDetailView immediately so empty screen never flashes (Rule 2)
     const welcome = document.getElementById('chatWelcomePanel');
