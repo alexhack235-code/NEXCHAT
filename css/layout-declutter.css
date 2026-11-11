@@ -863,6 +863,72 @@ opacity: 0.95 !important;
   display: none;
 }
 
+/* ==========================================================================
+   PERFECT 1/4 SCREEN BOTTOM POP-UP / SHEET (ZERO CUT-OFF, ZERO SLASHED EDGES)
+   ========================================================================== */
+@media (max-width: 899px) {
+  /* 1. Mobile More Sheet: Exactly ~1/4 of viewport */
+  .mobile-more-sheet .more-sheet-panel {
+    height: 25vh !important;
+    max-height: 28vh !important;
+    min-height: 185px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-top: 1.5px solid rgba(0, 255, 102, 0.4) !important;
+    padding: 10px 14px calc(env(safe-area-inset-bottom, 12px) + 12px) !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.75) !important;
+  }
+
+  .mobile-more-sheet .more-sheet-header {
+    margin-bottom: 10px !important;
+  }
+
+  .mobile-more-sheet .more-sheet-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+    padding-bottom: 8px !important;
+  }
+
+  /* 2. Attachment (Paperclip) Hub Pop-up: Clean 1/4 Screen Floating Island */
+  .attach-menu,
+  .attachment-popup-hub {
+    height: 25vh !important;
+    max-height: 28vh !important;
+    min-height: 185px !important;
+    bottom: 76px !important;
+    left: 10px !important;
+    right: 10px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    border-radius: 18px !important;
+    border: 1.5px solid rgba(0, 229, 255, 0.35) !important;
+    padding: 12px !important;
+    box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* 3. Bottom Drawers (Gifts, Status Viewers, etc.) */
+  .bottom-drawer .drawer-card,
+  .status-viewers-drawer .status-viewers-drawer-content {
+    height: 25vh !important;
+    max-height: 28vh !important;
+    min-height: 185px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-top: 1.5px solid rgba(0, 255, 102, 0.4) !important;
+    padding: 10px 14px calc(env(safe-area-inset-bottom, 12px) + 12px) !important;
+  }
+}
+
+
 .self-healing-banner {
   background: rgba(0, 255, 136, 0.12) !important;
   color: #00ff88 !important;
@@ -2619,11 +2685,57 @@ display: none !important;
 #smartReplyBar,
 #soundboardDock,
 #predictiveWordBar,
-#voiceDictateBtn,
 #soundboardToggleBtn,
 #audio-send-btn,
 .message-form > .input-btn:not(.fab-circle-btn) {
 display: none !important;
+}
+
+#voiceDictateBtn,
+.message-input-wrapper #voiceDictateBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #8696a0 !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  padding: 6px !important;
+  border-radius: 50% !important;
+  transition: color 0.15s ease, transform 0.15s ease, background 0.15s ease !important;
+}
+
+#voiceDictateBtn:hover,
+.message-input-wrapper #voiceDictateBtn:hover {
+  color: #00f2fe !important;
+  background: rgba(0, 242, 254, 0.08) !important;
+}
+
+#voiceDictateBtn.dictating,
+.message-input-wrapper #voiceDictateBtn.dictating {
+  color: #ff3b30 !important;
+  background: rgba(255, 59, 48, 0.18) !important;
+  box-shadow: 0 0 12px rgba(255, 59, 48, 0.5) !important;
+  animation: pulseVoiceDictating 1.2s infinite ease-in-out !important;
+}
+
+@keyframes pulseVoiceDictating {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.5); }
+  50% { transform: scale(1.15); box-shadow: 0 0 14px 2px rgba(255, 59, 48, 0.7); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+}
+
+.audio-control-btn.transcribe-btn {
+  background: rgba(0, 242, 254, 0.18) !important;
+  border: 1px solid rgba(0, 242, 254, 0.45) !important;
+  color: #00f2fe !important;
+}
+
+.audio-control-btn.transcribe-btn:hover {
+  background: rgba(0, 242, 254, 0.35) !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 12px rgba(0, 242, 254, 0.6) !important;
 }
 
 .message-input-area {
@@ -6285,3 +6397,69 @@ html[data-chat-size="small"] .message-time-text {
 .banner-stack > div:not(:first-child) {
   display: none;
 }
+
+/* ==========================================================================
+   PERFECT 1/4 SCREEN BOTTOM POP-UP / SHEET (ZERO CUT-OFF, ZERO SLASHED EDGES)
+   ========================================================================== */
+@media (max-width: 899px) {
+  /* 1. Mobile More Sheet: Exactly ~1/4 of viewport */
+  .mobile-more-sheet .more-sheet-panel {
+    height: 25vh !important;
+    max-height: 28vh !important;
+    min-height: 185px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-top: 1.5px solid rgba(0, 255, 102, 0.4) !important;
+    padding: 10px 14px calc(env(safe-area-inset-bottom, 12px) + 12px) !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.75) !important;
+  }
+
+  .mobile-more-sheet .more-sheet-header {
+    margin-bottom: 10px !important;
+  }
+
+  .mobile-more-sheet .more-sheet-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
+    padding-bottom: 8px !important;
+  }
+
+  /* 2. Attachment (Paperclip) Hub Pop-up: Clean 1/4 Screen Floating Island */
+  .attach-menu,
+  .attachment-popup-hub {
+    height: 25vh !important;
+    max-height: 28vh !important;
+    min-height: 185px !important;
+    bottom: 76px !important;
+    left: 10px !important;
+    right: 10px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    border-radius: 18px !important;
+    border: 1.5px solid rgba(0, 229, 255, 0.35) !important;
+    padding: 12px !important;
+    box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  /* 3. Bottom Drawers (Gifts, Status Viewers, etc.) */
+  .bottom-drawer .drawer-card,
+  .status-viewers-drawer .status-viewers-drawer-content {
+    height: 25vh !important;
+    max-height: 28vh !important;
+    min-height: 185px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    border-radius: 20px 20px 0 0 !important;
+    border-top: 1.5px solid rgba(0, 255, 102, 0.4) !important;
+    padding: 10px 14px calc(env(safe-area-inset-bottom, 12px) + 12px) !important;
+  }
+}
+
