@@ -9,6 +9,7 @@
   'use strict';
 
   const COMMANDS = [
+    { cmd: '/probing', title: 'Overnight Runtime Probing & Stress', desc: 'Investigate runtime health, memory leaks, and overnight background stability', icon: 'fa-microscope', color: '#38bdf8' },
     { cmd: '/analyze', title: 'Tactical System & Chat Analysis', desc: 'Analyze APK/WebView runtime, memory, and chat velocity', icon: 'fa-chart-line', color: '#38bdf8' },
     { cmd: '/summarize', title: 'Active Chat Summary', desc: 'Summarize visible conversation messages with ChronEX AI', icon: 'fa-wand-magic-sparkles', color: '#67e8f9' },
     { cmd: '/summarize all', title: 'Full Historical Group Summary', desc: 'Synthesize complete group history including pre-join messages', icon: 'fa-layer-group', color: '#a855f7' },
@@ -95,7 +96,21 @@
       if (palette) palette.style.display = 'none';
 
       const lower = rawVal.toLowerCase().trim();
-      if (lower === '/summarize all' || lower.startsWith('/summarize all')) {
+      if (lower.startsWith('/probing')) {
+        const parts = lower.split(/\s+/);
+        const sub = parts[1] || '';
+        if (window.NexRuntimeProbing) {
+          if (sub === 'start' || sub === 'simulate' || sub === 'run') {
+            window.NexRuntimeProbing.startSimulation();
+          } else if (sub === 'stop') {
+            window.NexRuntimeProbing.stopSimulation();
+          } else {
+            window.NexRuntimeProbing.runProbe();
+          }
+        } else {
+          this.executeCommand({ cmd: '/probing' });
+        }
+      } else if (lower === '/summarize all' || lower.startsWith('/summarize all')) {
         this.executeCommand({ cmd: '/summarize all' });
       } else if (lower === '/summarize' || lower.startsWith('/summarize')) {
         this.executeCommand({ cmd: '/summarize' });
@@ -188,6 +203,13 @@
       if (palette) palette.style.display = 'none';
 
       switch (command.cmd) {
+        case '/probing':
+          if (window.NexRuntimeProbing) {
+            window.NexRuntimeProbing.runProbe();
+          } else if (typeof showNotif === 'function') {
+            showNotif('Initializing runtime probing sentinel...', 'info', 2000);
+          }
+          break;
         case '/analyze':
           this.renderTacticalAnalysisCard();
           break;
