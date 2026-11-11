@@ -1425,6 +1425,10 @@
           <button id="menuCompanionToggleBtn" class="option-item" onclick="window.NexWorkflowCompanion?.toggle?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-robot" style="margin-right: 8px; color: #10b981;"></i>AI Workflow Companion &amp; Mood Sentinel</button>
           <button id="menuTrackRecordBtn" class="option-item" onclick="window.NexWorkflowCompanion?.showTrackRecord?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-chart-pie" style="margin-right: 8px; color: #f59e0b;"></i>Usage Track Record &amp; Habits</button>
           <button id="menuProbingBtn" class="option-item" onclick="window.NexRuntimeProbing?.runProbe?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-microscope" style="margin-right: 8px; color: #38bdf8;"></i>Overnight Runtime Probing &amp; Stress (/probing)</button>
+          <button id="menuNanoCanvasBtn" class="option-item" onclick="window.NexNanoCanvas?.openModal?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-paintbrush" style="margin-right: 8px; color: #00f2fe;"></i>Nano-Canvas Annotator (/canvas)</button>
+          <button id="menuDeadDropBtn" class="option-item" onclick="const s = prompt('Enter classified secret:'); if(s) window.NexQuantumDeadDrop?.dispatchDeadDrop?.(s); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-atom" style="margin-right: 8px; color: #c084fc;"></i>Quantum Dead Drop (/deaddrop)</button>
+          <button id="menuSleepProtocolBtn" class="option-item" onclick="window.NexSleepProtocol?.toggle?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-moon" style="margin-right: 8px; color: #a855f7;"></i>Sleep Protocol &amp; Morning Briefing (/sleep)</button>
+          <button id="menuZenShieldBtn" class="option-item" onclick="window.NexZenShield?.activateZenShield?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-shield-halved" style="margin-right: 8px; color: #10b981;"></i>Anti-Flame War Zen Shield (/zen)</button>
           <button id="menuVoicePersonasBtn" class="option-item" onclick="window.NexChronexxVoicePersonas?.openPersonaModal?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-microphone-lines" style="margin-right: 8px; color: #38bdf8;"></i>Chronexx Neural Voice Personas</button>
           <button id="reportBtn" class="option-item danger">Report User</button>
           <button id="deleteBtn" class="option-item danger" onclick="if(typeof window.deleteChat === 'function' && window.currentChatUser) { window.deleteChat(window.currentChatUser, window.currentChatType); } window.closeChatOptionsMenu?.();"><i class="fa-solid fa-trash" style="margin-right: 8px;"></i>Delete Chat</button>
@@ -7806,6 +7810,11 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script defer src="./src/js/elite-slash-commands.js"></script>
   <script defer src="./src/js/nex-workflow-companion.js"></script>
   <script defer src="./src/js/nex-runtime-probing.js"></script>
+  <script defer src="./src/js/nex-chaptered-voice.js"></script>
+  <script defer src="./src/js/nex-sleep-protocol.js"></script>
+  <script defer src="./src/js/nex-zen-shield.js"></script>
+  <script defer src="./src/js/nex-quantum-deaddrop.js"></script>
+  <script defer src="./src/js/nex-nano-canvas.js"></script>
   <script defer src="./src/js/elite-knowledge-drawer.js"></script>
   <script defer src="./src/js/elite-safety-numbers.js"></script>
   <script defer src="./src/js/scheduled-messages.js"></script>

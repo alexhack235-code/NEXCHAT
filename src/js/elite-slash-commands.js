@@ -9,6 +9,10 @@
   'use strict';
 
   const COMMANDS = [
+    { cmd: '/canvas', title: 'Nano-Canvas Annotator', desc: 'Open floating scratchpad to sketch diagrams and send to chat', icon: 'fa-paintbrush', color: '#00f2fe' },
+    { cmd: '/deaddrop', title: 'Quantum Ephemeral Dead Drop', desc: 'Send secret message protected by hold-to-reveal & tilt sensor', icon: 'fa-atom', color: '#c084fc' },
+    { cmd: '/sleep', title: 'Sleep Protocol & Morning Briefing', desc: 'Activate overnight rest mode and queue morning intelligence briefing', icon: 'fa-moon', color: '#a855f7' },
+    { cmd: '/zen', title: 'Anti-Flame War Zen Shield', desc: 'Quarantine heated debates and mute notification tension', icon: 'fa-shield-halved', color: '#10b981' },
     { cmd: '/probing', title: 'Overnight Runtime Probing & Stress', desc: 'Investigate runtime health, memory leaks, and overnight background stability', icon: 'fa-microscope', color: '#38bdf8' },
     { cmd: '/analyze', title: 'Tactical System & Chat Analysis', desc: 'Analyze APK/WebView runtime, memory, and chat velocity', icon: 'fa-chart-line', color: '#38bdf8' },
     { cmd: '/summarize', title: 'Active Chat Summary', desc: 'Summarize visible conversation messages with ChronEX AI', icon: 'fa-wand-magic-sparkles', color: '#67e8f9' },
@@ -96,7 +100,29 @@
       if (palette) palette.style.display = 'none';
 
       const lower = rawVal.toLowerCase().trim();
-      if (lower.startsWith('/probing')) {
+      if (lower.startsWith('/canvas') || lower.startsWith('/draw')) {
+        this.executeCommand({ cmd: '/canvas' });
+      } else if (lower.startsWith('/deaddrop')) {
+        const secret = rawVal.replace(/^\/deaddrop\s*/i, '').trim();
+        if (window.NexQuantumDeadDrop) {
+          window.NexQuantumDeadDrop.dispatchDeadDrop(secret || 'Classified Tactical Drop');
+        } else {
+          this.executeCommand({ cmd: '/deaddrop' });
+        }
+      } else if (lower.startsWith('/sleep') || lower.startsWith('/rest')) {
+        if (window.NexSleepProtocol) {
+          window.NexSleepProtocol.toggle();
+        } else {
+          this.executeCommand({ cmd: '/sleep' });
+        }
+      } else if (lower.startsWith('/zen')) {
+        if (window.NexZenShield) {
+          if (window.NexZenShield.isShieldActive) window.NexZenShield.deactivateZenShield();
+          else window.NexZenShield.activateZenShield();
+        } else {
+          this.executeCommand({ cmd: '/zen' });
+        }
+      } else if (lower.startsWith('/probing')) {
         const parts = lower.split(/\s+/);
         const sub = parts[1] || '';
         if (window.NexRuntimeProbing) {
@@ -203,6 +229,35 @@
       if (palette) palette.style.display = 'none';
 
       switch (command.cmd) {
+        case '/canvas':
+          if (window.NexNanoCanvas) {
+            window.NexNanoCanvas.openModal();
+          } else if (typeof showNotif === 'function') {
+            showNotif('Opening Nano-Canvas...', 'info', 1500);
+          }
+          break;
+        case '/deaddrop':
+          if (window.NexQuantumDeadDrop) {
+            window.NexQuantumDeadDrop.dispatchDeadDrop('Classified Tactical Drop');
+          } else if (typeof showNotif === 'function') {
+            showNotif('Creating Quantum Dead Drop...', 'info', 1500);
+          }
+          break;
+        case '/sleep':
+          if (window.NexSleepProtocol) {
+            window.NexSleepProtocol.toggle();
+          } else if (typeof showNotif === 'function') {
+            showNotif('Sleep Protocol toggled.', 'info', 1500);
+          }
+          break;
+        case '/zen':
+          if (window.NexZenShield) {
+            if (window.NexZenShield.isShieldActive) window.NexZenShield.deactivateZenShield();
+            else window.NexZenShield.activateZenShield();
+          } else if (typeof showNotif === 'function') {
+            showNotif('Zen Shield toggled.', 'info', 1500);
+          }
+          break;
         case '/probing':
           if (window.NexRuntimeProbing) {
             window.NexRuntimeProbing.runProbe();
