@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase-config.js";
 import { chronexAI } from "./chronex-ai-service.js";
 import {
-  doc, updateDoc, deleteDoc, serverTimestamp
+  doc, updateDoc, deleteDoc, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 // ============================================================================

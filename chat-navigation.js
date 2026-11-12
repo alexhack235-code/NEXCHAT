@@ -38,6 +38,16 @@ window.handleNavigation = function (navSection) {
         return;
     }
 
+    if (normalized === 'settings') {
+        if (typeof window.openSettingsModal === 'function') {
+            window.openSettingsModal();
+        } else {
+            const m = document.getElementById('settingsModal');
+            if (m) m.style.display = 'flex';
+        }
+        return;
+    }
+
     const target = sections[normalized];
     if (!target) {
         if (typeof window.showChatListView === 'function') {

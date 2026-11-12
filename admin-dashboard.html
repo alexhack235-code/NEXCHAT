@@ -1019,6 +1019,19 @@
       background: rgba(255, 255, 255, 0.02);
     }
 
+    
+      #adminAuthGateModal.auth-unlocked,
+      #adminAuthGateModal.auth-hidden {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+      #adminMainContainer.auth-visible {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
     /* Strict Passkey Gate Modal */
     #adminAuthGateModal {
       position: fixed;
@@ -2087,7 +2100,7 @@
         box-sizing: border-box !important;
         overflow-x: hidden !important;
         overflow-y: auto !important;
-        display: flex !important;
+        display: flex;
         align-items: center !important;
         justify-content: center !important;
         flex-direction: column !important;
@@ -2348,7 +2361,7 @@
         height: 100vh !important;
         height: 100dvh !important;
         padding: 14px 10px !important;
-        display: flex !important;
+        display: flex;
         align-items: center !important;
         justify-content: center !important;
         overflow-y: auto !important;
@@ -7260,8 +7273,10 @@
 
         if (isAuth && authTs && (now - authTs < SESSION_TIMEOUT_MS)) {
           // Authorized
-          authModal.style.display = 'none';
-          mainContainer.style.display = 'block';
+          authModal.classList.add('auth-unlocked', 'auth-hidden');
+          authModal.style.setProperty('display', 'none', 'important');
+          mainContainer.classList.add('auth-visible');
+          mainContainer.style.setProperty('display', 'block', 'important');
           startSessionTimer();
           loadDashboardData();
         } else {
@@ -7274,8 +7289,10 @@
         sessionStorage.removeItem('nex_admin_authorized');
         sessionStorage.removeItem('nex_admin_auth_timestamp');
         if (sessionTimerInterval) clearInterval(sessionTimerInterval);
-        mainContainer.style.display = 'none';
-        authModal.style.display = 'flex';
+        mainContainer.classList.remove('auth-visible');
+        mainContainer.style.setProperty('display', 'none', 'important');
+        authModal.classList.remove('auth-unlocked', 'auth-hidden');
+        authModal.style.setProperty('display', 'flex', 'important');
         passkeyInput.value = '';
         passkeyInput.focus();
       }
@@ -7283,8 +7300,10 @@
       function unlockConsole() {
         sessionStorage.setItem('nex_admin_authorized', 'true');
         sessionStorage.setItem('nex_admin_auth_timestamp', Date.now().toString());
-        authModal.style.display = 'none';
-        mainContainer.style.display = 'block';
+        authModal.classList.add('auth-unlocked', 'auth-hidden');
+        authModal.style.setProperty('display', 'none', 'important');
+        mainContainer.classList.add('auth-visible');
+        mainContainer.style.setProperty('display', 'block', 'important');
         logAudit('SuperAdmin authenticated via master passkey.', 'ok');
         startSessionTimer();
         loadDashboardData();

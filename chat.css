@@ -6538,7 +6538,15 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
    LUXURY SETTINGS SUITE (11-TAB ZERO-TRUST CALIBER CONTROL CENTER)
    ========================================================================== */
 .settings-modal {
-  z-index: 9990 !important;
+  z-index: 10050 !important;
+}
+
+body.settings-open .bottom-nav,
+.settings-modal.open ~ .bottom-nav,
+.settings-modal[style*="display: flex"] ~ .bottom-nav,
+.settings-modal:not([style*="display: none"]):not([style*="display:none"]) ~ .bottom-nav {
+  display: none !important;
+  pointer-events: none !important;
 }
 
 .luxury-settings-suite {
