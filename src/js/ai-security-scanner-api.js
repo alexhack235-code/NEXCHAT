@@ -449,8 +449,8 @@ if (typeof window !== 'undefined') {
   try {
     Object.defineProperty(window, 'aiSecurityScanner', {
       value: aiSecurityScanner,
-      writable: false,
-      configurable: false,
+      writable: true,
+      configurable: true,
       enumerable: false
     });
   } catch {

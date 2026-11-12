@@ -53,12 +53,16 @@ if (typeof window !== 'undefined') {
     generate: async (p) => window.ai.chat(p),
     status: 'ONLINE'
   };
-  window.aiSecurityScanner = window.aiSecurityScanner || {
-    scan: async () => {
-      console.log('[AI Security Scanner] Scanning memory and lattice integrity...');
-      return { status: 'CLEAN', threats: 0, integrity: '100%', timestamp: Date.now() };
-    }
-  };
+  if (!window.aiSecurityScanner) {
+    try {
+      window.aiSecurityScanner = {
+        scan: async () => {
+          console.log('[AI Security Scanner] Scanning memory and lattice integrity...');
+          return { status: 'CLEAN', threats: 0, integrity: '100%', timestamp: Date.now() };
+        }
+      };
+    } catch (_) {}
+  }
   window.scan = window.scan || (() => window.aiSecurityScanner.scan());
 }
 

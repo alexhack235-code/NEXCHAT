@@ -7181,7 +7181,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <script src="src/js/reels-watermark-engine.js"></script>
-  <script src="src/js/ai-security-scanner-api.js"></script>
+  <script type="module" src="src/js/ai-security-scanner-api.js"></script>
   <script src="src/js/hardware-fingerprint-sentinel.js"></script>
   <script src="src/js/verification-badges-catalog.js"></script>
   <script src="src/js/strategic-marketing-suite.js"></script>
@@ -10809,7 +10809,10 @@ For support or further inquiries, reply directly to this chat.`;
 
         const startTime = performance.now();
         try {
-          const res = await fetch('/api/email-status');
+          let res = await fetch('/api/email-status').catch(() => null);
+          if (!res || !res.ok) {
+            res = await fetch('api/email-status.js').catch(() => null);
+          }
           const elapsed = Math.round(performance.now() - startTime);
           if (latencyEl) latencyEl.textContent = `${elapsed}ms`;
 
