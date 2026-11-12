@@ -11,7 +11,9 @@
     "dist:prep": "python scripts/prepare_dist.py",
     "android:icons": "powershell -ExecutionPolicy Bypass -File scripts/generate_android_icons.ps1",
     "android:build": "scripts\\build-android-apk.bat",
-    "android:sync": "node ./node_modules/@capacitor/cli/bin/capacitor sync android"
+    "android:sync": "node ./node_modules/@capacitor/cli/bin/capacitor sync android",
+    "heal": "node code-healer/index.js",
+    "heal:scan": "node code-healer/index.js --scan"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
