@@ -64,9 +64,12 @@
         localStorage.setItem('auth_name', testName);
         localStorage.setItem('auth_email', 'demonalexander526@gmail.com');
         if (p.get('chat')) {
-          localStorage.setItem('selected_chat_id', p.get('chat'));
-          if (p.get('chatName')) localStorage.setItem('selected_chat_name', p.get('chatName'));
-          if (p.get('chatType')) localStorage.setItem('selected_chat_type', p.get('chatType'));
+          const cParam = p.get('chat');
+          if (cParam && cParam !== 'User' && cParam !== 'u_active' && cParam !== testUid) {
+            localStorage.setItem('selected_chat_id', cParam);
+            if (p.get('chatName')) localStorage.setItem('selected_chat_name', p.get('chatName'));
+            if (p.get('chatType')) localStorage.setItem('selected_chat_type', p.get('chatType'));
+          }
         }
         if (p.get('wallpaper')) {
           localStorage.setItem('nexchat_background', p.get('wallpaper'));
@@ -191,10 +194,10 @@
         </div>
         <!-- Active chat contact info (shows when in chat) -->
         <div id="activeChatHeader" class="active-chat-header" style="display: none;">
-          <img id="activeChatAvatar" src="logo.jpg" alt="Contact" class="active-chat-avatar" style="cursor: pointer;" onerror="this.onerror=null;this.src='logo.jpg';">
+          <img id="activeChatAvatar" src="" alt="Contact" class="active-chat-avatar" style="cursor: pointer;" onerror="if(window.getNeutralInitialsAvatar){this.src=window.getNeutralInitialsAvatar(document.getElementById('activeChatName')?.textContent||'Contact');}">
           <div class="active-chat-info">
             <div class="chat-title-lock-row">
-              <div id="activeChatName" class="active-chat-name">Contact Name</div>
+              <div id="activeChatName" class="active-chat-name"></div>
               <button type="button" id="btnQuickLockChatTop" class="btn-header-chat-lock" title="Lock chat with passcode" aria-label="Lock conversation">
                 <i class="fa-solid fa-lock-open lock-state-unlocked"></i>
                 <i class="fa-solid fa-lock lock-state-locked" style="display: none;"></i>
@@ -207,7 +210,7 @@
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 4px;">
-              <div id="activeChatStatus" class="active-chat-status">Online</div>
+              <div id="activeChatStatus" class="active-chat-status"></div>
               <span id="headerAutoTranslateBadge" class="auto-translate-header-pill" style="display: none;" title="Auto-Translate On Load Active"><i class="fa-solid fa-language"></i> TRANSLATED</span>
             </div>
           </div>
@@ -1016,19 +1019,19 @@
           <div class="chat-header-profile" id="chatHeaderProfile" style="cursor: pointer; position: relative;"
             title="Click to open group settings">
             <div class="header-avatar-container" style="position: relative; display: inline-flex; flex-shrink: 0;">
-              <img id="chatProfilePic" src="logo.jpg" alt="Profile" class="header-avatar" onerror="this.onerror=null;this.src='logo.jpg';">
+              <img id="chatProfilePic" src="" alt="Profile" class="header-avatar" onerror="if(window.getNeutralInitialsAvatar){this.src=window.getNeutralInitialsAvatar(document.getElementById('chatName')?.textContent||'Contact');}">
               <span id="chatOnlineIndicator" class="header-avatar-online-dot"></span>
             </div>
             <div class="header-text">
               <div class="chat-title-lock-row">
-                <h3 id="chatName">User</h3>
+                <h3 id="chatName"></h3>
                 <button type="button" id="btnQuickLockChat" class="btn-header-chat-lock" title="Lock chat with passcode (Prevent unauthorized reading)" aria-label="Lock conversation">
                   <i class="fa-solid fa-lock-open lock-state-unlocked"></i>
                   <i class="fa-solid fa-lock lock-state-locked" style="display: none;"></i>
                   <span class="lock-status-dot" id="headerLockDot"></span>
                 </button>
               </div>
-              <p id="statusText" class="status-subtitle">Online</p>
+              <p id="statusText" class="status-subtitle"></p>
             </div>
           </div>
           <div class="chat-detail-header-actions">
@@ -2288,10 +2291,12 @@
             <button type="button" id="closeProfileModal" class="close-modal" title="Close"><i class="fa-solid fa-xmark"></i></button>
           </div>
           <img id="profileModalImg" src=""
-            style="max-width: 100%; max-height: 65vh; border: 2px solid var(--accent-primary); box-shadow: 0 0 35px var(--accent-primary-dim); border-radius: var(--radius-lg); object-fit: contain; margin-top: 8px;">
+            style="max-width: 100%; max-height: 65vh; border: 2px solid var(--accent-primary); box-shadow: 0 0 35px var(--accent-primary-dim); border-radius: var(--radius-lg); object-fit: contain; margin-top: 8px;"
+            onerror="if(window.getNeutralInitialsAvatar){this.src=window.getNeutralInitialsAvatar(document.getElementById('profileModalName')?.textContent||'Contact');}">
           <h3 id="profileModalName"
             style="color: var(--accent-primary); text-align: center; margin-top: 15px; font-family: 'Orbitron', monospace; letter-spacing: 1.5px; text-transform: uppercase;">
-            USER</h3>
+          </h3>
+          <p id="profileModalId" style="font-family: monospace; font-size: 11.5px; color: #00d4ff; margin-top: 4px; letter-spacing: 0.5px; text-align: center;"></p>
           <p id="profileModalDesc"
             style="color: var(--text-secondary); text-align: center; font-size: 13.5px; margin-top: 8px; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.4;">
           </p>

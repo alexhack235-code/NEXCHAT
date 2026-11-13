@@ -83,8 +83,8 @@ self.addEventListener('fetch', (event) => {
         const clonedResponse = response.clone();
         if (response.status === 200) {
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clonedResponse);
-          });
+            cache.put(event.request, clonedResponse).catch(() => {});
+          }).catch(() => {});
         }
         return response;
       })
@@ -183,6 +183,8 @@ self.addEventListener('notificationclick', (event) => {
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
+    }).catch((err) => {
+      console.warn('[SW NotificationClick Error]', err);
     })
   );
 });
@@ -198,6 +200,8 @@ self.addEventListener('sync', (event) => {
         clients.forEach((client) => {
           client.postMessage({ type: 'SYNC_MESSAGES' });
         });
+      }).catch((err) => {
+        console.warn('[SW Sync Error]', err);
       })
     );
   }

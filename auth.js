@@ -269,11 +269,11 @@ function attachRegisterHandler() {
 
   registerForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const name = document.getElementById('regName').value.trim();
-    const username = document.getElementById('regUsername').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const pass = document.getElementById('regPassword').value;
-    const passConfirm = document.getElementById('regPasswordConfirm').value;
+    const name = document.getElementById('regName')?.value?.trim() || '';
+    const username = document.getElementById('regUsername')?.value?.trim() || '';
+    const email = document.getElementById('regEmail')?.value?.trim() || '';
+    const pass = document.getElementById('regPassword')?.value || '';
+    const passConfirm = document.getElementById('regPasswordConfirm')?.value || '';
 
     if (pass !== passConfirm) {
       showResult('Passwords do not match!', true);
@@ -464,7 +464,7 @@ function attachResetHandler() {
 
   resetForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const email = document.getElementById('resetEmail').value.trim();
+    const email = document.getElementById('resetEmail')?.value?.trim() || '';
 
     if (!email) {
       showResult('Please enter your email address!', true);
@@ -695,8 +695,8 @@ document.addEventListener('keydown', (e) => {
 if (loginForm) {
   loginForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass = document.getElementById('loginPassword').value;
+    const email = document.getElementById('loginEmail')?.value?.trim() || '';
+    const pass = document.getElementById('loginPassword')?.value || '';
 
     const loginRateLimit = checkRateLimit(email, 'login', 5, 900000);
     if (!loginRateLimit.allowed) {

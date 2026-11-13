@@ -61,7 +61,7 @@
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
       const user = localStorage.getItem('nexchat_user') ? JSON.parse(localStorage.getItem('nexchat_user')) : {};
-      const uid = window.myUID || user.uid || 'u_active';
+      const uid = window.myUID || (typeof auth !== 'undefined' && auth?.currentUser ? auth.currentUser.uid : null) || user.uid || localStorage.getItem('auth_uid') || '';
       const now = new Date();
       const timeStr = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
       const watermarkText = `VIEWER: ${uid} • NEX-ENCLAVE SECURE • ${timeStr}`;
