@@ -382,17 +382,26 @@
       const streakEl = document.getElementById('holoCardStreak');
       const freezesEl = document.getElementById('holoCardFreezes');
 
-      if (usernameEl) usernameEl.textContent = window.currentUserName || user.displayName || 'Cyber Operative';
-      if (uidEl) uidEl.textContent = `ID: ${window.myUID || user.uid || 'u_active'}`;
+      const partnerId = window.currentChatUserId || window.currentChatUser;
+      const partnerName = window.currentChatName;
+      const myId = window.myUID || user.uid;
+
+      if (partnerId && partnerId !== 'u_active' && partnerId !== 'User' && partnerId !== myId) {
+        if (usernameEl) usernameEl.textContent = partnerName || 'Contact';
+        if (uidEl) uidEl.textContent = `ID: ${partnerId}`;
+      } else {
+        if (usernameEl) usernameEl.textContent = window.currentUserName || user.displayName || 'Cyber Operative';
+        if (uidEl) uidEl.textContent = `ID: ${myId || 'u_active'}`;
+      }
 
       const tokens = localStorage.getItem('nexchat_user_tokens') || '1,000';
       if (tokensEl) tokensEl.textContent = `${parseInt(tokens, 10).toLocaleString()} NEX`;
 
-      const partnerId = window.currentChatUserId || window.currentChatUser || 'partner';
+      const activePartnerId = partnerId || 'partner';
       let streakCount = 7;
       try {
         const streaks = JSON.parse(localStorage.getItem('nexchat_streaks_data') || '{}');
-        if (streaks[partnerId]) streakCount = streaks[partnerId].count;
+        if (streaks[activePartnerId]) streakCount = streaks[activePartnerId].count;
       } catch (e) {}
 
       if (streakEl) streakEl.textContent = `${streakCount} Days`;

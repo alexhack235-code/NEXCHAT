@@ -1,4 +1,12 @@
 
+function getNeutralInitialsAvatar(name = 'Contact') {
+  const clean = String(name || 'Contact').replace(/^@/, '').trim();
+  const initial = (clean.charAt(0) || '?').toUpperCase();
+  return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="100%" height="100%" fill="%231e293b"/><circle cx="64" cy="64" r="54" fill="%23334155"/><text x="50%" y="55%" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="700" fill="%2300ff66" text-anchor="middle" dominant-baseline="central">${initial}</text></svg>`;
+}
+window.getNeutralInitialsAvatar = getNeutralInitialsAvatar;
+
+
 
 // Universal message-input / messageInput element resolver
 
@@ -8087,6 +8095,21 @@ function debounce(func, wait) {
 function showChatListView() {
 
   try { GroupChat.close(); } catch(e) {}
+  // Requirement 7 & 10: Blur active inputs to close keyboard and clear telemetry
+  try {
+    if (document.activeElement && typeof document.activeElement.blur === 'function') {
+      document.activeElement.blur();
+    }
+    const cyberModal = document.getElementById('cyberProfileCardModal');
+    if (cyberModal) cyberModal.style.display = 'none';
+    const themeModal = document.getElementById('themeStudioModal');
+    if (themeModal) themeModal.style.display = 'none';
+    const profilePicMod = document.getElementById('profilePicModal');
+    if (profilePicMod) profilePicMod.style.display = 'none';
+    const sleepBanner = document.getElementById('sleepProtocolBanner');
+    if (sleepBanner) sleepBanner.style.setProperty('display', 'none', 'important');
+  } catch (_) {}
+
 
   const listView = document.getElementById("chatListView");
 
@@ -21402,7 +21425,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
 
   window.currentChatName = username;
 
-  window.currentChatAvatar = profilePic || 'logo.jpg';
+  window.currentChatAvatar = profilePic || getNeutralInitialsAvatar(username);
 
 
 
@@ -55035,95 +55058,49 @@ if (typeof window !== 'undefined') {
 
 
 function restorePersistedSelectedChat() {
-
   try {
-
-    const isMobile = window.innerWidth < 900;
-
     const p = new URLSearchParams(window.location.search);
+    const currentMyUid = (typeof myUID !== 'undefined' && myUID) || window.myUID || (typeof auth !== 'undefined' && auth?.currentUser ? auth.currentUser.uid : null) || localStorage.getItem('myUID') || localStorage.getItem('auth_uid') || '';
 
-    // On mobile (< 900px / Android APK), ALWAYS land on the chat list by default!
+    // Requirement 3 & 5: NEVER auto-load stale localStorage or auto-open chat on mount/refresh
+    // Only open if explicitly requested via query parameter (?chat=... or ?chatId=...)
+    const cId = p.get('chat') || p.get('chatId');
 
-    // Never auto-jump into a previous user conversation from localStorage on initial startup.
+    if (!cId || cId === 'User' || cId === 'user' || cId === 'u_active' || (currentMyUid && cId === currentMyUid)) {
+      // Purge any stale self-chat or default-chat localStorage entries
+      try {
+        localStorage.removeItem('selected_chat_id');
+        localStorage.removeItem('selected_chat_name');
+        localStorage.removeItem('selected_chat_pic');
+        localStorage.removeItem('selected_chat_type');
+      } catch (_) {}
 
-    // Only open a chat if explicitly requested via URL parameter (e.g., deep link or push notification).
-
-    const cId = p.get('chat') || p.get('chatId') || (!isMobile ? localStorage.getItem('selected_chat_id') : null);
-
-    if (!cId) {
-
-      if (isMobile && typeof showChatListView === 'function') {
-
+      if (typeof showChatListView === 'function') {
         showChatListView();
-
       }
-
       return;
-
     }
 
-
-
-    const cName = p.get('chatName') || (!isMobile ? localStorage.getItem('selected_chat_name') : null) || 'Chat';
-
-    const cPic = (!isMobile ? localStorage.getItem('selected_chat_pic') : null) || 'logo.jpg';
-
-    const cType = p.get('chatType') || (!isMobile ? localStorage.getItem('selected_chat_type') : null) || 'direct';
-
-
-
-    // Pre-mount chatDetailView immediately so empty screen never flashes (Rule 2)
-
-    const welcome = document.getElementById('chatWelcomePanel');
-
-    if (welcome) welcome.style.setProperty('display', 'none', 'important');
-
-    const detail = document.getElementById('chatDetailView');
-
-    if (detail) {
-
-      detail.style.setProperty('display', 'flex', 'important');
-
-      detail.style.setProperty('background', '#0f0a1e', 'important');
-
-      detail.classList.remove('hidden');
-
-    }
-
-    const nameEl = document.getElementById('chatName');
-
-    if (nameEl) nameEl.textContent = cName;
-
-    const picEl = document.getElementById('chatProfilePic');
-
-    if (picEl) picEl.src = cPic;
-
-
+    const cName = p.get('chatName') || 'Contact';
+    const cPic = p.get('chatPic') || getNeutralInitialsAvatar(cName);
+    const cType = p.get('chatType') || 'direct';
 
     let attempts = 0;
-
     const interval = setInterval(() => {
-
       attempts++;
-
-      const currentUid = myUID || window.myUID || (typeof auth !== 'undefined' && auth.currentUser ? auth.currentUser.uid : null);
-
-      if (currentUid && typeof openChat === 'function') {
-
+      const uidNow = (typeof myUID !== 'undefined' && myUID) || window.myUID || (typeof auth !== 'undefined' && auth.currentUser ? auth.currentUser.uid : null);
+      if (uidNow && typeof openChat === 'function') {
         clearInterval(interval);
-
         openChat(cId, cName, cPic, cType);
-
       } else if (attempts > 30) {
-
         clearInterval(interval);
-
+        if (typeof showChatListView === 'function') showChatListView();
       }
-
     }, 200);
-
-  } catch (_) {}
-
+  } catch (err) {
+    console.error('[restorePersistedSelectedChat]', err);
+    if (typeof showChatListView === 'function') showChatListView();
+  }
 }
 
 

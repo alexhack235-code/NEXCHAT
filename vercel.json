@@ -126,6 +126,18 @@
   ],
   "rewrites": [
     {
+      "source": "/c",
+      "destination": "/chat.html"
+    },
+    {
+      "source": "/c/(.*)",
+      "destination": "/chat.html"
+    },
+    {
+      "source": "/chat",
+      "destination": "/chat.html"
+    },
+    {
       "source": "/privacy",
       "destination": "/privacy.html"
     },

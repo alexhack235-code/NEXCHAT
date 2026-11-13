@@ -183,7 +183,7 @@ export function createContactListItem(chat) {
   li.dataset.chatId = chat.uid;
   li.dataset.uid = chat.uid;
   li.dataset.chatType = chat.type || 'direct';
-  li.dataset.name = chat.name || 'User';
+  li.dataset.name = chat.name || 'Chat';
 
   let avatarHtml = '';
   if (chat.uid === 'chronex-ai') {

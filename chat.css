@@ -19889,3 +19889,118 @@ body.in-conversation .chat-main,
   line-height: 24px !important;
   flex: 1 1 auto !important;
 }
+
+
+/* ==========================================================================
+   TELEGRAM-STYLE FROSTED GLASSMORPHISM ENGINE (glassy.md)
+   ========================================================================== */
+
+:root {
+  /* Liquid Glass Base */
+  --glass-surface: rgba(18, 25, 38, 0.72);
+  --glass-surface-hover: rgba(28, 38, 58, 0.82);
+  --glass-surface-active: rgba(36, 48, 74, 0.90);
+
+  /* Glass Optics */
+  --glass-blur: blur(20px) saturate(180%);
+  --glass-blur-heavy: blur(32px) saturate(200%);
+  --glass-webkit-blur: blur(20px) saturate(180%);
+
+  /* Specular Borders & Highlights */
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --glass-border-light: 1px solid rgba(255, 255, 255, 0.14);
+  --glass-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+  /* Elevation Shadows */
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.38);
+  --glass-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Settings Modal Backdrop & Dialog Container */
+.settings-modal {
+  background: rgba(8, 12, 19, 0.78) !important;
+  backdrop-filter: var(--glass-blur-heavy) !important;
+  -webkit-backdrop-filter: var(--glass-blur-heavy) !important;
+}
+
+.settings-modal .settings-content,
+.settings-modal .settings-modal-content,
+.settings-modal-dialog,
+.luxury-settings-suite {
+  background: var(--glass-surface) !important;
+  backdrop-filter: var(--glass-blur) !important;
+  -webkit-backdrop-filter: var(--glass-webkit-blur) !important;
+  border: var(--glass-border) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--glass-shadow), var(--glass-inset-highlight) !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+}
+
+/* Grouped Settings Islands (Telegram Card Blocks) */
+.settings-group,
+.settings-card,
+.settings-section {
+  background: rgba(24, 33, 49, 0.65) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--glass-card-shadow) !important;
+  margin-bottom: 14px !important;
+  overflow: hidden !important;
+}
+
+/* Interactive Items & Glass Separators */
+.settings-item,
+.settings-row,
+.settings-toggle-row {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 12px 16px !important;
+  transition: background 0.18s ease, transform 0.15s ease !important;
+}
+
+.settings-item:last-child,
+.settings-row:last-child,
+.settings-toggle-row:last-child {
+  border-bottom: none !important;
+}
+
+.settings-item:hover,
+.settings-row:hover,
+.settings-toggle-row:hover {
+  background: var(--glass-surface-hover) !important;
+}
+
+.settings-item:active,
+.settings-row:active,
+.settings-toggle-row:active {
+  background: var(--glass-surface-active) !important;
+}
+
+/* Glass Icon Badges (Telegram Rounded Squircle Badges) */
+.settings-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .settings-modal .settings-content,
+  .settings-modal .settings-modal-content,
+  .settings-group,
+  .settings-card,
+  .settings-section {
+    background: rgba(18, 25, 38, 0.96) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
