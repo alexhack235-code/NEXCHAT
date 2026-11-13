@@ -13,7 +13,8 @@
     "android:build": "scripts\\build-android-apk.bat",
     "android:sync": "node ./node_modules/@capacitor/cli/bin/capacitor sync android",
     "heal": "node code-healer/index.js",
-    "heal:scan": "node code-healer/index.js --scan"
+    "heal:scan": "node code-healer/index.js --scan",
+    "heal:web": "node code-healer/server.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",

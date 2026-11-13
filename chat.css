@@ -15902,11 +15902,23 @@ body:not(.group-active) #tacticalMeshBanner {
 
 .nex-msg-meta,
 .message-time-row {
-  position: absolute !important;
-  bottom: 3px !important;
-  right: 8px !important;
-  margin: 0 !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 4px !important;
+  margin-top: 4px !important;
+  margin-bottom: 2px !important;
+  margin-left: auto !important;
+  float: right !important;
+  clear: both !important;
   line-height: 1 !important;
+}
+.message-bubble,
+.nex-msg-bubble {
+  padding: 8px 12px 10px 12px !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
 }
 
 .message-time-text {
@@ -19855,4 +19867,25 @@ body.in-conversation .chat-main,
   overflow-wrap: anywhere !important;
   box-sizing: border-box !important;
   max-width: 100% !important;
+}
+
+/* Fix input cramping: Voice dictate button is in Attachment Hub */
+.message-input-wrapper #voiceDictateBtn,
+.input-inline-btn.voice-dictate-btn {
+  display: none !important;
+}
+
+/* Generous finger tap target and full horizontal expansion */
+.message-input-wrapper {
+  min-height: 50px !important;
+  height: auto !important;
+  padding: 4px 10px !important;
+}
+.message-input-wrapper #message-input,
+.message-input-wrapper .message-input {
+  min-height: 44px !important;
+  height: 44px !important;
+  font-size: 16px !important;
+  line-height: 24px !important;
+  flex: 1 1 auto !important;
 }

@@ -50,9 +50,11 @@
       if (!input || !palette) return;
 
       input.addEventListener('input', () => {
-        const val = input.value;
-        if (val.startsWith('/')) {
-          const query = val.toLowerCase().slice(1);
+        const val = input.value || '';
+        // Fix 6: Only show slash command palette if user is in an active chat and explicitly starts input with '/'
+        const hasActiveChat = Boolean(window.currentChatUser || window.currentChatId);
+        if (hasActiveChat && val.startsWith('/') && val.trim().length >= 1) {
+          const query = val.toLowerCase().slice(1).trim();
           this.filteredCommands = COMMANDS.filter(c => c.cmd.includes(query) || c.title.toLowerCase().includes(query));
           this.selectedIndex = 0;
           this.renderPalette();
@@ -220,6 +222,13 @@
           item.style.background = 'transparent';
         }
       });
+    }
+
+        closePalette() {
+      const palette = document.getElementById('slashCommandPalette');
+      if (palette) palette.style.display = 'none';
+      const menu = document.getElementById('slashCommandsMenu');
+      if (menu) menu.style.display = 'none';
     }
 
     executeCommand(command) {
@@ -416,3 +425,11 @@
   global.eliteSlashCommands = new EliteSlashCommands();
 
 })(typeof window !== 'undefined' ? window : this);
+
+  // Expose global closer
+  window.closeSlashCommandPalette = function() {
+    const pal = document.getElementById('slashCommandPalette');
+    if (pal) pal.style.display = 'none';
+    const menu = document.getElementById('slashCommandsMenu');
+    if (menu) menu.style.display = 'none';
+  };

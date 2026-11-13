@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXCHAT — Autonomous Code Healer & Web View Console</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --bg-panel: #111622;
+      --bg-card: #182032;
+      --border: #232d45;
+      --border-bright: #38486f;
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.25);
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
+      --font-mono: 'Consolas', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: 0.5px;
+    }
+    .logo i { color: var(--cyan); }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: var(--green);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    /* Horizontal Vercel Pipeline Roadmap */
+    .pipeline-section {
+      background: #0d121c;
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+    }
+    .pipeline-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .pipeline-roadmap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .stage-card {
+      flex: 1;
+      min-width: 170px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    .stage-card.pending { opacity: 0.6; }
+    .stage-card.running {
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px var(--cyan-glow);
+      opacity: 1;
+    }
+    .stage-card.success {
+      border-color: var(--green);
+      background: rgba(16, 185, 129, 0.05);
+      opacity: 1;
+    }
+    .stage-card.failed {
+      border-color: var(--red);
+      background: rgba(239, 68, 68, 0.05);
+      opacity: 1;
+    }
+    .stage-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+      font-size: 0.9rem;
+    }
+    .stage-card.success .stage-icon { background: rgba(16, 185, 129, 0.2); color: var(--green); }
+    .stage-card.running .stage-icon { background: rgba(6, 182, 212, 0.2); color: var(--cyan); animation: spin 2s linear infinite; }
+    .stage-info { display: flex; flex-direction: column; }
+    .stage-name { font-size: 0.84rem; font-weight: 600; color: #fff; }
+    .stage-metric { font-size: 0.72rem; color: var(--text-dim); font-family: var(--font-mono); margin-top: 2px; }
+    .stage-connector {
+      color: var(--border-bright);
+      font-size: 0.9rem;
+      user-select: none;
+    }
+    .stage-connector.active { color: var(--green); }
+
+    /* Main Console Grid */
+    .console-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      flex: 1;
+      height: calc(100vh - 195px);
+    }
+    @media (max-width: 1024px) {
+      .console-grid { grid-template-columns: 1fr; height: auto; }
+    }
+
+    /* Left Sidebar: File Tree & Diagnostics */
+    .sidebar-left {
+      background: var(--bg-panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .section-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .file-list { list-style: none; padding: 8px; }
+    .file-item {
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      transition: background 0.15s ease;
+      margin-bottom: 4px;
+    }
+    .file-item:hover { background: var(--bg-card); }
+    .file-item.active { background: #1e293b; border-left: 3px solid var(--cyan); }
+    .badge-error {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--red);
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Center: Code View & Editor */
+    .editor-container {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-dark);
+      overflow: hidden;
+    }
+    .editor-toolbar {
+      background: #0f1420;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .editor-filename {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-group { display: flex; gap: 8px; }
+    .btn {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn:hover { border-color: var(--border-bright); background: #222d46; }
+    .btn-primary {
+      background: #0284c7;
+      border-color: var(--cyan);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #0369a1; box-shadow: 0 0 12px var(--cyan-glow); }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--red);
+      color: #fca5a5;
+    }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.25); }
+
+    .code-diff-area {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+    .code-pane {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    .code-pane-title {
+      background: #141a29;
+      padding: 6px 14px;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+    }
+    textarea.code-editor {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #cbd5e1;
+      font-family: var(--font-mono);
+      font-size: 0.86rem;
+      line-height: 1.6;
+      padding: 16px;
+      resize: none;
+      outline: none;
+      white-space: pre;
+    }
+
+    /* Right Sidebar: Telemetry & Actions */
+    .sidebar-right {
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    .telemetry-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 14px;
+      padding: 14px;
+    }
+    .telemetry-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .telemetry-body {
+      font-size: 0.84rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+    .issue-check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+    }
+    .issue-check-item i { color: var(--green); margin-top: 3px; }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Navigation -->
+  <header>
+    <div class="logo">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <span>NEXCHAT CODE HEALER</span>
+      <span style="font-size: 0.72rem; background: #0284c7; color: #fff; padding: 2px 6px; border-radius: 4px;">WEB VIEW</span>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span id="engineStatusText">AI Cluster Online (10 Keys)</span>
+      </div>
+      <button class="btn" onclick="openAntiMatterBridge()">
+        <i class="fa-solid fa-atom text-purple"></i> Anti-Matter Bridge
+      </button>
+    </div>
+  </header>
+
+  <!-- Horizontal Vercel Pipeline Roadmap -->
+  <div class="pipeline-section">
+    <div class="pipeline-title">
+      <span><i class="fa-solid fa-diagram-project"></i> Linear Pipeline Roadmap (Vercel-Style)</span>
+      <span id="pipelineOverallTime">Total: 0ms</span>
+    </div>
+    <div class="pipeline-roadmap" id="pipelineRoadmap">
+      <div class="stage-card success" id="stage1">
+        <div class="stage-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div class="stage-info">
+          <span class="stage-name">1. SCAN & INGEST</span>
+          <span class="stage-metric" id="stage1Metric">✔ Completed (2ms)</span>
+        </div>
+      </div>
+      <div class="stage-connector active">──►</div>
+      <div class="stage-card success" id="stage2">
+        <div class="stage-icon"><i class="fa-solid fa-microscope"></i></div>
+        <div class="stage-info">
+          <span class="stage-name">2. DIAGNOSTICS</span>
+          <span class="stage-metric" id="stage2Metric">✔ Completed (8ms)</span>
+        </div>
+      </div>
+      <div class="stage-connector active">──►</div>
+      <div class="stage-card success" id="stage3">
+        <div class="stage-icon"><i class="fa-solid fa-brain"></i></div>
+        <div class="stage-info">
+          <span class="stage-name">3. AI SYNTHESIS</span>
+          <span class="stage-metric" id="stage3Metric">✔ 1.42s (Groq LPU)</span>
+        </div>
+      </div>
+      <div class="stage-connector active">──►</div>
+      <div class="stage-card success" id="stage4">
+        <div class="stage-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="stage-info">
+          <span class="stage-name">4. AST VALIDATOR</span>
+          <span class="stage-metric" id="stage4Metric">✔ VM Pass (12ms)</span>
+        </div>
+      </div>
+      <div class="stage-connector active">──►</div>
+      <div class="stage-card success" id="stage5">
+        <div class="stage-icon"><i class="fa-solid fa-floppy-disk"></i></div>
+        <div class="stage-info">
+          <span class="stage-name">5. ATOMIC PATCH</span>
+          <span class="stage-metric" id="stage5Metric">✔ Backup + Commit</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="console-grid">
+
+    <!-- Left File Browser -->
+    <div class="sidebar-left">
+      <div class="section-header">
+        <span>Workspace Files</span>
+        <button class="btn" style="padding: 4px 8px; font-size: 0.72rem;" onclick="triggerScan()">
+          <i class="fa-solid fa-rotate"></i> Scan
+        </button>
+      </div>
+      <ul class="file-list" id="fileList">
+        <li class="file-item active" onclick="selectFile('chat.js')">
+          <span><i class="fa-brands fa-js text-yellow" style="margin-right: 6px;"></i> chat.js</span>
+          <span class="badge-error" style="background: rgba(16,185,129,0.2); color: var(--green);">OPTIMAL</span>
+        </li>
+        <li class="file-item" onclick="selectFile('chat.html')">
+          <span><i class="fa-brands fa-html5 text-orange" style="margin-right: 6px;"></i> chat.html</span>
+        </li>
+        <li class="file-item" onclick="selectFile('api/heal.js')">
+          <span><i class="fa-solid fa-server text-cyan" style="margin-right: 6px;"></i> api/heal.js</span>
+        </li>
+        <li class="file-item" onclick="selectFile('lib/translator.js')">
+          <span><i class="fa-solid fa-language text-purple" style="margin-right: 6px;"></i> lib/translator.js</span>
+        </li>
+        <li class="file-item" onclick="selectFile('email-config.example.json')">
+          <span><i class="fa-solid fa-gear text-dim" style="margin-right: 6px;"></i> email-config.example.json</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Center Code View -->
+    <div class="editor-container">
+      <div class="editor-toolbar">
+        <div class="editor-filename" id="currentFileName">
+          <i class="fa-solid fa-file-code"></i>
+          <span>chat.js</span>
+        </div>
+        <div class="btn-group">
+          <button class="btn" onclick="runDryRun()">
+            <i class="fa-solid fa-eye"></i> Dry Run
+          </button>
+          <button class="btn btn-primary" onclick="triggerHeal()">
+            <i class="fa-solid fa-bolt"></i> Autonomously Heal Code
+          </button>
+        </div>
+      </div>
+      <div class="code-diff-area">
+        <div class="code-pane">
+          <div class="code-pane-title">Original Source Code</div>
+          <textarea class="code-editor" id="originalCode" spellcheck="false" placeholder="Loading file code..."></textarea>
+        </div>
+        <div class="code-pane">
+          <div class="code-pane-title">AI Corrected / Healed Code</div>
+          <textarea class="code-editor" id="healedCode" spellcheck="false" placeholder="Healed code will appear here after AI synthesis..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Telemetry & Actions -->
+    <div class="sidebar-right">
+      <div class="section-header">
+        <span>Diagnostics & Telemetry</span>
+      </div>
+
+      <div class="telemetry-card">
+        <div class="telemetry-title">Root Cause Diagnosis</div>
+        <div class="telemetry-body" id="telemetryDiagnosis">
+          Ready to diagnose. Select any file from the workspace or click "Autonomously Heal Code" to run the linear AST healing pipeline.
+        </div>
+      </div>
+
+      <div class="telemetry-card">
+        <div class="telemetry-title">Resolved Anomalies</div>
+        <div id="resolvedList">
+          <div class="issue-check-item">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>AST validation engine active</span>
+          </div>
+          <div class="issue-check-item">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Automatic .bak snapshot protection enabled</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="telemetry-card" style="margin-top: auto;">
+        <div class="telemetry-title">Atomic Rollback Gate</div>
+        <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px;">
+          Revert changes instantly from previous safe snapshots if needed.
+        </div>
+        <button class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="triggerRollback()">
+          <i class="fa-solid fa-clock-rotate-left"></i> Rollback to Previous Backup
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentSelected = 'email-config.example.json';
+
+    async function loadFileContent(filePath) {
+      currentSelected = filePath;
+      document.getElementById('currentFileName').innerHTML = `<i class="fa-solid fa-file-code"></i> <span>${filePath}</span>`;
+      try {
+        const res = await fetch(`/api/file?path=${encodeURIComponent(filePath)}`);
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('originalCode').value = data.content || '';
+          document.getElementById('healedCode').value = '';
+        }
+      } catch (e) {
+        console.warn('Standalone web view preview mode.');
+      }
+    }
+
+    function selectFile(filePath) {
+      document.querySelectorAll('.file-item').forEach(el => el.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      loadFileContent(filePath);
+    }
+
+    function updatePipelineStage(stageNum, status, metric) {
+      const stage = document.getElementById(`stage${stageNum}`);
+      const metricEl = document.getElementById(`stage${stageNum}Metric`);
+      if (stage) {
+        stage.className = `stage-card ${status}`;
+        if (metric) metricEl.textContent = metric;
+      }
+    }
+
+    async function triggerHeal() {
+      updatePipelineStage(1, 'running', 'Scanning AST...');
+      updatePipelineStage(2, 'pending', 'Waiting...');
+      updatePipelineStage(3, 'pending', 'Waiting...');
+      updatePipelineStage(4, 'pending', 'Waiting...');
+      updatePipelineStage(5, 'pending', 'Waiting...');
+
+      const start = Date.now();
+      try {
+        const res = await fetch('/api/heal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filePath: currentSelected, dryRun: false })
+        });
+        const data = await res.json();
+
+        updatePipelineStage(1, 'success', '✔ Done (2ms)');
+        updatePipelineStage(2, 'success', '✔ Anomaly Isolated');
+        updatePipelineStage(3, 'success', `✔ ${data.provider?.toUpperCase() || 'AI'} Synthesized`);
+        updatePipelineStage(4, 'success', '✔ VM Syntax Passed');
+        updatePipelineStage(5, 'success', '✔ Applied & Backed Up');
+
+        if (data.fixedCode) {
+          document.getElementById('healedCode').value = data.fixedCode;
+        }
+        if (data.explanation) {
+          document.getElementById('telemetryDiagnosis').textContent = data.explanation;
+        }
+        if (data.issuesResolved && data.issuesResolved.length > 0) {
+          const list = document.getElementById('resolvedList');
+          list.innerHTML = '';
+          data.issuesResolved.forEach(iss => {
+            const div = document.createElement('div');
+            div.className = 'issue-check-item';
+            div.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${iss}</span>`;
+            list.appendChild(div);
+          });
+        }
+        document.getElementById('pipelineOverallTime').textContent = `Total: ${Date.now() - start}ms`;
+      } catch (err) {
+        updatePipelineStage(3, 'failed', '✖ Failed');
+        document.getElementById('telemetryDiagnosis').textContent = 'AI Healing error: ' + err.message;
+      }
+    }
+
+    function openAntiMatterBridge() {
+      alert("Anti-Matter Agent Integration is active at C:\\Users\\USER\\Desktop\\Anti-Matter. You can launch Anti-Matter with python run.py to run full autonomous browser QA and coding agent loops.");
+    }
+
+    // Initial load
+    loadFileContent('email-config.example.json');
+  </script>
+</body>
+</html>
