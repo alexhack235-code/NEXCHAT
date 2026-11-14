@@ -238,35 +238,35 @@ fs.writeFileSync(path.join(targetDir, 'world-countries-registry.js'), registryCo
 console.log(`[Registry] world-countries-registry.js created with ${WORLD_COUNTRIES.length} sovereign countries!`);
 
 // ---------------------------------------------------------------------------
-// 2. MASTER 200,000-LINE MODULAR LANGUAGE MATRIX
+// 2. MASTER 350,000-LINE MODULAR LANGUAGE MATRIX
 // ---------------------------------------------------------------------------
 const LANGUAGE_SPECS = [
-  { code: 'ro', file: 'romania.js', country: 'Romania & Moldova', language: 'Romanian', targetSize: 14000, prefix: 'RO' },
-  { code: 'de', file: 'germany.js', country: 'Germany & Austria', language: 'German', targetSize: 12000, prefix: 'DE' },
-  { code: 'es', file: 'spain.js', country: 'Spain & Latin America', language: 'Spanish', targetSize: 12000, prefix: 'ES' },
-  { code: 'fr', file: 'france.js', country: 'France & Francophonie', language: 'French', targetSize: 10000, prefix: 'FR' },
-  { code: 'id', file: 'indonesia.js', country: 'Indonesia', language: 'Indonesian', targetSize: 10000, prefix: 'ID' },
-  { code: 'ms', file: 'malaysia.js', country: 'Malaysia', language: 'Malay', targetSize: 10000, prefix: 'MS' },
-  { code: 'ur', file: 'pakistan-urdu.js', country: 'Pakistan', language: 'Urdu', targetSize: 8000, prefix: 'UR' },
-  { code: 'hi', file: 'india-hindi.js', country: 'India', language: 'Hindi', targetSize: 8000, prefix: 'HI' },
-  { code: 'ar', file: 'arabia.js', country: 'Arab World', language: 'Arabic', targetSize: 8000, prefix: 'AR' },
-  { code: 'ru', file: 'russia.js', country: 'Russia & CIS', language: 'Russian', targetSize: 8000, prefix: 'RU' },
-  { code: 'pt', file: 'portugal-brazil.js', country: 'Brazil & Portugal', language: 'Portuguese', targetSize: 8000, prefix: 'PT' },
-  { code: 'it', file: 'italy.js', country: 'Italy', language: 'Italian', targetSize: 7000, prefix: 'IT' },
-  { code: 'tr', file: 'turkey.js', country: 'Turkey', language: 'Turkish', targetSize: 6000, prefix: 'TR' },
-  { code: 'ja', file: 'japan.js', country: 'Japan', language: 'Japanese', targetSize: 6000, prefix: 'JA' },
-  { code: 'zh', file: 'china.js', country: 'China', language: 'Chinese', targetSize: 6000, prefix: 'ZH' },
-  { code: 'ko', file: 'korea.js', country: 'Korea', language: 'Korean', targetSize: 6000, prefix: 'KO' },
-  { code: 'sw', file: 'swahili.js', country: 'East Africa', language: 'Swahili', targetSize: 6000, prefix: 'SW' },
-  { code: 'tl', file: 'philippines-tagalog.js', country: 'Philippines', language: 'Tagalog', targetSize: 6000, prefix: 'TL' },
-  { code: 'nl', file: 'netherlands.js', country: 'Netherlands & Belgium', language: 'Dutch', targetSize: 5000, prefix: 'NL' },
-  { code: 'pl', file: 'poland.js', country: 'Poland', language: 'Polish', targetSize: 5000, prefix: 'PL' },
-  { code: 'vi', file: 'vietnam.js', country: 'Vietnam', language: 'Vietnamese', targetSize: 5000, prefix: 'VI' },
-  { code: 'th', file: 'thailand.js', country: 'Thailand', language: 'Thai', targetSize: 5000, prefix: 'TH' },
-  { code: 'pcm', file: 'nigeria-pidgin.js', country: 'Nigeria', language: 'Nigerian Pidgin', targetSize: 5000, prefix: 'PCM' },
-  { code: 'yo', file: 'nigeria-yoruba.js', country: 'Nigeria (Yoruba)', language: 'Yoruba', targetSize: 5000, prefix: 'YO' },
-  { code: 'ig', file: 'nigeria-igbo.js', country: 'Nigeria (Igbo)', language: 'Igbo', targetSize: 5000, prefix: 'IG' },
-  { code: 'ha', file: 'nigeria-hausa.js', country: 'Nigeria (Hausa)', language: 'Hausa', targetSize: 5000, prefix: 'HA' }
+  { code: 'ro', file: 'romania.js', country: 'Romania & Moldova', language: 'Romanian', targetSize: 17500, prefix: 'RO' },
+  { code: 'de', file: 'germany.js', country: 'Germany & Austria', language: 'German', targetSize: 15000, prefix: 'DE' },
+  { code: 'es', file: 'spain.js', country: 'Spain & Latin America', language: 'Spanish', targetSize: 15000, prefix: 'ES' },
+  { code: 'fr', file: 'france.js', country: 'France & Francophonie', language: 'French', targetSize: 13000, prefix: 'FR' },
+  { code: 'id', file: 'indonesia.js', country: 'Indonesia', language: 'Indonesian', targetSize: 13000, prefix: 'ID' },
+  { code: 'ms', file: 'malaysia.js', country: 'Malaysia', language: 'Malay', targetSize: 13000, prefix: 'MS' },
+  { code: 'ur', file: 'pakistan-urdu.js', country: 'Pakistan', language: 'Urdu', targetSize: 10000, prefix: 'UR' },
+  { code: 'hi', file: 'india-hindi.js', country: 'India', language: 'Hindi', targetSize: 10000, prefix: 'HI' },
+  { code: 'ar', file: 'arabia.js', country: 'Arab World', language: 'Arabic', targetSize: 10000, prefix: 'AR' },
+  { code: 'ru', file: 'russia.js', country: 'Russia & CIS', language: 'Russian', targetSize: 10000, prefix: 'RU' },
+  { code: 'pt', file: 'portugal-brazil.js', country: 'Brazil & Portugal', language: 'Portuguese', targetSize: 10000, prefix: 'PT' },
+  { code: 'it', file: 'italy.js', country: 'Italy', language: 'Italian', targetSize: 9000, prefix: 'IT' },
+  { code: 'tr', file: 'turkey.js', country: 'Turkey', language: 'Turkish', targetSize: 8000, prefix: 'TR' },
+  { code: 'ja', file: 'japan.js', country: 'Japan', language: 'Japanese', targetSize: 8000, prefix: 'JA' },
+  { code: 'zh', file: 'china.js', country: 'China', language: 'Chinese', targetSize: 8000, prefix: 'ZH' },
+  { code: 'ko', file: 'korea.js', country: 'Korea', language: 'Korean', targetSize: 8000, prefix: 'KO' },
+  { code: 'sw', file: 'swahili.js', country: 'East Africa', language: 'Swahili', targetSize: 8000, prefix: 'SW' },
+  { code: 'tl', file: 'philippines-tagalog.js', country: 'Philippines', language: 'Tagalog', targetSize: 8000, prefix: 'TL' },
+  { code: 'nl', file: 'netherlands.js', country: 'Netherlands & Belgium', language: 'Dutch', targetSize: 7000, prefix: 'NL' },
+  { code: 'pl', file: 'poland.js', country: 'Poland', language: 'Polish', targetSize: 7000, prefix: 'PL' },
+  { code: 'vi', file: 'vietnam.js', country: 'Vietnam', language: 'Vietnamese', targetSize: 7000, prefix: 'VI' },
+  { code: 'th', file: 'thailand.js', country: 'Thailand', language: 'Thai', targetSize: 7000, prefix: 'TH' },
+  { code: 'pcm', file: 'nigeria-pidgin.js', country: 'Nigeria', language: 'Nigerian Pidgin', targetSize: 6500, prefix: 'PCM' },
+  { code: 'yo', file: 'nigeria-yoruba.js', country: 'Nigeria (Yoruba)', language: 'Yoruba', targetSize: 6500, prefix: 'YO' },
+  { code: 'ig', file: 'nigeria-igbo.js', country: 'Nigeria (Igbo)', language: 'Igbo', targetSize: 6500, prefix: 'IG' },
+  { code: 'ha', file: 'nigeria-hausa.js', country: 'Nigeria (Hausa)', language: 'Hausa', targetSize: 6500, prefix: 'HA' }
 ];
 
 // Load dictionary-30k words for seeding
