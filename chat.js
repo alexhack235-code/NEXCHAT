@@ -1500,7 +1500,130 @@ function getTypingDocRef(chatId, chatType) {
   return doc(db, 'typingStatus', docId);
 }
 
+function isLocalUser(uid) {
+  if (!uid) return true;
+  const myId = myUID || window.myUID || (auth && auth.currentUser ? auth.currentUser.uid : null) || localStorage.getItem('myUID');
+  if (!myId) return false;
+  const sUid = String(uid).trim().toLowerCase();
+  const sMyId = String(myId).trim().toLowerCase();
+  return sUid === sMyId || sUid === 'me' || sUid === 'u_active' || sUid === 'anon';
+}
+window.isLocalUser = isLocalUser;
+
+function formatActionText(action, user) {
+  const name = user || 'User';
+  switch (action) {
+    case 'recording_audio':
+      return `${name} is recording audio...`;
+    case 'uploading_video':
+    case 'sending_video':
+      return `${name} is sending a video...`;
+    case 'uploading_photo':
+    case 'sending_photo':
+      return `${name} is sending a photo...`;
+    case 'uploading_file':
+    case 'sending_file':
+      return `${name} is sending a file...`;
+    default:
+      return `${name} is typing...`;
+  }
+}
+window.formatActionText = formatActionText;
+
+function setContactListActionPreview(userId, action, user) {
+  if (!userId || isLocalUser(userId)) return;
+  try {
+    const item = document.querySelector(`#contactList li[data-chat-id="${CSS.escape(userId)}"]`);
+    if (!item) return;
+
+    const previewEl = item.querySelector('.chat-preview');
+    if (!previewEl) return;
+
+    if (!item._originalPreviewHtml) {
+      item._originalPreviewHtml = previewEl.innerHTML;
+    }
+
+    let iconHtml = '<i class="fa-solid fa-pen" style="font-size: 11px; margin-right: 4px;"></i>';
+    let labelText = 'typing...';
+
+    if (action === 'recording_audio') {
+      iconHtml = '<i class="fa-solid fa-microphone" style="font-size: 11px; margin-right: 4px;"></i>';
+      labelText = 'recording audio...';
+    } else if (action === 'sending_video' || action === 'uploading_video') {
+      iconHtml = '<i class="fa-solid fa-video" style="font-size: 11px; margin-right: 4px;"></i>';
+      labelText = 'sending video...';
+    } else if (action === 'sending_photo' || action === 'uploading_photo') {
+      iconHtml = '<i class="fa-solid fa-camera" style="font-size: 11px; margin-right: 4px;"></i>';
+      labelText = 'sending photo...';
+    } else if (action === 'sending_file' || action === 'uploading_file') {
+      iconHtml = '<i class="fa-solid fa-file-arrow-up" style="font-size: 11px; margin-right: 4px;"></i>';
+      labelText = 'sending file...';
+    }
+
+    previewEl.innerHTML = `<span class="preview-text action-typing" style="color: #00ff66; font-weight: 500;">${iconHtml}${labelText}</span>`;
+
+    if (item._actionPreviewTimer) clearTimeout(item._actionPreviewTimer);
+    item._actionPreviewTimer = setTimeout(() => {
+      restoreContactListPreview(userId);
+    }, 4500);
+  } catch (_) {}
+}
+window.setContactListActionPreview = setContactListActionPreview;
+
+function restoreContactListPreview(userId) {
+  if (!userId) return;
+  try {
+    const item = document.querySelector(`#contactList li[data-chat-id="${CSS.escape(userId)}"]`);
+    if (!item || !item._originalPreviewHtml) return;
+
+    const previewEl = item.querySelector('.chat-preview');
+    if (previewEl) {
+      previewEl.innerHTML = item._originalPreviewHtml;
+    }
+    delete item._originalPreviewHtml;
+    if (item._actionPreviewTimer) {
+      clearTimeout(item._actionPreviewTimer);
+      delete item._actionPreviewTimer;
+    }
+  } catch (_) {}
+}
+window.restoreContactListPreview = restoreContactListPreview;
+
+function broadcastUserAction(actionType, targetChatId = null) {
+  const isActionActive = actionType && actionType !== 'idle';
+  const targetId = targetChatId || currentChatUser;
+  if (!targetId || !currentChatType) return;
+
+  const curUid = myUID || window.myUID || (auth && auth.currentUser ? auth.currentUser.uid : null) || localStorage.getItem('myUID');
+  if (!curUid || isLocalUser(targetId)) return;
+
+  if (typeof broadcastTyping === 'function') {
+    broadcastTyping(isActionActive, targetId, actionType || 'typing');
+  }
+
+  const typingRef = getTypingDocRef(targetId, currentChatType);
+  if (typingRef) {
+    setDoc(typingRef, {
+      typingUsersMap: {
+        [curUid]: {
+          isTyping: isActionActive,
+          action: actionType || (isActionActive ? 'typing' : 'idle'),
+          timestamp: Date.now(),
+          userName: myUsername || window.myUsername || 'User'
+        }
+      },
+      typingUsers: isActionActive ? arrayUnion(curUid) : arrayRemove(curUid),
+      updatedAt: serverTimestamp(),
+      updatedAtMs: Date.now()
+    }, { merge: true }).catch(() => {});
+  }
+}
+window.broadcastUserAction = broadcastUserAction;
+
 async function updateTypingStatus(isTyping) {
+  broadcastUserAction(isTyping ? 'typing' : 'idle');
+  return;
+
   const curUid = myUID || window.myUID || (auth && auth.currentUser ? auth.currentUser.uid : null);
 
   if (!curUid || !currentChatUser || !currentChatType) return;
@@ -1565,65 +1688,54 @@ async function clearTypingStatus() {
   await updateTypingStatus(false).catch(() => {});
 }
 
-function showTypingIndicator(label, avatarUrl) {
+function showTypingIndicator(label, avatarUrl, action = 'typing') {
   // STRICT RULE: NEVER show typing indicator when I am the one typing
-
   if (isMyTypingActive) return;
 
-// Filter out own name if present in label
-
   const myName = myUsername || window.myUsername || '';
-
   if (myName && label && label.toLowerCase().includes(myName.toLowerCase())) {
     return;
   }
 
-const indicator = document.getElementById('typingIndicator');
-
+  const indicator = document.getElementById('typingIndicator');
   if (!indicator) return;
 
-isOtherPersonTyping = true;
-
-// Resolve user avatar
+  isOtherPersonTyping = true;
 
   const chatAvatarImg = document.getElementById('chatAvatar') || document.querySelector('.chat-header-avatar');
   const resolvedAvatar = avatarUrl || (chatAvatarImg ? chatAvatarImg.src : '') || 'logo.jpg';
 
-// Format label: e.g. "Alex is typing..." -> "Alex typing..." or default "typing..."
-
   let cleanText = label || 'typing...';
-
   if (cleanText.endsWith(' is typing...')) {
     cleanText = cleanText.replace(' is typing...', ' typing...');
   }
 
-// Unique NEXCHAT Terminal Hash Indicator: [Avatar] ### typing...
-
-  indicator.innerHTML = `
-
-    <img class="typing-avatar" src="${resolvedAvatar}" alt="User" onerror="this.src='logo.jpg'">
-
+  let iconOrHashes = `
     <div class="typing-hashes">
-
       <span class="hash-dot">#</span>
-
       <span class="hash-dot">#</span>
-
       <span class="hash-dot">#</span>
-
     </div>
-
-    <span class="typing-text">${cleanText}</span>
-
   `;
 
-  // Maintain fixed 20px container height: use visibility, do NOT collapse/expand layout (Rule 4)
+  if (action === 'recording_audio') {
+    iconOrHashes = `<i class="fa-solid fa-microphone" style="color: #00ff66; margin-right: 6px; font-size: 13px; animation: nexCyanPulse 1.5s infinite ease-in-out;"></i>`;
+  } else if (action === 'sending_video' || action === 'uploading_video') {
+    iconOrHashes = `<i class="fa-solid fa-video" style="color: #00ff66; margin-right: 6px; font-size: 13px; animation: nexCyanPulse 1.5s infinite ease-in-out;"></i>`;
+  } else if (action === 'sending_photo' || action === 'uploading_photo') {
+    iconOrHashes = `<i class="fa-solid fa-camera" style="color: #00ff66; margin-right: 6px; font-size: 13px; animation: nexCyanPulse 1.5s infinite ease-in-out;"></i>`;
+  } else if (action === 'sending_file' || action === 'uploading_file') {
+    iconOrHashes = `<i class="fa-solid fa-file-arrow-up" style="color: #00ff66; margin-right: 6px; font-size: 13px; animation: nexCyanPulse 1.5s infinite ease-in-out;"></i>`;
+  }
+
+  indicator.innerHTML = `
+    <img class="typing-avatar" src="${resolvedAvatar}" alt="User" onerror="this.src='logo.jpg'">
+    ${iconOrHashes}
+    <span class="typing-text" style="color: #00ff66; font-weight: 500;">${escapeHtml(cleanText)}</span>
+  `;
 
   indicator.style.visibility = 'visible';
-
   indicator.style.display = 'inline-flex';
-
-// Auto-dismiss after 3000ms if other person stops typing
 
   if (otherTypingAutoDismissTimer) {
     clearTimeout(otherTypingAutoDismissTimer);
@@ -1631,7 +1743,7 @@ isOtherPersonTyping = true;
 
   otherTypingAutoDismissTimer = setTimeout(() => {
     hideTypingIndicator();
-  }, 3000);
+  }, 4000);
 }
 
 function hideTypingIndicator() {
@@ -1759,139 +1871,94 @@ const effectiveMyUID = myUID || window.myUID || (auth && auth.currentUser ? auth
 
   subscribeToChatPresence({
     chatId: chatId,
-
     chatType: chatType,
-
     userId: effectiveMyUID,
-
     userName: effectiveMyUsername,
+    onTypingUpdate: ({ isTyping, action, user, from }) => {
+      // RULE 1: STRICTLY IGNORE my own action - NEVER show indicator or list preview for self
+      if (isLocalUser(from)) return;
 
-    onTypingUpdate: ({ isTyping, user, from }) => {
-      // RULE 1: STRICTLY IGNORE my own typing event - this is the infinity bug
+      // RULE 2: If in active conversation with this user, update chat view
+      if (currentChatUser && String(from).toLowerCase() === String(currentChatUser).toLowerCase()) {
+        if (!isTyping || action === 'idle') {
+          hideTypingIndicator();
+          restoreContactListPreview(from);
+          return;
+        }
 
-      if (from && effectiveMyUID && String(from) === String(effectiveMyUID)) {
-        return;
+        const actionText = formatActionText(action, user);
+        showTypingIndicator(actionText, null, action);
       }
 
-      if (from && window.myUID && String(from) === String(window.myUID)) {
-        return;
+      // Update contact list preview for the remote sender ONLY
+      if (isTyping && action !== 'idle') {
+        setContactListActionPreview(from, action, user);
+      } else {
+        restoreContactListPreview(from);
       }
-
-// RULE 2: Only show for current active chat
-
-      if (chatType === 'direct' && from && currentChatUser && String(from) !== String(currentChatUser)) {
-        return;
-      }
-
-// RULE 3: Stop-typing event received
-
-      if (!isTyping) {
-        hideTypingIndicator();
-
-        return;
-      }
-
-// RULE 4: Show typing indicator ONLY for the OTHER person
-
-      showTypingIndicator(`${user} is typing...`);
-
-// RULE 5: Auto-hide after 3 seconds - FIXES INFINITY BUG
-
-      if (otherTypingAutoDismissTimer) {
-        clearTimeout(otherTypingAutoDismissTimer);
-      }
-
-      otherTypingAutoDismissTimer = setTimeout(() => {
-        hideTypingIndicator();
-      }, 3000);
     }
   });
-const typingRef = getTypingDocRef(chatId, chatType);
 
-  if (!typingRef) {
-    return;
-  }
+  const typingRef = getTypingDocRef(chatId, chatType);
+  if (!typingRef) return;
 
-// 2. Firestore backup listener with strict 3.5s freshness check so stale records never cause infinity
-
+  // 2. Firestore backup listener with strict 3.5s freshness check
   typingStatusUnsubscribe = onSnapshot(typingRef, (snap) => {
     if (!snap.exists()) {
       hideTypingIndicator();
-
+      if (chatId) restoreContactListPreview(chatId);
       return;
     }
 
-const data = snap.data();
+    const data = snap.data();
     const now = Date.now();
-    const curUid = effectiveMyUID || myUID || window.myUID;
 
-// Check for fresh typing events from OTHER users ONLY (within 3500ms)
-
+    // Check for fresh action events from REMOTE users ONLY
     let otherTypers = [];
 
-if (data.typingUsersMap) {
+    if (data.typingUsersMap) {
       otherTypers = Object.entries(data.typingUsersMap)
-
         .filter(([uid, info]) => {
-          if (!uid || uid === curUid) return false; // STRICTLY IGNORE SELF
-
+          if (isLocalUser(uid)) return false; // STRICTLY IGNORE SELF
           if (!info || !info.isTyping) return false;
           const ts = info.timestamp || 0;
-
-          return (now - ts) < 3000; // Must be within last 3.0 seconds
+          return (now - ts) < 4000;
         })
-
         .map(([uid, info]) => ({
           uid,
-
-          name: info.userName || getTypingUserName(uid)
+          name: info.userName || getTypingUserName(uid),
+          action: info.action || 'typing'
         }));
     } else if (Array.isArray(data.typingUsers) && !isMyTypingActive) {
-      // Legacy document array check: ONLY consider if doc was updated within last 3s AND local typing is NOT active
-
       const docUpdated = data.updatedAt?.toMillis ? data.updatedAt.toMillis() : (data.updatedAtMs || 0);
-
-      if (docUpdated && (now - docUpdated < 3000)) {
+      if (docUpdated && (now - docUpdated < 4000)) {
         otherTypers = data.typingUsers
-
-          .filter(uid => uid && uid !== curUid)
-
-          .map(uid => ({ uid, name: getTypingUserName(uid) }));
+          .filter(uid => !isLocalUser(uid))
+          .map(uid => ({ uid, name: getTypingUserName(uid), action: 'typing' }));
       }
     }
 
-if (!otherTypers.length) {
+    if (!otherTypers.length) {
       hideTypingIndicator();
-
+      if (chatId) restoreContactListPreview(chatId);
       return;
     }
 
-// Show indicator ONLY for the other person
+    const other = otherTypers[0];
+    const actionText = formatActionText(other.action, other.name);
 
     if (chatType === 'direct') {
-      const other = otherTypers[0];
-      const displayName = other.name || currentChatName || 'User';
-
-      showTypingIndicator(`${displayName} is typing...`);
+      showTypingIndicator(actionText, null, other.action);
     } else {
       if (otherTypers.length === 1) {
-        showTypingIndicator(`@${otherTypers[0].name} is typing...`);
-      } else if (otherTypers.length === 2) {
-        showTypingIndicator(`@${otherTypers[0].name} and @${otherTypers[1].name} are typing...`);
+        showTypingIndicator(actionText, null, other.action);
       } else {
-        showTypingIndicator(`Multiple people are typing...`);
+        showTypingIndicator(`Multiple people are active...`, null, 'typing');
       }
     }
 
-// Auto-dismiss after 3000ms
-
-    if (otherTypingAutoDismissTimer) {
-      clearTimeout(otherTypingAutoDismissTimer);
-    }
-
-    otherTypingAutoDismissTimer = setTimeout(() => {
-      hideTypingIndicator();
-    }, 3000);
+    // Update contact list preview for remote sender
+    setContactListActionPreview(other.uid, other.action, other.name);
   }, (error) => {
     console.warn('Typing indicator snapshot notice:', error);
   });
@@ -18040,6 +18107,8 @@ if (filenameEl) filenameEl.textContent = file.name;
       }
 
       if (modal) modal.style.display = 'flex';
+      const uploadActionType = isVideo ? 'sending_video' : (isImg ? 'sending_photo' : 'sending_file');
+      if (window.broadcastUserAction) window.broadcastUserAction(uploadActionType, chatId);
       const updateProgress = (progress, text) => {
         if (percentageEl) percentageEl.textContent = `${Math.round(progress)}%`;
 
@@ -18062,6 +18131,7 @@ const isVideo = file.type?.startsWith('video/') || ['mp4', 'webm', 'mov', 'mkv']
 
           showNotif(`Video uploaded successfully!`, 'success', 2500);
 
+          if (window.broadcastUserAction) window.broadcastUserAction('idle');
           resolve({
             fileName: file.name,
 
@@ -18094,6 +18164,7 @@ const isVideo = file.type?.startsWith('video/') || ['mp4', 'webm', 'mov', 'mkv']
 
           showNotif(`Photo uploaded successfully!`, 'success', 2500);
 
+          if (window.broadcastUserAction) window.broadcastUserAction('idle');
           resolve({
             fileName: file.name,
 
@@ -18134,6 +18205,7 @@ function fallbackToMediaBlob() {
 
           showNotif(`${file.name} uploaded successfully!`, 'success', 2500);
 
+          if (window.broadcastUserAction) window.broadcastUserAction('idle');
           resolve({
             fileName: file.name,
 

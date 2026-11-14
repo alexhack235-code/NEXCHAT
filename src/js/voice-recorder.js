@@ -360,6 +360,7 @@
         // UI transitions
         if (this.messageForm) this.messageForm.style.display = 'none';
         if (this.recordingUI) this.recordingUI.style.display = 'flex';
+        if (window.broadcastUserAction) window.broadcastUserAction('recording_audio');
         this.startTimer();
         this.startSpeechRecognition();
 
@@ -785,6 +786,7 @@
     }
 
     resetUI() {
+      if (window.broadcastUserAction) window.broadcastUserAction('idle');
       if (this.recordingUI) this.recordingUI.style.display = 'none';
       if (this.messageForm) this.messageForm.style.display = 'flex';
       this.updateTimerDisplay(0);

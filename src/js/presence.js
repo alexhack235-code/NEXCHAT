@@ -92,16 +92,16 @@ export async function subscribeToChatPresence({ chatId, chatType = 'direct', use
         const data = payload.payload;
         if (!data) return;
 
-        const myId = currentUserId || window.myUID;
+        const myId = currentUserId || window.myUID || (typeof myUID !== 'undefined' ? myUID : null) || localStorage.getItem('myUID');
         const senderId = data.from || data.userId;
 
-        // RULE 1: STRICTLY IGNORE MY OWN TYPING EVENT (Prevents self typing and infinity loop)
-        if (senderId && myId && String(senderId) === String(myId)) {
+        // RULE 1: STRICTLY IGNORE MY OWN TYPING EVENT (Prevents self typing on own screen)
+        if (senderId && myId && String(senderId).toLowerCase() === String(myId).toLowerCase()) {
           return;
         }
 
         // RULE 2: If directed to someone else in direct chat, ignore
-        if (data.to && myId && String(data.to) !== String(myId) && activeChatType === 'direct') {
+        if (data.to && myId && String(data.to).toLowerCase() !== String(myId).toLowerCase() && activeChatType === 'direct') {
           return;
         }
 
@@ -109,6 +109,7 @@ export async function subscribeToChatPresence({ chatId, chatType = 'direct', use
         if (onTypingUpdate) {
           onTypingUpdate({
             isTyping: !!data.isTyping,
+            action: data.action || (data.isTyping ? 'typing' : 'idle'),
             user: data.userName || data.user || 'User',
             from: senderId,
             timestamp: data.timestamp || Date.now()
@@ -138,10 +139,10 @@ export async function subscribeToChatPresence({ chatId, chatType = 'direct', use
  * @param {boolean} isTyping
  * @param {string} [targetUid=null]
  */
-export async function broadcastTyping(isTyping, targetUid = null) {
+export async function broadcastTyping(isTyping, targetUid = null, actionType = 'typing') {
   if (!currentChannel) return;
 
-  const myId = currentUserId || window.myUID || (typeof myUID !== 'undefined' ? myUID : 'anon');
+  const myId = currentUserId || window.myUID || (typeof myUID !== 'undefined' ? myUID : null) || localStorage.getItem('myUID') || 'anon';
   const myName = currentUserName || window.myUsername || (typeof myUsername !== 'undefined' ? myUsername : 'User');
 
   try {
@@ -154,6 +155,7 @@ export async function broadcastTyping(isTyping, targetUid = null) {
         userId: myId,
         userName: myName,
         isTyping: !!isTyping,
+        action: actionType || (isTyping ? 'typing' : 'idle'),
         timestamp: Date.now(),
       },
     });
