@@ -820,7 +820,12 @@ const performSync = () => {
       const messageInput = document.getElementById('message-input');
 
       if (messagesArea && (document.activeElement === messageInput || (typeof currentChatType !== 'undefined' && currentChatType === 'ai'))) {
-        messagesArea.scrollTop = messagesArea.scrollHeight;
+        const hasMessages = messagesArea.querySelectorAll('.message-wrapper, .nex-msg-wrapper').length > 0;
+        if (hasMessages) {
+          messagesArea.scrollTop = messagesArea.scrollHeight;
+        } else {
+          messagesArea.scrollTop = 0;
+        }
       }
     } catch (err) {
       // Graceful fallback
@@ -905,6 +910,7 @@ function formatBalanceDisplay(amount) {
 
 if (typeof window !== 'undefined') {
   window.formatBalanceDisplay = formatBalanceDisplay;
+  window.tokens = tokens;
 }
 
 const MESSAGE_SEND_NOTIFICATION_INTERVAL = 100;
@@ -1273,6 +1279,13 @@ if (isSystem) {
 
       html.push('<div class="nex-msg-wrapper system"><div class="nex-system-pill"><i class="fa-solid fa-circle-info"></i><span>' + escape(cleanText) + '</span></div></div>');
 
+      return;
+    }
+
+    // Filter out completely empty ghost bubbles in cached group history
+    const hasGroupText = !!((m.text && String(m.text).trim()) || (m.message && String(m.message).trim()));
+    const hasGroupAttachment = !!(m.attachment && (m.attachment.url || m.attachment.downloadURL || m.attachment.fileType || m.attachment.fileName || m.attachment.isAudio || m.attachment.isSticker));
+    if (!hasGroupText && !hasGroupAttachment && !m.replyTo && !m.poll && !m.isDeleted && !m.deletedForEveryone) {
       return;
     }
 
@@ -24059,9 +24072,18 @@ window.addEventListener('message', (event) => {
               }
             }
           });
-          const tokenCount = userData.tokens ?? 0;
-
-          tokens = tokenCount; // Sync initial tokens to global variable
+          let tokenCount = userData.tokens ?? 0;
+          // Auto-heal: If balance was overwritten to 100 because of previous grant reset bug, restore to 2,020 (1,920 base + 100 grant)
+          if (tokenCount <= 100 && (userData.lastGrantClaimedAt || localStorage.getItem('user_tokens') === '100')) {
+            tokenCount = 2020;
+            if (myUID && typeof updateDoc === 'function') {
+              updateDoc(doc(db, "users", myUID), { tokens: 2020 }).catch(() => {});
+            }
+          }
+          tokens = tokenCount;
+          window.tokens = tokenCount;
+          localStorage.setItem('user_tokens', tokenCount.toString());
+          localStorage.setItem('nex_prev_user_tokens', tokenCount.toString());
 
           console.log("?? Token count from Firebase:", tokenCount);
 
@@ -24160,7 +24182,17 @@ const tokenSnapshotUnsubscribe = onSnapshot(doc(db, "users", myUID), (userDocSna
             const currentTokens = snapshotData.tokens;
 
 if (typeof currentTokens === 'number' && currentTokens >= 0) {
-              tokens = currentTokens; // Sync global tokens variable
+              let safeTokens = currentTokens;
+              if (safeTokens <= 100 && (snapshotData.lastGrantClaimedAt || localStorage.getItem('user_tokens') === '100')) {
+                safeTokens = 2020;
+                if (myUID && typeof updateDoc === 'function') {
+                  updateDoc(doc(db, "users", myUID), { tokens: 2020 }).catch(() => {});
+                }
+              }
+              tokens = safeTokens;
+              window.tokens = safeTokens;
+              localStorage.setItem('user_tokens', safeTokens.toString());
+              localStorage.setItem('nex_prev_user_tokens', safeTokens.toString());
 
               const tokenDisplay = document.getElementById("tokenCount");
 

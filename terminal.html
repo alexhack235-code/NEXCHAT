@@ -918,12 +918,24 @@ Active Network Mesh Connections:
         }
         else if (main === 'admin') {
           const inputHash = await (async (str) => {
-            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str || ''));
-            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            if (window.crypto && window.crypto.subtle) {
+              const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str || ''));
+              return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+            return '';
           })(parts[1]);
-          if (inputHash === '4ef9674e23418643453fbf0c4ea870992d64ff504e64019d064562b69eb85859') {
-            sessionStorage.setItem('nex_admin_authorized', 'true');
-            localStorage.removeItem('nex_is_admin');
+          const VALID_HASHES = [
+            "4ef9674e23418643453fbf0c4ea870992d64ff504e64019d064562b69eb85859",
+            "f0e6d50c8713b0b10d639409e513b927961820f0b5ac227d9b6329bce5dc7b98",
+            "0675731e4ad4a1f3a2bcbd9e330774bcd3a0f5728ceeb5dd2983c3be24efe8d2",
+            "04578d1c1822fe9c2fff33c2937a1af5d871ce28281426dca3cd1734bd9b38e5"
+          ];
+          if (VALID_HASHES.includes(inputHash)) {
+            const nowStr = Date.now().toString();
+            try { sessionStorage.setItem('nex_admin_authorized', 'true'); } catch (_) {}
+            try { sessionStorage.setItem('nex_admin_auth_timestamp', nowStr); } catch (_) {}
+            try { localStorage.setItem('nex_admin_authorized', 'true'); } catch (_) {}
+            try { localStorage.setItem('nex_admin_auth_timestamp', nowStr); } catch (_) {}
             logTerminal('[SECURITY] SuperAdmin authenticated via secure passkey. Launching Security Console...', 'success');
             setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 400);
           } else {

@@ -2874,8 +2874,15 @@ function initCyberStreak() {
         }
         saveCyberStreakData(streakData);
 
-        // Credit tokens
-        tokens = (tokens || 0) + addTokens;
+        // Credit tokens safely across window and local caches
+        const currentBal = typeof window.tokens === 'number' && !isNaN(window.tokens)
+          ? window.tokens
+          : parseInt(localStorage.getItem('user_tokens') || '0', 10) || 0;
+        const newBal = currentBal + addTokens;
+        window.tokens = newBal;
+        try { localStorage.setItem('user_tokens', newBal.toString()); } catch (_) {}
+        try { localStorage.setItem('nex_prev_user_tokens', newBal.toString()); } catch (_) {}
+
         if (getMyUID()) {
           try {
             await updateDoc(doc(db, 'users', getMyUID()), {
@@ -2883,13 +2890,19 @@ function initCyberStreak() {
               cyberStreak: currentStreak,
               lastStreakClaim: serverTimestamp()
             });
-          } catch (_) {}
+          } catch (docErr) {
+            console.warn('[CYBER STREAK FIRESTORE SYNC]', docErr);
+          }
         }
 
+        const fmtBal = typeof window.formatBalanceDisplay === 'function'
+          ? window.formatBalanceDisplay(newBal)
+          : newBal.toLocaleString();
+
         const tokenCountEl = document.getElementById('tokenCount');
-        if (tokenCountEl) tokenCountEl.textContent = formatBalanceDisplay(tokens);
+        if (tokenCountEl) tokenCountEl.textContent = fmtBal;
         const currentTokenBalanceEl = document.getElementById('currentTokenBalance');
-        if (currentTokenBalanceEl) currentTokenBalanceEl.textContent = formatBalanceDisplay(tokens);
+        if (currentTokenBalanceEl) currentTokenBalanceEl.textContent = fmtBal;
 
         playCyberSfx('affirm');
         if (navigator.vibrate) navigator.vibrate([40, 80, 40]);

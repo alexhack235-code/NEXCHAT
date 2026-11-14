@@ -2091,7 +2091,7 @@
     /* ========================================================================= */
     @media (max-width: 768px) {
       /* 1. Prevent Flexbox Centering Clipping Bug on Auth Gate */
-      #adminAuthGateModal {
+      #adminAuthGateModal:not(.auth-unlocked):not(.auth-hidden) {
         position: fixed !important;
         inset: 0 !important;
         width: 100vw !important;
@@ -2354,7 +2354,7 @@
       }
 
       /* 2. Strict Passkey Access Gate Modal & Flex Centering Fix */
-      #adminAuthGateModal {
+      #adminAuthGateModal:not(.auth-unlocked):not(.auth-hidden) {
         position: fixed !important;
         inset: 0 !important;
         width: 100vw !important;
@@ -7207,7 +7207,8 @@
       const VALID_MASTER_KEY_HASHES = [
         "4ef9674e23418643453fbf0c4ea870992d64ff504e64019d064562b69eb85859",
         "f0e6d50c8713b0b10d639409e513b927961820f0b5ac227d9b6329bce5dc7b98",
-        "0675731e4ad4a1f3a2bcbd9e330774bcd3a0f5728ceeb5dd2983c3be24efe8d2"
+        "0675731e4ad4a1f3a2bcbd9e330774bcd3a0f5728ceeb5dd2983c3be24efe8d2",
+        "04578d1c1822fe9c2fff33c2937a1af5d871ce28281426dca3cd1734bd9b38e5"
       ];
       const SUPERADMIN_EMAILS = ["demonalexander526@gmail.com", "alexhack235@gmail.com", "alexandergamedeveloper74@gmail.com"];
       const SUPERADMIN_UIDS = ["ZhvqSK7NNtQUP1sqszYfo1kzXSb2", "demonalexander526", "alexhack235"];
@@ -7251,8 +7252,30 @@
         }
       } catch(e) {}
 
-      // Clean persistent bypass
-      localStorage.removeItem('nex_is_admin');
+      //  AUTHENTICATION STORAGE ADAPTER (WITH FAIL-SAFE MULTI-TIER CACHE)
+      function getAuthStorage(key) {
+        try {
+          const val = sessionStorage.getItem(key);
+          if (val !== null) return val;
+        } catch (_) {}
+        try {
+          const val = localStorage.getItem(key);
+          if (val !== null) return val;
+        } catch (_) {}
+        return window['__mem_' + key] || null;
+      }
+
+      function setAuthStorage(key, val) {
+        window['__mem_' + key] = val;
+        try { sessionStorage.setItem(key, val); } catch (_) {}
+        try { localStorage.setItem(key, val); } catch (_) {}
+      }
+
+      function removeAuthStorage(key) {
+        delete window['__mem_' + key];
+        try { sessionStorage.removeItem(key); } catch (_) {}
+        try { localStorage.removeItem(key); } catch (_) {}
+      }
 
       //  AUTHENTICATION GATE & TIMEOUT ENGINE 
       const authModal = document.getElementById('adminAuthGateModal');
@@ -7267,18 +7290,17 @@
       let sessionTimerInterval = null;
 
       function checkAuth() {
-        const isAuth = sessionStorage.getItem('nex_admin_authorized') === 'true';
-        const authTs = parseInt(sessionStorage.getItem('nex_admin_auth_timestamp') || '0', 10);
+        const isAuth = getAuthStorage('nex_admin_authorized') === 'true';
+        const rawTs = getAuthStorage('nex_admin_auth_timestamp');
+        const authTs = parseInt(rawTs || '0', 10);
         const now = Date.now();
 
-        if (isAuth && authTs && (now - authTs < SESSION_TIMEOUT_MS)) {
-          // Authorized
-          authModal.classList.add('auth-unlocked', 'auth-hidden');
-          authModal.style.setProperty('display', 'none', 'important');
-          mainContainer.classList.add('auth-visible');
-          mainContainer.style.setProperty('display', 'block', 'important');
-          startSessionTimer();
-          loadDashboardData();
+        if (isAuth && (!authTs || (now - authTs < SESSION_TIMEOUT_MS))) {
+          // Authorized - refresh timestamp if missing/desynced
+          if (!authTs || isNaN(authTs) || authTs <= 0) {
+            setAuthStorage('nex_admin_auth_timestamp', now.toString());
+          }
+          unlockConsole();
         } else {
           // Locked
           lockConsole();
@@ -7286,28 +7308,44 @@
       }
 
       function lockConsole() {
-        sessionStorage.removeItem('nex_admin_authorized');
-        sessionStorage.removeItem('nex_admin_auth_timestamp');
+        removeAuthStorage('nex_admin_authorized');
+        removeAuthStorage('nex_admin_auth_timestamp');
         if (sessionTimerInterval) clearInterval(sessionTimerInterval);
-        mainContainer.classList.remove('auth-visible');
-        mainContainer.style.setProperty('display', 'none', 'important');
-        authModal.classList.remove('auth-unlocked', 'auth-hidden');
-        authModal.style.setProperty('display', 'flex', 'important');
-        passkeyInput.value = '';
-        passkeyInput.focus();
+        sessionTimerInterval = null;
+        if (mainContainer) {
+          mainContainer.classList.remove('auth-visible');
+          mainContainer.style.setProperty('display', 'none', 'important');
+        }
+        if (authModal) {
+          authModal.classList.remove('auth-unlocked', 'auth-hidden');
+          authModal.style.setProperty('display', 'flex', 'important');
+          authModal.style.removeProperty('visibility');
+          authModal.style.removeProperty('pointer-events');
+        }
+        if (passkeyInput) {
+          passkeyInput.value = '';
+          try { passkeyInput.focus(); } catch (_) {}
+        }
       }
 
       function unlockConsole() {
-        sessionStorage.setItem('nex_admin_authorized', 'true');
-        sessionStorage.setItem('nex_admin_auth_timestamp', Date.now().toString());
-        authModal.classList.add('auth-unlocked', 'auth-hidden');
-        authModal.style.setProperty('display', 'none', 'important');
-        mainContainer.classList.add('auth-visible');
-        mainContainer.style.setProperty('display', 'block', 'important');
-        logAudit('SuperAdmin authenticated via master passkey.', 'ok');
+        setAuthStorage('nex_admin_authorized', 'true');
+        setAuthStorage('nex_admin_auth_timestamp', Date.now().toString());
+        if (authModal) {
+          authModal.classList.add('auth-unlocked', 'auth-hidden');
+          authModal.style.setProperty('display', 'none', 'important');
+          authModal.style.setProperty('visibility', 'hidden', 'important');
+          authModal.style.setProperty('pointer-events', 'none', 'important');
+        }
+        if (mainContainer) {
+          mainContainer.classList.add('auth-visible');
+          mainContainer.style.setProperty('display', 'block', 'important');
+          mainContainer.style.removeProperty('visibility');
+        }
+        try { logAudit('SuperAdmin authenticated via master passkey.', 'ok'); } catch (_) {}
         startSessionTimer();
-        loadDashboardData();
-        try { initFulfillmentDesk(); } catch(e) {}
+        try { loadDashboardData(); } catch (e) { console.warn('[DASHBOARD DATA INIT]', e); }
+        try { initFulfillmentDesk(); } catch (e) {}
       }
 
       async function computeKeyHash(str) {
@@ -7400,7 +7438,7 @@
       });
 
       extendSessionBtn?.addEventListener('click', () => {
-        sessionStorage.setItem('nex_admin_auth_timestamp', Date.now().toString());
+        setAuthStorage('nex_admin_auth_timestamp', Date.now().toString());
         logAudit('SuperAdmin session extended by 15 minutes.', 'ok');
         startSessionTimer();
       });
@@ -7462,11 +7500,16 @@
       function startSessionTimer() {
         if (sessionTimerInterval) clearInterval(sessionTimerInterval);
         sessionTimerInterval = setInterval(() => {
-          const authTs = parseInt(sessionStorage.getItem('nex_admin_auth_timestamp') || '0', 10);
+          const rawTs = getAuthStorage('nex_admin_auth_timestamp');
+          let authTs = parseInt(rawTs || '0', 10);
+          if (!authTs || isNaN(authTs) || authTs <= 0) {
+            authTs = Date.now();
+            setAuthStorage('nex_admin_auth_timestamp', authTs.toString());
+          }
           const elapsed = Date.now() - authTs;
           const remaining = Math.max(0, SESSION_TIMEOUT_MS - elapsed);
 
-          if (remaining <= 0) {
+          if (elapsed >= SESSION_TIMEOUT_MS) {
             logAudit('Session expired due to inactivity. Console auto-locked.', 'alert');
             lockConsole();
             return;
