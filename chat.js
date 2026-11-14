@@ -985,11 +985,16 @@ function renderCachedDirectChatHistory(messages, messagesDiv) {
   if (!messagesDiv || !messages || !messages.length) return;
   const currentUid = (window.currentUser && window.currentUser.uid) || myUID || window.myUID;
   const html = messages.map((m) => {
+    if (!m) return '';
     if (m.deletedFor && Array.isArray(m.deletedFor) && currentUid && m.deletedFor.includes(currentUid)) return '';
-
     if (window.NexChatFileManager && window.NexChatFileManager.isMessageHiddenLocally(m.docId || m.id)) return '';
-
     if (m.isDeleted && !m.deletedForEveryone) return '';
+
+    // Filter out completely empty ghost messages
+    const hasRawText = !!((m.text && String(m.text).trim()) || (m.message && String(m.message).trim()));
+    const hasAttachment = !!(m.attachment && (m.attachment.url || m.attachment.downloadURL || m.attachment.fileType || m.attachment.fileName || m.attachment.isAudio || m.attachment.isSticker || m.attachment.imageUrl));
+    if (!hasRawText && !hasAttachment && !m.replyTo && !m.isDeleted && !m.deletedForEveryone && !m.imageUrl && !m.stickerUrl) return '';
+
     const isOwn = m.from === myUID;
     const msgDate = m.time?.toDate?.() || new Date(m.time || Date.now());
     const formattedTime = (typeof formatTime === 'function') ? formatTime(msgDate) : msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1442,14 +1447,16 @@ function cleanChatDisplayName(name, isGroup = false) {
   if (!name) return isGroup ? 'NEX' : 'User';
   let clean = String(name).trim();
 
+  // Normalize generic placeholder terms so header title never flickers between "Chat" and "User"
+  const lower = clean.toLowerCase();
+  if (lower === 'chat' || lower === 'direct' || lower === 'contact') {
+    return isGroup ? 'NEX' : 'User';
+  }
+
   clean = clean.replace(/\bgroup\b/gi, '')
-
                .replace(/[\(\[\{]\s*[\)\]\}]/g, '')
-
                .replace(/[\s\-_–—]{2,}/g, ' ')
-
                .replace(/^[\s\-_–—]+|[\s\-_–—]+$/g, '')
-
                .trim();
 
   return clean || (isGroup ? 'NEX' : 'User');
@@ -1785,6 +1792,13 @@ function subscribeUserPresence(userId) {
   }
 
   if (!userId || userId === 'chronex-ai' || window.currentChatType === 'group') return;
+
+  // Unify presence: delegate to NexPresenceEngine to prevent duplicate snapshot listeners conflicting on statusText
+  if (window.NexPresenceEngine && typeof window.NexPresenceEngine.syncActiveChatPartner === 'function') {
+    window.NexPresenceEngine.syncActiveChatPartner(userId, window.currentChatName || 'User');
+    return;
+  }
+
   const userRef = doc(db, 'users', userId);
 
   userStatusUnsubscribe = onSnapshot(userRef, (snap) => {
@@ -2356,7 +2370,7 @@ if ('serviceWorker' in navigator) {
           this.close();
 
           if (chatId && typeof openChat === 'function') {
-            openChat(chatId, 'direct', title);
+            openChat(chatId, title || 'Contact', 'logo.jpg', 'direct');
           }
         };
       } catch (_) {}
@@ -2371,7 +2385,7 @@ if ('serviceWorker' in navigator) {
         this.close();
 
         if (chatId && typeof openChat === 'function') {
-          openChat(chatId, 'direct', title);
+          openChat(chatId, title || 'Contact', 'logo.jpg', 'direct');
         }
       };
     } catch (_) {}
@@ -2455,7 +2469,7 @@ toast.onclick = () => {
     toast.remove();
 
     if (typeof openChat === 'function') {
-      openChat(chatId, 'direct', senderName);
+      openChat(chatId, senderName || 'Contact', 'logo.jpg', 'direct');
     }
   };
 
@@ -5957,6 +5971,10 @@ showNotif("Chat unarchived", "success", 1500);
 }
 
 function handleNavigation(section) {
+  // Dismiss any floating notifications/tooltips when switching screens to prevent screen-to-screen leaks
+  const notifContainer = document.getElementById("notificationContainer");
+  if (notifContainer) notifContainer.innerHTML = "";
+
   if (section === "settings") {
     if (typeof openSettingsModal === "function") {
       openSettingsModal();
@@ -13292,12 +13310,17 @@ const messageFragment = document.createDocumentFragment();
 
 if (allMessages.length === 0) {
       if (!isInitialLoadComplete) {
-        messagesDiv.innerHTML = currentChatType === 'ai'
-
-          ? "<p style='text-align: center; color: #00ff66; padding: 20px; font-family: Orbitron;'><i class='fa-solid fa-circle-notch fa-spin'></i> Synchronizing Neural Uplink...</p>"
-
-          : "<p style='text-align: center; color: #888; padding: 20px;'>Loading messages...</p>";
-
+        if (!messagesDiv.children.length) {
+          messagesDiv.innerHTML = currentChatType === 'ai'
+            ? "<p style='text-align: center; color: #00ff66; padding: 20px; font-family: Orbitron;'><i class='fa-solid fa-circle-notch fa-spin'></i> Synchronizing Neural Uplink...</p>"
+            : `
+              <div class="chat-skeleton-loader" style="display:flex; flex-direction:column; gap:16px; padding:24px; opacity:0.35;">
+                <div style="align-self:flex-start; width:180px; height:42px; background:#202c33; border-radius:12px;"></div>
+                <div style="align-self:flex-end; width:220px; height:42px; background:#005c4b; border-radius:12px;"></div>
+                <div style="align-self:flex-start; width:140px; height:42px; background:#202c33; border-radius:12px;"></div>
+              </div>
+            `;
+        }
         return;
       }
 
@@ -13378,8 +13401,18 @@ if (unreadDocIds.length > 0) {
 let lastRenderedDatePill = null;
 
     allMessages.forEach((m) => {
-      // 1. Filter out messages deleted for current user
+      if (!m) return;
 
+      // Filter out empty messages without text, media, attachment, sticker, or thread synthesis
+      const hasContent = !!(
+        (m.text && String(m.text).trim()) ||
+        (m.message && String(m.message).trim()) ||
+        (m.attachment && (m.attachment.url || m.attachment.downloadURL || m.attachment.fileType || m.attachment.fileName || m.attachment.isAudio || m.attachment.isSticker || m.attachment.imageUrl)) ||
+        m.imageUrl || m.stickerUrl || m.replyTo || m.isDeleted || m.deletedForEveryone || m.isThreadSynthesis
+      );
+      if (!hasContent) return;
+
+      // 1. Filter out messages deleted for current user
       if (m.deletedFor && Array.isArray(m.deletedFor) && m.deletedFor.includes(myUID)) return;
 
       if (window.NexChatFileManager && window.NexChatFileManager.isMessageHiddenLocally(m.docId)) return;
@@ -14619,12 +14652,17 @@ function updateNavChatsBadge(count) {
   const num = parseInt(count, 10);
   const displayVal = isNaN(num) ? 0 : num;
 
+  if (displayVal <= 0) {
+    badge.textContent = '';
+    badge.dataset.count = '0';
+    badge.classList.remove('has-unread');
+    badge.style.setProperty('display', 'none', 'important');
+    return;
+  }
+
   badge.textContent = displayVal > 99 ? '99+' : String(displayVal);
-
   badge.dataset.count = String(displayVal);
-
   badge.classList.add('has-unread');
-
   badge.style.setProperty('display', 'inline-flex', 'important');
 }
 
@@ -14706,6 +14744,9 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   }
 
   // Fix 1 & 5: Clear previous input, close slash palette, and reset transient state
+  const stuckSpinners = document.querySelectorAll('#chronex-ai-loading, .loading-spinner, .chat-spinner');
+  stuckSpinners.forEach(el => el.remove());
+
   const prevInput = document.getElementById('message-input') || document.getElementById('messageInput');
   if (prevInput) {
     prevInput.value = '';
@@ -14939,7 +14980,16 @@ const chatDetailView = document.getElementById('chatDetailView');
 
 // Populate header profile data immediately for instant responsive UI
 
-  const cleanHeaderName = cleanChatDisplayName(username, chatType === 'group');
+  let resolvedName = username;
+  if (!resolvedName || resolvedName === 'Chat' || resolvedName === 'User' || resolvedName === 'Contact' || resolvedName === 'direct') {
+    const cachedContact = (window.loadedContactData && window.loadedContactData.find(c => c.uid === uid)) ||
+                          (window.cachedUsers && window.cachedUsers.find(u => (u.uid || u.id) === uid));
+    if (cachedContact && (cachedContact.name || cachedContact.username || cachedContact.displayName)) {
+      resolvedName = cachedContact.name || cachedContact.username || cachedContact.displayName;
+    }
+  }
+
+  const cleanHeaderName = cleanChatDisplayName(resolvedName, chatType === 'group');
   const chatNameEl = document.getElementById("chatName");
 
   if (chatNameEl) chatNameEl.textContent = cleanHeaderName;
@@ -14979,7 +15029,20 @@ const infoPicEl = document.getElementById("infoPic");
     }
   }
 
-updateChatProfileDisplay(cleanHeaderName, profilePic, chatType === 'ai' ? 'AI Ready' : (chatType === 'group' ? 'Group' : 'Connecting...'));
+  const cachedPartner = (window.loadedContactData && window.loadedContactData.find(c => c.uid === uid)) ||
+                        (window.cachedUsers && window.cachedUsers.find(u => (u.uid || u.id) === uid));
+  let initialPresence = 'offline';
+  if (chatType === 'ai') {
+    initialPresence = 'AI Ready';
+  } else if (chatType === 'group') {
+    initialPresence = 'Group';
+  } else if (cachedPartner && isUserStrictlyOnline(cachedPartner)) {
+    initialPresence = 'online';
+  } else if (cachedPartner && cachedPartner.lastSeen) {
+    initialPresence = formatLastSeen(cachedPartner.lastSeen);
+  }
+
+  updateChatProfileDisplay(cleanHeaderName, profilePic, initialPresence);
 
 // Switch view INSTANTLY before network roundtrips
 
@@ -15201,17 +15264,11 @@ const infoEmail = document.getElementById("infoEmail");
 
           if (infoEmail) infoEmail.textContent = userData.email || "";
 const statusText = getUserPresenceStatus(userData);
-          const statusTextEl = document.getElementById("statusText");
-
-          if (statusTextEl) statusTextEl.textContent = statusText;
-const infoStatusEl = document.getElementById("infoStatus");
-
-          if (infoStatusEl) infoStatusEl.textContent = statusText;
 
 updateChatProfileDisplay(freshName, freshPic, statusText);
 
           if (window.NexPresenceEngine && typeof window.NexPresenceEngine.syncActiveChatPartner === 'function') {
-            window.NexPresenceEngine.syncActiveChatPartner(uid, username);
+            window.NexPresenceEngine.syncActiveChatPartner(uid, freshName);
           }
 
 const isVerifiedUser = Boolean(userData.isVerified || (userData.verificationBadge && userData.verificationBadge !== 'NONE'));
@@ -15221,28 +15278,21 @@ const isVerifiedUser = Boolean(userData.isVerified || (userData.verificationBadg
             const activeChatName = document.getElementById("activeChatName");
 
             if (activeChatName) {
-              activeChatName.innerHTML = `${escapeHtml(username)} ${badgeHtml}`;
+              activeChatName.innerHTML = `${escapeHtml(freshName)} ${badgeHtml}`;
             }
 
             const chatNameEl = document.getElementById("chatName");
 
             if (chatNameEl) {
-              chatNameEl.innerHTML = `${escapeHtml(username)} ${badgeHtml}`;
+              chatNameEl.innerHTML = `${escapeHtml(freshName)} ${badgeHtml}`;
             }
           }
         } else {
           console.warn("User document not found in database, but proceeding with UID:", uid);
           const infoEmail = document.getElementById("infoEmail");
 
-          if (infoEmail) infoEmail.textContent = "Profile pending...";
-const statusTextEl = document.getElementById("statusText");
-
-          if (statusTextEl) statusTextEl.textContent = "Pending";
-const infoStatusEl = document.getElementById("infoStatus");
-
-          if (infoStatusEl) infoStatusEl.textContent = "Pending";
-
-updateChatProfileDisplay(username, profilePic, "Pending");
+          if (infoEmail) infoEmail.textContent = "";
+          updateChatProfileDisplay(cleanHeaderName, profilePic, "offline");
         }
       }
 
@@ -17784,32 +17834,22 @@ document.getElementById("logout-btn")?.addEventListener("click", logoutUser);
 
 document.getElementById("nav-messages")?.addEventListener("click", () => {
   handleNavigation("chats");
-
-  showNotif("Messages", "info", 800);
 });
 
 document.getElementById("nav-status")?.addEventListener("click", () => {
   handleNavigation("updates");
-
   if (typeof updateNavUpdatesBeacon === 'function') updateNavUpdatesBeacon(false);
-
-  showNotif("Updates", "info", 800);
 });
 
 document.getElementById("nav-announcements")?.addEventListener("click", () => {
   handleNavigation("announcements");
-
   if (typeof updateNavAlertsBeacon === 'function') updateNavAlertsBeacon(false);
-
-  showNotif("Dispatches", "info", 800);
 });
 
 // Bottom Nav & Feature Button Handlers
 
 document.getElementById("nav-calls")?.addEventListener("click", () => {
   handleNavigation("calls");
-
-  showNotif("Call History", "info", 800);
 });
 
 document.getElementById("nav-more")?.addEventListener("click", () => {

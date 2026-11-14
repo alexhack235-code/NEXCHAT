@@ -10135,10 +10135,23 @@ html[data-chat-size="extra-large"] .nex-msg-text {
 }
 
 /* Empty Conversation Welcome Enclave */
+/* When nexWelcomeStage is active, completely hide redundant .empty-state to eliminate keyboard overlap */
+.messages-area:has(#nexWelcomeStage) .empty-state,
+.messages-area:has(.nex-welcome-stage) .empty-state,
+#messages-area:has(#nexWelcomeStage) .empty-state,
+#messages-area:has(.nex-welcome-stage) .empty-state {
+  display: none !important;
+}
+
 .nex-welcome-stage {
   max-width: 480px;
+  width: 100%;
+  max-height: calc(100% - 16px) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  box-sizing: border-box !important;
   margin: auto;
-  padding: 36px 20px 24px 20px;
+  padding: 28px 20px 20px 20px;
   text-align: center;
   background: rgba(10, 16, 28, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -10147,6 +10160,43 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   animation: nexWelcomeFadeIn 0.35s ease-out;
   transition: opacity 0.3s ease, transform 0.3s ease;
   user-select: none;
+}
+
+@media (max-height: 600px), (max-width: 480px) {
+  .nex-welcome-stage {
+    padding: 14px 12px 10px 12px !important;
+    margin: 6px auto !important;
+    border-radius: 14px !important;
+  }
+  .nex-welcome-shield {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 16px !important;
+    margin: 0 auto 6px auto !important;
+    border-radius: 10px !important;
+  }
+  .nex-welcome-title {
+    font-size: 13.5px !important;
+    margin: 0 0 4px 0 !important;
+  }
+  .nex-welcome-subtitle {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    margin: 0 0 10px 0 !important;
+  }
+  .nex-welcome-chips {
+    gap: 6px !important;
+    margin-bottom: 10px !important;
+  }
+  .nex-starter-chip {
+    padding: 5px 9px !important;
+    font-size: 10.5px !important;
+    gap: 5px !important;
+  }
+  .nex-welcome-security-footer {
+    font-size: 9.5px !important;
+    padding-top: 8px !important;
+  }
 }
 
 @keyframes nexWelcomeFadeIn {
@@ -11443,11 +11493,19 @@ html[data-chat-size="extra-large"] .nex-msg-text {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior-y: contain !important;
-    padding-bottom: calc(var(--bottom-nav-height, 62px) + 95px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(var(--bottom-nav-height, 62px) + 120px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
-  #contactList {
-    padding-bottom: 30px !important;
+  #contactList,
+  #groupsList,
+  .chat-list {
+    padding-bottom: calc(var(--bottom-nav-height, 62px) + 120px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #contactList > li:last-child,
+  #groupsList > li:last-child,
+  .chat-list > li:last-child {
+    margin-bottom: 32px !important;
   }
 
   .chat-list-item.chat-item {
@@ -19363,7 +19421,7 @@ body,
   overscroll-behavior-y: contain !important;
   -webkit-overflow-scrolling: touch !important;
   scroll-behavior: auto !important;
-  padding-bottom: calc(var(--bottom-nav-height, 66px) + 50px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-bottom: calc(var(--bottom-nav-height, 66px) + 120px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 .chat-list,
@@ -19374,6 +19432,13 @@ body,
   contain: none !important;
   overscroll-behavior: auto !important;
   background: transparent !important;
+  padding-bottom: calc(var(--bottom-nav-height, 66px) + 120px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.chat-list > li:last-child,
+#contactList > li:last-child,
+#groupsList > li:last-child {
+  margin-bottom: 32px !important;
 }
 
 .chat-row,

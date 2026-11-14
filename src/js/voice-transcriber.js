@@ -107,8 +107,10 @@
         this.activeRecognizer.onstart = () => {
           this.isDictating = true;
           if (btn) btn.classList.add('dictating');
-          if (typeof window.showNotif === 'function') {
-            window.showNotif('Listening... Speak now to transcribe', 'info', 1600);
+          const inputEl = document.getElementById('message-input');
+          if (inputEl) {
+            inputEl._origPlaceholder = inputEl.placeholder;
+            inputEl.placeholder = '🎙️ Listening... Speak now to transcribe';
           }
           if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
         };
@@ -210,8 +212,10 @@
 
         this.isDictating = true;
         if (btn) btn.classList.add('dictating');
-        if (typeof window.showNotif === 'function') {
-          window.showNotif('Recording speech... Tap again when finished to transcribe', 'info', 2200);
+        const inputEl = document.getElementById('message-input');
+        if (inputEl) {
+          inputEl._origPlaceholder = inputEl.placeholder;
+          inputEl.placeholder = '🎙️ Recording speech... Tap mic again to transcribe';
         }
 
         this.mediaRecorderFallback.start(100);
@@ -289,6 +293,12 @@
       this.isDictating = false;
       const btn = document.getElementById('voiceDictateBtn');
       if (btn) btn.classList.remove('dictating');
+
+      const inputEl = document.getElementById('message-input');
+      if (inputEl && inputEl._origPlaceholder) {
+        inputEl.placeholder = inputEl._origPlaceholder;
+        delete inputEl._origPlaceholder;
+      }
 
       if (this.activeRecognizer) {
         try { this.activeRecognizer.stop(); } catch (e) {}

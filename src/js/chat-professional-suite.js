@@ -4209,12 +4209,16 @@ ${text}`;
         } else {
           stage.style.display = '';
         }
+        const emptyState = messagesArea.querySelector('.empty-state');
+        if (emptyState) emptyState.style.setProperty('display', 'none', 'important');
       } else {
         if (stage) {
           stage.remove();
         }
         const existingStage = document.getElementById('nexWelcomeStage');
         if (existingStage) existingStage.remove();
+        const emptyState = messagesArea.querySelector('.empty-state');
+        if (emptyState) emptyState.style.removeProperty('display');
       }
     }
 
