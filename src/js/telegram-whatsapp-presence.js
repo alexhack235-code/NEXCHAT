@@ -415,6 +415,27 @@
             }
           }
         }
+        // Also re-evaluate loaded contacts to expire stale online beacons in contactList
+        if (window.loadedContactData && Array.isArray(window.loadedContactData)) {
+          window.loadedContactData.forEach(contact => {
+            if (!contact || !contact.uid || contact.uid === 'chronex-ai') return;
+            const isOnline = this.isUserActuallyOnline(contact);
+            try {
+              if (typeof CSS !== 'undefined' && CSS.escape) {
+                const beacon = document.querySelector('#contactList li[data-chat-id="' + CSS.escape(contact.uid) + '"] .chat-online-beacon');
+                if (beacon) {
+                  if (isOnline) {
+                    beacon.classList.add('is-online');
+                    beacon.style.setProperty('display', 'block', 'important');
+                  } else {
+                    beacon.classList.remove('is-online');
+                    beacon.style.setProperty('display', 'none', 'important');
+                  }
+                }
+              }
+            } catch (_) {}
+          });
+        }
       }, 8000);
     }
   }

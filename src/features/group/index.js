@@ -493,6 +493,8 @@ function _renderItem(item, element, currentUid, options = {}) {
   }
 
   // Regular message
+  const hasContent = !!((item.text && String(item.text).trim()) || (item.message && String(item.message).trim()) || item.attachment || item.replyTo || item.poll || item.isDeleted || item.deletedForEveryone);
+  if (!hasContent) return;
   const members = groupStore.getState().members;
   const group = groupStore.getState().currentGroup;
   const senderId = item.senderId || item.from;

@@ -118,6 +118,10 @@ export function highlightMentions(text, mentionedUserIds, currentUid) {
  */
 export function renderMessageBubble(message, container, options = {}) {
   try {
+    if (!message) return;
+    const hasText = !!((message.text && String(message.text).trim()) || (message.message && String(message.message).trim()));
+    const hasAttachment = !!(message.attachment && (message.attachment.url || message.attachment.downloadURL || message.attachment.fileType || message.attachment.fileName || message.attachment.isAudio || message.attachment.isSticker));
+    if (!hasText && !hasAttachment && !message.replyTo && !message.poll && !message.isDeleted && !message.deletedForEveryone) return;
     const wrapper = document.createElement('div');
     wrapper.className = 'nex-msg-wrapper ' + (options.isOwn ? 'sent' : 'received');
     if (options.isConsecutive) {
