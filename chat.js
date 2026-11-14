@@ -5799,8 +5799,17 @@ const fab = document.getElementById('mobileFabNewChat');
     localStorage.removeItem('selected_chat_name');
     localStorage.removeItem('selected_chat_type');
     localStorage.removeItem('selected_chat_pic');
+    localStorage.removeItem('active_chat_user');
+    window.currentChatUser = null;
+    window.currentChatName = null;
     if (window.history && window.history.replaceState) {
-      const cleanUrl = window.location.pathname + window.location.hash;
+      const u = new URL(window.location.href);
+      u.searchParams.delete('chat');
+      u.searchParams.delete('chatId');
+      u.searchParams.delete('chatName');
+      u.searchParams.delete('chatPic');
+      u.searchParams.delete('chatType');
+      const cleanUrl = u.pathname + (u.search ? u.search : '') + u.hash;
       window.history.replaceState({}, document.title, cleanUrl);
     }
   } catch (_) {}
@@ -14747,8 +14756,10 @@ window.toggleCyberHubModal = function() {
 };
 
 async function openChat(uid, username, profilePic, chatType = 'direct') {
-  // Fix 4: If chatId is missing, invalid, or default 'User', redirect to chat list
-  if (!uid || uid === 'null' || uid === 'undefined' || uid === 'User' || uid === '') {
+  const currentMyUid = (typeof myUID !== 'undefined' && myUID) || window.myUID || (typeof auth !== 'undefined' && auth?.currentUser ? auth.currentUser.uid : null) || localStorage.getItem('myUID') || localStorage.getItem('auth_uid') || '';
+
+  // Fix 4: If chatId is missing, invalid, default 'User', or self-UID, redirect to chat list
+  if (!uid || uid === 'null' || uid === 'undefined' || uid === 'User' || uid === 'user' || uid === 'u_active' || uid === '' || (currentMyUid && uid === currentMyUid)) {
     console.warn('[openChat] Missing or invalid chatId:', uid, 'redirecting to chat list.');
     if (typeof showChatListView === 'function') {
       showChatListView();
@@ -14909,18 +14920,15 @@ currentChatUser = uid;
 // Persist selected chat in URL (?chat=...) + localStorage (Rule 2)
 
   try {
-    localStorage.setItem('selected_chat_id', uid);
-
-    localStorage.setItem('selected_chat_name', username || '');
-
-    localStorage.setItem('selected_chat_pic', profilePic || 'logo.jpg');
-
-    localStorage.setItem('selected_chat_type', chatType || 'direct');
-    const u = new URL(window.location.href);
-
-    u.searchParams.set('chat', uid);
-
-    window.history.replaceState({ nexchatSelectedChat: uid }, '', u.toString());
+    if (uid && uid !== 'User' && uid !== 'user' && uid !== 'u_active' && (!currentMyUid || uid !== currentMyUid)) {
+      localStorage.setItem('selected_chat_id', uid);
+      localStorage.setItem('selected_chat_name', username || '');
+      localStorage.setItem('selected_chat_pic', profilePic || 'logo.jpg');
+      localStorage.setItem('selected_chat_type', chatType || 'direct');
+      const u = new URL(window.location.href);
+      u.searchParams.set('chat', uid);
+      window.history.replaceState({ nexchatSelectedChat: uid }, '', u.toString());
+    }
   } catch (_) {}
 
 // Instant reset of unread badge for this chat in conversation list
@@ -36350,13 +36358,25 @@ function restorePersistedSelectedChat() {
     // Only open if explicitly requested via query parameter (?chat=... or ?chatId=...)
     const cId = p.get('chat') || p.get('chatId');
 
-    if (!cId || cId === 'User' || cId === 'user' || cId === 'u_active' || (currentMyUid && cId === currentMyUid)) {
+    if (!cId || cId === 'User' || cId === 'user' || cId === 'u_active' || cId === 'null' || cId === 'undefined' || (currentMyUid && cId === currentMyUid)) {
+      // Clean up URL if invalid chat parameter exists
+      if (p.has('chat') || p.has('chatId')) {
+        p.delete('chat');
+        p.delete('chatId');
+        p.delete('chatName');
+        p.delete('chatPic');
+        p.delete('chatType');
+        const cleanSearch = p.toString() ? '?' + p.toString() : '';
+        window.history.replaceState(null, '', window.location.pathname + cleanSearch + window.location.hash);
+      }
+
       // Purge any stale self-chat or default-chat localStorage entries
       try {
         localStorage.removeItem('selected_chat_id');
         localStorage.removeItem('selected_chat_name');
         localStorage.removeItem('selected_chat_pic');
         localStorage.removeItem('selected_chat_type');
+        localStorage.removeItem('active_chat_user');
       } catch (_) {}
 
       if (typeof showChatListView === 'function') {

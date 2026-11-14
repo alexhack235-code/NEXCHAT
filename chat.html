@@ -29,10 +29,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-    // NEXCHAT INSTANT CACHE BUSTER & BUILD GUARD (STRICTLY ONCE PER LOGIN SESSION)
+    // NEXCHAT INSTANT CACHE BUSTER & BUILD GUARD (STRICTLY FORCES PURGE ON NEW BUILD OR FRESH LOGIN)
     (function() {
-      const BUILD_ID = 'v11_20261114_LIVE_FRESH';
-      const hasPurgedThisSession = sessionStorage.getItem('nex_cache_purged_session') === 'true';
+      const BUILD_ID = 'v12_20261114_FRESH_RELEASE';
+      const storedBuild = localStorage.getItem('nex_build_version');
+      const isNewBuild = storedBuild !== BUILD_ID;
       const isFreshLogin = sessionStorage.getItem('nex_fresh_login_refresh') === 'true' || window.location.search.includes('fresh=');
 
       if (window.location.search.includes('fresh=')) {
@@ -40,18 +41,27 @@
         window.history.replaceState(null, '', cleanUrl);
       }
 
-      if (hasPurgedThisSession && !isFreshLogin) {
-        return;
-      }
+      // Purge any stale chat selection from storage to prevent ever reloading to an empty user chat
+      try {
+        const selId = localStorage.getItem('selected_chat_id');
+        if (selId === 'User' || selId === 'user' || selId === 'u_active' || !selId) {
+          localStorage.removeItem('selected_chat_id');
+          localStorage.removeItem('selected_chat_name');
+          localStorage.removeItem('selected_chat_pic');
+          localStorage.removeItem('selected_chat_type');
+          localStorage.removeItem('active_chat_user');
+        }
+      } catch (_) {}
 
-      if (isFreshLogin || localStorage.getItem('nex_build_version') !== BUILD_ID) {
+      // If new build or fresh login, wipe caches and unregister service workers immediately
+      if (isNewBuild || isFreshLogin) {
         localStorage.setItem('nex_build_version', BUILD_ID);
         sessionStorage.setItem('nex_cache_purged_session', 'true');
         try {
           sessionStorage.removeItem('nex_fresh_login_refresh');
         } catch (_) {}
         if ('caches' in window) {
-          caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
+          caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
         }
         if ('serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then(regs => {
@@ -59,6 +69,11 @@
               r.unregister().catch(() => {});
             });
           }).catch(() => {});
+        }
+        // If updating to a new build, reload once to guarantee clean in-memory scripts
+        if (isNewBuild && !window.location.search.includes('fresh=12')) {
+          const sep = window.location.search ? '&' : '?';
+          window.location.replace(window.location.pathname + (window.location.search ? window.location.search + '&fresh=12' : '?fresh=12') + window.location.hash);
         }
       }
     })();
@@ -89,20 +104,20 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="styles/theme.css">
-  <link rel="stylesheet" href="chat.css?v=10.0">
-  <link rel="stylesheet" href="chat2.css?v=10.0">
-  <link rel="stylesheet" href="src/features/group/group-chat.css?v=10.0">
-  <link rel="stylesheet" href="extension-hub.css">
-  <link rel="stylesheet" href="css/cyber-suite.css">
-  <link rel="stylesheet" href="css/nextgen-suite.css">
-  <link rel="stylesheet" href="css/chat-professional-suite.css">
-  <link rel="stylesheet" href="css/layout-declutter.css">
-  <link rel="stylesheet" href="css/status-elite-suite.css">
-  <link rel="stylesheet" href="css/stealth-forensics-suite.css">
-  <link rel="stylesheet" href="css/tactical-war-room.css">
-  <link rel="stylesheet" href="css/quorum-milestone.css">
-  <link rel="stylesheet" href="css/shredder-core.css">
+  <link rel="stylesheet" href="styles/theme.css?v=12.0">
+  <link rel="stylesheet" href="chat.css?v=12.0">
+  <link rel="stylesheet" href="chat2.css?v=12.0">
+  <link rel="stylesheet" href="src/features/group/group-chat.css?v=12.0">
+  <link rel="stylesheet" href="extension-hub.css?v=12.0">
+  <link rel="stylesheet" href="css/cyber-suite.css?v=12.0">
+  <link rel="stylesheet" href="css/nextgen-suite.css?v=12.0">
+  <link rel="stylesheet" href="css/chat-professional-suite.css?v=12.0">
+  <link rel="stylesheet" href="css/layout-declutter.css?v=12.0">
+  <link rel="stylesheet" href="css/status-elite-suite.css?v=12.0">
+  <link rel="stylesheet" href="css/stealth-forensics-suite.css?v=12.0">
+  <link rel="stylesheet" href="css/tactical-war-room.css?v=12.0">
+  <link rel="stylesheet" href="css/quorum-milestone.css?v=12.0">
+  <link rel="stylesheet" href="css/shredder-core.css?v=12.0">
   <link rel="stylesheet" href="css/p2p-airdrop.css">
   <link rel="stylesheet" href="css/tactile-audio-equalizer.css">
   <link rel="stylesheet" href="css/thread-side-rail.css">
@@ -9668,8 +9683,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   </div>
 </div>
 
-<script type="module" src="chat.js"></script>
-<script type="module" src="chat2.js?v=10.0"></script>
+<script type="module" src="chat.js?v=12.0"></script>
+<script type="module" src="chat2.js?v=12.0"></script>
 <script>
   if (new URLSearchParams(window.location.search).has('settings')) {
     window.addEventListener('load', () => {

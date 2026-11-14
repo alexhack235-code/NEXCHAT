@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'nexchat-v11-live-fresh';
+const CACHE_NAME = 'nexchat-v12-live-fresh';
 const STATIC_FILES = [
   './manifest.json',
   './logo.jpg',
@@ -62,13 +62,17 @@ self.addEventListener('fetch', (event) => {
       return; // Direct browser network bypass
     }
 
-    // Direct network bypass for HTML navigations and dynamic serverless APIs
+    // Direct network bypass for HTML navigations, core scripts/styles, and dynamic serverless APIs
     if (
       event.request.mode === 'navigate' ||
       event.request.destination === 'document' ||
       url.pathname.endsWith('.html') ||
       url.pathname === '/' ||
       url.pathname.startsWith('/api/') ||
+      url.pathname.endsWith('chat.js') ||
+      url.pathname.endsWith('chat2.js') ||
+      url.pathname.endsWith('chat.css') ||
+      url.pathname.endsWith('chat2.css') ||
       url.searchParams.has('fresh')
     ) {
       return; // Direct network bypass
