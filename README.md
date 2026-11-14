@@ -1,6 +1,6 @@
 # ⚡ NEXSHOT // The Unified Next-Gen Cyber Ecosystem
 
-[![Version](https://img.shields.io/badge/version-2.5.0-00f076.svg?style=for-the-badge)](https://github.com/alexhack235-code/NEXCHAT)
+[![Version](https://img.shields.io/badge/version-2.6.0--quantum--glass-00f076.svg?style=for-the-badge)](https://github.com/alexhack235-code/NEXCHAT)
 [![Architecture](https://img.shields.io/badge/architecture-Quantum--Secured-00d4ff.svg?style=for-the-badge)](https://github.com/alexhack235-code/NEXCHAT)
 [![Storage](https://img.shields.io/badge/storage-Multi--Vault%20Decentralized-f59e0b.svg?style=for-the-badge)](https://github.com/alexhack235-code/NEXCHAT)
 [![AI Brain](https://img.shields.io/badge/AI%20Engine-ChronEX%20Neural-a855f7.svg?style=for-the-badge)](https://github.com/alexhack235-code/NEXCHAT)
@@ -441,6 +441,68 @@ DEBUG=false
 ```
 
 > 🔒 **Security Notice:** Never commit `.env` or personal credentials to public source control. Keep `.gitignore` updated.
+
+---
+
+## 🛠️ Advanced Subsystems & Recent Architectural Upgrades (v2.6.0)
+
+### 11. 🛡️ Autonomous Local Code Healer & Self-Repair Engine (`code-healer/`)
+
+NEXCHAT now includes an embedded autonomous AI code healing and AST verification pipeline designed for zero-latency, local self-repair:
+
+```
+┌────────────┐     ┌──────────────┐     ┌────────────────┐     ┌─────────────┐     ┌──────────────┐
+│  1. SCAN   │ ──► │ 2. DIAGNOSE  │ ──► │ 3. SYNTHESIZE  │ ──► │ 4. AST CHECK│ ──► │ 5. PATCH DISK │
+└────────────┘     └──────────────┘     └────────────────┘     └─────────────┘     └──────────────┘
+```
+
+* **Multi-Model Fallback Cluster:** Automatically rotates requests across high-speed LPUs (`openai/gpt-oss-120b`, `qwen/qwen3.8-27b` via Groq) and Google Gemini with <1.5s repair latency.
+* **Strict Node.js VM AST Validation:** All generated code is validated inside isolated Node.js `vm.Script` sandboxes before modifying files, preventing syntax corruption.
+* **Interactive Live Console (`:3300`):** Full web GUI dashboard (`code-healer/web-view.html`) with real-time SSE progress streams and one-click patching.
+* **Anti-Matter Agent Integration:** Native tool bindings registered into Anti-Matter's ToolRegistry (`heal_code_file`, `scan_codebase_anomalies`, `launch_healer_webview`).
+* **NPM Commands:**
+  ```bash
+  npm run heal <filepath>   # Auto-diagnose and repair a file
+  npm run heal:scan         # Full codebase anomaly & syntax scan
+  npm run heal:web          # Launch web view dashboard on :3300
+  ```
+
+---
+
+### 12. 💎 Telegram-Style Frosted Glassmorphism Design System (`glassy.md`)
+
+Modeled directly after Telegram iOS, Android, and macOS settings panels, NEXCHAT features an optical glass design system:
+
+* **Layered Optical Depth:**
+  * **Specular Border Inset:** `inset 0 1px 0 rgba(255, 255, 255, 0.12)` simulates light catching physical cut glass edges.
+  * **Translucent Crystal Base:** `rgba(18, 25, 38, 0.72)` deep dark crystal background tint.
+  * **Backdrop Diffusion:** `blur(20px) saturate(180%)` eliminates muddy banding over wallpapers.
+  * **Elevation Shadows:** `0 8px 32px rgba(0, 0, 0, 0.38)` floating ambient depth.
+* **Grouped Settings Islands:** Settings options group into rounded capsule cards (`border-radius: 16px;`) with hairline glass separators (`rgba(255, 255, 255, 0.05)`).
+* **Hardware Acceleration:** Hardware-composited with `transform: translateZ(0)` and automatic `@media (prefers-reduced-transparency)` accessibility fallbacks.
+
+---
+
+### 13. ⚡ Core Architecture Compaction & Modular Decoupling (`chat2.js`)
+
+To eliminate monolithic bloat and improve application responsiveness, the core controller architecture was completely restructured:
+
+* **21,500+ Lines of Bloat Eliminated:** Compressed unnatural statement spacing and artificial whitespace across `chat.js`, shrinking payload size by over 40%.
+* **Modular Decoupling into `chat2.js`:** Extracted non-core subsystems into standalone modular units:
+  * **Storage & Network Intelligence:** Cache recalculation, auto-download quotas, and network telemetry.
+  * **Biometric Passkeys (WebAuthn):** Hardware security key enrollment and passkey authentication.
+  * **Linked Devices Manager:** Multi-device session authorization and QR bridge sync.
+  * **Enhanced Sound Alerts & Audio DSP:** Web Audio synthesizer and luxury sound banks.
+  * **In-Chat Live Search Engine:** Real-time query matching with DOM highlight clearing.
+* **Elimination of Competing Routing Loops:** Removed race-condition polling intervals, permanently preventing self-chat auto-routing (`u_active` / `User`), and integrated dynamic initials SVG avatar generation.
+
+---
+
+### 14. 🖥️ Windows Desktop Keep-Alive Daemon (`scripts/windows_keepalive_probe.ps1`)
+
+For uninterrupted long-running development and headless test runs, a lightweight native daemon script prevents Windows display sleep and system timeouts:
+* Leverages Win32 `SetThreadExecutionState` (`ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED`).
+* Emits periodic F15 virtual key pulses every 45 seconds with zero active typing interference.
 
 ---
 
