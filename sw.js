@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'nexchat-v10-csp-bypass';
+const CACHE_NAME = 'nexchat-v11-live-fresh';
 const STATIC_FILES = [
   './manifest.json',
   './logo.jpg',
@@ -68,7 +68,8 @@ self.addEventListener('fetch', (event) => {
       event.request.destination === 'document' ||
       url.pathname.endsWith('.html') ||
       url.pathname === '/' ||
-      url.pathname.startsWith('/api/')
+      url.pathname.startsWith('/api/') ||
+      url.searchParams.has('fresh')
     ) {
       return; // Direct network bypass
     }

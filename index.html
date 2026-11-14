@@ -17,12 +17,12 @@
     <script>
     // NEXCHAT INSTANT CACHE BUSTER & BUILD GUARD
     (function() {
-      const BUILD_ID = 'v10_20261108_CSP_BYPASS';
-      if (localStorage.getItem('nex_build_version') !== BUILD_ID) {
+      const BUILD_ID = 'v11_20261114_LIVE_FRESH';
+      const isFreshLogin = sessionStorage.getItem('nex_fresh_login_refresh') === 'true' || window.location.search.includes('fresh=');
+      if (isFreshLogin || localStorage.getItem('nex_build_version') !== BUILD_ID) {
         localStorage.setItem('nex_build_version', BUILD_ID);
         try {
-          localStorage.removeItem('nex_local_chats');
-          localStorage.removeItem('chronex_ai_messages');
+          sessionStorage.removeItem('nex_fresh_login_refresh');
         } catch (_) {}
         if ('caches' in window) {
           caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
@@ -33,6 +33,10 @@
               r.unregister().catch(() => {});
             });
           }).catch(() => {});
+        }
+        if (window.location.search.includes('fresh=')) {
+          const cleanUrl = window.location.pathname + window.location.hash;
+          window.history.replaceState(null, '', cleanUrl);
         }
       }
     })();

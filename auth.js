@@ -731,10 +731,10 @@ if (loginForm) {
         console.warn('Status update notice:', statusErr);
       }
 
-      setTimeout(() => {
+      setTimeout(async () => {
         hideLoginLoader();
-        location.href = 'chat.html';
-      }, 400);
+        await clearCacheAndRedirectToChat('chat.html');
+      }, 300);
     } catch (err) {
       hideLoginLoader();
       let errorMsg = err.message || 'Login failed. Please verify your credentials.';
@@ -748,6 +748,25 @@ if (loginForm) {
   });
 }
 
+async function clearCacheAndRedirectToChat(targetUrl = 'chat.html') {
+  try {
+    sessionStorage.setItem('nex_fresh_login_refresh', 'true');
+    if ('caches' in window) {
+      const keys = await caches.keys().catch(() => []);
+      await Promise.all(keys.map(k => caches.delete(k))).catch(() => {});
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations().catch(() => []);
+      await Promise.all(regs.map(r => r.unregister())).catch(() => {});
+    }
+  } catch (e) {
+    console.warn('[AUTH] Cache clearance notice:', e);
+  } finally {
+    const sep = targetUrl.includes('?') ? '&' : '?';
+    window.location.replace(`${targetUrl}${sep}fresh=${Date.now()}`);
+  }
+}
+
 function redirectIfOnAuthPage(user) {
   if (!user || !user.uid) return;
   const path = (window.location.pathname || '').toLowerCase();
@@ -758,7 +777,7 @@ function redirectIfOnAuthPage(user) {
       if (user.email) localStorage.setItem('auth_email', user.email);
       if (user.displayName) localStorage.setItem('auth_name', user.displayName);
     } catch (_) { }
-    window.location.href = 'chat.html';
+    clearCacheAndRedirectToChat('chat.html');
   }
 }
 
@@ -863,8 +882,8 @@ async function processGoogleUser(user, credentialResult) {
 
   showResult('Google sign-in successful! Redirecting...', false);
 
-  // Instant redirect to chat.html
-  window.location.href = 'chat.html';
+  // Instant redirect to chat.html with clean cache purge
+  await clearCacheAndRedirectToChat('chat.html');
 }
 
 async function handleGoogleSignIn() {
