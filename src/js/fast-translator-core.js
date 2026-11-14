@@ -18,6 +18,15 @@ class FastTranslationLRUCache {
 
   loadSessionEntries() {
     try {
+      if (typeof localStorage !== 'undefined') {
+        const local = localStorage.getItem('nex_learned_lexicon');
+        if (local) {
+          const parsed = JSON.parse(local);
+          for (const [k, v] of Object.entries(parsed)) {
+            this.cache.set(k, v);
+          }
+        }
+      }
       if (typeof sessionStorage !== 'undefined') {
         const stored = sessionStorage.getItem('nex_fast_trans_cache');
         if (stored) {
@@ -32,15 +41,19 @@ class FastTranslationLRUCache {
 
   saveSessionEntries() {
     try {
+      const obj = {};
+      let count = 0;
+      for (const [k, v] of this.cache.entries()) {
+        obj[k] = v;
+        count++;
+        if (count > 2500) break; // Keep learned lexicon robust but lightweight
+      }
+      const serialized = JSON.stringify(obj);
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('nex_learned_lexicon', serialized);
+      }
       if (typeof sessionStorage !== 'undefined') {
-        const obj = {};
-        let count = 0;
-        for (const [k, v] of this.cache.entries()) {
-          obj[k] = v;
-          count++;
-          if (count > 500) break; // Keep session storage compact
-        }
-        sessionStorage.setItem('nex_fast_trans_cache', JSON.stringify(obj));
+        sessionStorage.setItem('nex_fast_trans_cache', serialized);
       }
     } catch (_) {}
   }
