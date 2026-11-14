@@ -348,20 +348,53 @@
     }
 
     updateHeaderPresenceDisplay(userData, defaultName) {
+      this.lastPartnerData = userData;
       const activeChatStatus = document.getElementById('activeChatStatus');
       const chatUserStatus = document.getElementById('chatUserStatus');
-      const isOnline = this.isUserActuallyOnline(userData);
+      const statusTextEl = document.getElementById('statusText');
+      const onlineIndicator = document.getElementById('chatOnlineIndicator');
+      const infoStatusEl = document.getElementById('infoStatus');
 
-      const statusText = isOnline ? 'Online' : this.formatLastSeen(userData?.lastSeen);
+      const isOnline = this.isUserActuallyOnline(userData);
+      const statusText = isOnline ? 'online' : this.formatLastSeen(userData?.lastSeen);
       const dotHtml = `<span class="presence-pulse-dot ${isOnline ? 'online' : 'offline'}"></span>`;
       const fullHtml = `<span class="chat-presence-text ${isOnline ? 'is-online' : ''}">${dotHtml} ${statusText}</span>`;
 
       if (activeChatStatus) {
         activeChatStatus.innerHTML = fullHtml;
+        activeChatStatus.className = 'active-chat-status';
       }
       if (chatUserStatus) {
         chatUserStatus.innerHTML = fullHtml;
       }
+      if (statusTextEl) {
+        statusTextEl.innerHTML = fullHtml;
+        statusTextEl.className = 'status-subtitle';
+        statusTextEl.style.color = isOnline ? '#00a884' : '#8696a0';
+      }
+      if (onlineIndicator) {
+        onlineIndicator.style.display = isOnline ? 'block' : 'none';
+      }
+      if (infoStatusEl) {
+        infoStatusEl.textContent = statusText;
+      }
+
+      // Also update contact list item beacon in real time
+      try {
+        const uid = userData?.uid || userData?.id || this.currentPartnerUid;
+        if (uid && typeof CSS !== 'undefined' && CSS.escape) {
+          const beacon = document.querySelector(`#contactList li[data-chat-id="${CSS.escape(uid)}"] .chat-online-beacon`);
+          if (beacon) {
+            if (isOnline) {
+              beacon.classList.add('is-online');
+              beacon.style.setProperty('display', 'block', 'important');
+            } else {
+              beacon.classList.remove('is-online');
+              beacon.style.setProperty('display', 'none', 'important');
+            }
+          }
+        }
+      } catch (_) {}
     }
 
     /**
@@ -369,18 +402,20 @@
      */
     startContactPresenceTicker() {
       setInterval(() => {
-        // Re-evaluate active chat partner if open
+        // Re-evaluate active chat partner if open to expire stale presence
         if (this.currentPartnerUid && window.currentChatType === 'direct') {
-          const statusEl = document.getElementById('activeChatStatus');
-          if (statusEl && statusEl.textContent.includes('Online')) {
-            // Check if we need to expire them
-            const partnerData = window.cachedUsers?.find(u => u.uid === this.currentPartnerUid || u.id === this.currentPartnerUid);
-            if (partnerData && !this.isUserActuallyOnline(partnerData)) {
-              this.updateHeaderPresenceDisplay(partnerData, partnerData.username || 'User');
+          const dataToCheck = this.lastPartnerData || window.cachedUsers?.find(u => u.uid === this.currentPartnerUid || u.id === this.currentPartnerUid);
+          if (dataToCheck) {
+            const currentlyOnline = this.isUserActuallyOnline(dataToCheck);
+            const statusEl = document.getElementById('activeChatStatus');
+            const wasShowingOnline = statusEl && (statusEl.textContent.toLowerCase().includes('online'));
+            if (wasShowingOnline && !currentlyOnline) {
+              console.log('[PRESENCE] Heartbeat TTL expired for active partner. Transitioning to offline.');
+              this.updateHeaderPresenceDisplay(dataToCheck, dataToCheck.username || 'User');
             }
           }
         }
-      }, 10000);
+      }, 8000);
     }
   }
 

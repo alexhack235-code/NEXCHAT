@@ -185,32 +185,35 @@ export function createContactListItem(chat) {
   li.dataset.chatType = chat.type || 'direct';
   li.dataset.name = chat.name || 'Chat';
 
+  const isContactOnline = chat.uid === 'chronex-ai' || (window.isUserStrictlyOnline ? window.isUserStrictlyOnline(chat) : chat.online === true);
+  const beaconHtml = `<span class="chat-online-beacon ${isContactOnline ? 'is-online' : ''}" style="${isContactOnline ? 'display: block !important;' : 'display: none !important;'}"></span>`;
+
   let avatarHtml = '';
   if (chat.uid === 'chronex-ai') {
     avatarHtml = `
       <div class="chat-avatar-container" style="position: relative;">
         <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
-        <span class="chat-online-beacon" style="display: block;"></span>
+        ${beaconHtml}
         <span class="avatar-achievement-badge" style="background: linear-gradient(135deg, #00ff66, #00d4ff); color: #041019; box-shadow: 0 0 10px rgba(0,255,102,0.5);"><i class="fa-solid fa-bolt"></i><span>AI</span></span>
       </div>`;
   } else if (chat.isSmiley || chat.name === '@Daven ★' || chat.uid === 'daven') {
     avatarHtml = `
       <div class="chat-avatar-container" style="position: relative;">
         <svg width="52" height="52" viewBox="0 0 52 52" class="chat-avatar" style="width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);"><circle cx="26" cy="26" r="26" fill="#050a0e"/><circle cx="26" cy="26" r="24" fill="#0e1720"/><path d="M16 19L22 25M22 19L16 25" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M30 19L36 25M36 19L30 25" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M17 33C20 38 32 38 35 33" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
-        <span class="chat-online-beacon" style="display: block;"></span>
+        ${beaconHtml}
       </div>`;
   } else if (chat.pic) {
     avatarHtml = `
       <div class="chat-avatar-container" style="position: relative;">
         <img src="${chat.pic}" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">
-        <span class="chat-online-beacon" style="display: block;"></span>
+        ${beaconHtml}
       </div>`;
   } else {
     const letter = chat.letter || (chat.name ? chat.name.charAt(0).toUpperCase() : 'U');
     avatarHtml = `
       <div class="chat-avatar-container" style="position: relative;">
         <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">${letter}</div>
-        <span class="chat-online-beacon" style="display: block;"></span>
+        ${beaconHtml}
       </div>`;
   }
 

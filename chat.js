@@ -305,6 +305,8 @@ if (typeof window !== 'undefined') {
 
   window.serverTimestamp = serverTimestamp;
 
+  window.onSnapshot = onSnapshot;
+
   window.arrayUnion = arrayUnion;
 
   window.arrayRemove = arrayRemove;
@@ -349,6 +351,8 @@ if (typeof window !== 'undefined') {
     onSnapshot,
 
     serverTimestamp,
+
+    onSnapshot,
 
     arrayUnion,
 
@@ -1333,39 +1337,94 @@ function formatTimeRemaining(timestamp) {
 }
 
 function formatLastSeen(timestamp) {
-  if (!timestamp) return 'Offline';
-  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-
-  if (isNaN(date.getTime())) return 'Offline';
-  const diffMs = Date.now() - date.getTime();
-
-  if (diffMs < 60000) return 'Online';
-const timeStr = date.toLocaleTimeString('en-US', {
-    timeZone: 'Africa/Lagos',
-
-    hour: '2-digit',
-
-    minute: '2-digit',
-
-    hour12: false
-  });
-const now = new Date();
-  const isSameDay = date.toDateString() === now.toDateString();
-
-  if (isSameDay) {
-    return `last seen ${timeStr}`;
+  if (!timestamp) return 'offline';
+  let date = null;
+  if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+    date = timestamp.toDate();
+  } else if (timestamp.toMillis && typeof timestamp.toMillis === 'function') {
+    date = new Date(timestamp.toMillis());
+  } else if (timestamp instanceof Date) {
+    date = timestamp;
+  } else if (typeof timestamp === 'number') {
+    date = new Date(timestamp);
+  } else {
+    date = new Date(timestamp);
   }
 
-  const dateStr = date.toLocaleDateString('en-US', {
-    timeZone: 'Africa/Lagos',
+  if (!date || isNaN(date.getTime())) return 'offline';
 
+  const diffMs = Date.now() - date.getTime();
+  if (diffMs < 0) return 'last seen just now';
+
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+
+  if (diffSecs < 60) {
+    return 'last seen just now';
+  }
+  if (diffMins < 60) {
+    return `last seen ${diffMins}m ago`;
+  }
+
+  const now = new Date();
+  const timeStr = date.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+
+  const isToday = date.toDateString() === now.toDateString();
+  if (isToday) {
+    return `last seen today at ${timeStr}`;
+  }
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+  if (isYesterday) {
+    return `last seen yesterday at ${timeStr}`;
+  }
+
+  const dateStr = date.toLocaleDateString([], {
     month: 'short',
-
     day: 'numeric'
   });
 
   return `last seen ${dateStr} at ${timeStr}`;
 }
+
+function isUserStrictlyOnline(userData) {
+  if (!userData) return false;
+  if (userData.online !== true) return false;
+
+  let lastSeenDate = null;
+  if (userData.lastSeen) {
+    if (typeof userData.lastSeen.toDate === 'function') {
+      lastSeenDate = userData.lastSeen.toDate();
+    } else if (typeof userData.lastSeen.toMillis === 'function') {
+      lastSeenDate = new Date(userData.lastSeen.toMillis());
+    } else if (userData.lastSeen instanceof Date) {
+      lastSeenDate = userData.lastSeen;
+    } else if (typeof userData.lastSeen === 'number') {
+      lastSeenDate = new Date(userData.lastSeen);
+    } else {
+      lastSeenDate = new Date(userData.lastSeen);
+    }
+  }
+
+  // Strict WhatsApp heartbeat verification:
+  // Must have heartbeated within 45 seconds (HEARTBEAT_TTL).
+  // Stale online booleans without a fresh heartbeat are strictly offline.
+  if (!lastSeenDate || isNaN(lastSeenDate.getTime())) {
+    return false;
+  }
+
+  const ageMs = Date.now() - lastSeenDate.getTime();
+  return ageMs >= -5000 && ageMs <= 45000;
+}
+
+window.isUserStrictlyOnline = isUserStrictlyOnline;
+window.isUserActuallyOnline = isUserStrictlyOnline;
 
 function formatChatDate(timestamp) {
   if (!timestamp) return '';
@@ -1410,19 +1469,15 @@ function formatChatTimestamp(timestamp, includeDate = false) {
 }
 
 function getUserPresenceStatus(userData) {
-  if (!userData) return 'Unknown';
+  if (!userData) return 'offline';
 
-  if (window.NexPresenceEngine && typeof window.NexPresenceEngine.isUserActuallyOnline === 'function') {
-    if (window.NexPresenceEngine.isUserActuallyOnline(userData)) {
-      return 'Online';
-    }
-  } else if (userData.online === true) {
-    return 'Online';
+  if (isUserStrictlyOnline(userData)) {
+    return 'online';
   }
 
   if (userData.lastSeen) return formatLastSeen(userData.lastSeen);
 
-  return 'Offline';
+  return 'offline';
 }
 
 function buildTypingDocId(chatId, chatType) {
@@ -1613,37 +1668,64 @@ function getTypingUserName(uid) {
 
 function subscribeUserPresence(userId) {
   if (userStatusUnsubscribe) {
-    userStatusUnsubscribe();
-
+    try { userStatusUnsubscribe(); } catch (_) {}
     userStatusUnsubscribe = null;
   }
 
-if (!userId) return;
-const userRef = doc(db, 'users', userId);
+  if (!userId || userId === 'chronex-ai' || window.currentChatType === 'group') return;
+  const userRef = doc(db, 'users', userId);
 
   userStatusUnsubscribe = onSnapshot(userRef, (snap) => {
     if (!snap.exists()) return;
     const userData = snap.data();
-    const statusText = getUserPresenceStatus(userData);
+    const isOnline = isUserStrictlyOnline(userData);
+    const statusText = isOnline ? 'online' : formatLastSeen(userData.lastSeen);
+
+    const activeChatStatus = document.getElementById('activeChatStatus');
     const statusTextEl = document.getElementById('statusText');
-
-    if (statusTextEl) {
-      statusTextEl.textContent = statusText;
-
-      statusTextEl.className = 'status-subtitle';
-
-      statusTextEl.style.color = (statusText && statusText.toLowerCase().includes('online')) ? '#00a884' : '#8696a0';
-    }
-
+    const chatUserStatus = document.getElementById('chatUserStatus');
     const onlineDot = document.getElementById('chatOnlineIndicator');
-
-    if (onlineDot) {
-      onlineDot.style.display = (statusText && statusText.toLowerCase().includes('online')) ? 'block' : 'none';
-    }
-
     const infoStatusEl = document.getElementById('infoStatus');
 
-    if (infoStatusEl) infoStatusEl.textContent = statusText;
+    const dotHtml = `<span class="presence-pulse-dot ${isOnline ? 'online' : 'offline'}"></span>`;
+    const formattedHtml = `<span class="chat-presence-text ${isOnline ? 'is-online' : ''}">${dotHtml} ${escapeHtml(statusText)}</span>`;
+
+    if (activeChatStatus) {
+      activeChatStatus.innerHTML = formattedHtml;
+      activeChatStatus.className = 'active-chat-status';
+    }
+
+    if (statusTextEl) {
+      statusTextEl.innerHTML = formattedHtml;
+      statusTextEl.className = 'status-subtitle';
+      statusTextEl.style.color = isOnline ? '#00a884' : '#8696a0';
+    }
+
+    if (chatUserStatus) {
+      chatUserStatus.innerHTML = formattedHtml;
+    }
+
+    if (onlineDot) {
+      onlineDot.style.display = isOnline ? 'block' : 'none';
+    }
+
+    if (infoStatusEl) {
+      infoStatusEl.textContent = statusText;
+    }
+
+    // Live update for contact list indicator beacon
+    try {
+      const contactBeacon = document.querySelector(`#contactList li[data-chat-id="${CSS.escape(userId)}"] .chat-online-beacon`);
+      if (contactBeacon) {
+        if (isOnline) {
+          contactBeacon.classList.add('is-online');
+          contactBeacon.style.setProperty('display', 'block', 'important');
+        } else {
+          contactBeacon.classList.remove('is-online');
+          contactBeacon.style.setProperty('display', 'none', 'important');
+        }
+      }
+    } catch (_) {}
   }, (error) => {
     console.warn('User presence snapshot failed:', error);
   });
@@ -5557,6 +5639,10 @@ const fab = document.getElementById('mobileFabNewChat');
     try { userStatusUnsubscribe(); } catch (_) {}
 
     userStatusUnsubscribe = null;
+  }
+
+  if (window.NexPresenceEngine && typeof window.NexPresenceEngine.syncActiveChatPartner === 'function') {
+    window.NexPresenceEngine.syncActiveChatPartner(null);
   }
 
   if (messageListener) {
@@ -14269,7 +14355,7 @@ markSupabaseMessagesRead(roomId, myUID);
   }
 }
 
-function updateChatProfileDisplay(username, profilePic, status = 'Online') {
+function updateChatProfileDisplay(username, profilePic, status = 'offline') {
   const headerLogoContainer = document.getElementById("headerLogoContainer");
   const activeChatHeader = document.getElementById("activeChatHeader");
 
@@ -14280,22 +14366,34 @@ if (headerLogoContainer && activeChatHeader) {
 const activeChatName = document.getElementById("activeChatName");
     const activeChatStatus = document.getElementById("activeChatStatus");
     const activeChatAvatar = document.getElementById("activeChatAvatar");
-
-if (activeChatName) activeChatName.textContent = username;
-
-    if (activeChatStatus) {
-      activeChatStatus.textContent = status;
-
-      activeChatStatus.className = 'status-subtitle';
-
-      activeChatStatus.style.color = (status && status.toLowerCase().includes('online')) ? '#00a884' : '#8696a0';
-    }
-
+    const chatNameEl = document.getElementById("chatName");
+    const statusTextEl = document.getElementById("statusText");
+    const chatUserStatus = document.getElementById("chatUserStatus");
     const onlineIndicator = document.getElementById('chatOnlineIndicator');
 
-    if (onlineIndicator) {
-      const isOnline = status && (status.toLowerCase().includes('online') || status.toLowerCase().includes('active') || status.toLowerCase().includes('ready'));
+    if (activeChatName) activeChatName.textContent = username;
+    if (chatNameEl) chatNameEl.textContent = username;
 
+    const isOnline = Boolean(status && (status.toLowerCase() === 'online' || status.toLowerCase().includes('online') || status.toLowerCase().includes('ready') || status.toLowerCase().includes('ai ready')));
+    const dotHtml = `<span class="presence-pulse-dot ${isOnline ? 'online' : 'offline'}"></span>`;
+    const formattedHtml = `<span class="chat-presence-text ${isOnline ? 'is-online' : ''}">${dotHtml} ${escapeHtml(status)}</span>`;
+
+    if (activeChatStatus) {
+      activeChatStatus.innerHTML = formattedHtml;
+      activeChatStatus.className = 'active-chat-status';
+    }
+
+    if (statusTextEl) {
+      statusTextEl.innerHTML = formattedHtml;
+      statusTextEl.className = 'status-subtitle';
+      statusTextEl.style.color = isOnline ? '#00a884' : '#8696a0';
+    }
+
+    if (chatUserStatus) {
+      chatUserStatus.innerHTML = formattedHtml;
+    }
+
+    if (onlineIndicator) {
       onlineIndicator.style.display = isOnline ? 'block' : 'none';
     }
 
@@ -17934,15 +18032,20 @@ if (filenameEl) filenameEl.textContent = file.name;
 
       if (percentageEl) percentageEl.textContent = '0%';
 
-      if (circle) circle.style.strokeDashoffset = '314'; // Full circle
+      const r = circle ? (circle.r?.baseVal?.value || 18) : 18;
+      const circumference = 2 * Math.PI * r;
+      if (circle) {
+        circle.style.strokeDasharray = `${circumference}`;
+        circle.style.strokeDashoffset = `${circumference}`;
+      }
 
       if (modal) modal.style.display = 'flex';
-const updateProgress = (progress, text) => {
+      const updateProgress = (progress, text) => {
         if (percentageEl) percentageEl.textContent = `${Math.round(progress)}%`;
 
         if (sizeEl) sizeEl.textContent = text || `${((totalSize * progress / 100) / 1024 / 1024).toFixed(2)} / ${totalSizeMB} MB`;
 
-        if (circle) circle.style.strokeDashoffset = 314 - (314 * progress / 100);
+        if (circle) circle.style.strokeDashoffset = `${circumference - (circumference * progress / 100)}`;
       };
 const isVideo = file.type?.startsWith('video/') || ['mp4', 'webm', 'mov', 'mkv'].includes(fileExt);
       const isImg = file.type?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(fileExt);
@@ -32978,7 +33081,11 @@ return {
 
             isVerified,
 
-            verificationBadge
+            verificationBadge,
+
+            online: user.online === true,
+
+            lastSeen: user.lastSeen || null
           };
         } catch (e) {
           console.error("Error loading contact", uid, e);
@@ -33011,7 +33118,7 @@ contactList.innerHTML = "";
 const seenContactIds = new Set();
 
     contactDataList.forEach(data => {
-      const { uid, name, pic, latestMsg, latestTime, unreadCount, isVerified, verificationBadge } = data;
+      const { uid, name, pic, latestMsg, latestTime, unreadCount, isVerified, verificationBadge, online, lastSeen } = data;
 
       if (!uid || seenContactIds.has(uid)) return;
 
@@ -33033,6 +33140,8 @@ if (isUserVerified) {
 
         userVerifiedBadgeHtml = `<span class="nex-verified-badge tg-verified-badge" title="Verified NEX User"><i class="fa-solid fa-circle-check"></i></span>`;
       }
+
+const isContactOnline = isUserStrictlyOnline({ online, lastSeen });
 
 const isPicValid = pic && typeof pic === 'string' &&
 
@@ -33115,7 +33224,7 @@ li.innerHTML = `
 
           ${avatar}
 
-          <span class="chat-online-beacon"></span>
+          <span class="chat-online-beacon ${isContactOnline ? 'is-online' : ''}" style="${isContactOnline ? 'display: block !important;' : 'display: none !important;'}"></span>
 
           ${userAvatarBadgeHtml}
 
