@@ -733,7 +733,7 @@ if (loginForm) {
 
       setTimeout(async () => {
         hideLoginLoader();
-        await clearCacheAndRedirectToChat('chat.html');
+        await clearCacheAndRedirectToChat('chat.html', true);
       }, 300);
     } catch (err) {
       hideLoginLoader();
@@ -748,8 +748,15 @@ if (loginForm) {
   });
 }
 
-async function clearCacheAndRedirectToChat(targetUrl = 'chat.html') {
+async function clearCacheAndRedirectToChat(targetUrl = 'chat.html', forceOnce = false) {
+  const hasPurgedThisSession = sessionStorage.getItem('nex_cache_purged_session') === 'true';
+  if (hasPurgedThisSession && !forceOnce) {
+    window.location.replace(targetUrl);
+    return;
+  }
+
   try {
+    sessionStorage.setItem('nex_cache_purged_session', 'true');
     sessionStorage.setItem('nex_fresh_login_refresh', 'true');
     if ('caches' in window) {
       const keys = await caches.keys().catch(() => []);
@@ -777,7 +784,12 @@ function redirectIfOnAuthPage(user) {
       if (user.email) localStorage.setItem('auth_email', user.email);
       if (user.displayName) localStorage.setItem('auth_name', user.displayName);
     } catch (_) { }
-    clearCacheAndRedirectToChat('chat.html');
+
+    if (sessionStorage.getItem('nex_cache_purged_session') === 'true') {
+      window.location.replace('chat.html');
+    } else {
+      clearCacheAndRedirectToChat('chat.html', true);
+    }
   }
 }
 
@@ -882,8 +894,8 @@ async function processGoogleUser(user, credentialResult) {
 
   showResult('Google sign-in successful! Redirecting...', false);
 
-  // Instant redirect to chat.html with clean cache purge
-  await clearCacheAndRedirectToChat('chat.html');
+  // Instant redirect to chat.html with one-time clean cache purge
+  await clearCacheAndRedirectToChat('chat.html', true);
 }
 
 async function handleGoogleSignIn() {

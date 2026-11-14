@@ -15,12 +15,24 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-    // NEXCHAT INSTANT CACHE BUSTER & BUILD GUARD
+    // NEXCHAT INSTANT CACHE BUSTER & BUILD GUARD (STRICTLY ONCE PER LOGIN SESSION)
     (function() {
       const BUILD_ID = 'v11_20261114_LIVE_FRESH';
+      const hasPurgedThisSession = sessionStorage.getItem('nex_cache_purged_session') === 'true';
       const isFreshLogin = sessionStorage.getItem('nex_fresh_login_refresh') === 'true' || window.location.search.includes('fresh=');
+
+      if (window.location.search.includes('fresh=')) {
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState(null, '', cleanUrl);
+      }
+
+      if (hasPurgedThisSession && !isFreshLogin) {
+        return;
+      }
+
       if (isFreshLogin || localStorage.getItem('nex_build_version') !== BUILD_ID) {
         localStorage.setItem('nex_build_version', BUILD_ID);
+        sessionStorage.setItem('nex_cache_purged_session', 'true');
         try {
           sessionStorage.removeItem('nex_fresh_login_refresh');
         } catch (_) {}
@@ -33,10 +45,6 @@
               r.unregister().catch(() => {});
             });
           }).catch(() => {});
-        }
-        if (window.location.search.includes('fresh=')) {
-          const cleanUrl = window.location.pathname + window.location.hash;
-          window.history.replaceState(null, '', cleanUrl);
         }
       }
     })();
