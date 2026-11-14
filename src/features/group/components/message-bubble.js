@@ -122,10 +122,26 @@ export function renderMessageBubble(message, container, options = {}) {
     const hasText = !!((message.text && String(message.text).trim()) || (message.message && String(message.message).trim()));
     const hasAttachment = !!(message.attachment && (message.attachment.url || message.attachment.downloadURL || message.attachment.fileType || message.attachment.fileName || message.attachment.isAudio || message.attachment.isSticker));
     if (!hasText && !hasAttachment && !message.replyTo && !message.poll && !message.isDeleted && !message.deletedForEveryone) return;
+
+    // Detect if this message is a die-cut sticker
+    const isSticker = !!(
+      message.type === 'sticker' ||
+      message.isSticker ||
+      (message.attachment && (
+        message.attachment.isSticker ||
+        message.attachment.fileType === 'sticker' ||
+        (message.attachment.fileName && String(message.attachment.fileName).toLowerCase().includes('sticker')) ||
+        (message.attachment.fileType === 'image/webp' && !hasText)
+      ))
+    );
+
     const wrapper = document.createElement('div');
     wrapper.className = 'nex-msg-wrapper ' + (options.isOwn ? 'sent' : 'received');
     if (options.isConsecutive) {
       wrapper.classList.add('consecutive');
+    }
+    if (isSticker) {
+      wrapper.classList.add('is-sticker-message');
     }
     wrapper.dataset.messageId = message.id;
     wrapper.id = 'msg-' + message.id;
@@ -232,6 +248,9 @@ export function renderMessageBubble(message, container, options = {}) {
     if (options.isConsecutive) {
       bubble.classList.add('consecutive');
     }
+    if (isSticker) {
+      bubble.classList.add('is-sticker-bubble');
+    }
 
     // 2. WhatsApp Group Identity: 1 single row, Left = DisplayName (~ ALEXANDER), Right = Phone/Username in small grey
     const effectiveSenderId = message.senderId || message.from || options.senderId || 'user';
@@ -293,7 +312,9 @@ export function renderMessageBubble(message, container, options = {}) {
       }
     });
 
-    bubble.appendChild(senderDiv);
+    if (!isSticker) {
+      bubble.appendChild(senderDiv);
+    }
 
     // 3. Quoted reply with left bar tinted to match quoted sender's assigned color (Replying to You / Replying to [Name])
     if (message.replyTo) {
@@ -329,29 +350,51 @@ export function renderMessageBubble(message, container, options = {}) {
       bubble.appendChild(quoteBlock);
     }
 
-    // 4. Attachments (image / video / audio / document)
-    if (message.attachment) {
+    // 4. Attachments (image / video / audio / document / sticker)
+    if (message.attachment || isSticker) {
       const attDiv = document.createElement('div');
       attDiv.className = 'nex-msg-attachment';
-      const type = message.attachment.fileType;
+      const att = message.attachment || {};
+      const type = att.fileType || (isSticker ? 'sticker' : '');
 
-      if (type && type.startsWith('image/')) {
+      if (isSticker) {
+        const stickerSrc = att.downloadURL || att.url || att.fileUrl || message.imageUrl || message.stickerUrl || '';
+        const altText = att.fileName || 'Sticker';
+        if (typeof window.createCyberStickerElement === 'function') {
+          attDiv.appendChild(window.createCyberStickerElement(stickerSrc, altText, options.isOwn));
+        } else {
+          const stkWrap = document.createElement('div');
+          stkWrap.className = 'message-sticker-wrap';
+          stkWrap.style.cssText = 'position: relative; display: inline-block; width: 150px; height: 150px; user-select: none;';
+          const stkImg = document.createElement('img');
+          stkImg.src = stickerSrc;
+          stkImg.alt = altText;
+          stkImg.className = 'message-sticker-img';
+          stkImg.style.cssText = 'width: 150px; height: 150px; max-width: 160px; max-height: 160px; object-fit: contain; background: transparent; display: block; border-radius: 8px;';
+          stkImg.draggable = false;
+          stkImg.loading = 'lazy';
+          stkWrap.appendChild(stkImg);
+          attDiv.appendChild(stkWrap);
+        }
+      } else if (type && type.startsWith('image/')) {
         const img = document.createElement('img');
-        img.src = (message.attachment.downloadURL || message.attachment.url || message.attachment.fileUrl || "");
+        img.src = (att.downloadURL || att.url || att.fileUrl || "");
         img.className = 'nex-attachment-img';
+        img.style.cssText = 'max-width: 100%; max-height: 320px; object-fit: cover; border-radius: 8px; display: block;';
+        img.loading = 'lazy';
         attDiv.appendChild(img);
       } else if (type && type.startsWith('video/')) {
         const vid = document.createElement('video');
-        vid.src = (message.attachment.downloadURL || message.attachment.url || message.attachment.fileUrl || "");
+        vid.src = (att.downloadURL || att.url || att.fileUrl || "");
         vid.controls = true;
         vid.className = 'nex-attachment-video';
         attDiv.appendChild(vid);
-      } else if (type && (type.startsWith('audio/') || message.attachment.viewOnceType === 'audio' || (message.attachment.fileName && message.attachment.fileName.startsWith('voice_note_')))) {
+      } else if (type && (type.startsWith('audio/') || att.viewOnceType === 'audio' || (att.fileName && att.fileName.startsWith('voice_note_')))) {
         if (typeof window.renderUnifiedVoiceNotePlayer === 'function') {
-          const unifiedPlayer = window.renderUnifiedVoiceNotePlayer(message.attachment, message, isOwn);
+          const unifiedPlayer = window.renderUnifiedVoiceNotePlayer(att, message, options.isOwn);
           attDiv.appendChild(unifiedPlayer);
         } else {
-          const audioSrc = (message.attachment.downloadURL || message.attachment.url || message.attachment.fileUrl || "");
+          const audioSrc = (att.downloadURL || att.url || att.fileUrl || "");
           const voiceWrap = document.createElement('div');
           voiceWrap.className = 'cached-voice-attachment nex-voice-card-wrapper';
           voiceWrap.style.cssText = 'display:flex; flex-direction:column; gap:6px; min-width:220px;';
@@ -363,12 +406,12 @@ export function renderMessageBubble(message, container, options = {}) {
           nativeAudio.style.cssText = 'width: 100%; height: 36px; border-radius: 6px; margin-top: 4px;';
           voiceWrap.appendChild(nativeAudio);
 
-          if (message.attachment.transcript) {
+          if (att.transcript) {
             const transBox = document.createElement('div');
             transBox.className = 'voice-note-transcript-card';
             transBox.innerHTML = `
               <div style="font-size:9.5px; font-weight:700; color:#00f2ff; text-transform:uppercase; margin-bottom:2px;"><i class="fa-solid fa-language"></i> Transcript</div>
-              <div class="transcript-text">${escapeHtml(message.attachment.transcript)}</div>
+              <div class="transcript-text">${escapeHtml(att.transcript)}</div>
             `;
             voiceWrap.appendChild(transBox);
           }
@@ -381,7 +424,7 @@ export function renderMessageBubble(message, container, options = {}) {
         docIcon.className = 'fa-solid fa-file-lines';
         docIcon.style.marginRight = '6px';
         const docText = document.createElement('span');
-        docText.textContent = message.attachment.fileName || 'Document';
+        docText.textContent = att.fileName || 'Document';
         doc.appendChild(docIcon);
         doc.appendChild(docText);
         attDiv.appendChild(doc);

@@ -113,22 +113,47 @@
   word-wrap: break-word;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.15);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   line-height: 1.4;
+  opacity: 1 !important;
 }
 
 .nex-msg-bubble.received {
-  background-color: #202c33;
-  color: #e9edef;
+  background-color: #202c33 !important;
+  color: #e9edef !important;
   border-radius: 0 8px 8px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nex-msg-bubble.sent {
-  background-color: #005c4b;
-  color: #e9edef;
+  background-color: #005c4b !important;
+  color: #ffffff !important;
   border-radius: 8px 0 8px 8px;
-  border: 1px solid rgba(0, 255, 102, 0.15);
+  border: 1px solid rgba(0, 255, 102, 0.2);
+}
+
+/* Die-cut transparent stickers */
+.nex-msg-bubble.is-sticker-bubble,
+.nex-msg-wrapper.is-sticker-message .nex-msg-bubble {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: auto !important;
+  max-width: 160px !important;
+}
+
+.nex-msg-bubble.is-sticker-bubble .nex-msg-meta,
+.nex-msg-wrapper.is-sticker-message .nex-msg-meta {
+  background: rgba(11, 20, 26, 0.72) !important;
+  padding: 2px 6px !important;
+  border-radius: 8px !important;
+  width: fit-content !important;
+  align-self: flex-end !important;
+  margin-top: -18px !important;
+  position: relative !important;
+  z-index: 3 !important;
 }
 
 .nex-msg-sender {
@@ -219,19 +244,118 @@
   color: #ffd279;
 }
 
+/* ==========================================================================
+   Date Separators & Unread Messages Divider
+   ========================================================================== */
+.nex-date-separator-container,
+.nex-date-separator {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 14px 0 !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+  pointer-events: none;
+  user-select: none;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.nex-date-separator-pill,
+.nex-date-separator {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #182229 !important;
+  color: #8696a0 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 5px 12px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.35px;
+}
+
+.nex-unread-divider-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 16px 0 !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+.nex-unread-divider-container::before {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 230, 118, 0.4);
+  z-index: 1;
+}
+
+.nex-unread-divider-label {
+  position: relative !important;
+  z-index: 2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #111b21 !important;
+  color: #00e676 !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  padding: 5px 14px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 230, 118, 0.5) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
 .nex-msg-attachment {
   margin-top: 6px;
   border-radius: var(--nex-radius-md);
   overflow: hidden;
 }
 
-.nex-msg-image {
-  max-width: 280px;
-  max-height: 300px;
-  object-fit: contain;
-  border-radius: var(--nex-radius-md);
+.nex-msg-image,
+.nex-attachment-img {
+  max-width: 100% !important;
+  max-height: 320px !important;
+  object-fit: cover !important;
+  border-radius: var(--nex-radius-md) !important;
   cursor: pointer;
+  display: block;
   transition: transform var(--nex-transition);
+}
+
+.message-sticker-wrap,
+.nex-msg-attachment .message-sticker-wrap {
+  width: 150px !important;
+  height: 150px !important;
+  max-width: 160px !important;
+  max-height: 160px !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+.message-sticker-img {
+  width: 150px !important;
+  height: 150px !important;
+  max-width: 160px !important;
+  max-height: 160px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  display: block !important;
+  border-radius: 8px !important;
 }
 
 .nex-msg-image:hover {
@@ -329,27 +453,47 @@
    3. Reactions
    ========================================================================== */
 .nex-reactions-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  margin-top: -6px !important;
+  margin-bottom: 4px !important;
+  margin-left: 6px !important;
+  position: relative !important;
+  z-index: 4 !important;
+}
+
+.nex-msg-wrapper.sent .nex-reactions-row {
+  justify-content: flex-end !important;
+  margin-right: 6px !important;
+  margin-left: 0 !important;
 }
 
 .nex-reaction-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
-  background: var(--nex-bg-card);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  font-size: 0.75rem;
-  color: var(--nex-text-secondary);
-  cursor: pointer;
-  transition: all var(--nex-transition);
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding: 2px 7px !important;
+  background: #202c33 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  font-size: 11px !important;
+  color: #e9edef !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  transition: transform 0.15s ease !important;
 }
 
 .nex-reaction-pill:hover {
+  transform: scale(1.08) !important;
+}
+
+.nex-reaction-pill.mine,
+.nex-reaction-pill.active {
+  background: rgba(0, 92, 75, 0.95) !important;
+  border-color: #00ff66 !important;
+  color: #ffffff !important;
+}
   background: var(--nex-bg-card-hover);
 }
 

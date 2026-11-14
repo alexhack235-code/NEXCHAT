@@ -21,12 +21,14 @@ async function runBenchmark() {
   const { fastTranslateSync } = await import('../src/js/fast-translator-core.js');
 
   const testCasesHit = [
-    { text: 'hello', lang: 'ro', expected: 'salut' },
-    { text: 'hello', lang: 'ur', expected: 'سلام' },
-    { text: 'thank you', lang: 'id', expected: 'terima kasih' },
-    { text: 'thank you', lang: 'ms', expected: 'terima kasih' },
-    { text: 'good morning', lang: 'de', expected: 'Guten Morgen' },
-    { text: 'hello', lang: 'es', expected: 'hola' },
+    { text: 'hello', lang: 'Romania', expected: 'salut' },
+    { text: 'hello', lang: 'Pakistan', expected: 'سلام' },
+    { text: 'thank you', lang: 'Indonesia', expected: 'terima kasih' },
+    { text: 'thank you', lang: 'Malaysia', expected: 'terima kasih' },
+    { text: 'good morning', lang: 'Germany', expected: 'Guten Morgen' },
+    { text: 'hello', lang: 'Argentina', expected: 'hola' },
+    { text: 'hello', lang: 'Brazil', expected: 'olá' },
+    { text: 'hello', lang: 'Egypt', expected: 'مرحباً' },
     { text: 'where is the file', lang: 'ro', expected: 'unde este fișier' }
   ];
 

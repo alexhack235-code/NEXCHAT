@@ -826,10 +826,10 @@ html, body {
 
 .app[data-custom-bg="true"] .messages-area,
 .messages-area.has-custom-wallpaper {
-  background-color: rgba(6, 10, 20, 0.35) !important;
+  background-color: rgba(11, 20, 26, 0.78) !important;
   background-image: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
 }
 
 body.light-mode .messages-area.has-custom-wallpaper,
@@ -2305,8 +2305,13 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
 }
 
 @keyframes toastPop {
-  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  from { opacity: 0; transform: translateY(-12px) scale(0.95); }
   to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toastFadeOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-12px) scale(0.95); }
 }
 
 /* --------------------------------------------------------------------------
@@ -11288,14 +11293,12 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   font-size: 16px !important;
   color: #e9edef !important;
   line-height: 1.25 !important;
-  white-space: normal !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2 !important;
-  -webkit-box-orient: vertical !important;
+  white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  word-break: break-word !important;
-  max-width: clamp(200px, 70vw, 480px) !important;
+  max-width: 100% !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
 }
 
 /* Streamlined group action buttons: Video call, Phone call, Menu */
@@ -19387,13 +19390,15 @@ body,
     z-index: 5 !important;
   }
 
-  /* Desktop Toast Notifications: Pin to top-right so they never obscure headers or active conversation */
+  /* Toast Notifications: Centered on screen */
   .notification-container {
+    position: fixed !important;
     top: 20px !important;
-    right: 20px !important;
-    left: auto !important;
-    transform: none !important;
-    max-width: 380px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    max-width: 420px !important;
+    width: calc(100% - 32px) !important;
     z-index: 100050 !important;
   }
 }

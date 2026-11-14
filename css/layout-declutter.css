@@ -257,7 +257,9 @@ justify-content: center !important;
 overflow: hidden !important;
 text-overflow: ellipsis !important;
 white-space: nowrap !important;
-max-width: clamp(140px, 35vw, 360px) !important;
+max-width: 100% !important;
+flex: 1 1 auto !important;
+min-width: 0 !important;
 font-size: 16px !important;
 font-weight: 700 !important;
 color: #e9edef !important;
@@ -2589,7 +2591,9 @@ line-height: 1.25 !important;
 white-space: nowrap !important;
 overflow: hidden !important;
 text-overflow: ellipsis !important;
-max-width: clamp(185px, 60vw, 420px) !important;
+max-width: 100% !important;
+flex: 1 1 auto !important;
+min-width: 0 !important;
 }
 
 /* Streamlined group action buttons: Video call, Phone call, Menu */
@@ -3329,7 +3333,9 @@ user-select: text !important;
 .chat-detail-header.group-chat #chatName,
 .chat-detail-header #chatName,
 #chatName {
-max-width: clamp(160px, 60vw, 420px) !important;
+max-width: 100% !important;
+flex: 1 1 auto !important;
+min-width: 0 !important;
 font-size: 15.5px !important;
 }
 
@@ -5912,13 +5918,15 @@ body.motion-120hz .chat-messages {
     z-index: 5 !important;
   }
 
-  /* Desktop Toast Notifications: Pin to top-right so they never obscure headers or active conversation */
+  /* Toast Notifications: Centered on screen */
   .notification-container {
+    position: fixed !important;
     top: 20px !important;
-    right: 20px !important;
-    left: auto !important;
-    transform: none !important;
-    max-width: 380px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    max-width: 420px !important;
+    width: calc(100% - 32px) !important;
     z-index: 100050 !important;
   }
 }

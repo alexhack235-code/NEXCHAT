@@ -3892,31 +3892,21 @@ const notif = document.createElement("div");
   notif.className = `notification ${type}`;
 
   notif.style.cssText = `
-
-    padding: 12px 18px;
-
-    margin: 8px 12px;
-
-    border-radius: 10px;
-
+    padding: 11px 20px;
+    margin: 4px auto;
+    border-radius: 9999px;
     background: ${type === "success" ? "#10b981" : type === "error" ? "#ef4444" : type === "warning" ? "#f59e0b" : "#0284c7"};
-
     color: white;
-
     font-weight: 600;
-
-    animation: slideInRight 0.28s ease;
-
-    box-shadow: 0 6px 20px rgba(0,0,0,0.45);
-
+    animation: toastPop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
     font-size: 13.5px;
-
-    max-width: 90%;
-
-    display: flex;
-
+    max-width: 95%;
+    display: inline-flex;
     align-items: center;
-
+    justify-content: center;
+    text-align: center;
+    pointer-events: auto;
   `;
 
   notif.innerHTML = iconHtml + '<span>' + escapeHtml(cleanMsg) + '</span>';
@@ -3926,9 +3916,9 @@ const notif = document.createElement("div");
 playNotificationSound(type);
 
 setTimeout(() => {
-    notif.style.animation = "slideOutRight 0.3s ease";
+    notif.style.animation = "toastFadeOut 0.25s ease forwards";
 
-    setTimeout(() => notif.remove(), 300);
+    setTimeout(() => notif.remove(), 250);
   }, duration);
 }
 

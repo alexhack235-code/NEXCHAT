@@ -80,15 +80,19 @@ export const translationLRU = new FastTranslationLRUCache(5000);
 // ---------------------------------------------------------------------------
 // TIER 1: HIGH-FREQUENCY MULTI-LANGUAGE PHRASE DICTIONARY (O(1) 0ms MATCH)
 // ---------------------------------------------------------------------------
-import { EXPANDED_MULTILINGUAL_DICTIONARY } from './multilingual-dictionary.js';
-export { EXPANDED_MULTILINGUAL_DICTIONARY };
+import { EXPANDED_MULTILINGUAL_DICTIONARY, resolveCountryToLanguage } from './multilingual-dictionary.js';
+export { EXPANDED_MULTILINGUAL_DICTIONARY, resolveCountryToLanguage };
 
 // ---------------------------------------------------------------------------
-// LANGUAGE CODE NORMALIZER (< 0.001ms)
+// LANGUAGE CODE NORMALIZER (< 0.001ms) - RESOLVES ALL 195 WORLD COUNTRIES
 // ---------------------------------------------------------------------------
 export function normalizeLangCode(lang) {
   if (!lang || typeof lang !== 'string') return 'es';
   const l = lang.trim().toLowerCase();
+  if (typeof resolveCountryToLanguage === 'function') {
+    const fromCountry = resolveCountryToLanguage(l);
+    if (fromCountry && fromCountry !== l) return fromCountry;
+  }
   const map = {
     'spanish': 'es', 'es': 'es', 'español': 'es',
     'french': 'fr', 'fr': 'fr', 'français': 'fr',
