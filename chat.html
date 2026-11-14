@@ -5521,127 +5521,233 @@
         </div>
       </div>
 
-      <!-- CREATE STATUS MODAL (NEXCHAT HACKER TERMINAL STORY TRANSMITTER) -->
-      <div id="createStatusModal" class="modal create-status-modal terminal-create-modal" style="display: none;">
-        <div class="modal-content create-status-content terminal-modal-box">
-          <!-- Row 1: Modal Header (Title + Close Button) -->
-          <div class="create-status-header terminal-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0, 255, 136, 0.2); padding-bottom: 10px;">
-            <div style="display: flex; flex-direction: column; gap: 2px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800; letter-spacing: 0.5px;">[NEX//TRANSMITTER]</span>
-                <span class="term-cursor-blink" style="color: #00FF88;">_</span>
+      <!-- CREATE STATUS MODAL (NEXT-GEN LUXURY STATUS STUDIO) -->
+      <div id="createStatusModal" class="modal create-status-modal status-studio-modal" style="display: none;">
+        <div class="modal-content create-status-content status-studio-card">
+          <!-- Row 1: Studio Header -->
+          <div class="create-status-header status-studio-header">
+            <div class="status-studio-header-left">
+              <div class="status-studio-badge-icon">
+                <i class="fa-solid fa-sparkles"></i>
               </div>
-              <span style="font-size: 10px; color: #8696A0; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.4px;">EPHEMERAL 24H BROADCAST NODE</span>
+              <div class="status-studio-title-group">
+                <h3 class="status-studio-title">New Status</h3>
+                <span class="status-studio-subtitle">Share moments that disappear in 24 hours</span>
+              </div>
             </div>
-            <button type="button" class="close-btn terminal-modal-close" id="closeCreateStatusModalBtn" title="Close" style="position: static; width: 32px; height: 32px; font-size: 14px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" class="status-studio-close-btn" id="closeCreateStatusModalBtn" title="Close" aria-label="Close status studio">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
           </div>
 
-          <!-- Row 2: Dedicated Full-Width Tabs Pill Bar -->
-          <div class="create-status-tabs" style="display: flex; gap: 6px; width: 100%; margin-bottom: 16px; background: rgba(6, 10, 16, 0.7); padding: 4px; border-radius: 10px; border: 1px solid rgba(0, 255, 136, 0.15); box-sizing: border-box;">
-            <button type="button" class="btn-primary terminal-tab-btn active" id="statusTabMediaBtn" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 700; border-radius: 8px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <!-- Row 2: Dedicated Segmented Studio Tabs -->
+          <div class="create-status-tabs status-studio-tabs">
+            <button type="button" class="terminal-tab-btn status-studio-tab-btn active" id="statusTabMediaBtn">
               <i class="fa-solid fa-photo-film"></i> <span>Media</span>
             </button>
-            <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabTextBtn" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 700; border-radius: 8px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <i class="fa-solid fa-font"></i> <span>Text</span>
+            <button type="button" class="terminal-tab-btn status-studio-tab-btn" id="statusTabTextBtn">
+              <i class="fa-solid fa-font"></i> <span>Typography</span>
             </button>
-            <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabAudioBtn" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 700; border-radius: 8px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <i class="fa-solid fa-microphone"></i> <span>Voice</span>
+            <button type="button" class="terminal-tab-btn status-studio-tab-btn" id="statusTabAudioBtn">
+              <i class="fa-solid fa-microphone-lines"></i> <span>Voice Note</span>
             </button>
-            <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabCodeBtn" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 700; border-radius: 8px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px;">
-              <i class="fa-solid fa-code"></i> <span>Code</span>
+            <button type="button" class="terminal-tab-btn status-studio-tab-btn" id="statusTabCodeBtn">
+              <i class="fa-solid fa-code"></i> <span>Code Snippet</span>
             </button>
           </div>
 
-          <!-- TAB 1: Media Story (Photo/Video + Caption) -->
-          <div class="create-status-tab-pane" id="statusTabMediaPane">
-            <div class="status-drop-zone terminal-drop-zone" id="statusMediaDropZone" style="border: 2px dashed rgba(0, 255, 136, 0.4); border-radius: 10px; padding: 26px 16px; text-align: center; cursor: pointer; background: rgba(0, 255, 136, 0.03); transition: all 0.2s;">
-              <input type="file" id="statusMediaModalFileInput" accept="image/*,video/*" style="display: none;">
-              <div id="statusDropPlaceholder">
-                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 38px; color: #00ff88; margin-bottom: 8px; filter: drop-shadow(0 0 10px rgba(0,255,136,0.4));"></i>
-                <div style="font-size: 14px; font-weight: 700; color: #fff; font-family: 'JetBrains Mono', monospace;">CLICK OR DRAG MEDIA PAYLOAD</div>
-                <div style="font-size: 11.5px; color: #8b949e; margin-top: 4px; font-family: 'JetBrains Mono', monospace;">Supports MP4, MOV, PNG, JPG • Max 2 Minutes (120s limit)</div>
+          <!-- Studio Scrollable Content Body -->
+          <div class="status-studio-body">
+            <!-- TAB 1: Media Studio (Photo/Video + Filters + Caption) -->
+            <div class="create-status-tab-pane status-studio-pane" id="statusTabMediaPane">
+              <div class="status-drop-zone status-studio-dropzone" id="statusMediaDropZone">
+                <input type="file" id="statusMediaModalFileInput" accept="image/*,video/*" style="display: none;">
+                <div id="statusDropPlaceholder" class="status-drop-placeholder">
+                  <div class="status-drop-icon-wrap">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                  </div>
+                  <h4 class="status-drop-heading">Choose a Photo or Video</h4>
+                  <p class="status-drop-subtext">Drag &amp; drop files here, or tap to browse your library</p>
+                  <div class="status-formats-pill-row">
+                    <span class="status-fmt-badge">MP4</span>
+                    <span class="status-fmt-badge">MOV</span>
+                    <span class="status-fmt-badge">WEBM</span>
+                    <span class="status-fmt-badge">PNG</span>
+                    <span class="status-fmt-badge">JPG</span>
+                    <span class="status-fmt-badge">GIF</span>
+                    <span class="status-fmt-badge highlight">Max 120s</span>
+                  </div>
+                </div>
+
+                <div id="statusMediaPreviewBox" class="status-media-preview-box" style="display: none;">
+                  <div class="status-studio-preview-card">
+                    <img id="statusModalImgPreview" src="logo.jpg" alt="Preview" class="status-studio-preview-media" style="display: none;">
+                    <video id="statusModalVideoPreview" src="" controls playsinline class="status-studio-preview-media" style="display: none;"></video>
+                    
+                    <!-- Floating Top Media Overlay Tools -->
+                    <div class="status-preview-overlay-top">
+                      <button type="button" id="removeStatusMediaPreviewBtn" class="status-preview-tool-btn danger" title="Discard and choose different file">
+                        <i class="fa-solid fa-arrow-rotate-left"></i> <span>Change</span>
+                      </button>
+                      <button type="button" id="statusManualTrimBtn" class="status-preview-tool-btn" style="display: none;" title="Trim Video Duration">
+                        <i class="fa-solid fa-scissors"></i> <span>Trim</span>
+                      </button>
+                    </div>
+
+                    <!-- Visual Filter Presets Strip -->
+                    <div class="status-filter-presets-bar" id="statusFilterPresetsBar">
+                      <span class="status-filter-bar-title"><i class="fa-solid fa-wand-magic-sparkles"></i> FILTERS</span>
+                      <div class="status-filter-chips-scroll">
+                        <button type="button" class="status-filter-chip active" data-filter="none">Normal</button>
+                        <button type="button" class="status-filter-chip" data-filter="contrast(1.15) saturate(1.3)">Vivid</button>
+                        <button type="button" class="status-filter-chip" data-filter="hue-rotate(150deg) saturate(1.4) contrast(1.1)">Cyber</button>
+                        <button type="button" class="status-filter-chip" data-filter="grayscale(1) contrast(1.25)">Noir</button>
+                        <button type="button" class="status-filter-chip" data-filter="contrast(1.1) sepia(0.25) saturate(0.95)">Cinema</button>
+                        <button type="button" class="status-filter-chip" data-filter="sepia(0.35) saturate(1.25)">Warm</button>
+                        <button type="button" class="status-filter-chip" data-filter="hue-rotate(85deg) saturate(1.35)">Emerald</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div id="statusMediaPreviewBox" style="display: none; position: relative;">
-                <img id="statusModalImgPreview" src="logo.jpg" alt="Preview" style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; object-fit: contain; margin: 0 auto; border: 1px solid rgba(0,255,136,0.3);">
-                <video id="statusModalVideoPreview" src="" controls playsinline style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; margin: 0 auto; border: 1px solid rgba(0,255,136,0.3);"></video>
-                <button type="button" id="removeStatusMediaPreviewBtn" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;" title="Remove media"><i class="fa-solid fa-xmark"></i></button>
+
+              <!-- Media Caption Capsule -->
+              <div class="status-caption-input-box">
+                <div class="status-caption-input-inner">
+                  <i class="fa-solid fa-pen-nib status-caption-icon"></i>
+                  <input type="text" id="statusMediaCaptionInput" placeholder="Add a caption to your story..." maxlength="250" class="status-caption-field" autocomplete="off">
+                  <span id="statusMediaCharCount" class="status-char-count">0/250</span>
+                </div>
               </div>
             </div>
-            <div style="margin-top: 14px;">
-              <div style="display: flex; align-items: center; gap: 6px; background: rgba(16, 26, 36, 0.95); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 8px; padding: 4px 12px;">
-                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 12px;">&gt;</span>
-                <input type="text" id="statusMediaCaptionInput" placeholder="Add status decryption caption... (optional)" class="settings-input" style="width: 100%; border: none; background: transparent; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 8px 0; outline: none;">
+
+            <!-- TAB 2: Text / Typography Studio (Custom Gradients + Rich Fonts) -->
+            <div class="create-status-tab-pane status-studio-pane" id="statusTabTextPane" style="display: none;">
+              <div id="statusTextStoryCanvas" class="status-text-canvas status-studio-text-canvas">
+                <div class="status-text-canvas-header">
+                  <span class="status-canvas-badge"><i class="fa-solid fa-font"></i> STORY PREVIEW</span>
+                  <span id="statusTextCharCount" class="status-char-count">0/280</span>
+                </div>
+                <textarea id="statusTextStoryInput" placeholder="Tap to type your story update..." maxlength="280" class="status-studio-textarea"></textarea>
+              </div>
+
+              <!-- Palette & Font Controls -->
+              <div class="status-text-controls-card">
+                <div class="status-control-section">
+                  <span class="status-control-label"><i class="fa-solid fa-palette"></i> GRADIENTS:</span>
+                  <div class="status-palette-tray">
+                    <button type="button" class="gradient-swatch active" data-gradient="linear-gradient(135deg, #090d16, #111b27)" style="background: linear-gradient(135deg, #090d16, #111b27);" title="Obsidian Void"></button>
+                    <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #022c22, #059669)" style="background: linear-gradient(135deg, #022c22, #059669);" title="Cyber Emerald"></button>
+                    <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #082f49, #0284c7)" style="background: linear-gradient(135deg, #082f49, #0284c7);" title="Quantum Azure"></button>
+                    <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #3b0764, #9333ea)" style="background: linear-gradient(135deg, #3b0764, #9333ea);" title="Neon Violet"></button>
+                    <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #451a03, #d97706)" style="background: linear-gradient(135deg, #451a03, #d97706);" title="Sunset Amber"></button>
+                    <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #4c0519, #e11d48)" style="background: linear-gradient(135deg, #4c0519, #e11d48);" title="Purge Crimson"></button>
+                    <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #064e3b, #0369a1)" style="background: linear-gradient(135deg, #064e3b, #0369a1);" title="Aurora Green"></button>
+                    <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #1e1b4b, #4338ca)" style="background: linear-gradient(135deg, #1e1b4b, #4338ca);" title="Midnight Indigo"></button>
+                  </div>
+                </div>
+
+                <div class="status-control-section status-font-row">
+                  <div class="status-font-style-group">
+                    <span class="status-control-label"><i class="fa-solid fa-text-height"></i> STYLE:</span>
+                    <div class="status-font-tray">
+                      <button type="button" class="status-font-pill active" data-font="sans">Modern</button>
+                      <button type="button" class="status-font-pill" data-font="mono">Mono</button>
+                      <button type="button" class="status-font-pill" data-font="serif">Serif</button>
+                      <button type="button" class="status-font-pill" data-font="display">Bold</button>
+                    </div>
+                  </div>
+
+                  <div class="status-align-group">
+                    <button type="button" class="status-align-pill" data-align="left" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+                    <button type="button" class="status-align-pill active" data-align="center" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+                    <button type="button" class="status-align-pill" data-align="right" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: Voice Note Studio (60s Voice Note + Real-time Spectrum) -->
+            <div class="create-status-tab-pane status-studio-pane" id="statusTabAudioPane" style="display: none;">
+              <div class="status-voice-recorder-box status-studio-voice-box">
+                <div class="status-voice-halo-wrapper">
+                  <button type="button" id="statusVoiceRecordBtn" class="status-voice-mic-btn" title="Tap to Record / Stop">
+                    <i class="fa-solid fa-microphone"></i>
+                  </button>
+                  <div class="status-voice-pulse-ring"></div>
+                </div>
+                <div id="statusVoiceTimerDisplay" class="status-voice-timer-display">0:00</div>
+                <div id="statusVoiceHintText" class="status-voice-hint-text">Tap the microphone to record up to 60s voice story</div>
+                <canvas id="statusVoiceSpectrumCanvas" class="status-voice-spectrum-canvas" width="280" height="50"></canvas>
+              </div>
+              <div class="status-caption-input-box">
+                <div class="status-caption-input-inner">
+                  <i class="fa-solid fa-microphone-lines status-caption-icon"></i>
+                  <input type="text" id="statusAudioCaptionInput" placeholder="Add voice story topic or caption..." class="status-caption-field" autocomplete="off">
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 4: Code Snippet Studio -->
+            <div class="create-status-tab-pane status-studio-pane" id="statusTabCodePane" style="display: none;">
+              <div class="status-code-studio-window">
+                <div class="status-code-window-bar">
+                  <div class="status-code-window-dots">
+                    <span class="code-dot red"></span>
+                    <span class="code-dot yellow"></span>
+                    <span class="code-dot green"></span>
+                  </div>
+                  <div class="status-code-lang-selector-wrap">
+                    <i class="fa-solid fa-code status-lang-icon"></i>
+                    <select id="statusCodeLangSelect" class="status-code-lang-select">
+                      <option value="javascript">JavaScript / TypeScript</option>
+                      <option value="python">Python</option>
+                      <option value="rust">Rust</option>
+                      <option value="solidity">Solidity / Web3</option>
+                      <option value="html">HTML / CSS</option>
+                      <option value="sql">SQL / Postgres</option>
+                      <option value="bash">Bash / Shell</option>
+                    </select>
+                  </div>
+                </div>
+                <textarea id="statusCodeStoryInput" class="status-code-textarea" placeholder="// Paste or type code snippet to broadcast to the network..."></textarea>
               </div>
             </div>
           </div>
 
-          <!-- TAB 2: Text Story (Custom Gradients + Big Typography) -->
-          <div class="create-status-tab-pane" id="statusTabTextPane" style="display: none;">
-            <div id="statusTextStoryCanvas" class="status-text-canvas terminal-text-canvas" style="border-radius: 10px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; padding: 20px; background: linear-gradient(135deg, #0a0e13, #111b21); border: 1px solid rgba(0, 255, 136, 0.3); transition: background 0.3s; position: relative;">
-              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00FF88; margin-bottom: 8px; opacity: 0.7;">root@nexchat/status:~$ transmit --message</div>
-              <textarea id="statusTextStoryInput" placeholder="Type your terminal status dispatch..." maxlength="280" style="width: 100%; background: transparent; border: none; outline: none; color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; text-align: center; resize: none; min-height: 100px; text-shadow: 0 0 10px rgba(0,255,136,0.5);"></textarea>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; justify-content: center;">
-              <span style="font-size: 10.5px; color: #8b949e; font-family: 'JetBrains Mono', monospace; font-weight: 700;">PALETTE:</span>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #0a0e13, #111b21)" style="width: 24px; height: 24px; border-radius: 4px; border: 2px solid #00FF88; background: #0A0E13;" title="Matrix Void"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #022c22, #065f46)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #065F46;" title="Cyber Emerald"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #082f49, #0284c7)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #0284C7;" title="Cyan Quantum"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #451a03, #d97706)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #D97706;" title="Amber CRT"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #4c0519, #e11d48)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #E11D48;" title="Purge Crimson"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #3b0764, #9333ea)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #9333EA;" title="Neon Violet"></button>
-            </div>
-          </div>
-
-          <!-- TAB 3: Voice Audio Story (60s Voice Note + Spectrum) -->
-          <div class="create-status-tab-pane" id="statusTabAudioPane" style="display: none;">
-            <div class="status-voice-recorder-box">
-              <button type="button" id="statusVoiceRecordBtn" class="status-voice-mic-btn" title="Tap to Record / Stop">
-                <i class="fa-solid fa-microphone"></i>
-              </button>
-              <div id="statusVoiceTimerDisplay" class="status-voice-timer-display">0:00</div>
-              <div id="statusVoiceHintText" class="status-voice-hint-text">Tap the microphone to record up to 60s voice story</div>
-            </div>
-            <div style="margin-top: 14px;">
-              <div style="display: flex; align-items: center; gap: 6px; background: rgba(16, 26, 36, 0.95); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 8px; padding: 4px 12px;">
-                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 12px;">&gt;</span>
-                <input type="text" id="statusAudioCaptionInput" placeholder="Add voice story topic or caption..." class="settings-input" style="width: 100%; border: none; background: transparent; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 8px 0; outline: none;">
-              </div>
-            </div>
-          </div>
-
-          <!-- TAB 4: Code Snippet Story -->
-          <div class="create-status-tab-pane" id="statusTabCodePane" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00ff88; font-weight: 700;">LANGUAGE_SYNTAX:</span>
-              <select id="statusCodeLangSelect" style="background: rgba(16, 24, 36, 0.95); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 6px; padding: 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; outline: none;">
-                <option value="javascript">JavaScript / TypeScript</option>
-                <option value="python">Python</option>
-                <option value="rust">Rust</option>
-                <option value="solidity">Solidity / Web3</option>
-                <option value="html">HTML / CSS</option>
-                <option value="sql">SQL / Postgres</option>
-                <option value="bash">Bash / Shell</option>
-              </select>
-            </div>
-            <textarea id="statusCodeStoryInput" class="status-code-textarea" placeholder="// Paste or type code snippet to broadcast to the network..."></textarea>
-          </div>
-
-          <!-- Status Post Footer -->
-          <div style="margin-top: 18px; border-top: 1px solid rgba(0, 255, 136, 0.2); padding-top: 14px;">
-            <div id="statusUploadProgressContainer" style="display: none; width: 100%; margin-bottom: 10px;">
-              <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #00ff88; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;">
-                <span id="statusUploadStatusText">[UPLOADING_TO_VAULT...]</span>
+          <!-- Studio Pinned Footer -->
+          <div class="status-studio-footer">
+            <div id="statusUploadProgressContainer" class="status-studio-progress-container" style="display: none;">
+              <div class="status-studio-progress-text-row">
+                <span id="statusUploadStatusText"><i class="fa-solid fa-spinner fa-spin"></i> Preparing status upload...</span>
                 <span id="statusUploadPercent">0%</span>
               </div>
-              <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                <div id="statusUploadProgressBar" style="height: 100%; width: 0%; background: #00e575; box-shadow: 0 0 5px rgba(0, 229, 117, 0.25); transition: width 0.2s;"></div>
+              <div class="status-studio-progress-track">
+                <div id="statusUploadProgressBar" class="status-studio-progress-fill" style="width: 0%;"></div>
               </div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-              <span style="font-size: 11px; color: #8b949e; font-family: 'JetBrains Mono', monospace;"><i class="fa-solid fa-clock-rotate-left"></i> TTL: 24 HOURS (EPHEMERAL)</span>
-              <button type="button" id="publishStatusBtn" class="btn-primary terminal-publish-btn" style="padding: 10px 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; background: linear-gradient(135deg, #00FF88, #00D4FF); color: #000; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0,255,136,0.4);">
-                <i class="fa-solid fa-paper-plane"></i> [TRANSMIT_TO_MESH]
-              </button>
+
+            <div class="status-studio-footer-action-row">
+              <div class="status-studio-meta-pills">
+                <div class="status-audience-pill" title="Audience privacy">
+                  <i class="fa-solid fa-earth-americas"></i>
+                  <span>Public</span>
+                </div>
+                <div class="status-ttl-badge" title="Status lifetime is 24 hours">
+                  <i class="fa-regular fa-clock"></i>
+                  <span>24h</span>
+                </div>
+              </div>
+
+              <div class="status-studio-btn-group">
+                <button type="button" class="status-cancel-btn" onclick="window.closeCreateStatusModal()">
+                  Cancel
+                </button>
+                <button type="button" id="publishStatusBtn" class="status-publish-btn">
+                  <i class="fa-solid fa-paper-plane"></i>
+                  <span>Share Status</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -6080,11 +6186,14 @@
 
       <!-- Own Status Controls (Shown when viewing your own status) -->
       <div class="status-viewer-own-controls" id="statusViewerOwnControls" style="display: none;">
-        <div class="status-views-badge" id="statusViewerViewsBadge">
-          <i class="fa-solid fa-eye"></i>
-          <span id="statusViewCount">0</span>
-          <span>views</span>
-        </div>
+        <button type="button" class="status-views-badge status-views-luxury-pill" id="statusViewerViewsBadge" title="Tap or swipe up for viewer analytics">
+          <div class="status-views-mini-avatars" id="statusViewsMiniAvatars"></div>
+          <div class="status-views-badge-info">
+            <span class="status-views-count-row"><i class="fa-solid fa-eye"></i> <span id="statusViewCount">0</span> views</span>
+            <span class="status-views-hint">Swipe up for analytics</span>
+          </div>
+          <i class="fa-solid fa-chevron-up status-views-chevron"></i>
+        </button>
         <button type="button" class="status-delete-btn" id="statusViewerDeleteBtn" title="Delete status update">
           <i class="fa-solid fa-trash-can"></i>
           <span>Delete</span>
@@ -6096,22 +6205,33 @@
   <!-- SLIDE-UP VIEWERS ANALYTICS DRAWER -->
   <div id="statusViewersDrawer" class="status-viewers-drawer" style="display: none;">
     <div class="status-viewers-drawer-scrim" id="statusViewersDrawerScrim"></div>
-    <div class="status-viewers-drawer-content">
-      <div class="status-viewers-drawer-handle"></div>
+    <div class="status-viewers-drawer-content" id="statusViewersDrawerContent">
+      <div class="status-viewers-drawer-handle" id="statusViewersDrawerHandle"></div>
       <div class="status-viewers-drawer-header">
         <div class="status-viewers-drawer-title">
-          <i class="fa-solid fa-chart-simple" style="color: #00ff88;"></i>
-          <span>Viewer Analytics</span>
+          <div class="status-viewers-title-icon-wrap">
+            <i class="fa-solid fa-chart-simple"></i>
+          </div>
+          <div class="status-viewers-title-text-group">
+            <span class="status-viewers-main-title">Viewer Analytics</span>
+            <span class="status-viewers-subtitle">Real-time status reach &amp; engagement</span>
+          </div>
           <span id="statusViewersDrawerCount" class="status-viewers-count-chip">0 Views</span>
         </div>
-        <button type="button" id="closeStatusViewersDrawerBtn" class="status-viewers-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+        <button type="button" id="closeStatusViewersDrawerBtn" class="status-viewers-close-btn" title="Close" aria-label="Close viewers sheet"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="status-viewers-search-box">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="statusViewersSearchInput" placeholder="Filter viewers..." autocomplete="off" />
+        <input type="text" id="statusViewersSearchInput" placeholder="Search viewers by name..." autocomplete="off" />
       </div>
       <div id="statusViewersListContainer" class="status-viewers-list-container">
-        <div class="status-viewers-empty"><i class="fa-regular fa-eye-slash"></i><p>No views recorded yet</p></div>
+        <div class="status-viewers-empty">
+          <div class="status-viewers-empty-icon-wrap">
+            <i class="fa-solid fa-eye-slash"></i>
+          </div>
+          <p class="status-viewers-empty-title">No views recorded yet</p>
+          <span class="status-viewers-empty-hint">When contacts view your status, their details, timestamps, and reactions will appear here in real time.</span>
+        </div>
       </div>
     </div>
   </div>

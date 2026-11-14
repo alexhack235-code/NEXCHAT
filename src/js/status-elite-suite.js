@@ -602,14 +602,16 @@
     }
 
     // -------------------------------------------------------------------------
-    // 6. SLIDE-UP VIEWERS ANALYTICS DRAWER
+    // 6. SLIDE-UP VIEWERS ANALYTICS DRAWER (SWIPE & INTERACTION ENGINE)
     // -------------------------------------------------------------------------
     bindViewersDrawer() {
       const badge = document.getElementById('statusViewerViewsBadge');
       const drawer = document.getElementById('statusViewersDrawer');
+      const drawerContent = document.getElementById('statusViewersDrawerContent');
       const scrim = document.getElementById('statusViewersDrawerScrim');
       const closeBtn = document.getElementById('closeStatusViewersDrawerBtn');
       const searchInput = document.getElementById('statusViewersSearchInput');
+      const viewerModal = document.getElementById('statusViewerModal');
 
       if (badge && badge.dataset.drawerBound !== 'true') {
         badge.dataset.drawerBound = 'true';
@@ -622,6 +624,46 @@
 
       if (scrim) scrim.addEventListener('click', () => this.closeViewersDrawer());
       if (closeBtn) closeBtn.addEventListener('click', () => this.closeViewersDrawer());
+
+      // Touch gesture: Swipe down on drawer content to dismiss
+      if (drawerContent && !drawerContent.dataset.gestureBound) {
+        drawerContent.dataset.gestureBound = 'true';
+        let drawerTouchStartY = 0;
+        drawerContent.addEventListener('touchstart', (e) => {
+          drawerTouchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        drawerContent.addEventListener('touchend', (e) => {
+          const deltaY = e.changedTouches[0].clientY - drawerTouchStartY;
+          if (deltaY > 60) {
+            this.closeViewersDrawer();
+          }
+        }, { passive: true });
+      }
+
+      // Touch gesture: Swipe up on story viewer to open viewers drawer for own status
+      if (viewerModal && !viewerModal.dataset.swipeUpBound) {
+        viewerModal.dataset.swipeUpBound = 'true';
+        let viewerTouchStartY = 0;
+        let viewerTouchStartX = 0;
+
+        viewerModal.addEventListener('touchstart', (e) => {
+          viewerTouchStartY = e.touches[0].clientY;
+          viewerTouchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        viewerModal.addEventListener('touchend', (e) => {
+          const deltaY = viewerTouchStartY - e.changedTouches[0].clientY;
+          const deltaX = Math.abs(viewerTouchStartX - e.changedTouches[0].clientX);
+          // Vertical upward swipe greater than 60px with minimal horizontal drift
+          if (deltaY > 60 && deltaX < 80) {
+            const ownControls = document.getElementById('statusViewerOwnControls');
+            if (ownControls && (ownControls.style.display !== 'none' || ownControls.classList.contains('visible'))) {
+              this.openViewersDrawer();
+            }
+          }
+        }, { passive: true });
+      }
 
       if (searchInput) {
         searchInput.addEventListener('input', (e) => {
@@ -639,11 +681,16 @@
       if (!drawer) return;
       drawer.style.display = 'flex';
 
+      // Pause story playback while viewing analytics
+      if (typeof window.setStoryPaused === 'function') {
+        window.setStoryPaused(true);
+      }
+
       const listContainer = document.getElementById('statusViewersListContainer');
       const countChip = document.getElementById('statusViewersDrawerCount');
       if (!listContainer) return;
 
-      listContainer.innerHTML = '<div class="status-viewers-empty"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading analytics...</p></div>';
+      listContainer.innerHTML = '<div class="status-viewers-empty"><i class="fa-solid fa-spinner fa-spin" style="color: #00ff88;"></i><p class="status-viewers-empty-title">Loading viewer analytics...</p></div>';
 
       // Current active slide inspection
       let viewers = [];
@@ -652,47 +699,141 @@
       if (currentSlide && currentSlide.viewersList && Array.isArray(currentSlide.viewersList)) {
         viewers = currentSlide.viewersList;
       } else if (currentSlide && currentSlide.id && window.db && typeof window.collection === 'function') {
-        // Fetch real-time viewer subcollection
+        // Fetch real-time viewer subcollection from Firestore
         try {
           const viewsCol = window.collection(window.db, 'statuses', currentSlide.id, 'views');
           const snap = await window.getDocs(viewsCol);
           snap.forEach(docSnap => {
-            viewers.push({ id: docSnap.id, ...docSnap.data() });
+            viewers.push({ id: docSnap.id, uid: docSnap.id, ...docSnap.data() });
           });
         } catch (_) {}
       }
 
+      // If slide has viewers array directly on doc
+      if (viewers.length === 0 && currentSlide && Array.isArray(currentSlide.viewers)) {
+        currentSlide.viewers.forEach(v => {
+          if (typeof v === 'string') {
+            viewers.push({ id: v, uid: v, username: 'Contact', avatarUrl: 'logo.jpg' });
+          } else if (typeof v === 'object' && v !== null) {
+            viewers.push(v);
+          }
+        });
+      }
+
+      // Update total count chip
       if (countChip) countChip.textContent = `${viewers.length} Views`;
+
+      // Update mini avatars stack on own controls pill
+      const miniAvatars = document.getElementById('statusViewsMiniAvatars');
+      if (miniAvatars) {
+        miniAvatars.innerHTML = '';
+        const topViewers = viewers.slice(0, 3);
+        topViewers.forEach(v => {
+          const img = document.createElement('img');
+          img.className = 'status-views-mini-avatar-thumb';
+          img.src = v.avatarUrl || 'logo.jpg';
+          img.alt = v.username || 'Viewer';
+          img.onerror = () => { img.src = 'logo.jpg'; };
+          miniAvatars.appendChild(img);
+        });
+      }
 
       if (viewers.length === 0) {
         listContainer.innerHTML = `
           <div class="status-viewers-empty">
-            <i class="fa-regular fa-eye-slash"></i>
-            <p>No viewers yet. New views and reactions will appear here in real time.</p>
+            <div class="status-viewers-empty-icon-wrap">
+              <i class="fa-solid fa-eye-slash"></i>
+            </div>
+            <p class="status-viewers-empty-title">No views recorded yet</p>
+            <span class="status-viewers-empty-hint">When contacts view your status, their profile, timestamps, and reactions will appear here in real time.</span>
           </div>
         `;
         return;
       }
 
+      // Sort viewers newest first
+      viewers.sort((a, b) => (b.viewedAt || 0) - (a.viewedAt || 0));
+
       listContainer.innerHTML = '';
+      const reactionIconsMap = {
+        heart: 'fa-heart',
+        fire: 'fa-fire',
+        clap: 'fa-hands-clapping',
+        laugh: 'fa-face-laugh-squint',
+        wow: 'fa-face-surprise',
+        bolt: 'fa-bolt'
+      };
+      const reactionColorsMap = {
+        heart: '#ef4444',
+        fire: '#f97316',
+        clap: '#eab308',
+        laugh: '#facc15',
+        wow: '#06b6d4',
+        bolt: '#00ff88'
+      };
+
       viewers.forEach(v => {
         const row = document.createElement('div');
         row.className = 'status-viewer-row-item';
         row.setAttribute('data-name', v.username || 'User');
 
-        const timeStr = v.viewedAt ? new Date(v.viewedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently';
-        const reactionIcon = v.reaction ? `<span class="status-viewer-row-reaction"><i class="fa-solid fa-${this.escape(v.reaction)}" style="color: #00ff88;"></i></span>` : '';
+        let timeStr = 'Recently';
+        if (v.viewedAt) {
+          const diffMs = Date.now() - v.viewedAt;
+          const mins = Math.floor(diffMs / 60000);
+          const hours = Math.floor(diffMs / 3600000);
+          if (mins < 1) timeStr = 'Just now';
+          else if (mins < 60) timeStr = `${mins}m ago`;
+          else if (hours < 24) timeStr = `${hours}h ago`;
+          else timeStr = new Date(v.viewedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        let reactionBadge = '';
+        if (v.reaction && reactionIconsMap[v.reaction]) {
+          const iconClass = reactionIconsMap[v.reaction];
+          const iconColor = reactionColorsMap[v.reaction] || '#00ff88';
+          reactionBadge = `
+            <div class="status-viewer-row-reaction-badge" title="Reacted: ${this.escape(v.reaction)}">
+              <i class="fa-solid ${iconClass}" style="color: ${iconColor};"></i>
+            </div>
+          `;
+        }
+
+        const safeAvatar = this.escape(v.avatarUrl || 'logo.jpg');
+        const safeName = this.escape(v.username || 'User');
+        const targetUid = this.escape(v.uid || v.id || '');
 
         row.innerHTML = `
           <div class="status-viewer-row-left">
-            <img src="${this.escape(v.avatarUrl || 'logo.jpg')}" alt="Avatar" class="status-viewer-row-avatar" onerror="this.src='logo.jpg'" />
+            <img src="${safeAvatar}" alt="${safeName}" class="status-viewer-row-avatar" onerror="this.src='logo.jpg'" />
             <div class="status-viewer-row-info">
-              <span class="status-viewer-row-name">${this.escape(v.username || 'User')}</span>
+              <span class="status-viewer-row-name">${safeName}</span>
               <span class="status-viewer-row-time"><i class="fa-solid fa-clock"></i> ${timeStr}</span>
             </div>
           </div>
-          ${reactionIcon}
+          <div class="status-viewer-row-actions">
+            ${reactionBadge}
+            ${targetUid ? `
+              <button type="button" class="status-viewer-dm-btn" data-uid="${targetUid}" data-name="${safeName}" data-pic="${safeAvatar}" title="Message ${safeName}">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            ` : ''}
+          </div>
         `;
+
+        const dmBtn = row.querySelector('.status-viewer-dm-btn');
+        if (dmBtn) {
+          dmBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.closeViewersDrawer();
+            const modal = document.getElementById('statusViewerModal');
+            if (modal) modal.style.display = 'none';
+            if (typeof window.openChat === 'function') {
+              window.openChat(targetUid, safeName, safeAvatar, 'direct');
+            }
+          });
+        }
+
         listContainer.appendChild(row);
       });
     }
@@ -702,6 +843,11 @@
       if (drawer) drawer.style.display = 'none';
       const search = document.getElementById('statusViewersSearchInput');
       if (search) search.value = '';
+
+      // Resume story playback if open
+      if (typeof window.setStoryPaused === 'function') {
+        window.setStoryPaused(false);
+      }
     }
 
     // -------------------------------------------------------------------------

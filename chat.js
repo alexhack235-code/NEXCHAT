@@ -28064,8 +28064,10 @@ loadStatusFeed();
 // Top-level hoisted status media state
 
 let selectedStatusMediaFile = null; // Top-level hoisted
-
-let selectedStatusGradient = 'linear-gradient(135deg, #059669, #10b981)';
+let selectedStatusGradient = 'linear-gradient(135deg, #090d16, #111b27)';
+let selectedStatusFilter = 'none';
+let selectedStatusFont = 'sans';
+let selectedStatusAlign = 'center';
 
 function validateStatusMediaDuration(file, callback) {
   if (!file) return callback(true);
@@ -28407,12 +28409,13 @@ userGroupsMap.forEach((grp) => {
         myBgPreview.src = latestSlide.mediaUrl;
       }
 
+      const totalViews = myGroup.slides.reduce((acc, s) => acc + (s.viewCount || (Array.isArray(s.viewers) ? s.viewers.length : 0)), 0);
       const mySubtext = myCircle?.querySelector('.status-card-subtext');
 
       if (mySubtext) {
         const d = new Date(latestSlide.timestamp);
-
-        mySubtext.textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        mySubtext.innerHTML = `<span class="my-status-views-tag"><i class="fa-solid fa-eye"></i> ${totalViews} ${totalViews === 1 ? 'view' : 'views'}</span> • ${timeStr}`;
       }
     } else {
       if (myCircle) myCircle.classList.remove('has-status');
@@ -28763,10 +28766,9 @@ cleanupStorySlide();
 
     if (video) {
       video.style.display = 'block';
+      video.style.filter = currentSlide.filter || 'none';
       const winStart = (currentSlide.timeWindow?.start != null)
-
         ? currentSlide.timeWindow.start
-
         : (typeof currentSlide.trimStart === 'number' ? currentSlide.trimStart : 0);
 
       video.src = currentSlide.mediaUrl;
@@ -28774,7 +28776,6 @@ cleanupStorySlide();
       if (winStart > 0) {
         const seekOnReady = () => {
           try { video.currentTime = winStart; } catch (_) {}
-
           video.removeEventListener('loadedmetadata', seekOnReady);
         };
 
@@ -28788,66 +28789,56 @@ cleanupStorySlide();
 
     if (muteBtn) {
       muteBtn.style.display = 'flex';
-
       muteBtn.innerHTML = (video && !video.muted) ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
     }
   } else if (currentSlide.mediaUrl && isValidImageUrl(currentSlide.mediaUrl)) {
     if (audioStage) audioStage.style.display = 'none';
-
     if (codeStage) codeStage.style.display = 'none';
-
-    if (video) {
-      video.pause();
-
-      video.style.display = 'none';
-    }
-
+    if (video) { video.pause(); video.style.display = 'none'; }
     if (muteBtn) muteBtn.style.display = 'none';
-
     if (textSlide) textSlide.style.display = 'none';
 
     if (img) {
       img.style.display = 'block';
-
+      img.style.filter = currentSlide.filter || 'none';
       img.src = getValidImageSrc(currentSlide.mediaUrl, 'logo.jpg');
     }
   } else {
     if (audioStage) audioStage.style.display = 'none';
-
     if (codeStage) codeStage.style.display = 'none';
-
     if (video) video.style.display = 'none';
-
     if (muteBtn) muteBtn.style.display = 'none';
-
     if (img) img.style.display = 'none';
 
     if (textSlide) {
       textSlide.style.display = 'flex';
-
       textSlide.textContent = currentSlide.caption || 'No content';
-
-      textSlide.style.background = currentSlide.gradient || 'linear-gradient(135deg, #0f172a, #1e293b)';
+      textSlide.style.background = currentSlide.gradient || 'linear-gradient(135deg, #090d16, #111b27)';
+      if (currentSlide.fontFamily === 'mono') {
+        textSlide.style.fontFamily = "'JetBrains Mono', monospace";
+      } else if (currentSlide.fontFamily === 'serif') {
+        textSlide.style.fontFamily = "Georgia, serif";
+      } else if (currentSlide.fontFamily === 'display') {
+        textSlide.style.fontFamily = "Impact, -apple-system, sans-serif";
+      } else {
+        textSlide.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      }
+      textSlide.style.textAlign = currentSlide.textAlign || 'center';
     }
   }
 
-// Interactive Widgets Sticker Overlay (Polls & AMAs)
-
+  // Interactive Widgets Sticker Overlay (Polls & AMAs)
   if (interactiveContainer && window.NexStatusEliteSuite) {
     window.NexStatusEliteSuite.renderInteractiveWidgets(currentSlide, interactiveContainer);
   }
 
-// Floating Caption Card
-
+  // Floating Caption Card
   if (caption && captionBox) {
     if (currentSlide.caption && currentSlide.mediaType !== 'text') {
       captionBox.style.display = 'flex';
-
       caption.textContent = currentSlide.caption;
-
       if (detailsTime) {
         const dObj = new Date(slideTime);
-
         detailsTime.textContent = dObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
     } else {
@@ -28855,30 +28846,40 @@ cleanupStorySlide();
     }
   }
 
-// Own Status vs Other User Status Controls
-
+  // Own Status vs Other User Status Controls
   const isOwn = (typeof myUID !== 'undefined' && myUID && currentGrp.userId === myUID);
   const ownControls = document.getElementById('statusViewerOwnControls');
   const replyRow = document.getElementById('statusViewerReplyRow');
   const quickReactions = document.getElementById('statusQuickReactionsTray');
   const viewCountEl = document.getElementById('statusViewCount');
 
-if (isOwn) {
+  if (isOwn) {
     if (ownControls) {
       ownControls.classList.add('visible');
-
       ownControls.style.display = 'flex';
     }
 
     if (replyRow) replyRow.style.display = 'none';
-
     if (quickReactions) quickReactions.style.display = 'none';
-
     if (viewCountEl) viewCountEl.textContent = currentSlide.viewCount || currentSlide.views || 0;
+
+    // Populate mini-avatars preview of viewers
+    const miniAvatars = document.getElementById('statusViewsMiniAvatars');
+    if (miniAvatars) {
+      miniAvatars.innerHTML = '';
+      const vList = Array.isArray(currentSlide.viewersList) ? currentSlide.viewersList : (Array.isArray(currentSlide.viewers) ? currentSlide.viewers : []);
+      vList.slice(0, 3).forEach(v => {
+        const thumb = document.createElement('img');
+        thumb.className = 'status-views-mini-avatar-thumb';
+        thumb.src = typeof v === 'object' ? (v.avatarUrl || 'logo.jpg') : 'logo.jpg';
+        thumb.alt = 'Viewer';
+        thumb.onerror = () => { thumb.src = 'logo.jpg'; };
+        miniAvatars.appendChild(thumb);
+      });
+    }
   } else {
     if (ownControls) {
       ownControls.classList.remove('visible');
-
       ownControls.style.display = 'none';
     }
 
@@ -29565,45 +29566,82 @@ window.closeCreateStatusModal = closeCreateStatusModal;
 
 function closeCreateStatusModal() {
   const modal = document.getElementById('createStatusModal');
-
   if (!modal) return;
-
   modal.style.display = 'none';
-
   document.body.style.overflow = '';
-
-selectedStatusMediaFile = null;
+  selectedStatusMediaFile = null;
+  selectedStatusFilter = 'none';
+  selectedStatusFont = 'sans';
+  selectedStatusAlign = 'center';
 
   if (window.NexTransmitterTrimmer) {
     window.NexTransmitterTrimmer.hideTrimmer();
   }
 
   const fileInput = document.getElementById('statusMediaModalFileInput');
-
   if (fileInput) fileInput.value = '';
+
   const captionInput = document.getElementById('statusMediaCaptionInput');
-
   if (captionInput) captionInput.value = '';
+
+  const mediaCharCount = document.getElementById('statusMediaCharCount');
+  if (mediaCharCount) mediaCharCount.textContent = '0/250';
+
   const textInput = document.getElementById('statusTextStoryInput');
+  if (textInput) {
+    textInput.value = '';
+    textInput.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    textInput.style.textAlign = 'center';
+  }
 
-  if (textInput) textInput.value = '';
-const previewBox = document.getElementById('statusMediaPreviewBox');
+  const textCharCount = document.getElementById('statusTextCharCount');
+  if (textCharCount) textCharCount.textContent = '0/280';
+
+  const previewBox = document.getElementById('statusMediaPreviewBox');
   const dropPlaceholder = document.getElementById('statusDropPlaceholder');
-
   if (previewBox) previewBox.style.display = 'none';
-
   if (dropPlaceholder) dropPlaceholder.style.display = 'block';
-const progressBox = document.getElementById('statusUploadProgressContainer');
 
+  const imgPreview = document.getElementById('statusModalImgPreview');
+  if (imgPreview) {
+    imgPreview.src = '';
+    imgPreview.style.filter = 'none';
+  }
+
+  const videoPreview = document.getElementById('statusModalVideoPreview');
+  if (videoPreview) {
+    videoPreview.pause();
+    videoPreview.src = '';
+    videoPreview.style.filter = 'none';
+  }
+
+  const manualTrimBtn = document.getElementById('statusManualTrimBtn');
+  if (manualTrimBtn) manualTrimBtn.style.display = 'none';
+
+  // Reset filter chips to Normal
+  document.querySelectorAll('.status-filter-chip').forEach((chip, i) => {
+    chip.classList.toggle('active', i === 0);
+  });
+
+  // Reset font pills to Modern
+  document.querySelectorAll('.status-font-pill').forEach((pill, i) => {
+    pill.classList.toggle('active', i === 0);
+  });
+
+  // Reset align pills to Center
+  document.querySelectorAll('.status-align-pill').forEach((pill, i) => {
+    pill.classList.toggle('active', i === 1);
+  });
+
+  const progressBox = document.getElementById('statusUploadProgressContainer');
   if (progressBox) progressBox.style.display = 'none';
 
   if (window.NexStatusEliteSuite) { window.NexStatusEliteSuite.clearRecordedVoice(); }
 
   const codeInput = document.getElementById('statusCodeStoryInput');
-
   if (codeInput) codeInput.value = '';
-  const audioCaption = document.getElementById('statusAudioCaptionInput');
 
+  const audioCaption = document.getElementById('statusAudioCaptionInput');
   if (audioCaption) audioCaption.value = '';
 }
 
@@ -29612,36 +29650,29 @@ function switchStatusModalTab(tab) {
   const textBtn = document.getElementById('statusTabTextBtn');
   const audioBtn = document.getElementById('statusTabAudioBtn');
   const codeBtn = document.getElementById('statusTabCodeBtn');
-const mediaPane = document.getElementById('statusTabMediaPane');
+  const mediaPane = document.getElementById('statusTabMediaPane');
   const textPane = document.getElementById('statusTabTextPane');
   const audioPane = document.getElementById('statusTabAudioPane');
   const codePane = document.getElementById('statusTabCodePane');
-const allBtns = [mediaBtn, textBtn, audioBtn, codeBtn];
+  const allBtns = [mediaBtn, textBtn, audioBtn, codeBtn];
   const allPanes = [mediaPane, textPane, audioPane, codePane];
 
-allBtns.forEach(b => { if (b) b.className = 'btn-secondary terminal-tab-btn'; });
-
+  allBtns.forEach(b => { if (b) b.classList.remove('active'); });
   allPanes.forEach(p => { if (p) p.style.display = 'none'; });
 
-if (tab === 'text') {
-    if (textBtn) textBtn.className = 'btn-primary terminal-tab-btn active';
-
+  if (tab === 'text') {
+    if (textBtn) textBtn.classList.add('active');
     if (textPane) textPane.style.display = 'block';
-
     setTimeout(() => document.getElementById('statusTextStoryInput')?.focus(), 100);
   } else if (tab === 'audio') {
-    if (audioBtn) audioBtn.className = 'btn-primary terminal-tab-btn active';
-
+    if (audioBtn) audioBtn.classList.add('active');
     if (audioPane) audioPane.style.display = 'block';
   } else if (tab === 'code') {
-    if (codeBtn) codeBtn.className = 'btn-primary terminal-tab-btn active';
-
+    if (codeBtn) codeBtn.classList.add('active');
     if (codePane) codePane.style.display = 'block';
-
     setTimeout(() => document.getElementById('statusCodeStoryInput')?.focus(), 100);
   } else {
-    if (mediaBtn) mediaBtn.className = 'btn-primary terminal-tab-btn active';
-
+    if (mediaBtn) mediaBtn.classList.add('active');
     if (mediaPane) mediaPane.style.display = 'block';
   }
 }
@@ -29653,157 +29684,198 @@ function setupCreateStatusModal() {
 
   modal.dataset.bound = 'true';
 
-document.getElementById('closeCreateStatusModalBtn')?.addEventListener('click', closeCreateStatusModal);
+  document.getElementById('closeCreateStatusModalBtn')?.addEventListener('click', closeCreateStatusModal);
 
   document.getElementById('statusTabMediaBtn')?.addEventListener('click', () => switchStatusModalTab('media'));
-
   document.getElementById('statusTabTextBtn')?.addEventListener('click', () => switchStatusModalTab('text'));
-
   document.getElementById('statusTabAudioBtn')?.addEventListener('click', () => switchStatusModalTab('audio'));
-
   document.getElementById('statusTabCodeBtn')?.addEventListener('click', () => switchStatusModalTab('code'));
-const fileInput = document.getElementById('statusMediaModalFileInput');
+
+  const fileInput = document.getElementById('statusMediaModalFileInput');
   const dropZone = document.getElementById('statusMediaDropZone');
   const previewBox = document.getElementById('statusMediaPreviewBox');
   const dropPlaceholder = document.getElementById('statusDropPlaceholder');
   const imgPreview = document.getElementById('statusModalImgPreview');
   const videoPreview = document.getElementById('statusModalVideoPreview');
   const removeBtn = document.getElementById('removeStatusMediaPreviewBtn');
+  const manualTrimBtn = document.getElementById('statusManualTrimBtn');
+  const captionInput = document.getElementById('statusMediaCaptionInput');
+  const mediaCharCount = document.getElementById('statusMediaCharCount');
+  const textInput = document.getElementById('statusTextStoryInput');
+  const textCharCount = document.getElementById('statusTextCharCount');
 
-if (dropZone && !dropZone.dataset.clickBound) {
+  // Manual trimmer trigger
+  manualTrimBtn?.addEventListener('click', () => {
+    if (window.NexTransmitterTrimmer && selectedStatusMediaFile) {
+      window.NexTransmitterTrimmer.activateTrimmer(selectedStatusMediaFile);
+    }
+  });
+
+  // Caption character counter
+  captionInput?.addEventListener('input', () => {
+    if (mediaCharCount) mediaCharCount.textContent = (captionInput.value.length) + '/250';
+  });
+
+  // Text story character counter
+  textInput?.addEventListener('input', () => {
+    if (textCharCount) textCharCount.textContent = (textInput.value.length) + '/280';
+  });
+
+  // Filter chips click
+  document.querySelectorAll('.status-filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.status-filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const filterVal = chip.getAttribute('data-filter') || 'none';
+      selectedStatusFilter = filterVal;
+      if (imgPreview) imgPreview.style.filter = filterVal;
+      if (videoPreview) videoPreview.style.filter = filterVal;
+    });
+  });
+
+  // Font pills click
+  document.querySelectorAll('.status-font-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.status-font-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      selectedStatusFont = pill.getAttribute('data-font') || 'sans';
+      if (!textInput) return;
+      if (selectedStatusFont === 'mono') {
+        textInput.style.fontFamily = "'JetBrains Mono', monospace";
+      } else if (selectedStatusFont === 'serif') {
+        textInput.style.fontFamily = "Georgia, serif";
+      } else if (selectedStatusFont === 'display') {
+        textInput.style.fontFamily = "Impact, -apple-system, sans-serif";
+      } else {
+        textInput.style.fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      }
+    });
+  });
+
+  // Align pills click
+  document.querySelectorAll('.status-align-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.status-align-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      selectedStatusAlign = pill.getAttribute('data-align') || 'center';
+      if (textInput) textInput.style.textAlign = selectedStatusAlign;
+    });
+  });
+
+  if (dropZone && !dropZone.dataset.clickBound) {
     dropZone.dataset.clickBound = 'true';
 
     dropZone.addEventListener('click', (e) => {
-      if (e.target !== removeBtn && !removeBtn?.contains(e.target)) {
+      if (e.target !== removeBtn && !removeBtn?.contains(e.target) && e.target !== manualTrimBtn && !manualTrimBtn?.contains(e.target)) {
         fileInput?.click();
       }
     });
 
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
-
       dropZone.style.borderColor = '#00ff88';
-
-      dropZone.style.background = 'rgba(0, 255, 136, 0.1)';
+      dropZone.style.background = 'rgba(0, 255, 136, 0.08)';
     });
 
     dropZone.addEventListener('dragleave', () => {
-      dropZone.style.borderColor = 'rgba(0, 255, 136, 0.4)';
-
-      dropZone.style.background = 'rgba(0, 255, 136, 0.03)';
+      dropZone.style.borderColor = '';
+      dropZone.style.background = '';
     });
 
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
-
-      dropZone.style.borderColor = 'rgba(0, 255, 136, 0.4)';
-
-      dropZone.style.background = 'rgba(0, 255, 136, 0.03)';
+      dropZone.style.borderColor = '';
+      dropZone.style.background = '';
       const file = e.dataTransfer?.files?.[0];
 
       if (file && fileInput) {
         const dt = new DataTransfer();
-
         dt.items.add(file);
-
         fileInput.files = dt.files;
-
         fileInput.dispatchEvent(new Event('change', { bubbles: true }));
       }
     });
   }
 
-fileInput?.addEventListener('change', (e) => {
+  fileInput?.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
-validateStatusMediaDuration(file, (isValid) => {
+    validateStatusMediaDuration(file, (isValid) => {
       if (!isValid) {
         selectedStatusMediaFile = null;
 
         if (fileInput) fileInput.value = '';
-
         if (previewBox) previewBox.style.display = 'none';
-
         if (dropPlaceholder) dropPlaceholder.style.display = 'block';
-
-        if (videoPreview) { videoPreview.pause(); videoPreview.src = ''; }
-
-        if (imgPreview) { imgPreview.src = ''; }
-
+        if (videoPreview) { videoPreview.pause(); videoPreview.src = ''; videoPreview.style.filter = 'none'; }
+        if (imgPreview) { imgPreview.src = ''; imgPreview.style.filter = 'none'; }
+        if (manualTrimBtn) manualTrimBtn.style.display = 'none';
         return;
       }
 
-selectedStatusMediaFile = file;
-
-      if (file.type.startsWith('video/') && window.NexTransmitterTrimmer && window.NexTransmitterTrimmer.activeFile) {
-        // Handled by NexTransmitterTrimmer
-
-        return;
-      }
-
+      selectedStatusMediaFile = file;
       const fileUrl = URL.createObjectURL(file);
 
-    if (dropPlaceholder) dropPlaceholder.style.display = 'none';
+      if (dropPlaceholder) dropPlaceholder.style.display = 'none';
+      if (previewBox) previewBox.style.display = 'block';
 
-    if (previewBox) previewBox.style.display = 'block';
+      if (file.type.startsWith('video/')) {
+        if (imgPreview) {
+          imgPreview.style.display = 'none';
+          imgPreview.src = '';
+        }
 
-if (file.type.startsWith('video/')) {
-      if (imgPreview) imgPreview.style.display = 'none';
+        if (videoPreview) {
+          videoPreview.style.display = 'block';
+          videoPreview.style.filter = selectedStatusFilter;
+          videoPreview.src = fileUrl;
+        }
 
-      if (videoPreview) {
-        videoPreview.style.display = 'block';
+        if (manualTrimBtn) manualTrimBtn.style.display = 'inline-flex';
+      } else {
+        if (videoPreview) {
+          videoPreview.pause();
+          videoPreview.style.display = 'none';
+          videoPreview.src = '';
+        }
 
-        videoPreview.src = fileUrl;
+        if (imgPreview) {
+          imgPreview.style.display = 'block';
+          imgPreview.style.filter = selectedStatusFilter;
+          imgPreview.src = fileUrl;
+        }
+
+        if (manualTrimBtn) manualTrimBtn.style.display = 'none';
       }
-    } else {
-      if (videoPreview) {
-        videoPreview.pause();
-
-        videoPreview.style.display = 'none';
-      }
-
-      if (imgPreview) {
-        imgPreview.style.display = 'block';
-
-        imgPreview.src = fileUrl;
-      }
-    }
     });
   });
 
-removeBtn?.addEventListener('click', (e) => {
+  removeBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
 
     selectedStatusMediaFile = null;
-
     if (window.NexTransmitterTrimmer) window.NexTransmitterTrimmer.hideTrimmer();
 
     if (fileInput) fileInput.value = '';
-
     if (previewBox) previewBox.style.display = 'none';
-
     if (dropPlaceholder) dropPlaceholder.style.display = 'block';
-
-    if (videoPreview) { videoPreview.pause(); videoPreview.src = ''; }
-
-    if (imgPreview) { imgPreview.src = ''; }
+    if (videoPreview) { videoPreview.pause(); videoPreview.src = ''; videoPreview.style.filter = 'none'; }
+    if (imgPreview) { imgPreview.src = ''; imgPreview.style.filter = 'none'; }
+    if (manualTrimBtn) manualTrimBtn.style.display = 'none';
   });
 
-document.querySelectorAll('.gradient-swatch').forEach(btn => {
+  document.querySelectorAll('.gradient-swatch').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.gradient-swatch').forEach(b => b.style.borderColor = 'rgba(255,255,255,0.3)');
-
       btn.style.borderColor = '#ffffff';
 
-      selectedStatusGradient = btn.getAttribute('data-gradient') || 'linear-gradient(135deg, #059669, #10b981)';
+      selectedStatusGradient = btn.getAttribute('data-gradient') || 'linear-gradient(135deg, #090d16, #111b27)';
       const canvas = document.getElementById('statusTextStoryCanvas');
-
       if (canvas) canvas.style.background = selectedStatusGradient;
     });
   });
-
 document.getElementById('publishStatusBtn')?.addEventListener('click', async () => {
     const publishBtn = document.getElementById('publishStatusBtn');
     const mediaPane = document.getElementById('statusTabMediaPane');
@@ -30011,6 +30083,12 @@ const effectiveUid = auth?.currentUser?.uid || (typeof getAuth === 'function' ? 
         mediaUrl: uploadedUrl || null,
 
         mediaType: activeTab === 'audio' ? 'audio' : (activeTab === 'code' ? 'code' : (isMedia ? (fileType.startsWith('video/') ? 'video' : 'image') : 'text')),
+
+        filter: isMedia ? selectedStatusFilter : 'none',
+
+        fontFamily: activeTab === 'text' ? selectedStatusFont : null,
+
+        textAlign: activeTab === 'text' ? selectedStatusAlign : null,
 
         gradient: activeTab === 'text' ? selectedStatusGradient : null,
 
