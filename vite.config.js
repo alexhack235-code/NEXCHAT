@@ -212,7 +212,7 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
-    emptyOutDir: true,
+    emptyOutDir: false,
     sourcemap: false,
     reportCompressedSize: false,
     minify: 'esbuild',
