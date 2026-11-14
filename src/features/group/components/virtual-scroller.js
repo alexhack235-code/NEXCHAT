@@ -1,27 +1,11 @@
 /**
- * VirtualScroller - High-performance virtual scroll engine for chat messages
+ * VirtualScroller - High-performance resilient scroller engine for chat messages
  * 
- * Renders only visible items + overscan buffer, recycling DOM nodes from a pool.
- * Supports reverse-infinite-scroll (load older messages at top), anchor-based
- * scroll restoration, and auto-scroll-to-bottom for new messages.
- * 
- * Designed for 10,000+ messages at 60fps in a vanilla JS environment.
- * 
- * @example
- *   const scroller = new VirtualScroller(container, {
- *     estimatedItemHeight: 72,
- *     overscan: 5,
- *     renderItem: (item, element) => { ... },
- *     onLoadMore: () => loadOlderMessages(),
- *     onBottomReached: () => markAllRead()
- *   });
- *   scroller.setItems(messages);
- *   scroller.appendItems(newMessages);
- *   scroller.prependItems(olderMessages);
+ * Flow-based DOM engine with key-based element reconciliation, native GPU scrolling,
+ * and auto-scroll-to-bottom. Solves message overlapping, ghost text, floating stickers,
+ * and layout desynchronization.
  */
 
-const DEFAULT_ITEM_HEIGHT = 72;
-const OVERSCAN_COUNT = 5;
 const SCROLL_TO_BOTTOM_THRESHOLD = 150;
 const LOAD_MORE_THRESHOLD = 200;
 
@@ -29,17 +13,15 @@ export class VirtualScroller {
   /**
    * @param {HTMLElement} container - The scroll container element
    * @param {Object} options
-   * @param {number} [options.estimatedItemHeight=72] - Estimated height per item
-   * @param {number} [options.overscan=5] - Extra items to render above/below viewport
-   * @param {Function} options.renderItem - (item, element) => void — renders item into element
-   * @param {Function} [options.onLoadMore] - Called when scrolled near top (pagination)
+   * @param {number} [options.estimatedItemHeight=72]
+   * @param {number} [options.overscan=5]
+   * @param {Function} options.renderItem - (item, element, index) => void
+   * @param {Function} [options.onLoadMore] - Called when scrolled near top
    * @param {Function} [options.onBottomReached] - Called when scrolled to bottom
-   * @param {Function} [options.onVisibleRangeChange] - (startIndex, endIndex) => void
+   * @param {Function} [options.onVisibleRangeChange]
    */
   constructor(container, options = {}) {
     this._container = container;
-    this._estimatedHeight = options.estimatedItemHeight || DEFAULT_ITEM_HEIGHT;
-    this._overscan = options.overscan || OVERSCAN_COUNT;
     this._renderItem = options.renderItem;
     this._onLoadMore = options.onLoadMore;
     this._onBottomReached = options.onBottomReached;
@@ -47,12 +29,6 @@ export class VirtualScroller {
 
     /** @type {Array<Object>} All items */
     this._items = [];
-
-    /** @type {Map<number, number>} Measured heights by index */
-    this._measuredHeights = new Map();
-
-    /** @type {Map<string, number>} Measured heights by item ID */
-    this._measuredHeightsById = new Map();
 
     /** @type {Map<string, HTMLElement>} DOM node pool keyed by item ID */
     this._nodePool = new Map();
@@ -79,30 +55,42 @@ export class VirtualScroller {
 
   /**
    * Build the internal DOM structure:
-   * container > viewport > content (with dynamic height)
+   * container > natural flow content wrapper
    */
   _setupDOM() {
     this._container.classList.add('nex-virtual-scroller');
-    this._container.style.overflow = 'auto';
+    this._container.style.overflowY = 'auto';
+    this._container.style.overflowX = 'hidden';
     this._container.style.position = 'relative';
-    this._container.style.willChange = 'transform';
+    this._container.style.scrollBehavior = 'auto';
+    this._container.style.webkitOverflowScrolling = 'touch';
 
-    // Content wrapper — its height represents total scrollable area
+    // Content wrapper in natural document flow
     this._content = document.createElement('div');
     this._content.classList.add('nex-virtual-scroller-content');
     this._content.style.position = 'relative';
     this._content.style.width = '100%';
+    this._content.style.minHeight = '100%';
+    this._content.style.display = 'flex';
+    this._content.style.flexDirection = 'column';
+    this._content.style.justifyContent = 'flex-end';
+    this._content.style.boxSizing = 'border-box';
+    this._content.style.padding = '8px 12px 24px 12px';
+    this._content.style.gap = '6px';
 
-    // Rendered items container — positioned absolutely within content
+    // Rendered items container (flex column, natural height)
     this._rendered = document.createElement('div');
-    this._rendered.style.position = 'absolute';
-    this._rendered.style.top = '0';
-    this._rendered.style.left = '0';
-    this._rendered.style.right = '0';
+    this._rendered.className = 'nex-virtual-scroller-rendered';
+    this._rendered.style.display = 'flex';
+    this._rendered.style.flexDirection = 'column';
+    this._rendered.style.width = '100%';
+    this._rendered.style.position = 'relative';
+    this._rendered.style.boxSizing = 'border-box';
+    this._rendered.style.gap = '4px';
 
     this._content.appendChild(this._rendered);
 
-    // Clear container and mount
+    // Mount into container
     this._container.innerHTML = '';
     this._container.appendChild(this._content);
 
@@ -123,13 +111,15 @@ export class VirtualScroller {
     this._container.addEventListener('scroll', this._onScroll, { passive: true });
 
     this._resizeObserver = new ResizeObserver(() => {
-      this._scheduleRender();
+      if (this._isNearBottom) {
+        this.scrollToBottom(false);
+      }
     });
     this._resizeObserver.observe(this._container);
   }
 
   /**
-   * Handle scroll events with RAF batching
+   * Handle scroll events with threshold checking
    */
   _handleScroll() {
     if (this._destroyed) return;
@@ -156,8 +146,6 @@ export class VirtualScroller {
     if (this._isNearBottom && this._onBottomReached) {
       this._onBottomReached();
     }
-
-    this._scheduleRender();
   }
 
   /**
@@ -172,107 +160,43 @@ export class VirtualScroller {
   }
 
   /**
-   * Get the height for an item (measured or estimated)
-   * @param {number} index
-   * @returns {number}
-   */
-  _getItemHeight(index) {
-    const item = this._items[index];
-    if (item?.id && this._measuredHeightsById.has(item.id)) {
-      return this._measuredHeightsById.get(item.id);
-    }
-    return this._measuredHeights.get(index) || this._estimatedHeight;
-  }
-
-  /**
-   * Calculate the total height of all items
-   * @returns {number}
-   */
-  _getTotalHeight() {
-    let total = 0;
-    for (let i = 0; i < this._items.length; i++) {
-      total += this._getItemHeight(i);
-    }
-    return total;
-  }
-
-  /**
-   * Get the Y offset for a given index
-   * @param {number} index
-   * @returns {number}
-   */
-  _getOffsetForIndex(index) {
-    let offset = 0;
-    for (let i = 0; i < index && i < this._items.length; i++) {
-      offset += this._getItemHeight(i);
-    }
-    return offset;
-  }
-
-  /**
-   * Find the item index at a given scroll offset
-   * @param {number} offset
-   * @returns {number}
-   */
-  _getIndexAtOffset(offset) {
-    let accumulated = 0;
-    for (let i = 0; i < this._items.length; i++) {
-      accumulated += this._getItemHeight(i);
-      if (accumulated > offset) return i;
-    }
-    return Math.max(0, this._items.length - 1);
-  }
-
-  /**
-   * Core render — determines visible range and renders only those items
+   * Core render — renders items into clean, natural document flow.
+   * Completely avoids position:absolute, eliminate message overlapping,
+   * sticker collisions, and scroll tear.
    */
   _render() {
-    if (this._destroyed || this._items.length === 0) {
-      this._content.style.height = '0px';
+    if (this._destroyed) return;
+
+    if (this._items.length === 0) {
       this._rendered.innerHTML = '';
       return;
     }
 
-    const totalHeight = this._getTotalHeight();
-    this._content.style.height = `${totalHeight}px`;
-
-    const viewportHeight = this._container.clientHeight || window.innerHeight || 800;
-    const scrollTop = this._scrollTop;
-
-    // Find visible range
-    const startIndex = Math.max(0, this._getIndexAtOffset(scrollTop) - this._overscan);
-    const endOffset = scrollTop + viewportHeight;
-    let endIndex = Math.min(this._items.length - 1, this._getIndexAtOffset(endOffset) + this._overscan);
-
-    // Notify visible range change
-    if (this._onVisibleRangeChange) {
-      const visStart = this._getIndexAtOffset(scrollTop);
-      const visEnd = this._getIndexAtOffset(endOffset);
-      this._onVisibleRangeChange(visStart, visEnd);
-    }
-
-    // Collect currently rendered item IDs
-    const renderedIds = new Set();
     const fragment = document.createDocumentFragment();
+    const activeIds = new Set();
 
-    for (let i = startIndex; i <= endIndex; i++) {
+    for (let i = 0; i < this._items.length; i++) {
       const item = this._items[i];
       if (!item) continue;
 
-      const itemId = item.id || `idx-${i}`;
-      renderedIds.add(itemId);
+      const itemId = String(item.id || item.clientMsgId || `idx-${i}`);
+      activeIds.add(itemId);
 
-      // Get or create node
       let node = this._nodePool.get(itemId);
       if (!node) {
         node = document.createElement('div');
         node.classList.add('nex-vs-item');
-        node.dataset.vsIndex = String(i);
         node.dataset.vsId = itemId;
+        node.dataset.vsIndex = String(i);
+        node.style.position = 'relative';
+        node.style.display = 'flex';
+        node.style.flexDirection = 'column';
+        node.style.width = '100%';
+        node.style.boxSizing = 'border-box';
         node._lastRenderedItem = item;
+
         this._nodePool.set(itemId, node);
-        
-        // Render item content
+
         if (this._renderItem) {
           this._renderItem(item, node, i);
         }
@@ -284,71 +208,26 @@ export class VirtualScroller {
         }
       }
 
-      // Position the node
-      const offsetY = this._getOffsetForIndex(i);
-      node.style.position = 'absolute';
-      node.style.top = `${offsetY}px`;
-      node.style.left = '0';
-      node.style.right = '0';
-      node.style.width = '100%';
-
       fragment.appendChild(node);
     }
 
-    // Replace rendered content
+    // Mount all nodes in clean document order
     this._rendered.innerHTML = '';
     this._rendered.appendChild(fragment);
 
-    // Measure actual heights after render
-    requestAnimationFrame(() => {
-      if (this._destroyed) return;
-      let heightChanged = false;
-
-      for (let i = startIndex; i <= endIndex; i++) {
-        const item = this._items[i];
-        if (!item) continue;
-        const itemId = item.id || `idx-${i}`;
-        const node = this._nodePool.get(itemId);
-        if (node) {
-          const actualHeight = node.getBoundingClientRect().height;
-          if (actualHeight > 0) {
-            if (item.id) {
-              this._measuredHeightsById.set(item.id, actualHeight);
-            }
-            if (actualHeight !== this._measuredHeights.get(i)) {
-              this._measuredHeights.set(i, actualHeight);
-              heightChanged = true;
-            }
-          }
-        }
+    // Garbage collect unmounted nodes from pool
+    for (const [id, node] of this._nodePool.entries()) {
+      if (!activeIds.has(id)) {
+        node.remove();
+        this._nodePool.delete(id);
       }
+    }
 
-      // Re-render if heights changed significantly
-      if (heightChanged) {
-        const newTotal = this._getTotalHeight();
-        this._content.style.height = `${newTotal}px`;
-
-        // Re-position visible items
-        for (let i = startIndex; i <= endIndex; i++) {
-          const item = this._items[i];
-          if (!item) continue;
-          const itemId = item.id || `idx-${i}`;
-          const node = this._nodePool.get(itemId);
-          if (node) {
-            const offsetY = this._getOffsetForIndex(i);
-            node.style.top = `${offsetY}px`;
-          }
-        }
-      }
-    });
-
-    // Clean up off-screen nodes from pool (keep pool manageable)
-    if (this._nodePool.size > (endIndex - startIndex + 1) * 3) {
-      for (const [id, node] of this._nodePool) {
-        if (!renderedIds.has(id)) {
-          this._nodePool.delete(id);
-        }
-      }
+    // Auto-scroll down if user was at bottom
+    if (this._isNearBottom) {
+      requestAnimationFrame(() => {
+        this.scrollToBottom(false);
+      });
     }
   }
 
@@ -358,29 +237,6 @@ export class VirtualScroller {
    */
   setItems(items) {
     this._items = items || [];
-    this._measuredHeights.clear();
-
-    // Re-index from _measuredHeightsById
-    for (let i = 0; i < this._items.length; i++) {
-      const id = this._items[i]?.id;
-      if (id && this._measuredHeightsById.has(id)) {
-        this._measuredHeights.set(i, this._measuredHeightsById.get(id));
-      }
-    }
-
-    // Clean up node pool for removed items, preserving reusable nodes without blanking
-    const currentIdSet = new Set();
-    for (let i = 0; i < this._items.length; i++) {
-      const id = this._items[i]?.id;
-      if (id) currentIdSet.add(id);
-    }
-    for (const [id, node] of this._nodePool) {
-      if (!currentIdSet.has(id)) {
-        node.remove();
-        this._nodePool.delete(id);
-      }
-    }
-
     this._scheduleRender();
 
     if (this._isNearBottom) {
@@ -398,31 +254,18 @@ export class VirtualScroller {
       return;
     }
 
-    // Capture anchor: the item currently at the top of the viewport
-    const anchorIndex = this._getIndexAtOffset(this._scrollTop);
-    const anchorOffset = this._scrollTop - this._getOffsetForIndex(anchorIndex);
+    const prevScrollHeight = this._container.scrollHeight;
+    const prevScrollTop = this._container.scrollTop;
 
-    // Shift measured heights
-    const newMeasured = new Map();
-    for (const [idx, height] of this._measuredHeights) {
-      newMeasured.set(idx + olderItems.length, height);
-    }
-    this._measuredHeights = newMeasured;
-
-    // Prepend items
     this._items = [...olderItems, ...this._items];
+    this._render();
 
-    // Clear node pool (IDs shifted)
-    this._nodePool.clear();
-    this._rendered.innerHTML = '';
-
-    // Restore scroll position to the anchor item
     requestAnimationFrame(() => {
-      const newAnchorOffset = this._getOffsetForIndex(anchorIndex + olderItems.length);
-      this._container.scrollTop = newAnchorOffset + anchorOffset;
+      const newScrollHeight = this._container.scrollHeight;
+      const heightDiff = newScrollHeight - prevScrollHeight;
+      this._container.scrollTop = prevScrollTop + heightDiff;
       this._scrollTop = this._container.scrollTop;
       this._isLoadingMore = false;
-      this._scheduleRender();
     });
   }
 
@@ -436,66 +279,49 @@ export class VirtualScroller {
     const wasNearBottom = this._isNearBottom;
     this._items = [...this._items, ...newItems];
 
-    // Invalidate node pool for new items
-    for (const item of newItems) {
-      const id = item.id;
-      if (id) this._nodePool.delete(id);
-    }
+    this._render();
 
-    this._scheduleRender();
-
-    // Auto-scroll to bottom if user was near bottom
     if (wasNearBottom) {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          this.scrollToBottom(true);
-        });
+        this.scrollToBottom(true);
       });
     }
   }
 
   /**
-   * Update a single item in place (e.g., reaction added, read receipt updated)
+   * Update a single item in place (reactions, edit, read status)
    * @param {string} itemId
    * @param {Object} updatedItem
    */
   updateItem(itemId, updatedItem) {
-    const index = this._items.findIndex(item => item.id === itemId);
+    const index = this._items.findIndex(item => String(item.id || item.clientMsgId) === String(itemId));
     if (index === -1) return;
 
     this._items[index] = updatedItem;
 
-    // Re-render the specific node
-    const node = this._nodePool.get(itemId);
+    const node = this._nodePool.get(String(itemId));
     if (node && this._renderItem) {
+      node._lastRenderedItem = updatedItem;
       this._renderItem(updatedItem, node, index);
-      // Clear measured height to re-measure
-      this._measuredHeights.delete(index);
+    } else {
+      this._scheduleRender();
     }
-
-    this._scheduleRender();
   }
 
   /**
-   * Remove an item (e.g., message deleted)
+   * Remove an item (message deleted)
    * @param {string} itemId
    */
   removeItem(itemId) {
-    const index = this._items.findIndex(item => item.id === itemId);
+    const index = this._items.findIndex(item => String(item.id || item.clientMsgId) === String(itemId));
     if (index === -1) return;
 
     this._items.splice(index, 1);
-    this._nodePool.delete(itemId);
-
-    // Shift measured heights
-    const newMeasured = new Map();
-    for (const [idx, height] of this._measuredHeights) {
-      if (idx < index) newMeasured.set(idx, height);
-      else if (idx > index) newMeasured.set(idx - 1, height);
+    const node = this._nodePool.get(String(itemId));
+    if (node) {
+      node.remove();
+      this._nodePool.delete(String(itemId));
     }
-    this._measuredHeights = newMeasured;
-
-    this._scheduleRender();
   }
 
   /**
@@ -503,21 +329,15 @@ export class VirtualScroller {
    * @param {boolean} [smooth=false]
    */
   scrollToBottom(smooth = false) {
-    if (this._destroyed) return;
-    const targetScroll = Math.max(this._getTotalHeight(), this._container.scrollHeight, 100000);
+    if (this._destroyed || !this._container) return;
     this._container.scrollTo({
-      top: targetScroll,
+      top: this._container.scrollHeight + 10000,
       behavior: smooth ? 'smooth' : 'auto'
     });
     this._isNearBottom = true;
     if (this._scrollToBottomBtn) {
       this._scrollToBottomBtn.style.display = 'none';
     }
-    requestAnimationFrame(() => {
-      if (!this._destroyed && this._container) {
-        this._container.scrollTop = this._container.scrollHeight;
-      }
-    });
   }
 
   /**
@@ -526,77 +346,31 @@ export class VirtualScroller {
    * @param {string} [behavior='smooth']
    */
   scrollToItem(itemId, behavior = 'smooth') {
-    const index = this._items.findIndex(item => item.id === itemId);
-    if (index === -1) return;
-
-    const offset = this._getOffsetForIndex(index);
-    const viewportHeight = this._container.clientHeight;
-
-    this._container.scrollTo({
-      top: Math.max(0, offset - viewportHeight / 3),
-      behavior
-    });
-
-    // Highlight the item briefly
-    requestAnimationFrame(() => {
-      const node = this._nodePool.get(itemId);
-      if (node) {
-        node.classList.add('nex-vs-item-highlight');
-        setTimeout(() => node.classList.remove('nex-vs-item-highlight'), 2000);
-      }
-    });
+    const node = this._nodePool.get(String(itemId));
+    if (node) {
+      node.scrollIntoView({ behavior, block: 'center' });
+      node.classList.add('nex-vs-item-highlight');
+      setTimeout(() => node.classList.remove('nex-vs-item-highlight'), 2000);
+    }
   }
 
   /**
-   * Get total item count
-   * @returns {number}
-   */
-  getItemCount() {
-    return this._items.length;
-  }
-
-  /**
-   * Check if scrolled near bottom
-   * @returns {boolean}
-   */
-  isNearBottom() {
-    return this._isNearBottom;
-  }
-
-  /**
-   * Mark pagination loading as complete
+   * Finish loading more (resets loading lock)
    */
   finishLoadMore() {
     this._isLoadingMore = false;
   }
 
   /**
-   * Clean up and destroy the scroller
+   * Destroy the scroller instance and remove event listeners
    */
   destroy() {
     this._destroyed = true;
-
-    if (this._rafHandle != null) {
-      cancelAnimationFrame(this._rafHandle);
-      this._rafHandle = null;
-    }
-
+    if (this._rafHandle) cancelAnimationFrame(this._rafHandle);
+    if (this._resizeObserver) this._resizeObserver.disconnect();
     this._container.removeEventListener('scroll', this._onScroll);
-
-    if (this._resizeObserver) {
-      this._resizeObserver.disconnect();
-      this._resizeObserver = null;
-    }
-
-    if (this._scrollToBottomBtn?.parentElement) {
-      this._scrollToBottomBtn.remove();
-    }
-
-    this._items = [];
-    this._measuredHeights.clear();
-    this._measuredHeightsById.clear();
+    this._scrollToBottomBtn?.remove();
     this._nodePool.clear();
-    this._rendered.innerHTML = '';
-    this._container.innerHTML = '';
+    this._items = [];
   }
 }

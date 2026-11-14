@@ -3,22 +3,38 @@ const path = require('path');
 const { performance } = require('perf_hooks');
 
 async function runBenchmark() {
-  console.log('Testing Multilingual Dictionary & Fallback Latency...');
-  const dictPath = path.join(__dirname, '..', 'src', 'js', 'multilingual-dictionary.js');
-  const fileContent = fs.readFileSync(dictPath, 'utf8');
-  const lineCount = fileContent.split('\n').length;
-  console.log(`Loaded dictionary lines: ${lineCount}`);
+  console.log('Testing Multilingual Dictionary & Modular Languages...');
+  const langDir = path.join(__dirname, '..', 'src', 'js', 'languages');
+  const files = fs.readdirSync(langDir).filter(f => f.endsWith('.js'));
+  let totalEntries = 0;
+  let totalLines = 0;
+  console.log('Checking modular language files in src/js/languages/:');
+  for (const f of files) {
+    const content = fs.readFileSync(path.join(langDir, f), 'utf8');
+    const lines = content.split('\n').length;
+    totalLines += lines;
+    console.log(`  - ${f.padEnd(25)} ${lines} lines`);
+  }
+  console.log(`Total modular language code lines: ${totalLines.toLocaleString()}`);
 
   // Dynamic import of ESM module
   const { fastTranslateSync } = await import('../src/js/fast-translator-core.js');
 
   const testCasesHit = [
-    { text: 'hello', lang: 'es', expected: '¡Hola!' },
-    { text: 'thank you', lang: 'fr', expected: 'Merci' },
+    { text: 'hello', lang: 'ro', expected: 'salut' },
+    { text: 'hello', lang: 'ur', expected: 'سلام' },
+    { text: 'thank you', lang: 'id', expected: 'terima kasih' },
+    { text: 'thank you', lang: 'ms', expected: 'terima kasih' },
     { text: 'good morning', lang: 'de', expected: 'Guten Morgen' },
-    { text: 'how are you', lang: 'yo', expected: 'Bawo ni o se wa?' },
-    { text: 'where is the file', lang: 'es', expected: '¿dónde está el archivo' }
+    { text: 'hello', lang: 'es', expected: 'hola' },
+    { text: 'where is the file', lang: 'ro', expected: 'unde este fișier' }
   ];
+
+  console.log('Testing direct translation across requested modules:');
+  for (const tc of testCasesHit) {
+    const res = fastTranslateSync(tc.text, tc.lang);
+    console.log(`  [${tc.lang.toUpperCase()}] "${tc.text}" => "${res}" (Expected: "${tc.expected}")`);
+  }
 
   const testCasesMiss = [
     { text: 'Supercalifragilisticexpialidocious quantum entanglement', lang: 'es' },

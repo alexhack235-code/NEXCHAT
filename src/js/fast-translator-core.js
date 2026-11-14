@@ -106,7 +106,14 @@ export function normalizeLangCode(lang) {
     'hausa': 'ha', 'ha': 'ha',
     'igbo': 'ig', 'ig': 'ig',
     'swahili': 'sw', 'sw': 'sw',
-    'tagalog': 'tl', 'tl': 'tl'
+    'tagalog': 'tl', 'tl': 'tl',
+    'pakistan': 'ur', 'urdu': 'ur', 'pk': 'ur', 'ur': 'ur',
+    'indonesia': 'id', 'indonesian': 'id', 'bahasa': 'id', 'id': 'id',
+    'malaysia': 'ms', 'malay': 'ms', 'ms': 'ms', 'my': 'ms',
+    'germany': 'de',
+    'romania': 'ro', 'romanian': 'ro', 'ro': 'ro',
+    'turkey': 'tr', 'turkish': 'tr', 'tr': 'tr',
+    'korea': 'ko', 'korean': 'ko', 'ko': 'ko'
   };
   return map[l] || l;
 }
