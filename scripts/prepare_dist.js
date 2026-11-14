@@ -36,11 +36,16 @@ for (const folder of folders) {
   }
 }
 
-// Copy root web files (e.g. gaminghub.js, sw.js) missed by Vite bundler
+// Copy root web files (e.g. gaminghub.js, sw.js, robots.txt, sitemap.xml) missed by Vite bundler
 const rootFileExtensions = ['.js', '.css', '.json', '.svg', '.ico', '.png', '.jpg', '.webp', '.html'];
+const sensitiveFiles = ['NEXCHAT_API_KEYS_FOR_DEVELOPER.txt', 'FIREBASE-SECURITY-RULES.txt', 'FIREBASE-STORAGE-RULES.txt', 'REALTIME-DATABASE-RULES.txt', 'AI_NEXT_TASKS.txt', 'NEXCHAT_BUG_HUNT_REPORT.txt', 'swarm-report.txt', 'tunnel_url.txt'];
+const allowedExtraFiles = ['robots.txt', 'sitemap.xml'];
+
 const rootFiles = fs.readdirSync('.').filter(file => {
+  if (sensitiveFiles.includes(file) || file.startsWith('.')) return false;
+  if (allowedExtraFiles.includes(file)) return true;
   const ext = path.extname(file).toLowerCase();
-  return rootFileExtensions.includes(ext) && !file.startsWith('.') && file !== 'vite.config.js';
+  return rootFileExtensions.includes(ext) && file !== 'vite.config.js';
 });
 
 for (const file of rootFiles) {

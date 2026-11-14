@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin-dashboard.html
+
+# Sitemap location for Googlebot, Bingbot and search crawlers
+Sitemap: https://nexchat-drab.vercel.app/sitemap.xml

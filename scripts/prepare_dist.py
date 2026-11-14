@@ -4,7 +4,7 @@ dist_dir = os.path.abspath('dist')
 os.makedirs(dist_dir, exist_ok=True)
 
 # Copy root web files only if missing, preserving Vite's minified production files
-extensions = ['*.html', '*.css', '*.js', '*.json', '*.jpg', '*.png', '*.svg', '*.ico', '*.webp']
+extensions = ['*.html', '*.css', '*.js', '*.json', '*.jpg', '*.png', '*.svg', '*.ico', '*.webp', '*.txt', '*.xml']
 copied_count = 0
 
 for ext in extensions:
