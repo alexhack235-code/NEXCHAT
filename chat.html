@@ -298,18 +298,18 @@
           <button id="cyberDropBtnHeader" class="header-icon-btn cyber-sub-tool" title="P2P CyberDrop Direct File Beam"><i class="fa-solid fa-share-nodes"></i></button>
           <button id="cipherVaultBtnHeader" class="header-icon-btn cyber-sub-tool" title="Cipher Vault &amp; Secret Rooms"><i class="fa-solid fa-key"></i></button>
           <button id="terminal-btn-header" class="header-icon-btn cyber-sub-tool" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
-          <button type="button" id="stealthGhostToggleBtn" class="header-icon-btn stealth-ghost-toggle-btn" title="Quantum Stealth Ghost Mode: Freeze presence &amp; read receipts (Ctrl+Shift+G)" aria-label="Toggle Stealth Ghost Mode" data-stealth-active="false">
+          <button type="button" id="stealthGhostToggleBtn" class="header-icon-btn stealth-ghost-toggle-btn cyber-sub-tool" title="Quantum Stealth Ghost Mode: Freeze presence &amp; read receipts (Ctrl+Shift+G)" aria-label="Toggle Stealth Ghost Mode" data-stealth-active="false">
             <div class="stealth-icon-container">
               <i class="fa-solid fa-ghost stealth-ghost-icon"></i>
               <span class="stealth-status-beacon" id="stealthStatusBeacon"></span>
             </div>
             <span class="stealth-btn-label">GHOST</span>
           </button>
-          <button type="button" id="aegisPrivacyShieldBtn" class="header-icon-btn aegis-privacy-toggle-btn" title="Aegis Privacy Shield: Anti-Shoulder Surfing Blur (Ctrl+Shift+P)" aria-label="Toggle Aegis Privacy Shield" data-aegis-active="false">
+          <button type="button" id="aegisPrivacyShieldBtn" class="header-icon-btn aegis-privacy-toggle-btn cyber-sub-tool" title="Aegis Privacy Shield: Anti-Shoulder Surfing Blur (Ctrl+Shift+P)" aria-label="Toggle Aegis Privacy Shield" data-aegis-active="false">
             <i class="fa-solid fa-user-secret" style="color: #00f3ff;"></i>
             <span class="aegis-btn-label">AEGIS</span>
           </button>
-          <button id="ghostPanicLockBtn" class="header-icon-btn ghost-lock-btn" title="Ghost Panic Shield (Ctrl+Shift+L)"><i class="fa-solid fa-shield-virus"></i></button>
+          <button id="ghostPanicLockBtn" class="header-icon-btn ghost-lock-btn cyber-sub-tool" title="Ghost Panic Shield (Ctrl+Shift+L)"><i class="fa-solid fa-shield-virus"></i></button>
           <button id="holoAvatarBtnHeader" class="header-icon-btn cyber-sub-tool" title="3D Holographic Avatar Studio" onclick="window.holographicAvatarsEngine?.openModal()"><i class="fa-solid fa-cube text-[#00ff66]"></i></button>
           <button id="broadcastChannelsBtnHeader" class="header-icon-btn cyber-sub-tool" title="Tactical Broadcast Channels" onclick="window.broadcastChannelsEngine?.openModal()"><i class="fa-solid fa-tower-broadcast text-[#00f3ff]"></i></button>
           <button id="cyberMatrixBtnHeader" class="header-icon-btn cyber-sub-tool" title="100 Cyber Feature Matrix Toggles" onclick="window.cyberFeatureMatrix?.openModal()"><i class="fa-solid fa-sliders text-[#00f3ff]"></i></button>
@@ -9041,7 +9041,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
      Colorway: Deep Obsidian (#060913), Threat Crimson (#ef4444), Amber (#f59e0b)
      Strictly 0 Unicode Emojis (FontAwesome 6 Icons Only)
      ========================================================================== -->
-<div class="settings-card shredder-core-card" id="shredderCoreSettingsCard">
+<div class="settings-card shredder-core-card" id="shredderCoreSettingsCard" style="display: none;">
   <div class="shredder-card-header">
     <div class="shredder-title-group">
       <div class="shredder-icon-box">

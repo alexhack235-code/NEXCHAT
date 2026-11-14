@@ -3703,7 +3703,10 @@ export {
   initAudioSpaces,
   initCyberDrop,
   initCipherVault,
-  initMeshSettings
+  initMeshSettings,
+  setupStorageSettingsListeners,
+  setupBiometricSecurityListeners,
+  setupLinkedDevicesManager
 };
 
 // ============================================================================
@@ -4325,6 +4328,7 @@ if (typeof window !== 'undefined') {
   if (typeof executeInChatSearch === 'function') window.executeInChatSearch = executeInChatSearch;
   if (typeof setupMediaLightbox === 'function') window.setupMediaLightbox = setupMediaLightbox;
   if (typeof setupStorageSettingsListeners === 'function') window.setupStorageSettingsListeners = setupStorageSettingsListeners;
+  if (typeof setupBiometricSecurityListeners === 'function') window.setupBiometricSecurityListeners = setupBiometricSecurityListeners;
   if (typeof setupBiometricPasskeysListeners === 'function') window.setupBiometricPasskeysListeners = setupBiometricPasskeysListeners;
   if (typeof setupLinkedDevicesManager === 'function') window.setupLinkedDevicesManager = setupLinkedDevicesManager;
   if (typeof setupEnhancedSoundAlertListeners === 'function') window.setupEnhancedSoundAlertListeners = setupEnhancedSoundAlertListeners;

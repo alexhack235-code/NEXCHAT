@@ -119,7 +119,13 @@ import {
 
   initCipherVault,
 
-  initMeshSettings
+  initMeshSettings,
+
+  setupStorageSettingsListeners,
+
+  setupBiometricSecurityListeners,
+
+  setupLinkedDevicesManager
 } from "./chat2.js";
 
 /**
@@ -35341,39 +35347,39 @@ const messagesArea = document.getElementById('messages-area');
 
 const bootAllFeatures = () => {
   const subsystems = [
-    ['NexbotStudio', initNexbotStudio],
+    ['NexbotStudio', () => (typeof initNexbotStudio === 'function' ? initNexbotStudio() : window.initNexbotStudio?.())],
 
-    ['NeuralRadar', initNeuralRadar],
+    ['NeuralRadar', () => (typeof initNeuralRadar === 'function' ? initNeuralRadar() : window.initNeuralRadar?.())],
 
-    ['VipVault', initVipVault],
+    ['VipVault', () => (typeof initVipVault === 'function' ? initVipVault() : window.initVipVault?.())],
 
-    ['GhostProtocol', initGhostProtocol],
+    ['GhostProtocol', () => (typeof initGhostProtocol === 'function' ? initGhostProtocol() : window.initGhostProtocol?.())],
 
-    ['CyberStreak', initCyberStreak],
+    ['CyberStreak', () => (typeof initCyberStreak === 'function' ? initCyberStreak() : window.initCyberStreak?.())],
 
-    ['SmartReplyAndPolish', initSmartReplyAndPolish],
+    ['SmartReplyAndPolish', () => (typeof initSmartReplyAndPolish === 'function' ? initSmartReplyAndPolish() : window.initSmartReplyAndPolish?.())],
 
-    ['NeuralSoundboard', initNeuralSoundboard],
+    ['NeuralSoundboard', () => (typeof initNeuralSoundboard === 'function' ? initNeuralSoundboard() : window.initNeuralSoundboard?.())],
 
-    ['AudioSpaces', initAudioSpaces],
+    ['AudioSpaces', () => (typeof initAudioSpaces === 'function' ? initAudioSpaces() : window.initAudioSpaces?.())],
 
-    ['CyberDrop', initCyberDrop],
+    ['CyberDrop', () => (typeof initCyberDrop === 'function' ? initCyberDrop() : window.initCyberDrop?.())],
 
-    ['CipherVault', initCipherVault],
+    ['CipherVault', () => (typeof initCipherVault === 'function' ? initCipherVault() : window.initCipherVault?.())],
 
-    ['MeshSettings', initMeshSettings],
+    ['MeshSettings', () => (typeof initMeshSettings === 'function' ? initMeshSettings() : window.initMeshSettings?.())],
 
-    ['MobileFeatures', setupMobileFeatures],
+    ['MobileFeatures', () => (typeof setupMobileFeatures === 'function' ? setupMobileFeatures() : window.setupMobileFeatures?.())],
 
-    ['LanguageOnboarding', setupNewUserLanguageOnboarding],
+    ['LanguageOnboarding', () => (typeof setupNewUserLanguageOnboarding === 'function' ? setupNewUserLanguageOnboarding() : window.setupNewUserLanguageOnboarding?.())],
 
-    ['StorageSettings', setupStorageSettingsListeners],
+    ['StorageSettings', () => (typeof setupStorageSettingsListeners === 'function' ? setupStorageSettingsListeners() : window.setupStorageSettingsListeners?.())],
 
-    ['BiometricSecurity', setupBiometricSecurityListeners],
+    ['BiometricSecurity', () => (typeof setupBiometricSecurityListeners === 'function' ? setupBiometricSecurityListeners() : window.setupBiometricSecurityListeners?.())],
 
-    ['LinkedDevicesManager', setupLinkedDevicesManager],
+    ['LinkedDevicesManager', () => (typeof setupLinkedDevicesManager === 'function' ? setupLinkedDevicesManager() : window.setupLinkedDevicesManager?.())],
 
-    ['EnhancedSoundAlerts', setupEnhancedSoundAlertListeners]
+    ['EnhancedSoundAlerts', () => (typeof setupEnhancedSoundAlertListeners === 'function' ? setupEnhancedSoundAlertListeners() : window.setupEnhancedSoundAlertListeners?.())]
   ];
 
   subsystems.forEach(([name, fn]) => {
