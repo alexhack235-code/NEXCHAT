@@ -32,17 +32,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-    // NEXCHAT INSTANT CACHE BUSTER & BUILD GUARD (STRICTLY FORCES PURGE ON NEW BUILD OR FRESH LOGIN)
+    // NEXCHAT STABLE BUILD GUARD (NO RELOAD LOOPS)
     (function() {
       const BUILD_ID = 'v12_20261114_FRESH_RELEASE';
-      const storedBuild = localStorage.getItem('nex_build_version');
-      const isNewBuild = storedBuild !== BUILD_ID;
-      const isFreshLogin = sessionStorage.getItem('nex_fresh_login_refresh') === 'true' || window.location.search.includes('fresh=');
-
-      if (window.location.search.includes('fresh=')) {
-        const cleanUrl = window.location.pathname + window.location.hash;
-        window.history.replaceState(null, '', cleanUrl);
-      }
+      localStorage.setItem('nex_build_version', BUILD_ID);
 
       // Purge any stale chat selection from storage to prevent ever reloading to an empty user chat
       try {
@@ -55,30 +48,6 @@
           localStorage.removeItem('active_chat_user');
         }
       } catch (_) {}
-
-      // If new build or fresh login, wipe caches and unregister service workers immediately
-      if (isNewBuild || isFreshLogin) {
-        localStorage.setItem('nex_build_version', BUILD_ID);
-        sessionStorage.setItem('nex_cache_purged_session', 'true');
-        try {
-          sessionStorage.removeItem('nex_fresh_login_refresh');
-        } catch (_) {}
-        if ('caches' in window) {
-          caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).catch(() => {});
-        }
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(regs => {
-            regs.forEach(r => {
-              r.unregister().catch(() => {});
-            });
-          }).catch(() => {});
-        }
-        // If updating to a new build, reload once to guarantee clean in-memory scripts
-        if (isNewBuild && !window.location.search.includes('fresh=12')) {
-          const sep = window.location.search ? '&' : '?';
-          window.location.replace(window.location.pathname + (window.location.search ? window.location.search + '&fresh=12' : '?fresh=12') + window.location.hash);
-        }
-      }
     })();
   </script>
   <script>
@@ -133,9 +102,48 @@
   <link rel="stylesheet" href="css/stealth-sensors.css">
   <link rel="stylesheet" href="css/nex-status-audio.css">
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/jpeg" href="https://nexchat-drab.vercel.app/logo.jpg">
+  <link rel="apple-touch-icon" href="https://nexchat-drab.vercel.app/logo.jpg">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
+  <script>
+    /* IMMEDIATE ATTACHMENT HUB CONTROLLER (DEFENSIVE PRE-BOOT) */
+    window.openAttachmentHub = function() {
+      const hubEl = document.getElementById('attachmentPopupHub');
+      if (!hubEl) return;
+      hubEl.classList.add('active', 'is-open');
+      hubEl.style.setProperty('display', 'grid', 'important');
+    };
+    window.closeAttachmentHub = function() {
+      const hubEl = document.getElementById('attachmentPopupHub');
+      if (!hubEl) return;
+      hubEl.classList.remove('active', 'is-open');
+      hubEl.style.setProperty('display', 'none', 'important');
+    };
+    window.toggleAttachmentHub = function(e) {
+      if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+      }
+      const hubEl = document.getElementById('attachmentPopupHub');
+      if (!hubEl) return;
+      const isOpen = hubEl.classList.contains('active') || hubEl.classList.contains('is-open') || (hubEl.style.display && hubEl.style.display !== 'none');
+      if (isOpen) {
+        window.closeAttachmentHub();
+      } else {
+        window.openAttachmentHub();
+      }
+    };
+    document.addEventListener('click', function(e) {
+      const hubEl = document.getElementById('attachmentPopupHub');
+      const btn = document.getElementById('btnToggleAttachmentHub');
+      if (!hubEl || !btn) return;
+      if (!hubEl.contains(e.target) && !btn.contains(e.target)) {
+        window.closeAttachmentHub();
+      }
+    });
+  </script>
   <!-- CHRONEXX AI PROFESSIONAL LAYOUT & NEURAL VOICE STYLES -->
   <style>
     .chronex-ai-bubble {
@@ -1806,7 +1814,7 @@
               <button type="button" id="sticker-btn" class="input-inline-btn sticker-toggle-btn" title="Stickers" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
               <input type="text" id="message-input" class="message-input nex-input flex-1 min-w-0 w-full h-[48px] min-h-[48px] px-4 py-3 text-[15px] leading-[48px] whitespace-nowrap overflow-hidden truncate rounded-full bg-[#2a3942] text-white placeholder:text-[#8696a0] outline-none" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" />
               <button type="button" id="voiceDictateBtn" class="input-inline-btn voice-dictate-btn" style="display: none !important;" title="Voice to Text &amp; Translate"><i class="fa-solid fa-microphone-lines"></i></button>
-              <button type="button" id="btnToggleAttachmentHub" class="input-inline-btn" title="Attachment Hub" style="color: #cbd5e1;" onclick="window.toggleAttachmentHub(event);"><i class="fa-solid fa-paperclip"></i></button>
+              <button type="button" id="btnToggleAttachmentHub" class="input-inline-btn" title="Attachment Hub" style="color: #cbd5e1;" onclick="if(typeof window.toggleAttachmentHub==='function'){window.toggleAttachmentHub(event);}else{const h=document.getElementById('attachmentPopupHub');if(h){const isO=h.style.display==='grid'||h.classList.contains('active');h.style.display=isO?'none':'grid';h.classList.toggle('active',!isO);}}"><i class="fa-solid fa-paperclip"></i></button>
               <button type="button" id="camera-btn" class="input-inline-btn chat-camera-inline-btn" title="Take photo or video" onclick="document.getElementById('file-input')?.click();"><i class="fa-solid fa-camera"></i></button>
               <button type="button" id="aiPolishInputBtn" class="input-inline-btn ai-polish-inline-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
             </div>

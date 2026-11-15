@@ -205,24 +205,8 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' })
     .then(reg => {
       reg.update().catch(() => {});
-      reg.onupdatefound = () => {
-        const newWorker = reg.installing;
-        if (newWorker) {
-          newWorker.onstatechange = () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('[NEXCHAT PWA] New Service Worker active, reloading page...');
-              window.location.reload();
-            }
-          };
-        }
-      };
     })
     .catch(err => {
       console.warn('[NEXCHAT PWA] Service Worker registration failed:', err);
     });
-
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    console.log('[NEXCHAT PWA] Service worker controller changed, refreshing...');
-    window.location.reload();
-  });
 }

@@ -556,11 +556,7 @@ if (document.readyState === 'loading') {
 const loginForm = document.getElementById('loginForm');
 
 let loaderWatchdog = null;
-
-// ============================================================================
-// NEXCHAT QUANTUM DECRYPTION CINEMATIC INTRO ENGINE
-// Combines 4 progressive philosophical phrases while 3D tesseract rolls
-// ============================================================================
+  
 const NEX_CINEMATIC_PHRASES = [
   "WHAT IF PRIVACY WAS NOT A PRIVILEGE, BUT ABSOLUTE POWER?",
   "IN A WORLD OF TOTAL SURVEILLANCE, TRUE FREEDOM LIES IN THE ENCLAVE.",
@@ -1244,7 +1240,7 @@ function initNexshotFusionIntro() {
         const finalTimer = setTimeout(() => {
           if (!isIntroActive) return;
           if (typewriterText) {
-            typewriterText.textContent = "[NEXCHAT QUANTUM CORE ENGAGED // ACCESS GRANTED]";
+            typewriterText.textContent = "[NEXCHAT QUANTUM CORE ENGAGED // ACCESS INITIATING........... AUTHORISATION COMPLETE..... ACCESS GRANTED]";
           }
           if (phaseBadge) phaseBadge.textContent = "CORE SEALED";
           playMajesticChord();
