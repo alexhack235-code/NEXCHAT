@@ -882,11 +882,20 @@ let myTypingDebounceTimer = null; // Timer to auto-stop my outgoing typing broad
 
 let otherTypingAutoDismissTimer = null; // Timer to auto-hide incoming indicator after 3s (Fixes Infinity Bug)
 
-let myUID = null;
-let myUsername = null;
+let myUID = localStorage.getItem('myUID') || localStorage.getItem('auth_uid') || null;
+let myUsername = localStorage.getItem('myUsername') || localStorage.getItem('auth_username') || localStorage.getItem('username') || localStorage.getItem('auth_name') || null;
 let currentJoinModalGroupId = null;
 let currentJoinRequestDocId = null;
-let myProfilePic = null;
+let myProfilePic = localStorage.getItem('myProfilePic') || localStorage.getItem('auth_profile_pic') || null;
+if (myUID) window.myUID = myUID;
+if (myUsername) window.myUsername = myUsername;
+if (myProfilePic) window.myProfilePic = myProfilePic;
+try {
+  const earlyCachedContacts = JSON.parse(localStorage.getItem('nex_cached_contacts_' + (myUID || '')) || '[]');
+  if (Array.isArray(earlyCachedContacts) && earlyCachedContacts.length > 0) {
+    window.loadedContactData = earlyCachedContacts;
+  }
+} catch (_) {}
 let tokens = 0;
 const GROUP_DEFENSE_BOT_ID = 'group_defense_bot';
 let currentMuteGroupId = null;
@@ -15003,7 +15012,13 @@ const chatDetailView = document.getElementById('chatDetailView');
                           (window.cachedUsers && window.cachedUsers.find(u => (u.uid || u.id) === uid));
     if (cachedContact && (cachedContact.name || cachedContact.username || cachedContact.displayName)) {
       resolvedName = cachedContact.name || cachedContact.username || cachedContact.displayName;
+    } else {
+      const persistedName = localStorage.getItem('contact_name_' + uid);
+      if (persistedName) resolvedName = persistedName;
     }
+  }
+  if (resolvedName && resolvedName !== 'User' && resolvedName !== 'Chat' && resolvedName !== 'Contact' && resolvedName !== 'direct') {
+    try { localStorage.setItem('contact_name_' + uid, resolvedName); } catch (_) {}
   }
 
   const cleanHeaderName = cleanChatDisplayName(resolvedName, chatType === 'group');
@@ -15250,7 +15265,10 @@ showNotif("ChronEX AI Neural Interface Active", "info", 2000);
 
 if (userDoc.exists()) {
           userData = userDoc.data();
-          const freshName = userData.username || userData.name || username || 'User';
+          const freshName = userData.username || userData.name || userData.displayName || username || localStorage.getItem('contact_name_' + uid) || 'User';
+          if (freshName && freshName !== 'User') {
+            try { localStorage.setItem('contact_name_' + uid, freshName); } catch (_) {}
+          }
           const freshPic = userData.profilePic || profilePic || 'logo.jpg';
           const chatNameEl = document.getElementById("chatName");
 
@@ -21203,8 +21221,8 @@ function openSettingsModal() {
 
 // Synchronize Verified User Profile in Profile Tab
 
-    const currentName = window.myUsername || (window.auth && window.auth.currentUser && window.auth.currentUser.displayName) || 'NEX Operative';
-    const currentPic = window.myProfilePic || (window.auth && window.auth.currentUser && window.auth.currentUser.photoURL) || 'logo.jpg';
+    const currentName = window.myUsername || (window.auth && window.auth.currentUser && window.auth.currentUser.displayName) || localStorage.getItem('myUsername') || localStorage.getItem('auth_username') || localStorage.getItem('username') || 'NEX Operative';
+    const currentPic = window.myProfilePic || (window.auth && window.auth.currentUser && window.auth.currentUser.photoURL) || localStorage.getItem('myProfilePic') || localStorage.getItem('auth_profile_pic') || 'logo.jpg';
     const currentHandle = '@' + currentName.toLowerCase().replace(/[^a-z0-9_]/g, '_');
     const tabPic = document.getElementById('tabProfilePic');
     const tabName = document.getElementById('tabProfileName');
@@ -23970,41 +23988,65 @@ if (user) {
 
       sessionStorage.removeItem('auth_redirect_block');
 
-myUID = user.uid;
-
+      myUID = user.uid;
       window.myUID = user.uid;
+      localStorage.setItem('auth_uid', user.uid);
+      localStorage.setItem('myUID', user.uid);
+
+      // Instant synchronous profile hydration from local cache to prevent 'User' fallback
+      const cachedUsername = localStorage.getItem('myUsername') || localStorage.getItem('auth_username') || localStorage.getItem('username') || localStorage.getItem('auth_name') || user.displayName || '';
+      if (cachedUsername) {
+        myUsername = cachedUsername;
+        window.myUsername = cachedUsername;
+      }
+      const cachedPic = localStorage.getItem('myProfilePic') || localStorage.getItem('auth_profile_pic') || user.photoURL || '';
+      if (cachedPic) {
+        myProfilePic = cachedPic;
+        window.myProfilePic = cachedPic;
+      }
+      if (myProfilePic || myUsername) {
+        updateProfileSticker(myProfilePic, myUsername);
+      }
 
       pageInitializedForCurrentUser = true;
 
       console.log(" User authenticated:", myUID);
 
       // Initialize WhatsApp-style Web Push Notifications
-
       try { initWebPushNotifications(); } catch (_) {}
 
-const authEmail = user.email || localStorage.getItem('auth_email') || '';
-
+      const authEmail = user.email || localStorage.getItem('auth_email') || '';
       if (authEmail) {
         window.myEmail = authEmail;
-
         localStorage.setItem('auth_email', authEmail);
       }
 
-if (typeof chronexAI !== 'undefined' && chronexAI.setUserId) {
+      if (typeof chronexAI !== 'undefined' && chronexAI.setUserId) {
         chronexAI.setUserId(myUID);
       }
 
-try {
+      try {
         const userDoc = await getDoc(doc(db, "users", myUID));
 
         if (userDoc.exists()) {
           const userData = userDoc.data();
+          const freshUsername = userData.username || userData.name || userData.displayName || user.displayName || cachedUsername || "";
+          if (freshUsername) {
+            myUsername = freshUsername;
+            window.myUsername = freshUsername;
+            localStorage.setItem('myUsername', freshUsername);
+            localStorage.setItem('auth_username', freshUsername);
+            localStorage.setItem('username', freshUsername);
+            localStorage.setItem('auth_name', freshUsername);
+          }
 
-          myUsername = userData.username || "";
-
-          window.myUsername = myUsername;
-
-          myProfilePic = userData.profilePic || userData.profilePicUrl || "";
+          const freshPic = userData.profilePic || userData.profilePicUrl || user.photoURL || cachedPic || "";
+          if (freshPic) {
+            myProfilePic = freshPic;
+            window.myProfilePic = freshPic;
+            localStorage.setItem('myProfilePic', freshPic);
+            localStorage.setItem('auth_profile_pic', freshPic);
+          }
 const userEmail = userData.email || user.email || localStorage.getItem('auth_email') || '';
 
           if (userEmail) {
@@ -32927,6 +32969,9 @@ let chronexLi = null;
     const cached = JSON.parse(localStorage.getItem('nex_cached_contacts_' + myUID) || '[]');
 
     if (Array.isArray(cached) && cached.length > 0) {
+      if (!Array.isArray(window.loadedContactData) || window.loadedContactData.length === 0) {
+        window.loadedContactData = cached;
+      }
       preWarmRecentChatsFromIndexedDB(cached).catch(() => {});
 
       cached.forEach(data => {
@@ -35930,6 +35975,39 @@ if (cloudPolished && cloudPolished.trim().length > 0 && cloudPolished.trim() !==
 window.triggerAiPolishDraft = triggerAiPolishDraft;
 
 // 22-App Attachment Hub Action Dispatcher
+window.openAttachmentHub = function() {
+  const hubEl = document.getElementById('attachmentPopupHub');
+  if (!hubEl) return;
+  hubEl.classList.add('active', 'is-open');
+  hubEl.style.setProperty('display', 'grid', 'important');
+};
+
+window.closeAttachmentHub = function() {
+  const hubEl = document.getElementById('attachmentPopupHub');
+  if (!hubEl) return;
+  hubEl.classList.remove('active', 'is-open');
+  hubEl.style.setProperty('display', 'none', 'important');
+};
+
+window.toggleAttachmentHub = function(e) {
+  if (e) {
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+  }
+  const hubEl = document.getElementById('attachmentPopupHub');
+  if (!hubEl) return;
+  const now = Date.now();
+  if (hubEl._lastToggleTime && (now - hubEl._lastToggleTime < 250)) {
+    return;
+  }
+  hubEl._lastToggleTime = now;
+  const isOpen = hubEl.classList.contains('active') || hubEl.classList.contains('is-open') || (hubEl.style.display && hubEl.style.display !== 'none');
+  if (isOpen) {
+    window.closeAttachmentHub();
+  } else {
+    window.openAttachmentHub();
+  }
+};
 
 function initAttachmentHubActions() {
   const hub = document.getElementById('attachmentPopupHub');
