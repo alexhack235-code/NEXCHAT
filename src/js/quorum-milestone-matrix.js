@@ -255,6 +255,10 @@
       const hud = document.getElementById('nexQuorumHud');
       if (!hud) return;
 
+      if (!this.state.isHudVisible) {
+        hud.style.display = 'none';
+        return;
+      }
       hud.style.display = 'flex';
       this.renderQuorumCard();
       this.renderMilestonesTrack();

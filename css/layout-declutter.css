@@ -21,8 +21,20 @@ display: none !important;
 .desktop-header-actions {
 display: flex !important;
 align-items: center !important;
-gap: 10px !important;
+gap: 6px !important;
 flex-wrap: nowrap !important;
+overflow-x: auto !important;
+scrollbar-width: none !important;
+-webkit-overflow-scrolling: touch !important;
+}
+
+.desktop-header-actions::-webkit-scrollbar {
+display: none !important;
+}
+
+.desktop-header-actions .header-icon-btn,
+.desktop-header-actions .cyber-suite-hub-btn {
+flex-shrink: 0 !important;
 }
 
 /* Secondary cyber tools are grouped inside the Cyber Suite Hub, preserving primary translator access */
@@ -57,6 +69,51 @@ border-color: #00f2ff !important;
 color: #fff !important;
 transform: translateY(-1px) !important;
 box-shadow: 0 0 18px rgba(0, 242, 255, 0.35) !important;
+}
+
+/* Viewport-Anchored Chat Workspace & Pinned Message Input Bar */
+.chat-main {
+height: calc(100vh - 68px) !important;
+height: calc(100dvh - 68px) !important;
+max-height: calc(100vh - 68px) !important;
+max-height: calc(100dvh - 68px) !important;
+overflow: hidden !important;
+position: relative !important;
+}
+
+.chat-detail-view,
+#chatDetailView {
+height: 100% !important;
+max-height: 100% !important;
+display: flex !important;
+flex-direction: column !important;
+overflow: hidden !important;
+position: relative !important;
+}
+
+.chat-detail-header {
+flex-shrink: 0 !important;
+position: sticky !important;
+top: 0 !important;
+z-index: 10 !important;
+}
+
+.messages-area,
+#messages-area,
+.chat-messages {
+flex: 1 1 0% !important;
+min-height: 0 !important;
+overflow-y: auto !important;
+overscroll-behavior: contain !important;
+}
+
+.chat-input-wrapper,
+.message-input-area,
+#messageInputArea {
+flex-shrink: 0 !important;
+position: sticky !important;
+bottom: 0 !important;
+z-index: 25 !important;
 }
 
 }

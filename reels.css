@@ -7880,6 +7880,14 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   transform: scale(1.05) !important;
 }
 
+.reels-header-center {
+  position: static !important;
+  transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 .reels-feed-tabs {
   display: flex !important;
   align-items: center !important;
