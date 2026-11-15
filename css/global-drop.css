@@ -315,6 +315,14 @@
   .x-stream-list {
     padding-bottom: 84px;
   }
+  /* Ensure the 6-tab bottom nav label for Global Drop fits without ellipsis */
+  #nav-global-drop .nav-label {
+    font-size: 9.5px !important;
+    letter-spacing: -0.4px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
 }
 
 /* Sticky Header with Sliding Underline Tabs */
