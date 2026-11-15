@@ -14,6 +14,14 @@
   const STORAGE_KEY = 'nex_chronexx_voice_persona';
 
   const PERSONAS = {
+    'gemini_natural': {
+      id: 'gemini_natural',
+      name: 'Gemini Neural Voice',
+      pitch: 1.0,
+      rate: 1.0,
+      dspFilter: 'none',
+      description: 'Balanced, warm, articulate natural voice modeled after Gemini conversational voice AI.'
+    },
     'cyber_operative': {
       id: 'cyber_operative',
       name: 'Cyberpunk Operative',
@@ -51,7 +59,7 @@
   const NexChronexxVoicePersonas = {
     getActivePersona() {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return PERSONAS[saved] || PERSONAS['cyber_operative'];
+      return PERSONAS[saved] || PERSONAS['gemini_natural'];
     },
 
     setPersona(id) {
@@ -79,9 +87,11 @@
       utterance.pitch = persona.pitch;
       utterance.rate = persona.rate;
 
-      // Select suitable English system voice if available
+      // Select suitable English system voice prioritizing Google and Neural Natural voices
       const voices = window.speechSynthesis.getVoices();
-      const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('David')));
+      const preferred = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Google US English') || v.name.includes('Google UK English Female') || v.name.includes('Google') || v.name.includes('Jenny') || v.name.includes('Natural') || v.name.includes('Neural2'))) ||
+                        voices.find(v => v.lang.startsWith('en') && !v.name.includes('eSpeak')) ||
+                        voices[0];
       if (preferred) utterance.voice = preferred;
 
       window.speechSynthesis.speak(utterance);

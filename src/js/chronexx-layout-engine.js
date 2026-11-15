@@ -293,8 +293,8 @@
       this.activePlayerEl = null;
       this.timerInterval = null;
       this.elapsedSec = 0;
-      this.playbackRate = 1.05;
-      this.pitch = 1.02;
+      this.playbackRate = 1.0;
+      this.pitch = 1.0;
     }
 
     cleanTextForSpeech(rawText) {
@@ -392,9 +392,12 @@
       utterance.rate = this.playbackRate;
       utterance.pitch = this.pitch;
 
-      // Select high quality voice if available
+      // Select high quality voice prioritizing Google and Natural Neural voices
       const voices = this.synth.getVoices();
-      const preferredVoice = voices.find(v => (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Neural')) && v.lang.startsWith('en')) || voices.find(v => v.lang.startsWith('en')) || voices[0];
+      const preferredVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Google US English') || v.name.includes('Google UK English Female') || v.name.includes('Google') || v.name.includes('Jenny') || v.name.includes('Natural') || v.name.includes('Neural2'))) ||
+                             voices.find(v => (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Neural')) && v.lang.startsWith('en')) ||
+                             voices.find(v => v.lang.startsWith('en') && !v.name.includes('eSpeak')) ||
+                             voices[0];
       if (preferredVoice) utterance.voice = preferredVoice;
 
       utterance.onstart = () => {
