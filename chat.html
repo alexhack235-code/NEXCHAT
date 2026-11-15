@@ -541,7 +541,7 @@
               </button>
             </div>
 
-            <!-- Dual Sliding Underline Tabs: For you / Following -->
+            <!-- Tabs: For you / Following / Near you -->
             <div class="x-timeline-tabs" role="tablist">
               <button type="button" class="x-tab-btn active" data-mode="radar" id="globalDropTabRadar">
                 <div class="x-tab-text-wrap">
@@ -552,6 +552,12 @@
               <button type="button" class="x-tab-btn" data-mode="following" id="globalDropTabFollowing">
                 <div class="x-tab-text-wrap">
                   <span>Following</span>
+                  <div class="x-tab-active-indicator"></div>
+                </div>
+              </button>
+              <button type="button" class="x-tab-btn" data-mode="local" id="globalDropTabLocal">
+                <div class="x-tab-text-wrap">
+                  <span id="globalDropLocalTabLabel"><i class="fa-solid fa-location-crosshairs"></i> Near you</span>
                   <div class="x-tab-active-indicator"></div>
                 </div>
               </button>
@@ -625,6 +631,17 @@
                   <span id="globalDropVoiceTimer" class="x-voice-timer">0:00</span>
                 </div>
 
+                <!-- Location tag chip in composer -->
+                <div class="x-composer-location-row" id="globalDropComposerLocationRow" style="display: none;">
+                  <span class="x-composer-location-chip" id="globalDropComposerLocationChip">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span id="globalDropLocationLabel">Detecting location...</span>
+                    <button type="button" class="x-loc-remove-btn" id="globalDropRemoveLocationBtn" title="Remove location tag">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </span>
+                </div>
+
                 <!-- Audience reply privacy banner -->
                 <div class="x-reply-privacy-row">
                   <i class="fa-solid fa-earth-americas"></i>
@@ -645,6 +662,9 @@
                     </button>
                     <button type="button" class="x-tool-icon-btn" id="globalDropAddVoiceBtn" title="Audio Voice Drop">
                       <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <button type="button" class="x-tool-icon-btn" id="globalDropAddLocationBtn" title="Tag Geo-Location Pin">
+                      <i class="fa-solid fa-location-dot"></i>
                     </button>
 
                     <!-- Topic Selector -->

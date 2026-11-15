@@ -578,6 +578,70 @@
   color: var(--x-text-secondary);
 }
 
+/* Location tag chip in composer */
+.x-composer-location-row {
+  display: flex;
+  margin: 4px 0 6px 0;
+}
+
+.x-composer-location-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: var(--x-green-dim);
+  border: 1px solid rgba(0, 255, 136, 0.35);
+  color: var(--x-green);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.x-loc-remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--x-green);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0 0 0 2px;
+  display: flex;
+  align-items: center;
+}
+
+.x-loc-remove-btn:hover {
+  color: #ffffff;
+}
+
+/* Geo-Badge on Drop Cards in Timeline */
+.x-drop-geo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  background: var(--x-green-subtle);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  color: var(--x-green);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  margin-left: 4px;
+}
+
+.x-drop-geo-badge:hover {
+  background: var(--x-green-dim);
+  border-color: var(--x-green);
+  box-shadow: 0 0 8px var(--x-green-glow);
+}
+
+.x-drop-distance {
+  font-size: 11px;
+  color: var(--x-text-secondary);
+  font-family: var(--x-mono);
+  margin-left: 4px;
+}
+
 /* Reply privacy indicator row */
 .x-reply-privacy-row {
   display: flex;

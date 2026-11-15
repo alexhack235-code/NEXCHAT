@@ -28,7 +28,7 @@ import { uploadAnyMedia } from './media-upload.js';
 
 class GlobalDropEngine {
   constructor() {
-    this.currentMode = 'radar'; // 'radar' | 'following' | 'nodes'
+    this.currentMode = 'radar'; // 'radar' | 'following' | 'local' | 'nodes'
     this.currentTopic = 'all';  // 'all' | 'tech' | 'cybersec' | etc.
     this.unsubscribeFeed = null;
     this.selectedMediaFiles = [];
@@ -42,13 +42,16 @@ class GlobalDropEngine {
     this.audioChunks = [];
     this.isRecordingVoice = false;
     this.cachedDrops = [];
+    this.userLocation = null;
+    this.activeDropLocation = null;
+    this.selectedGeoFilter = null;
   }
 
   // ---------------------------------------------------------------------------
   // INITIALIZATION & EVENT BINDINGS
   // ---------------------------------------------------------------------------
   init() {
-    console.log('[GLOBAL DROP] Initializing Global Drop Microblogging Engine...');
+    console.log('[GLOBAL DROP] Initializing Global Drop Microblogging Engine with Geo-Locator...');
     this.bindHeaderTabs();
     this.bindTopicChips();
     this.bindComposer();
@@ -56,6 +59,7 @@ class GlobalDropEngine {
     this.bindMobileFab();
     this.bindGlobalEvents();
     this.loadSideWidgets();
+    this.initGeoLocator();
   }
 
   getUID() {
@@ -83,7 +87,13 @@ class GlobalDropEngine {
         tab.classList.add('active');
         const mode = tab.getAttribute('data-mode') || 'radar';
         this.currentMode = mode;
-        this.subscribeFeed();
+        if (mode === 'local' && !this.userLocation) {
+          this.detectUserLocation(false).then(() => {
+            this.filterAndRenderCachedDrops();
+          });
+        } else {
+          this.filterAndRenderCachedDrops();
+        }
       });
     });
 
@@ -310,6 +320,217 @@ class GlobalDropEngine {
   }
 
   // ---------------------------------------------------------------------------
+  // 2B. GEO-LOCATOR & SECTOR DETECTION
+  // ---------------------------------------------------------------------------
+  initGeoLocator() {
+    const addLocBtn = document.getElementById('globalDropAddLocationBtn');
+    const removeLocBtn = document.getElementById('globalDropRemoveLocationBtn');
+    const locRow = document.getElementById('globalDropComposerLocationRow');
+    const locLabel = document.getElementById('globalDropLocationLabel');
+
+    // Restore cached location from localStorage if fresh (< 12 hours)
+    try {
+      const cached = localStorage.getItem('nexchat_user_geo');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && (Date.now() - (parsed.timestamp || 0) < 12 * 3600 * 1000)) {
+          this.userLocation = parsed;
+          this.updateLocalTabLabel();
+        }
+      }
+    } catch (e) {
+      console.warn('[GLOBAL DROP GEO] Cache read error:', e);
+    }
+
+    // Proactively detect user location in background if not known
+    if (!this.userLocation) {
+      this.detectUserLocation(false);
+    }
+
+    // Tag location button in composer toolbar
+    addLocBtn?.addEventListener('click', async () => {
+      if (locRow) locRow.style.display = 'flex';
+      if (locLabel) locLabel.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting sector...';
+
+      const loc = await this.detectUserLocation(true);
+      if (loc) {
+        this.activeDropLocation = loc;
+        if (locLabel) locLabel.textContent = loc.label || `${loc.city}, ${loc.countryCode}`;
+      } else {
+        if (locLabel) locLabel.textContent = 'Global Matrix (Unknown)';
+        this.activeDropLocation = { city: 'Global', country: 'Earth', countryCode: 'GL', label: 'Global Matrix' };
+      }
+    });
+
+    // Remove location tag chip
+    removeLocBtn?.addEventListener('click', () => {
+      this.activeDropLocation = null;
+      if (locRow) locRow.style.display = 'none';
+      if (locLabel) locLabel.textContent = '';
+    });
+  }
+
+  async detectUserLocation(interactive = false) {
+    if (this.userLocation && !interactive) {
+      return this.userLocation;
+    }
+
+    // 1. Try Browser HTML5 Geolocation
+    const geoPromise = new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        return resolve(null);
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          // Privacy rounding: 2 decimal places (~1.1 km accuracy)
+          const lat = Math.round(pos.coords.latitude * 100) / 100;
+          const lng = Math.round(pos.coords.longitude * 100) / 100;
+          resolve({ lat, lng });
+        },
+        () => resolve(null),
+        { timeout: 5000, maximumAge: 300000, enableHighAccuracy: false }
+      );
+    });
+
+    try {
+      const coords = await geoPromise;
+      if (coords) {
+        // Reverse geocode via free reverse geocoding API or fallback
+        try {
+          const resp = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coords.lat}&longitude=${coords.lng}&localityLanguage=en`, { signal: AbortSignal.timeout(4000) });
+          if (resp.ok) {
+            const data = await resp.json();
+            const city = data.city || data.locality || data.principalSubdivision || 'Local Sector';
+            const country = data.countryName || 'Global';
+            const countryCode = data.countryCode || '';
+            const label = city + (countryCode ? `, ${countryCode}` : '');
+            this.userLocation = {
+              city,
+              country,
+              countryCode,
+              label,
+              lat: coords.lat,
+              lng: coords.lng,
+              timestamp: Date.now()
+            };
+            localStorage.setItem('nexchat_user_geo', JSON.stringify(this.userLocation));
+            this.updateLocalTabLabel();
+            return this.userLocation;
+          }
+        } catch (revErr) {
+          console.warn('[GLOBAL DROP GEO] Reverse geocode error:', revErr);
+        }
+      }
+    } catch (e) {
+      console.warn('[GLOBAL DROP GEO] Geolocation error:', e);
+    }
+
+    // 2. Fallback to IP Geolocation
+    const ipLoc = await this.fallbackIpLocation();
+    if (ipLoc) {
+      this.userLocation = ipLoc;
+      localStorage.setItem('nexchat_user_geo', JSON.stringify(this.userLocation));
+      this.updateLocalTabLabel();
+      return this.userLocation;
+    }
+
+    // 3. Fallback to Timezone inference
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const parts = tz.split('/');
+      const city = parts[parts.length - 1]?.replace(/_/g, ' ') || 'Local';
+      this.userLocation = {
+        city,
+        country: 'Global',
+        countryCode: '',
+        label: city,
+        lat: null,
+        lng: null,
+        timestamp: Date.now()
+      };
+      this.updateLocalTabLabel();
+      return this.userLocation;
+    } catch (tzErr) {
+      return null;
+    }
+  }
+
+  async fallbackIpLocation() {
+    try {
+      const res = await fetch('https://freeipapi.com/api/json', { signal: AbortSignal.timeout(3500) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.cityName) {
+          return {
+            city: data.cityName || 'Local Sector',
+            country: data.countryName || '',
+            countryCode: data.countryCode || '',
+            label: `${data.cityName}, ${data.countryCode || ''}`,
+            lat: data.latitude ? Math.round(data.latitude * 100) / 100 : null,
+            lng: data.longitude ? Math.round(data.longitude * 100) / 100 : null,
+            timestamp: Date.now()
+          };
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    try {
+      const res2 = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3500) });
+      if (res2.ok) {
+        const data2 = await res2.json();
+        if (data2 && data2.city) {
+          return {
+            city: data2.city || 'Local Sector',
+            country: data2.country_name || '',
+            countryCode: data2.country_code || '',
+            label: `${data2.city}, ${data2.country_code || ''}`,
+            lat: data2.latitude ? Math.round(data2.latitude * 100) / 100 : null,
+            lng: data2.longitude ? Math.round(data2.longitude * 100) / 100 : null,
+            timestamp: Date.now()
+          };
+        }
+      }
+    } catch (e2) {
+      // ignore
+    }
+
+    return null;
+  }
+
+  updateLocalTabLabel() {
+    const labelSpan = document.getElementById('globalDropLocalTabLabel');
+    if (!labelSpan) return;
+    if (this.userLocation?.city) {
+      labelSpan.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Near ${this.userLocation.city}`;
+    } else {
+      labelSpan.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Near you`;
+    }
+  }
+
+  getRawDistanceKm(lat1, lon1, lat2, lon2) {
+    if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return Infinity;
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const dist = this.getRawDistanceKm(lat1, lon1, lat2, lon2);
+    if (!isFinite(dist)) return null;
+    if (dist < 1) return '< 1 km away';
+    if (dist < 10) return `${dist.toFixed(1)} km away`;
+    return `${Math.round(dist)} km away`;
+  }
+
+  // ---------------------------------------------------------------------------
   // 3. TRANSMIT DROP (PUBLISH TO COLD-VAULT & FIRESTORE)
   // ---------------------------------------------------------------------------
   async transmitDrop() {
@@ -408,6 +629,7 @@ class GlobalDropEngine {
         authorPhoto: this.getAvatar(),
         authorVerified: true,
         content: content,
+        location: this.activeDropLocation || null,
         mediaUrls: mediaUrls.map(m => m.url),
         mediaItems: mediaUrls,
         mediaType: detectedMediaType,
@@ -448,6 +670,11 @@ class GlobalDropEngine {
       this.selectedMediaFiles = [];
       this.recordedVoiceBlob = null;
       this.codeSnippet = null;
+      this.activeDropLocation = null;
+      const locRow = document.getElementById('globalDropComposerLocationRow');
+      if (locRow) locRow.style.display = 'none';
+      const locLabel = document.getElementById('globalDropLocationLabel');
+      if (locLabel) locLabel.textContent = '';
       this.renderComposerMediaPreviews();
 
       if (window.showNotif) {
@@ -531,6 +758,46 @@ class GlobalDropEngine {
       const myUid = this.getUID();
       // Show user's own drops or mutual contacts
       list = list.filter(d => d.authorId === myUid);
+    } else if (this.currentMode === 'local') {
+      // Local Radar mode: filter drops with location tag near user or active geo filter
+      if (this.selectedGeoFilter) {
+        const filterLower = this.selectedGeoFilter.toLowerCase();
+        list = list.filter(d => d.location && (
+          (d.location.city && d.location.city.toLowerCase() === filterLower) ||
+          (d.location.countryCode && d.location.countryCode.toLowerCase() === filterLower) ||
+          (d.location.label && d.location.label.toLowerCase().includes(filterLower))
+        ));
+      } else if (this.userLocation) {
+        const uLat = this.userLocation.lat;
+        const uLng = this.userLocation.lng;
+        const uCity = (this.userLocation.city || '').toLowerCase();
+        const uCountry = (this.userLocation.countryCode || '').toLowerCase();
+
+        list = list.filter(d => {
+          if (!d.location) return false;
+          // Match by city
+          if (uCity && d.location.city && d.location.city.toLowerCase() === uCity) return true;
+          // Match by country code
+          if (uCountry && d.location.countryCode && d.location.countryCode.toLowerCase() === uCountry) return true;
+          // Match by coordinates (< 500 km)
+          if (uLat != null && uLng != null && d.location.lat != null && d.location.lng != null) {
+            const dist = this.getRawDistanceKm(uLat, uLng, d.location.lat, d.location.lng);
+            return dist <= 500;
+          }
+          return false;
+        });
+      } else {
+        // Fallback: show drops that have any location tag
+        list = list.filter(d => Boolean(d.location));
+      }
+    } else if (this.selectedGeoFilter) {
+      // Radar / For You mode with active geo filter
+      const filterLower = this.selectedGeoFilter.toLowerCase();
+      list = list.filter(d => d.location && (
+        (d.location.city && d.location.city.toLowerCase() === filterLower) ||
+        (d.location.countryCode && d.location.countryCode.toLowerCase() === filterLower) ||
+        (d.location.label && d.location.label.toLowerCase().includes(filterLower))
+      ));
     }
 
     // Filter by topic
@@ -553,19 +820,56 @@ class GlobalDropEngine {
     const container = document.getElementById('globalDropStreamList');
     if (!container) return;
 
-    if (!drops.length) {
-      container.innerHTML = `
-        <div style="padding: 60px 20px; text-align: center; color: var(--x-text-secondary); border-bottom: 1px solid var(--x-border);">
-          <i class="fa-solid fa-earth-americas" style="font-size: 38px; color: var(--x-green); margin-bottom: 14px; display: block; opacity: 0.85; filter: drop-shadow(0 0 14px var(--x-green-glow));"></i>
-          <h3 style="font-size: 19px; font-weight: 800; color: #ffffff; margin-bottom: 6px;">Welcome to Global Drop!</h3>
-          <p style="font-size: 14px; color: var(--x-text-secondary); max-width: 380px; margin: 0 auto; line-height: 1.45;">This is the best place to see what is happening in the cyber matrix right now. Transmit your first drop above!</p>
-        </div>
-      `;
-      return;
-    }
-
     container.innerHTML = '';
     const myUid = this.getUID();
+
+    // Render active sector filter banner if filtered
+    if (this.selectedGeoFilter) {
+      const banner = document.createElement('div');
+      banner.className = 'x-geo-filter-banner';
+      banner.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: rgba(0, 255, 136, 0.08); border-bottom: 1px solid rgba(0, 255, 136, 0.2); font-size: 13px; color: var(--x-green);';
+      banner.innerHTML = `
+        <span style="display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-location-dot"></i>
+          <span>Filtered sector: <strong>${this.escapeHtml(this.selectedGeoFilter)}</strong></span>
+        </span>
+        <button type="button" id="globalDropClearGeoFilterBtn" style="background: transparent; border: none; color: #ffffff; cursor: pointer; font-size: 12px; font-weight: 600; text-decoration: underline;">
+          Clear filter
+        </button>
+      `;
+      container.appendChild(banner);
+
+      banner.querySelector('#globalDropClearGeoFilterBtn')?.addEventListener('click', () => {
+        this.selectedGeoFilter = null;
+        this.filterAndRenderCachedDrops();
+      });
+    }
+
+    if (!drops.length) {
+      const emptyDiv = document.createElement('div');
+      if (this.currentMode === 'local') {
+        const sectorName = this.userLocation?.city || 'your area';
+        emptyDiv.innerHTML = `
+          <div style="padding: 60px 20px; text-align: center; color: var(--x-text-secondary); border-bottom: 1px solid var(--x-border);">
+            <i class="fa-solid fa-location-crosshairs" style="font-size: 38px; color: var(--x-green); margin-bottom: 14px; display: block; opacity: 0.85; filter: drop-shadow(0 0 14px var(--x-green-glow));"></i>
+            <h3 style="font-size: 19px; font-weight: 800; color: #ffffff; margin-bottom: 6px;">No drops in your sector yet</h3>
+            <p style="font-size: 14px; color: var(--x-text-secondary); max-width: 400px; margin: 0 auto; line-height: 1.45;">
+              Be the pioneer to transmit the first Global Drop from ${this.escapeHtml(sectorName)}! Tag your sector with the location pin above to light up the radar.
+            </p>
+          </div>
+        `;
+      } else {
+        emptyDiv.innerHTML = `
+          <div style="padding: 60px 20px; text-align: center; color: var(--x-text-secondary); border-bottom: 1px solid var(--x-border);">
+            <i class="fa-solid fa-earth-americas" style="font-size: 38px; color: var(--x-green); margin-bottom: 14px; display: block; opacity: 0.85; filter: drop-shadow(0 0 14px var(--x-green-glow));"></i>
+            <h3 style="font-size: 19px; font-weight: 800; color: #ffffff; margin-bottom: 6px;">Welcome to Global Drop!</h3>
+            <p style="font-size: 14px; color: var(--x-text-secondary); max-width: 380px; margin: 0 auto; line-height: 1.45;">This is the best place to see what is happening in the cyber matrix right now. Transmit your first drop above!</p>
+          </div>
+        `;
+      }
+      container.appendChild(emptyDiv);
+      return;
+    }
 
     drops.forEach(drop => {
       const card = document.createElement('article');
@@ -585,6 +889,26 @@ class GlobalDropEngine {
       let ttlBadge = '';
       if (drop.ttl && drop.ttl !== 'permanent') {
         ttlBadge = `<span class="x-drop-ttl-badge" title="Auto-purges after ${drop.ttl}"><i class="fa-regular fa-clock"></i> ${drop.ttl}</span>`;
+      }
+
+      // Geo Location Badge
+      let geoBadgeHtml = '';
+      if (drop.location && (drop.location.city || drop.location.label)) {
+        const locLabel = this.escapeHtml(drop.location.city || drop.location.label);
+        let distBadge = '';
+        if (this.userLocation?.lat != null && this.userLocation?.lng != null && drop.location.lat != null && drop.location.lng != null) {
+          const distStr = this.calculateDistanceKm(this.userLocation.lat, this.userLocation.lng, drop.location.lat, drop.location.lng);
+          if (distStr) {
+            distBadge = `<span class="x-drop-distance">· ${distStr}</span>`;
+          }
+        }
+        geoBadgeHtml = `
+          <button type="button" class="x-drop-geo-badge" data-geo-city="${locLabel}" title="Filter stream by ${locLabel}">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>${locLabel}</span>
+            ${distBadge}
+          </button>
+        `;
       }
 
       // Text with highlighted tags
@@ -626,6 +950,7 @@ class GlobalDropEngine {
               <span class="x-drop-dot">·</span>
               <span class="x-drop-time">${timeStr}</span>
               ${ttlBadge}
+              ${geoBadgeHtml}
             </div>
             <button type="button" class="x-drop-more-btn global-drop-card-more-btn" data-drop-id="${drop.id}" title="More options">
               <i class="fa-solid fa-ellipsis"></i>
@@ -795,6 +1120,22 @@ class GlobalDropEngine {
     card.querySelector('.global-drop-card-more-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.openDropOptionsMenu(drop);
+    });
+
+    // 8. Geo location badge filter click
+    card.querySelector('.x-drop-geo-badge')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const city = e.currentTarget.dataset.geoCity;
+      if (city) {
+        if (this.selectedGeoFilter === city) {
+          this.selectedGeoFilter = null;
+          if (window.showNotif) window.showNotif('Showing all drops', 'info');
+        } else {
+          this.selectedGeoFilter = city;
+          if (window.showNotif) window.showNotif(`Filtering stream to sector: ${city}`, 'success');
+        }
+        this.filterAndRenderCachedDrops();
+      }
     });
   }
 
