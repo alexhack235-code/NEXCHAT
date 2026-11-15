@@ -73,8 +73,10 @@ class GlobalDropEngine {
   // ---------------------------------------------------------------------------
   // 1. HEADER & MODE SWITCHING
   // ---------------------------------------------------------------------------
+  // 1. HEADER & MODE SWITCHING
+  // ---------------------------------------------------------------------------
   bindHeaderTabs() {
-    const tabs = document.querySelectorAll('.global-drop-mode-pill');
+    const tabs = document.querySelectorAll('.x-tab-btn, .global-drop-mode-pill');
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
@@ -97,7 +99,7 @@ class GlobalDropEngine {
   }
 
   bindTopicChips() {
-    const chips = document.querySelectorAll('.global-drop-topic-chip');
+    const chips = document.querySelectorAll('.x-topic-chip, .global-drop-topic-chip');
     chips.forEach(chip => {
       chip.addEventListener('click', () => {
         chips.forEach(c => c.classList.remove('active'));
@@ -343,7 +345,7 @@ class GlobalDropEngine {
 
     if (transmitBtn) {
       transmitBtn.disabled = true;
-      transmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Transmitting...';
+      transmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Posting...</span>';
     }
 
     try {
@@ -459,7 +461,7 @@ class GlobalDropEngine {
     } finally {
       if (transmitBtn) {
         transmitBtn.disabled = false;
-        transmitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Transmit';
+        transmitBtn.innerHTML = '<span>Post</span>';
       }
     }
   }
@@ -545,7 +547,7 @@ class GlobalDropEngine {
   }
 
   // ---------------------------------------------------------------------------
-  // 5. DROP CARDS RENDERING (OBSIDIAN GLASS UI)
+  // 5. DROP CARDS RENDERING (OFFICIAL X CONTINUOUS TIMELINE ARCHITECTURE)
   // ---------------------------------------------------------------------------
   renderDrops(drops) {
     const container = document.getElementById('globalDropStreamList');
@@ -553,10 +555,10 @@ class GlobalDropEngine {
 
     if (!drops.length) {
       container.innerHTML = `
-        <div style="padding: 50px 20px; text-align: center; color: var(--drop-text-muted); background: var(--drop-card-bg); border: 1px solid var(--drop-card-border); border-radius: 16px;">
-          <i class="fa-solid fa-earth-americas" style="font-size: 36px; color: var(--drop-accent); margin-bottom: 14px; display: block; opacity: 0.6;"></i>
-          <p style="font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 6px;">Zero Dispatches in this Frequency</p>
-          <span style="font-size: 13px;">No Drops found for this topic filter. Transmit the first one above!</span>
+        <div style="padding: 60px 20px; text-align: center; color: var(--x-text-secondary); border-bottom: 1px solid var(--x-border);">
+          <i class="fa-solid fa-earth-americas" style="font-size: 38px; color: var(--x-green); margin-bottom: 14px; display: block; opacity: 0.85; filter: drop-shadow(0 0 14px var(--x-green-glow));"></i>
+          <h3 style="font-size: 19px; font-weight: 800; color: #ffffff; margin-bottom: 6px;">Welcome to Global Drop!</h3>
+          <p style="font-size: 14px; color: var(--x-text-secondary); max-width: 380px; margin: 0 auto; line-height: 1.45;">This is the best place to see what is happening in the cyber matrix right now. Transmit your first drop above!</p>
         </div>
       `;
       return;
@@ -566,14 +568,15 @@ class GlobalDropEngine {
     const myUid = this.getUID();
 
     drops.forEach(drop => {
-      const card = document.createElement('div');
-      card.className = 'global-drop-card';
+      const card = document.createElement('article');
+      card.className = 'x-drop-row global-drop-card';
       card.id = `drop-card-${drop.id}`;
+      card.dataset.dropId = drop.id;
 
       // Time format
       const timeStr = this.formatRelativeTime(drop.createdAtMs || (drop.createdAt?.seconds ? drop.createdAt.seconds * 1000 : Date.now()));
       const safeAuthor = this.escapeHtml(drop.authorName || 'Transmitter');
-      const safeHandle = this.escapeHtml(drop.authorHandle || 'node');
+      const safeHandle = this.escapeHtml(drop.authorHandle || (drop.authorName ? drop.authorName.toLowerCase().replace(/\s+/g, '_') : 'node'));
       const safeAvatar = drop.authorPhoto || 'logo.jpg';
       const isSignaled = Array.isArray(drop.likes) && drop.likes.includes(myUid);
       const isEchoed = Array.isArray(drop.echoes) && drop.echoes.includes(myUid);
@@ -581,11 +584,8 @@ class GlobalDropEngine {
       // Pinned / TTL badge
       let ttlBadge = '';
       if (drop.ttl && drop.ttl !== 'permanent') {
-        ttlBadge = `<span class="global-drop-card-ttl-pill" title="Ephemeral Drop"><i class="fa-solid fa-hourglass-half"></i> ${drop.ttl}</span>`;
+        ttlBadge = `<span class="x-drop-ttl-badge" title="Auto-purges after ${drop.ttl}"><i class="fa-regular fa-clock"></i> ${drop.ttl}</span>`;
       }
-
-      // Topic pill
-      const topicPill = drop.topic ? `<span class="global-drop-card-topic-pill">#${this.escapeHtml(drop.topic)}</span>` : '';
 
       // Text with highlighted tags
       const formattedContent = this.formatDropText(drop.content || '');
@@ -598,76 +598,93 @@ class GlobalDropEngine {
 
       // Voice Player HTML
       const voiceHtml = drop.voiceUrl ? `
-        <div class="global-drop-voice-player">
-          <button type="button" class="global-drop-voice-play-btn" data-url="${drop.voiceUrl}">
+        <div class="x-drop-voice-player global-drop-voice-player">
+          <button type="button" class="x-drop-voice-play-btn global-drop-voice-play-btn" data-url="${drop.voiceUrl}">
             <i class="fa-solid fa-play"></i>
           </button>
-          <div class="global-drop-voice-wave-bars">
-            ${Array.from({ length: 24 }).map((_, i) => `<div class="global-drop-voice-wave-bar" style="height: ${6 + (i % 6) * 3}px;"></div>`).join('')}
+          <div class="x-drop-voice-wave-bars global-drop-voice-wave-bars">
+            ${Array.from({ length: 28 }).map((_, i) => `<div class="x-drop-voice-wave-bar" style="height: ${4 + (i % 7) * 3}px;"></div>`).join('')}
           </div>
-          <span style="font-size: 11px; color: var(--drop-text-muted); font-family: var(--drop-font-mono);">VOICE DROP</span>
+          <span style="font-size: 11px; color: var(--x-text-secondary); font-family: var(--x-mono); letter-spacing: 0.5px;">AUDIO DROP</span>
         </div>
       ` : '';
 
       card.innerHTML = `
-        <div class="global-drop-card-header">
-          <div class="global-drop-card-author-left">
-            <div class="global-drop-card-avatar-wrap">
-              <img src="${safeAvatar}" alt="${safeAuthor}" class="global-drop-card-avatar" onerror="this.src='logo.jpg'" />
-              <div class="global-drop-card-avatar-beacon"></div>
-            </div>
-            <div class="global-drop-card-meta">
-              <div class="global-drop-card-name-row">
-                <span class="global-drop-card-name">${safeAuthor}</span>
-                <i class="fa-solid fa-certificate global-drop-card-verified-badge" title="Verified Node"></i>
-              </div>
-              <div class="global-drop-card-handle-row">
-                <span>@${safeHandle}</span>
-                <span>•</span>
-                <span>${timeStr}</span>
-                ${topicPill}
-                ${ttlBadge}
-              </div>
-            </div>
+        <div class="x-drop-avatar-col">
+          <div class="x-avatar-wrap">
+            <img src="${safeAvatar}" alt="${safeAuthor}" class="x-drop-avatar" onerror="this.src='logo.jpg'" />
+            <div class="x-avatar-status-beacon"></div>
           </div>
-          <button type="button" class="global-drop-card-more-btn" data-drop-id="${drop.id}" title="Drop Options">
-            <i class="fa-solid fa-ellipsis"></i>
-          </button>
         </div>
 
-        ${formattedContent ? `<div class="global-drop-card-content">${formattedContent}</div>` : ''}
-        ${mediaHtml}
-        ${codeHtml}
-        ${voiceHtml}
+        <div class="x-drop-main-col">
+          <div class="x-drop-header">
+            <div class="x-drop-author-info">
+              <span class="x-drop-author-name">${safeAuthor}</span>
+              <i class="fa-solid fa-circle-check x-drop-verified" title="Verified Cyber Node"></i>
+              <span class="x-drop-author-handle">@${safeHandle}</span>
+              <span class="x-drop-dot">·</span>
+              <span class="x-drop-time">${timeStr}</span>
+              ${ttlBadge}
+            </div>
+            <button type="button" class="x-drop-more-btn global-drop-card-more-btn" data-drop-id="${drop.id}" title="More options">
+              <i class="fa-solid fa-ellipsis"></i>
+            </button>
+          </div>
 
-        <div class="global-drop-card-actions">
-          <!-- Signal (Like) -->
-          <button type="button" class="global-drop-action-btn signal ${isSignaled ? 'active' : ''}" data-drop-id="${drop.id}" title="Pulse Signal">
-            <i class="${isSignaled ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i>
-            <span class="signal-count">${drop.signalsCount || drop.likesCount || (Array.isArray(drop.likes) ? drop.likes.length : 0)}</span>
-          </button>
+          ${formattedContent ? `<div class="x-drop-text">${formattedContent}</div>` : ''}
+          ${mediaHtml}
+          ${codeHtml}
+          ${voiceHtml}
 
-          <!-- Echo (Retransmit) -->
-          <button type="button" class="global-drop-action-btn echo ${isEchoed ? 'active' : ''}" data-drop-id="${drop.id}" title="Echo Retransmit">
-            <i class="fa-solid fa-arrows-rotate"></i>
-            <span class="echo-count">${drop.echoesCount || drop.repostsCount || 0}</span>
-          </button>
+          <!-- X Action Row (Comment, Retweet, Like, Views, Bookmark, Share) -->
+          <div class="x-action-row">
+            <!-- 1. Reply -->
+            <button type="button" class="x-action-btn x-action-reply global-drop-action-btn discuss" data-drop-id="${drop.id}" title="Reply">
+              <div class="x-action-icon-circle">
+                <i class="fa-regular fa-comment"></i>
+              </div>
+              <span class="x-action-count reply-count">${drop.repliesCount || 0}</span>
+            </button>
 
-          <!-- Discussion (Replies) -->
-          <button type="button" class="global-drop-action-btn discuss" data-drop-id="${drop.id}" title="Discussion Thread">
-            <i class="fa-regular fa-comment-dots"></i>
-            <span class="reply-count">${drop.repliesCount || 0}</span>
-          </button>
+            <!-- 2. Repost / Echo -->
+            <button type="button" class="x-action-btn x-action-echo global-drop-action-btn echo ${isEchoed ? 'active' : ''}" data-drop-id="${drop.id}" title="Repost">
+              <div class="x-action-icon-circle">
+                <i class="fa-solid fa-retweet"></i>
+              </div>
+              <span class="x-action-count echo-count">${drop.echoesCount || 0}</span>
+            </button>
 
-          <!-- Forward / Share to Chat -->
-          <button type="button" class="global-drop-action-btn forward" data-drop-id="${drop.id}" title="Transmit to Direct Chat">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
+            <!-- 3. Like / Signal -->
+            <button type="button" class="x-action-btn x-action-like global-drop-action-btn signal ${isSignaled ? 'active' : ''}" data-drop-id="${drop.id}" title="Like">
+              <div class="x-action-icon-circle">
+                <i class="${isSignaled ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i>
+              </div>
+              <span class="x-action-count signal-count">${drop.signalsCount || drop.likesCount || (Array.isArray(drop.likes) ? drop.likes.length : 0)}</span>
+            </button>
 
-          <!-- Bookmark / Save to Vault -->
-          <button type="button" class="global-drop-action-btn bookmark" data-drop-id="${drop.id}" title="Save to Cyber Vault">
-            <i class="fa-regular fa-bookmark"></i>
-          </button>
+            <!-- 4. Views / Analytics -->
+            <button type="button" class="x-action-btn x-action-views" data-drop-id="${drop.id}" title="Views">
+              <div class="x-action-icon-circle">
+                <i class="fa-solid fa-chart-simple"></i>
+              </div>
+              <span class="x-action-count">${drop.viewsCount || (drop.likesCount ? drop.likesCount * 4 + 18 : '84')}</span>
+            </button>
+
+            <!-- 5. Bookmark & Share -->
+            <div class="x-action-group-right">
+              <button type="button" class="x-action-btn x-action-bookmark global-drop-action-btn bookmark" data-drop-id="${drop.id}" title="Bookmark">
+                <div class="x-action-icon-circle">
+                  <i class="fa-regular fa-bookmark"></i>
+                </div>
+              </button>
+              <button type="button" class="x-action-btn x-action-share global-drop-action-btn forward" data-drop-id="${drop.id}" title="Share">
+                <div class="x-action-icon-circle">
+                  <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       `;
 
@@ -688,19 +705,19 @@ class GlobalDropEngine {
       const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') || drop.mediaType === 'video';
       if (isVideo) {
         return `
-          <div class="global-drop-media-cell" data-media-url="${url}">
+          <div class="x-media-cell global-drop-media-cell" data-media-url="${url}">
             <video src="${url}" controls preload="metadata" playsinline></video>
           </div>
         `;
       }
       return `
-        <div class="global-drop-media-cell" data-media-url="${url}">
+        <div class="x-media-cell global-drop-media-cell" data-media-url="${url}">
           <img src="${url}" alt="Drop Attachment" loading="lazy" />
         </div>
       `;
     }).join('');
 
-    return `<div class="global-drop-media-grid ${gridClass}">${cellsHtml}</div>`;
+    return `<div class="x-media-grid global-drop-media-grid ${gridClass}">${cellsHtml}</div>`;
   }
 
   buildCodeBoxHtml(codeSnippet) {
@@ -709,21 +726,21 @@ class GlobalDropEngine {
     const lang = this.escapeHtml(codeSnippet.language || 'code');
 
     return `
-      <div class="global-drop-code-box">
-        <div class="global-drop-code-header">
-          <div class="global-drop-code-dots">
-            <span class="dot-r"></span>
-            <span class="dot-y"></span>
-            <span class="dot-g"></span>
+      <div class="x-drop-code-box global-drop-code-box">
+        <div class="x-drop-code-header">
+          <div class="x-drop-code-dots">
+            <span class="x-dot-r"></span>
+            <span class="x-dot-y"></span>
+            <span class="x-dot-g"></span>
           </div>
-          <div class="global-drop-code-meta">
-            <span class="global-drop-code-lang">${lang}</span>
-            <button type="button" class="global-drop-code-copy-btn" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(codeSnippet.code)}')).then(() => alert('Code copied to clipboard!'))">
+          <div class="x-drop-code-meta">
+            <span class="x-drop-code-lang">${lang}</span>
+            <button type="button" class="x-drop-code-copy-btn" onclick="navigator.clipboard.writeText(decodeURIComponent('${encodeURIComponent(codeSnippet.code)}')).then(() => { if(window.showNotif) window.showNotif('Code snippet copied to clipboard', 'success'); })">
               <i class="fa-regular fa-copy"></i> Copy
             </button>
           </div>
         </div>
-        <pre class="global-drop-code-body"><code>${safeCode}</code></pre>
+        <pre class="x-drop-code-pre"><code>${safeCode}</code></pre>
       </div>
     `;
   }
@@ -1057,7 +1074,7 @@ class GlobalDropEngine {
   bindMobileFab() {
     const fab = document.getElementById('globalDropMobileFab');
     fab?.addEventListener('click', () => {
-      const composer = document.querySelector('.global-drop-composer-card');
+      const composer = document.querySelector('.x-composer, .global-drop-composer-card');
       if (composer) {
         composer.scrollIntoView({ behavior: 'smooth' });
         document.getElementById('globalDropTextarea')?.focus();
@@ -1066,38 +1083,84 @@ class GlobalDropEngine {
   }
 
   // ---------------------------------------------------------------------------
-  // 9. SIDEBAR MODULES (TRENDING & ELITE TRANSMITTERS)
+  // 9. SIDEBAR MODULES (TRENDING & WHO TO FOLLOW)
   // ---------------------------------------------------------------------------
   loadSideWidgets() {
+    // 1. Trending Topics (What's happening)
     const trendingList = document.getElementById('globalDropTrendingList');
-    if (!trendingList) return;
+    if (trendingList) {
+      const trendingItems = [
+        { category: 'Technology · Trending', tag: '#ChronexAI', count: '48.2K Drops' },
+        { category: 'Cyber Security · Trending', tag: '#E2EEProtocol', count: '29.5K Drops' },
+        { category: 'Web3 & Quantum · Trending', tag: '#QuantumVault', count: '18.1K Drops' },
+        { category: 'Development · Trending', tag: '#ViteArchitecture', count: '14.3K Drops' },
+        { category: 'Gaming Hub · Trending', tag: '#CyberCombat', count: '10.8K Drops' }
+      ];
 
-    const trendingTags = [
-      { tag: '#CyberSec', count: '14.2K Dispatches' },
-      { tag: '#ChronEX', count: '9.8K Dispatches' },
-      { tag: '#DevRel', count: '7.4K Dispatches' },
-      { tag: '#WebAssembly', count: '5.1K Dispatches' },
-      { tag: '#QuantumE2EE', count: '3.6K Dispatches' }
-    ];
+      trendingList.innerHTML = trendingItems.map(item => `
+        <div class="x-trending-item global-drop-trending-item" data-tag="${item.tag}">
+          <span class="x-trending-category">${item.category}</span>
+          <span class="x-trending-tag">${item.tag}</span>
+          <span class="x-trending-count">${item.count}</span>
+        </div>
+      `).join('');
 
-    trendingList.innerHTML = trendingTags.map(item => `
-      <div class="global-drop-trending-item" data-tag="${item.tag}">
-        <span class="global-drop-trending-tag">${item.tag}</span>
-        <span class="global-drop-trending-count">${item.count}</span>
-      </div>
-    `).join('');
-
-    trendingList.querySelectorAll('.global-drop-trending-item').forEach(el => {
-      el.addEventListener('click', () => {
-        const tag = el.getAttribute('data-tag');
-        if (tag) {
-          this.currentTopic = tag.replace('#', '').toLowerCase();
-          const chip = document.querySelector(`.global-drop-topic-chip[data-topic="${this.currentTopic}"]`);
-          if (chip) chip.click();
-          else this.filterAndRenderCachedDrops();
-        }
+      trendingList.querySelectorAll('.x-trending-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const tag = el.getAttribute('data-tag');
+          if (tag) {
+            this.currentTopic = tag.replace('#', '').toLowerCase();
+            const chip = document.querySelector(`.x-topic-chip[data-topic="${this.currentTopic}"], .global-drop-topic-chip[data-topic="${this.currentTopic}"]`);
+            if (chip) chip.click();
+            else this.filterAndRenderCachedDrops();
+          }
+        });
       });
-    });
+    }
+
+    // 2. Who to follow widget
+    const followList = document.getElementById('globalDropFollowList');
+    if (followList) {
+      const followRecs = [
+        { name: 'Chronex AI', handle: 'chronex_ai', avatar: 'logo.jpg' },
+        { name: 'NEX Core Enclave', handle: 'nex_core', avatar: 'logo.jpg' },
+        { name: 'Sentinel Protocol', handle: 'sentinel_shield', avatar: 'logo.jpg' }
+      ];
+
+      followList.innerHTML = followRecs.map(rec => `
+        <div class="x-follow-item">
+          <div class="x-follow-user-left">
+            <img src="${rec.avatar}" alt="${rec.name}" class="x-follow-avatar" onerror="this.src='logo.jpg'" />
+            <div class="x-follow-names">
+              <span class="x-follow-display-name">${rec.name}</span>
+              <span class="x-follow-handle">@${rec.handle}</span>
+            </div>
+          </div>
+          <button type="button" class="x-follow-btn" onclick="this.textContent = this.textContent === 'Follow' ? 'Following' : 'Follow'; if(window.showNotif) window.showNotif('Following @${rec.handle}', 'success');">Follow</button>
+        </div>
+      `).join('');
+    }
+
+    // 3. User rail info update
+    this.updateUserRailPill();
+  }
+
+  updateUserRailPill() {
+    const name = this.getUsername();
+    const handle = '@' + name.toLowerCase().replace(/\s+/g, '_');
+    const avatar = this.getAvatar();
+
+    const nameEl = document.getElementById('globalDropNavUserName');
+    if (nameEl) nameEl.textContent = name;
+
+    const handleEl = document.getElementById('globalDropNavUserHandle');
+    if (handleEl) handleEl.textContent = handle;
+
+    const avatarEl = document.getElementById('globalDropNavUserAvatar');
+    if (avatarEl) avatarEl.src = avatar;
+
+    const mobileAvatarEl = document.getElementById('globalDropMobileHeaderAvatar');
+    if (mobileAvatarEl) mobileAvatarEl.src = avatar;
   }
 
   bindGlobalEvents() {

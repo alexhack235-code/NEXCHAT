@@ -468,67 +468,139 @@
       </ul>
     </div>
 
-    <!-- GLOBAL DROP (CYBER-OBSIDIAN MICROBLOGGING & PUBLIC BROADCAST MATRIX) -->
+    <!-- GLOBAL DROP (OFFICIAL X-ARCHITECTURE SUITE: RAILS, 600PX STREAM, SIDEBAR) -->
     <div class="global-drop-container" id="globalDropContainer" style="display: none;">
-      <div class="global-drop-layout">
-        <!-- Center Stream Column -->
-        <main class="global-drop-stream-col">
-          <!-- Sticky Feed Header -->
-          <header class="global-drop-header">
-            <div class="global-drop-header-row">
-              <div class="global-drop-brand">
-                <div class="global-drop-brand-icon">
-                  <i class="fa-solid fa-earth-americas"></i>
-                </div>
-                <div>
-                  <h1 class="global-drop-brand-text">Global Drop</h1>
-                  <span class="global-drop-brand-badge">Cyber Broadcast Node</span>
-                </div>
-              </div>
-              <div class="global-drop-header-actions">
-                <button type="button" class="global-drop-action-icon-btn" id="globalDropRefreshBtn" title="Synchronize Radar">
-                  <i class="fa-solid fa-arrows-rotate"></i>
-                </button>
-              </div>
+      <div class="x-layout">
+        <!-- 1. LEFT NAVIGATION RAIL (Desktop >= 1200px) -->
+        <aside class="x-nav-rail">
+          <div class="x-nav-rail-inner">
+            <!-- Brand Logo -->
+            <div class="x-nav-logo" title="Global Drop Matrix" onclick="window.globalDropEngine?.switchFeedMode('radar')">
+              <i class="fa-solid fa-earth-americas"></i>
             </div>
 
-            <!-- Feed Mode Switcher (Global Radar / Following / Nodes) -->
-            <div class="global-drop-mode-pills" role="tablist">
-              <button type="button" class="global-drop-mode-pill active" data-mode="radar">
-                <i class="fa-solid fa-satellite-dish"></i> Global Radar
-              </button>
-              <button type="button" class="global-drop-mode-pill" data-mode="following">
-                <i class="fa-solid fa-users"></i> Network Circle
+            <!-- Vertical Navigation Menu -->
+            <nav class="x-nav-menu">
+              <a class="x-nav-item active" href="javascript:void(0)" onclick="window.globalDropEngine?.switchFeedMode('radar')">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+              </a>
+              <a class="x-nav-item" href="javascript:void(0)" onclick="window.globalDropEngine?.switchTopic('all')">
+                <i class="fa-solid fa-hashtag"></i>
+                <span>Explore</span>
+              </a>
+              <a class="x-nav-item" href="javascript:void(0)" onclick="window.handleNavigation?.('chats')">
+                <i class="fa-regular fa-comment-dots"></i>
+                <span>Messages</span>
+              </a>
+              <a class="x-nav-item" href="javascript:void(0)" onclick="if(typeof window.openChronexAI === 'function') window.openChronexAI(); else window.handleNavigation?.('chats');">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Chronex AI</span>
+              </a>
+              <a class="x-nav-item" href="javascript:void(0)" onclick="window.handleNavigation?.('vault')">
+                <i class="fa-regular fa-bookmark"></i>
+                <span>Vault</span>
+              </a>
+              <a class="x-nav-item" href="javascript:void(0)" onclick="window.handleNavigation?.('settings')">
+                <i class="fa-regular fa-user"></i>
+                <span>Profile</span>
+              </a>
+            </nav>
+
+            <!-- Large X Drop Pill Button -->
+            <button type="button" class="x-nav-drop-btn" onclick="document.getElementById('globalDropTextarea')?.focus()">
+              <i class="fa-solid fa-feather-pointed"></i>
+              <span>Drop</span>
+            </button>
+
+            <!-- User Account Pill at Rail Bottom -->
+            <div class="x-nav-user-pill" id="globalDropNavUserPill">
+              <img src="logo.jpg" alt="User Avatar" class="x-nav-user-avatar" id="globalDropNavUserAvatar" onerror="this.src='logo.jpg'" />
+              <div class="x-nav-user-info">
+                <span class="x-nav-user-name" id="globalDropNavUserName">NEX User</span>
+                <span class="x-nav-user-handle" id="globalDropNavUserHandle">@nexnode</span>
+              </div>
+              <i class="fa-solid fa-ellipsis x-nav-user-more"></i>
+            </div>
+          </div>
+        </aside>
+
+        <!-- 2. CENTER TIMELINE STREAM (Exactly 600px width with 1px hairline borders) -->
+        <main class="x-timeline-col">
+          <!-- Sticky Header with Dual 50/50 Sliding Underline Tabs -->
+          <header class="x-timeline-header">
+            <div class="x-timeline-header-top">
+              <div class="x-mobile-header-avatar">
+                <img src="logo.jpg" alt="Me" id="globalDropMobileHeaderAvatar" onerror="this.src='logo.jpg'" />
+              </div>
+              <div class="x-mobile-header-logo">
+                <i class="fa-solid fa-earth-americas"></i>
+              </div>
+              <button type="button" class="x-header-icon-btn" id="globalDropRefreshBtn" title="Refresh Timeline">
+                <i class="fa-solid fa-arrows-rotate"></i>
               </button>
             </div>
 
-            <!-- Topic Nodes Filter Strip -->
-            <div class="global-drop-topics-strip" id="globalDropTopicsStrip">
-              <button type="button" class="global-drop-topic-chip active" data-topic="all">#All</button>
-              <button type="button" class="global-drop-topic-chip" data-topic="tech">#Tech</button>
-              <button type="button" class="global-drop-topic-chip" data-topic="cybersec">#CyberSec</button>
-              <button type="button" class="global-drop-topic-chip" data-topic="crypto">#Crypto</button>
-              <button type="button" class="global-drop-topic-chip" data-topic="ai">#AI</button>
-              <button type="button" class="global-drop-topic-chip" data-topic="dev">#Dev</button>
-              <button type="button" class="global-drop-topic-chip" data-topic="gaming">#Gaming</button>
-              <button type="button" class="global-drop-topic-chip" data-topic="design">#Design</button>
+            <!-- Dual Sliding Underline Tabs: For you / Following -->
+            <div class="x-timeline-tabs" role="tablist">
+              <button type="button" class="x-tab-btn active" data-mode="radar" id="globalDropTabRadar">
+                <div class="x-tab-text-wrap">
+                  <span>For you</span>
+                  <div class="x-tab-active-indicator"></div>
+                </div>
+              </button>
+              <button type="button" class="x-tab-btn" data-mode="following" id="globalDropTabFollowing">
+                <div class="x-tab-text-wrap">
+                  <span>Following</span>
+                  <div class="x-tab-active-indicator"></div>
+                </div>
+              </button>
             </div>
           </header>
 
-          <!-- Dispatch Composer Card -->
-          <section class="global-drop-composer-card" aria-label="Compose Drop">
-            <div class="global-drop-composer-top">
-              <img id="globalDropComposerAvatar" src="logo.jpg" alt="Transmitter Avatar" class="global-drop-composer-avatar" onerror="this.src='logo.jpg'" />
-              <div class="global-drop-composer-input-area">
-                <textarea id="globalDropTextarea" class="global-drop-composer-textarea" placeholder="Transmit a Global Drop... use #hashtags or @mentions" rows="2"></textarea>
+          <!-- Topic Filter Carousel / Trending Topics Strip -->
+          <div class="x-topics-carousel" id="globalDropTopicsStrip">
+            <button type="button" class="x-topic-chip active" data-topic="all">All</button>
+            <button type="button" class="x-topic-chip" data-topic="tech">Tech</button>
+            <button type="button" class="x-topic-chip" data-topic="cybersec">CyberSec</button>
+            <button type="button" class="x-topic-chip" data-topic="crypto">Crypto</button>
+            <button type="button" class="x-topic-chip" data-topic="ai">AI</button>
+            <button type="button" class="x-topic-chip" data-topic="dev">Dev</button>
+            <button type="button" class="x-topic-chip" data-topic="gaming">Gaming</button>
+            <button type="button" class="x-topic-chip" data-topic="design">Design</button>
+          </div>
+
+          <!-- INLINE X COMPOSER (Pristine borderless auto-expanding editor) -->
+          <section class="x-composer" aria-label="Compose Drop">
+            <div class="x-composer-row">
+              <div class="x-composer-avatar-col">
+                <img id="globalDropComposerAvatar" src="logo.jpg" alt="Avatar" class="x-composer-avatar" onerror="this.src='logo.jpg'" />
+              </div>
+              <div class="x-composer-main-col">
+                <!-- Audience selector pill -->
+                <div class="x-audience-row">
+                  <button type="button" class="x-audience-pill" id="globalDropAudienceBtn">
+                    <i class="fa-solid fa-earth-americas"></i>
+                    <span>Everyone</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </button>
+                </div>
+
+                <!-- Auto-expanding borderless textarea -->
+                <textarea id="globalDropTextarea" class="x-composer-textarea" placeholder="What is happening?!" rows="2"></textarea>
+
+                <!-- Media Preview Thumbnails -->
+                <div class="x-composer-previews" id="globalDropMediaPreviews" style="display: none;"></div>
 
                 <!-- Code Snippet Drawer -->
-                <div class="global-drop-code-snippet-drawer" id="globalDropCodeDrawer">
-                  <div class="global-drop-code-snippet-header">
-                    <span style="font-size: 11px; font-weight: 700; color: var(--drop-accent); font-family: var(--drop-font-mono);">
-                      <i class="fa-solid fa-code"></i> CODE PAYLOAD
-                    </span>
-                    <select id="globalDropCodeLangSelect" class="global-drop-code-lang-select">
+                <div class="x-code-drawer" id="globalDropCodeDrawer" style="display: none;">
+                  <div class="x-code-header">
+                    <div class="x-code-dots">
+                      <span class="x-dot-r"></span>
+                      <span class="x-dot-y"></span>
+                      <span class="x-dot-g"></span>
+                    </div>
+                    <select id="globalDropCodeLangSelect" class="x-code-lang-select">
                       <option value="javascript">JavaScript</option>
                       <option value="typescript">TypeScript</option>
                       <option value="python">Python</option>
@@ -539,97 +611,123 @@
                       <option value="bash">Bash / Shell</option>
                     </select>
                   </div>
-                  <textarea id="globalDropCodeTextarea" class="global-drop-code-textarea" placeholder="// Paste or write code snippet here..."></textarea>
+                  <textarea id="globalDropCodeTextarea" class="x-code-textarea" placeholder="// Paste or write code snippet here..."></textarea>
                 </div>
 
                 <!-- Voice Recording Drawer -->
-                <div class="global-drop-voice-drawer" id="globalDropVoiceDrawer">
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <button type="button" id="globalDropVoiceRecordBtn" class="global-drop-voice-record-btn" title="Record Voice Drop">
-                      <i class="fa-solid fa-microphone"></i>
-                    </button>
-                    <span id="globalDropVoiceTimer" style="font-size: 12px; font-family: var(--drop-font-mono); color: var(--drop-text-primary);">Tap mic to record audio drop</span>
+                <div class="x-voice-drawer" id="globalDropVoiceDrawer" style="display: none;">
+                  <button type="button" id="globalDropVoiceRecordBtn" class="x-voice-record-btn" title="Record Voice Drop">
+                    <i class="fa-solid fa-microphone"></i>
+                  </button>
+                  <div class="x-voice-bars" id="globalDropVoiceBars">
+                    <span></span><span></span><span></span><span></span><span></span>
                   </div>
+                  <span id="globalDropVoiceTimer" class="x-voice-timer">0:00</span>
                 </div>
 
-                <!-- Composer Media Preview Strip -->
-                <div class="global-drop-media-previews" id="globalDropMediaPreviews" style="display: none;"></div>
-              </div>
-            </div>
+                <!-- Audience reply privacy banner -->
+                <div class="x-reply-privacy-row">
+                  <i class="fa-solid fa-earth-americas"></i>
+                  <span>Everyone can reply</span>
+                </div>
 
-            <!-- Composer Bottom Toolbar -->
-            <div class="global-drop-composer-bottom">
-              <div class="global-drop-composer-tools">
-                <input type="file" id="globalDropMediaFileInput" accept="image/*,video/*" multiple style="display: none;" />
-                <button type="button" class="global-drop-tool-btn" id="globalDropAddMediaBtn" title="Add Photos or Videos">
-                  <i class="fa-regular fa-image"></i>
-                </button>
-                <button type="button" class="global-drop-tool-btn" id="globalDropAddCodeBtn" title="Attach Code Snippet">
-                  <i class="fa-solid fa-code"></i>
-                </button>
-                <button type="button" class="global-drop-tool-btn" id="globalDropAddVoiceBtn" title="Record Spoken Voice Drop">
-                  <i class="fa-solid fa-microphone"></i>
-                </button>
+                <div class="x-composer-divider"></div>
 
-                <!-- Topic Selector -->
-                <select id="globalDropTopicSelect" class="global-drop-ttl-select" title="Target Topic Frequency">
-                  <option value="general">#General</option>
-                  <option value="tech">#Tech</option>
-                  <option value="cybersec">#CyberSec</option>
-                  <option value="crypto">#Crypto</option>
-                  <option value="ai">#AI</option>
-                  <option value="dev">#Dev</option>
-                  <option value="gaming">#Gaming</option>
-                  <option value="design">#Design</option>
-                </select>
+                <!-- Composer Bottom Toolbar -->
+                <div class="x-composer-toolbar">
+                  <div class="x-composer-tools">
+                    <input type="file" id="globalDropMediaFileInput" accept="image/*,video/*" multiple style="display: none;" />
+                    <button type="button" class="x-tool-icon-btn" id="globalDropAddMediaBtn" title="Media (Images/Videos up to 100MB)">
+                      <i class="fa-regular fa-image"></i>
+                    </button>
+                    <button type="button" class="x-tool-icon-btn" id="globalDropAddCodeBtn" title="Code Snippet">
+                      <i class="fa-solid fa-code"></i>
+                    </button>
+                    <button type="button" class="x-tool-icon-btn" id="globalDropAddVoiceBtn" title="Audio Voice Drop">
+                      <i class="fa-solid fa-microphone"></i>
+                    </button>
 
-                <!-- Ephemeral TTL Selector -->
-                <select id="globalDropTtlSelect" class="global-drop-ttl-select" title="Drop Lifespan / TTL">
-                  <option value="permanent">TTL: Permanent</option>
-                  <option value="24h">TTL: 24 Hours</option>
-                  <option value="48h">TTL: 48 Hours</option>
-                  <option value="7d">TTL: 7 Days</option>
-                </select>
-              </div>
+                    <!-- Topic Selector -->
+                    <select id="globalDropTopicSelect" class="x-tool-select" title="Target Topic Frequency">
+                      <option value="general">#General</option>
+                      <option value="tech">#Tech</option>
+                      <option value="cybersec">#CyberSec</option>
+                      <option value="crypto">#Crypto</option>
+                      <option value="ai">#AI</option>
+                      <option value="dev">#Dev</option>
+                      <option value="gaming">#Gaming</option>
+                      <option value="design">#Design</option>
+                    </select>
 
-              <div class="global-drop-composer-submit-group">
-                <!-- Circular Character Progress Ring -->
-                <svg class="global-drop-char-ring" viewBox="0 0 24 24">
-                  <circle class="bg" cx="12" cy="12" r="10"></circle>
-                  <circle class="progress" id="globalDropCharProgress" cx="12" cy="12" r="10" stroke-dasharray="62.83" stroke-dashoffset="62.83"></circle>
-                </svg>
+                    <!-- Ephemeral TTL Selector -->
+                    <select id="globalDropTtlSelect" class="x-tool-select" title="Drop Lifespan / TTL">
+                      <option value="permanent">TTL: Permanent</option>
+                      <option value="24h">TTL: 24h</option>
+                      <option value="48h">TTL: 48h</option>
+                      <option value="7d">TTL: 7d</option>
+                    </select>
+                  </div>
 
-                <button type="button" id="globalDropTransmitBtn" class="global-drop-transmit-btn" disabled>
-                  <i class="fa-solid fa-paper-plane"></i> Transmit
-                </button>
+                  <div class="x-composer-submit-group">
+                    <!-- Circular Character Progress Ring -->
+                    <svg class="x-char-ring" viewBox="0 0 24 24">
+                      <circle class="bg" cx="12" cy="12" r="10"></circle>
+                      <circle class="progress" id="globalDropCharProgress" cx="12" cy="12" r="10" stroke-dasharray="62.83" stroke-dashoffset="62.83"></circle>
+                    </svg>
+
+                    <div class="x-char-divider"></div>
+
+                    <button type="button" id="globalDropTransmitBtn" class="x-post-btn" disabled>
+                      <span>Post</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
 
-          <!-- Drops Feed Stream List -->
-          <div id="globalDropStreamList" class="global-drop-stream-list"></div>
+          <!-- CONTINUOUS TIMELINE FEED (Flat continuous stream with 1px hairline borders) -->
+          <div id="globalDropStreamList" class="x-stream-list"></div>
         </main>
 
-        <!-- Right Side Widgets (Desktop >= 1024px) -->
-        <aside class="global-drop-side-col">
-          <!-- Trending Nodes Card -->
-          <div class="global-drop-side-card">
-            <div class="global-drop-side-card-title">
-              <i class="fa-solid fa-fire"></i>
-              <span>Trending Nodes</span>
+        <!-- 3. RIGHT SIDEBAR (Desktop >= 1024px, 350px width) -->
+        <aside class="x-sidebar-col">
+          <div class="x-sidebar-inner">
+            <!-- Search Box -->
+            <div class="x-search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="globalDropSearchInput" placeholder="Search Global Drop" autocomplete="off" />
             </div>
-            <div class="global-drop-trending-list" id="globalDropTrendingList"></div>
-          </div>
 
-          <!-- Network Security Badge Card -->
-          <div class="global-drop-side-card">
-            <div class="global-drop-side-card-title">
-              <i class="fa-solid fa-shield-halved"></i>
-              <span>Cyber Pulse</span>
+            <!-- Premium Subscription Card -->
+            <div class="x-widget-card x-premium-card">
+              <h2 class="x-widget-title">Subscribe to Premium</h2>
+              <p class="x-widget-subtitle">Subscribe to unlock verified green badges, 100MB Cold-Vault broadcasts, and cyber analytics.</p>
+              <button type="button" class="x-subscribe-btn">Subscribe</button>
             </div>
-            <div style="font-size: 12.5px; color: var(--drop-text-secondary); line-height: 1.5;">
-              Global Drop broadcasts are routed through decentralized E2EE protocols with Cold-Vault media caching.
+
+            <!-- What's happening (Trending) Card -->
+            <div class="x-widget-card x-trending-widget">
+              <h2 class="x-widget-title">What's happening</h2>
+              <div class="x-trending-list" id="globalDropTrendingList"></div>
+              <a href="javascript:void(0)" class="x-show-more-link">Show more</a>
             </div>
+
+            <!-- Who to follow Card -->
+            <div class="x-widget-card x-follow-widget">
+              <h2 class="x-widget-title">Who to follow</h2>
+              <div class="x-follow-list" id="globalDropFollowList"></div>
+              <a href="javascript:void(0)" class="x-show-more-link">Show more</a>
+            </div>
+
+            <!-- Legal Footer -->
+            <footer class="x-footer-nav">
+              <a href="terms.html">Terms of Service</a>
+              <a href="privacy.html">Privacy Policy</a>
+              <a href="javascript:void(0)">Cookie Policy</a>
+              <a href="javascript:void(0)">Accessibility</a>
+              <span>© 2026 NEXCHAT Corp.</span>
+            </footer>
           </div>
         </aside>
       </div>
