@@ -834,7 +834,7 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   z-index: 100000;
-  display: flex;
+  display: none !important;
   align-items: center;
   justify-content: center;
   padding: 16px;
@@ -844,6 +844,7 @@
 }
 
 .nex-prof-modal-backdrop.active {
+  display: flex !important;
   opacity: 1;
   pointer-events: auto;
 }
