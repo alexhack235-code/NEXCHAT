@@ -1,5 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 import { chronexAI } from "./chronex-ai-service.js";
+import { initGlobalDropEngine, globalDropEngine } from "./src/js/global-drop-engine.js";
 import {
   doc, updateDoc, deleteDoc, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -1090,8 +1091,106 @@ export function initChat2() {
     try { initCyberDrop(); } catch (_) {}
     try { initCipherVault(); } catch (_) {}
     try { initMeshSettings(); } catch (_) {}
+    try { initGlobalDropEngine(); } catch (err) { console.error('[GLOBAL DROP] Engine init error:', err); }
+    try { setupGlobalDropNavigation(); } catch (_) {}
 
     console.log('[NEXCHAT] chat2.js secondary modular controller initialized successfully.');
+}
+
+function setupGlobalDropNavigation() {
+  const navBtn = document.getElementById('nav-global-drop');
+  const globalDropContainer = document.getElementById('globalDropContainer');
+  const fab = document.getElementById('globalDropMobileFab');
+
+  const showGlobalDrop = () => {
+    // Hide other views
+    const chatListView = document.getElementById('chatListView');
+    const statusContainer = document.getElementById('statusContainer');
+    const groupsContainer = document.getElementById('groupsContainer');
+    const announcementsContainer = document.getElementById('announcementsContainer');
+    const callHistoryContainer = document.getElementById('callHistoryContainer');
+    const chatMain = document.querySelector('.chat-main');
+    const chatDetailView = document.getElementById('chatDetailView');
+
+    if (chatMain) {
+      chatMain.style.removeProperty('display');
+      chatMain.style.setProperty('display', 'none', 'important');
+    }
+    if (chatListView) {
+      chatListView.style.removeProperty('display');
+      chatListView.style.setProperty('display', 'none', 'important');
+    }
+    if (chatDetailView) {
+      chatDetailView.style.removeProperty('display');
+      chatDetailView.style.setProperty('display', 'none', 'important');
+    }
+    if (statusContainer) {
+      statusContainer.style.removeProperty('display');
+      statusContainer.style.setProperty('display', 'none', 'important');
+    }
+    if (groupsContainer) {
+      groupsContainer.style.removeProperty('display');
+      groupsContainer.style.setProperty('display', 'none', 'important');
+    }
+    if (announcementsContainer) {
+      announcementsContainer.style.removeProperty('display');
+      announcementsContainer.style.setProperty('display', 'none', 'important');
+    }
+    if (callHistoryContainer) {
+      callHistoryContainer.style.removeProperty('display');
+      callHistoryContainer.style.setProperty('display', 'none', 'important');
+    }
+
+    if (globalDropContainer) {
+      globalDropContainer.style.removeProperty('display');
+      globalDropContainer.style.setProperty('display', 'flex', 'important');
+    }
+    if (fab) fab.style.display = 'flex';
+
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
+      btn.classList.toggle('active', btn.id === 'nav-global-drop' || btn.dataset.nav === 'global-drop');
+    });
+
+    const app = document.querySelector('.app');
+    if (app) app.dataset.activeSection = 'global-drop';
+    if (document.body) document.body.dataset.activeSection = 'global-drop';
+  };
+
+  const hideGlobalDrop = () => {
+    if (globalDropContainer) {
+      globalDropContainer.style.removeProperty('display');
+      globalDropContainer.style.setProperty('display', 'none', 'important');
+    }
+    if (fab) fab.style.display = 'none';
+  };
+
+  navBtn?.addEventListener('click', () => {
+    showGlobalDrop();
+  });
+
+  // Intercept window.handleNavigation
+  if (typeof window.handleNavigation === 'function') {
+    const origNav = window.handleNavigation;
+    window.handleNavigation = function(section) {
+      if (section === 'global-drop') {
+        showGlobalDrop();
+        return;
+      } else {
+        hideGlobalDrop();
+      }
+      return origNav.apply(this, arguments);
+    };
+  }
+
+  // Also hide Global Drop when clicking any other bottom nav button
+  document.querySelectorAll('.bottom-nav .nav-item:not(#nav-global-drop)').forEach(btn => {
+    btn.addEventListener('click', hideGlobalDrop);
+  });
+
+  // Check URL parameters for direct link to drop
+  if (window.location.search.includes('drop=') || window.location.hash === '#global-drop') {
+    setTimeout(showGlobalDrop, 400);
+  }
 }
 
 // Global Exports

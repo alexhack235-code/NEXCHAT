@@ -172,6 +172,38 @@ service cloud.firestore {
     //   - amount: number (optional, wager amount)
     //   - status: string (optional, bet status)
     //
+    // Collection: global_drops
+    // Document ID: {dropId} (Auto-generated)
+    // Fields:
+    //   - authorId / userId: string (required, author UID, immutable)
+    //   - authorName / authorHandle / authorPhoto: string (optional)
+    //   - authorVerified: bool (optional)
+    //   - content: string (optional, max 2000 chars)
+    //   - mediaUrls: list of strings (optional, max 10 items)
+    //   - mediaItems: list of maps (optional, max 10 items)
+    //   - mediaType: string (optional, max 50 chars)
+    //   - voiceUrl: string (optional URL, max 2048 chars)
+    //   - codeSnippet: map (optional)
+    //   - topic: string (optional, max 100 chars)
+    //   - tags: list of strings (optional, max 50 items)
+    //   - ttl: string (optional, max 50 chars)
+    //   - expiresAtMs: int/number (optional)
+    //   - poll: map (optional)
+    //   - signalsCount / likesCount / echoesCount / repostsCount / repliesCount / viewsCount: number (optional, >= 0)
+    //   - likes / echoes / signals: list of strings (optional)
+    //   - pinned: bool (optional)
+    //   - createdAt: timestamp (optional, immutable)
+    //   - createdAtMs: int/number (optional)
+    // Subcollection: replies/{replyId}
+    //   - authorId / userId: string (required, replier UID, immutable)
+    //   - authorName / authorHandle / authorPhoto: string (optional)
+    //   - content: string (required, 1 to 2000 chars)
+    //   - likes / signals / likesCount / signalsCount: interaction fields
+    //   - createdAt: timestamp (optional, immutable)
+    //   - createdAtMs: int/number (optional)
+    // Subcollection: signals/{signalId}
+    //   - userId: string (required, sender UID)
+    //
     // Collection: nexbot_configs
     // Document ID: {configId} (Auto-generated)
     // Fields:
@@ -1024,6 +1056,61 @@ service cloud.firestore {
              (!('syntheticMetrics' in data) || data.syntheticMetrics == null || data.syntheticMetrics is map);
     }
 
+    // Global Drop Validator: Microblogging schema with mediaUrls, codeSnippet, poll, tags, TTL, and engagement counters
+    function isValidGlobalDropCreate(data) {
+      return (
+               ('authorId' in data && data.authorId == request.auth.uid) ||
+               ('userId' in data && data.userId == request.auth.uid) ||
+               isSuperAdmin()
+             ) &&
+             isValidOptionalString('content', 0, 2000) &&
+             (!('mediaUrls' in data) || data.mediaUrls == null || (data.mediaUrls is list && data.mediaUrls.size() <= 10)) &&
+             isValidOptionalList('mediaItems', 10) &&
+             isValidOptionalString('topic', 0, 100) &&
+             isValidOptionalList('tags', 50) &&
+             isValidOptionalString('ttl', 0, 50) &&
+             isValidOptionalString('authorName', 0, 100) &&
+             isValidOptionalString('authorHandle', 0, 100) &&
+             isValidOptionalUrl('authorPhoto') &&
+             isValidOptionalUrl('voiceUrl') &&
+             isValidOptionalString('mediaType', 0, 50) &&
+             (!('codeSnippet' in data) || data.codeSnippet == null || data.codeSnippet is map) &&
+             (!('poll' in data) || data.poll == null || data.poll is map) &&
+             (!('authorVerified' in data) || data.authorVerified is bool) &&
+             (!('pinned' in data) || data.pinned is bool) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('createdAtMs' in data) || data.createdAtMs is int || data.createdAtMs is number) &&
+             (!('expiresAtMs' in data) || data.expiresAtMs == null || data.expiresAtMs is int || data.expiresAtMs is number) &&
+             (!('signalsCount' in data) || (data.signalsCount is number && data.signalsCount >= 0)) &&
+             (!('likesCount' in data) || (data.likesCount is number && data.likesCount >= 0)) &&
+             (!('echoesCount' in data) || (data.echoesCount is number && data.echoesCount >= 0)) &&
+             (!('repostsCount' in data) || (data.repostsCount is number && data.repostsCount >= 0)) &&
+             (!('repliesCount' in data) || (data.repliesCount is number && data.repliesCount >= 0)) &&
+             (!('viewsCount' in data) || (data.viewsCount is number && data.viewsCount >= 0)) &&
+             isValidOptionalList('likes', 10000) &&
+             isValidOptionalList('echoes', 10000) &&
+             isValidOptionalList('signals', 10000);
+    }
+
+    // Global Drop Reply Validator
+    function isValidGlobalDropReply(data) {
+      return (
+               ('authorId' in data && data.authorId == request.auth.uid) ||
+               ('userId' in data && data.userId == request.auth.uid) ||
+               isSuperAdmin()
+             ) &&
+             isValidOptionalString('content', 0, 2000) &&
+             isValidOptionalString('authorName', 0, 100) &&
+             isValidOptionalString('authorHandle', 0, 100) &&
+             isValidOptionalUrl('authorPhoto') &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('createdAtMs' in data) || data.createdAtMs is int || data.createdAtMs is number) &&
+             (!('likesCount' in data) || (data.likesCount is number && data.likesCount >= 0)) &&
+             (!('signalsCount' in data) || (data.signalsCount is number && data.signalsCount >= 0)) &&
+             isValidOptionalList('likes', 1000) &&
+             isValidOptionalList('signals', 1000);
+    }
+
     // Escrow Contract Helpers & ChronEX Smart Escrow Guardian Validator
     function isEscrowBuyer(data) {
       return isAuthenticated() && (
@@ -1872,6 +1959,101 @@ service cloud.firestore {
         allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
         allow update: if isSuperAdmin() || (isAuthenticated() && request.auth.uid == resource.data.userId);
         allow delete: if isSuperAdmin();
+      }
+    }
+
+    // ===============================================================
+    // 6B. GLOBAL DROPS (Microblogging Feed, Replies & Signals)
+    // ===============================================================
+    match /global_drops/{dropId} {
+      // 1. Public microblogging feed
+      allow read: if true;
+
+      // 2. Create: authenticated author with schema validation
+      allow create: if isAuthenticated() &&
+                       (request.resource.data.authorId == request.auth.uid || request.resource.data.userId == request.auth.uid) &&
+                       isValidGlobalDropCreate(request.resource.data);
+
+      // 3. Update: Author editing content/pinned (preserving immutable fields) OR engagement update OR isSuperAdmin
+      allow update: if isAuthenticated() && (
+        (
+          (
+            ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+            ('userId' in resource.data && isOwner(resource.data.userId)) ||
+            isOwner(resource.data.authorId) ||
+            isOwner(resource.data.userId)
+          ) &&
+          areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+          isValidOptionalString('content', 0, 2000) &&
+          (!('pinned' in request.resource.data) || request.resource.data.pinned is bool)
+        ) ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'likes', 'likesCount', 'signals', 'signalsCount', 'echoes',
+            'echoesCount', 'repostsCount', 'repliesCount', 'viewsCount', 'poll'
+          ]) &&
+          isValidOptionalList('likes', 10000) &&
+          isValidOptionalList('echoes', 10000) &&
+          isValidOptionalList('signals', 10000) &&
+          (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+          (!('signalsCount' in request.resource.data) || (request.resource.data.signalsCount is number && request.resource.data.signalsCount >= 0)) &&
+          (!('echoesCount' in request.resource.data) || (request.resource.data.echoesCount is number && request.resource.data.echoesCount >= 0)) &&
+          (!('repostsCount' in request.resource.data) || (request.resource.data.repostsCount is number && request.resource.data.repostsCount >= 0)) &&
+          (!('repliesCount' in request.resource.data) || (request.resource.data.repliesCount is number && request.resource.data.repliesCount >= 0)) &&
+          (!('viewsCount' in request.resource.data) || (request.resource.data.viewsCount is number && request.resource.data.viewsCount >= 0)) &&
+          (!('poll' in request.resource.data) || request.resource.data.poll == null || request.resource.data.poll is map)
+        ) ||
+        isSuperAdmin()
+      );
+
+      // 4. Delete: Author, SuperAdmin, or expired TTL drop
+      allow delete: if isAuthenticated() && (
+        isOwner(resource.data.authorId) ||
+        isOwner(resource.data.userId) ||
+        isSuperAdmin() ||
+        (resource.data.expiresAtMs is int && resource.data.expiresAtMs <= request.time.toMillis())
+      );
+
+      // Subcollection: replies/{replyId}
+      match /replies/{replyId} {
+        allow read: if true;
+
+        allow create: if isAuthenticated() &&
+                         (request.resource.data.authorId == request.auth.uid || request.resource.data.userId == request.auth.uid) &&
+                         isValidGlobalDropReply(request.resource.data);
+
+        allow update: if isAuthenticated() && (
+          (
+            (isOwner(resource.data.authorId) || isOwner(resource.data.userId)) &&
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+            isValidOptionalString('content', 0, 2000)
+          ) ||
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'signals', 'signalsCount']) &&
+            isValidOptionalList('likes', 1000) &&
+            isValidOptionalList('signals', 1000) &&
+            (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+            (!('signalsCount' in request.resource.data) || (request.resource.data.signalsCount is number && request.resource.data.signalsCount >= 0))
+          ) ||
+          isSuperAdmin()
+        );
+
+        allow delete: if isAuthenticated() && (
+          isOwner(resource.data.authorId) ||
+          isSuperAdmin()
+        );
+      }
+
+      // Subcollection: signals/{signalId}
+      match /signals/{signalId} {
+        allow read: if isAuthenticated();
+
+        allow write: if isAuthenticated() && (
+          request.auth.uid == signalId ||
+          (request.resource.data != null && 'userId' in request.resource.data && request.resource.data.userId == request.auth.uid) ||
+          (resourceExists() && 'userId' in resource.data && resource.data.userId == request.auth.uid) ||
+          isSuperAdmin()
+        );
       }
     }
 

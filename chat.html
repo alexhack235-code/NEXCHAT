@@ -86,6 +86,7 @@
   <link rel="stylesheet" href="css/chat-professional-suite.css?v=12.0">
   <link rel="stylesheet" href="css/layout-declutter.css?v=12.0">
   <link rel="stylesheet" href="css/status-elite-suite.css?v=12.0">
+  <link rel="stylesheet" href="css/global-drop.css?v=12.0">
   <link rel="stylesheet" href="css/stealth-forensics-suite.css?v=12.0">
   <link rel="stylesheet" href="css/tactical-war-room.css?v=12.0">
   <link rel="stylesheet" href="css/quorum-milestone.css?v=12.0">
@@ -465,6 +466,173 @@
           <p class="hint">Create or join a group to get started</p>
         </li>
       </ul>
+    </div>
+
+    <!-- GLOBAL DROP (CYBER-OBSIDIAN MICROBLOGGING & PUBLIC BROADCAST MATRIX) -->
+    <div class="global-drop-container" id="globalDropContainer" style="display: none;">
+      <div class="global-drop-layout">
+        <!-- Center Stream Column -->
+        <main class="global-drop-stream-col">
+          <!-- Sticky Feed Header -->
+          <header class="global-drop-header">
+            <div class="global-drop-header-row">
+              <div class="global-drop-brand">
+                <div class="global-drop-brand-icon">
+                  <i class="fa-solid fa-earth-americas"></i>
+                </div>
+                <div>
+                  <h1 class="global-drop-brand-text">Global Drop</h1>
+                  <span class="global-drop-brand-badge">Cyber Broadcast Node</span>
+                </div>
+              </div>
+              <div class="global-drop-header-actions">
+                <button type="button" class="global-drop-action-icon-btn" id="globalDropRefreshBtn" title="Synchronize Radar">
+                  <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Feed Mode Switcher (Global Radar / Following / Nodes) -->
+            <div class="global-drop-mode-pills" role="tablist">
+              <button type="button" class="global-drop-mode-pill active" data-mode="radar">
+                <i class="fa-solid fa-satellite-dish"></i> Global Radar
+              </button>
+              <button type="button" class="global-drop-mode-pill" data-mode="following">
+                <i class="fa-solid fa-users"></i> Network Circle
+              </button>
+            </div>
+
+            <!-- Topic Nodes Filter Strip -->
+            <div class="global-drop-topics-strip" id="globalDropTopicsStrip">
+              <button type="button" class="global-drop-topic-chip active" data-topic="all">#All</button>
+              <button type="button" class="global-drop-topic-chip" data-topic="tech">#Tech</button>
+              <button type="button" class="global-drop-topic-chip" data-topic="cybersec">#CyberSec</button>
+              <button type="button" class="global-drop-topic-chip" data-topic="crypto">#Crypto</button>
+              <button type="button" class="global-drop-topic-chip" data-topic="ai">#AI</button>
+              <button type="button" class="global-drop-topic-chip" data-topic="dev">#Dev</button>
+              <button type="button" class="global-drop-topic-chip" data-topic="gaming">#Gaming</button>
+              <button type="button" class="global-drop-topic-chip" data-topic="design">#Design</button>
+            </div>
+          </header>
+
+          <!-- Dispatch Composer Card -->
+          <section class="global-drop-composer-card" aria-label="Compose Drop">
+            <div class="global-drop-composer-top">
+              <img id="globalDropComposerAvatar" src="logo.jpg" alt="Transmitter Avatar" class="global-drop-composer-avatar" onerror="this.src='logo.jpg'" />
+              <div class="global-drop-composer-input-area">
+                <textarea id="globalDropTextarea" class="global-drop-composer-textarea" placeholder="Transmit a Global Drop... use #hashtags or @mentions" rows="2"></textarea>
+
+                <!-- Code Snippet Drawer -->
+                <div class="global-drop-code-snippet-drawer" id="globalDropCodeDrawer">
+                  <div class="global-drop-code-snippet-header">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--drop-accent); font-family: var(--drop-font-mono);">
+                      <i class="fa-solid fa-code"></i> CODE PAYLOAD
+                    </span>
+                    <select id="globalDropCodeLangSelect" class="global-drop-code-lang-select">
+                      <option value="javascript">JavaScript</option>
+                      <option value="typescript">TypeScript</option>
+                      <option value="python">Python</option>
+                      <option value="html">HTML/CSS</option>
+                      <option value="rust">Rust</option>
+                      <option value="cpp">C++</option>
+                      <option value="json">JSON</option>
+                      <option value="bash">Bash / Shell</option>
+                    </select>
+                  </div>
+                  <textarea id="globalDropCodeTextarea" class="global-drop-code-textarea" placeholder="// Paste or write code snippet here..."></textarea>
+                </div>
+
+                <!-- Voice Recording Drawer -->
+                <div class="global-drop-voice-drawer" id="globalDropVoiceDrawer">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <button type="button" id="globalDropVoiceRecordBtn" class="global-drop-voice-record-btn" title="Record Voice Drop">
+                      <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <span id="globalDropVoiceTimer" style="font-size: 12px; font-family: var(--drop-font-mono); color: var(--drop-text-primary);">Tap mic to record audio drop</span>
+                  </div>
+                </div>
+
+                <!-- Composer Media Preview Strip -->
+                <div class="global-drop-media-previews" id="globalDropMediaPreviews" style="display: none;"></div>
+              </div>
+            </div>
+
+            <!-- Composer Bottom Toolbar -->
+            <div class="global-drop-composer-bottom">
+              <div class="global-drop-composer-tools">
+                <input type="file" id="globalDropMediaFileInput" accept="image/*,video/*" multiple style="display: none;" />
+                <button type="button" class="global-drop-tool-btn" id="globalDropAddMediaBtn" title="Add Photos or Videos">
+                  <i class="fa-regular fa-image"></i>
+                </button>
+                <button type="button" class="global-drop-tool-btn" id="globalDropAddCodeBtn" title="Attach Code Snippet">
+                  <i class="fa-solid fa-code"></i>
+                </button>
+                <button type="button" class="global-drop-tool-btn" id="globalDropAddVoiceBtn" title="Record Spoken Voice Drop">
+                  <i class="fa-solid fa-microphone"></i>
+                </button>
+
+                <!-- Topic Selector -->
+                <select id="globalDropTopicSelect" class="global-drop-ttl-select" title="Target Topic Frequency">
+                  <option value="general">#General</option>
+                  <option value="tech">#Tech</option>
+                  <option value="cybersec">#CyberSec</option>
+                  <option value="crypto">#Crypto</option>
+                  <option value="ai">#AI</option>
+                  <option value="dev">#Dev</option>
+                  <option value="gaming">#Gaming</option>
+                  <option value="design">#Design</option>
+                </select>
+
+                <!-- Ephemeral TTL Selector -->
+                <select id="globalDropTtlSelect" class="global-drop-ttl-select" title="Drop Lifespan / TTL">
+                  <option value="permanent">TTL: Permanent</option>
+                  <option value="24h">TTL: 24 Hours</option>
+                  <option value="48h">TTL: 48 Hours</option>
+                  <option value="7d">TTL: 7 Days</option>
+                </select>
+              </div>
+
+              <div class="global-drop-composer-submit-group">
+                <!-- Circular Character Progress Ring -->
+                <svg class="global-drop-char-ring" viewBox="0 0 24 24">
+                  <circle class="bg" cx="12" cy="12" r="10"></circle>
+                  <circle class="progress" id="globalDropCharProgress" cx="12" cy="12" r="10" stroke-dasharray="62.83" stroke-dashoffset="62.83"></circle>
+                </svg>
+
+                <button type="button" id="globalDropTransmitBtn" class="global-drop-transmit-btn" disabled>
+                  <i class="fa-solid fa-paper-plane"></i> Transmit
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Drops Feed Stream List -->
+          <div id="globalDropStreamList" class="global-drop-stream-list"></div>
+        </main>
+
+        <!-- Right Side Widgets (Desktop >= 1024px) -->
+        <aside class="global-drop-side-col">
+          <!-- Trending Nodes Card -->
+          <div class="global-drop-side-card">
+            <div class="global-drop-side-card-title">
+              <i class="fa-solid fa-fire"></i>
+              <span>Trending Nodes</span>
+            </div>
+            <div class="global-drop-trending-list" id="globalDropTrendingList"></div>
+          </div>
+
+          <!-- Network Security Badge Card -->
+          <div class="global-drop-side-card">
+            <div class="global-drop-side-card-title">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>Cyber Pulse</span>
+            </div>
+            <div style="font-size: 12.5px; color: var(--drop-text-secondary); line-height: 1.5;">
+              Global Drop broadcasts are routed through decentralized E2EE protocols with Cold-Vault media caching.
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
 
     <!-- ANNOUNCEMENTS & PROTOCOL DISPATCHES SECTION (LIVE STREAM + AUTO-TRANSLATOR) -->
@@ -5975,7 +6143,16 @@
         <span class="nav-label">Updates</span>
       </button>
 
-      <!-- 3. Reels (CamShot Video Feed) -->
+      <!-- 3. Global Drop (Cyber Microblogging Matrix) -->
+      <button id="nav-global-drop" class="nav-item" data-nav="global-drop" title="Global Drop">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-earth-americas"></i>
+          <span class="nav-status-beacon" id="navGlobalDropBeacon" style="display: none; background: #00ff88;"></span>
+        </div>
+        <span class="nav-label">Global Drop</span>
+      </button>
+
+      <!-- 4. Reels (CamShot Video Feed) -->
       <button id="nav-reels" class="nav-item" data-nav="reels" title="CamShot Video Reels">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-clapperboard"></i>
@@ -5983,21 +6160,12 @@
         <span class="nav-label">Reels</span>
       </button>
 
-      <!-- 4. Market Hub (Center Elevated Super-App Signal) -->
+      <!-- 5. Market Hub (Center Elevated Super-App Signal) -->
       <button id="nav-marketplace" class="nav-item" data-nav="marketplace" title="Market Hub">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-store"></i>
         </div>
         <span class="nav-label">Market</span>
-      </button>
-
-      <!-- 5. Announcements / Dispatches -->
-      <button id="nav-announcements" class="nav-item" data-nav="announcements" title="System Announcements">
-        <div class="nav-icon-wrapper">
-          <i class="fa-solid fa-bullhorn"></i>
-          <span class="nav-status-beacon" id="navAlertsBeacon"></span>
-        </div>
-        <span class="nav-label">Alerts</span>
       </button>
 
       <!-- 6. Calls -->
@@ -6009,6 +6177,13 @@
       </button>
 
       <!-- Desktop Extra Tabs (visible only on desktop >= 900px) -->
+      <button id="nav-announcements" class="nav-item desktop-only-nav" data-nav="announcements" title="System Announcements">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-bullhorn"></i>
+          <span class="nav-status-beacon" id="navAlertsBeacon"></span>
+        </div>
+        <span class="nav-label">Alerts</span>
+      </button>
       <button id="nav-ai" class="nav-item desktop-only-nav" data-nav="ai" title="ChronEX AI Assistant">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-microchip"></i>
@@ -9813,6 +9988,35 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
     </div>
   </div>
 </div>
+
+<!-- ========================================================================= -->
+<!-- GLOBAL DROP REPLIES & DISCUSSIONS DRAWER                                  -->
+<!-- ========================================================================= -->
+<div id="globalDropRepliesDrawer" class="global-drop-replies-drawer" style="display: none;" role="dialog" aria-modal="true">
+  <div class="global-drop-replies-content">
+    <div class="global-drop-replies-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-comments" style="color: var(--drop-accent, #00ff88);"></i>
+        <span style="font-weight: 700; font-size: 15px; color: #ffffff;">Discussions</span>
+      </div>
+      <button type="button" id="globalDropRepliesCloseBtn" class="global-drop-action-icon-btn" title="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div id="globalDropRepliesList" class="global-drop-replies-list"></div>
+    <div class="global-drop-replies-composer">
+      <input type="text" id="globalDropReplyInput" placeholder="Transmit a reply..." autocomplete="off" />
+      <button type="button" id="globalDropReplySendBtn" class="global-drop-transmit-btn" style="padding: 8px 14px;">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING CYBER-FAB FOR MOBILE GLOBAL DROP -->
+<button id="globalDropMobileFab" class="global-drop-mobile-fab" title="Transmit Drop" style="display: none;">
+  <i class="fa-solid fa-feather-pointed"></i>
+</button>
 
 <script type="module" src="chat.js?v=12.0"></script>
 <script type="module" src="chat2.js?v=12.0"></script>

@@ -75,6 +75,23 @@ service firebase.storage {
     }
 
     // ============================================================
+    // 3B. GLOBAL DROPS (Microblogging Media: Images, Videos, Voice)
+    // ============================================================
+    match /global_drops/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 100 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /drops/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 100 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    // ============================================================
     // 4. CHAT ATTACHMENTS & DIRECT MESSAGES MEDIA
     // ============================================================
     match /shared/{allPaths=**} {
