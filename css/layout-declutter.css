@@ -81,14 +81,26 @@ overflow: hidden !important;
 position: relative !important;
 }
 
-.chat-detail-view,
-#chatDetailView {
+.chat-detail-view:not([style*="display: none"]):not(.hidden),
+#chatDetailView:not([style*="display: none"]):not(.hidden) {
 height: 100% !important;
 max-height: 100% !important;
 display: flex !important;
 flex-direction: column !important;
 overflow: hidden !important;
 position: relative !important;
+}
+
+#chatDetailView[style*="display: none"],
+#chatDetailView.hidden {
+display: none !important;
+}
+
+@media (max-width: 899px) {
+  body:not(.in-conversation) #chatDetailView,
+  .chat-main:not(.in-conversation) #chatDetailView {
+    display: none !important;
+  }
 }
 
 .chat-detail-header {
