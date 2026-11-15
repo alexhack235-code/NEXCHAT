@@ -4433,4 +4433,7 @@ if (typeof window !== 'undefined') {
   if (typeof setupEnhancedSoundAlertListeners === 'function') window.setupEnhancedSoundAlertListeners = setupEnhancedSoundAlertListeners;
   if (typeof setupSentinelMailerSettings === 'function') window.setupSentinelMailerSettings = setupSentinelMailerSettings;
   if (typeof setupAiDefenseListeners === 'function') window.setupAiDefenseListeners = setupAiDefenseListeners;
+  if (typeof setupGlobalDropNavigation === 'function') window.setupGlobalDropNavigation = setupGlobalDropNavigation;
+  if (typeof initGlobalDropEngine === 'function') window.initGlobalDropEngine = initGlobalDropEngine;
+  if (typeof globalDropEngine !== 'undefined') window.globalDropEngine = globalDropEngine;
 }
