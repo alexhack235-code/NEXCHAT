@@ -259,12 +259,19 @@ NEXCHAT/
 * **Automated Gmail Security Alerts:** Real-time email dispatch alerting the account owner whenever an extension permission is approved or revoked.
 * **Dynamic Extension Discovery:** Browse, authorize, or revoke ecosystem applications like NEX-REELS, NEX-METROPOLIS 3D, and custom NEXBOT agents.
 
-### 5. 🛡️ SuperAdmin Security Command Center
-* **Zero-Trust Master PIN Gate:** Protected by numeric master access PIN (`1337`) preventing unauthenticated access.
-* **Live User Moderation:** Real-time user ledger with instant account banning/unbanning, muting, and privilege revocation.
+### 5. 🛡️ SuperAdmin Security Command Center (`admin-dashboard.html`)
+* **Cryptographic SHA-256 Master Key Gate:** Protected by 256-bit hash verification with multi-tier fail-safe caching (`sessionStorage`, `localStorage`, and in-memory fallback), preventing lock-screen looping.
+* **Terminal CLI Integration (`terminal.html`):** Seamless `admin <password>` CLI command authentication that verifies the master key and sets session timestamps before launching the command center.
+* **Responsive Anti-Lock CSS:** Guarded modal styling (`#adminAuthGateModal:not(.auth-unlocked)`) ensuring mobile viewports (<= 768px, <= 480px) cleanly unlock without clipping or flexbox centering traps.
+* **Live User Moderation & Sanctions:** Real-time user ledger with instant account banning/unbanning, muting, token grants, and verification badge issuance.
 * **Interactive Radar & Threat Telemetry:** Canvas radar map displaying active nodes, signal strengths, IP footprints, and WAF security scanner logs.
 
-### 6. 🧼 Settings Suite Sanitization & Security Hardening
+### 6. ⚡ Cyber Streak Matrix & Neural Token System
+* **7-Day Cyber Streak Rewards:** Daily reward progression (Day 1: +25 to Day 7: +500 tokens) with streak multipliers and Streak Shield auto-preservation.
+* **Atomic Balance Management:** Protected Firestore atomic increments (`increment(tokens)`) with strict-mode cross-module variable binding (`window.tokens`, `user_tokens`).
+* **Starter Grant Auto-Healer:** Safe baseline resolution protecting user tokens from reset bugs, automatically restoring balances to the verified baseline (1,920 + 100 = 2,020 tokens).
+
+### 7. 🧼 Settings Suite Sanitization & Security Hardening
 * **Zero Credential Leakage:** All raw backend Supabase Anon Keys, project URLs, and WAF vault keys have been completely purged from client inputs and settings DOM.
 * **Clean User Dashboard:** Replaced with live connection status (`Connected & Synchronized`), real-time latency ping testing, and privacy toggles.
 * **Purged Admin Triggers:** Administrative consoles are strictly unlinked from regular user menus.
