@@ -45,6 +45,9 @@ class GlobalDropEngine {
     this.userLocation = null;
     this.activeDropLocation = null;
     this.selectedGeoFilter = null;
+    this.currentProfileUid = null;
+    this.currentProfileTab = 'drops';
+    this.cachedProfileDrops = [];
   }
 
   // ---------------------------------------------------------------------------
@@ -60,6 +63,7 @@ class GlobalDropEngine {
     this.bindGlobalEvents();
     this.loadSideWidgets();
     this.initGeoLocator();
+    this.initUserProfile();
   }
 
   getUID() {
@@ -620,6 +624,11 @@ class GlobalDropEngine {
       else if (this.selectedTtl === '48h') expiresAtMs = now + 172800000;
       else if (this.selectedTtl === '7d') expiresAtMs = now + 604800000;
 
+      // Calculate author metadata (tenure, location, rank)
+      const userJoinedAt = parseInt(localStorage.getItem('userCreatedAtMs') || localStorage.getItem('auth_time') || (now - 86400000 * 90), 10);
+      const tenureInfo = this.calculateUserRankAndTenure(userJoinedAt);
+      const authorLoc = this.activeDropLocation?.city || this.activeDropLocation?.label || this.userLocation?.city || null;
+
       // 5. Build Drop Document Payload
       const dropDoc = {
         authorId: uid,
@@ -628,6 +637,10 @@ class GlobalDropEngine {
         authorHandle: (this.getUsername() || 'user').toLowerCase().replace(/\s+/g, '_'),
         authorPhoto: this.getAvatar(),
         authorVerified: true,
+        authorLocation: authorLoc,
+        authorTenure: tenureInfo.shortBadge,
+        authorRank: tenureInfo.rank,
+        authorJoinedAtMs: userJoinedAt,
         content: content,
         location: this.activeDropLocation || null,
         mediaUrls: mediaUrls.map(m => m.url),
@@ -899,7 +912,7 @@ class GlobalDropEngine {
         if (this.userLocation?.lat != null && this.userLocation?.lng != null && drop.location.lat != null && drop.location.lng != null) {
           const distStr = this.calculateDistanceKm(this.userLocation.lat, this.userLocation.lng, drop.location.lat, drop.location.lng);
           if (distStr) {
-            distBadge = `<span class="x-drop-distance">· ${distStr}</span>`;
+            distBadge = `<span class="x-drop-distance">&middot; ${distStr}</span>`;
           }
         }
         geoBadgeHtml = `
@@ -933,6 +946,10 @@ class GlobalDropEngine {
         </div>
       ` : '';
 
+      // Author Tenure & Location chips for timeline
+      const authorTenureBadge = drop.authorTenure ? `<span class="x-drop-tenure-chip" title="NEXCHAT Member Tenure"><i class="fa-solid fa-shield-halved"></i> ${this.escapeHtml(drop.authorTenure)}</span>` : '';
+      const authorLocationBadge = (!geoBadgeHtml && drop.authorLocation) ? `<span class="x-drop-location-chip" title="Location"><i class="fa-solid fa-location-dot"></i> ${this.escapeHtml(drop.authorLocation)}</span>` : '';
+
       card.innerHTML = `
         <div class="x-drop-avatar-col">
           <div class="x-avatar-wrap">
@@ -947,8 +964,10 @@ class GlobalDropEngine {
               <span class="x-drop-author-name">${safeAuthor}</span>
               <i class="fa-solid fa-circle-check x-drop-verified" title="Verified Cyber Node"></i>
               <span class="x-drop-author-handle">@${safeHandle}</span>
-              <span class="x-drop-dot">·</span>
+              <span class="x-drop-dot">&middot;</span>
               <span class="x-drop-time">${timeStr}</span>
+              ${authorTenureBadge}
+              ${authorLocationBadge}
               ${ttlBadge}
               ${geoBadgeHtml}
             </div>
@@ -1012,6 +1031,32 @@ class GlobalDropEngine {
           </div>
         </div>
       `;
+
+      // Click avatar or author name to open User Profile
+      card.querySelector('.x-drop-avatar-col')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openUserProfile(drop.authorId || drop.userId, {
+          name: drop.authorName,
+          handle: drop.authorHandle,
+          photo: drop.authorPhoto
+        });
+      });
+      card.querySelector('.x-drop-author-name')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openUserProfile(drop.authorId || drop.userId, {
+          name: drop.authorName,
+          handle: drop.authorHandle,
+          photo: drop.authorPhoto
+        });
+      });
+      card.querySelector('.x-drop-author-handle')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openUserProfile(drop.authorId || drop.userId, {
+          name: drop.authorName,
+          handle: drop.authorHandle,
+          photo: drop.authorPhoto
+        });
+      });
 
       // Click anywhere on card (except interactive elements) to open Thread
       card.style.cursor = 'pointer';
@@ -1466,6 +1511,10 @@ class GlobalDropEngine {
               <i class="fa-solid fa-circle-check x-drop-verified" title="Verified Cyber Node"></i>
             </span>
             <span class="x-thread-parent-handle">@${safeHandle}</span>
+            <div class="x-thread-parent-submeta">
+              ${drop.authorTenure ? `<span class="x-drop-tenure-chip" title="NEXCHAT Tenure"><i class="fa-solid fa-shield-halved"></i> ${this.escapeHtml(drop.authorTenure)}</span>` : ''}
+              ${(drop.authorLocation || (drop.location && (drop.location.city || drop.location.label))) ? `<span class="x-drop-location-chip"><i class="fa-solid fa-location-dot"></i> ${this.escapeHtml(drop.authorLocation || drop.location.city || drop.location.label)}</span>` : ''}
+            </div>
           </div>
         </div>
         <button type="button" class="x-thread-action-icon-btn global-drop-card-more-btn" title="More options">
@@ -1480,7 +1529,7 @@ class GlobalDropEngine {
 
       <div class="x-thread-parent-timestamp">
         <span>${fullTimeStr}</span>
-        <span>·</span>
+        <span>&middot;</span>
         <span style="color: var(--x-green); font-weight: 600;"><i class="fa-solid fa-satellite-dish"></i> NEX Radar</span>
         ${geoBadgeHtml}
         ${ttlBadge}
@@ -1490,7 +1539,7 @@ class GlobalDropEngine {
         <span><strong>${echoesCount}</strong> Reposts</span>
         <span><strong>${repliesCount}</strong> Replies</span>
         <span><strong id="threadParentLikesCount">${likesCount}</strong> Likes</span>
-        <span><strong>${viewsCount}</strong> Views</span>
+        <span><strong>${this.formatCompactNumber(viewsCount)}</strong> Views</span>
       </div>
 
       <div class="x-thread-parent-actions">
@@ -1514,6 +1563,16 @@ class GlobalDropEngine {
         </button>
       </div>
     `;
+
+    // Click author info to open User Profile
+    parentContainer.querySelector('.x-thread-parent-author-info')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openUserProfile(drop.authorId || drop.userId, {
+        name: drop.authorName,
+        handle: drop.authorHandle,
+        photo: drop.authorPhoto
+      });
+    });
 
     // Bind parent actions
     parentContainer.querySelector('.global-drop-action-btn.signal')?.addEventListener('click', (e) => {
@@ -1642,6 +1701,24 @@ class GlobalDropEngine {
               const c = parseInt(cnt.textContent || '0', 10);
               cnt.textContent = isAct ? c + 1 : Math.max(0, c - 1);
             }
+          });
+
+          // Click author avatar or name in reply to open user profile
+          rCard.querySelector('.x-thread-reply-left')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.openUserProfile(rep.authorId || rep.userId, {
+              name: rep.authorName,
+              handle: rep.authorHandle,
+              photo: rep.authorPhoto
+            });
+          });
+          rCard.querySelector('.x-thread-reply-author')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.openUserProfile(rep.authorId || rep.userId, {
+              name: rep.authorName,
+              handle: rep.authorHandle,
+              photo: rep.authorPhoto
+            });
           });
 
           list.appendChild(rCard);
@@ -1792,10 +1869,401 @@ class GlobalDropEngine {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
     return String(str).replace(/[&<>"']/g, m => map[m]);
   }
+
+  // ---------------------------------------------------------------------------
+  // 10. USER-TO-USER PROFILE (OFFICIAL X SPECIFICATION)
+  // ---------------------------------------------------------------------------
+  initUserProfile() {
+    const modal = document.getElementById('globalDropUserProfileModal');
+    const backBtn = document.getElementById('globalDropProfileBackBtn');
+    const shareBtn = document.getElementById('globalDropProfileShareBtn');
+    const tabs = document.querySelectorAll('.x-profile-tab');
+
+    const closeModal = () => {
+      if (modal) modal.style.display = 'none';
+      this.currentProfileUid = null;
+    };
+
+    backBtn?.addEventListener('click', closeModal);
+
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    shareBtn?.addEventListener('click', () => {
+      if (!this.currentProfileUid) return;
+      const url = `${window.location.origin}/chat?profile=${this.currentProfileUid}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url);
+        if (window.showNotif) window.showNotif('Profile link copied to clipboard', 'success');
+      }
+    });
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        this.currentProfileTab = tab.getAttribute('data-tab') || 'drops';
+        this.renderProfileFilteredDrops();
+      });
+    });
+
+    // Profile navigation triggers
+    document.getElementById('globalDropNavUserPill')?.addEventListener('click', () => {
+      this.openUserProfile(this.getUID());
+    });
+    document.getElementById('globalDropMobileHeaderAvatar')?.addEventListener('click', () => {
+      this.openUserProfile(this.getUID());
+    });
+  }
+
+  formatCompactNumber(num) {
+    if (!num) return '0';
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(num);
+  }
+
+  calculateUserRankAndTenure(ms) {
+    if (!ms) {
+      return {
+        tenureText: 'Joined Recently',
+        tenureYears: '0',
+        rank: 'Novice Operative',
+        shortBadge: '< 1mo'
+      };
+    }
+    const diffMs = Date.now() - ms;
+    const diffYears = diffMs / (1000 * 60 * 60 * 24 * 365.25);
+    const diffMonths = diffMs / (1000 * 60 * 60 * 24 * 30.44);
+
+    let tenureText = '';
+    let rank = 'Cyber Operative';
+    let shortBadge = '';
+
+    if (diffYears >= 2) {
+      const y = Math.floor(diffYears);
+      tenureText = `${y} yrs on NEXCHAT`;
+      rank = `Pioneer Operative (${y}+ Yrs)`;
+      shortBadge = `${y}y`;
+    } else if (diffYears >= 1) {
+      tenureText = `1 yr on NEXCHAT`;
+      rank = `Veteran Operative (1+ Yr)`;
+      shortBadge = `1y`;
+    } else if (diffMonths >= 6) {
+      const m = Math.floor(diffMonths);
+      tenureText = `${m} mos on NEXCHAT`;
+      rank = `Senior Transmitter (${m} Mos)`;
+      shortBadge = `${m}mo`;
+    } else if (diffMonths >= 1) {
+      const m = Math.floor(diffMonths);
+      tenureText = `${m} mo${m > 1 ? 's' : ''} on NEXCHAT`;
+      rank = `Active Transmitter (${m} Mos)`;
+      shortBadge = `${m}mo`;
+    } else {
+      tenureText = 'Joined this month';
+      rank = 'New Node Operative';
+      shortBadge = '< 1mo';
+    }
+
+    const date = new Date(ms);
+    const monthYear = date.toLocaleDateString([], { month: 'short', year: 'numeric' });
+
+    return {
+      monthYear,
+      tenureText: `Joined ${monthYear} &middot; ${tenureText}`,
+      tenureYears: diffYears.toFixed(1),
+      rank,
+      shortBadge
+    };
+  }
+
+  formatJoinDateAndTenure(ms) {
+    return this.calculateUserRankAndTenure(ms).tenureText;
+  }
+
+  async openUserProfile(targetUid, authorData = {}) {
+    if (!targetUid) targetUid = this.getUID();
+    this.currentProfileUid = targetUid;
+    this.currentProfileTab = 'drops';
+
+    const modal = document.getElementById('globalDropUserProfileModal');
+    const headerName = document.getElementById('globalDropProfileHeaderName');
+    const headerDropsCount = document.getElementById('globalDropProfileHeaderDropsCount');
+    const avatar = document.getElementById('globalDropProfileAvatar');
+    const displayName = document.getElementById('globalDropProfileDisplayName');
+    const rankChip = document.getElementById('globalDropProfileRankChip');
+    const handle = document.getElementById('globalDropProfileHandle');
+    const bio = document.getElementById('globalDropProfileBio');
+    const joinDate = document.getElementById('globalDropProfileJoinDate');
+    const locItem = document.getElementById('globalDropProfileLocation');
+    const viewsItem = document.getElementById('globalDropProfileViews');
+    const nodeIdItem = document.getElementById('globalDropProfileNodeId');
+    const followingCount = document.getElementById('globalDropProfileFollowingCount');
+    const followersCount = document.getElementById('globalDropProfileFollowersCount');
+    const totalViewsCount = document.getElementById('globalDropProfileTotalViewsCount');
+    const totalDropsCount = document.getElementById('globalDropProfileTotalDropsCount');
+    const ctaButtons = document.getElementById('globalDropProfileCtaButtons');
+    const stream = document.getElementById('globalDropProfileStream');
+
+    if (!modal) return;
+
+    if (stream) {
+      stream.innerHTML = `
+        <div style="padding: 40px; text-align: center; color: var(--x-text-secondary);">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--x-green); margin-bottom: 8px; display: block;"></i>
+          <span>Retrieving node profile...</span>
+        </div>
+      `;
+    }
+
+    const myUid = this.getUID();
+    const isMe = (targetUid === myUid);
+    const initialName = authorData.name || (isMe ? this.getUsername() : 'Transmitter');
+    const initialHandle = authorData.handle || (initialName ? initialName.toLowerCase().replace(/\s+/g, '_') : 'node');
+    const initialAvatar = authorData.photo || (isMe ? this.getAvatar() : 'logo.jpg');
+
+    if (headerName) headerName.textContent = initialName;
+    if (displayName) displayName.innerHTML = `${this.escapeHtml(initialName)} <i class="fa-solid fa-circle-check x-drop-verified" title="Verified Cyber Node"></i>`;
+    if (handle) handle.textContent = `@${initialHandle}`;
+    if (avatar) avatar.src = initialAvatar;
+
+    modal.style.display = 'flex';
+
+    // 1. Fetch user doc from Firestore
+    let userData = {};
+    if (db) {
+      try {
+        const uSnap = await getDoc(doc(db, 'users', targetUid));
+        if (uSnap.exists()) {
+          userData = uSnap.data();
+        }
+      } catch (err) {
+        console.warn('[GLOBAL DROP PROFILE] User doc fetch error:', err);
+      }
+    }
+
+    const finalName = userData.displayName || userData.username || userData.name || initialName;
+    const finalHandle = userData.username || (finalName ? finalName.toLowerCase().replace(/\s+/g, '_') : initialHandle);
+    const finalAvatar = userData.profilePic || userData.photoURL || initialAvatar;
+    const finalBio = userData.bio || userData.status || 'NEX Cyber Node Operative • Transmitting on Global Drop.';
+    const finalLocation = userData.location || (this.userLocation?.city ? `${this.userLocation.city}, ${this.userLocation.countryCode}` : 'Global Matrix');
+    const joinedAt = userData.createdAtMs || userData.createdAt?.seconds * 1000 || userData.timestamp || (Date.now() - 365 * 86400000);
+
+    if (headerName) headerName.textContent = finalName;
+    if (displayName) displayName.innerHTML = `${this.escapeHtml(finalName)} <i class="fa-solid fa-circle-check x-drop-verified" title="Verified Cyber Node"></i>`;
+    if (handle) handle.textContent = `@${finalHandle}`;
+    if (avatar) avatar.src = finalAvatar;
+    if (bio) bio.textContent = finalBio;
+
+    // Tenure & rank calculation
+    const tenureData = this.calculateUserRankAndTenure(joinedAt);
+    if (rankChip) {
+      rankChip.innerHTML = `<i class="fa-solid fa-shield-halved"></i> <span>${this.escapeHtml(tenureData.rank)}</span>`;
+    }
+    if (joinDate) {
+      joinDate.innerHTML = `<i class="fa-regular fa-calendar"></i> <span>${this.escapeHtml(tenureData.tenureText)}</span>`;
+    }
+
+    // Location
+    if (locItem) {
+      locItem.innerHTML = `<i class="fa-solid fa-location-dot"></i> <span>${this.escapeHtml(finalLocation)}</span>`;
+    }
+
+    // Node Fingerprint
+    if (nodeIdItem) {
+      nodeIdItem.innerHTML = `<i class="fa-solid fa-fingerprint"></i> <span>NEX-${targetUid.slice(0, 8).toUpperCase()}</span>`;
+    }
+
+    // Following & Followers
+    const following = Array.isArray(userData.following) ? userData.following.length : 142;
+    const followers = Array.isArray(userData.followers) ? userData.followers.length : 1840;
+    if (followingCount) followingCount.textContent = this.formatCompactNumber(following);
+    if (followersCount) followersCount.textContent = this.formatCompactNumber(followers);
+
+    // CTA Buttons
+    if (ctaButtons) {
+      ctaButtons.innerHTML = '';
+      if (isMe) {
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'x-profile-edit-btn wide';
+        editBtn.textContent = 'Edit profile';
+        editBtn.addEventListener('click', () => {
+          if (typeof window.openSettingsModal === 'function') window.openSettingsModal();
+        });
+        ctaButtons.appendChild(editBtn);
+      } else {
+        const myFollowingList = Array.isArray(window.myFollowing) ? window.myFollowing : [];
+        let isFollowing = myFollowingList.includes(targetUid);
+
+        const followBtn = document.createElement('button');
+        followBtn.type = 'button';
+        followBtn.className = `x-profile-follow-btn ${isFollowing ? 'following' : ''}`;
+        followBtn.textContent = isFollowing ? 'Following' : 'Follow';
+
+        followBtn.addEventListener('click', async () => {
+          isFollowing = !isFollowing;
+          followBtn.className = `x-profile-follow-btn ${isFollowing ? 'following' : ''}`;
+          followBtn.textContent = isFollowing ? 'Following' : 'Follow';
+
+          if (db && myUid) {
+            try {
+              const myRef = doc(db, 'users', myUid);
+              const targetRef = doc(db, 'users', targetUid);
+              if (isFollowing) {
+                await updateDoc(myRef, { following: arrayUnion(targetUid) });
+                await updateDoc(targetRef, { followers: arrayUnion(myUid) });
+                if (window.showNotif) window.showNotif(`Now following @${finalHandle}`, 'success');
+              } else {
+                await updateDoc(myRef, { following: arrayRemove(targetUid) });
+                await updateDoc(targetRef, { followers: arrayRemove(myUid) });
+                if (window.showNotif) window.showNotif(`Unfollowed @${finalHandle}`, 'info');
+              }
+            } catch (err) {
+              console.warn('[GLOBAL DROP PROFILE] Follow toggle error:', err);
+            }
+          }
+        });
+        ctaButtons.appendChild(followBtn);
+
+        const dmBtn = document.createElement('button');
+        dmBtn.type = 'button';
+        dmBtn.className = 'x-profile-dm-btn';
+        dmBtn.title = 'Send Direct Message';
+        dmBtn.innerHTML = '<i class="fa-regular fa-envelope"></i>';
+        dmBtn.addEventListener('click', () => {
+          modal.style.display = 'none';
+          if (typeof window.openChat === 'function') {
+            window.openChat(targetUid, finalName, finalAvatar, 'direct');
+            if (typeof window.showChatDetailView === 'function') window.showChatDetailView();
+          } else if (typeof window.startDirectChat === 'function') {
+            window.startDirectChat(targetUid, finalName);
+          } else if (typeof window.handleNavigation === 'function') {
+            window.handleNavigation('chats');
+          }
+        });
+        ctaButtons.appendChild(dmBtn);
+      }
+    }
+
+    // 2. Query user drops
+    try {
+      const dropsRef = collection(db, 'global_drops');
+      const q = query(dropsRef, where('authorId', '==', targetUid), orderBy('createdAtMs', 'desc'), limit(50));
+      const dropSnaps = await getDocs(q);
+      const userDrops = [];
+      dropSnaps.forEach(dSnap => {
+        userDrops.push({ id: dSnap.id, ...dSnap.data() });
+      });
+
+      this.cachedProfileDrops = userDrops;
+      if (headerDropsCount) headerDropsCount.textContent = `${userDrops.length} Drops`;
+
+      const totalViews = userDrops.reduce((acc, d) => acc + (d.viewsCount || 1), 0);
+      if (viewsItem) {
+        viewsItem.innerHTML = `<i class="fa-solid fa-chart-simple"></i> <span><strong>${this.formatCompactNumber(totalViews)}</strong> Drop Views</span>`;
+      }
+      if (totalViewsCount) totalViewsCount.textContent = this.formatCompactNumber(totalViews);
+      if (totalDropsCount) totalDropsCount.textContent = this.formatCompactNumber(userDrops.length);
+
+      this.renderProfileFilteredDrops();
+    } catch (err) {
+      console.warn('[GLOBAL DROP PROFILE] Drops query fallback:', err);
+      const filtered = this.cachedDrops.filter(d => d.authorId === targetUid || d.userId === targetUid);
+      this.cachedProfileDrops = filtered;
+      if (headerDropsCount) headerDropsCount.textContent = `${filtered.length} Drops`;
+      const fallbackViews = filtered.reduce((acc, d) => acc + (d.viewsCount || 1), 0);
+      if (viewsItem) {
+        viewsItem.innerHTML = `<i class="fa-solid fa-chart-simple"></i> <span><strong>${this.formatCompactNumber(fallbackViews)}</strong> Drop Views</span>`;
+      }
+      if (totalViewsCount) totalViewsCount.textContent = this.formatCompactNumber(fallbackViews);
+      if (totalDropsCount) totalDropsCount.textContent = this.formatCompactNumber(filtered.length);
+      this.renderProfileFilteredDrops();
+    }
+  }
+
+  renderProfileFilteredDrops() {
+    const stream = document.getElementById('globalDropProfileStream');
+    if (!stream) return;
+
+    let drops = [...this.cachedProfileDrops];
+
+    if (this.currentProfileTab === 'media') {
+      drops = drops.filter(d => Array.isArray(d.mediaUrls) && d.mediaUrls.length > 0);
+    } else if (this.currentProfileTab === 'likes') {
+      drops = this.cachedDrops.filter(d => Array.isArray(d.likes) && d.likes.includes(this.currentProfileUid));
+    }
+
+    if (!drops.length) {
+      stream.innerHTML = `
+        <div style="padding: 48px 20px; text-align: center; color: var(--x-text-secondary);">
+          <i class="fa-regular fa-folder-open" style="font-size: 32px; color: var(--x-green); opacity: 0.8; margin-bottom: 12px; display: block;"></i>
+          <h3 style="font-size: 18px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">No ${this.currentProfileTab} yet</h3>
+          <p style="font-size: 13.5px; max-width: 320px; margin: 0 auto; line-height: 1.4;">When this transmitter posts ${this.currentProfileTab}, they will appear here.</p>
+        </div>
+      `;
+      return;
+    }
+
+    stream.innerHTML = '';
+    const myUid = this.getUID();
+
+    drops.forEach(drop => {
+      const card = document.createElement('article');
+      card.className = 'x-drop-row global-drop-card';
+      card.id = `profile-drop-card-${drop.id}`;
+
+      const timeStr = this.formatRelativeTime(drop.createdAtMs || Date.now());
+      const safeAuthor = this.escapeHtml(drop.authorName || 'Transmitter');
+      const safeHandle = this.escapeHtml(drop.authorHandle || 'node');
+      const safeAvatar = drop.authorPhoto || 'logo.jpg';
+      const isSignaled = Array.isArray(drop.likes) && drop.likes.includes(myUid);
+      const isEchoed = Array.isArray(drop.echoes) && drop.echoes.includes(myUid);
+
+      const mediaHtml = this.buildMediaGridHtml(drop);
+      const codeHtml = this.buildCodeBoxHtml(drop.codeSnippet);
+
+      card.innerHTML = `
+        <div class="x-drop-avatar-col">
+          <img src="${safeAvatar}" alt="${safeAuthor}" class="x-drop-avatar" onerror="this.src='logo.jpg'" />
+        </div>
+        <div class="x-drop-main-col">
+          <div class="x-drop-header">
+            <div class="x-drop-author-info">
+              <span class="x-drop-author-name">${safeAuthor}</span>
+              <i class="fa-solid fa-circle-check x-drop-verified"></i>
+              <span class="x-drop-author-handle">@${safeHandle}</span>
+              <span class="x-drop-dot">·</span>
+              <span class="x-drop-time">${timeStr}</span>
+            </div>
+          </div>
+          <div class="x-drop-text">${this.formatDropText(drop.content || '')}</div>
+          ${mediaHtml}
+          ${codeHtml}
+          <div class="x-action-row">
+            <button type="button" class="x-action-btn x-action-reply"><i class="fa-regular fa-comment"></i> <span class="x-action-count">${drop.repliesCount || 0}</span></button>
+            <button type="button" class="x-action-btn x-action-echo ${isEchoed ? 'active' : ''}"><i class="fa-solid fa-retweet"></i> <span class="x-action-count">${drop.echoesCount || 0}</span></button>
+            <button type="button" class="x-action-btn x-action-like ${isSignaled ? 'active' : ''}"><i class="${isSignaled ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i> <span class="x-action-count">${drop.likesCount || 0}</span></button>
+            <button type="button" class="x-action-btn x-action-views"><i class="fa-solid fa-chart-simple"></i> <span class="x-action-count">${drop.viewsCount || 42}</span></button>
+          </div>
+        </div>
+      `;
+
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('button, a, video, audio')) return;
+        this.openRepliesDrawer(drop);
+      });
+
+      stream.appendChild(card);
+    });
+  }
 }
 
 // Global Singleton
 const globalDropEngine = new GlobalDropEngine();
+window.openGlobalDropUserProfile = (uid, data) => globalDropEngine.openUserProfile(uid, data);
 
 export function initGlobalDropEngine() {
   globalDropEngine.init();

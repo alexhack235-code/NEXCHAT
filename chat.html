@@ -10170,6 +10170,131 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- GLOBAL DROP X USER-TO-USER PROFILE VIEW (OFFICIAL X SPECIFICATION)        -->
+<!-- ========================================================================= -->
+<div id="globalDropUserProfileModal" class="x-profile-modal-overlay" style="display: none;" role="dialog" aria-modal="true">
+  <div class="x-profile-container">
+    <!-- 1. Sticky Header Bar -->
+    <header class="x-profile-header">
+      <button type="button" id="globalDropProfileBackBtn" class="x-thread-back-btn" title="Back" aria-label="Back">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <div class="x-profile-header-title">
+        <span class="x-profile-title-name" id="globalDropProfileHeaderName">User</span>
+        <span class="x-profile-title-count" id="globalDropProfileHeaderDropsCount">0 Drops</span>
+      </div>
+      <button type="button" id="globalDropProfileShareBtn" class="x-thread-action-icon-btn" title="Share Profile">
+        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+      </button>
+    </header>
+
+    <!-- 2. Scrollable Profile Body -->
+    <div class="x-profile-scrollable" id="globalDropProfileScrollable">
+      <!-- 2A. Cover Banner -->
+      <div class="x-profile-banner" id="globalDropProfileBanner">
+        <div class="x-profile-banner-grid-overlay"></div>
+      </div>
+
+      <!-- 2B. Profile Info Card -->
+      <div class="x-profile-info-section">
+        <div class="x-profile-avatar-row">
+          <div class="x-profile-avatar-wrapper">
+            <img src="logo.jpg" alt="Avatar" class="x-profile-avatar" id="globalDropProfileAvatar" onerror="this.src='logo.jpg'" />
+            <div class="x-profile-avatar-beacon"></div>
+          </div>
+          <div class="x-profile-cta-buttons" id="globalDropProfileCtaButtons">
+            <!-- Rendered dynamically: Follow/Following + DM or Edit Profile -->
+          </div>
+        </div>
+
+        <div class="x-profile-names-block">
+          <div class="x-profile-display-name-row">
+            <h2 class="x-profile-display-name" id="globalDropProfileDisplayName">
+              Transmitter
+              <i class="fa-solid fa-circle-check x-drop-verified" title="Verified Cyber Node"></i>
+            </h2>
+            <span class="x-profile-rank-chip" id="globalDropProfileRankChip" title="Operative Rank based on NEXCHAT tenure">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>Operative</span>
+            </span>
+          </div>
+          <span class="x-profile-handle" id="globalDropProfileHandle">@node</span>
+        </div>
+
+        <p class="x-profile-bio" id="globalDropProfileBio">
+          NEX Cyber Node Operative &middot; Transmitting on Global Drop.
+        </p>
+
+        <!-- Tenure, Location, Join Date & Views Metadata Strip -->
+        <div class="x-profile-meta-strip">
+          <span class="x-profile-meta-item" id="globalDropProfileJoinDate">
+            <i class="fa-regular fa-calendar"></i>
+            <span>Joined Recently</span>
+          </span>
+          <span class="x-profile-meta-item" id="globalDropProfileLocation">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>Global Matrix</span>
+          </span>
+          <span class="x-profile-meta-item" id="globalDropProfileViews">
+            <i class="fa-solid fa-chart-simple"></i>
+            <span>0 Drop Views</span>
+          </span>
+          <span class="x-profile-meta-item" id="globalDropProfileNodeId">
+            <i class="fa-solid fa-fingerprint"></i>
+            <span>NEX Node</span>
+          </span>
+        </div>
+
+        <!-- Following / Followers / Views / Drops Counts -->
+        <div class="x-profile-stats-row">
+          <div class="x-profile-stat-item">
+            <strong id="globalDropProfileFollowingCount">0</strong>
+            <span>Following</span>
+          </div>
+          <div class="x-profile-stat-item">
+            <strong id="globalDropProfileFollowersCount">0</strong>
+            <span>Followers</span>
+          </div>
+          <div class="x-profile-stat-item">
+            <strong id="globalDropProfileTotalViewsCount">0</strong>
+            <span>Drop Views</span>
+          </div>
+          <div class="x-profile-stat-item">
+            <strong id="globalDropProfileTotalDropsCount">0</strong>
+            <span>Drops</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2C. Profile Navigation Tabs -->
+      <div class="x-profile-tabs" role="tablist">
+        <button type="button" class="x-profile-tab active" data-tab="drops" id="globalDropProfileTabDrops">
+          <span>Drops</span>
+          <div class="x-tab-active-indicator"></div>
+        </button>
+        <button type="button" class="x-profile-tab" data-tab="replies" id="globalDropProfileTabReplies">
+          <span>Replies</span>
+          <div class="x-tab-active-indicator"></div>
+        </button>
+        <button type="button" class="x-profile-tab" data-tab="media" id="globalDropProfileTabMedia">
+          <span>Media</span>
+          <div class="x-tab-active-indicator"></div>
+        </button>
+        <button type="button" class="x-profile-tab" data-tab="likes" id="globalDropProfileTabLikes">
+          <span>Likes</span>
+          <div class="x-tab-active-indicator"></div>
+        </button>
+      </div>
+
+      <!-- 2D. Profile Drops Feed Stream -->
+      <section class="x-profile-stream" id="globalDropProfileStream">
+        <!-- Rendered dynamically -->
+      </section>
+    </div>
+  </div>
+</div>
+
 <!-- FLOATING CYBER-FAB FOR MOBILE GLOBAL DROP -->
 <button id="globalDropMobileFab" class="global-drop-mobile-fab" title="Transmit Drop" style="display: none;">
   <i class="fa-solid fa-feather-pointed"></i>
