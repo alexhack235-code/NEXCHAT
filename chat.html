@@ -10246,7 +10246,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           </span>
         </div>
 
-        <!-- Following / Followers / Views / Drops Counts -->
+        <!-- Following / Followers / Views / Drops / Videos Counts -->
         <div class="x-profile-stats-row">
           <div class="x-profile-stat-item">
             <strong id="globalDropProfileFollowingCount">0</strong>
@@ -10257,12 +10257,16 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
             <span>Followers</span>
           </div>
           <div class="x-profile-stat-item">
-            <strong id="globalDropProfileTotalViewsCount">0</strong>
-            <span>Drop Views</span>
+            <strong id="globalDropProfileVideosCount">0</strong>
+            <span>Videos</span>
           </div>
           <div class="x-profile-stat-item">
             <strong id="globalDropProfileTotalDropsCount">0</strong>
             <span>Drops</span>
+          </div>
+          <div class="x-profile-stat-item">
+            <strong id="globalDropProfileTotalViewsCount">0</strong>
+            <span>Drop Views</span>
           </div>
         </div>
       </div>
@@ -10270,18 +10274,28 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       <!-- 2C. Profile Navigation Tabs -->
       <div class="x-profile-tabs" role="tablist">
         <button type="button" class="x-profile-tab active" data-tab="drops" id="globalDropProfileTabDrops">
+          <i class="fa-solid fa-layer-group"></i>
           <span>Drops</span>
           <div class="x-tab-active-indicator"></div>
         </button>
-        <button type="button" class="x-profile-tab" data-tab="replies" id="globalDropProfileTabReplies">
-          <span>Replies</span>
+        <button type="button" class="x-profile-tab" data-tab="videos" id="globalDropProfileTabVideos">
+          <i class="fa-solid fa-video"></i>
+          <span>Videos</span>
+          <span class="x-profile-tab-badge" id="globalDropProfileVideosCountBadge">0</span>
           <div class="x-tab-active-indicator"></div>
         </button>
         <button type="button" class="x-profile-tab" data-tab="media" id="globalDropProfileTabMedia">
+          <i class="fa-regular fa-image"></i>
           <span>Media</span>
           <div class="x-tab-active-indicator"></div>
         </button>
+        <button type="button" class="x-profile-tab" data-tab="replies" id="globalDropProfileTabReplies">
+          <i class="fa-regular fa-comment"></i>
+          <span>Replies</span>
+          <div class="x-tab-active-indicator"></div>
+        </button>
         <button type="button" class="x-profile-tab" data-tab="likes" id="globalDropProfileTabLikes">
+          <i class="fa-regular fa-heart"></i>
           <span>Likes</span>
           <div class="x-tab-active-indicator"></div>
         </button>

@@ -1971,7 +1971,7 @@ class GlobalDropEngine {
 
     return {
       monthYear,
-      tenureText: `Joined ${monthYear} &middot; ${tenureText}`,
+      tenureText: `Joined ${monthYear} \u00B7 ${tenureText}`,
       tenureYears: diffYears.toFixed(1),
       rank,
       shortBadge
@@ -2160,6 +2160,12 @@ class GlobalDropEngine {
       this.cachedProfileDrops = userDrops;
       if (headerDropsCount) headerDropsCount.textContent = `${userDrops.length} Drops`;
 
+      const videoDrops = userDrops.filter(d => d.mediaType === 'video' || (Array.isArray(d.mediaUrls) && d.mediaUrls.some(u => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u) || (typeof u === 'string' && u.includes('/video/')))));
+      const videosCountEl = document.getElementById('globalDropProfileVideosCount');
+      const videosBadgeEl = document.getElementById('globalDropProfileVideosCountBadge');
+      if (videosCountEl) videosCountEl.textContent = this.formatCompactNumber(videoDrops.length);
+      if (videosBadgeEl) videosBadgeEl.textContent = this.formatCompactNumber(videoDrops.length);
+
       const totalViews = userDrops.reduce((acc, d) => acc + (d.viewsCount || 1), 0);
       if (viewsItem) {
         viewsItem.innerHTML = `<i class="fa-solid fa-chart-simple"></i> <span><strong>${this.formatCompactNumber(totalViews)}</strong> Drop Views</span>`;
@@ -2174,6 +2180,12 @@ class GlobalDropEngine {
       this.cachedProfileDrops = filtered;
       if (headerDropsCount) headerDropsCount.textContent = `${filtered.length} Drops`;
       const fallbackViews = filtered.reduce((acc, d) => acc + (d.viewsCount || 1), 0);
+      const videoDrops = filtered.filter(d => d.mediaType === 'video' || (Array.isArray(d.mediaUrls) && d.mediaUrls.some(u => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u) || (typeof u === 'string' && u.includes('/video/')))));
+      const videosCountEl = document.getElementById('globalDropProfileVideosCount');
+      const videosBadgeEl = document.getElementById('globalDropProfileVideosCountBadge');
+      if (videosCountEl) videosCountEl.textContent = this.formatCompactNumber(videoDrops.length);
+      if (videosBadgeEl) videosBadgeEl.textContent = this.formatCompactNumber(videoDrops.length);
+
       if (viewsItem) {
         viewsItem.innerHTML = `<i class="fa-solid fa-chart-simple"></i> <span><strong>${this.formatCompactNumber(fallbackViews)}</strong> Drop Views</span>`;
       }
@@ -2189,10 +2201,50 @@ class GlobalDropEngine {
 
     let drops = [...this.cachedProfileDrops];
 
-    if (this.currentProfileTab === 'media') {
+    if (this.currentProfileTab === 'videos') {
+      const videoDrops = drops.filter(d => d.mediaType === 'video' || (Array.isArray(d.mediaUrls) && d.mediaUrls.some(u => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u) || (typeof u === 'string' && u.includes('/video/')))));
+      if (!videoDrops.length) {
+        stream.innerHTML = `
+          <div style="padding: 48px 20px; text-align: center; color: var(--x-text-secondary);">
+            <i class="fa-solid fa-video-slash" style="font-size: 32px; color: var(--x-green); opacity: 0.8; margin-bottom: 12px; display: block;"></i>
+            <h3 style="font-size: 18px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">No videos uploaded yet</h3>
+            <p style="font-size: 13.5px; max-width: 320px; margin: 0 auto; line-height: 1.4;">When this user posts video clips or reels on Global Drop, they will be showcased here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      stream.innerHTML = '<div class="x-profile-videos-grid"></div>';
+      const grid = stream.querySelector('.x-profile-videos-grid');
+      videoDrops.forEach(drop => {
+        const vUrl = (Array.isArray(drop.mediaUrls) ? drop.mediaUrls.find(u => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u) || (typeof u === 'string' && u.includes('/video/'))) : null) || (Array.isArray(drop.mediaUrls) ? drop.mediaUrls[0] : '');
+        const card = document.createElement('div');
+        card.className = 'x-profile-video-card';
+        card.innerHTML = `
+          <video src="${vUrl}" preload="metadata" muted playsinline></video>
+          <div class="x-profile-video-card-overlay">
+            <span class="x-profile-video-play-tag"><i class="fa-solid fa-play"></i> VIDEO</span>
+            <div class="x-profile-video-footer-block">
+              <div class="x-profile-video-caption">${this.escapeHtml(drop.content || 'Video drop')}</div>
+              <div class="x-profile-video-footer">
+                <span><i class="fa-regular fa-heart"></i> ${drop.likesCount || 0}</span>
+                <span><i class="fa-solid fa-chart-simple"></i> ${this.formatCompactNumber(drop.viewsCount || 1)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', () => {
+          this.openRepliesDrawer(drop);
+        });
+        grid.appendChild(card);
+      });
+      return;
+    } else if (this.currentProfileTab === 'media') {
       drops = drops.filter(d => Array.isArray(d.mediaUrls) && d.mediaUrls.length > 0);
     } else if (this.currentProfileTab === 'likes') {
       drops = this.cachedDrops.filter(d => Array.isArray(d.likes) && d.likes.includes(this.currentProfileUid));
+    } else if (this.currentProfileTab === 'replies') {
+      drops = drops.filter(d => (d.repliesCount || 0) > 0 || d.replyToDropId);
     }
 
     if (!drops.length) {
