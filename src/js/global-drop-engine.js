@@ -1013,6 +1013,15 @@ class GlobalDropEngine {
         </div>
       `;
 
+      // Click anywhere on card (except interactive elements) to open Thread
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('button, a, video, audio, input, textarea, select, .x-action-btn, .x-drop-geo-badge, .global-drop-card-more-btn, .x-drop-code-copy-btn')) {
+          return;
+        }
+        this.openRepliesDrawer(drop);
+      });
+
       // Event Listeners for actions
       this.bindCardActions(card, drop);
       container.appendChild(card);
@@ -1276,30 +1285,51 @@ class GlobalDropEngine {
     }
   }
 
+  formatFullTimestamp(ms) {
+    if (!ms) return '';
+    const date = new Date(ms);
+    const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    const month = date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    return `${time} · ${month}`;
+  }
+
   // ---------------------------------------------------------------------------
-  // 7. REPLIES & DISCUSSIONS DRAWER
+  // 7. REPLIES & DISCUSSIONS DRAWER (OFFICIAL X THREAD SPECIFICATION)
   // ---------------------------------------------------------------------------
   bindRepliesDrawer() {
     const drawer = document.getElementById('globalDropRepliesDrawer');
     const closeBtn = document.getElementById('globalDropRepliesCloseBtn');
     const sendBtn = document.getElementById('globalDropReplySendBtn');
     const input = document.getElementById('globalDropReplyInput');
+    const shareBtn = document.getElementById('globalDropThreadShareBtn');
 
-    closeBtn?.addEventListener('click', () => {
+    const closeThread = () => {
       if (drawer) drawer.style.display = 'none';
       if (this.unsubscribeReplies) {
         this.unsubscribeReplies();
         this.unsubscribeReplies = null;
       }
-    });
+      this.currentReplyDrop = null;
+    };
+
+    closeBtn?.addEventListener('click', closeThread);
 
     drawer?.addEventListener('click', (e) => {
       if (e.target === drawer) {
-        drawer.style.display = 'none';
-        if (this.unsubscribeReplies) {
-          this.unsubscribeReplies();
-          this.unsubscribeReplies = null;
-        }
+        closeThread();
+      }
+    });
+
+    shareBtn?.addEventListener('click', () => {
+      if (!this.currentReplyDrop) return;
+      this.shareDropToChat(this.currentReplyDrop);
+    });
+
+    input?.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+      if (sendBtn) {
+        sendBtn.disabled = !input.value.trim();
       }
     });
 
@@ -1307,9 +1337,13 @@ class GlobalDropEngine {
       const text = input?.value.trim();
       if (!text || !this.currentReplyDrop) return;
       const uid = this.getUID();
-      if (!uid) return;
+      if (!uid) {
+        if (window.showNotif) window.showNotif('Please sign in to reply to drops', 'warning');
+        return;
+      }
 
-      input.value = '';
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
       try {
         const repliesCol = collection(db, 'global_drops', this.currentReplyDrop.id, 'replies');
@@ -1327,14 +1361,25 @@ class GlobalDropEngine {
         // Increment reply count on parent drop
         const dropRef = doc(db, 'global_drops', this.currentReplyDrop.id);
         await updateDoc(dropRef, { repliesCount: increment(1) });
+
+        input.value = '';
+        input.style.height = 'auto';
+        if (window.showNotif) window.showNotif('Reply transmitted to thread', 'success');
+        if (navigator.vibrate) navigator.vibrate(15);
       } catch (err) {
         console.error('[GLOBAL DROP] Post reply error:', err);
+        if (window.showNotif) window.showNotif('Failed to post reply: ' + err.message, 'error');
+      } finally {
+        if (sendBtn) {
+          sendBtn.disabled = !input?.value.trim();
+          sendBtn.innerHTML = '<span>Reply</span>';
+        }
       }
     };
 
     sendBtn?.addEventListener('click', submitReply);
     input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         submitReply();
       }
@@ -1344,23 +1389,178 @@ class GlobalDropEngine {
   openRepliesDrawer(drop) {
     this.currentReplyDrop = drop;
     const drawer = document.getElementById('globalDropRepliesDrawer');
+    const parentContainer = document.getElementById('globalDropThreadParent');
     const list = document.getElementById('globalDropRepliesList');
-    if (!drawer || !list) return;
+    const replyingHandle = document.getElementById('globalDropThreadReplyingHandle');
+    const headerSub = document.getElementById('globalDropThreadHeaderSub');
+    const composerAvatar = document.getElementById('globalDropThreadComposerAvatar');
+    const replyInput = document.getElementById('globalDropReplyInput');
+    const scrollable = document.getElementById('globalDropThreadScrollable');
 
-    drawer.style.display = 'flex';
-    list.innerHTML = `
-      <div style="padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--drop-card-border); border-radius: 12px; margin-bottom: 12px;">
-        <span style="font-weight: 700; color: var(--drop-accent);">@${this.escapeHtml(drop.authorHandle || 'user')}</span>: ${this.escapeHtml(drop.content || '')}
+    if (!drawer || !parentContainer || !list) return;
+
+    if (composerAvatar) composerAvatar.src = this.getAvatar();
+    if (replyingHandle) replyingHandle.textContent = `@${drop.authorHandle || 'node'}`;
+    if (headerSub) headerSub.textContent = `@${drop.authorHandle || 'node'}`;
+    if (replyInput) {
+      replyInput.value = '';
+      replyInput.style.height = 'auto';
+    }
+
+    const myUid = this.getUID();
+    const safeAuthor = this.escapeHtml(drop.authorName || 'Transmitter');
+    const safeHandle = this.escapeHtml(drop.authorHandle || 'node');
+    const safeAvatar = drop.authorPhoto || 'logo.jpg';
+    const isSignaled = Array.isArray(drop.likes) && drop.likes.includes(myUid);
+    const isEchoed = Array.isArray(drop.echoes) && drop.echoes.includes(myUid);
+
+    // Full timestamp
+    const fullTimeStr = this.formatFullTimestamp(drop.createdAtMs || (drop.createdAt?.seconds ? drop.createdAt.seconds * 1000 : Date.now()));
+
+    // Media, Code, Voice
+    const mediaHtml = this.buildMediaGridHtml(drop);
+    const codeHtml = this.buildCodeBoxHtml(drop.codeSnippet);
+    const voiceHtml = drop.voiceUrl ? `
+      <div class="x-drop-voice-player global-drop-voice-player" style="margin: 12px 0;">
+        <button type="button" class="x-drop-voice-play-btn global-drop-voice-play-btn" data-url="${drop.voiceUrl}">
+          <i class="fa-solid fa-play"></i>
+        </button>
+        <div class="x-drop-voice-wave-bars global-drop-voice-wave-bars">
+          ${Array.from({ length: 32 }).map((_, i) => `<div class="x-drop-voice-wave-bar" style="height: ${4 + (i % 7) * 3}px;"></div>`).join('')}
+        </div>
+        <span style="font-size: 11px; color: var(--x-text-secondary); font-family: var(--x-mono); letter-spacing: 0.5px;">AUDIO DROP</span>
       </div>
-      <div style="text-align: center; color: var(--drop-text-muted); padding: 20px;">
-        <i class="fa-solid fa-spinner fa-spin"></i> Loading replies...
+    ` : '';
+
+    // Location badge
+    let geoBadgeHtml = '';
+    if (drop.location && (drop.location.city || drop.location.label)) {
+      const locLabel = this.escapeHtml(drop.location.city || drop.location.label);
+      geoBadgeHtml = `
+        <span class="x-drop-geo-badge" style="margin-left: 6px;">
+          <i class="fa-solid fa-location-dot"></i>
+          <span>${locLabel}</span>
+        </span>
+      `;
+    }
+
+    // Pinned / TTL badge
+    let ttlBadge = '';
+    if (drop.ttl && drop.ttl !== 'permanent') {
+      ttlBadge = `<span class="x-drop-ttl-badge" style="margin-left: 6px;"><i class="fa-regular fa-clock"></i> ${drop.ttl}</span>`;
+    }
+
+    // Engagement stats
+    const likesCount = drop.signalsCount || drop.likesCount || (Array.isArray(drop.likes) ? drop.likes.length : 0);
+    const echoesCount = drop.echoesCount || 0;
+    const repliesCount = drop.repliesCount || 0;
+    const viewsCount = drop.viewsCount || (likesCount ? likesCount * 4 + 18 : 84);
+
+    parentContainer.innerHTML = `
+      <div class="x-thread-parent-author-row">
+        <div class="x-thread-parent-author-info">
+          <img src="${safeAvatar}" alt="${safeAuthor}" class="x-thread-parent-avatar" onerror="this.src='logo.jpg'" />
+          <div class="x-thread-parent-names">
+            <span class="x-thread-parent-name">
+              ${safeAuthor}
+              <i class="fa-solid fa-circle-check x-drop-verified" title="Verified Cyber Node"></i>
+            </span>
+            <span class="x-thread-parent-handle">@${safeHandle}</span>
+          </div>
+        </div>
+        <button type="button" class="x-thread-action-icon-btn global-drop-card-more-btn" title="More options">
+          <i class="fa-solid fa-ellipsis"></i>
+        </button>
+      </div>
+
+      <div class="x-thread-parent-content">${this.formatDropText(drop.content || '')}</div>
+      ${mediaHtml}
+      ${codeHtml}
+      ${voiceHtml}
+
+      <div class="x-thread-parent-timestamp">
+        <span>${fullTimeStr}</span>
+        <span>·</span>
+        <span style="color: var(--x-green); font-weight: 600;"><i class="fa-solid fa-satellite-dish"></i> NEX Radar</span>
+        ${geoBadgeHtml}
+        ${ttlBadge}
+      </div>
+
+      <div class="x-thread-metrics-bar">
+        <span><strong>${echoesCount}</strong> Reposts</span>
+        <span><strong>${repliesCount}</strong> Replies</span>
+        <span><strong id="threadParentLikesCount">${likesCount}</strong> Likes</span>
+        <span><strong>${viewsCount}</strong> Views</span>
+      </div>
+
+      <div class="x-thread-parent-actions">
+        <button type="button" class="x-action-btn x-action-reply global-drop-action-btn discuss" title="Reply">
+          <div class="x-action-icon-circle"><i class="fa-regular fa-comment"></i></div>
+          <span class="x-action-count">${repliesCount}</span>
+        </button>
+        <button type="button" class="x-action-btn x-action-echo global-drop-action-btn echo ${isEchoed ? 'active' : ''}" title="Repost">
+          <div class="x-action-icon-circle"><i class="fa-solid fa-retweet"></i></div>
+          <span class="x-action-count">${echoesCount}</span>
+        </button>
+        <button type="button" class="x-action-btn x-action-like global-drop-action-btn signal ${isSignaled ? 'active' : ''}" id="threadParentLikeBtn" title="Like">
+          <div class="x-action-icon-circle"><i class="${isSignaled ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i></div>
+          <span class="x-action-count">${likesCount}</span>
+        </button>
+        <button type="button" class="x-action-btn x-action-bookmark global-drop-action-btn bookmark" title="Bookmark">
+          <div class="x-action-icon-circle"><i class="fa-regular fa-bookmark"></i></div>
+        </button>
+        <button type="button" class="x-action-btn x-action-share global-drop-action-btn forward" title="Share">
+          <div class="x-action-icon-circle"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
+        </button>
       </div>
     `;
 
+    // Bind parent actions
+    parentContainer.querySelector('.global-drop-action-btn.signal')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleSignal(drop.id, parentContainer);
+    });
+    parentContainer.querySelector('.global-drop-action-btn.echo')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleEcho(drop.id, parentContainer);
+    });
+    parentContainer.querySelector('.global-drop-action-btn.forward')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.shareDropToChat(drop);
+    });
+    parentContainer.querySelector('.global-drop-action-btn.bookmark')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const bBtn = parentContainer.querySelector('.global-drop-action-btn.bookmark');
+      bBtn.classList.toggle('active');
+      const bIcon = bBtn.querySelector('i');
+      if (bIcon) bIcon.className = bBtn.classList.contains('active') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark';
+      if (window.showNotif) window.showNotif('Drop saved to Cyber Vault bookmarks', 'success');
+    });
+    parentContainer.querySelector('.global-drop-card-more-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openDropOptionsMenu(drop);
+    });
+
+    const pVoiceBtn = parentContainer.querySelector('.global-drop-voice-play-btn');
+    if (pVoiceBtn) {
+      pVoiceBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playVoiceAudio(pVoiceBtn, pVoiceBtn.getAttribute('data-url'));
+      });
+    }
+
+    // Subscribe to replies stream
     if (this.unsubscribeReplies) {
       this.unsubscribeReplies();
       this.unsubscribeReplies = null;
     }
+
+    list.innerHTML = `
+      <div style="text-align: center; color: var(--x-text-secondary); padding: 32px 16px;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; color: var(--x-green); margin-bottom: 8px; display: block;"></i>
+        <span>Loading replies...</span>
+      </div>
+    `;
 
     try {
       const repliesCol = collection(db, 'global_drops', drop.id, 'replies');
@@ -1369,44 +1569,92 @@ class GlobalDropEngine {
       this.unsubscribeReplies = onSnapshot(q, (snapshot) => {
         if (snapshot.empty) {
           list.innerHTML = `
-            <div style="padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--drop-card-border); border-radius: 12px; margin-bottom: 12px;">
-              <span style="font-weight: 700; color: var(--drop-accent);">@${this.escapeHtml(drop.authorHandle || 'user')}</span>: ${this.escapeHtml(drop.content || '')}
-            </div>
-            <div style="text-align: center; color: var(--drop-text-muted); padding: 20px;">
-              No replies yet. Be the first to start the discussion!
+            <div class="x-thread-empty">
+              <i class="fa-regular fa-comment-dots"></i>
+              <h3>Be the first to reply</h3>
+              <p>Share your perspective or signal back to @${safeHandle}.</p>
             </div>
           `;
           return;
         }
 
-        let html = `
-          <div style="padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--drop-card-border); border-radius: 12px; margin-bottom: 12px;">
-            <span style="font-weight: 700; color: var(--drop-accent);">@${this.escapeHtml(drop.authorHandle || 'user')}</span>: ${this.escapeHtml(drop.content || '')}
-          </div>
-        `;
-
-        snapshot.forEach(docSnap => {
+        list.innerHTML = '';
+        snapshot.forEach((docSnap, idx) => {
           const rep = docSnap.data();
-          const t = this.formatRelativeTime(rep.createdAtMs || Date.now());
-          html += `
-            <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
-              <img src="${rep.authorPhoto || 'logo.jpg'}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" onerror="this.src='logo.jpg'" />
-              <div style="flex: 1;">
-                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
-                  <span style="font-size: 13px; font-weight: 700; color: #ffffff;">${this.escapeHtml(rep.authorName || 'Transmitter')}</span>
-                  <span style="font-size: 11px; color: var(--drop-text-muted);">@${this.escapeHtml(rep.authorHandle || 'user')} • ${t}</span>
-                </div>
-                <div style="font-size: 13.5px; color: #e2e8f0; line-height: 1.45;">${this.escapeHtml(rep.content || '')}</div>
+          const rTime = this.formatRelativeTime(rep.createdAtMs || Date.now());
+          const rAuthor = this.escapeHtml(rep.authorName || 'Transmitter');
+          const rHandle = this.escapeHtml(rep.authorHandle || 'node');
+          const rAvatar = rep.authorPhoto || 'logo.jpg';
+          const isLast = (idx === snapshot.docs.length - 1);
+
+          const rCard = document.createElement('article');
+          rCard.className = 'x-thread-reply-card';
+          rCard.innerHTML = `
+            <div class="x-thread-reply-left">
+              <img src="${rAvatar}" alt="${rAuthor}" class="x-thread-reply-avatar" onerror="this.src='logo.jpg'" />
+              ${!isLast ? '<div class="x-thread-spine-line"></div>' : ''}
+            </div>
+            <div class="x-thread-reply-right">
+              <div class="x-thread-reply-header">
+                <span class="x-thread-reply-author">${rAuthor}</span>
+                <i class="fa-solid fa-circle-check x-drop-verified" style="font-size: 11px;"></i>
+                <span class="x-thread-reply-handle">@${rHandle}</span>
+                <span>·</span>
+                <span class="x-thread-reply-time">${rTime}</span>
+              </div>
+              <div class="x-thread-reply-rep-badge">
+                Replying to <span style="color: var(--x-green);">@${safeHandle}</span>
+              </div>
+              <div class="x-thread-reply-text">${this.formatDropText(rep.content || '')}</div>
+              <div class="x-thread-reply-actions">
+                <button type="button" class="x-thread-reply-action-btn reply-to-reply" title="Reply">
+                  <i class="fa-regular fa-comment"></i>
+                </button>
+                <button type="button" class="x-thread-reply-action-btn like-reply" title="Like">
+                  <i class="fa-regular fa-heart"></i>
+                  <span class="like-rep-count">${rep.likesCount || 0}</span>
+                </button>
+                <button type="button" class="x-thread-reply-action-btn share-reply" title="Share">
+                  <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                </button>
               </div>
             </div>
           `;
-        });
 
-        list.innerHTML = html;
+          // Reply to reply click -> populate textarea with @handle
+          rCard.querySelector('.reply-to-reply')?.addEventListener('click', () => {
+            const ta = document.getElementById('globalDropReplyInput');
+            if (ta) {
+              ta.value = `@${rHandle} ` + ta.value.replace(`@${rHandle} `, '');
+              ta.focus();
+            }
+          });
+
+          // Like reply click
+          rCard.querySelector('.like-reply')?.addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            btn.classList.toggle('active');
+            const icon = btn.querySelector('i');
+            const cnt = btn.querySelector('.like-rep-count');
+            const isAct = btn.classList.contains('active');
+            if (icon) icon.className = isAct ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+            if (cnt) {
+              const c = parseInt(cnt.textContent || '0', 10);
+              cnt.textContent = isAct ? c + 1 : Math.max(0, c - 1);
+            }
+          });
+
+          list.appendChild(rCard);
+        });
+      }, (err) => {
+        console.error('[GLOBAL DROP] Replies stream error:', err);
       });
     } catch (err) {
-      console.error('[GLOBAL DROP] Reply subscription error:', err);
+      console.error('[GLOBAL DROP] Reply subscription init error:', err);
     }
+
+    drawer.style.display = 'flex';
+    if (scrollable) scrollable.scrollTop = 0;
   }
 
   // ---------------------------------------------------------------------------

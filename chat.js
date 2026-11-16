@@ -13723,6 +13723,22 @@ if (m.replyTo) {
 
       replyQuote.innerHTML = `<strong class="reply-quote-sender" style="color: ${isOwn ? "#bbf7d0" : "#00ff66"}; display: block; font-weight: 700; margin-bottom: 2px; font-size: 11px;"><i class="fa-solid fa-reply" style="font-size:9.5px;margin-right:5px;opacity:0.85;"></i>${replyTitle}</strong><span class="reply-quote-snippet" style="font-style: italic; color: #d1d7db; font-size: 11.5px; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 100%;">${replySnippet}</span>`;
 
+      replyQuote.style.cursor = 'pointer';
+      replyQuote.title = 'Jump to quoted message';
+      replyQuote.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = m.replyTo?.id || m.replyTo?.messageId || m.replyToId;
+        if (targetId) {
+          const targetEl = document.querySelector(`[data-msg-id="${targetId}"], [data-doc-id="${targetId}"], #msg-${targetId}`);
+          if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetEl.style.transition = 'box-shadow 0.3s ease';
+            targetEl.style.boxShadow = '0 0 16px rgba(0, 255, 136, 0.7)';
+            setTimeout(() => { targetEl.style.boxShadow = ''; }, 1400);
+          }
+        }
+      });
+
         bubble.appendChild(replyQuote);
       }
 
@@ -14022,13 +14038,25 @@ const hasDiffRevisions = window.eliteRevisionDiffEngine && typeof window.eliteRe
       replyBtn.addEventListener("click", (e) => {
         e.stopPropagation();
 
+        if (typeof openReplyForMessage === 'function') {
+          openReplyForMessage(m, isOwn);
+        } else if (typeof setReplyTo === 'function') {
+          setReplyTo({
+            messageId: m.docId || m.id || m.clientMsgId || '',
+            senderName: isOwn ? 'You' : (m.senderName || currentChatName || 'Friend'),
+            text: m.text || (m.attachment ? (m.attachment.fileName || 'Attachment') : 'Message'),
+            isOwn: !!isOwn
+          });
+        }
+
         if (window.messagingFeatures && window.messagingFeatures.setReplyingToMessage) {
           window.messagingFeatures.setReplyingToMessage({
             text: m.text || (m.attachment ? (m.attachment.fileName || 'Attachment') : ''),
-
             senderName: isOwn ? 'You' : (currentChatName || 'Friend')
           });
         }
+
+        if (navigator.vibrate) navigator.vibrate(15);
       });
 
       actionsBar.appendChild(replyBtn);
