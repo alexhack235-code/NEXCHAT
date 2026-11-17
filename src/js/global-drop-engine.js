@@ -92,6 +92,8 @@ class GlobalDropEngine {
   // INITIALIZATION & EVENT BINDINGS
   // ---------------------------------------------------------------------------
   init() {
+    if (this._isInitialized) return;
+    this._isInitialized = true;
     console.log('[GLOBAL DROP] Initializing Global Drop Microblogging Engine with Geo-Locator...');
     this.bindHeaderTabs();
     this.bindTopicChips();
@@ -102,6 +104,51 @@ class GlobalDropEngine {
     this.loadSideWidgets();
     this.initGeoLocator();
     this.initUserProfile();
+    this.initHeaderAutoHide();
+  }
+
+  initHeaderAutoHide() {
+    const container = document.getElementById('globalDropContainer');
+    const header = document.querySelector('.top-header');
+    if (!container || !header) return;
+
+    let lastScrollTop = 0;
+    let isHidden = false;
+
+    const handleScroll = (scrollTop) => {
+      const app = document.querySelector('.app');
+      const activeSection = app?.dataset?.activeSection || document.body.dataset?.activeSection;
+      if (activeSection !== 'global-drop') return;
+
+      if (scrollTop <= 15) {
+        if (isHidden) {
+          header.classList.remove('header-hidden');
+          document.body.classList.remove('drop-feed-scrolled-down');
+          isHidden = false;
+        }
+      } else if (scrollTop > lastScrollTop + 8 && scrollTop > 35) {
+        if (!isHidden) {
+          header.classList.add('header-hidden');
+          document.body.classList.add('drop-feed-scrolled-down');
+          isHidden = true;
+        }
+      } else if (scrollTop < lastScrollTop - 8) {
+        if (isHidden) {
+          header.classList.remove('header-hidden');
+          document.body.classList.remove('drop-feed-scrolled-down');
+          isHidden = false;
+        }
+      }
+      lastScrollTop = Math.max(0, scrollTop);
+    };
+
+    container.addEventListener('scroll', () => {
+      handleScroll(container.scrollTop);
+    }, { passive: true });
+
+    window.addEventListener('scroll', () => {
+      handleScroll(window.scrollY || document.documentElement.scrollTop);
+    }, { passive: true });
   }
 
   getUID() {
@@ -167,6 +214,9 @@ class GlobalDropEngine {
   // 2. DISPATCH COMPOSER (NEW DROP)
   // ---------------------------------------------------------------------------
   bindComposer() {
+    if (this._composerBound) return;
+    this._composerBound = true;
+
     const textarea = document.getElementById('globalDropTextarea');
     const charRingProgress = document.getElementById('globalDropCharProgress');
     const transmitBtn = document.getElementById('globalDropTransmitBtn');
@@ -243,7 +293,11 @@ class GlobalDropEngine {
     });
 
     // Transmit drop button
-    transmitBtn?.addEventListener('click', () => this.transmitDrop());
+    transmitBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.transmitDrop();
+    });
   }
 
   handleMediaSelection(e) {
@@ -254,6 +308,7 @@ class GlobalDropEngine {
     const total = this.selectedMediaFiles.length + files.length;
     if (total > 4) {
       if (window.showNotif) window.showNotif('Maximum 4 media attachments per Drop', 'warning');
+      e.target.value = '';
       return;
     }
 
@@ -265,6 +320,7 @@ class GlobalDropEngine {
       this.selectedMediaFiles.push(f);
     });
 
+    e.target.value = '';
     this.renderComposerMediaPreviews();
     const transmitBtn = document.getElementById('globalDropTransmitBtn');
     if (transmitBtn) transmitBtn.disabled = false;
@@ -280,29 +336,41 @@ class GlobalDropEngine {
       return;
     }
 
-    container.style.display = 'flex';
+    container.style.display = 'block';
+    const count = Math.min(this.selectedMediaFiles.length, 4);
+    const grid = document.createElement('div');
+    grid.className = 'x-composer-media-grid';
+    grid.setAttribute('data-count', String(count));
+
     this.selectedMediaFiles.forEach((file, index) => {
       const item = document.createElement('div');
-      item.className = 'global-drop-media-preview-item';
+      item.className = 'x-preview-item global-drop-media-preview-item';
 
       const fileUrl = URL.createObjectURL(file);
       if (file.type.startsWith('video/')) {
         const vid = document.createElement('video');
         vid.src = fileUrl;
         vid.muted = true;
+        vid.playsInline = true;
+        vid.autoplay = true;
+        vid.loop = true;
         item.appendChild(vid);
       } else {
         const img = document.createElement('img');
         img.src = fileUrl;
+        img.alt = 'Attached Media Preview';
         item.appendChild(img);
       }
 
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
-      removeBtn.className = 'global-drop-media-remove-btn';
+      removeBtn.className = 'x-composer-media-remove-btn global-drop-media-remove-btn';
       removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
       removeBtn.title = 'Remove';
-      removeBtn.addEventListener('click', () => {
+      removeBtn.setAttribute('aria-label', 'Remove media');
+      removeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         this.selectedMediaFiles.splice(index, 1);
         this.renderComposerMediaPreviews();
         const textarea = document.getElementById('globalDropTextarea');
@@ -313,8 +381,10 @@ class GlobalDropEngine {
       });
 
       item.appendChild(removeBtn);
-      container.appendChild(item);
+      grid.appendChild(item);
     });
+
+    container.appendChild(grid);
   }
 
   // ---------------------------------------------------------------------------
@@ -576,6 +646,8 @@ class GlobalDropEngine {
   // 3. TRANSMIT DROP (PUBLISH TO COLD-VAULT & FIRESTORE)
   // ---------------------------------------------------------------------------
   async transmitDrop() {
+    if (this.isTransmitting) return;
+
     const textarea = document.getElementById('globalDropTextarea');
     const transmitBtn = document.getElementById('globalDropTransmitBtn');
     const topicSelect = document.getElementById('globalDropTopicSelect');
@@ -606,6 +678,8 @@ class GlobalDropEngine {
       return;
     }
 
+    // Synchronously lock and disable button
+    this.isTransmitting = true;
     if (transmitBtn) {
       transmitBtn.disabled = true;
       transmitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Posting...</span>';
@@ -760,10 +834,13 @@ class GlobalDropEngine {
         window.showNotif('Failed to transmit Drop: ' + (err.message || 'Unknown network error'), 'error');
       }
     } finally {
-      if (transmitBtn) {
-        transmitBtn.disabled = false;
-        transmitBtn.innerHTML = '<span>Post</span>';
-      }
+      setTimeout(() => {
+        this.isTransmitting = false;
+        if (transmitBtn) {
+          transmitBtn.disabled = false;
+          transmitBtn.innerHTML = '<span>Post</span>';
+        }
+      }, 1200);
     }
   }
 
@@ -795,13 +872,26 @@ class GlobalDropEngine {
       this.unsubscribeFeed = onSnapshot(q, (snapshot) => {
         const drops = [];
         const now = Date.now();
+        const seenDocIds = new Set();
+        const seenDropSignatures = new Set();
 
         snapshot.forEach(docSnap => {
+          if (seenDocIds.has(docSnap.id)) return;
+          seenDocIds.add(docSnap.id);
+
           const data = docSnap.data();
           // Filter out expired TTL drops
           if (data.expiresAtMs && data.expiresAtMs < now) {
             return;
           }
+
+          // Twin deduplication: guard against duplicate documents created by rapid submit events
+          const sig = `${data.authorId || ''}_${(data.content || '').slice(0, 60)}_${Math.round((data.createdAtMs || 0) / 4000)}`;
+          if (seenDropSignatures.has(sig)) {
+            return;
+          }
+          seenDropSignatures.add(sig);
+
           drops.push({ id: docSnap.id, ...data });
         });
 
