@@ -942,11 +942,30 @@ function getDirectChatCacheKey(uidA, uidB) {
   return [uidA, uidB].filter(Boolean).sort().join('|');
 }
 
+function getSeedDirectChatMessages(targetUid) {
+  const currentUid = (typeof myUID !== 'undefined' && myUID) || window.myUID || (typeof auth !== 'undefined' && auth?.currentUser ? auth.currentUser.uid : null) || localStorage.getItem('myUID') || localStorage.getItem('auth_uid') || 'me';
+  const seedHistories = {
+    'duty': [{ docId: 'seed_duty_1', id: 'seed_duty_1', text: 'N n', from: currentUid, senderId: currentUid, time: new Date(Date.now() - 18 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
+    'home-alone': [{ docId: 'seed_ha_1', id: 'seed_ha_1', text: 'Please provide more content for this', from: currentUid, senderId: currentUid, time: new Date(Date.now() - 24 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
+    'king-alex001': [{ docId: 'seed_ka_1', id: 'seed_ka_1', text: 'Bruh', from: currentUid, senderId: currentUid, time: new Date(Date.now() - 48 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
+    'daven': [{ docId: 'seed_dav_1', id: 'seed_dav_1', text: 'Heyyyyyyyyyyyy.', from: currentUid, senderId: currentUid, time: new Date(Date.now() - 48 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }]
+  };
+  return seedHistories[targetUid] ? seedHistories[targetUid].slice() : null;
+}
+
 function getCachedDirectChatMessages(uidA, uidB, maxAge = Infinity) {
   const key = getDirectChatCacheKey(uidA, uidB);
-  const cached = directChatMessageCache.get(key);
+  let cached = directChatMessageCache.get(key);
 
-  if (!cached) return null;
+  if (!cached || !cached.messages || !cached.messages.length) {
+    const otherUid = (uidA === myUID) ? uidB : uidA;
+    const seed = getSeedDirectChatMessages(otherUid);
+    if (seed && seed.length > 0) {
+      cacheDirectChatMessages(uidA, uidB, seed);
+      return seed;
+    }
+    return null;
+  }
 
   if (maxAge !== Infinity && (Date.now() - cached.timestamp > maxAge)) {
     return null;
@@ -1141,9 +1160,12 @@ attachmentHtml = `
       }
     }
 
+    const effectiveMid = m.docId || m.id || m.clientMsgId || '';
+    const wrapperAttr = effectiveMid ? `data-doc-id="${escapeHtml(effectiveMid)}" data-message-id="${escapeHtml(effectiveMid)}" id="msg-wrapper-${escapeHtml(effectiveMid)}"` : '';
+
 return `
 
-      <div class="message-wrapper ${isOwn ? 'sent' : 'received'}" style="display:flex; justify-content:${align}; margin:6px 0; padding:0; overflow:visible;">
+      <div class="message-wrapper ${isOwn ? 'sent' : 'received'}" ${wrapperAttr} style="display:flex; justify-content:${align}; margin:6px 0; padding:0; overflow:visible;">
 
         <div class="message-bubble ${isOwn ? 'sent' : 'received'}" style="position:relative; display:flex; flex-direction:column; padding:7px 11px 6px 11px; border-radius:${bubbleRadius}; max-width:calc(75% - 8px); ${isOwn ? 'margin-left:auto; margin-right:8px;' : 'margin-right:auto; margin-left:0;'} min-width:88px; overflow:visible; word-break:break-word; overflow-wrap:anywhere; box-shadow:0 1px 2px rgba(0,0,0,0.35); background:${bubbleBg}; border:${isOwn ? 'none' : '1px solid rgba(255,255,255,0.05)'}; color:${bubbleColor}; font-size:14.5px; line-height:1.45; box-sizing:border-box;">
 
@@ -2481,7 +2503,7 @@ const toast = document.createElement('div');
 
   toast.innerHTML = `
 
-    <span style="color: #00a884; font-size: 15px;">💬</span>
+    <i class="fa-solid fa-comment" style="color: #00a884; font-size: 15px;"></i>
 
     <div style="display: flex; flex-direction: column; overflow: hidden; text-align: left;">
 
@@ -13196,6 +13218,11 @@ let messages1 = [];
   let messages2 = [];
   let loaded1 = false;
   let loaded2 = false;
+
+  if (cachedDirectMessages && cachedDirectMessages.length > 0) {
+    messages1 = cachedDirectMessages.filter(m => (m.from === myUID || m.senderId === myUID));
+    messages2 = cachedDirectMessages.filter(m => (m.from !== myUID && m.senderId !== myUID));
+  }
 const updateMessages = () => {
     const isPasscodeLocked = (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.isChatLocked === 'function' && window.NexChatPasscodeGate.isChatLocked(currentChatUser));
 
@@ -13205,7 +13232,7 @@ const updateMessages = () => {
 
     const isInitialLoadComplete = loaded1 && loaded2;
     const activeChatKey = getDirectChatCacheKey(myUID, currentChatUser);
-    const hasCachedRender = messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.children.length > 0;
+    const hasCachedRender = messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.children.length > 0 && !messagesDiv.querySelector('.chat-skeleton-loader');
 
 // ROOT FIX: Never replace or disrupt rendered cached conversation with partial (single-stream) data!
 
@@ -13359,18 +13386,27 @@ if (currentChatType === 'ai') {
 
 console.log("No messages found between users");
       const seedHistories = {
-        'duty': [{ text: 'N n', from: myUID || 'me', time: new Date(Date.now() - 18 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
+        'duty': [{ docId: 'seed_duty_1', id: 'seed_duty_1', text: 'N n', from: myUID || 'me', time: new Date(Date.now() - 18 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
 
-        'home-alone': [{ text: 'Please provide more content for this', from: myUID || 'me', time: new Date(Date.now() - 24 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
+        'home-alone': [{ docId: 'seed_ha_1', id: 'seed_ha_1', text: 'Please provide more content for this', from: myUID || 'me', time: new Date(Date.now() - 24 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
 
-        'king-alex001': [{ text: 'Bruh', from: myUID || 'me', time: new Date(Date.now() - 48 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
+        'king-alex001': [{ docId: 'seed_ka_1', id: 'seed_ka_1', text: 'Bruh', from: myUID || 'me', time: new Date(Date.now() - 48 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }],
 
-        'daven': [{ text: 'Heyyyyyyyyyyyy.', from: myUID || 'me', time: new Date(Date.now() - 48 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }]
+        'daven': [{ docId: 'seed_dav_1', id: 'seed_dav_1', text: 'Heyyyyyyyyyyyy.', from: myUID || 'me', time: new Date(Date.now() - 48 * 3600 * 1000), read: true, status: 'sent', senderName: 'You' }]
       };
 
       if (seedHistories[currentChatUser]) {
-        renderCachedDirectChatHistory(seedHistories[currentChatUser], messagesDiv);
-
+        const seed = seedHistories[currentChatUser];
+        cacheDirectChatMessages(myUID, currentChatUser, seed);
+        const seedSig = seed.map(m => (m.docId || m.id || m.clientMsgId || '') + ':' + (m.status || '') + ':' + (m.read ? '1' : '0')).join(';');
+        if (messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.currentSignature === seedSig) {
+          messagesDiv.dataset.isCachedPreview = 'false';
+          return;
+        }
+        renderCachedDirectChatHistory(seed, messagesDiv);
+        messagesDiv.dataset.renderedChatKey = activeChatKey;
+        messagesDiv.dataset.currentSignature = seedSig;
+        messagesDiv.dataset.isCachedPreview = 'false';
         return;
       }
 
@@ -14252,7 +14288,8 @@ div.appendChild(bubble);
     });
 const newSignature = allMessages.map(m => (m.docId || m.id || m.clientMsgId || '') + ':' + (m.status || '') + ':' + (m.read ? '1' : '0')).join(';');
 
-    if (messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.currentSignature === newSignature && messagesDiv.dataset.isCachedPreview !== 'true') {
+    if (messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.currentSignature === newSignature) {
+      messagesDiv.dataset.isCachedPreview = 'false';
       return;
     }
 
@@ -14797,6 +14834,12 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
     if (typeof showChatListView === 'function') {
       showChatListView();
     }
+    return;
+  }
+
+  // Guard against redundant openChat calls for the already active chat
+  if (currentChatUser === uid && currentChatType === chatType && document.body.classList.contains('in-conversation')) {
+    showChatDetailView();
     return;
   }
 
@@ -33036,7 +33079,10 @@ let chronexLi = null;
 
           `;
 
-          cachedLi.addEventListener("click", () => openChat(data.uid, data.name, data.pic, "direct"));
+          cachedLi.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openChat(data.uid, data.name, data.pic, "direct");
+          });
 
           contactList.appendChild(cachedLi);
         }
@@ -33557,6 +33603,7 @@ let longPressTimer = null;
       let longPressFired = false;
 
 li.addEventListener("click", (e) => {
+        e.stopPropagation();
         if (longPressFired) {
           longPressFired = false;
 

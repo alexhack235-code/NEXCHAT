@@ -13,11 +13,15 @@
  */
 async function fetchTargetVault(resourceType = 'auto', folder = 'nexchat-media') {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
     const res = await fetch('/api/vault', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ resourceType, folder, action: 'dispatch' })
+      body: JSON.stringify({ resourceType, folder, action: 'dispatch' }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
     if (res.ok) {
       const data = await res.json();
       if (data && data.success && data.target) {

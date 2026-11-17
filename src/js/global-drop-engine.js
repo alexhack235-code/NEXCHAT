@@ -26,6 +26,44 @@ import {
 } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import { uploadAnyMedia } from './media-upload.js';
 
+function compressImageToDataUrl(file, maxDimension = 1200, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      return reject(new Error('File is not an image'));
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        canvas.width = 0;
+        canvas.height = 0;
+        resolve(dataUrl);
+      };
+      img.onerror = () => resolve(e.target.result);
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 class GlobalDropEngine {
   constructor() {
     this.currentMode = 'radar'; // 'radar' | 'following' | 'local' | 'nodes'
@@ -580,8 +618,18 @@ class GlobalDropEngine {
 
       for (const file of this.selectedMediaFiles) {
         try {
-          const res = await uploadAnyMedia(file, { folder: 'global_drops', uid });
-          const url = res.url || res.downloadUrl;
+          // Race uploadAnyMedia with a 4500ms timeout for instant responsiveness
+          const uploadPromise = uploadAnyMedia(file, { folder: 'global_drops', uid });
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Media upload timed out')), 4500));
+          const res = await Promise.race([uploadPromise, timeoutPromise]).catch(async (err) => {
+            console.warn('[GLOBAL DROP] Media upload timed out or failed, using client fallback:', err);
+            if (file.type && file.type.startsWith('image/')) {
+              const fallbackUrl = await compressImageToDataUrl(file);
+              return { url: fallbackUrl, downloadUrl: fallbackUrl };
+            }
+            throw err;
+          });
+          const url = res?.url || res?.downloadUrl;
           if (url) {
             mediaUrls.push({
               url: url,
@@ -593,6 +641,19 @@ class GlobalDropEngine {
           }
         } catch (mErr) {
           console.error('[GLOBAL DROP] Media vault error:', mErr);
+          if (file.type && file.type.startsWith('image/')) {
+            try {
+              const fallbackUrl = await compressImageToDataUrl(file);
+              if (fallbackUrl) {
+                mediaUrls.push({
+                  url: fallbackUrl,
+                  type: 'image',
+                  name: file.name
+                });
+                if (detectedMediaType !== 'video') detectedMediaType = 'image';
+              }
+            } catch (_) {}
+          }
         }
       }
 

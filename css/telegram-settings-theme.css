@@ -1,0 +1,603 @@
+/* ===================================================================
+   NEXCHAT TELEGRAM WEB (K) GLASSMORPHIC SETTINGS THEME
+   Strict Telegram Web K Aesthetic:
+   - #0f0f0f dark backdrop with 24px blur
+   - #212121 / rgba(33, 33, 33, 0.85) rounded surface cards (20px-24px radius)
+   - Distinct gradient squircles for setting row categories
+   - Sleek 42x22px pill switches with smooth cubic-bezier transitions
+   - Telegram Hero profile section with 96px avatar
+   - Zero Unicode emojis (Strict FontAwesome 6 only)
+   =================================================================== */
+
+:root {
+  --tg-bg: #0f0f0f;
+  --tg-surface: #212121;
+  --tg-surface-glass: rgba(33, 33, 33, 0.82);
+  --tg-surface-hover: rgba(255, 255, 255, 0.06);
+  --tg-surface-active: rgba(255, 255, 255, 0.1);
+  --tg-primary: #8774e1;
+  --tg-primary-glow: rgba(135, 116, 225, 0.35);
+  --tg-accent-green: #00ff66;
+  --tg-text: #ffffff;
+  --tg-text-secondary: #aaaaaa;
+  --tg-text-muted: #707579;
+  --tg-border: rgba(255, 255, 255, 0.08);
+  --tg-card-radius: 20px;
+  --tg-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modal Frame */
+#settingsModal.settings-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+#settingsModal .settings-modal-content.luxury-settings-suite {
+  width: 100%;
+  max-width: 960px;
+  height: 90vh;
+  max-height: 840px;
+  background: var(--tg-bg);
+  border: 1px solid var(--tg-border);
+  border-radius: var(--tg-card-radius);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  animation: tgModalFadeIn 0.24s var(--tg-ease);
+}
+
+@keyframes tgModalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Telegram Header */
+#settingsModal .settings-header {
+  height: 64px;
+  min-height: 64px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--tg-surface-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--tg-border);
+  z-index: 10;
+}
+
+#settingsModal .settings-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+#settingsModal .settings-header-left h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--tg-text);
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#settingsModal .settings-subtitle {
+  font-size: 12px;
+  color: var(--tg-text-secondary);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#settingsModal .settings-search-bar-wrap {
+  position: relative;
+  width: 240px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--tg-border);
+  border-radius: 19px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 8px;
+  transition: all 0.2s var(--tg-ease);
+}
+
+#settingsModal .settings-search-bar-wrap:focus-within {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--tg-primary);
+  box-shadow: 0 0 0 3px var(--tg-primary-glow);
+}
+
+#settingsModal .settings-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 13.5px;
+  width: 100%;
+}
+
+#settingsModal .settings-search-input::placeholder {
+  color: var(--tg-text-muted);
+}
+
+#settingsModal .close-btn,
+#settingsModal .settings-back-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--tg-text-secondary);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+
+#settingsModal .close-btn:hover,
+#settingsModal .settings-back-btn:hover {
+  background: var(--tg-surface-hover);
+  color: #ffffff;
+}
+
+/* Layout Split */
+#settingsModal .settings-layout {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  background: var(--tg-bg);
+}
+
+/* Sidebar Navigation */
+#settingsModal .settings-sidebar {
+  width: 290px;
+  min-width: 290px;
+  background: rgba(18, 18, 18, 0.95);
+  border-right: 1px solid var(--tg-border);
+  overflow-y: auto;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#settingsModal .settings-nav-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tg-text-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 10px 14px 4px 14px;
+}
+
+#settingsModal .settings-nav-tab {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--tg-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s var(--tg-ease), color 0.18s var(--tg-ease);
+  position: relative;
+  text-align: left;
+}
+
+#settingsModal .settings-nav-tab i {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+#settingsModal .settings-nav-tab:hover {
+  background: var(--tg-surface-hover);
+  color: #ffffff;
+}
+
+#settingsModal .settings-nav-tab.active {
+  background: rgba(135, 116, 225, 0.16);
+  color: var(--tg-primary);
+  font-weight: 600;
+}
+
+#settingsModal .settings-tab-microbadge {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+}
+
+#settingsModal .settings-sidebar-spacer {
+  flex: 1;
+  min-height: 16px;
+}
+
+#settingsModal .logout-tab {
+  color: #ef4444 !important;
+}
+
+#settingsModal .logout-tab:hover {
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+/* Main Content Pane */
+#settingsModal .settings-pane-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--tg-bg);
+}
+
+#settingsModal .settings-pane-header {
+  margin-bottom: 20px;
+}
+
+#settingsModal .settings-pane-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#settingsModal .settings-pane-header p {
+  font-size: 13.5px;
+  color: var(--tg-text-secondary);
+  margin: 0;
+}
+
+/* Telegram Glassmorphic Cards */
+#settingsModal .settings-card,
+.tg-settings-card {
+  background: var(--tg-surface);
+  border: 1px solid var(--tg-border);
+  border-radius: var(--tg-card-radius);
+  margin-bottom: 20px;
+  padding: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-sizing: border-box;
+}
+
+/* Telegram Profile Hero Section */
+#settingsModal .settings-profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 0 20px 0;
+  position: relative;
+}
+
+#settingsModal .settings-profile-avatar-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+#settingsModal .settings-profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s var(--tg-ease), border-color 0.2s;
+}
+
+#settingsModal .settings-profile-avatar-wrap:hover .settings-profile-avatar {
+  transform: scale(1.03);
+  border-color: var(--tg-primary);
+}
+
+#settingsModal .settings-avatar-edit-overlay {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--tg-primary);
+  color: #ffffff;
+  border: 2px solid var(--tg-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+#settingsModal .avatar-achievement-badge {
+  display: none;
+}
+
+#settingsModal .settings-profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+#settingsModal .settings-profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#settingsModal .settings-profile-name {
+  font-size: 21px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+}
+
+#settingsModal .settings-profile-edit-name-btn {
+  background: transparent;
+  border: none;
+  color: var(--tg-text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  transition: color 0.18s;
+}
+
+#settingsModal .settings-profile-edit-name-btn:hover {
+  color: var(--tg-primary);
+}
+
+#settingsModal .settings-profile-handle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--tg-primary);
+}
+
+#settingsModal .settings-profile-status {
+  font-size: 13px;
+  color: var(--tg-accent-green);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+#settingsModal .status-online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tg-accent-green);
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+}
+
+/* Telegram Action Buttons Toolbar */
+#settingsModal .settings-profile-actions-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--tg-border);
+}
+
+#settingsModal .settings-profile-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 19px;
+  border: 1px solid var(--tg-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.18s var(--tg-ease);
+}
+
+#settingsModal .settings-profile-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+#settingsModal .settings-profile-btn.studio-btn {
+  background: linear-gradient(135deg, rgba(135, 116, 225, 0.2), rgba(0, 255, 102, 0.15));
+  border-color: var(--tg-primary);
+  color: #ffffff;
+}
+
+/* Gradient Squircle Category Icons */
+.tg-squircle-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tg-squircle-red { background: linear-gradient(135deg, #ff5252, #e53935); }
+.tg-squircle-green { background: linear-gradient(135deg, #4caf50, #388e3c); }
+.tg-squircle-cyan { background: linear-gradient(135deg, #26c6da, #0097a7); }
+.tg-squircle-slate { background: linear-gradient(135deg, #90a4ae, #546e7a); }
+.tg-squircle-blue { background: linear-gradient(135deg, #29b6f6, #0288d1); }
+.tg-squircle-indigo { background: linear-gradient(135deg, #5c6bc0, #3949ab); }
+.tg-squircle-teal { background: linear-gradient(135deg, #009688, #00796b); }
+.tg-squircle-purple { background: linear-gradient(135deg, #8774e1, #651fff); }
+.tg-squircle-orange { background: linear-gradient(135deg, #ffa726, #f57c00); }
+
+/* Telegram Row Structure inside Cards */
+.tg-settings-row {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 8px 18px;
+  gap: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.18s var(--tg-ease);
+  cursor: pointer;
+}
+
+.tg-settings-row:last-child {
+  border-bottom: none;
+}
+
+.tg-settings-row:hover {
+  background: var(--tg-surface-hover);
+}
+
+.tg-settings-row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tg-settings-row-title {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--tg-text);
+  line-height: 1.3;
+}
+
+.tg-settings-row-desc {
+  font-size: 12.5px;
+  color: var(--tg-text-secondary);
+  line-height: 1.3;
+}
+
+/* Telegram Pill Toggle Switch */
+.tg-switch,
+#settingsModal .switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.tg-switch input,
+#settingsModal .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.tg-slider,
+#settingsModal .slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  transition: background-color 0.22s var(--tg-ease);
+}
+
+.tg-slider:before,
+#settingsModal .slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.22s var(--tg-ease);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+.tg-switch input:checked + .tg-slider,
+#settingsModal .switch input:checked + .slider {
+  background-color: var(--tg-primary);
+}
+
+.tg-switch input:checked + .tg-slider:before,
+#settingsModal .switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  #settingsModal.settings-modal {
+    padding: 0;
+  }
+
+  #settingsModal .settings-modal-content.luxury-settings-suite {
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+  }
+
+  #settingsModal .settings-layout {
+    flex-direction: column;
+  }
+
+  #settingsModal .settings-sidebar {
+    width: 100%;
+    min-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--tg-border);
+    max-height: 48vh;
+  }
+
+  #settingsModal .settings-pane-container {
+    padding: 16px;
+  }
+
+  #settingsModal .settings-search-bar-wrap {
+    width: 150px;
+  }
+}

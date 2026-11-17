@@ -16,7 +16,8 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const resp = await fetch(COLD_VAULT_API_URL, {
-        headers: { 'x-nexchat-secret': NEXCHAT_SECRET }
+        headers: { 'x-nexchat-secret': NEXCHAT_SECRET },
+        signal: AbortSignal.timeout ? AbortSignal.timeout(3500) : undefined
       });
       const data = await resp.json();
       return res.status(resp.status).json(data);
@@ -36,7 +37,8 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
           'x-nexchat-secret': NEXCHAT_SECRET
         },
-        body: JSON.stringify(req.body || {})
+        body: JSON.stringify(req.body || {}),
+        signal: AbortSignal.timeout ? AbortSignal.timeout(3500) : undefined
       });
       const data = await resp.json();
       return res.status(resp.status).json(data);
