@@ -75,12 +75,20 @@
   padding: 0 20px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   background: var(--tg-surface-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--tg-border);
   z-index: 10;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+#settingsModal .settings-back-btn.mobile-only,
+#settingsModal #settingsBackNavBtn.mobile-only {
+  display: none !important;
 }
 
 #settingsModal .settings-header-left {
@@ -113,16 +121,25 @@
 
 #settingsModal .settings-search-bar-wrap {
   position: relative;
-  width: 240px;
+  width: 260px;
   height: 38px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--tg-border);
   border-radius: 19px;
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 14px;
   gap: 8px;
   transition: all 0.2s var(--tg-ease);
+  box-sizing: border-box;
+}
+
+#settingsModal .settings-search-bar-wrap .search-bar-icon {
+  position: static !important;
+  color: var(--tg-text-muted);
+  font-size: 13px;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 #settingsModal .settings-search-bar-wrap:focus-within {
@@ -138,6 +155,7 @@
   color: #ffffff;
   font-size: 13.5px;
   width: 100%;
+  padding: 0;
 }
 
 #settingsModal .settings-search-input::placeholder {
@@ -570,34 +588,185 @@
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   #settingsModal.settings-modal {
-    padding: 0;
+    padding: 0 !important;
   }
 
   #settingsModal .settings-modal-content.luxury-settings-suite {
-    max-width: 100%;
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
-    border: none;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
   }
 
-  #settingsModal .settings-layout {
-    flex-direction: column;
+  #settingsModal .settings-header {
+    height: auto !important;
+    min-height: unset !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    grid-template-areas:
+      "back title close"
+      "search search search" !important;
+    align-items: center !important;
+    gap: 10px 8px !important;
+    padding: 12px 16px 14px 16px !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    background: var(--tg-surface-glass) !important;
+    border-bottom: 1px solid var(--tg-border) !important;
   }
 
-  #settingsModal .settings-sidebar {
-    width: 100%;
-    min-width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--tg-border);
-    max-height: 48vh;
+  #settingsModal .settings-back-btn.mobile-only,
+  #settingsModal #settingsBackNavBtn {
+    grid-area: back !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--tg-border) !important;
+    color: var(--tg-text) !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
   }
 
-  #settingsModal .settings-pane-container {
-    padding: 16px;
+  #settingsModal .settings-header-left {
+    grid-area: title !important;
+    padding-left: 4px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #settingsModal .settings-title-desktop {
+    display: none !important;
+  }
+
+  #settingsModal .settings-subtitle {
+    display: none !important;
+  }
+
+  #settingsModal .settings-header-left h2 {
+    font-size: 17px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  #settingsModal .close-btn,
+  #settingsModal #closeSettingsBtn {
+    grid-area: close !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--tg-border) !important;
+    color: var(--tg-text) !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
   }
 
   #settingsModal .settings-search-bar-wrap {
-    width: 150px;
+    grid-area: search !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 38px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-radius: 19px !important;
+    position: relative !important;
+  }
+
+  #settingsModal .settings-layout {
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  #settingsModal .settings-sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    height: auto !important;
+    max-height: unset !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    padding: 10px 14px !important;
+    gap: 8px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--tg-border) !important;
+    background: rgba(18, 18, 18, 0.98) !important;
+    scrollbar-width: none !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    z-index: 5 !important;
+  }
+
+  #settingsModal .settings-sidebar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #settingsModal .settings-nav-group {
+    display: contents !important;
+  }
+
+  #settingsModal .settings-nav-group-title {
+    display: none !important;
+  }
+
+  #settingsModal .settings-nav-tab {
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+    white-space: nowrap !important;
+    width: auto !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 16px !important;
+    border-radius: 19px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border: 1px solid var(--tg-border) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--tg-text-secondary) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: all 0.18s var(--tg-ease) !important;
+    cursor: pointer !important;
+  }
+
+  #settingsModal .settings-nav-tab.active {
+    background: rgba(135, 116, 225, 0.25) !important;
+    border-color: var(--tg-primary) !important;
+    color: #ffffff !important;
+  }
+
+  #settingsModal .settings-pane-container {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
   }
 }
