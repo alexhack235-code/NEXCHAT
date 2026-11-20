@@ -114008,208 +114008,208 @@ export const LANGUAGE_REGISTRY = [
     "country": "Romania & Moldova",
     "language": "Romanian",
     "code": "ro",
-    "entries": 17500,
-    "lines": 17520
+    "entries": 35000,
+    "lines": 42520
   },
   {
     "file": "germany.js",
     "country": "Germany & Austria",
     "language": "German",
     "code": "de",
-    "entries": 15000,
-    "lines": 15020
+    "entries": 35000,
+    "lines": 40020
   },
   {
     "file": "spain.js",
     "country": "Spain & Latin America",
     "language": "Spanish",
     "code": "es",
-    "entries": 15000,
-    "lines": 15020
+    "entries": 35000,
+    "lines": 40020
   },
   {
     "file": "france.js",
     "country": "France & Francophonie",
     "language": "French",
     "code": "fr",
-    "entries": 13000,
-    "lines": 13020
+    "entries": 35000,
+    "lines": 38020
   },
   {
     "file": "indonesia.js",
     "country": "Indonesia",
     "language": "Indonesian",
     "code": "id",
-    "entries": 13000,
-    "lines": 13020
+    "entries": 35000,
+    "lines": 38020
   },
   {
     "file": "malaysia.js",
     "country": "Malaysia",
     "language": "Malay",
     "code": "ms",
-    "entries": 13000,
-    "lines": 13020
+    "entries": 35000,
+    "lines": 38020
   },
   {
     "file": "pakistan-urdu.js",
     "country": "Pakistan",
     "language": "Urdu",
     "code": "ur",
-    "entries": 10000,
-    "lines": 10020
+    "entries": 35000,
+    "lines": 35020
   },
   {
     "file": "india-hindi.js",
     "country": "India",
     "language": "Hindi",
     "code": "hi",
-    "entries": 10000,
-    "lines": 10020
+    "entries": 35000,
+    "lines": 35020
   },
   {
     "file": "arabia.js",
     "country": "Arab World",
     "language": "Arabic",
     "code": "ar",
-    "entries": 10000,
-    "lines": 10020
+    "entries": 35000,
+    "lines": 35020
   },
   {
     "file": "russia.js",
     "country": "Russia & CIS",
     "language": "Russian",
     "code": "ru",
-    "entries": 10000,
-    "lines": 10020
+    "entries": 35000,
+    "lines": 35020
   },
   {
     "file": "portugal-brazil.js",
     "country": "Brazil & Portugal",
     "language": "Portuguese",
     "code": "pt",
-    "entries": 10000,
-    "lines": 10020
+    "entries": 35000,
+    "lines": 35020
   },
   {
     "file": "italy.js",
     "country": "Italy",
     "language": "Italian",
     "code": "it",
-    "entries": 9000,
-    "lines": 9020
+    "entries": 35000,
+    "lines": 34020
   },
   {
     "file": "turkey.js",
     "country": "Turkey",
     "language": "Turkish",
     "code": "tr",
-    "entries": 8000,
-    "lines": 8020
+    "entries": 35000,
+    "lines": 33020
   },
   {
     "file": "japan.js",
     "country": "Japan",
     "language": "Japanese",
     "code": "ja",
-    "entries": 8000,
-    "lines": 8020
+    "entries": 35000,
+    "lines": 33020
   },
   {
     "file": "china.js",
     "country": "China",
     "language": "Chinese",
     "code": "zh",
-    "entries": 8000,
-    "lines": 8020
+    "entries": 35000,
+    "lines": 33020
   },
   {
     "file": "korea.js",
     "country": "Korea",
     "language": "Korean",
     "code": "ko",
-    "entries": 8000,
-    "lines": 8020
+    "entries": 35000,
+    "lines": 33020
   },
   {
     "file": "swahili.js",
     "country": "East Africa",
     "language": "Swahili",
     "code": "sw",
-    "entries": 8000,
-    "lines": 8020
+    "entries": 35000,
+    "lines": 33020
   },
   {
     "file": "philippines-tagalog.js",
     "country": "Philippines",
     "language": "Tagalog",
     "code": "tl",
-    "entries": 8000,
-    "lines": 8020
+    "entries": 35000,
+    "lines": 33020
   },
   {
     "file": "netherlands.js",
     "country": "Netherlands & Belgium",
     "language": "Dutch",
     "code": "nl",
-    "entries": 7000,
-    "lines": 7020
+    "entries": 35000,
+    "lines": 32020
   },
   {
     "file": "poland.js",
     "country": "Poland",
     "language": "Polish",
     "code": "pl",
-    "entries": 7000,
-    "lines": 7020
+    "entries": 35000,
+    "lines": 32020
   },
   {
     "file": "vietnam.js",
     "country": "Vietnam",
     "language": "Vietnamese",
     "code": "vi",
-    "entries": 7000,
-    "lines": 7020
+    "entries": 35000,
+    "lines": 32020
   },
   {
     "file": "thailand.js",
     "country": "Thailand",
     "language": "Thai",
     "code": "th",
-    "entries": 7000,
-    "lines": 7020
+    "entries": 35000,
+    "lines": 32020
   },
   {
     "file": "nigeria-pidgin.js",
     "country": "Nigeria",
     "language": "Nigerian Pidgin",
     "code": "pcm",
-    "entries": 6500,
-    "lines": 6520
+    "entries": 35000,
+    "lines": 31520
   },
   {
     "file": "nigeria-yoruba.js",
     "country": "Nigeria (Yoruba)",
     "language": "Yoruba",
     "code": "yo",
-    "entries": 6500,
-    "lines": 6520
+    "entries": 35000,
+    "lines": 31520
   },
   {
     "file": "nigeria-igbo.js",
     "country": "Nigeria (Igbo)",
     "language": "Igbo",
     "code": "ig",
-    "entries": 6500,
-    "lines": 6520
+    "entries": 35000,
+    "lines": 31520
   },
   {
     "file": "nigeria-hausa.js",
     "country": "Nigeria (Hausa)",
     "language": "Hausa",
     "code": "ha",
-    "entries": 6500,
-    "lines": 6520
+    "entries": 35000,
+    "lines": 31520
   }
 ];
 

@@ -134,16 +134,27 @@ service cloud.firestore {
     //   - isDeleted / deletedForEveryone: bool (optional)
     //   - deletedAt: timestamp/number/string (optional)
     //
-    // Collection: statuses
-    // Document ID: {statusId} (Auto-generated)
+    // Collection: statuses, status_updates, stories, status_stories
+    // Document ID: {statusId} / {storyId} (Auto-generated)
     // Fields:
-    //   - userId: string (required, creator UID, immutable)
-    //   - content / caption: string (optional, max 2000 chars)
-    //   - mediaUrl / imageUrl: string (optional URL, max 2048 chars)
-    //   - type: string (optional, 'image' | 'video' | 'text')
-    //   - expiresAtMs: int (optional, max 24h + 5m grace period, immutable)
-    //   - expiresAt: timestamp/string (optional, max 24h + 5m grace period, immutable)
+    //   - userId / authorId: string (required, creator UID or guest session UID, immutable)
+    //   - username / authorName / author: string (optional, max 100 chars)
+    //   - profilePic / avatar / authorPhoto: string URL (optional, max 2048 chars or data/blob)
+    //   - content / caption / text: string (optional, max 5000 chars)
+    //   - type: string (optional, 'image' | 'video' | 'text' | 'audio' | 'code' | 'quote' | 'voice', max 50 chars)
+    //   - mediaType: string (optional, max 100 chars, e.g. 'image/jpeg', 'video/mp4')
+    //   - imageUrl / mediaUrl / videoUrl / audioUrl / voiceUrl: string URL (optional, max 2048 chars or data/blob)
+    //   - thumbnailUrl: string URL (optional)
+    //   - duration: number (optional, >= 0)
+    //   - gradient / background / filter / font / align: string (optional styling, max 200 chars)
+    //   - codeSnippet: map (optional, syntax-highlighted code snippet story)
+    //   - pollData / poll: map (optional, interactive story poll)
+    //   - isGuest: bool (optional, guest story marker)
     //   - views / viewCount / viewsCount: interaction tracking
+    //   - expiresAtMs: int/number (optional, max 24h + grace period, immutable)
+    //   - expiresAt: timestamp/string (optional, immutable)
+    //   - createdAt / timestamp: timestamp/number/string (optional, immutable)
+    //   - createdAtMs: int/number (optional)
     //
     // Collection: reels
     // Document ID: {reelId} (Auto-generated)
@@ -172,16 +183,23 @@ service cloud.firestore {
     //   - amount: number (optional, wager amount)
     //   - status: string (optional, bet status)
     //
-    // Collection: global_drops
+    // Collection: global_drops, drops
     // Document ID: {dropId} (Auto-generated)
     // Fields:
-    //   - authorId / userId: string (required, author UID, immutable)
+    //   - authorId / userId: string (required, author UID or guest session UID, immutable)
     //   - authorName / authorHandle / authorPhoto: string (optional)
     //   - authorVerified: bool (optional)
-    //   - content: string (optional, max 2000 chars)
-    //   - mediaUrls: list of strings (optional, max 10 items)
-    //   - mediaItems: list of maps (optional, max 10 items)
-    //   - mediaType: string (optional, max 50 chars)
+    //   - authorLocation: string (optional, max 200 chars)
+    //   - authorTenure: string (optional, max 100 chars)
+    //   - authorRank: string or number (optional, max 100 chars)
+    //   - authorJoinedAtMs: int/number (optional)
+    //   - content: string (optional, max 5000 chars)
+    //   - location: map or string (optional, geolocation metadata)
+    //   - mediaUrls: list of strings (optional, image/video URLs, max 20 items)
+    //   - mediaItems: list of maps (optional, media payloads with url/type/name, max 20 items)
+    //   - mediaType: string (optional, 'none' | 'image' | 'video' | 'voice' | 'code', max 50 chars)
+    //   - videoUrl: string URL (optional, video attachment)
+    //   - thumbnailUrl: string URL (optional)
     //   - voiceUrl: string (optional URL, max 2048 chars)
     //   - codeSnippet: map (optional)
     //   - topic: string (optional, max 100 chars)
@@ -578,7 +596,7 @@ service cloud.firestore {
                  url.matches("^[a-zA-Z0-9_./-]+$") ||
                  url == ""
                )) ||
-               (url.size() <= 1048576 && (url.matches("^data:image/.*") || url.matches("^data:video/.*") || url.matches("^blob:.*")))
+               (url.size() <= 1048576 && (url.matches("^data:image/.*") || url.matches("^data:video/.*") || url.matches("^data:audio/.*") || url.matches("^blob:.*")))
              );
     }
 
@@ -1056,16 +1074,106 @@ service cloud.firestore {
              (!('syntheticMetrics' in data) || data.syntheticMetrics == null || data.syntheticMetrics is map);
     }
 
-    // Global Drop Validator: Microblogging schema with mediaUrls, codeSnippet, poll, tags, TTL, and engagement counters
-    function isValidGlobalDropCreate(data) {
+    // Status & Story Upload Validator (Statuses, Status Updates, Stories, Status Stories)
+    function isValidStatusStoryCreate(data) {
       return (
-               ('authorId' in data && data.authorId == request.auth.uid) ||
-               ('userId' in data && data.userId == request.auth.uid) ||
+               (isAuthenticated() && (
+                 ('userId' in data && data.userId == request.auth.uid) ||
+                 ('authorId' in data && data.authorId == request.auth.uid)
+               )) ||
+               (!isAuthenticated() && (
+                 ('userId' in data && data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128) ||
+                 ('authorId' in data && data.authorId is string && data.authorId.size() > 0 && data.authorId.size() <= 128)
+               )) ||
                isSuperAdmin()
              ) &&
-             isValidOptionalString('content', 0, 2000) &&
-             (!('mediaUrls' in data) || data.mediaUrls == null || (data.mediaUrls is list && data.mediaUrls.size() <= 10)) &&
-             isValidOptionalList('mediaItems', 10) &&
+             isValidOptionalString('content', 0, 5000) &&
+             isValidOptionalString('caption', 0, 5000) &&
+             isValidOptionalString('text', 0, 5000) &&
+             isValidOptionalString('username', 0, 100) &&
+             isValidOptionalString('authorName', 0, 100) &&
+             isValidOptionalString('author', 0, 100) &&
+             isValidOptionalString('type', 0, 50) &&
+             isValidOptionalString('mediaType', 0, 100) &&
+             isValidOptionalUrl('imageUrl') &&
+             isValidOptionalUrl('mediaUrl') &&
+             isValidOptionalUrl('videoUrl') &&
+             isValidOptionalUrl('audioUrl') &&
+             isValidOptionalUrl('voiceUrl') &&
+             isValidOptionalUrl('profilePic') &&
+             isValidOptionalUrl('avatar') &&
+             isValidOptionalUrl('authorPhoto') &&
+             isValidOptionalUrl('thumbnailUrl') &&
+             isValidOptionalString('gradient', 0, 200) &&
+             isValidOptionalString('background', 0, 200) &&
+             isValidOptionalString('filter', 0, 100) &&
+             isValidOptionalString('font', 0, 100) &&
+             isValidOptionalString('align', 0, 50) &&
+             (!('duration' in data) || data.duration == null || (data.duration is number && data.duration >= 0)) &&
+             (!('expiresAtMs' in data) || data.expiresAtMs == null || data.expiresAtMs is int || data.expiresAtMs is number) &&
+             (!('expiresAt' in data) || data.expiresAt == null || data.expiresAt is timestamp || data.expiresAt is string) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('createdAtMs' in data) || data.createdAtMs is int || data.createdAtMs is number) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('codeSnippet' in data) || data.codeSnippet == null || data.codeSnippet is map) &&
+             (!('pollData' in data) || data.pollData == null || data.pollData is map) &&
+             (!('poll' in data) || data.poll == null || data.poll is map) &&
+             (!('isGuest' in data) || data.isGuest is bool) &&
+             (!('views' in data) || data.views is number || data.views is list) &&
+             (!('viewCount' in data) || (data.viewCount is number && data.viewCount >= 0)) &&
+             (!('viewsCount' in data) || (data.viewsCount is number && data.viewsCount >= 0)) &&
+             (!('likes' in data) || data.likes is number || data.likes is list) &&
+             (!('likesCount' in data) || (data.likesCount is number && data.likesCount >= 0)) &&
+             (!('likedBy' in data) || data.likedBy is list);
+    }
+
+    function isValidStatusStoryUpdate(data) {
+      return isValidOptionalString('content', 0, 5000) &&
+             isValidOptionalString('caption', 0, 5000) &&
+             isValidOptionalString('text', 0, 5000) &&
+             isValidOptionalString('username', 0, 100) &&
+             isValidOptionalString('authorName', 0, 100) &&
+             isValidOptionalString('type', 0, 50) &&
+             isValidOptionalString('mediaType', 0, 100) &&
+             isValidOptionalUrl('imageUrl') &&
+             isValidOptionalUrl('mediaUrl') &&
+             isValidOptionalUrl('videoUrl') &&
+             isValidOptionalUrl('audioUrl') &&
+             isValidOptionalUrl('voiceUrl') &&
+             isValidOptionalUrl('profilePic') &&
+             isValidOptionalUrl('avatar') &&
+             isValidOptionalUrl('thumbnailUrl') &&
+             isValidOptionalString('gradient', 0, 200) &&
+             isValidOptionalString('filter', 0, 100) &&
+             isValidOptionalString('font', 0, 100) &&
+             isValidOptionalString('align', 0, 50) &&
+             (!('codeSnippet' in data) || data.codeSnippet == null || data.codeSnippet is map) &&
+             (!('pollData' in data) || data.pollData == null || data.pollData is map) &&
+             (!('poll' in data) || data.poll == null || data.poll is map) &&
+             (!('views' in data) || data.views is number || data.views is list) &&
+             (!('viewCount' in data) || (data.viewCount is number && data.viewCount >= 0)) &&
+             (!('viewsCount' in data) || (data.viewsCount is number && data.viewsCount >= 0)) &&
+             (!('likesCount' in data) || (data.likesCount is number && data.likesCount >= 0)) &&
+             isValidOptionalList('likedBy', 10000) &&
+             isValidOptionalList('likes', 10000);
+    }
+
+    // Global Drop Validator: Microblogging schema with mediaUrls, video attachments, codeSnippet, poll, tags, TTL, guest sessions, and engagement counters
+    function isValidGlobalDropCreate(data) {
+      return (
+               (isAuthenticated() && (
+                 ('authorId' in data && data.authorId == request.auth.uid) ||
+                 ('userId' in data && data.userId == request.auth.uid)
+               )) ||
+               (!isAuthenticated() && (
+                 ('authorId' in data && data.authorId is string && data.authorId.size() > 0 && data.authorId.size() <= 128) ||
+                 ('userId' in data && data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128)
+               )) ||
+               isSuperAdmin()
+             ) &&
+             isValidOptionalString('content', 0, 5000) &&
+             (!('mediaUrls' in data) || data.mediaUrls == null || (data.mediaUrls is list && data.mediaUrls.size() <= 20)) &&
+             isValidOptionalList('mediaItems', 20) &&
              isValidOptionalString('topic', 0, 100) &&
              isValidOptionalList('tags', 50) &&
              isValidOptionalString('ttl', 0, 50) &&
@@ -1073,7 +1181,14 @@ service cloud.firestore {
              isValidOptionalString('authorHandle', 0, 100) &&
              isValidOptionalUrl('authorPhoto') &&
              isValidOptionalUrl('voiceUrl') &&
+             isValidOptionalUrl('videoUrl') &&
+             isValidOptionalUrl('thumbnailUrl') &&
              isValidOptionalString('mediaType', 0, 50) &&
+             isValidOptionalString('authorLocation', 0, 200) &&
+             isValidOptionalString('authorTenure', 0, 100) &&
+             (!('authorRank' in data) || data.authorRank == null || data.authorRank is string || data.authorRank is number) &&
+             (!('authorJoinedAtMs' in data) || data.authorJoinedAtMs == null || data.authorJoinedAtMs is int || data.authorJoinedAtMs is number) &&
+             (!('location' in data) || data.location == null || data.location is map || data.location is string) &&
              (!('codeSnippet' in data) || data.codeSnippet == null || data.codeSnippet is map) &&
              (!('poll' in data) || data.poll == null || data.poll is map) &&
              (!('authorVerified' in data) || data.authorVerified is bool) &&
@@ -1095,11 +1210,17 @@ service cloud.firestore {
     // Global Drop Reply Validator
     function isValidGlobalDropReply(data) {
       return (
-               ('authorId' in data && data.authorId == request.auth.uid) ||
-               ('userId' in data && data.userId == request.auth.uid) ||
+               (isAuthenticated() && (
+                 ('authorId' in data && data.authorId == request.auth.uid) ||
+                 ('userId' in data && data.userId == request.auth.uid)
+               )) ||
+               (!isAuthenticated() && (
+                 ('authorId' in data && data.authorId is string && data.authorId.size() > 0 && data.authorId.size() <= 128) ||
+                 ('userId' in data && data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128)
+               )) ||
                isSuperAdmin()
              ) &&
-             isValidOptionalString('content', 0, 2000) &&
+             isValidOptionalString('content', 0, 5000) &&
              isValidOptionalString('authorName', 0, 100) &&
              isValidOptionalString('authorHandle', 0, 100) &&
              isValidOptionalUrl('authorPhoto') &&
@@ -1810,57 +1931,418 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // 5. NEX-STATUS (Ephemeral Stories, Media URLs, Views & 24h Purge)
+    // 5. NEX-STATUS & STORIES (Statuses, Status Updates, Stories, Status Stories)
     // ===============================================================
     match /statuses/{statusId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
 
-      allow create: if isAuthenticated() &&
-                       request.resource.data.userId == request.auth.uid &&
-                       (
-                         !('expiresAtMs' in request.resource.data) ||
-                         (
-                           (request.resource.data.expiresAtMs is int || request.resource.data.expiresAtMs is number) &&
-                           request.resource.data.expiresAtMs <= request.time.toMillis() + 172800000 &&
-                           request.resource.data.expiresAtMs >= request.time.toMillis() - 86400000
-                         )
-                       ) &&
-                       (
-                         !('expiresAt' in request.resource.data) ||
-                         request.resource.data.expiresAt == null ||
-                         request.resource.data.expiresAt is timestamp ||
-                         request.resource.data.expiresAt is string
-                       ) &&
-                       isValidOptionalString('content', 0, 5000) &&
-                       isValidOptionalString('caption', 0, 5000) &&
-                       isValidOptionalUrl('imageUrl') &&
-                       isValidOptionalUrl('mediaUrl');
+      allow create: if (
+        (isAuthenticated() && (
+          ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid) ||
+          ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid)
+        )) ||
+        (!isAuthenticated() && (
+          ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128) ||
+          ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128)
+        )) ||
+        isSuperAdmin()
+      ) && isValidStatusStoryCreate(request.resource.data);
 
-      // Author/Admin can update their status; viewers can record views without modifying author content
-      allow update: if isAuthenticated() && (
+      allow update: if (
         (
-          isOwner(resource.data.userId) &&
-          areImmutableFieldsUnchanged(['userId', 'createdAt', 'expiresAtMs', 'expiresAt']) &&
-          isValidOptionalString('content', 0, 2000) &&
-          isValidOptionalString('caption', 0, 2000)
+          isAuthenticated() &&
+          (
+            ('userId' in resource.data && isOwner(resource.data.userId)) ||
+            ('authorId' in resource.data && isOwner(resource.data.authorId))
+          ) &&
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt']) &&
+          isValidStatusStoryUpdate(request.resource.data)
         ) ||
-        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'viewCount', 'viewsCount', 'pollData'])) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId) ||
+            ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId)
+          ) &&
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt']) &&
+          isValidStatusStoryUpdate(request.resource.data)
+        ) ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
+          ]) &&
+          (!('viewCount' in request.resource.data) || (request.resource.data.viewCount is number && request.resource.data.viewCount >= 0)) &&
+          (!('viewsCount' in request.resource.data) || (request.resource.data.viewsCount is number && request.resource.data.viewsCount >= 0)) &&
+          (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+          isValidOptionalList('views', 10000) &&
+          isValidOptionalList('likedBy', 10000) &&
+          isValidOptionalList('likes', 10000)
+        ) ||
         isSuperAdmin()
       );
 
-      // Auto-purge or author/admin deletion once expired or owner-initiated
-      allow delete: if isAuthenticated() && (
-        isOwner(resource.data.userId) ||
-        isSuperAdmin() ||
-        (resource.data.expiresAtMs is int && resource.data.expiresAtMs <= request.time.toMillis())
+      allow delete: if (
+        (
+          isAuthenticated() &&
+          (
+            ('userId' in resource.data && isOwner(resource.data.userId)) ||
+            ('authorId' in resource.data && isOwner(resource.data.authorId))
+          )
+        ) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+            ('isGuest' in resource.data && resource.data.isGuest == true)
+          )
+        ) ||
+        (
+          ('expiresAtMs' in resource.data && (resource.data.expiresAtMs is int || resource.data.expiresAtMs is number) && resource.data.expiresAtMs <= request.time.toMillis())
+        ) ||
+        isSuperAdmin()
       );
 
       match /views/{viewId} {
-        allow read: if isAuthenticated() && (isOwner(get(/databases/$(database)/documents/statuses/$(statusId)).data.userId) || isSuperAdmin());
-        allow create, update: if isAuthenticated() && (
-          request.resource.data.uid == request.auth.uid ||
-          request.resource.data.viewerId == request.auth.uid ||
-          request.resource.data.userId == request.auth.uid
+        allow read: if true;
+        allow create, update: if (
+          (isAuthenticated() && (
+            request.resource.data.uid == request.auth.uid ||
+            request.resource.data.viewerId == request.auth.uid ||
+            request.resource.data.userId == request.auth.uid ||
+            viewId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('uid' in request.resource.data && request.resource.data.uid is string && request.resource.data.uid.size() <= 128) ||
+            ('viewerId' in request.resource.data && request.resource.data.viewerId is string && request.resource.data.viewerId.size() <= 128) ||
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            viewId.size() <= 128
+          )) ||
+          isSuperAdmin()
+        );
+        allow delete: if (
+          (isAuthenticated() && (
+            (resource.data.uid is string && resource.data.uid == request.auth.uid) ||
+            (resource.data.viewerId is string && resource.data.viewerId == request.auth.uid) ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.uid is string && resource.data.uid.matches('^guest_.*')) ||
+            (resource.data.viewerId is string && resource.data.viewerId.matches('^guest_.*'))
+          ))
+        );
+      }
+
+      match /reactions/{reactionId} {
+        allow read: if true;
+        allow create, update: if (
+          (isAuthenticated() && (request.resource.data.userId == request.auth.uid || reactionId == request.auth.uid)) ||
+          (!isAuthenticated() && (request.resource.data.userId is string || reactionId is string)) ||
+          isSuperAdmin()
+        );
+        allow delete: if (
+          (isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin())) ||
+          (!isAuthenticated() && resource.data.userId.matches('^guest_.*'))
+        );
+      }
+    }
+
+    match /status_updates/{statusId} {
+      allow read: if true;
+      allow create: if (
+        (isAuthenticated() && (
+          ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid) ||
+          ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid)
+        )) ||
+        (!isAuthenticated() && (
+          ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128) ||
+          ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128)
+        )) ||
+        isSuperAdmin()
+      ) && isValidStatusStoryCreate(request.resource.data);
+
+      allow update: if (
+        (
+          isAuthenticated() &&
+          (
+            ('userId' in resource.data && isOwner(resource.data.userId)) ||
+            ('authorId' in resource.data && isOwner(resource.data.authorId))
+          ) &&
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt']) &&
+          isValidStatusStoryUpdate(request.resource.data)
+        ) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId) ||
+            ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId)
+          ) &&
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt']) &&
+          isValidStatusStoryUpdate(request.resource.data)
+        ) ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
+          ]) &&
+          (!('viewCount' in request.resource.data) || (request.resource.data.viewCount is number && request.resource.data.viewCount >= 0)) &&
+          (!('viewsCount' in request.resource.data) || (request.resource.data.viewsCount is number && request.resource.data.viewsCount >= 0)) &&
+          (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+          isValidOptionalList('views', 10000) &&
+          isValidOptionalList('likedBy', 10000) &&
+          isValidOptionalList('likes', 10000)
+        ) ||
+        isSuperAdmin()
+      );
+
+      allow delete: if (
+        (
+          isAuthenticated() &&
+          (
+            ('userId' in resource.data && isOwner(resource.data.userId)) ||
+            ('authorId' in resource.data && isOwner(resource.data.authorId))
+          )
+        ) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+            ('isGuest' in resource.data && resource.data.isGuest == true)
+          )
+        ) ||
+        (
+          ('expiresAtMs' in resource.data && (resource.data.expiresAtMs is int || resource.data.expiresAtMs is number) && resource.data.expiresAtMs <= request.time.toMillis())
+        ) ||
+        isSuperAdmin()
+      );
+
+      match /views/{viewId} {
+        allow read: if true;
+        allow create, update: if (
+          (isAuthenticated() && (
+            request.resource.data.uid == request.auth.uid ||
+            request.resource.data.viewerId == request.auth.uid ||
+            request.resource.data.userId == request.auth.uid ||
+            viewId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('uid' in request.resource.data && request.resource.data.uid is string && request.resource.data.uid.size() <= 128) ||
+            ('viewerId' in request.resource.data && request.resource.data.viewerId is string && request.resource.data.viewerId.size() <= 128) ||
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            viewId.size() <= 128
+          )) ||
+          isSuperAdmin()
+        );
+        allow delete: if (
+          (isAuthenticated() && (
+            (resource.data.uid is string && resource.data.uid == request.auth.uid) ||
+            (resource.data.viewerId is string && resource.data.viewerId == request.auth.uid) ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.uid is string && resource.data.uid.matches('^guest_.*')) ||
+            (resource.data.viewerId is string && resource.data.viewerId.matches('^guest_.*'))
+          ))
+        );
+      }
+    }
+
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if (
+        (isAuthenticated() && (
+          ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid) ||
+          ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid)
+        )) ||
+        (!isAuthenticated() && (
+          ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128) ||
+          ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128)
+        )) ||
+        isSuperAdmin()
+      ) && isValidStatusStoryCreate(request.resource.data);
+
+      allow update: if (
+        (
+          isAuthenticated() &&
+          (
+            ('userId' in resource.data && isOwner(resource.data.userId)) ||
+            ('authorId' in resource.data && isOwner(resource.data.authorId))
+          ) &&
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt']) &&
+          isValidStatusStoryUpdate(request.resource.data)
+        ) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId) ||
+            ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId)
+          ) &&
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt']) &&
+          isValidStatusStoryUpdate(request.resource.data)
+        ) ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
+          ]) &&
+          (!('viewCount' in request.resource.data) || (request.resource.data.viewCount is number && request.resource.data.viewCount >= 0)) &&
+          (!('viewsCount' in request.resource.data) || (request.resource.data.viewsCount is number && request.resource.data.viewsCount >= 0)) &&
+          (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+          isValidOptionalList('views', 10000) &&
+          isValidOptionalList('likedBy', 10000) &&
+          isValidOptionalList('likes', 10000)
+        ) ||
+        isSuperAdmin()
+      );
+
+      allow delete: if (
+        (
+          isAuthenticated() &&
+          (
+            ('userId' in resource.data && isOwner(resource.data.userId)) ||
+            ('authorId' in resource.data && isOwner(resource.data.authorId))
+          )
+        ) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+            ('isGuest' in resource.data && resource.data.isGuest == true)
+          )
+        ) ||
+        (
+          ('expiresAtMs' in resource.data && (resource.data.expiresAtMs is int || resource.data.expiresAtMs is number) && resource.data.expiresAtMs <= request.time.toMillis())
+        ) ||
+        isSuperAdmin()
+      );
+
+      match /views/{viewId} {
+        allow read: if true;
+        allow create, update: if (
+          (isAuthenticated() && (
+            request.resource.data.uid == request.auth.uid ||
+            request.resource.data.viewerId == request.auth.uid ||
+            request.resource.data.userId == request.auth.uid ||
+            viewId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('uid' in request.resource.data && request.resource.data.uid is string && request.resource.data.uid.size() <= 128) ||
+            ('viewerId' in request.resource.data && request.resource.data.viewerId is string && request.resource.data.viewerId.size() <= 128) ||
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            viewId.size() <= 128
+          )) ||
+          isSuperAdmin()
+        );
+        allow delete: if (
+          (isAuthenticated() && (
+            (resource.data.uid is string && resource.data.uid == request.auth.uid) ||
+            (resource.data.viewerId is string && resource.data.viewerId == request.auth.uid) ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.uid is string && resource.data.uid.matches('^guest_.*')) ||
+            (resource.data.viewerId is string && resource.data.viewerId.matches('^guest_.*'))
+          ))
+        );
+      }
+    }
+
+    match /status_stories/{storyId} {
+      allow read: if true;
+      allow create: if (
+        (isAuthenticated() && (
+          ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid) ||
+          ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid)
+        )) ||
+        (!isAuthenticated() && (
+          ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128) ||
+          ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128)
+        )) ||
+        isSuperAdmin()
+      ) && isValidStatusStoryCreate(request.resource.data);
+
+      allow update: if (
+        (
+          isAuthenticated() &&
+          (
+            ('userId' in resource.data && isOwner(resource.data.userId)) ||
+            ('authorId' in resource.data && isOwner(resource.data.authorId))
+          ) &&
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt']) &&
+          isValidStatusStoryUpdate(request.resource.data)
+        ) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId) ||
+            ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId)
+          ) &&
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt']) &&
+          isValidStatusStoryUpdate(request.resource.data)
+        ) ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
+          ]) &&
+          (!('viewCount' in request.resource.data) || (request.resource.data.viewCount is number && request.resource.data.viewCount >= 0)) &&
+          (!('viewsCount' in request.resource.data) || (request.resource.data.viewsCount is number && request.resource.data.viewsCount >= 0)) &&
+          (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+          isValidOptionalList('views', 10000) &&
+          isValidOptionalList('likedBy', 10000) &&
+          isValidOptionalList('likes', 10000)
+        ) ||
+        isSuperAdmin()
+      );
+
+      allow delete: if (
+        (
+          isAuthenticated() &&
+          (
+            ('userId' in resource.data && isOwner(resource.data.userId)) ||
+            ('authorId' in resource.data && isOwner(resource.data.authorId))
+          )
+        ) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+            ('isGuest' in resource.data && resource.data.isGuest == true)
+          )
+        ) ||
+        (
+          ('expiresAtMs' in resource.data && (resource.data.expiresAtMs is int || resource.data.expiresAtMs is number) && resource.data.expiresAtMs <= request.time.toMillis())
+        ) ||
+        isSuperAdmin()
+      );
+
+      match /views/{viewId} {
+        allow read: if true;
+        allow create, update: if (
+          (isAuthenticated() && (
+            request.resource.data.uid == request.auth.uid ||
+            request.resource.data.viewerId == request.auth.uid ||
+            request.resource.data.userId == request.auth.uid ||
+            viewId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('uid' in request.resource.data && request.resource.data.uid is string && request.resource.data.uid.size() <= 128) ||
+            ('viewerId' in request.resource.data && request.resource.data.viewerId is string && request.resource.data.viewerId.size() <= 128) ||
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            viewId.size() <= 128
+          )) ||
+          isSuperAdmin()
+        );
+        allow delete: if (
+          (isAuthenticated() && (
+            (resource.data.uid is string && resource.data.uid == request.auth.uid) ||
+            (resource.data.viewerId is string && resource.data.viewerId == request.auth.uid) ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.uid is string && resource.data.uid.matches('^guest_.*')) ||
+            (resource.data.viewerId is string && resource.data.viewerId.matches('^guest_.*'))
+          ))
         );
       }
     }
@@ -1969,22 +2451,39 @@ service cloud.firestore {
       // 1. Public microblogging feed
       allow read: if true;
 
-      // 2. Create: authenticated author with schema validation
-      allow create: if isAuthenticated() &&
-                       (request.resource.data.authorId == request.auth.uid || request.resource.data.userId == request.auth.uid) &&
-                       isValidGlobalDropCreate(request.resource.data);
+      // 2. Create: authenticated author or guest session with schema validation (including video attachments)
+      allow create: if (
+        (isAuthenticated() && (
+          ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid) ||
+          ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid)
+        )) ||
+        (!isAuthenticated() && (
+          ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128) ||
+          ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128)
+        )) ||
+        isSuperAdmin()
+      ) && isValidGlobalDropCreate(request.resource.data);
 
       // 3. Update: Author editing content/pinned (preserving immutable fields) OR engagement update OR isSuperAdmin
-      allow update: if isAuthenticated() && (
+      allow update: if (
         (
+          isAuthenticated() &&
           (
             ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-            ('userId' in resource.data && isOwner(resource.data.userId)) ||
-            isOwner(resource.data.authorId) ||
-            isOwner(resource.data.userId)
+            ('userId' in resource.data && isOwner(resource.data.userId))
           ) &&
           areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
-          isValidOptionalString('content', 0, 2000) &&
+          isValidOptionalString('content', 0, 5000) &&
+          (!('pinned' in request.resource.data) || request.resource.data.pinned is bool)
+        ) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId) ||
+            ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId)
+          ) &&
+          areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+          isValidOptionalString('content', 0, 5000) &&
           (!('pinned' in request.resource.data) || request.resource.data.pinned is bool)
         ) ||
         (
@@ -2006,10 +2505,16 @@ service cloud.firestore {
         isSuperAdmin()
       );
 
-      // 4. Delete: Author, SuperAdmin, or expired TTL drop
-      allow delete: if isAuthenticated() && (
-        isOwner(resource.data.authorId) ||
-        isOwner(resource.data.userId) ||
+      // 4. Delete: Author (authenticated or guest with guest_ prefix), SuperAdmin, or expired TTL drop
+      allow delete: if (
+        (isAuthenticated() && (
+          ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+          ('userId' in resource.data && isOwner(resource.data.userId))
+        )) ||
+        (!isAuthenticated() && (
+          ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+          ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*'))
+        )) ||
         isSuperAdmin() ||
         (resource.data.expiresAtMs is int && resource.data.expiresAtMs <= request.time.toMillis())
       );
@@ -2018,15 +2523,36 @@ service cloud.firestore {
       match /replies/{replyId} {
         allow read: if true;
 
-        allow create: if isAuthenticated() &&
-                         (request.resource.data.authorId == request.auth.uid || request.resource.data.userId == request.auth.uid) &&
-                         isValidGlobalDropReply(request.resource.data);
+        allow create: if (
+          (isAuthenticated() && (
+            ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid) ||
+            ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid)
+          )) ||
+          (!isAuthenticated() && (
+            ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128) ||
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128)
+          )) ||
+          isSuperAdmin()
+        ) && isValidGlobalDropReply(request.resource.data);
 
-        allow update: if isAuthenticated() && (
+        allow update: if (
           (
-            (isOwner(resource.data.authorId) || isOwner(resource.data.userId)) &&
+            isAuthenticated() &&
+            (
+              ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+              ('userId' in resource.data && isOwner(resource.data.userId))
+            ) &&
             areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
-            isValidOptionalString('content', 0, 2000)
+            isValidOptionalString('content', 0, 5000)
+          ) ||
+          (
+            !isAuthenticated() &&
+            (
+              ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId) ||
+              ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId)
+            ) &&
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+            isValidOptionalString('content', 0, 5000)
           ) ||
           (
             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'signals', 'signalsCount']) &&
@@ -2038,21 +2564,249 @@ service cloud.firestore {
           isSuperAdmin()
         );
 
-        allow delete: if isAuthenticated() && (
-          isOwner(resource.data.authorId) ||
+        allow delete: if (
+          (isAuthenticated() && (
+            ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+            ('userId' in resource.data && isOwner(resource.data.userId))
+          )) ||
+          (!isAuthenticated() && (
+            ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+            ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*'))
+          )) ||
           isSuperAdmin()
         );
       }
 
       // Subcollection: signals/{signalId}
       match /signals/{signalId} {
-        allow read: if isAuthenticated();
-
-        allow write: if isAuthenticated() && (
-          request.auth.uid == signalId ||
-          (request.resource.data != null && 'userId' in request.resource.data && request.resource.data.userId == request.auth.uid) ||
-          (resourceExists() && 'userId' in resource.data && resource.data.userId == request.auth.uid) ||
+        allow read: if true;
+        allow create: if (
+          (isAuthenticated() && (
+            request.resource.data.userId == request.auth.uid ||
+            signalId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            signalId.size() <= 128
+          )) ||
           isSuperAdmin()
+        );
+        allow delete: if (
+          (isAuthenticated() && (
+            resource.data.userId == request.auth.uid ||
+            signalId == request.auth.uid ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            signalId.matches('^guest_.*')
+          ))
+        );
+      }
+
+      // Subcollection: likes/{likeId}
+      match /likes/{likeId} {
+        allow read: if true;
+        allow create: if (
+          (isAuthenticated() && (
+            request.resource.data.userId == request.auth.uid ||
+            likeId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            likeId.size() <= 128
+          )) ||
+          isSuperAdmin()
+        );
+        allow delete: if (
+          (isAuthenticated() && (
+            resource.data.userId == request.auth.uid ||
+            likeId == request.auth.uid ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            likeId.matches('^guest_.*')
+          ))
+        );
+      }
+    }
+
+    // Match alias: /drops/{dropId}
+    match /drops/{dropId} {
+      allow read: if true;
+
+      allow create: if (
+        (isAuthenticated() && (
+          ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid) ||
+          ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid)
+        )) ||
+        (!isAuthenticated() && (
+          ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128) ||
+          ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128)
+        )) ||
+        isSuperAdmin()
+      ) && isValidGlobalDropCreate(request.resource.data);
+
+      allow update: if (
+        (
+          isAuthenticated() &&
+          (
+            ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+            ('userId' in resource.data && isOwner(resource.data.userId))
+          ) &&
+          areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+          isValidOptionalString('content', 0, 5000) &&
+          (!('pinned' in request.resource.data) || request.resource.data.pinned is bool)
+        ) ||
+        (
+          !isAuthenticated() &&
+          (
+            ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId) ||
+            ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId)
+          ) &&
+          areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+          isValidOptionalString('content', 0, 5000) &&
+          (!('pinned' in request.resource.data) || request.resource.data.pinned is bool)
+        ) ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'likes', 'likesCount', 'signals', 'signalsCount', 'echoes',
+            'echoesCount', 'repostsCount', 'repliesCount', 'viewsCount', 'poll'
+          ]) &&
+          isValidOptionalList('likes', 10000) &&
+          isValidOptionalList('echoes', 10000) &&
+          isValidOptionalList('signals', 10000) &&
+          (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+          (!('signalsCount' in request.resource.data) || (request.resource.data.signalsCount is number && request.resource.data.signalsCount >= 0)) &&
+          (!('echoesCount' in request.resource.data) || (request.resource.data.echoesCount is number && request.resource.data.echoesCount >= 0)) &&
+          (!('repostsCount' in request.resource.data) || (request.resource.data.repostsCount is number && request.resource.data.repostsCount >= 0)) &&
+          (!('repliesCount' in request.resource.data) || (request.resource.data.repliesCount is number && request.resource.data.repliesCount >= 0)) &&
+          (!('viewsCount' in request.resource.data) || (request.resource.data.viewsCount is number && request.resource.data.viewsCount >= 0)) &&
+          (!('poll' in request.resource.data) || request.resource.data.poll == null || request.resource.data.poll is map)
+        ) ||
+        isSuperAdmin()
+      );
+
+      allow delete: if (
+        (isAuthenticated() && (
+          ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+          ('userId' in resource.data && isOwner(resource.data.userId))
+        )) ||
+        (!isAuthenticated() && (
+          ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+          ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*'))
+        )) ||
+        isSuperAdmin() ||
+        (resource.data.expiresAtMs is int && resource.data.expiresAtMs <= request.time.toMillis())
+      );
+
+      match /replies/{replyId} {
+        allow read: if true;
+
+        allow create: if (
+          (isAuthenticated() && (
+            ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid) ||
+            ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid)
+          )) ||
+          (!isAuthenticated() && (
+            ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128) ||
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128)
+          )) ||
+          isSuperAdmin()
+        ) && isValidGlobalDropReply(request.resource.data);
+
+        allow update: if (
+          (
+            isAuthenticated() &&
+            (
+              ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+              ('userId' in resource.data && isOwner(resource.data.userId))
+            ) &&
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+            isValidOptionalString('content', 0, 5000)
+          ) ||
+          (
+            !isAuthenticated() &&
+            (
+              ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId) ||
+              ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId)
+            ) &&
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+            isValidOptionalString('content', 0, 5000)
+          ) ||
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'signals', 'signalsCount']) &&
+            isValidOptionalList('likes', 1000) &&
+            isValidOptionalList('signals', 1000) &&
+            (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+            (!('signalsCount' in request.resource.data) || (request.resource.data.signalsCount is number && request.resource.data.signalsCount >= 0))
+          ) ||
+          isSuperAdmin()
+        );
+
+        allow delete: if (
+          (isAuthenticated() && (
+            ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+            ('userId' in resource.data && isOwner(resource.data.userId))
+          )) ||
+          (!isAuthenticated() && (
+            ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+            ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*'))
+          )) ||
+          isSuperAdmin()
+        );
+      }
+
+      match /signals/{signalId} {
+        allow read: if true;
+        allow create: if (
+          (isAuthenticated() && (
+            request.resource.data.userId == request.auth.uid ||
+            signalId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            signalId.size() <= 128
+          )) ||
+          isSuperAdmin()
+        );
+        allow delete: if (
+          (isAuthenticated() && (
+            resource.data.userId == request.auth.uid ||
+            signalId == request.auth.uid ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            signalId.matches('^guest_.*')
+          ))
+        );
+      }
+
+      match /likes/{likeId} {
+        allow read: if true;
+        allow create: if (
+          (isAuthenticated() && (
+            request.resource.data.userId == request.auth.uid ||
+            likeId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            likeId.size() <= 128
+          )) ||
+          isSuperAdmin()
+        );
+        allow delete: if (
+          (isAuthenticated() && (
+            resource.data.userId == request.auth.uid ||
+            likeId == request.auth.uid ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            likeId.matches('^guest_.*')
+          ))
         );
       }
     }
@@ -3008,19 +3762,6 @@ service cloud.firestore {
       allow read, write: if isOwner(uid) || isSuperAdmin();
     }
 
-    match /status_updates/{statusId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && (
-        request.resource.data.userId == request.auth.uid ||
-        request.resource.data.authorId == request.auth.uid
-      ) && isValidOptionalString('content', 0, 2000);
-      allow update, delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.userId ||
-        request.auth.uid == resource.data.authorId ||
-        isSuperAdmin()
-      );
-    }
-
     match /offlineMessageQueue/{queueId} {
       allow read: if isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
@@ -3417,18 +4158,11 @@ service cloud.firestore {
       );
     }
 
-    match /stories/{storyId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.userId ||
-        isSuperAdmin()
-      );
-    }
-
     match /storyViews/{viewId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && request.resource.data.viewerId == request.auth.uid;
+      allow read: if true;
+      allow create: if (isAuthenticated() && request.resource.data.viewerId == request.auth.uid) ||
+                       (!isAuthenticated() && ('viewerId' in request.resource.data && request.resource.data.viewerId is string && request.resource.data.viewerId.size() <= 128)) ||
+                       isSuperAdmin();
     }
 
     match /liveStreams/{streamId} {

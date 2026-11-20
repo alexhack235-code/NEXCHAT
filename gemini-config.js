@@ -32,7 +32,6 @@ export const GEMINI_CONFIG = {
   enabled: true,
   // Flagship Gemini 3.8 Super Intelligence with tiered auto-failover
   models: [
-    'gemini-2.5-flash',
     'gemini-2.0-flash',
     'gemini-1.5-flash',
     'gemini-1.5-pro'

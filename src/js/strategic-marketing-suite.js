@@ -119,7 +119,7 @@
         } else {
           alert('Referral link copied to clipboard: ' + url);
         }
-      });
+      }).catch(() => {});
     }
 
     openReferralModal() {

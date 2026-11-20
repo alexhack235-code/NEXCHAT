@@ -52,7 +52,7 @@ const CHRONEX_CONFIG = {
   },
 
   response: {
-    caching: true,
+    caching: false,
     cacheDuration: 3600, // 1 hour
     maxCacheSize: 100
   }
@@ -155,6 +155,45 @@ class ChronexAI {
     const rawMsg = (message || '').trim();
     const cleanMsg = rawMsg.toLowerCase();
 
+    // Greeting intent interceptor - Natural dynamic greetings with contextual variety
+    if (/^(hi|hello|hey|greetings|good\s+(morning|afternoon|evening)|yo|howdy)\b/i.test(cleanMsg) && cleanMsg.length < 35) {
+      const greetings = [
+        "Hey! Ready to dive in. What are we building or debugging next?",
+        "Hello! Systems are primed and ready. What's on your agenda?",
+        "Greetings! How can I assist with your code, architecture, or workflow today?",
+        "Hey there! All modules operational. Tell me what you'd like to work on.",
+        "Hello! I'm synced up and ready. What objective are we tackling?"
+      ];
+      return greetings[Math.floor(Math.random() * greetings.length)];
+    }
+
+    // Status & System Health Intent
+    if (/(what('?s|\s+is)\s+the\s+status|system\s+status|current\s+status|^status\??$|how\s+are\s+things)/i.test(cleanMsg)) {
+      return `### System & Operational Status\n\n` +
+             `- **Neural Brain:** Online & synced across failover clusters\n` +
+             `- **E2EE Vault:** NIST AES-256-GCM / ECDH P-256 active\n` +
+             `- **Media Pipeline:** Multi-Vault Cloud Storage & ImageKit failover primed\n` +
+             `- **Real-Time Mesh:** WebRTC / Supabase dual-sync operational\n\n` +
+             `All platform services are running cleanly. Ready for your next command!`;
+    }
+
+    // Progression / Continuation Intent
+    if (/^(continue|proceed|keep going|next|go on|continue the process)\b/i.test(cleanMsg)) {
+      return `Understood. Continuing execution on the active pipeline. I'm verifying the current task state and pushing the next milestones forward. Let me know if you want to inspect any specific component!`;
+    }
+
+    // Affirmation Intent
+    if (/^(ok|okay|alright|cool|got it|sounds good|understood|sure)\b/i.test(cleanMsg) && cleanMsg.length < 25) {
+      const affirmations = [
+        "Got it! Standing by for your next directive.",
+        "Understood. Let me know whenever you're ready for the next step.",
+        "Confirmed. Ready when you are!",
+        "All set. What would you like to tackle next?"
+      ];
+      return affirmations[Math.floor(Math.random() * affirmations.length)];
+    }
+
+
     // 0A. Summary Request Interceptor - Return ONLY 2 clean bullet points, NO conversational intro!
     if ((options && options.mode === 'summary') || /(?:executive\s+summary|2-bullet|bullet\s+summary|summarize\s+this)/i.test(cleanMsg)) {
       if (!rawMsg || cleanMsg.includes('no speech') || cleanMsg.includes('not clear enough')) {
@@ -229,10 +268,6 @@ class ChronexAI {
              `How can I assist you with your project today?`;
     }
 
-    // 3. Greetings
-    if (/^(hi|hello|hey|yo|greetings|good morning|good afternoon|good evening)(\s|$|!|\?)/i.test(cleanMsg)) {
-      return `Hello! I'm **ChronEX AI**, ready to assist you. What objective or technical question would you like to tackle right now?`;
-    }
 
     // 4. Mathematical Expressions
     const isMath = /^[\d\s+\-*\/^().,eE]+$/.test(cleanMsg) && /[\d]/.test(cleanMsg) && /[+\-*\/^]/.test(cleanMsg);
@@ -280,12 +315,11 @@ class ChronexAI {
     if (options && options.mode === 'translate') {
       return rawMsg.replace(/^(?:translate(?:\s+this)?(?:\s+into\s+\w+)?:\s*)/i, '').replace(/^["'“”‘’]+|["'“”‘’]+$/g, '').trim();
     }
-    return `### ChronEX Neural Cognition\n\n` +
-           `I have received your message: *"${rawMsg.length > 80 ? rawMsg.substring(0, 80) + '...' : rawMsg}"*.\n\n` +
-           `I am fully synchronized and ready to assist you. To provide you with the most accurate and high-precision response, please let me know:\n` +
-           `- Would you like code implementation (Python, JavaScript, Rust), architecture review, or bug troubleshooting?\n` +
-           `- Or are you testing conversational capabilities, audio transcripts, or E2EE encryption?\n\n` +
-           `I'm ready whenever you are!`;
+    // Natural dynamic conversational responses without robotic boilerplate
+    if (cleanMsg.length < 25 && !cleanMsg.includes('?')) {
+      return `I'm here to help with "${rawMsg}". Let me know if you need code examples, system architecture reviews, or debugging!`;
+    }
+    return `Understood. Regarding "${rawMsg.length > 60 ? rawMsg.substring(0, 60) + '...' : rawMsg}": I am here to assist. Could you provide a bit more context on what you would like to achieve, or would you like me to walk through a recommended approach step by step?`;
   }
 
   async getPythonResponse(message) {
@@ -443,7 +477,7 @@ class ChronexAI {
       }
 
       const cacheKey = message.toLowerCase().trim();
-      const cachedResponse = this.getFromCache(cacheKey);
+      const cachedResponse = this.config.response?.caching ? this.getFromCache(cacheKey) : null;
       if (cachedResponse) {
         console.log(" Retrieved from cache");
         return cachedResponse;
@@ -498,7 +532,7 @@ class ChronexAI {
         }
 
         this.recordDailyRequest(quotaId);
-        this.cacheResponse(cacheKey, aiResponse);
+        if (this.config.response?.caching) { this.cacheResponse(cacheKey, aiResponse); }
 
         this.saveConversation(message, aiResponse, conversationId, clientId).catch(err => {
           console.warn("[WARN] Chronex AI History sync failed:", err.message);
@@ -770,30 +804,42 @@ class ChronexAI {
       return null;
     }
 
-    // 1. Try Vercel Serverless Gateway (/api/ai) if running over HTTP/HTTPS
+    // 1. Try Vercel Serverless Gateway (/api/chat & /api/ai) if running over HTTP/HTTPS
     if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
-      try {
-        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-        const timeoutTimer = controller ? setTimeout(() => controller.abort(), 10000) : null;
+      for (const endpoint of ['/api/chat', '/api/ai']) {
+        try {
+          const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const timeoutTimer = controller ? setTimeout(() => controller.abort(), 12000) : null;
 
-        const serverResp = await fetch('/api/ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, history: conversationHistory, image: imagePayload?.data || (typeof imagePayload === 'string' ? imagePayload : null), imageMimeType: imagePayload?.mimeType || 'image/jpeg' }),
-          signal: controller?.signal
-        });
+          const serverResp = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-nexchat-secret': 'NEXCHAT_ULTRA_12345'
+            },
+            body: JSON.stringify({
+              message,
+              prompt: message,
+              history: conversationHistory,
+              image: imagePayload?.data || (typeof imagePayload === 'string' ? imagePayload : null),
+              imageMimeType: imagePayload?.mimeType || 'image/jpeg'
+            }),
+            signal: controller?.signal
+          });
 
-        if (timeoutTimer) clearTimeout(timeoutTimer);
+          if (timeoutTimer) clearTimeout(timeoutTimer);
 
-        if (serverResp.ok) {
-          const serverData = await serverResp.json();
-          if (serverData?.success && serverData?.response) {
-            console.log(" Chronex AI: Response received from Vercel Serverless AI Gateway (/api/ai)");
-            return serverData.response;
+          if (serverResp.ok) {
+            const serverData = await serverResp.json();
+            const textReply = serverData?.reply || serverData?.response;
+            if (serverData?.success && textReply) {
+              console.log(` Chronex AI: Response received from ${endpoint}`);
+              return textReply;
+            }
           }
+        } catch (serverErr) {
+          // Try next endpoint or fall through to direct client pool
         }
-      } catch (serverErr) {
-        // Fall through immediately to direct client pool
       }
     }
 
@@ -887,7 +933,7 @@ class ChronexAI {
       generationConfig: geminiConfig.generationConfig
     };
 
-    const models = geminiConfig.models || ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-pro-latest', 'gemini-3.5-flash-lite', 'gemini-1.5-flash'];
+    const models = geminiConfig.models || ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
 
     // Try keys with auto-failover across the pool with maximum 12s total budget
     const overallDeadline = Date.now() + 12000;

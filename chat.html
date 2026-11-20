@@ -86,7 +86,52 @@
   <link rel="stylesheet" href="css/chat-professional-suite.css?v=12.0">
   <link rel="stylesheet" href="css/layout-declutter.css?v=12.0">
   <link rel="stylesheet" href="css/status-elite-suite.css?v=12.0">
-  <link rel="stylesheet" href="css/global-drop.css?v=12.0">
+  <link rel="stylesheet" href="css/global-drop.css?v=13.0">
+  <style id="globalDropMobileStyles">
+    @media (max-width: 899px) {
+      .x-composer {
+        display: none !important;
+      }
+      .x-composer.mobile-modal-open {
+        display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        z-index: 1200 !important;
+        background: #000000 !important;
+        padding: env(safe-area-inset-top, 14px) 16px env(safe-area-inset-bottom, 16px) 16px !important;
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        animation: xComposerSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .x-composer.mobile-modal-open .x-composer-modal-header {
+        display: flex !important;
+      }
+      .app[data-active-section="global-drop"] ~ .global-drop-mobile-fab,
+      body[data-active-section="global-drop"] .global-drop-mobile-fab,
+      .global-drop-mobile-fab {
+        display: flex !important;
+      }
+    }
+    @media (min-width: 900px) {
+      .global-drop-mobile-fab {
+        display: none !important;
+      }
+    }
+    .x-composer-modal-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+    }
+  </style>
   <link rel="stylesheet" href="css/stealth-forensics-suite.css?v=12.0">
   <link rel="stylesheet" href="css/tactical-war-room.css?v=12.0">
   <link rel="stylesheet" href="css/quorum-milestone.css?v=12.0">
@@ -104,10 +149,12 @@
   <link rel="stylesheet" href="css/nex-status-audio.css">
   <link rel="stylesheet" href="css/telegram-settings-theme.css?v=12.0">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/jpeg" href="https://nexchat-drab.vercel.app/logo.jpg">
-  <link rel="apple-touch-icon" href="https://nexchat-drab.vercel.app/logo.jpg">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
-  <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/favicons/icon-512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
   <link rel="manifest" href="/manifest.json">
   <script>
     /* IMMEDIATE ATTACHMENT HUB CONTROLLER (DEFENSIVE PRE-BOOT) */
@@ -234,7 +281,7 @@
         </div>
         <!-- Active chat contact info (shows when in chat) -->
         <div id="activeChatHeader" class="active-chat-header" style="display: none;">
-          <img id="activeChatAvatar" src="" alt="Contact" class="active-chat-avatar" style="cursor: pointer;" onerror="if(window.getNeutralInitialsAvatar){this.src=window.getNeutralInitialsAvatar(document.getElementById('activeChatName')?.textContent||'Contact');}">
+          <img id="activeChatAvatar" src="logo.jpg" alt="" class="active-chat-avatar" style="cursor: pointer;" onerror="this.onerror=null; this.src='logo.jpg';">
           <div class="active-chat-info">
             <div class="chat-title-lock-row">
               <div id="activeChatName" class="active-chat-name"></div>
@@ -531,7 +578,7 @@
           <!-- Sticky Header with Dual 50/50 Sliding Underline Tabs -->
           <header class="x-timeline-header">
             <div class="x-timeline-header-top">
-              <div class="x-mobile-header-avatar">
+              <div class="x-mobile-header-avatar" id="globalDropMobileHeaderAvatarWrap" role="button" aria-label="Open Account Navigation" onclick="if(window.globalDropOpenDrawer) window.globalDropOpenDrawer(event); else if(window.globalDropEngine?.openAccountDrawer) window.globalDropEngine.openAccountDrawer(event);">
                 <img src="logo.jpg" alt="Me" id="globalDropMobileHeaderAvatar" onerror="this.src='logo.jpg'" />
               </div>
               <div class="x-mobile-header-logo">
@@ -567,7 +614,15 @@
 
 
           <!-- INLINE X COMPOSER (Pristine borderless auto-expanding editor) -->
-          <section class="x-composer" aria-label="Compose Drop">
+          <section class="x-composer" id="globalDropComposer" aria-label="Compose Drop">
+            <!-- Mobile Slide-Up Compose Sheet Top Bar -->
+            <div class="x-composer-modal-header" id="globalDropComposerModalHeader">
+              <button type="button" class="x-composer-modal-close" id="globalDropCloseComposerBtn" title="Close Composer" aria-label="Close Composer">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+              <span class="x-composer-modal-title">Compose Drop</span>
+              <button type="button" class="x-composer-modal-post-btn" id="globalDropModalTopPostBtn">Post</button>
+            </div>
             <div class="x-composer-row">
               <div class="x-composer-avatar-col">
                 <img id="globalDropComposerAvatar" src="logo.jpg" alt="Avatar" class="x-composer-avatar" onerror="this.src='logo.jpg'" />
@@ -709,25 +764,25 @@
               <input type="text" id="globalDropSearchInput" placeholder="Search Global Drop" autocomplete="off" />
             </div>
 
-            <!-- Premium Subscription Card -->
+            <!-- Quantum Genesis Subscription Card -->
             <div class="x-widget-card x-premium-card">
-              <h2 class="x-widget-title">Subscribe to Premium</h2>
-              <p class="x-widget-subtitle">Subscribe to unlock verified green badges, 100MB Cold-Vault broadcasts, and cyber analytics.</p>
-              <button type="button" class="x-subscribe-btn">Subscribe</button>
+              <h2 class="x-widget-title"><i class="fa-solid fa-atom" style="color: #38bdf8;"></i> Genesis Node Upgrade</h2>
+              <p class="x-widget-subtitle">Activate Tier-5 Genesis access: 600GB/mo multi-vault cold storage, verified quantum badge, and sub-millisecond edge routes.</p>
+              <button type="button" class="x-subscribe-btn">Upgrade Node</button>
             </div>
 
-            <!-- What's happening (Trending) Card -->
+            <!-- Active Quantum Signals & Trends -->
             <div class="x-widget-card x-trending-widget">
-              <h2 class="x-widget-title">What's happening</h2>
+              <h2 class="x-widget-title"><i class="fa-solid fa-bolt-lightning" style="color: #10b981;"></i> Active Signals &amp; Radar</h2>
               <div class="x-trending-list" id="globalDropTrendingList"></div>
-              <a href="javascript:void(0)" class="x-show-more-link">Show more</a>
+              <a href="javascript:void(0)" class="x-show-more-link">Expand Radar</a>
             </div>
 
-            <!-- Who to follow Card -->
+            <!-- Recommended Network Nodes -->
             <div class="x-widget-card x-follow-widget">
-              <h2 class="x-widget-title">Who to follow</h2>
+              <h2 class="x-widget-title"><i class="fa-solid fa-network-wired" style="color: #a855f7;"></i> Recommended Nodes</h2>
               <div class="x-follow-list" id="globalDropFollowList"></div>
-              <a href="javascript:void(0)" class="x-show-more-link">Show more</a>
+              <a href="javascript:void(0)" class="x-show-more-link">Discover Peers</a>
             </div>
 
             <!-- Legal Footer -->
@@ -741,6 +796,130 @@
           </div>
         </aside>
       </div>
+
+      <!-- GLOBAL DROP USER PROFILE & NAVIGATION SIDE DRAWER (EXACT REPLICA FROM IMAGE 2) -->
+      <div class="x-drawer-overlay" id="globalDropDrawerOverlay"></div>
+      <aside class="x-drawer" id="globalDropDrawer" aria-label="Account Navigation Drawer">
+        <!-- Top Bar: Avatar & More Menu -->
+        <div class="x-drawer-header">
+          <div class="x-drawer-avatar-wrap">
+            <img src="logo.jpg" alt="User Avatar" class="x-drawer-avatar" id="globalDropDrawerAvatar" onerror="this.src='logo.jpg'" />
+          </div>
+          <button type="button" class="x-drawer-dots-btn" id="globalDropDrawerDotsBtn" title="Account Options">
+            <i class="fa-solid fa-ellipsis"></i>
+          </button>
+        </div>
+
+        <!-- User Identification -->
+        <div class="x-drawer-user-info">
+          <div class="x-drawer-display-name" id="globalDropDrawerName">User</div>
+          <div class="x-drawer-handle" id="globalDropDrawerHandle">@user</div>
+        </div>
+
+        <!-- Follower & Following Stats -->
+        <div class="x-drawer-stats-row">
+          <div class="x-drawer-stat" id="globalDropDrawerFollowingWrap">
+            <strong id="globalDropDrawerFollowingCount">21</strong>
+            <span>Following</span>
+          </div>
+          <div class="x-drawer-stat" id="globalDropDrawerFollowersWrap">
+            <strong id="globalDropDrawerFollowersCount">1</strong>
+            <span>Follower</span>
+          </div>
+        </div>
+
+        <!-- Main Navigation Menu Items (Clean & Simple Everyday Labels) -->
+        <nav class="x-drawer-nav nex-drawer-nav">
+          <!-- 1. Profile -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerProfileLink">
+            <div class="x-drawer-icon"><i class="fa-regular fa-user"></i></div>
+            <span class="x-drawer-label">Profile</span>
+          </a>
+
+          <!-- 2. Premium -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerPremiumLink">
+            <div class="x-drawer-icon"><i class="fa-solid fa-gem" style="color: #00ff66;"></i></div>
+            <span class="x-drawer-label">Premium</span>
+            <span class="x-drawer-badge-pill" style="background: rgba(0,255,102,0.15); color: #00ff66; border-color: rgba(0,255,102,0.3);">GENESIS</span>
+          </a>
+
+          <!-- 3. Communities -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerCommunitiesLink">
+            <div class="x-drawer-icon"><i class="fa-solid fa-users"></i></div>
+            <span class="x-drawer-label">Communities</span>
+          </a>
+
+          <!-- 4. Bookmarks -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerBookmarksLink">
+            <div class="x-drawer-icon"><i class="fa-regular fa-bookmark"></i></div>
+            <span class="x-drawer-label">Bookmarks</span>
+          </a>
+
+          <!-- 5. Likes -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerLovedLink">
+            <div class="x-drawer-icon"><i class="fa-regular fa-heart"></i></div>
+            <span class="x-drawer-label">Likes</span>
+          </a>
+
+          <!-- 6. Reposts -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerResharedLink">
+            <div class="x-drawer-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+            <span class="x-drawer-label">Reposts</span>
+          </a>
+
+          <!-- 7. History -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerHistoryLink">
+            <div class="x-drawer-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <span class="x-drawer-label">History</span>
+          </a>
+
+          <!-- 8. Channels -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerListsLink">
+            <div class="x-drawer-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
+            <span class="x-drawer-label">Channels</span>
+          </a>
+
+          <!-- 9. Audio Spaces -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerSpacesLink">
+            <div class="x-drawer-icon"><i class="fa-solid fa-podcast"></i></div>
+            <span class="x-drawer-label">Audio Spaces</span>
+          </a>
+
+          <!-- 10. Creator Studio -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerStudioLink">
+            <div class="x-drawer-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <span class="x-drawer-label">Creator Studio</span>
+          </a>
+
+          <div class="x-drawer-divider nex-drawer-divider"></div>
+
+          <!-- 11. ChronEX AI -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerAutomateLink">
+            <div class="x-drawer-icon"><i class="fa-solid fa-robot"></i></div>
+            <span class="x-drawer-label">ChronEX AI</span>
+            <span class="x-drawer-badge-new" style="background: rgba(0,255,102,0.2); color: #00ff66;">v4.2</span>
+          </a>
+
+          <!-- 12. Settings & Privacy -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerSettingsLink">
+            <div class="x-drawer-icon"><i class="fa-solid fa-gear"></i></div>
+            <span class="x-drawer-label">Settings &amp; Privacy</span>
+          </a>
+
+          <!-- 13. Help & Support -->
+          <a href="javascript:void(0)" class="x-drawer-item nex-drawer-item" id="globalDropDrawerHelpLink">
+            <div class="x-drawer-icon"><i class="fa-regular fa-circle-question"></i></div>
+            <span class="x-drawer-label">Help &amp; Support</span>
+          </a>
+        </nav>
+
+        <!-- Bottom Footer: Dark Mode Moon Icon -->
+        <div class="x-drawer-footer">
+          <button type="button" class="x-drawer-theme-btn" id="globalDropDrawerThemeBtn" title="Toggle Display Mode">
+            <i class="fa-regular fa-moon"></i>
+          </button>
+        </div>
+      </aside>
     </div>
 
     <!-- ANNOUNCEMENTS & PROTOCOL DISPATCHES SECTION (LIVE STREAM + AUTO-TRANSLATOR) -->
@@ -1333,7 +1512,7 @@
           <div class="chat-header-profile" id="chatHeaderProfile" style="cursor: pointer; position: relative;"
             title="Click to open group settings">
             <div class="header-avatar-container" style="position: relative; display: inline-flex; flex-shrink: 0;">
-              <img id="chatProfilePic" src="" alt="Profile" class="header-avatar" onerror="if(window.getNeutralInitialsAvatar){this.src=window.getNeutralInitialsAvatar(document.getElementById('chatName')?.textContent||'Contact');}">
+              <img id="chatProfilePic" src="logo.jpg" alt="" class="header-avatar" onerror="this.onerror=null; this.src='logo.jpg';">
               <span id="chatOnlineIndicator" class="header-avatar-online-dot"></span>
             </div>
             <div class="header-text">
@@ -3092,7 +3271,10 @@
                   <label for="bubbleStyleSelect"><strong>Message Bubble Theme</strong></label>
                   <select id="bubbleStyleSelect" class="settings-select" style="margin-top: 6px;">
                     <option value="neon-onyx">Neon Onyx (Default Cyber)</option>
-                    <option value="glass-frost">Glassmorphic Frost (Blur & Translucent)</option>
+                    <option value="telegram-glass">Telegram High Glassmorphism (Frosted Translucent Blur)</option>
+                    <option value="liquid-crystal">Liquid Crystal Glass (Deep Blur & Specular Glow)</option>
+                    <option value="midnight-obsidian">Midnight Obsidian Glass (Dark Smoke & Emerald Edge)</option>
+                    <option value="glass-frost">Glassmorphic Frost (Emerald Translucent & Blur)</option>
                     <option value="cyberpunk-gold">Cyberpunk Gold (High Luxury)</option>
                     <option value="minimal-slate">Minimalist Slate (Clean & Muted)</option>
                   </select>
@@ -3804,13 +3986,13 @@
                   <div class="settings-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div class="settings-card-title" style="display: flex; align-items: center; gap: 8px;">
                       <i class="fa-solid fa-earth-americas" style="color: #38bdf8;"></i>
-                      <strong>Primary Communication Language</strong>
+                      <strong data-i18n="settings.primaryLangTitle">Primary Communication Language</strong>
                     </div>
                     <span id="settingsCurrentLangBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(56,189,248,0.15); color: #38bdf8; font-weight: 700; border: 1px solid rgba(56,189,248,0.3);">
                       English (Global)
                     </span>
                   </div>
-                  <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
+                  <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;" data-i18n="settings.primaryLangDesc">
                     Choose your default chat language. The auto-correct engine activates its high-speed O(1) Radix prefix lookup table and typo mappings.
                   </p>
                   <div style="display: flex; gap: 8px; margin-top: 10px;">
@@ -10300,7 +10482,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 </div>
 
 <!-- FLOATING CYBER-FAB FOR MOBILE GLOBAL DROP -->
-<button id="globalDropMobileFab" class="global-drop-mobile-fab" title="Transmit Drop" style="display: none;">
+<button id="globalDropMobileFab" class="global-drop-mobile-fab" title="Transmit Drop">
   <i class="fa-solid fa-feather-pointed"></i>
 </button>
 

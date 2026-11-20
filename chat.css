@@ -6968,8 +6968,31 @@ body.settings-open .bottom-nav,
 /* ==========================================================================
    MESSAGE BUBBLE THEMES
    ========================================================================== */
+body.bubble-theme-telegram-glass .message.sent,
+body.bubble-theme-telegram-glass .my-message,
+body.bubble-theme-telegram-glass .group-msg-row.my-msg .group-msg-bubble {
+  background: rgba(43, 82, 120, 0.65) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28) !important;
+  color: #ffffff !important;
+}
+
+body.bubble-theme-telegram-glass .message.received,
+body.bubble-theme-telegram-glass .other-message,
+body.bubble-theme-telegram-glass .group-msg-row.other-msg .group-msg-bubble {
+  background: rgba(24, 37, 51, 0.65) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22) !important;
+  color: #e2e8f0 !important;
+}
+
 body.bubble-theme-glass-frost .message.sent,
-body.bubble-theme-glass-frost .my-message {
+body.bubble-theme-glass-frost .my-message,
+body.bubble-theme-glass-frost .group-msg-row.my-msg .group-msg-bubble {
   background: rgba(16, 185, 129, 0.35) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
@@ -6978,11 +7001,56 @@ body.bubble-theme-glass-frost .my-message {
 }
 
 body.bubble-theme-glass-frost .message.received,
-body.bubble-theme-glass-frost .other-message {
+body.bubble-theme-glass-frost .other-message,
+body.bubble-theme-glass-frost .group-msg-row.other-msg .group-msg-bubble {
   background: rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+body.bubble-theme-liquid-crystal .message.sent,
+body.bubble-theme-liquid-crystal .my-message,
+body.bubble-theme-liquid-crystal .group-msg-row.my-msg .group-msg-bubble {
+  background: rgba(0, 200, 255, 0.28) !important;
+  backdrop-filter: blur(20px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
+  border: 1px solid rgba(0, 212, 255, 0.35) !important;
+  box-shadow: 0 8px 30px rgba(0, 212, 255, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+}
+
+body.bubble-theme-liquid-crystal .message.received,
+body.bubble-theme-liquid-crystal .other-message,
+body.bubble-theme-liquid-crystal .group-msg-row.other-msg .group-msg-bubble {
+  background: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+  color: #f1f5f9 !important;
+}
+
+body.bubble-theme-midnight-obsidian .message.sent,
+body.bubble-theme-midnight-obsidian .my-message,
+body.bubble-theme-midnight-obsidian .group-msg-row.my-msg .group-msg-bubble {
+  background: rgba(18, 24, 38, 0.72) !important;
+  backdrop-filter: blur(18px) contrast(110%) !important;
+  -webkit-backdrop-filter: blur(18px) contrast(110%) !important;
+  border: 1px solid rgba(0, 240, 118, 0.28) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+body.bubble-theme-midnight-obsidian .message.received,
+body.bubble-theme-midnight-obsidian .other-message,
+body.bubble-theme-midnight-obsidian .group-msg-row.other-msg .group-msg-bubble {
+  background: rgba(10, 15, 26, 0.78) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+  color: #cbd5e1 !important;
 }
 
 body.bubble-theme-cyberpunk-gold .message.sent,

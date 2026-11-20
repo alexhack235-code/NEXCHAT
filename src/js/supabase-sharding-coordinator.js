@@ -142,13 +142,15 @@ export async function getShardForGroup(groupId) {
       };
       groupShardRouteCache.set(groupId, route);
 
-      // Persist allocation in background
-      main.from('group_shards').upsert({
-        group_id: groupId,
-        shard_name: chosen.name,
-        allocated_at: new Date().toISOString(),
-        last_activity_at: new Date().toISOString()
-      }, { onConflict: 'group_id' }).catch(() => {});
+      // Persist allocation in background (safely wrapped in Promise.resolve for PostgREST builder compatibility)
+      Promise.resolve(
+        main.from('group_shards').upsert({
+          group_id: groupId,
+          shard_name: chosen.name,
+          allocated_at: new Date().toISOString(),
+          last_activity_at: new Date().toISOString()
+        }, { onConflict: 'group_id' })
+      ).catch(() => {});
 
       return route;
     }

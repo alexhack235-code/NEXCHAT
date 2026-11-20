@@ -39,12 +39,17 @@ export async function openGroupChat(groupId) {
   
   // Reset store with cached messages if available to prevent blank screen flicker
   const initialCached = (typeof window !== 'undefined' && typeof window.getCachedGroupChatMessages === 'function' ? window.getCachedGroupChatMessages(groupId) : null);
-  groupStore.resetState();
   groupStore.setState({
     currentGroupId: groupId,
+    currentGroup: null,
     messages: initialCached && initialCached.length > 0 ? initialCached : [],
     isLoadingMessages: !initialCached || initialCached.length === 0,
-    hasOlderMessages: true
+    isLoadingOlder: false,
+    hasOlderMessages: true,
+    pinnedMessages: [],
+    replyingTo: null,
+    oldestLoadedTimestamp: null,
+    newestLoadedTimestamp: null
   });
 
   // 1. Try cache first for instant render
@@ -60,6 +65,7 @@ export async function openGroupChat(groupId) {
   // 2. Fetch from Firestore
   try {
     let snapshot;
+    let fallbackMode = false;
     try {
       const q = query(
         collection(db, 'groupMessages'),
@@ -70,6 +76,7 @@ export async function openGroupChat(groupId) {
       snapshot = await getDocs(q);
     } catch (indexErr) {
       console.warn('[GroupMsg] Indexed query fallback triggered:', indexErr?.message);
+      fallbackMode = true;
       const fallbackQ = query(
         collection(db, 'groupMessages'),
         where('groupId', '==', groupId)
@@ -100,8 +107,8 @@ export async function openGroupChat(groupId) {
     // Sort chronologically ascending
     _sortMessages(messages);
 
-    // Update store immediately for instant 0ms visual render
-    const hasOlder = snapshot.docs.length >= PAGE_SIZE;
+    // If fallbackMode was triggered, all messages for the group are already loaded in memory
+    const hasOlder = !fallbackMode && snapshot.docs.length >= PAGE_SIZE;
     const oldest = messages.length > 0 ? messages[0] : null;
     const newest = messages.length > 0 ? messages[messages.length - 1] : null;
 
@@ -180,11 +187,9 @@ export async function loadOlderMessages() {
       );
       snapshot = await getDocs(q);
     } catch (e) {
-      const fallbackQ = query(
-        collection(db, 'groupMessages'),
-        where('groupId', '==', groupId)
-      );
-      snapshot = await getDocs(fallbackQ);
+      console.warn('[GroupMsg] Pagination query unavailable without index:', e?.message);
+      groupStore.setState({ isLoadingOlder: false, hasOlderMessages: false });
+      return [];
     }
     const olderMessages = [];
 
@@ -203,24 +208,32 @@ export async function loadOlderMessages() {
     // Reverse to chronological order
     olderMessages.reverse();
 
+    const currentMessages = groupStore.getState().messages;
+    const existingIds = new Set(currentMessages.map(m => m.id));
+    const trulyOlder = olderMessages.filter(m => !existingIds.has(m.id));
+
+    if (trulyOlder.length === 0) {
+      groupStore.setState({ isLoadingOlder: false, hasOlderMessages: false });
+      return [];
+    }
+
     // Resolve user profiles
-    await _resolveUserProfiles(olderMessages);
+    await _resolveUserProfiles(trulyOlder);
 
     // Prepend to existing messages
-    const currentMessages = groupStore.getState().messages;
-    const newOldest = olderMessages.length > 0 ? olderMessages[0] : null;
+    const newOldest = trulyOlder.length > 0 ? trulyOlder[0] : null;
 
     groupStore.setState({
-      messages: [...olderMessages, ...currentMessages],
+      messages: [...trulyOlder, ...currentMessages],
       isLoadingOlder: false,
       hasOlderMessages: snapshot.docs.length >= PAGE_SIZE,
       oldestLoadedTimestamp: newOldest?.timestamp || state.oldestLoadedTimestamp
     });
 
     // Cache
-    cacheMessages(groupId, olderMessages).catch(() => {});
+    cacheMessages(groupId, trulyOlder).catch(() => {});
 
-    return olderMessages;
+    return trulyOlder;
 
   } catch (error) {
     console.error('[GroupMsg] Load older failed:', error);
@@ -606,6 +619,7 @@ export function closeGroupChat() {
 function _attachRealtimeListener(groupId, newestMessage) {
   if (_realtimeUnsubscribe) {
     _realtimeUnsubscribe();
+    _realtimeUnsubscribe = null;
   }
 
   // Listen directly on groupId so it never requires composite indexes and is resilient to index build delays
@@ -629,8 +643,11 @@ function _attachRealtimeListener(groupId, newestMessage) {
 
       // Skip messages deleted for current user
       if (currentUid && Array.isArray(data.deletedFor) && data.deletedFor.includes(currentUid)) {
-        messages = messages.filter(m => m.id !== msgId);
-        changed = true;
+        const filtered = messages.filter(m => m.id !== msgId);
+        if (filtered.length !== messages.length) {
+          messages = filtered;
+          changed = true;
+        }
         continue;
       }
 
@@ -651,16 +668,27 @@ function _attachRealtimeListener(groupId, newestMessage) {
         );
 
         if (existingIdx >= 0) {
-          // Update existing
-          messages[existingIdx] = { id: msgId, ...data };
+          // Check if message actually differs to avoid redundant re-renders on initial snapshot
+          const oldMsg = messages[existingIdx];
+          const hasDiff = oldMsg.text !== data.text ||
+            oldMsg.edited !== data.edited ||
+            oldMsg.status !== data.status ||
+            JSON.stringify(oldMsg.reactions || []) !== JSON.stringify(data.reactions || []) ||
+            (oldMsg.readBy?.length || 0) !== (data.readBy?.length || 0);
+
+          if (hasDiff) {
+            messages[existingIdx] = { id: msgId, ...data };
+            changed = true;
+          }
         } else if (optimisticIdx >= 0) {
           // Replace optimistic with confirmed
           messages[optimisticIdx] = { id: msgId, ...data };
+          changed = true;
         } else {
-          // New message
+          // Truly a new message
           messages.push({ id: msgId, ...data });
+          changed = true;
         }
-        changed = true;
       } else if (change.type === 'modified') {
         const idx = messages.findIndex(m => m.id === msgId);
         if (idx >= 0) {
@@ -676,8 +704,11 @@ function _attachRealtimeListener(groupId, newestMessage) {
         } else if (target && typeof window.nexDeleteAdvanced === 'function') {
           window.nexDeleteAdvanced(target, msgId);
         }
-        messages = messages.filter(m => m.id !== msgId);
-        changed = true;
+        const filtered = messages.filter(m => m.id !== msgId);
+        if (filtered.length !== messages.length) {
+          messages = filtered;
+          changed = true;
+        }
       }
     }
 

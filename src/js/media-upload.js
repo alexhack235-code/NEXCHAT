@@ -18,6 +18,7 @@ export {
 };
 export { uploadReelVideo, REELS_VAULTS } from './reels-vault.js';
 export { uploadStatusMedia, STATUS_VAULTS } from './status-vault.js';
+export { uploadToImageKit } from './imagekit-vault.js';
 
 /**
  * Uploads a media file (voice note, audio, document, image) to Vercel Blob.
@@ -132,10 +133,28 @@ export async function uploadAnyMedia(file, options = {}) {
       vault: res.vault || 'Cloudinary',
     };
   } catch (err) {
-    console.warn('[STORAGE] Cloudinary pool upload notice, attempting secondary storage fallback:', err?.message || err);
+    console.warn('[STORAGE] Cloudinary pool upload notice, attempting ImageKit fallback:', err?.message || err);
   }
 
-  // 2. Secondary Fallback: Vercel Blob (if serverless API route available)
+  // 2. High-Speed Intermittent: ImageKit Multi-Vault Pool (Vaults 1 to 30, Zero Egress Fees)
+  try {
+    const ikRes = await uploadToImageKit(file, options);
+    if (ikRes && ikRes.url) {
+      return {
+        url: ikRes.url,
+        downloadUrl: ikRes.downloadUrl || ikRes.url,
+        fileId: ikRes.fileId,
+        fileName: ikRes.name || file.name || 'file',
+        fileSize: ikRes.size || file.size,
+        fileType: ikRes.fileType || file.type || 'application/octet-stream',
+        vault: ikRes.vault || 'ImageKit'
+      };
+    }
+  } catch (ikErr) {
+    console.warn('[STORAGE] ImageKit pool upload notice, attempting Vercel Blob fallback:', ikErr?.message || ikErr);
+  }
+
+  // 3. Secondary Fallback: Vercel Blob (if serverless API route available)
   try {
     return await uploadMediaBlob(file, options);
   } catch (err) {

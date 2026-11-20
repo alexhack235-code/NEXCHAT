@@ -65,7 +65,9 @@ export const UI_TRANSLATIONS = {
       "notifications": "Notifications",
       "language": "Language",
       "storage": "Storage",
-      "help": "Help"
+      "help": "Help",
+      "primaryLangTitle": "Primary Communication Language",
+      "primaryLangDesc": "Choose your default chat language. The auto-correct engine activates its high-speed O(1) Radix prefix lookup table and typo mappings."
     },
     "settingsTabs": {
       "tab-stealth-sensors": "Stealth & Sensors",
@@ -151,7 +153,9 @@ export const UI_TRANSLATIONS = {
       "notifications": "Notificaciones",
       "language": "Idioma",
       "storage": "Almacenamiento",
-      "help": "Ayuda"
+      "help": "Ayuda",
+      "primaryLangTitle": "Idioma principal de comunicación",
+      "primaryLangDesc": "Elige tu idioma de chat predeterminado. El motor de autocorrección activa su tabla de búsqueda de prefijos Radix O(1) de alta velocidad y mapas de errores tipográficos."
     },
     "settingsTabs": {
       "tab-stealth-sensors": "Modo Sigilo y Sensores",
@@ -237,7 +241,9 @@ export const UI_TRANSLATIONS = {
       "notifications": "Alerts",
       "language": "Language",
       "storage": "Storage",
-      "help": "Help & Support"
+      "help": "Help & Support",
+      "primaryLangTitle": "Main Language Weh You Dey Yarn",
+      "primaryLangDesc": "Pick your default chat language. The auto-correct engine dey sharp with high-speed O(1) Radix lookup table."
     },
     "settingsTabs": {
       "tab-stealth-sensors": "Stealth & Sensors",
@@ -323,7 +329,9 @@ export const UI_TRANSLATIONS = {
       "notifications": "Notifications",
       "language": "Langue",
       "storage": "Stockage",
-      "help": "Aide"
+      "help": "Aide",
+      "primaryLangTitle": "Langue principale de communication",
+      "primaryLangDesc": "Choisissez votre langue de discussion par défaut. Le moteur d'autocorrection active sa table de recherche de préfixes Radix O(1) haute vitesse."
     },
     "settingsTabs": {
       "tab-stealth-sensors": "Furtivité et Capteurs",
@@ -409,7 +417,9 @@ export const UI_TRANSLATIONS = {
       "notifications": "Benachrichtigungen",
       "language": "Sprache",
       "storage": "Speicher",
-      "help": "Hilfe"
+      "help": "Hilfe",
+      "primaryLangTitle": "Primäre Kommunikationssprache",
+      "primaryLangDesc": "Wählen Sie Ihre Standard-Chatsprache. Die Autokorrektur aktiviert ihre schnelle O(1)-Radix-Präfix-Nachschlagetabelle."
     },
     "settingsTabs": {
       "tab-stealth-sensors": "Tarnung & Sensoren",
@@ -581,7 +591,9 @@ export const UI_TRANSLATIONS = {
       "notifications": "Уведомления",
       "language": "Язык",
       "storage": "Память",
-      "help": "Помощь"
+      "help": "Помощь",
+      "primaryLangTitle": "Основной язык общения",
+      "primaryLangDesc": "Выберите язык чата по умолчанию. Движок автокоррекции активирует высокоскоростную O(1) таблицу префиксов Radix и сопоставление опечаток."
     },
     "settingsTabs": {
       "tab-stealth-sensors": "Стелс и Датчики",

@@ -333,7 +333,7 @@
           if (textEl) {
             navigator.clipboard.writeText(textEl.textContent.trim()).then(() => {
               if (typeof window.showNotif === 'function') window.showNotif('Transcript copied to clipboard!', 'success', 1500);
-            });
+            }).catch(() => {});
           }
         }
       });

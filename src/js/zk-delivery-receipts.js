@@ -262,7 +262,7 @@
         const text = document.getElementById('zkModalSignatureDump')?.textContent || '';
         navigator.clipboard.writeText(text).then(() => {
           if (typeof window.showNotif === 'function') window.showNotif('ZK signature copied to clipboard', 'success');
-        });
+        }).catch(() => {});
       });
     }
 

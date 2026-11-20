@@ -19,6 +19,24 @@ import {
 
 let supabaseClient = null;
 const activeSubscriptions = new Map();
+const pendingSubscriptions = new Map();
+
+function deterministicUuid(str) {
+  if (!str) return '00000000-0000-0000-0000-000000000000';
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)) {
+    return str;
+  }
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const hex = ((h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0')).slice(0, 32);
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
 
 /**
  * Retrieves the active Supabase configuration from window, localStorage, or defaults.
@@ -245,7 +263,7 @@ export async function sendSupabaseMessage({
     }
 
     // 3. PostgreSQL Database Persistence on designated Shard
-    const { data, error } = await client
+    let { data, error } = await client
       .from('messages')
       .insert({
         room_id: roomId,
@@ -261,6 +279,27 @@ export async function sendSupabaseMessage({
       })
       .select()
       .single();
+
+    if (error && error.message && error.message.includes('uuid')) {
+      const isUuid = (val) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+      const uuidPayload = {
+        room_id: roomId,
+        sender_id: isUuid(from) ? from : deterministicUuid(from),
+        recipient_id: chatType === 'direct' ? (isUuid(to) ? to : (to ? deterministicUuid(to) : null)) : null,
+        group_id: chatType === 'group' ? (isUuid(to) ? to : (to ? deterministicUuid(to) : null)) : null,
+        text,
+        attachment: attachment ? (typeof attachment === 'string' ? attachment : JSON.stringify(attachment)) : null,
+        reply_to: replyTo ? (typeof replyTo === 'string' ? replyTo : JSON.stringify(replyTo)) : null,
+        status: 'sent',
+        reactions: '[]',
+        created_at: nowIso,
+      };
+      const retryResult = await client.from('messages').insert(uuidPayload).select().single();
+      if (!retryResult.error) {
+        data = retryResult.data;
+        error = null;
+      }
+    }
 
     if (error) {
       console.warn(`[SUPABASE CHAT] DB insert notice on ${shardName}, relying on broadcast:`, error.message);
@@ -310,14 +349,34 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
     activeSubscriptions.delete(roomId);
   }
 
+  const subToken = (pendingSubscriptions.get(roomId) || 0) + 1;
+  pendingSubscriptions.set(roomId, subToken);
+
   const { client, shardName } = await resolveRoomClient(roomId);
+
+  // If another subscription was requested for this room while awaiting shard resolution, abort this one
+  if (pendingSubscriptions.get(roomId) !== subToken) {
+    return () => {};
+  }
+
   const config = getSupabaseConfig();
   if (!client || !config.isConfigured) {
     return () => {};
   }
 
-  console.log(`[SUPABASE CHAT] Subscribing to room ${roomId} on shard: ${shardName}`);
   const channelName = `chat_room_${roomId}`;
+
+  // Clean up any existing channel with this topic on this client
+  try {
+    if (typeof client.getChannels === 'function') {
+      const existing = client.getChannels().find(c => c.topic === `realtime:${channelName}` || c.name === channelName);
+      if (existing) {
+        client.removeChannel(existing);
+      }
+    }
+  } catch (_) {}
+
+  console.log(`[SUPABASE CHAT] Subscribing to room ${roomId} on shard: ${shardName}`);
   const channel = client.channel(channelName);
 
   // 1. Listen for Broadcast Events (Sub-15ms peer stream)
@@ -375,7 +434,9 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
 
   const unsub = () => {
     try { client.removeChannel(channel); } catch {}
-    activeSubscriptions.delete(roomId);
+    if (activeSubscriptions.get(roomId) === unsub) {
+      activeSubscriptions.delete(roomId);
+    }
     console.log(`[SUPABASE CHAT] [${shardName}] Unsubscribed from ${channelName}`);
   };
 
@@ -491,12 +552,15 @@ export async function markSupabaseMessagesRead(roomId, readerId) {
     }).catch(() => {});
 
     // 2. Update status in Postgres on the shard
-    await client
+    const isUuid = (val) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+    let readUpdate = client
       .from('messages')
       .update({ status: 'read' })
-      .eq('room_id', roomId)
-      .neq('sender_id', readerId)
-      .neq('status', 'read');
+      .eq('room_id', roomId);
+    if (isUuid(readerId)) {
+      readUpdate = readUpdate.neq('sender_id', readerId);
+    }
+    await readUpdate.neq('status', 'read');
   } catch (err) {
     console.warn('[SUPABASE CHAT] Mark read notice:', err.message);
   }

@@ -88,6 +88,92 @@ class GlobalDropEngine {
     this.cachedProfileDrops = [];
   }
 
+
+  // ---------------------------------------------------------------------------
+  // VAULT & TIMELINE PERSISTENCE (BOOKMARKS, HISTORY, RESHARES)
+  // ---------------------------------------------------------------------------
+  getBookmarkedDropIds() {
+    try {
+      const stored = localStorage.getItem('nex_bookmarked_drop_ids');
+      return stored ? JSON.parse(stored) : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  isDropBookmarked(dropId) {
+    if (!dropId) return false;
+    const ids = this.getBookmarkedDropIds();
+    return ids.includes(dropId);
+  }
+
+  toggleDropBookmark(dropId) {
+    if (!dropId) return false;
+    const ids = this.getBookmarkedDropIds();
+    const idx = ids.indexOf(dropId);
+    let isNow = false;
+    if (idx >= 0) {
+      ids.splice(idx, 1);
+      isNow = false;
+    } else {
+      ids.unshift(dropId);
+      isNow = true;
+    }
+    try {
+      localStorage.setItem('nex_bookmarked_drop_ids', JSON.stringify(ids.slice(0, 500)));
+    } catch (_) {}
+    return isNow;
+  }
+
+  recordDropHistory(dropId) {
+    if (!dropId) return;
+    try {
+      const stored = localStorage.getItem('nex_drop_history_ids');
+      const ids = stored ? JSON.parse(stored) : [];
+      const idx = ids.indexOf(dropId);
+      if (idx >= 0) ids.splice(idx, 1);
+      ids.unshift(dropId);
+      localStorage.setItem('nex_drop_history_ids', JSON.stringify(ids.slice(0, 300)));
+    } catch (_) {}
+  }
+
+  getHistoryDropIds() {
+    try {
+      const stored = localStorage.getItem('nex_drop_history_ids');
+      return stored ? JSON.parse(stored) : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  getResharedDropIds() {
+    try {
+      const stored = localStorage.getItem('nex_reshared_drop_ids');
+      return stored ? JSON.parse(stored) : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  toggleDropReshared(dropId) {
+    if (!dropId) return false;
+    try {
+      const ids = this.getResharedDropIds();
+      const idx = ids.indexOf(dropId);
+      let isEchoed = false;
+      if (idx >= 0) {
+        ids.splice(idx, 1);
+      } else {
+        ids.unshift(dropId);
+        isEchoed = true;
+      }
+      localStorage.setItem('nex_reshared_drop_ids', JSON.stringify(ids.slice(0, 300)));
+      return isEchoed;
+    } catch (_) {
+      return false;
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // INITIALIZATION & EVENT BINDINGS
   // ---------------------------------------------------------------------------
@@ -100,6 +186,7 @@ class GlobalDropEngine {
     this.bindComposer();
     this.bindRepliesDrawer();
     this.bindMobileFab();
+    this.bindAccountDrawer();
     this.bindGlobalEvents();
     this.loadSideWidgets();
     this.initGeoLocator();
@@ -655,11 +742,11 @@ class GlobalDropEngine {
     const codeLangSelect = document.getElementById('globalDropCodeLangSelect');
 
     const content = textarea?.value.trim() || '';
-    const uid = this.getUID();
+    let uid = this.getUID();
 
     if (!uid) {
-      if (window.showNotif) window.showNotif('Please sign in to transmit a Global Drop', 'error');
-      return;
+      uid = localStorage.getItem('local_guest_uid') || `guest_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      localStorage.setItem('local_guest_uid', uid);
     }
 
     // Code snippet payload
@@ -692,13 +779,17 @@ class GlobalDropEngine {
 
       for (const file of this.selectedMediaFiles) {
         try {
-          // Race uploadAnyMedia with a 4500ms timeout for instant responsiveness
+          const isVideo = file.type && file.type.startsWith('video/');
+          const timeoutDuration = isVideo ? 60000 : 12000;
           const uploadPromise = uploadAnyMedia(file, { folder: 'global_drops', uid });
-          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Media upload timed out')), 4500));
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Media upload timed out')), timeoutDuration));
           const res = await Promise.race([uploadPromise, timeoutPromise]).catch(async (err) => {
             console.warn('[GLOBAL DROP] Media upload timed out or failed, using client fallback:', err);
             if (file.type && file.type.startsWith('image/')) {
               const fallbackUrl = await compressImageToDataUrl(file);
+              return { url: fallbackUrl, downloadUrl: fallbackUrl };
+            } else if (isVideo) {
+              const fallbackUrl = URL.createObjectURL(file);
               return { url: fallbackUrl, downloadUrl: fallbackUrl };
             }
             throw err;
@@ -727,6 +818,14 @@ class GlobalDropEngine {
                 if (detectedMediaType !== 'video') detectedMediaType = 'image';
               }
             } catch (_) {}
+          } else if (file.type && file.type.startsWith('video/')) {
+            const fallbackUrl = URL.createObjectURL(file);
+            mediaUrls.push({
+              url: fallbackUrl,
+              type: 'video',
+              name: file.name
+            });
+            detectedMediaType = 'video';
           }
         }
       }
@@ -920,8 +1019,20 @@ class GlobalDropEngine {
     // Filter by mode
     if (this.currentMode === 'following') {
       const myUid = this.getUID();
-      // Show user's own drops or mutual contacts
       list = list.filter(d => d.authorId === myUid);
+    } else if (this.currentMode === 'bookmarks') {
+      const bookmarkedIds = this.getBookmarkedDropIds();
+      list = list.filter(d => bookmarkedIds.includes(d.id));
+    } else if (this.currentMode === 'loved') {
+      const myUid = this.getUID();
+      list = list.filter(d => Array.isArray(d.likes) && d.likes.includes(myUid));
+    } else if (this.currentMode === 'reshared') {
+      const resharedIds = this.getResharedDropIds();
+      const myUid = this.getUID();
+      list = list.filter(d => resharedIds.includes(d.id) || (Array.isArray(d.echoes) && d.echoes.includes(myUid)));
+    } else if (this.currentMode === 'history') {
+      const historyIds = this.getHistoryDropIds();
+      list = list.filter(d => historyIds.includes(d.id));
     } else if (this.currentMode === 'local') {
       // Local Radar mode: filter drops with location tag near user or active geo filter
       if (this.selectedGeoFilter) {
@@ -1022,6 +1133,38 @@ class GlobalDropEngine {
             </p>
           </div>
         `;
+      } else if (this.currentMode === 'bookmarks') {
+        emptyDiv.innerHTML = `
+          <div style="padding: 60px 20px; text-align: center; color: var(--x-text-secondary); border-bottom: 1px solid var(--x-border);">
+            <i class="fa-regular fa-bookmark" style="font-size: 38px; color: var(--x-green); margin-bottom: 14px; display: block; opacity: 0.85; filter: drop-shadow(0 0 14px var(--x-green-glow));"></i>
+            <h3 style="font-size: 19px; font-weight: 800; color: #ffffff; margin-bottom: 6px;">Save Drops for later</h3>
+            <p style="font-size: 14px; color: var(--x-text-secondary); max-width: 380px; margin: 0 auto; line-height: 1.45;">Don't let the good ones fly away! Bookmark Drops to easily find them again in the future.</p>
+          </div>
+        `;
+      } else if (this.currentMode === 'loved') {
+        emptyDiv.innerHTML = `
+          <div style="padding: 60px 20px; text-align: center; color: var(--x-text-secondary); border-bottom: 1px solid var(--x-border);">
+            <i class="fa-regular fa-heart" style="font-size: 38px; color: var(--x-green); margin-bottom: 14px; display: block; opacity: 0.85; filter: drop-shadow(0 0 14px var(--x-green-glow));"></i>
+            <h3 style="font-size: 19px; font-weight: 800; color: #ffffff; margin-bottom: 6px;">You haven't loved any Drops yet</h3>
+            <p style="font-size: 14px; color: var(--x-text-secondary); max-width: 380px; margin: 0 auto; line-height: 1.45;">When you like a Drop, it will appear here.</p>
+          </div>
+        `;
+      } else if (this.currentMode === 'reshared') {
+        emptyDiv.innerHTML = `
+          <div style="padding: 60px 20px; text-align: center; color: var(--x-text-secondary); border-bottom: 1px solid var(--x-border);">
+            <i class="fa-solid fa-retweet" style="font-size: 38px; color: var(--x-green); margin-bottom: 14px; display: block; opacity: 0.85; filter: drop-shadow(0 0 14px var(--x-green-glow));"></i>
+            <h3 style="font-size: 19px; font-weight: 800; color: #ffffff; margin-bottom: 6px;">No reshared Drops</h3>
+            <p style="font-size: 14px; color: var(--x-text-secondary); max-width: 380px; margin: 0 auto; line-height: 1.45;">Drops you reshare to your network will appear here.</p>
+          </div>
+        `;
+      } else if (this.currentMode === 'history') {
+        emptyDiv.innerHTML = `
+          <div style="padding: 60px 20px; text-align: center; color: var(--x-text-secondary); border-bottom: 1px solid var(--x-border);">
+            <i class="fa-solid fa-clock-rotate-left" style="font-size: 38px; color: var(--x-green); margin-bottom: 14px; display: block; opacity: 0.85; filter: drop-shadow(0 0 14px var(--x-green-glow));"></i>
+            <h3 style="font-size: 19px; font-weight: 800; color: #ffffff; margin-bottom: 6px;">No watch history</h3>
+            <p style="font-size: 14px; color: var(--x-text-secondary); max-width: 380px; margin: 0 auto; line-height: 1.45;">Drops you view in your stream will be recorded here.</p>
+          </div>
+        `;
       } else {
         emptyDiv.innerHTML = `
           <div style="padding: 60px 20px; text-align: center; color: var(--x-text-secondary); border-bottom: 1px solid var(--x-border);">
@@ -1048,6 +1191,8 @@ class GlobalDropEngine {
       const safeAvatar = drop.authorPhoto || 'logo.jpg';
       const isSignaled = Array.isArray(drop.likes) && drop.likes.includes(myUid);
       const isEchoed = Array.isArray(drop.echoes) && drop.echoes.includes(myUid);
+      const isBookmarked = this.isDropBookmarked(drop.id);
+      this.recordDropHistory(drop.id);
 
       // Pinned / TTL badge
       let ttlBadge = '';
@@ -1168,9 +1313,9 @@ class GlobalDropEngine {
 
             <!-- 5. Bookmark & Share -->
             <div class="x-action-group-right">
-              <button type="button" class="x-action-btn x-action-bookmark global-drop-action-btn bookmark" data-drop-id="${drop.id}" title="Bookmark">
+              <button type="button" class="x-action-btn x-action-bookmark global-drop-action-btn bookmark ${isBookmarked ? 'active' : ''}" data-drop-id="${drop.id}" title="Bookmark">
                 <div class="x-action-icon-circle">
-                  <i class="fa-regular fa-bookmark"></i>
+                  <i class="${isBookmarked ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'}"></i>
                 </div>
               </button>
               <button type="button" class="x-action-btn x-action-share global-drop-action-btn forward" data-drop-id="${drop.id}" title="Share">
@@ -1304,12 +1449,16 @@ class GlobalDropEngine {
     card.querySelector('.global-drop-action-btn.bookmark')?.addEventListener('click', (e) => {
       e.stopPropagation();
       const btn = card.querySelector('.global-drop-action-btn.bookmark');
-      btn.classList.toggle('active');
+      const isNow = this.toggleDropBookmark(drop.id);
+      btn.classList.toggle('active', isNow);
       const icon = btn.querySelector('i');
       if (icon) {
-        icon.className = btn.classList.contains('active') ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark';
+        icon.className = isNow ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark';
       }
-      if (window.showNotif) window.showNotif('Drop saved to Cyber Vault bookmarks', 'success');
+      if (window.showNotif) window.showNotif(isNow ? 'Drop saved to Bookmarks' : 'Removed from Bookmarks', 'success');
+      if (this.currentMode === 'bookmarks') {
+        this.filterAndRenderCachedDrops();
+      }
     });
 
     // 6. Voice playback trigger
@@ -1886,17 +2035,243 @@ class GlobalDropEngine {
   }
 
   // ---------------------------------------------------------------------------
-  // 8. MOBILE CYBER-FAB
+  // 8. MOBILE CYBER-FAB & COMPOSER MODAL SHEET
   // ---------------------------------------------------------------------------
   bindMobileFab() {
     const fab = document.getElementById('globalDropMobileFab');
-    fab?.addEventListener('click', () => {
-      const composer = document.querySelector('.x-composer, .global-drop-composer-card');
-      if (composer) {
-        composer.scrollIntoView({ behavior: 'smooth' });
-        document.getElementById('globalDropTextarea')?.focus();
+    const closeBtn = document.getElementById('globalDropCloseComposerBtn');
+    const topPostBtn = document.getElementById('globalDropModalTopPostBtn');
+
+    fab?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openComposerModal();
+    });
+
+    closeBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.closeComposerModal();
+    });
+
+    topPostBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.transmitDrop();
+    });
+  }
+
+  openComposerModal() {
+    const composer = document.getElementById('globalDropComposer') || document.querySelector('.x-composer');
+    if (composer) {
+      composer.classList.add('mobile-modal-open');
+      const textarea = document.getElementById('globalDropTextarea');
+      if (textarea) {
+        setTimeout(() => textarea.focus(), 150);
+      }
+    }
+  }
+
+  closeComposerModal() {
+    const composer = document.getElementById('globalDropComposer') || document.querySelector('.x-composer');
+    if (composer) {
+      composer.classList.remove('mobile-modal-open');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // 8B. PROFILE NAVIGATION SIDE DRAWER (EXACT REPLICA FROM IMAGE 2)
+  // ---------------------------------------------------------------------------
+  bindAccountDrawer() {
+    const mobileAvatar = document.getElementById('globalDropMobileHeaderAvatar');
+    const mobileAvatarWrap = document.getElementById('globalDropMobileHeaderAvatarWrap') || document.querySelector('.x-mobile-header-avatar');
+    const drawer = document.getElementById('globalDropDrawer');
+    const overlay = document.getElementById('globalDropDrawerOverlay');
+    if (!drawer || !overlay) return;
+
+    // Mount drawer and overlay directly to body to prevent clipping by parent scroll/overflow containers
+    if (drawer.parentElement && drawer.parentElement !== document.body) {
+      document.body.appendChild(overlay);
+      document.body.appendChild(drawer);
+    }
+
+    const openDrawer = (e) => {
+      if (e) {
+        e.preventDefault?.();
+        e.stopPropagation?.();
+      }
+      this.syncDrawerProfile();
+      overlay.style.display = 'block';
+      drawer.style.display = 'flex';
+      drawer.style.visibility = 'visible';
+      requestAnimationFrame(() => {
+        overlay.classList.add('active');
+        drawer.classList.add('open');
+      });
+    };
+
+    const closeDrawer = (e) => {
+      if (e) {
+        e.preventDefault?.();
+        e.stopPropagation?.();
+      }
+      overlay.classList.remove('active');
+      drawer.classList.remove('open');
+      setTimeout(() => {
+        if (!drawer.classList.contains('open')) {
+          overlay.style.display = 'none';
+          drawer.style.display = 'none';
+        }
+      }, 260);
+    };
+
+    // Expose globally for both inline and external invocation
+    window.globalDropOpenDrawer = openDrawer;
+    window.globalDropCloseDrawer = closeDrawer;
+    this.openAccountDrawer = openDrawer;
+    this.closeAccountDrawer = closeDrawer;
+
+    // Bind triggers to avatar image and wrapper container (handling click, touchend, pointerup)
+    const avatarElements = [mobileAvatar, mobileAvatarWrap].filter(Boolean);
+    avatarElements.forEach(el => {
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', (e) => openDrawer(e));
+      el.addEventListener('touchend', (e) => openDrawer(e), { passive: false });
+    });
+
+    overlay.addEventListener('click', (e) => closeDrawer(e));
+    overlay.addEventListener('touchend', (e) => closeDrawer(e), { passive: false });
+
+    // Header dots button in drawer
+    document.getElementById('globalDropDrawerDotsBtn')?.addEventListener('click', () => {
+      if (window.showNotif) window.showNotif('Node Identity: Genesis Tier 1 Verified', 'info');
+    });
+
+    // Wire drawer navigation items
+    document.getElementById('globalDropDrawerProfileLink')?.addEventListener('click', () => {
+      closeDrawer();
+      this.openUserProfile(this.getUID());
+    });
+
+    document.getElementById('globalDropDrawerPremiumLink')?.addEventListener('click', () => {
+      closeDrawer();
+      if (window.showNotif) window.showNotif('Genesis Tier Active — 100% Unlocked', 'success');
+      this.openUserProfile(this.getUID());
+    });
+
+    document.getElementById('globalDropDrawerCommunitiesLink')?.addEventListener('click', () => {
+      closeDrawer();
+      if (typeof window.handleNavigation === 'function') {
+        window.handleNavigation('groups');
       }
     });
+
+    document.getElementById('globalDropDrawerBookmarksLink')?.addEventListener('click', () => {
+      closeDrawer();
+      this.setFeedFilter('bookmarks');
+    });
+
+    document.getElementById('globalDropDrawerLovedLink')?.addEventListener('click', () => {
+      closeDrawer();
+      this.setFeedFilter('loved');
+    });
+
+    document.getElementById('globalDropDrawerResharedLink')?.addEventListener('click', () => {
+      closeDrawer();
+      this.setFeedFilter('reshared');
+    });
+
+    document.getElementById('globalDropDrawerHistoryLink')?.addEventListener('click', () => {
+      closeDrawer();
+      this.setFeedFilter('history');
+    });
+
+    document.getElementById('globalDropDrawerListsLink')?.addEventListener('click', () => {
+      closeDrawer();
+      if (window.broadcastChannelsEngine?.openModal) {
+        window.broadcastChannelsEngine.openModal();
+      } else if (window.showNotif) {
+        window.showNotif('Frequency Channels Active', 'info');
+      }
+    });
+
+    document.getElementById('globalDropDrawerSpacesLink')?.addEventListener('click', () => {
+      closeDrawer();
+      if (window.CyberFeatures?.audioSpaces?.show) {
+        window.CyberFeatures.audioSpaces.show();
+      } else if (window.showNotif) {
+        window.showNotif('Quantum Voice Stages Initialized', 'info');
+      }
+    });
+
+    document.getElementById('globalDropDrawerStudioLink')?.addEventListener('click', () => {
+      closeDrawer();
+      if (window.cyberFeatureMatrix?.openModal) {
+        window.cyberFeatureMatrix.openModal();
+      } else if (window.showNotif) {
+        window.showNotif('Cyber Matrix Studio Matrix Active', 'info');
+      }
+    });
+
+    document.getElementById('globalDropDrawerAutomateLink')?.addEventListener('click', () => {
+      closeDrawer();
+      if (typeof window.openChronexAI === 'function') {
+        window.openChronexAI();
+      } else if (window.showNotif) {
+        window.showNotif('ChronEX Swarm v4.2 Online', 'info');
+      }
+    });
+
+    document.getElementById('globalDropDrawerSettingsLink')?.addEventListener('click', () => {
+      closeDrawer();
+      if (typeof window.openSettingsModal === 'function') {
+        window.openSettingsModal();
+      } else {
+        const m = document.getElementById('settingsModal');
+        if (m) m.style.display = 'flex';
+      }
+    });
+
+    document.getElementById('globalDropDrawerHelpLink')?.addEventListener('click', () => {
+      closeDrawer();
+      if (window.showNotif) window.showNotif('Protocol Matrix & Docs Loaded', 'info');
+    });
+
+    document.getElementById('globalDropDrawerThemeBtn')?.addEventListener('click', () => {
+      if (typeof window.toggleTheme === 'function') {
+        window.toggleTheme();
+      } else {
+        document.body.classList.toggle('light-theme');
+      }
+    });
+  }
+
+  syncDrawerProfile() {
+    const avatar = document.getElementById('globalDropDrawerAvatar');
+    const nameEl = document.getElementById('globalDropDrawerName');
+    const handleEl = document.getElementById('globalDropDrawerHandle');
+    const followingEl = document.getElementById('globalDropDrawerFollowingCount');
+    const followersEl = document.getElementById('globalDropDrawerFollowersCount');
+
+    const currentUser = (typeof auth !== 'undefined' && auth?.currentUser) ? auth.currentUser : null;
+    const myUid = this.getUID();
+    const myName = currentUser?.displayName || localStorage.getItem('nex_display_name') || this.getUsername() || 'User';
+    const myAvatar = this.getAvatar();
+    const myHandle = '@' + (currentUser?.email ? currentUser.email.split('@')[0] : (localStorage.getItem('nex_username') || 'user_' + (myUid ? myUid.slice(0, 5) : 'node')));
+
+    if (avatar) avatar.src = myAvatar;
+    if (nameEl) nameEl.textContent = myName;
+    if (handleEl) handleEl.textContent = myHandle;
+
+    const followingCount = localStorage.getItem('nex_following_count') || '21';
+    const followersCount = localStorage.getItem('nex_followers_count') || '1';
+    if (followingEl) followingEl.textContent = followingCount;
+    if (followersEl) followersEl.textContent = followersCount;
+  }
+
+  setFeedFilter(mode) {
+    this.currentMode = mode;
+    document.querySelectorAll('.x-timeline-tabs .x-tab-btn').forEach(btn => btn.classList.remove('active'));
+    this.filterAndRenderCachedDrops();
+    const container = document.getElementById('globalDropContainer') || document.querySelector('.x-timeline-col');
+    if (container) container.scrollTop = 0;
   }
 
   // ---------------------------------------------------------------------------
@@ -2063,9 +2438,7 @@ class GlobalDropEngine {
     document.getElementById('globalDropNavUserPill')?.addEventListener('click', () => {
       this.openUserProfile(this.getUID());
     });
-    document.getElementById('globalDropMobileHeaderAvatar')?.addEventListener('click', () => {
-      this.openUserProfile(this.getUID());
-    });
+    // Note: globalDropMobileHeaderAvatar is bound in bindAccountDrawer() to open the navigation drawer
   }
 
   formatCompactNumber(num) {

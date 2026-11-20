@@ -129,7 +129,7 @@
         }
       }
       try {
-        const cfg = await import('./firebase-config.js');
+        const cfg = await import('../../firebase-config.js');
         const mod = await import("https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js");
         return {
           db: cfg.db,

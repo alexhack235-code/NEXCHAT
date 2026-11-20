@@ -136,8 +136,9 @@ export class VirtualScroller {
       this._scrollToBottomBtn.style.display = this._isNearBottom ? 'none' : 'flex';
     }
 
-    // Trigger load-more when near top
-    if (this._scrollTop < LOAD_MORE_THRESHOLD && !this._isLoadingMore && this._onLoadMore && this._items.length > 0) {
+    // Trigger load-more when near top ONLY if there is actual scrollable overflow
+    const hasScrollOverflow = scrollHeight > clientHeight + 60;
+    if (hasScrollOverflow && this._scrollTop < LOAD_MORE_THRESHOLD && !this._isLoadingMore && this._onLoadMore && this._items.length > 0) {
       this._isLoadingMore = true;
       this._onLoadMore();
     }

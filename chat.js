@@ -3055,6 +3055,7 @@ function renderChronexWelcomeStage(container) {
   if (!container) return;
 
   if (container.querySelector('.chronex-welcome-stage')) return;
+  if (container.querySelector('.message-wrapper')) return; // NEVER wipe existing messages!
   const activeKey = getActiveChronexModelKey();
 
 container.innerHTML = `
@@ -12348,31 +12349,19 @@ function displayChronexAIUserMessage(message, attachment = null) {
   const messagesContainer = document.getElementById("messages-area");
 
   if (!messagesContainer) return;
-const welcomeStage = messagesContainer.querySelector('.chronex-welcome-stage');
+  const welcomeStage = messagesContainer.querySelector('.chronex-welcome-stage');
 
   if (welcomeStage) {
-    welcomeStage.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-
-    welcomeStage.style.opacity = '0';
-
-    welcomeStage.style.pointerEvents = 'none';
-
-    setTimeout(() => {
-      try {
-        if (welcomeStage && welcomeStage.parentNode) {
-          welcomeStage.remove();
-
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-      } catch (_) {}
-    }, 260);
+    try {
+      welcomeStage.remove();
+    } catch (_) {}
   }
 
-const div = document.createElement("div");
+  const div = document.createElement("div");
 
   div.className = "message-wrapper sent chronex-user-msg-wrapper";
 
-  div.style.cssText = "display: flex; justify-content: flex-end; margin: 8px 0; padding: 0 12px; content-visibility: visible !important; contain: none !important;";
+  div.style.cssText = "display: flex; justify-content: flex-end; margin: 8px 0; padding: 0 12px; position: relative; width: 100%; box-sizing: border-box; clear: both; content-visibility: visible !important; contain: none !important;";
 let mediaHtml = '';
 
   if (attachment) {
@@ -12397,7 +12386,7 @@ div.innerHTML = `
 
       ${mediaHtml}
 
-      ${message ? `<p style="margin: 0; white-space: pre-wrap;">${escape(message)}</p>` : ''}
+      ${message ? `<p style="margin: 0; white-space: pre-wrap;">${typeof escapeHtml === 'function' ? escapeHtml(message) : String(message).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>` : ''}
 
       <div style="font-size: 10.5px; margin-top: 5px; opacity: 0.85; text-align: right; color: rgba(255,255,255,0.9);">${formatTimeAgo(new Date())}</div>
 
@@ -12420,7 +12409,7 @@ const div = document.createElement("div");
 
   div.className = "message-wrapper received ai-message-bubble-wrapper";
 
-  div.style.cssText = "display: flex; justify-content: flex-start; align-items: flex-end; margin: 10px 0; padding: 0 12px; gap: 8px; content-visibility: visible !important; contain: none !important;";
+  div.style.cssText = "display: flex; justify-content: flex-start; align-items: flex-end; margin: 10px 0; padding: 0 12px; gap: 8px; position: relative; width: 100%; box-sizing: border-box; clear: both; content-visibility: visible !important; contain: none !important;";
 const voicePlayerMarkup = window.ChronexxVoiceEngine ? window.ChronexxVoiceEngine.renderVoicePlayerBar(response) : '';
 
 div.innerHTML = `
@@ -13379,7 +13368,9 @@ if (allMessages.length === 0) {
       }
 
 if (currentChatType === 'ai') {
-        renderChronexWelcomeStage(messagesDiv);
+        if (!messagesDiv.querySelector('.message-wrapper')) {
+          renderChronexWelcomeStage(messagesDiv);
+        }
 
         return;
       }
@@ -14418,10 +14409,12 @@ messageListener2 = onSnapshot(q2, (snap) => {
 
   if (currentChatType === 'direct' && myUID && currentChatUser) {
     const roomId = buildRoomId(myUID, currentChatUser);
+    const activeDirectAtSub = currentChatUser;
 
     subscribeToSupabaseRoom(roomId, {
       onNewMessage: (incoming) => {
         if (!incoming || incoming.from === myUID) return;
+        if (currentChatUser !== activeDirectAtSub || currentChatType !== 'direct') return;
         const msgCorrelationId = incoming.clientMsgId || incoming.client_msg_id || incoming.docId || incoming.id;
 
         if (msgCorrelationId && window._nexProcessedRealtimeIds && window._nexProcessedRealtimeIds.has(msgCorrelationId)) {
@@ -14529,6 +14522,7 @@ messageListener2 = onSnapshot(q2, (snap) => {
 
       onMessageUpdated: (updated) => {
         if (!updated) return;
+        if (currentChatUser !== activeDirectAtSub || currentChatType !== 'direct') return;
         const target = messages1.find(m => m.docId === updated.docId) || messages2.find(m => m.docId === updated.docId);
 
         if (target) {
@@ -14538,6 +14532,10 @@ messageListener2 = onSnapshot(q2, (snap) => {
         }
       }
     }).then(unsub => {
+      if (currentChatUser !== activeDirectAtSub || currentChatType !== 'direct') {
+        try { unsub(); } catch (_) {}
+        return;
+      }
       supabaseRoomUnsubscribe = unsub;
     }).catch(err => {
       console.warn('[SUPABASE] Room subscription notice:', err?.message);
@@ -14824,6 +14822,38 @@ window.toggleCyberHubModal = function() {
     modal.classList.add('open');
   }
 };
+
+async function resolveGroupParticipantSubtitle(memberIds, groupId) {
+  if (!Array.isArray(memberIds) || memberIds.length === 0) return;
+  try {
+    const names = [];
+    const myUidVal = (typeof myUID !== 'undefined' && myUID) || window.myUID || '';
+    for (const mid of memberIds.slice(0, 5)) {
+      if (myUidVal && mid === myUidVal) {
+        names.push('You');
+        continue;
+      }
+      const cached = (window.loadedContactData && window.loadedContactData.find(c => c.uid === mid)) ||
+                     (window.cachedUsers && window.cachedUsers.find(u => (u.uid || u.id) === mid));
+      if (cached && (cached.name || cached.username)) {
+        names.push(cached.name || cached.username);
+      } else {
+        const local = localStorage.getItem('contact_name_' + mid);
+        if (local) names.push(local);
+      }
+    }
+    if (names.length > 0) {
+      const remaining = memberIds.length - names.length;
+      const subtitle = names.join(', ') + (remaining > 0 ? ` and ${remaining} more` : '');
+      const activeChatStatus = document.getElementById("activeChatStatus");
+      const statusTextEl = document.getElementById("statusText");
+      if (currentChatUser === groupId && currentChatType === 'group') {
+        if (activeChatStatus) activeChatStatus.textContent = subtitle;
+        if (statusTextEl) statusTextEl.textContent = subtitle;
+      }
+    }
+  } catch (_) {}
+}
 
 async function openChat(uid, username, profilePic, chatType = 'direct') {
   const currentMyUid = (typeof myUID !== 'undefined' && myUID) || window.myUID || (typeof auth !== 'undefined' && auth?.currentUser ? auth.currentUser.uid : null) || localStorage.getItem('myUID') || localStorage.getItem('auth_uid') || '';
@@ -15302,11 +15332,11 @@ const realGroupPic = groupData.profilePic || groupData.groupPic || groupData.ico
             window.currentChatAvatar = realGroupPic;
           }
 
-updateChatProfileDisplay(username, realGroupPic || profilePic, tempSubtitle);
+            updateChatProfileDisplay(username, realGroupPic || profilePic, activeStatusSubtitle);
 
-if (memberIds.length > 0) {
-            resolveGroupParticipantSubtitle(memberIds, uid);
-          }
+            if (memberIds.length > 0 && typeof resolveGroupParticipantSubtitle === 'function') {
+              resolveGroupParticipantSubtitle(memberIds, uid);
+            }
         }
       } else if (chatType === 'ai') {
         clearGroupChatRestrictions();
@@ -22222,17 +22252,20 @@ try {
 function applyBubbleTheme(theme) {
   document.body.classList.remove(
     "bubble-theme-neon-onyx",
-
+    "bubble-theme-telegram-glass",
+    "bubble-theme-liquid-crystal",
+    "bubble-theme-midnight-obsidian",
     "bubble-theme-glass-frost",
-
     "bubble-theme-cyberpunk-gold",
-
     "bubble-theme-minimal-slate"
   );
 
   if (theme && theme !== "neon-onyx") {
     document.body.classList.add(`bubble-theme-${theme}`);
   }
+  try {
+    localStorage.setItem('nex_bubble_theme', theme || 'neon-onyx');
+  } catch (_) {}
 }
 
 async function loadBlockedUsersList() {
@@ -27082,8 +27115,6 @@ try {
     const cachedGroup = getCachedGroupChatMessages(groupId);
 
     if (cachedGroup && cachedGroup.length > 0) {
-      renderCachedGroupChatHistory(cachedGroup, messagesDiv);
-
       cancelChatLoadFeedback();
     } else {
       const chatKey = getGroupChatCacheKey(groupId);
@@ -27092,9 +27123,9 @@ try {
         loadChatHistoryFromIndexedDB(chatKey).then((idbMsgs) => {
           if (currentChatUser === groupId && idbMsgs && idbMsgs.length > 0) {
             cacheGroupChatMessages(groupId, idbMsgs);
-
-            renderCachedGroupChatHistory(idbMsgs, messagesDiv);
-
+            if (typeof groupStore !== 'undefined' && groupStore.getState().currentGroupId === groupId && (!groupStore.getState().messages || groupStore.getState().messages.length === 0)) {
+              groupStore.setState({ messages: idbMsgs, isLoadingMessages: false });
+            }
             cancelChatLoadFeedback();
           }
         }).catch(() => {});
@@ -27139,10 +27170,12 @@ try {
 
     if (groupId) {
       const groupRoomId = `group_${groupId}`;
+      const activeGroupAtSub = groupId;
 
       subscribeToSupabaseRoom(groupRoomId, {
         onNewMessage: (incoming) => {
           if (!incoming || incoming.from === myUID) return;
+          if (currentChatUser !== activeGroupAtSub || currentChatType !== 'group') return;
 
 // Optimistically insert into groupStore.getState().messages if not already present (sub-15ms group message render)
 
@@ -27208,6 +27241,10 @@ playLuxuryPopSound();
           }
         }
       }).then(unsub => {
+        if (currentChatUser !== activeGroupAtSub || currentChatType !== 'group') {
+          try { unsub(); } catch (_) {}
+          return;
+        }
         supabaseRoomUnsubscribe = unsub;
       }).catch(err => {
         console.warn('[SUPABASE GROUP] Subscription notice:', err?.message);

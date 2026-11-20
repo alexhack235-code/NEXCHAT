@@ -19,6 +19,26 @@
     ],
     "rewrites": [
       {
+        "source": "/chat",
+        "destination": "/chat.html"
+      },
+      {
+        "source": "/reels",
+        "destination": "/reels.html"
+      },
+      {
+        "source": "/gaminghub",
+        "destination": "/gaminghub.html"
+      },
+      {
+        "source": "/terminal",
+        "destination": "/terminal.html"
+      },
+      {
+        "source": "/landing",
+        "destination": "/landing.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

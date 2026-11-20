@@ -467,7 +467,7 @@
             const url = document.getElementById("downloadLink").href;
             navigator.clipboard.writeText(url).then(() => {
                 alert("Copied Video URL to clipboard:\n" + url);
-            });
+            }).catch(() => {});
         }
 
         async function updateStatus() {

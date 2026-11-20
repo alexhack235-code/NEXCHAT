@@ -458,7 +458,7 @@
               setTimeout(() => {
                 copyBtn.innerHTML = '<i class="fa-solid fa-copy"></i> Copy';
               }, 2000);
-            });
+            }).catch(() => {});
           }
         });
       }
