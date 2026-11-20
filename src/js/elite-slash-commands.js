@@ -138,9 +138,9 @@
         } else {
           this.executeCommand({ cmd: '/probing' });
         }
-      } else if (lower === '/summarize all' || lower.startsWith('/summarize all')) {
+      } else if (lower === '/summarize all' || lower.startsWith('/summarize all') || lower === '/summarize 1000' || lower === '/summarize 1k') {
         this.executeCommand({ cmd: '/summarize all' });
-      } else if (lower === '/summarize' || lower.startsWith('/summarize')) {
+      } else if (lower === '/summarize' || lower.startsWith('/summarize') || lower === '/bulletproof') {
         this.executeCommand({ cmd: '/summarize' });
       } else if (lower.startsWith('/analyze')) {
         this.executeCommand({ cmd: '/analyze' });
@@ -278,17 +278,21 @@
           this.renderTacticalAnalysisCard();
           break;
         case '/summarize':
-          if (window.NexChronexxSummarizer && typeof window.NexChronexxSummarizer.triggerGroupCatchUp === 'function') {
-            window.NexChronexxSummarizer.triggerGroupCatchUp({ fullHistory: false });
+          if (window.chronexBriefEngine && typeof window.chronexBriefEngine.triggerBrief === 'function') {
+            window.chronexBriefEngine.triggerBrief(500);
+          } else if (window.NexChronexxSummarizer && typeof window.NexChronexxSummarizer.triggerGroupCatchUp === 'function') {
+            window.NexChronexxSummarizer.triggerGroupCatchUp({ sliceCount: 500 });
           } else if (typeof showNotif === 'function') {
-            showNotif('Synthesizing active conversation with ChronEX AI...', 'info', 2000);
+            showNotif('Synthesizing active conversation with ChronEX 500 Bulletproof AI...', 'info', 2000);
           }
           break;
         case '/summarize all':
-          if (window.NexChronexxSummarizer && typeof window.NexChronexxSummarizer.triggerGroupCatchUp === 'function') {
-            window.NexChronexxSummarizer.triggerGroupCatchUp({ fullHistory: true });
+          if (window.chronexBriefEngine && typeof window.chronexBriefEngine.triggerBrief === 'function') {
+            window.chronexBriefEngine.triggerBrief(1000);
+          } else if (window.NexChronexxSummarizer && typeof window.NexChronexxSummarizer.triggerGroupCatchUp === 'function') {
+            window.NexChronexxSummarizer.triggerGroupCatchUp({ fullHistory: true, sliceCount: 1000 });
           } else if (typeof showNotif === 'function') {
-            showNotif('Synthesizing full group archive with ChronEX AI...', 'info', 2000);
+            showNotif('Synthesizing full 1,000-message archive with ChronEX AI...', 'info', 2000);
           }
           break;
         case '/companion':

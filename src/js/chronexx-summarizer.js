@@ -59,19 +59,20 @@
             try {
               const { collection, query, where, orderBy, limit, getDocs } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
               let qSnap;
+              const targetQueryLimit = Math.max(Number(options.sliceCount) || (isFullHistory ? 1000 : 500), 500);
               try {
                 const q = query(
                   collection(window.db, 'groupMessages'),
                   where('groupId', '==', window.currentChatUser),
                   orderBy('timestamp', 'asc'),
-                  limit(120)
+                  limit(targetQueryLimit)
                 );
                 qSnap = await getDocs(q);
               } catch (_) {
                 const fallbackQ = query(
                   collection(window.db, 'groupMessages'),
                   where('groupId', '==', window.currentChatUser),
-                  limit(120)
+                  limit(targetQueryLimit)
                 );
                 qSnap = await getDocs(fallbackQ);
               }
@@ -121,7 +122,8 @@
       }
 
       const count = messages.length;
-      const recent = messages.slice(-80);
+      const targetSlice = Math.min(Math.max(Number(options.sliceCount) || (isFullHistory ? 1000 : 500), 50), 1000);
+      const recent = messages.slice(-targetSlice);
       const authors = Array.from(new Set(recent.map(m => m.sender)));
       const authorsStr = authors.slice(0, 4).join(', ');
 
@@ -130,8 +132,8 @@
         : `Synthesize these ${recent.length} conversation messages into 3 concise bullet points (Themes, Decisions, Next Steps). Direct bullets only:\n${recent.map(m => `${m.sender}: ${m.text}`).join('\n')}`;
 
       const briefingTitle = isFullHistory
-        ? `ChronEX Full Group History Briefing (${count} Messages Analyzed)`
-        : `ChronEX AI Briefing (${count} Messages Analyzed)`;
+        ? `ChronEX 1,000 Bulk Archive Briefing (${recent.length} Messages Analyzed)`
+        : `ChronEX 500 Bulletproof Briefing (${recent.length} Messages Analyzed)`;
 
       if (typeof window.generateChronexAIResponse === 'function') {
         if (typeof window.showNotif === 'function') {
@@ -198,9 +200,14 @@
             <i class="fa-solid fa-microchip" style="color:#00f3ff; font-size:16px;"></i>
             <strong style="color:#00f3ff; font-size:13.5px; text-transform:uppercase;">${escapeHtml(summaryData.title)}</strong>
           </div>
-          <button type="button" class="btn-speak-briefing" style="padding:4px 10px; background:rgba(0,243,255,0.15); border:1px solid #00f3ff; color:#00f3ff; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px;">
-            <i class="fa-solid fa-volume-high"></i> Audio Briefing
-          </button>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button type="button" class="btn-speak-briefing" style="padding:4px 10px; background:rgba(0,243,255,0.15); border:1px solid #00f3ff; color:#00f3ff; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px;">
+              <i class="fa-solid fa-volume-high"></i> Audio
+            </button>
+            <button type="button" class="btn-print-briefing" style="padding:4px 10px; background:rgba(0,240,118,0.15); border:1px solid #00f076; color:#00f076; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:5px;" title="Bulletproof Print Briefing">
+              <i class="fa-solid fa-print"></i> Bulletproof Print
+            </button>
+          </div>
         </div>
 
         <div style="margin-bottom:10px;">
@@ -240,6 +247,14 @@
           window.speechSynthesis.speak(utterance);
         } else {
           alert(summaryData.spokenText || 'All systems normal.');
+        }
+      });
+
+      card.querySelector('.btn-print-briefing')?.addEventListener('click', () => {
+        if (window.chronexBriefEngine && typeof window.chronexBriefEngine.exportBriefAsPrintPDF === 'function') {
+          window.chronexBriefEngine.exportBriefAsPrintPDF();
+        } else {
+          window.print();
         }
       });
 

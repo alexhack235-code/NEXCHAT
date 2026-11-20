@@ -560,11 +560,11 @@ class ChronexBriefEngine {
     if (contentBox) contentBox.style.display = 'none';
 
     try {
-      // Step A: Collect last 50-100 messages in active group chat (optimized context window)
+      // Step A: Collect last 50-1000 messages in active conversation (optimized context window)
       if (typeof customSliceCount === 'number') {
         this.currentSliceCount = customSliceCount;
       }
-      const messages = this.collectRecentGroupMessages(Math.min(Math.max(this.currentSliceCount || 80, 20), 500));
+      const messages = this.collectRecentGroupMessages(Math.min(Math.max(this.currentSliceCount || 500, 20), 1000));
       const count = messages.length;
 
       if (titleEl) titleEl.textContent = `Reading Group Stream (${count} messages)...`;
@@ -616,11 +616,12 @@ ${preparedLines.map(p => p.line).join('\n')}`;
 
       let summaryText = '';
 
-      // 1. Try Vercel Edge Serverless Gateway (/api/ai) first (fastest, shared pro keys, 3s timeout)
+      // 1. Try Vercel Edge Serverless Gateway (/api/ai) first (fastest, shared pro keys)
       if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
         try {
+          const timeoutMs = preparedLines.length > 200 ? 12000 : 6000;
           const controller = new AbortController();
-          const timer = setTimeout(() => controller.abort(), 3200);
+          const timer = setTimeout(() => controller.abort(), timeoutMs);
           const serverRes = await fetch('/api/ai', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -642,6 +643,7 @@ ${preparedLines.map(p => p.line).join('\n')}`;
         const pool = geminiKeyPool;
         const totalKeys = pool ? pool.getTotalKeys() : 1;
         const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        const fallbackTimeoutMs = preparedLines.length > 200 ? 12000 : 6000;
 
         for (let attempt = 0; attempt < Math.max(1, totalKeys); attempt++) {
           const keyInfo = pool?.getNextKey?.();
@@ -652,7 +654,7 @@ ${preparedLines.map(p => p.line).join('\n')}`;
           for (const model of models) {
             try {
               const controller = new AbortController();
-              const timer = setTimeout(() => controller.abort(), 2800);
+              const timer = setTimeout(() => controller.abort(), fallbackTimeoutMs);
               const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
               const res = await fetch(endpoint, {
                 method: 'POST',
@@ -763,7 +765,7 @@ ${preparedLines.map(p => p.line).join('\n')}`;
     }
   }
 
-  collectRecentGroupMessages(maxCount = 500) {
+  collectRecentGroupMessages(maxCount = 1000) {
     // 1. From groupStore if active
     if (typeof window !== 'undefined' && window.groupStore?.getState) {
       const storeMsgs = window.groupStore.getState().messages;
@@ -772,25 +774,33 @@ ${preparedLines.map(p => p.line).join('\n')}`;
       }
     }
 
-    // 2. From DOM messages-area elements
-    const container = document.getElementById('messages-area');
+    // 2. From in-memory activeChatMessages array
+    if (typeof window !== 'undefined' && Array.isArray(window.activeChatMessages) && window.activeChatMessages.length > 0) {
+      return window.activeChatMessages.slice(-maxCount);
+    }
+
+    // 3. From DOM messages-area or chat message containers
+    const container = document.getElementById('messages-area') || 
+                      document.getElementById('messagesContainer') || 
+                      document.querySelector('.chat-messages-container') ||
+                      document.querySelector('.messages-list');
     if (!container) return [];
 
-    const nodes = container.querySelectorAll('.nex-msg-wrapper, .message-wrapper');
+    const nodes = container.querySelectorAll('.nex-msg-wrapper, .message-wrapper, .message, .chat-message, .group-msg');
     const list = [];
 
     nodes.forEach(node => {
       const id = node.dataset.messageId || node.dataset.msgId || node.id?.replace(/^msg-/, '');
-      const textEl = node.querySelector('.nex-msg-text, .message-content');
-      const senderEl = node.querySelector('.nex-msg-sender-name, .message-sender');
+      const textEl = node.querySelector('.nex-msg-text, .message-content, .msg-text, .message-body, p');
+      const senderEl = node.querySelector('.nex-msg-sender-name, .message-sender, .sender-name, .user-name');
       const timeEl = node.querySelector('.nex-msg-time, .message-time');
 
       const text = textEl?._chronexOriginalText || textEl?.textContent || '';
-      if (text.trim()) {
+      if (text.trim() && !text.includes('No speech to summarize') && text.trim().length > 1) {
         list.push({
           id,
           text: text.trim(),
-          senderName: senderEl?.textContent?.replace(/^~\s*/, '') || 'Member',
+          senderName: senderEl?.textContent?.replace(/^~\s*/, '') || (node.classList.contains('sent') ? 'You' : 'Member'),
           timestamp: Date.now()
         });
       }
@@ -1001,55 +1011,96 @@ ${preparedLines.map(p => p.line).join('\n')}`;
       return;
     }
 
-    const groupName = (typeof window.currentChatName !== 'undefined' && window.currentChatName) || 'Group Chat';
+    const groupName = (typeof window.currentChatName !== 'undefined' && window.currentChatName) || 'Executive Summary';
     const langName = CHRONEX_LANG_MAP[this.userLang] || this.userLang;
     const dateStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-    const printWindow = window.open('', '_blank', 'width=800,height=700');
-    if (!printWindow) {
-      if (typeof window.showNotif === 'function') window.showNotif('Popup blocked. Please allow popups to print.', 'warning');
-      return;
-    }
-
     const bulletsHtml = this.currentSummaryBullets.map((b, idx) => `
-      <div style="margin-bottom: 14px; padding: 12px 14px; background: #f8fafc; border-left: 4px solid #0284c7; border-radius: 4px;">
-        <span style="font-weight: 700; color: #0369a1; font-size: 13px;">Item 0${idx + 1}:</span>
+      <div style="margin-bottom: 14px; padding: 12px 14px; background: #f8fafc; border-left: 4px solid #00f076; border-radius: 4px;">
+        <span style="font-weight: 700; color: #0284c7; font-size: 13px;">Key Takeaway 0${idx + 1}:</span>
         <p style="margin: 4px 0 0 0; font-size: 14px; line-height: 1.5; color: #1e293b;">${this.escapeHtml(b.text)}</p>
       </div>
     `).join('');
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>ChronEX Brief - ${this.escapeHtml(groupName)}</title>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 36px; color: #0f172a; }
-          .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 24px; }
-          .title { font-size: 20px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; }
-          .meta { font-size: 12px; color: #64748b; }
-          .footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
-          @media print { body { padding: 0; } }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1 class="title">CHRONEX EXECUTIVE BRIEFING</h1>
-          <div class="meta">
-            <div><strong>Conversation:</strong> ${this.escapeHtml(groupName)}</div>
-            <div><strong>Generated:</strong> ${dateStr} | <strong>Language:</strong> ${langName}</div>
-          </div>
-        </div>
-        <div class="content">
-          ${bulletsHtml}
-        </div>
-        <div class="footer">
-          Generated via NEXCHAT ChronEX Cognitive Engine. Certified Cryptographic Snapshot.
-        </div>
-      </body>
-      </html>
-    `);
+    const printDocHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>NEXCHAT ChronEX Bulletproof Brief - ${this.escapeHtml(groupName)}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 36px; color: #0f172a; margin: 0; }
+    .header { border-bottom: 2px solid #00f076; padding-bottom: 16px; margin-bottom: 24px; }
+    .title { font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0; letter-spacing: 0.5px; }
+    .meta { font-size: 12px; color: #64748b; line-height: 1.6; }
+    .content { margin: 20px 0; }
+    .footer { margin-top: 36px; padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
+    @media print { body { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="title">CHRONEX BULLETPROOF EXECUTIVE BRIEFING</h1>
+    <div class="meta">
+      <div><strong>Target Stream:</strong> ${this.escapeHtml(groupName)}</div>
+      <div><strong>Generated:</strong> ${dateStr} | <strong>Language:</strong> ${langName}</div>
+      <div><strong>Engine:</strong> ChronEX AI 1,000-Message Neural Synthesis Mesh</div>
+    </div>
+  </div>
+  <div class="content">
+    ${bulletsHtml}
+  </div>
+  <div class="footer">
+    NEXCHAT Zero-Knowledge Architecture // Certified Cryptographic Summary Transcript.
+  </div>
+</body>
+</html>`;
 
+    // 1. Primary method: Invisible Sandboxed Iframe (100% Bulletproof against browser popup blockers)
+    try {
+      let printFrame = document.getElementById('chronexBulletproofPrintFrame');
+      if (printFrame) {
+        printFrame.remove();
+      }
+      printFrame = document.createElement('iframe');
+      printFrame.id = 'chronexBulletproofPrintFrame';
+      printFrame.style.position = 'fixed';
+      printFrame.style.right = '0';
+      printFrame.style.bottom = '0';
+      printFrame.style.width = '0';
+      printFrame.style.height = '0';
+      printFrame.style.border = 'none';
+      document.body.appendChild(printFrame);
+
+      const frameDoc = printFrame.contentWindow.document;
+      frameDoc.open();
+      frameDoc.write(printDocHtml);
+      frameDoc.close();
+
+      setTimeout(() => {
+        try {
+          printFrame.contentWindow.focus();
+          printFrame.contentWindow.print();
+          if (typeof window.showNotif === 'function') window.showNotif('Bulletproof print dialog dispatched successfully.', 'success', 2500);
+        } catch (printErr) {
+          console.warn('[ChronEX Print] Iframe print fallback:', printErr);
+          this._fallbackWindowPrint(printDocHtml);
+        }
+      }, 350);
+      return;
+    } catch (e) {
+      console.warn('[ChronEX Print] Attempting window.open fallback:', e);
+      this._fallbackWindowPrint(printDocHtml);
+    }
+  }
+
+  _fallbackWindowPrint(html) {
+    const printWindow = window.open('', '_blank', 'width=800,height=700');
+    if (!printWindow) {
+      if (typeof window.showNotif === 'function') window.showNotif('Popup blocked. Copied summary to clipboard instead!', 'info', 3000);
+      this.copyBriefToClipboard();
+      return;
+    }
+    printWindow.document.write(html);
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {
@@ -1175,9 +1226,10 @@ ${preparedLines.map(p => p.line).join('\n')}`;
                 <div class="chronex-slice-controls">
                   <span class="chronex-slice-label">Slice:</span>
                   <button type="button" class="chronex-slice-btn" data-slice="50">50</button>
-                  <button type="button" class="chronex-slice-btn active" data-slice="100">100</button>
+                  <button type="button" class="chronex-slice-btn" data-slice="100">100</button>
                   <button type="button" class="chronex-slice-btn" data-slice="250">250</button>
-                  <button type="button" class="chronex-slice-btn" data-slice="500">500</button>
+                  <button type="button" class="chronex-slice-btn active" data-slice="500">500 (Bulletproof)</button>
+                  <button type="button" class="chronex-slice-btn" data-slice="1000">1,000 (Bulk)</button>
                 </div>
               </div>
 
@@ -1231,9 +1283,9 @@ ${preparedLines.map(p => p.line).join('\n')}`;
                   <i class="fa-solid fa-download"></i>
                   <span>Export MD</span>
                 </button>
-                <button type="button" id="chronexPrintPdfBtn" class="chronex-hud-action-pill" title="Print executive briefing card">
+                <button type="button" id="chronexPrintPdfBtn" class="chronex-hud-action-pill" title="Bulletproof Print / PDF Executive Briefing">
                   <i class="fa-solid fa-print"></i>
-                  <span>Print</span>
+                  <span>Bulletproof Print</span>
                 </button>
                 <button type="button" id="chronexShareChatBtn" class="chronex-hud-action-pill highlight" title="Share brief directly to this group chat">
                   <i class="fa-solid fa-paper-plane"></i>

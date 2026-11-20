@@ -1592,7 +1592,7 @@
             <button id="headerVideoBtn" class="header-icon-btn chat-action-call" title="Video Call"><i class="fa-solid fa-video"></i></button>
             <button id="headerCallBtn" class="header-icon-btn chat-action-call" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
             <button id="btnOpenGroupStage" class="header-icon-btn" title="Live Cyber Audio Stage"><i class="fa-solid fa-podcast" style="color: #00f3ff;"></i></button>
-            <button id="btnChronexxCatchUp" class="header-icon-btn" title="Chronexx Group Catch-Up &amp; Executive Summary" onclick="window.NexChronexxSummarizer?.triggerGroupCatchUp();"><i class="fa-solid fa-microchip" style="color: #ffd700;"></i></button>
+            <button id="btnChronexxCatchUp" class="header-icon-btn" title="500-1,000 Message Bulletproof Summarizer (ChronEX AI)" onclick="if(window.chronexBriefEngine && typeof window.chronexBriefEngine.triggerBrief === 'function') { window.chronexBriefEngine.triggerBrief(500); } else { window.NexChronexxSummarizer?.triggerGroupCatchUp({ sliceCount: 500 }); }"><i class="fa-solid fa-bolt" style="color: #ffd700;"></i></button>
             <button id="btnTacticalScreenShare" class="header-icon-btn" title="Tactical Screen Share (60 FPS)" onclick="window.NexTacticalScreenShare?.startScreenShare();"><i class="fa-solid fa-display" style="color: #c084fc;"></i></button>
             <button id="btnP2PFileSwarm" class="header-icon-btn" title="P2P Heavy File Swarm (Up to 2GB)" onclick="document.getElementById('inputP2PSwarmFile')?.click();"><i class="fa-solid fa-network-wired" style="color: #10b981;"></i></button>
             <button id="headerReportBtn" class="header-icon-btn report-header-btn" title="Report User or Conversation" style="color: #ef4444;" aria-label="Report User"><i class="fa-solid fa-flag"></i></button>
@@ -1916,8 +1916,8 @@
           <button id="menuP2PTransferBtn" class="option-item" onclick="document.getElementById('inputP2PSwarmFile')?.click(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-network-wired" style="margin-right: 8px; color: #10b981;"></i>P2P Heavy File Swarm (Up to 2GB)</button>
           <button id="menuTacticalScreenBtn" class="option-item" onclick="window.NexTacticalScreenShare?.startScreenShare?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-display" style="margin-right: 8px; color: #c084fc;"></i>Tactical Screen Share &amp; Telestrator</button>
           <button id="menuGroupStageBtn" class="option-item" onclick="window.NexGroupAudioStage?.toggleStage?.('current'); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-podcast" style="margin-right: 8px; color: #00f3ff;"></i>Live Cyber Audio Stage</button>
-          <button id="menuChronexxSummaryBtn" class="option-item" onclick="window.NexChronexxSummarizer?.triggerGroupCatchUp?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-microchip" style="margin-right: 8px; color: #ffd700;"></i>Chronexx Group Catch-Up Briefing</button>
-          <button id="menuChronexxAllSummaryBtn" class="option-item" onclick="window.NexChronexxSummarizer?.triggerGroupCatchUp?.({ fullHistory: true }); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-layer-group" style="margin-right: 8px; color: #a855f7;"></i>Chronexx Full History Summary (/summarize all)</button>
+          <button id="menuChronexxSummaryBtn" class="option-item" onclick="if(window.chronexBriefEngine && typeof window.chronexBriefEngine.triggerBrief === 'function') { window.chronexBriefEngine.triggerBrief(500); } else { window.NexChronexxSummarizer?.triggerGroupCatchUp?.({ sliceCount: 500 }); } window.closeChatOptionsMenu?.();"><i class="fa-solid fa-bolt" style="margin-right: 8px; color: #ffd700;"></i>ChronEX 500 Bulletproof Summarizer</button>
+          <button id="menuChronexxAllSummaryBtn" class="option-item" onclick="if(window.chronexBriefEngine && typeof window.chronexBriefEngine.triggerBrief === 'function') { window.chronexBriefEngine.triggerBrief(1000); } else { window.NexChronexxSummarizer?.triggerGroupCatchUp?.({ fullHistory: true, sliceCount: 1000 }); } window.closeChatOptionsMenu?.();"><i class="fa-solid fa-layer-group" style="margin-right: 8px; color: #a855f7;"></i>ChronEX 1,000 Bulk Archive Summarizer (/summarize all)</button>
           <button id="menuCompanionToggleBtn" class="option-item" onclick="window.NexWorkflowCompanion?.toggle?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-robot" style="margin-right: 8px; color: #10b981;"></i>AI Workflow Companion &amp; Mood Sentinel</button>
           <button id="menuTrackRecordBtn" class="option-item" onclick="window.NexWorkflowCompanion?.showTrackRecord?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-chart-pie" style="margin-right: 8px; color: #f59e0b;"></i>Usage Track Record &amp; Habits</button>
           <button id="menuProbingBtn" class="option-item" onclick="window.NexRuntimeProbing?.runProbe?.(); window.closeChatOptionsMenu?.();"><i class="fa-solid fa-microscope" style="margin-right: 8px; color: #38bdf8;"></i>Overnight Runtime Probing &amp; Stress (/probing)</button>
@@ -9965,9 +9965,10 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <div class="chronex-timeframe-deck">
             <span class="chronex-slice-label">Slice:</span>
             <button type="button" class="chronex-slice-btn" data-slice="50">50</button>
-            <button type="button" class="chronex-slice-btn active" data-slice="100">100</button>
+            <button type="button" class="chronex-slice-btn" data-slice="100">100</button>
             <button type="button" class="chronex-slice-btn" data-slice="250">250</button>
-            <button type="button" class="chronex-slice-btn" data-slice="500">500</button>
+            <button type="button" class="chronex-slice-btn active" data-slice="500">500 (Bulletproof)</button>
+            <button type="button" class="chronex-slice-btn" data-slice="1000">1,000 (Bulk)</button>
           </div>
         </div>
 
@@ -10021,9 +10022,9 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
               <i class="fa-solid fa-file-arrow-down"></i>
               <span>Export MD</span>
             </button>
-            <button type="button" id="chronexPrintPdfBtn" class="chronex-hud-action-pill" title="Print executive briefing or save as PDF">
+            <button type="button" id="chronexPrintPdfBtn" class="chronex-hud-action-pill" title="Bulletproof Print / PDF Executive Briefing">
               <i class="fa-solid fa-print"></i>
-              <span>PDF</span>
+              <span>Bulletproof Print</span>
             </button>
             <button type="button" id="chronexShareChatBtn" class="chronex-hud-action-pill highlight" title="Share brief directly to this group chat">
               <i class="fa-solid fa-paper-plane"></i>
