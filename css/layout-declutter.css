@@ -1005,6 +1005,255 @@ opacity: 0.95 !important;
   }
 }
 
+/* ==========================================================================
+   DESKTOP VIEWPORT CLAMPING & PERMANENT PINNED COMPOSER
+   Locks composer bar above bottom edge on standard 800px displays without page scroll.
+   ========================================================================== */
+@media (min-width: 900px) {
+  html, body {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  .app {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    background: #0f0a1e !important;
+  }
+
+  .top-header {
+    flex-shrink: 0 !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+  }
+
+  .chat-main {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow: hidden !important;
+    background: #0f0a1e !important;
+  }
+
+  #chatListView,
+  .chat-list-view {
+    width: 350px !important;
+    min-width: 350px !important;
+    max-width: 350px !important;
+    flex: 0 0 350px !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  #chatDetailView,
+  .chat-detail-view {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  #chatDetailView.hidden,
+  #chatDetailView[style*="display: none"] {
+    display: none !important;
+  }
+
+  .chat-detail-header {
+    flex-shrink: 0 !important;
+    height: 60px !important;
+    min-height: 60px !important;
+  }
+
+  #messages-area,
+  .messages-area,
+  .chat-messages {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
+
+  #messageInputArea,
+  .message-input-area,
+  .chat-input-wrapper {
+    flex-shrink: 0 !important;
+    position: relative !important;
+    bottom: 0 !important;
+    z-index: 30 !important;
+    padding: 8px 14px 10px 14px !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE SINGLE-COLUMN DRAWER NAVIGATION & ZERO HORIZONTAL OVERFLOW
+   Strictly confines mobile view to 100vw, eliminates horizontal panning,
+   and cleanly toggles single-column drawer navigation.
+   ========================================================================== */
+@media (max-width: 899px) {
+  html, body {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+  }
+
+  .app {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .top-header {
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .header-right-scroll {
+    overflow: hidden !important;
+    max-width: 100% !important;
+    flex-shrink: 0 !important;
+  }
+
+  .desktop-header-actions,
+  .desktop-only-header,
+  .desktop-only-nav {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+  }
+
+  .chat-main {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+  }
+
+  /* LIST VIEW MODE ON MOBILE: Chat list takes 100% of viewport; detail view is strictly hidden */
+  body:not(.in-conversation) #chatListView,
+  .chat-main:not([data-layout="conversation"]) #chatListView,
+  .app:not([data-subview="conversation"]) #chatListView {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    flex: 1 1 0% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  body:not(.in-conversation) #chatDetailView,
+  .chat-main:not([data-layout="conversation"]) #chatDetailView,
+  .app:not([data-subview="conversation"]) #chatDetailView,
+  body:not(.in-conversation) .chat-detail-view,
+  .chat-main:not([data-layout="conversation"]) .chat-detail-view {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  body:not(.in-conversation) #chatWelcomePanel,
+  .chat-main:not([data-layout="conversation"]) #chatWelcomePanel {
+    display: none !important;
+  }
+
+  /* CONVERSATION VIEW MODE ON MOBILE: Chat detail view takes 100% full screen overlay; list is hidden */
+  body.in-conversation #chatListView,
+  .chat-main[data-layout="conversation"] #chatListView,
+  .app[data-subview="conversation"] #chatListView {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.in-conversation #chatDetailView,
+  .chat-main[data-layout="conversation"] #chatDetailView,
+  .app[data-subview="conversation"] #chatDetailView,
+  #chatDetailView.visible,
+  .chat-detail-view.visible {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    background: #0f0a1e !important;
+  }
+
+  body.in-conversation .top-header,
+  .chat-main[data-layout="conversation"] .top-header {
+    display: none !important;
+  }
+
+  /* Ensure back button in chat header is always clearly visible and clickable on mobile */
+  .chat-detail-header .back-btn,
+  #backBtn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+    color: #e9edef !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+    margin-right: 4px !important;
+  }
+
+  /* Mobile bottom composer is fixed cleanly to the bottom with safe area insets */
+  .message-input-area,
+  #messageInputArea {
+    position: relative !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    padding: 6px 8px calc(env(safe-area-inset-bottom, 8px) + 6px) 8px !important;
+    background: #111b21 !important;
+    z-index: 10 !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+
 
 .self-healing-banner {
   background: rgba(0, 255, 136, 0.12) !important;
@@ -6550,3 +6799,509 @@ html[data-chat-size="small"] .message-time-text {
   }
 }
 
+/* ==========================================================================
+   DESKTOP VIEWPORT CLAMPING & PERMANENT PINNED COMPOSER
+   Locks composer bar above bottom edge on standard 800px displays without page scroll.
+   ========================================================================== */
+@media (min-width: 900px) {
+  html, body {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  .app {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    background: #0f0a1e !important;
+  }
+
+  .top-header {
+    flex-shrink: 0 !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+  }
+
+  .chat-main {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow: hidden !important;
+    background: #0f0a1e !important;
+  }
+
+  #chatListView,
+  .chat-list-view {
+    width: 350px !important;
+    min-width: 350px !important;
+    max-width: 350px !important;
+    flex: 0 0 350px !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  #chatDetailView,
+  .chat-detail-view {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  #chatDetailView.hidden,
+  #chatDetailView[style*="display: none"] {
+    display: none !important;
+  }
+
+  .chat-detail-header {
+    flex-shrink: 0 !important;
+    height: 60px !important;
+    min-height: 60px !important;
+  }
+
+  #messages-area,
+  .messages-area,
+  .chat-messages {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+  }
+
+  #messageInputArea,
+  .message-input-area,
+  .chat-input-wrapper {
+    flex-shrink: 0 !important;
+    position: relative !important;
+    bottom: 0 !important;
+    z-index: 30 !important;
+    padding: 8px 14px 10px 14px !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE SINGLE-COLUMN DRAWER NAVIGATION & ZERO HORIZONTAL OVERFLOW
+   Strictly confines mobile view to 100vw, eliminates horizontal panning,
+   and cleanly toggles single-column drawer navigation.
+   ========================================================================== */
+@media (max-width: 899px) {
+  html, body {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+  }
+
+  .app {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .top-header {
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .header-right-scroll {
+    overflow: hidden !important;
+    max-width: 100% !important;
+    flex-shrink: 0 !important;
+  }
+
+  .desktop-header-actions,
+  .desktop-only-header,
+  .desktop-only-nav {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+  }
+
+  .chat-main {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+  }
+
+  /* LIST VIEW MODE ON MOBILE: Chat list takes 100% of viewport; detail view is strictly hidden */
+  body:not(.in-conversation) #chatListView,
+  .chat-main:not([data-layout="conversation"]) #chatListView,
+  .app:not([data-subview="conversation"]) #chatListView {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    flex: 1 1 0% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  body:not(.in-conversation) #chatDetailView,
+  .chat-main:not([data-layout="conversation"]) #chatDetailView,
+  .app:not([data-subview="conversation"]) #chatDetailView,
+  body:not(.in-conversation) .chat-detail-view,
+  .chat-main:not([data-layout="conversation"]) .chat-detail-view {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  body:not(.in-conversation) #chatWelcomePanel,
+  .chat-main:not([data-layout="conversation"]) #chatWelcomePanel {
+    display: none !important;
+  }
+
+  /* CONVERSATION VIEW MODE ON MOBILE: Chat detail view takes 100% full screen overlay; list is hidden */
+  body.in-conversation #chatListView,
+  .chat-main[data-layout="conversation"] #chatListView,
+  .app[data-subview="conversation"] #chatListView {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.in-conversation #chatDetailView,
+  .chat-main[data-layout="conversation"] #chatDetailView,
+  .app[data-subview="conversation"] #chatDetailView,
+  #chatDetailView.visible,
+  .chat-detail-view.visible {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    background: #0f0a1e !important;
+  }
+
+  body.in-conversation .top-header,
+  .chat-main[data-layout="conversation"] .top-header {
+    display: none !important;
+  }
+
+  /* Ensure back button in chat header is always clearly visible and clickable on mobile */
+  .chat-detail-header .back-btn,
+  #backBtn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 38px !important;
+    width: 38px !important;
+    height: 38px !important;
+    color: #e9edef !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+    margin-right: 4px !important;
+  }
+
+  /* Mobile bottom composer is fixed cleanly to the bottom with safe area insets */
+  .message-input-area,
+  #messageInputArea {
+    position: relative !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    padding: 6px 8px calc(env(safe-area-inset-bottom, 8px) + 6px) 8px !important;
+    background: #111b21 !important;
+    z-index: 10 !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+
+
+/* ==========================================================================
+   NATURAL FREEDOM & DESKTOP OVERFLOW RESOLUTION (WHATSAPP-GRADE POLISH)
+   1. Clamps desktop viewport to 100vh with permanently pinned message composer.
+   2. Declutters top header, ensuring Settings & Dark Mode are always visible.
+   3. Frees up Status, Channels, and Reels for an organic, unforced visual aura.
+   ========================================================================== */
+
+/* 1. DESKTOP VIEWPORT ZERO-OVERFLOW ENFORCEMENT */
+@media (min-width: 900px) {
+  html, body {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    width: 100% !important;
+  }
+
+  .app {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .top-header {
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    padding: 0 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  /* Desktop Header Actions: Keep essential buttons visible and pinned */
+  .desktop-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Ensure Settings button and Dark Mode toggle are always visible and pinned */
+  #settings-btn-header {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #e2e8f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    order: 99 !important;
+    flex-shrink: 0 !important;
+  }
+
+  #settings-btn-header:hover {
+    color: #00ff66 !important;
+    background: rgba(0, 255, 102, 0.12) !important;
+    border-color: rgba(0, 255, 102, 0.35) !important;
+  }
+
+  .desktop-header-actions .toggle-switch-container {
+    order: 98 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .chat-main {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow: hidden !important;
+    width: 100% !important;
+  }
+
+  #chatListView,
+  .chat-list-view {
+    width: 360px !important;
+    min-width: 360px !important;
+    max-width: 360px !important;
+    flex: 0 0 360px !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  #chatDetailView,
+  .chat-detail-view {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    width: auto !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  .chat-detail-header {
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #messages-area,
+  .messages-area,
+  .chat-messages {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  #messageInputArea,
+  .message-input-area,
+  .chat-input-wrapper {
+    flex-shrink: 0 !important;
+    position: relative !important;
+    bottom: 0 !important;
+    z-index: 30 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px 16px !important;
+    margin: 0 !important;
+    background: #111b21 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  }
+}
+
+/* 2. DIRECT CHAT STREAMLINING & BANNER SUPPRESSION (NATURAL WHATSAPP FEEL) */
+.chat-detail-view:not(.group-chat) #tacticalMeshBanner,
+#chatDetailView:not(.group-chat) #tacticalMeshBanner,
+.chat-detail-view:not(.group-chat) #selfHealingBanner,
+#chatDetailView:not(.group-chat) #selfHealingBanner,
+.chat-detail-view:not(.group-chat) #attachmentRemovedBanner,
+#chatDetailView:not(.group-chat) #attachmentRemovedBanner,
+.chat-detail-view:not(.group-chat) #groupAdminOnlyBanner,
+#chatDetailView:not(.group-chat) #groupAdminOnlyBanner {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Header Action Buttons in Direct Chat: Strictly 3 essential WhatsApp icons */
+.chat-detail-view:not(.group-chat) .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#chatSearchToggleBtn):not(#menuBtn),
+#chatDetailView:not(.group-chat) .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#chatSearchToggleBtn):not(#menuBtn) {
+  display: none !important;
+}
+
+/* 3. STATUS SECTION: ORGANIC, FLUID BREATHING ROOM */
+.nex-status-container,
+.whatsapp-updates-container {
+  padding: 0 !important;
+  background: #0b141a !important;
+}
+
+.updates-top-appbar {
+  padding: 14px 20px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.updates-section-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #e9edef !important;
+  letter-spacing: 0.3px !important;
+}
+
+.status-story-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+}
+
+.status-story-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(0, 255, 102, 0.3) !important;
+}
+
+.status-horizontal-list {
+  padding: 16px 20px !important;
+  gap: 12px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+}
+
+/* 4. CHANNELS LIST: NATURAL WHATSAPP FEED STYLING */
+.channels-list {
+  padding: 8px 16px !important;
+}
+
+.channels-list-item,
+.channel-row {
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+  margin-bottom: 6px !important;
+  transition: background 0.15s ease !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.channels-list-item:hover,
+.channel-row:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 5. REELS PAGE: FLUID UNCONSTRAINED VIEWPORT & CLEAN FLOATING CONTROLS */
+.reels-body {
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+.reels-feed-tabs {
+  gap: 16px !important;
+}
+
+.feed-tab-btn {
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  letter-spacing: 0.2px !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+
+.feed-tab-btn.active {
+  opacity: 1 !important;
+  color: #fff !important;
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.4) !important;
+}

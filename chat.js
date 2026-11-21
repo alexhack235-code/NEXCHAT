@@ -812,12 +812,17 @@ const performSync = () => {
     syncViewportTicking = false;
 
     try {
-      const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      const isDesktop = window.innerWidth >= 900;
+      const vh = isDesktop ? window.innerHeight : (window.visualViewport ? window.visualViewport.height : window.innerHeight);
 
       if (Math.abs(vh - lastVh) > 1) {
         lastVh = vh;
 
-        document.documentElement.style.setProperty('--visual-viewport-height', vh + 'px');
+        if (isDesktop) {
+          document.documentElement.style.removeProperty('--visual-viewport-height');
+        } else {
+          document.documentElement.style.setProperty('--visual-viewport-height', vh + 'px');
+        }
       }
 
 // Keep active message list anchored when virtual keyboard toggles or viewport resizes
@@ -6921,30 +6926,68 @@ function applyThemeMode(themeMode = "dark") {
   const resolvedTheme = themeMode === "light" ? "light" : "dark";
   const body = document.body;
 
-body.classList.toggle("dark-mode", resolvedTheme === "dark");
-
+  body.classList.toggle("dark-mode", resolvedTheme === "dark");
   body.classList.toggle("light-mode", resolvedTheme === "light");
-
   body.classList.toggle("dark-theme", resolvedTheme === "dark");
-
   body.classList.toggle("light-theme", resolvedTheme === "light");
 
   document.documentElement.style.colorScheme = resolvedTheme;
-const darkToggle = document.getElementById("darkModeToggle");
 
+  // Sync Header sliding toggle
+  const darkToggle = document.getElementById("darkModeToggle");
   if (darkToggle) {
     darkToggle.classList.toggle("active", resolvedTheme === "dark");
   }
 
-const themeRadios = document.querySelectorAll('input[name="theme"]');
-
+  // Sync Settings radio pills
+  const themeRadios = document.querySelectorAll('input[name="theme"]');
   themeRadios.forEach(radio => {
     radio.checked = radio.value === resolvedTheme;
   });
 
-localStorage.setItem("darkMode", String(resolvedTheme === "dark"));
+  // Sync Settings master toggle switch
+  const settingsThemeSwitch = document.getElementById("settingsThemeToggleSwitch");
+  if (settingsThemeSwitch) {
+    settingsThemeSwitch.checked = resolvedTheme === "dark";
+  }
 
-return resolvedTheme;
+  // Sync Settings toggle text label
+  const themeToggleText = document.getElementById("themeToggleTextLabel");
+  if (themeToggleText) {
+    themeToggleText.textContent = resolvedTheme === "dark" ? "Dark" : "Light";
+    themeToggleText.style.color = resolvedTheme === "dark" ? "#00ff66" : "#f59e0b";
+  }
+
+  // Sync Quick Theme button in Settings header
+  const quickThemeIcon = document.getElementById("settingsQuickThemeIcon");
+  if (quickThemeIcon) {
+    quickThemeIcon.className = resolvedTheme === "dark" ? "fa-solid fa-moon" : "fa-solid fa-sun";
+    quickThemeIcon.style.color = resolvedTheme === "dark" ? "#ffd700" : "#f59e0b";
+  }
+
+  // Sync Visual Theme Cards
+  const cardDark = document.getElementById("themeCardDark");
+  const cardLight = document.getElementById("themeCardLight");
+  if (cardDark) {
+    cardDark.classList.toggle("active", resolvedTheme === "dark");
+    cardDark.style.borderColor = resolvedTheme === "dark" ? "#00ff66" : "rgba(255, 255, 255, 0.15)";
+    cardDark.style.boxShadow = resolvedTheme === "dark" ? "0 0 15px rgba(0, 255, 102, 0.15)" : "none";
+  }
+  if (cardLight) {
+    cardLight.classList.toggle("active", resolvedTheme === "light");
+    cardLight.style.borderColor = resolvedTheme === "light" ? "#f59e0b" : "rgba(255, 255, 255, 0.15)";
+    cardLight.style.boxShadow = resolvedTheme === "light" ? "0 0 15px rgba(245, 158, 11, 0.15)" : "none";
+  }
+
+  localStorage.setItem("darkMode", String(resolvedTheme === "dark"));
+
+  try {
+    const settings = JSON.parse(localStorage.getItem("nexchat_settings") || "{}");
+    settings.theme = resolvedTheme;
+    localStorage.setItem("nexchat_settings", JSON.stringify(settings));
+  } catch (_) {}
+
+  return resolvedTheme;
 }
 
 window.addEventListener("load", () => {
@@ -25007,9 +25050,57 @@ toggles.forEach(id => {
     });
   }
 
-document.querySelectorAll('input[name="theme"]').forEach(radio => {
-    radio.addEventListener("change", saveSettingsPreferences, false);
+  document.querySelectorAll('input[name="theme"]').forEach(radio => {
+    radio.addEventListener("change", (e) => {
+      applyThemeMode(e.target.value);
+      saveSettingsPreferences();
+      showNotif(e.target.value === "dark" ? "Dark Mode Enabled" : "Light Mode Enabled", "success", 2000);
+    }, false);
   });
+
+  const settingsThemeSwitch = document.getElementById("settingsThemeToggleSwitch");
+  if (settingsThemeSwitch && !settingsThemeSwitch.dataset.bound) {
+    settingsThemeSwitch.dataset.bound = "true";
+    settingsThemeSwitch.addEventListener("change", (e) => {
+      const mode = e.target.checked ? "dark" : "light";
+      applyThemeMode(mode);
+      saveSettingsPreferences();
+      showNotif(mode === "dark" ? "Dark Mode Enabled" : "Light Mode Enabled", "success", 2000);
+    }, false);
+  }
+
+  const quickThemeBtn = document.getElementById("settingsQuickThemeToggle");
+  if (quickThemeBtn && !quickThemeBtn.dataset.bound) {
+    quickThemeBtn.dataset.bound = "true";
+    quickThemeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const currentMode = document.body.classList.contains("dark-mode") ? "dark" : "light";
+      const nextMode = currentMode === "dark" ? "light" : "dark";
+      applyThemeMode(nextMode);
+      saveSettingsPreferences();
+      showNotif(nextMode === "dark" ? "Dark Mode Enabled" : "Light Mode Enabled", "success", 2000);
+    }, false);
+  }
+
+  const cardDark = document.getElementById("themeCardDark");
+  if (cardDark && !cardDark.dataset.bound) {
+    cardDark.dataset.bound = "true";
+    cardDark.addEventListener("click", () => {
+      applyThemeMode("dark");
+      saveSettingsPreferences();
+      showNotif("Dark Mode Enabled", "success", 2000);
+    }, false);
+  }
+
+  const cardLight = document.getElementById("themeCardLight");
+  if (cardLight && !cardLight.dataset.bound) {
+    cardLight.dataset.bound = "true";
+    cardLight.addEventListener("click", () => {
+      applyThemeMode("light");
+      saveSettingsPreferences();
+      showNotif("Light Mode Enabled", "success", 2000);
+    }, false);
+  }
 
 document.querySelectorAll('input[name="chatSize"]').forEach(radio => {
     radio.addEventListener("change", saveSettingsPreferences, false);

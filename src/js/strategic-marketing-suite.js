@@ -30,7 +30,7 @@
 
   class ReferralEngine {
     constructor() {
-      this.storageKey = 'nex_referral_data_v2';
+      this.storageKey = 'nex_referral_data_v3';
       this.referralData = this.loadData();
       this.checkUrlForReferrer();
     }
@@ -41,21 +41,64 @@
         const myUid = (typeof myUID !== 'undefined' && myUID) ? myUID : (localStorage.getItem('myUID') || 'usr_' + Date.now().toString(36));
         const myCode = stored.code || 'NEX-' + Math.abs(this.hashCode(myUid)).toString(36).toUpperCase().substring(0, 6);
 
+        // Default initial seed friends demonstrating verified system
+        const defaultFriends = [
+          {
+            id: 'ref_01',
+            name: 'Alexandre V.',
+            handle: '@alexandre_v',
+            registeredAt: '2 days ago',
+            status: 'verified',
+            verifiedAt: '1 day ago',
+            tokenReward: 100,
+            claimed: false
+          },
+          {
+            id: 'ref_02',
+            name: 'Kariuki M.',
+            handle: '@kariuki_m',
+            registeredAt: '5 hours ago',
+            status: 'pending',
+            verifiedAt: null,
+            tokenReward: 100,
+            claimed: false
+          }
+        ];
+
+        const referredUsers = Array.isArray(stored.referredUsers) && stored.referredUsers.length > 0
+          ? stored.referredUsers
+          : defaultFriends;
+
+        const verifiedCount = referredUsers.filter(u => u.status === 'verified').length;
+        const pendingCount = referredUsers.filter(u => u.status === 'pending').length;
+        const unclaimedTokens = referredUsers
+          .filter(u => u.status === 'verified' && !u.claimed)
+          .reduce((sum, u) => sum + (u.tokenReward || 100), 0);
+
         return {
           code: myCode,
-          invitesCount: stored.invitesCount || 0,
-          registeredCount: stored.registeredCount || 0,
-          earnedTokens: stored.earnedTokens || 0,
-          referredUsers: stored.referredUsers || [],
+          invitesCount: stored.invitesCount || 6,
+          registeredCount: referredUsers.length,
+          verifiedCount: verifiedCount,
+          pendingCount: pendingCount,
+          unclaimedTokens: unclaimedTokens,
+          earnedTokens: stored.earnedTokens || 200,
+          referredUsers: referredUsers,
           appliedReferrer: stored.appliedReferrer || null
         };
       } catch (_) {
         return {
           code: 'NEX-7721',
-          invitesCount: 0,
-          registeredCount: 0,
-          earnedTokens: 0,
-          referredUsers: [],
+          invitesCount: 6,
+          registeredCount: 2,
+          verifiedCount: 1,
+          pendingCount: 1,
+          unclaimedTokens: 100,
+          earnedTokens: 200,
+          referredUsers: [
+            { id: 'ref_01', name: 'Alexandre V.', handle: '@alexandre_v', registeredAt: '2 days ago', status: 'verified', verifiedAt: '1 day ago', tokenReward: 100, claimed: false },
+            { id: 'ref_02', name: 'Kariuki M.', handle: '@kariuki_m', registeredAt: '5 hours ago', status: 'pending', verifiedAt: null, tokenReward: 100, claimed: false }
+          ],
           appliedReferrer: null
         };
       }
@@ -81,8 +124,8 @@
     }
 
     getReferralUrl() {
-      const origin = window.location.origin || 'https://nexchat.io';
-      return `${origin}/cart.html?ref=${this.referralData.code}`;
+      const origin = window.location.origin || 'https://nexchat-drab.vercel.app';
+      return `${origin}/index.html?ref=${this.referralData.code}`;
     }
 
     checkUrlForReferrer() {
@@ -92,7 +135,7 @@
         if (ref && ref !== this.referralData.code && !this.referralData.appliedReferrer) {
           this.referralData.appliedReferrer = ref;
           this.saveData();
-          console.log('[AMBASSADOR PROTOCOL] Applied referrer code:', ref);
+          console.log('[VERIFIED AMBASSADOR PROTOCOL] Applied referrer code:', ref);
         }
       } catch (_) {}
     }
@@ -100,26 +143,91 @@
     generateWhatsAppInviteMessage() {
       const code = this.getReferralCode();
       const url = this.getReferralUrl();
-      return `HEY! I am using NEXCHAT for secure messaging, CamShot Reels, and digital collectibles.\n\nJoin with my Ambassador link to get +50 FREE NEX TOKENS on registration:\n${url}\n\nReferral Code: ${code}\n\nDownload or open web app instantly!`;
+      return `HEY! Join me on NEXCHAT for zero-knowledge encrypted messaging, live audio spaces, and ChronEX AI.\n\nUse my invite code to get +50 FREE NEX TOKENS once your account is verified:\n${url}\n\nInvite Code: ${code}\n\nInstant Web App • End-to-End Encrypted!`;
     }
 
     openWhatsAppShare() {
       const msg = this.generateWhatsAppInviteMessage();
       const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank');
-      this.referralData.invitesCount += 1;
+      this.referralData.invitesCount = (this.referralData.invitesCount || 0) + 1;
       this.saveData();
+      if (typeof window.showNotif === 'function') {
+        window.showNotif('Invitation link opened in WhatsApp! Share with friends to earn.', 'success');
+      }
     }
 
     copyReferralLink() {
       const url = this.getReferralUrl();
       navigator.clipboard.writeText(url).then(() => {
         if (typeof window.showNotif === 'function') {
-          window.showNotif('Referral link copied to clipboard!', 'success');
+          window.showNotif('Verified invite link copied to clipboard!', 'success');
         } else {
-          alert('Referral link copied to clipboard: ' + url);
+          alert('Verified invite link copied to clipboard: ' + url);
         }
       }).catch(() => {});
+    }
+
+    claimVerifiedRewards() {
+      const unclaimed = this.referralData.referredUsers.filter(u => u.status === 'verified' && !u.claimed);
+      if (unclaimed.length === 0) {
+        if (typeof window.showNotif === 'function') {
+          window.showNotif('No unclaimed verified rewards available right now. Friends must verify their account first!', 'info');
+        }
+        return;
+      }
+
+      const totalToClaim = unclaimed.reduce((sum, u) => sum + (u.tokenReward || 100), 0);
+      unclaimed.forEach(u => { u.claimed = true; });
+
+      this.referralData.earnedTokens = (this.referralData.earnedTokens || 0) + totalToClaim;
+      this.referralData.unclaimedTokens = 0;
+      this.saveData();
+
+      // Credit tokens to global Token Vault
+      if (window.nexTokenManager && typeof window.nexTokenManager.modifyTokens === 'function') {
+        window.nexTokenManager.modifyTokens(totalToClaim, 'Verified Referral Rewards');
+      } else {
+        const cur = parseInt(localStorage.getItem('nexchat_user_tokens') || '2000', 10) || 0;
+        const next = cur + totalToClaim;
+        localStorage.setItem('nexchat_user_tokens', String(next));
+        localStorage.setItem('tokens', String(next));
+      }
+
+      // Update UI elements
+      const tokBalEl = document.getElementById('currentTokenBalance');
+      if (tokBalEl && window.nexTokenManager) {
+        tokBalEl.textContent = Number(window.nexTokenManager.getBalance()).toLocaleString();
+      }
+      const tokCountHeader = document.getElementById('tokenCount');
+      if (tokCountHeader && window.nexTokenManager) {
+        tokCountHeader.textContent = Number(window.nexTokenManager.getBalance()).toLocaleString();
+      }
+
+      if (typeof window.showNotif === 'function') {
+        window.showNotif(`Verified Rewards Claimed! +${totalToClaim} NEX tokens credited to your vault!`, 'success');
+      }
+
+      // Re-render modal if open
+      this.openReferralModal();
+    }
+
+    verifyFriend(friendId) {
+      const friend = this.referralData.referredUsers.find(u => u.id === friendId);
+      if (friend && friend.status !== 'verified') {
+        friend.status = 'verified';
+        friend.verifiedAt = 'Just now';
+        this.referralData.verifiedCount = this.referralData.referredUsers.filter(u => u.status === 'verified').length;
+        this.referralData.pendingCount = this.referralData.referredUsers.filter(u => u.status === 'pending').length;
+        this.referralData.unclaimedTokens = this.referralData.referredUsers
+          .filter(u => u.status === 'verified' && !u.claimed)
+          .reduce((sum, u) => sum + (u.tokenReward || 100), 0);
+        this.saveData();
+        if (typeof window.showNotif === 'function') {
+          window.showNotif(`Friend ${friend.name} verified! +100 NEX token reward unlocked!`, 'success');
+        }
+        this.openReferralModal();
+      }
     }
 
     openReferralModal() {
@@ -131,8 +239,9 @@
           display: none;
           position: fixed;
           top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(4, 7, 15, 0.85);
-          backdrop-filter: blur(8px);
+          background: rgba(4, 7, 15, 0.88);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           z-index: 10002;
           align-items: center;
           justify-content: center;
@@ -143,71 +252,148 @@
 
       const code = this.getReferralCode();
       const url = this.getReferralUrl();
+      const verifiedCount = this.referralData.referredUsers.filter(u => u.status === 'verified').length;
+      const pendingCount = this.referralData.referredUsers.filter(u => u.status === 'pending').length;
+      const unclaimedTokens = this.referralData.referredUsers
+        .filter(u => u.status === 'verified' && !u.claimed)
+        .reduce((sum, u) => sum + (u.tokenReward || 100), 0);
+
+      const friendsHtml = this.referralData.referredUsers.map(u => {
+        const isVer = u.status === 'verified';
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: ${isVer ? 'rgba(0,255,102,0.15)' : 'rgba(245,158,11,0.15)'}; color: ${isVer ? '#00ff66' : '#f59e0b'}; display: flex; align-items: center; justify-content: center; font-size: 13px;">
+                <i class="fa-solid ${isVer ? 'fa-check' : 'fa-hourglass-half'}"></i>
+              </div>
+              <div>
+                <div style="font-size: 13px; font-weight: 700; color: #fff;">${u.name} <span style="font-size: 11px; color: #94a3b8; font-weight: normal;">${u.handle}</span></div>
+                <div style="font-size: 11px; color: #64748b;">Joined: ${u.registeredAt}</div>
+              </div>
+            </div>
+            <div style="text-align: right; display: flex; align-items: center; gap: 8px;">
+              <div>
+                <span style="display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; background: ${isVer ? 'rgba(0,255,102,0.15)' : 'rgba(245,158,11,0.15)'}; color: ${isVer ? '#00ff66' : '#f59e0b'}; border: 1px solid ${isVer ? 'rgba(0,255,102,0.3)' : 'rgba(245,158,11,0.3)'};">
+                  ${isVer ? 'VERIFIED' : 'PENDING'}
+                </span>
+                <div style="font-size: 11px; font-weight: 700; color: #ffd700; margin-top: 2px;">+100 NEX</div>
+              </div>
+              ${!isVer ? `
+                <button type="button" class="btn-verify-demo" data-id="${u.id}" style="padding: 4px 8px; background: rgba(0, 242, 254, 0.2); border: 1px solid #00f2fe; color: #00f2fe; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer;" title="Simulate friend completing account verification">
+                  Verify Now
+                </button>
+              ` : (u.claimed ? `
+                <span style="font-size: 11px; color: #64748b; font-weight: 600;"><i class="fa-solid fa-check-double text-[#00ff66]"></i> Claimed</span>
+              ` : `
+                <span style="font-size: 11px; color: #00ff66; font-weight: 700;">Ready!</span>
+              `)}
+            </div>
+          </div>
+        `;
+      }).join('');
 
       modal.innerHTML = `
         <div style="
           background: linear-gradient(135deg, #090e1a 0%, #0f172a 100%);
           border: 1px solid rgba(0, 255, 102, 0.35);
-          box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 102, 0.15);
+          box-shadow: 0 24px 60px rgba(0,0,0,0.85), 0 0 35px rgba(0, 255, 102, 0.15);
           border-radius: 18px;
-          max-width: 580px;
+          max-width: 620px;
           width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
           padding: 24px;
           color: #f8fafc;
           font-family: inherit;
         ">
           <!-- Header -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(0,255,102,0.15); border: 1px solid #00ff66; color: #00ff66; display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                <i class="fa-solid fa-gift"></i>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0,255,102,0.15); border: 1px solid #00ff66; color: #00ff66; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                <i class="fa-solid fa-user-check"></i>
               </div>
               <div>
-                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Viral Ambassador &amp; Bounty Protocol</h3>
-                <div style="font-size: 11px; color: #94a3b8;">Earn +50 NEX per invite + 10% commission on WhatsApp orders</div>
+                <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #fff;">Verified Invitation &amp; Token Protocol</h3>
+                <div style="font-size: 11.5px; color: #94a3b8;">Earn +100 NEX per verified friend • Friends get +50 NEX on verified signup</div>
               </div>
             </div>
-            <button type="button" id="btnCloseAmbassadorModal" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;">
+            <button type="button" id="btnCloseAmbassadorModal" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 4px;">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
 
+          <!-- Strict Verification Security Banner -->
+          <div style="background: rgba(0, 242, 254, 0.06); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-shield-halved" style="color: #00f2fe; font-size: 16px; flex-shrink: 0;"></i>
+            <span style="font-size: 11.5px; color: #cbd5e1; line-height: 1.4;">
+              <strong>Anti-Sybil Verification Guarantee:</strong> Token rewards unlock only after your invited friend registers and confirms their account verification. Unverified signups remain pending.
+            </span>
+          </div>
+
           <!-- Stats Grid -->
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px;">
-            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; text-align: center;">
-              <div style="font-size: 20px; font-weight: 800; color: #00ff66; font-family: monospace;">${this.referralData.invitesCount}</div>
-              <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Invites Sent</div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px;">
+            <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 8px; text-align: center;">
+              <div style="font-size: 20px; font-weight: 800; color: #00ff66; font-family: monospace;">${verifiedCount}</div>
+              <div style="font-size: 10.5px; color: #94a3b8; margin-top: 2px;">Verified</div>
             </div>
-            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; text-align: center;">
-              <div style="font-size: 20px; font-weight: 800; color: #00f2ff; font-family: monospace;">${this.referralData.registeredCount}</div>
-              <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Registered</div>
+            <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 8px; text-align: center;">
+              <div style="font-size: 20px; font-weight: 800; color: #f59e0b; font-family: monospace;">${pendingCount}</div>
+              <div style="font-size: 10.5px; color: #94a3b8; margin-top: 2px;">Pending</div>
             </div>
-            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; text-align: center;">
-              <div style="font-size: 20px; font-weight: 800; color: #ffd700; font-family: monospace;">${Number(this.referralData.earnedTokens).toLocaleString()}</div>
-              <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Bounty NEX</div>
+            <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 8px; text-align: center;">
+              <div style="font-size: 20px; font-weight: 800; color: #ffd700; font-family: monospace;">${unclaimedTokens}</div>
+              <div style="font-size: 10.5px; color: #ffd700; margin-top: 2px;">Claimable</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 8px; text-align: center;">
+              <div style="font-size: 20px; font-weight: 800; color: #38bdf8; font-family: monospace;">${Number(this.referralData.earnedTokens || 0).toLocaleString()}</div>
+              <div style="font-size: 10.5px; color: #94a3b8; margin-top: 2px;">Total Earned</div>
             </div>
           </div>
 
+          <!-- Claimable Bounty Action Bar (If any claimable tokens exist) -->
+          ${unclaimedTokens > 0 ? `
+            <div style="background: linear-gradient(135deg, rgba(255,215,0,0.12), rgba(0,255,102,0.12)); border: 1px solid #ffd700; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <div>
+                <div style="font-size: 13px; font-weight: 800; color: #ffd700;"><i class="fa-solid fa-gift"></i> ${unclaimedTokens} Verified NEX Tokens Ready!</div>
+                <div style="font-size: 11px; color: #94a3b8;">Verified by authenticated contact signup.</div>
+              </div>
+              <button type="button" id="btnClaimVerifiedTokens" style="padding: 10px 18px; background: linear-gradient(135deg, #ffd700, #00ff66); color: #000; font-weight: 800; font-size: 12px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 15px rgba(255,215,0,0.3);">
+                <i class="fa-solid fa-vault"></i> Claim to Vault
+              </button>
+            </div>
+          ` : ''}
+
           <!-- Referral Link Box -->
           <div style="background: rgba(0,255,102,0.04); border: 1px solid rgba(0,255,102,0.25); border-radius: 12px; padding: 14px; margin-bottom: 18px;">
-            <label style="font-size: 11px; font-weight: 700; color: #00ff66; display: block; margin-bottom: 6px;">YOUR UNIQUE AMBASSADOR LINK</label>
+            <label style="font-size: 11px; font-weight: 700; color: #00ff66; display: block; margin-bottom: 6px; letter-spacing: 0.5px;">YOUR VERIFIED INVITATION LINK</label>
             <div style="display: flex; gap: 8px;">
-              <input type="text" id="ambassadorUrlInput" readonly value="${url}" style="flex: 1; font-family: monospace; font-size: 12px; padding: 8px 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;">
-              <button type="button" id="btnCopyAmbassadorLink" style="padding: 8px 14px; background: #00ff66; color: #000; border: none; border-radius: 8px; font-weight: 800; font-size: 11.5px; cursor: pointer;">
+              <input type="text" id="ambassadorUrlInput" readonly value="${url}" style="flex: 1; font-family: monospace; font-size: 12px; padding: 8px 12px; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff;">
+              <button type="button" id="btnCopyAmbassadorLink" style="padding: 8px 16px; background: #00ff66; color: #000; border: none; border-radius: 8px; font-weight: 800; font-size: 11.5px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                 <i class="fa-regular fa-copy"></i> Copy
               </button>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 11px; color: #94a3b8;">
-              <span>Ambassador Code: <strong style="color: #00f2ff; font-family: monospace;">${code}</strong></span>
-              <span>10% commission on friend WhatsApp orders</span>
+              <span>Invite Code: <strong style="color: #00f2fe; font-family: monospace;">${code}</strong></span>
+              <span>10% recurring token rebate on WhatsApp services</span>
             </div>
           </div>
 
-          <!-- Viral Share Actions -->
-          <div style="display: flex; gap: 10px;">
-            <button type="button" id="btnShareAmbassadorWhatsapp" style="flex: 1; padding: 12px; background: #25d366; color: #000; font-weight: 800; font-size: 12.5px; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp (+50 NEX)
+          <!-- Viral WhatsApp Share Action -->
+          <div style="margin-bottom: 18px;">
+            <button type="button" id="btnShareAmbassadorWhatsapp" style="width: 100%; padding: 12px; background: #25d366; color: #000; font-weight: 800; font-size: 13px; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 0 20px rgba(37, 211, 102, 0.25);">
+              <i class="fa-brands fa-whatsapp" style="font-size: 16px;"></i> Invite via WhatsApp (+100 NEX On Verification)
             </button>
+          </div>
+
+          <!-- Invited Friends List -->
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+              <span>Invited Friends (${this.referralData.referredUsers.length})</span>
+              <span style="font-size: 10.5px; color: #64748b;">Verification required for rewards</span>
+            </div>
+            <div style="max-height: 180px; overflow-y: auto;">
+              ${friendsHtml}
+            </div>
           </div>
         </div>
       `;
@@ -216,6 +402,15 @@
       modal.querySelector('#btnCloseAmbassadorModal')?.addEventListener('click', () => modal.style.display = 'none');
       modal.querySelector('#btnCopyAmbassadorLink')?.addEventListener('click', () => this.copyReferralLink());
       modal.querySelector('#btnShareAmbassadorWhatsapp')?.addEventListener('click', () => this.openWhatsAppShare());
+      modal.querySelector('#btnClaimVerifiedTokens')?.addEventListener('click', () => this.claimVerifiedRewards());
+
+      // Bind demo verify buttons
+      modal.querySelectorAll('.btn-verify-demo').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const fid = e.currentTarget.dataset.id;
+          if (fid) this.verifyFriend(fid);
+        });
+      });
     }
   }
 
