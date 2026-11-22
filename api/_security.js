@@ -14,6 +14,7 @@
 
 import crypto from "crypto";
 import { firebaseConfig } from "../firebase-public-config.js";
+import { simdScan, verifyAntiDebug, encryptChaCha20ConstantTime } from "../src/js/fortress-native-engine.js";
 
 // ==============================================================================
 // 0. CONSTANT-TIME PRE-HASHED EQUALITY (RANGEERROR & TIMING LEAK IMMUNE)
@@ -751,6 +752,26 @@ export function enforceWaf(req, res) {
 
     // 2. TAB 30 ASM & SHELLCODE TRAP EVALUATION
     const rawBytes = nexchatAsmGuard.normalizeToBytes(combinedTargets);
+    
+    // 2.1 FORTRESS LAYER 41: AVX2 SIMD HARDWARE PAYLOAD SCAN
+    const simdAnalysis = simdScan(rawBytes);
+    if (!simdAnalysis.clean) {
+      banIpWithStrikes(ip, `FORTRESS_SIMD_ATTACK [Mask: 0x${simdAnalysis.threat_mask.toString(16)}]`, JAIL_DURATION_MS);
+      reportThreatToFortress({
+        source: "NEXCHAT-EDGE-SIMD",
+        attackType: "SIMD_VECTOR_ATTACK",
+        clientIp: ip,
+        details: { threatMask: simdAnalysis.threat_mask, matchOffset: simdAnalysis.match_offset, engine: simdAnalysis.engine },
+      });
+      res.setHeader("Content-Type", "application/json");
+      res.status(403).json({
+        ok: false,
+        error: "Access denied. Microarchitectural vector payload sanitizer intercepted exploit signature.",
+        code: "FORTRESS_SIMD_BLOCKED"
+      });
+      return false;
+    }
+
     const asmAnalysis = nexchatAsmGuard.inspectBytes(rawBytes);
 
     if (asmAnalysis.isHostile) {
@@ -1719,3 +1740,8 @@ export class ObjectAuthGuard {
 }
 
 export const objectAuthGuard = ObjectAuthGuard;
+
+// ==============================================================================
+// 15. FORTRESS BARE-METAL / SIMD / CHRONO NATIVE EXPORTS (LAYERS 41 - 52)
+// ==============================================================================
+export { simdScan, verifyAntiDebug, encryptChaCha20ConstantTime };

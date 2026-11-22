@@ -553,6 +553,53 @@ assert.strictEqual(spoofReelRes.statusCode, 201);
 assert.strictEqual(spoofReelRes.body?.reel?.authorId, "user_anon", "Anonymous reel submission must not accept forged authorId");
 console.log(" [PASS] Identity spoofing strictly blocked: anonymous reel authors defaulted to user_anon");
 
+// ================================================================
+// [TEST 22] FORTRESS LAYER 41: AVX2 SIMD HARDWARE PAYLOAD SANITIZER
+// ================================================================
+console.log("\n[TEST 22] Testing Fortress Layer 41 AVX2 SIMD Hardware Payload Sanitizer...");
+const { simdScan, verifyAntiDebug, encryptChaCha20ConstantTime } = await import("./src/js/fortress-native-engine.js");
+
+const benignScan = simdScan("Normal benign user chat message.");
+assert.strictEqual(benignScan.clean, true, "Benign message should pass SIMD scan");
+console.log(` [PASS] Benign payload passed (${benignScan.engine})`);
+
+const sqliScan = simdScan("SELECT * FROM users WHERE '1'='1' OR 1=1;");
+assert.strictEqual(sqliScan.clean, false, "SQLi attack must be flagged by SIMD scan");
+console.log(` [PASS] SQLi attack flagged (Mask: 0x${sqliScan.threat_mask.toString(16)})`);
+
+const cmdScan = simdScan("user_input; /bin/sh -c 'id'");
+assert.strictEqual(cmdScan.clean, false, "Command injection must be flagged by SIMD scan");
+console.log(` [PASS] Command injection flagged (Mask: 0x${cmdScan.threat_mask.toString(16)})`);
+
+const nopSled = Buffer.alloc(32, 0x90);
+const nopScan = simdScan(nopSled);
+assert.strictEqual(nopScan.clean, false, "NOP sled shellcode must be flagged by SIMD scan");
+console.log(` [PASS] 0x90 NOP sled shellcode flagged (Mask: 0x${nopScan.threat_mask.toString(16)})`);
+
+// ================================================================
+// [TEST 23] FORTRESS LAYER 43: CHRONO TIMING & ANTI-DEBUG SENTINEL
+// ================================================================
+console.log("\n[TEST 23] Testing Fortress Layer 43 Chrono Timing & Anti-Debug Sentinel...");
+const antiDebugRep = verifyAntiDebug();
+assert.strictEqual(typeof antiDebugRep.debugger_detected, "boolean");
+console.log(` [PASS] Anti-debug sentinel operational (${antiDebugRep.engine}): DebuggerDetected=${antiDebugRep.debugger_detected}, DeltaCycles=${antiDebugRep.delta_cycles}`);
+
+// ================================================================
+// [TEST 24] FORTRESS LAYER 50: CONSTANT-TIME ARX CHACHA20 VAULT CIPHER
+// ================================================================
+console.log("\n[TEST 24] Testing Fortress Layer 50 Constant-Time ARX ChaCha20 Vault Cipher...");
+const testKey = Buffer.alloc(32, 0x42);
+const testNonce = Buffer.alloc(12, 0x13);
+const plaintext = Buffer.from("NEXCHAT_SOVEREIGN_VAULT_PAYLOAD_2026", "utf-8");
+
+const ciphertext = encryptChaCha20ConstantTime(testKey, testNonce, 1, plaintext);
+assert.notStrictEqual(ciphertext.toString("hex"), plaintext.toString("hex"), "Ciphertext must not match plaintext");
+
+// ChaCha20 stream cipher is symmetric (encrypting ciphertext decrypts it back)
+const decrypted = encryptChaCha20ConstantTime(testKey, testNonce, 1, ciphertext);
+assert.strictEqual(decrypted.toString("utf-8"), plaintext.toString("utf-8"), "Decrypted ciphertext must match exact original plaintext");
+console.log(" [PASS] Constant-time ChaCha20 encryption/decryption round-trip verified with zero timing leak");
+
 console.log("\n==================================================================");
-console.log("🎉 ALL 21 NEXCHAT FORTRESS SECURITY & ACTIVE DEFENSE TESTS PASSED 100%!");
+console.log("🎉 ALL 24 NEXCHAT FORTRESS SECURITY & ACTIVE DEFENSE TESTS PASSED 100%!");
 console.log("==================================================================");

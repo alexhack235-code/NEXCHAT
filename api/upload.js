@@ -86,6 +86,14 @@ export default async function handler(req, res) {
   const uploadType = req.headers['x-upload-type'] || req.query.type || 'media';
   const vaultParam = req.headers['x-vault-index'] !== undefined ? req.headers['x-vault-index'] : req.query.vault;
 
+  // Immediate Defense: Reject dangerous file extensions immediately
+  if (DANGEROUS_EXTENSIONS.test(rawFilename)) {
+    return res.status(403).json({
+      error: 'Prohibited file extension. Executable and script uploads are strictly forbidden.',
+      code: 'PROHIBITED_EXTENSION'
+    });
+  }
+
   // 1. Mandatory Authentication Guard: All uploads (media, reels, profiles, vaults) require valid Firebase Auth
   if (!authenticatedUser) {
     return res.status(401).json({ 
