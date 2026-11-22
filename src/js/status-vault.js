@@ -39,7 +39,7 @@ async function uploadToSingleStatusVault(file, vaultIndex, options = {}) {
     xhr.setRequestHeader('x-filename', filename);
     xhr.setRequestHeader('x-upload-type', 'status');
     xhr.setRequestHeader('x-vault-index', String(vaultIndex));
-    xhr.setRequestHeader('x-access-mode', 'private');
+    xhr.setRequestHeader('x-access-mode', 'public');
     xhr.setRequestHeader('Authorization', authHeaders.Authorization);
 
     if (file.type) {
@@ -60,17 +60,20 @@ async function uploadToSingleStatusVault(file, vaultIndex, options = {}) {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const res = JSON.parse(xhr.responseText);
+          const isVideoFile = Boolean(file.type?.startsWith('video/') || /\.(mp4|webm|mov|m4v|ogg)$/i.test(file.name || filename));
+          const isAudioFile = Boolean(file.type?.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac)$/i.test(file.name || filename));
+          const resolvedMediaType = isVideoFile ? 'video' : (isAudioFile ? 'audio' : 'image');
           resolve({
             url: res.url,
             rawBlobUrl: res.rawBlobUrl || res.url,
             pathname: res.pathname,
             vault: res.vault || vault.name,
             vaultIndex: vaultIndex,
-            access: 'private',
+            access: 'public',
             fileName: file.name || cleanName,
             fileSize: file.size,
-            fileType: file.type || (file.name?.match(/\.(mp4|webm|mov)$/i) ? 'video/mp4' : 'image/jpeg'),
-            mediaType: file.type || 'image/jpeg',
+            fileType: isVideoFile ? (file.type || 'video/mp4') : (file.type || 'image/jpeg'),
+            mediaType: resolvedMediaType,
           });
         } catch (err) {
           reject(new Error(`Failed to parse response from ${vault.name}: ${err.message}`));

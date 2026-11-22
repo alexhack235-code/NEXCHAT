@@ -93,8 +93,8 @@ export default async function handler(req, res) {
   const vaultParam = req.query.vault;
   const type = req.query.type || 'media';
 
-  // SECURITY PROTOCOL: Authenticate before serving sensitive private or status blobs
-  if (type === 'private' || type === 'status') {
+  // SECURITY PROTOCOL: Authenticate before serving sensitive private vault blobs
+  if (type === 'private') {
     let authenticatedUser = null;
     try {
       authenticatedUser = await verifyFirebaseIdToken(req);

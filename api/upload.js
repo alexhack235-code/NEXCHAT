@@ -40,11 +40,11 @@ const REELS_VAULTS = {
   5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_5', ''), access: 'private', name: 'NEX-REELS VAULT 5' },
 };
 const STATUS_VAULTS = {
-  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_1', ''), access: 'private', name: 'NEX-STATUS VAULT 1' },
-  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_2', ''), access: 'private', name: 'NEX-STATUS VAULT 2' },
-  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_3', ''), access: 'private', name: 'NEX-STATUS VAULT 3' },
-  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_4', ''), access: 'private', name: 'NEX-STATUS VAULT 4' },
-  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_5', ''), access: 'private', name: 'NEX-STATUS VAULT 5' },
+  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_1', ''), access: 'public', name: 'NEX-STATUS VAULT 1' },
+  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_2', ''), access: 'public', name: 'NEX-STATUS VAULT 2' },
+  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_3', ''), access: 'public', name: 'NEX-STATUS VAULT 3' },
+  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_4', ''), access: 'public', name: 'NEX-STATUS VAULT 4' },
+  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_5', ''), access: 'public', name: 'NEX-STATUS VAULT 5' },
 };
 
 // Security constants

@@ -192,6 +192,7 @@ class GlobalDropEngine {
     this.initGeoLocator();
     this.initUserProfile();
     this.initHeaderAutoHide();
+    this.syncTheme();
   }
 
   initHeaderAutoHide() {
@@ -2086,6 +2087,10 @@ class GlobalDropEngine {
     const overlay = document.getElementById('globalDropDrawerOverlay');
     if (!drawer || !overlay) return;
 
+    // Ensure hidden initially to avoid blocking touch/scroll events
+    overlay.style.display = 'none';
+    drawer.style.display = 'none';
+
     // Mount drawer and overlay directly to body to prevent clipping by parent scroll/overflow containers
     if (drawer.parentElement && drawer.parentElement !== document.body) {
       document.body.appendChild(overlay);
@@ -2239,13 +2244,64 @@ class GlobalDropEngine {
       if (window.showNotif) window.showNotif('Protocol Matrix & Docs Loaded', 'info');
     });
 
-    document.getElementById('globalDropDrawerThemeBtn')?.addEventListener('click', () => {
-      if (typeof window.toggleTheme === 'function') {
-        window.toggleTheme();
-      } else {
-        document.body.classList.toggle('light-theme');
-      }
+    document.getElementById('globalDropDrawerThemeBtn')?.addEventListener('click', (e) => {
+      e?.preventDefault?.();
+      e?.stopPropagation?.();
+      this.toggleTheme();
     });
+
+    // Initial theme sync
+    this.syncTheme();
+  }
+
+  toggleTheme() {
+    if (typeof window.toggleThemeMode === 'function') {
+      window.toggleThemeMode();
+    } else if (typeof window.switchDarkMode === 'function') {
+      window.switchDarkMode();
+    } else {
+      const isDark = document.body.classList.contains('dark-mode') || document.body.classList.contains('dark-theme');
+      const nextTheme = isDark ? 'light' : 'dark';
+      document.body.classList.toggle('dark-mode', nextTheme === 'dark');
+      document.body.classList.toggle('light-mode', nextTheme === 'light');
+      document.body.classList.toggle('dark-theme', nextTheme === 'dark');
+      document.body.classList.toggle('light-theme', nextTheme === 'light');
+      document.documentElement.style.colorScheme = nextTheme;
+      try {
+        localStorage.setItem('darkMode', String(nextTheme === 'dark'));
+      } catch (_) {}
+    }
+    this.syncTheme();
+  }
+
+  syncTheme() {
+    const isLight = document.body.classList.contains('light-mode') || 
+                    document.body.classList.contains('light-theme') || 
+                    localStorage.getItem('darkMode') === 'false';
+    const drawer = document.getElementById('globalDropDrawer');
+    const container = document.getElementById('globalDropContainer');
+    const themeBtn = document.getElementById('globalDropDrawerThemeBtn');
+
+    if (drawer) {
+      drawer.classList.toggle('light-theme', isLight);
+      drawer.classList.toggle('light-mode', isLight);
+      drawer.classList.toggle('dark-theme', !isLight);
+      drawer.classList.toggle('dark-mode', !isLight);
+    }
+    if (container) {
+      container.classList.toggle('light-theme', isLight);
+      container.classList.toggle('light-mode', isLight);
+      container.classList.toggle('dark-theme', !isLight);
+      container.classList.toggle('dark-mode', !isLight);
+    }
+    if (themeBtn) {
+      const icon = themeBtn.querySelector('i');
+      if (icon) {
+        icon.className = isLight ? 'fa-solid fa-sun' : 'fa-regular fa-moon';
+        icon.style.color = isLight ? '#f59e0b' : '#ffd700';
+      }
+      themeBtn.title = isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+    }
   }
 
   syncDrawerProfile() {
@@ -2269,6 +2325,8 @@ class GlobalDropEngine {
     const followersCount = localStorage.getItem('nex_followers_count') || '1';
     if (followingEl) followingEl.textContent = followingCount;
     if (followersEl) followersEl.textContent = followersCount;
+
+    this.syncTheme();
   }
 
   setFeedFilter(mode) {

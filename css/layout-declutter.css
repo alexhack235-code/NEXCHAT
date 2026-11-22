@@ -5175,6 +5175,56 @@ body[data-active-section="updates"] .top-header {
   display: none !important;
 }
 
+/* 5. Groups & Communities Route Active */
+.app[data-active-section="groups"] .groups-container,
+body[data-active-section="groups"] .groups-container,
+.app[data-active-section="communities"] .groups-container,
+body[data-active-section="communities"] .groups-container {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y !important;
+  box-sizing: border-box !important;
+}
+
+.app[data-active-section="groups"] .chat-main,
+body[data-active-section="groups"] .chat-main,
+.app[data-active-section="communities"] .chat-main,
+body[data-active-section="communities"] .chat-main {
+  display: none !important;
+}
+
+/* 6. Global Drop Route Active */
+.app[data-active-section="global-drop"] .global-drop-container,
+body[data-active-section="global-drop"] .global-drop-container {
+  display: flex !important;
+  flex-direction: row !important;
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y !important;
+  box-sizing: border-box !important;
+}
+
+.app[data-active-section="global-drop"] .chat-main,
+body[data-active-section="global-drop"] .chat-main {
+  display: none !important;
+}
+
 /* WhatsApp Calls Layout Strict Vertical Hierarchy */
 .call-history-container {
   display: none !important;

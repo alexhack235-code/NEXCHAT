@@ -810,8 +810,8 @@
       </div>
 
       <!-- GLOBAL DROP USER PROFILE & NAVIGATION SIDE DRAWER (EXACT REPLICA FROM IMAGE 2) -->
-      <div class="x-drawer-overlay" id="globalDropDrawerOverlay"></div>
-      <aside class="x-drawer" id="globalDropDrawer" aria-label="Account Navigation Drawer">
+      <div class="x-drawer-overlay" id="globalDropDrawerOverlay" style="display: none;"></div>
+      <aside class="x-drawer" id="globalDropDrawer" style="display: none;" aria-label="Account Navigation Drawer">
         <!-- Top Bar: Avatar & More Menu -->
         <div class="x-drawer-header">
           <div class="x-drawer-avatar-wrap">
@@ -934,7 +934,7 @@
 
         <!-- Bottom Footer: Dark Mode Moon Icon -->
         <div class="x-drawer-footer">
-          <button type="button" class="x-drawer-theme-btn" id="globalDropDrawerThemeBtn" title="Toggle Display Mode">
+          <button type="button" class="x-drawer-theme-btn" id="globalDropDrawerThemeBtn" title="Toggle Display Mode" onclick="if(window.globalDropEngine?.toggleTheme){window.globalDropEngine.toggleTheme();}else if(typeof window.toggleThemeMode==='function'){window.toggleThemeMode();}else if(typeof window.switchDarkMode==='function'){window.switchDarkMode();}">
             <i class="fa-regular fa-moon"></i>
           </button>
         </div>
@@ -1878,6 +1878,24 @@
         </div>
         <!-- In-Chat Dedicated Banners Container (Pushes list down, never overlays chat bubbles) -->
         <div id="chatBannersContainer" class="chat-banners-container">
+          <!-- WhatsApp-style Unknown Contact Safety Card -->
+          <div id="unknownContactSafetyBanner" class="unknown-contact-safety-card" style="display: none;">
+            <div class="safety-card-header">
+              <i class="fa-solid fa-shield-halved safety-icon"></i>
+              <div class="safety-text-group">
+                <span class="safety-title">This sender is not in your contact list</span>
+                <span class="safety-subtitle">Do you want to block this user or add them to your contacts?</span>
+              </div>
+            </div>
+            <div class="safety-actions">
+              <button type="button" id="safetyBlockContactBtn" class="safety-btn block-btn">
+                <i class="fa-solid fa-ban"></i> Block
+              </button>
+              <button type="button" id="safetyAddContactBtn" class="safety-btn add-btn">
+                <i class="fa-solid fa-user-plus"></i> Add to Contacts
+              </button>
+            </div>
+          </div>
           <!-- Tactical Off-Grid P2P Mesh Banner -->
           <div id="tacticalMeshBanner" class="tactical-mesh-banner direct-chat-hidden" style="display: none !important;">
             <div class="mesh-banner-inner">

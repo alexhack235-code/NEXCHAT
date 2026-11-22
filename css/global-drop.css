@@ -37,6 +37,24 @@
   --x-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
+body.light-mode,
+body.light-theme,
+.global-drop-container.light-mode,
+.global-drop-container.light-theme {
+  --x-black: #ffffff;
+  --x-dark-bg: #f8fafc;
+  --x-border: rgba(0, 0, 0, 0.09);
+  --x-border-subtle: rgba(0, 0, 0, 0.05);
+  --x-hover-bg: rgba(0, 0, 0, 0.035);
+  --x-active-bg: rgba(0, 0, 0, 0.07);
+  --x-card-bg: #ffffff;
+  --x-widget-bg: #f1f5f9;
+  
+  --x-text-primary: #0f172a;
+  --x-text-secondary: #475569;
+  --x-text-muted: #94a3b8;
+}
+
 /* -----------------------------------------------------------------------------
    1. OVERALL CONTAINER & FULL SCREEN X FRAME
    ----------------------------------------------------------------------------- */
@@ -44,14 +62,20 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
+  flex: 1 1 0% !important;
   width: 100%;
   height: 100%;
-  min-height: 0;
+  min-height: 0 !important;
+  max-height: 100%;
   background: var(--x-black);
   color: var(--x-text-primary);
   font-family: var(--x-font);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y !important;
+  scroll-behavior: smooth;
   position: relative;
   box-sizing: border-box;
 }
@@ -76,6 +100,7 @@
   min-height: 100%;
   margin: 0 auto;
   box-sizing: border-box;
+  touch-action: pan-y;
 }
 
 /* -----------------------------------------------------------------------------
@@ -301,19 +326,22 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  touch-action: pan-y;
 }
 
 @media (max-width: 899px) {
   .global-drop-container {
-    padding-bottom: 72px;
+    padding-bottom: calc(var(--bottom-nav-height, 66px) + 30px + env(safe-area-inset-bottom, 0px)) !important;
   }
   .x-timeline-col {
     max-width: 100%;
     border-left: none;
     border-right: none;
+    touch-action: pan-y;
   }
   .x-stream-list {
     padding-bottom: 84px;
+    touch-action: pan-y;
   }
   /* Ensure the 6-tab bottom nav label for Global Drop fits without ellipsis */
   #nav-global-drop .nav-label {
@@ -2881,6 +2909,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 
 /* Account Side Drawer & Overlay (Exact X Replica) */
 .x-drawer-overlay {
+  display: none;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
@@ -2893,11 +2922,13 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 }
 
 .x-drawer-overlay.active {
+  display: block;
   opacity: 1;
   pointer-events: auto;
 }
 
 .x-drawer {
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -2909,17 +2940,19 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   z-index: 100000;
   transform: translateX(-100%);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
   flex-direction: column;
   padding: calc(env(safe-area-inset-top, 16px) + 12px) 16px calc(env(safe-area-inset-bottom, 16px) + 12px) 16px;
   box-shadow: 6px 0 28px rgba(0, 0, 0, 0.85);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
+  pointer-events: none;
 }
 
 .x-drawer.open {
+  display: flex;
   transform: translateX(0);
+  pointer-events: auto;
 }
 
 .x-drawer-header {
@@ -3101,4 +3134,227 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 .x-drawer-theme-btn:hover,
 .x-drawer-theme-btn:active {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* =============================================================================
+   LIGHT MODE SUITE FOR GLOBAL DROP & SIDE DRAWER
+   ============================================================================= */
+body.light-mode .global-drop-container,
+body.light-theme .global-drop-container,
+.global-drop-container.light-mode,
+.global-drop-container.light-theme {
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .x-timeline-col,
+body.light-theme .x-timeline-col,
+.global-drop-container.light-mode .x-timeline-col,
+.global-drop-container.light-theme .x-timeline-col {
+  background: #ffffff !important;
+  border-left-color: rgba(0, 0, 0, 0.09) !important;
+  border-right-color: rgba(0, 0, 0, 0.09) !important;
+}
+
+body.light-mode .x-timeline-header,
+body.light-theme .x-timeline-header,
+.global-drop-container.light-mode .x-timeline-header,
+.global-drop-container.light-theme .x-timeline-header {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.09) !important;
+}
+
+body.light-mode .x-tab-btn,
+body.light-theme .x-tab-btn,
+.global-drop-container.light-mode .x-tab-btn,
+.global-drop-container.light-theme .x-tab-btn {
+  color: #64748b !important;
+}
+
+body.light-mode .x-tab-btn.active,
+body.light-theme .x-tab-btn.active,
+.global-drop-container.light-mode .x-tab-btn.active,
+.global-drop-container.light-theme .x-tab-btn.active {
+  color: #0f172a !important;
+}
+
+body.light-mode .x-drop-row,
+body.light-theme .x-drop-row,
+.global-drop-container.light-mode .x-drop-row,
+.global-drop-container.light-theme .x-drop-row {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .x-drop-row:hover,
+body.light-theme .x-drop-row:hover,
+.global-drop-container.light-mode .x-drop-row:hover,
+.global-drop-container.light-theme .x-drop-row:hover {
+  background: rgba(0, 0, 0, 0.025) !important;
+}
+
+body.light-mode .x-drop-name,
+body.light-theme .x-drop-name,
+.global-drop-container.light-mode .x-drop-name,
+.global-drop-container.light-theme .x-drop-name {
+  color: #0f172a !important;
+}
+
+body.light-mode .x-drop-text,
+body.light-theme .x-drop-text,
+.global-drop-container.light-mode .x-drop-text,
+.global-drop-container.light-theme .x-drop-text {
+  color: #1e293b !important;
+}
+
+body.light-mode .x-drop-handle,
+body.light-mode .x-drop-time,
+body.light-theme .x-drop-handle,
+body.light-theme .x-drop-time,
+.global-drop-container.light-mode .x-drop-handle,
+.global-drop-container.light-theme .x-drop-handle {
+  color: #64748b !important;
+}
+
+body.light-mode .x-composer-textarea,
+body.light-theme .x-composer-textarea,
+.global-drop-container.light-mode .x-composer-textarea,
+.global-drop-container.light-theme .x-composer-textarea {
+  color: #0f172a !important;
+}
+
+body.light-mode .x-composer-textarea::placeholder,
+body.light-theme .x-composer-textarea::placeholder,
+.global-drop-container.light-mode .x-composer-textarea::placeholder,
+.global-drop-container.light-theme .x-composer-textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+body.light-mode .x-composer,
+body.light-theme .x-composer,
+.global-drop-container.light-mode .x-composer,
+.global-drop-container.light-theme .x-composer {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .x-widget-card,
+body.light-theme .x-widget-card,
+.global-drop-container.light-mode .x-widget-card,
+.global-drop-container.light-theme .x-widget-card {
+  background: #f8fafc !important;
+  border-color: rgba(0, 0, 0, 0.09) !important;
+}
+
+body.light-mode .x-search-box,
+body.light-theme .x-search-box,
+.global-drop-container.light-mode .x-search-box,
+.global-drop-container.light-theme .x-search-box {
+  background: #f1f5f9 !important;
+  border-color: rgba(0, 0, 0, 0.09) !important;
+}
+
+body.light-mode .x-search-box input,
+body.light-theme .x-search-box input,
+.global-drop-container.light-mode .x-search-box input,
+.global-drop-container.light-theme .x-search-box input {
+  color: #0f172a !important;
+}
+
+body.light-mode .x-nav-item,
+body.light-theme .x-nav-item,
+.global-drop-container.light-mode .x-nav-item,
+.global-drop-container.light-theme .x-nav-item {
+  color: #0f172a !important;
+}
+
+body.light-mode .x-nav-user-pill:hover,
+body.light-theme .x-nav-user-pill:hover,
+.global-drop-container.light-mode .x-nav-user-pill:hover,
+.global-drop-container.light-theme .x-nav-user-pill:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-mode .x-nav-user-name,
+body.light-theme .x-nav-user-name,
+.global-drop-container.light-mode .x-nav-user-name,
+.global-drop-container.light-theme .x-nav-user-name {
+  color: #0f172a !important;
+}
+
+body.light-mode .x-drawer,
+body.light-theme .x-drawer,
+.x-drawer.light-theme,
+.x-drawer.light-mode {
+  background: #ffffff !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 6px 0 28px rgba(0, 0, 0, 0.15) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .x-drawer-display-name,
+body.light-theme .x-drawer-display-name,
+.x-drawer.light-theme .x-drawer-display-name,
+.x-drawer.light-mode .x-drawer-display-name {
+  color: #0f172a !important;
+}
+
+body.light-mode .x-drawer-handle,
+body.light-theme .x-drawer-handle,
+.x-drawer.light-theme .x-drawer-handle,
+.x-drawer.light-mode .x-drawer-handle,
+body.light-mode .x-drawer-stat,
+body.light-theme .x-drawer-stat,
+.x-drawer.light-theme .x-drawer-stat,
+.x-drawer.light-mode .x-drawer-stat {
+  color: #64748b !important;
+}
+
+body.light-mode .x-drawer-stat strong,
+body.light-theme .x-drawer-stat strong,
+.x-drawer.light-theme .x-drawer-stat strong,
+.x-drawer.light-mode .x-drawer-stat strong {
+  color: #0f172a !important;
+}
+
+body.light-mode .x-drawer-item,
+body.light-theme .x-drawer-item,
+.x-drawer.light-theme .x-drawer-item,
+.x-drawer.light-mode .x-drawer-item {
+  color: #1e293b !important;
+}
+
+body.light-mode .x-drawer-item:hover,
+body.light-theme .x-drawer-item:hover,
+.x-drawer.light-theme .x-drawer-item:hover,
+.x-drawer.light-mode .x-drawer-item:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.light-mode .x-drawer-divider,
+body.light-theme .x-drawer-divider,
+.x-drawer.light-theme .x-drawer-divider,
+.x-drawer.light-mode .x-drawer-divider {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-mode .x-drawer-theme-btn,
+body.light-theme .x-drawer-theme-btn,
+.x-drawer.light-theme .x-drawer-theme-btn,
+.x-drawer.light-mode .x-drawer-theme-btn {
+  color: #0f172a !important;
+}
+
+body.light-mode .x-drawer-dots-btn,
+body.light-theme .x-drawer-dots-btn,
+.x-drawer.light-theme .x-drawer-dots-btn,
+.x-drawer.light-mode .x-drawer-dots-btn {
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .x-thread-container,
+body.light-theme .x-thread-container,
+body.light-mode .x-profile-container,
+body.light-theme .x-profile-container {
+  background: #ffffff !important;
+  color: #0f172a !important;
 }

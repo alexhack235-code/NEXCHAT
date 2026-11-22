@@ -216,6 +216,10 @@
       "destination": "/api/send-email-alert"
     },
     {
+      "source": "/api/summarize",
+      "destination": "/api/chat?mode=summarize"
+    },
+    {
       "source": "/api/ai",
       "destination": "/api/chat"
     },

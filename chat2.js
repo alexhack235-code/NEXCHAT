@@ -1163,6 +1163,7 @@ function setupGlobalDropNavigation() {
     const app = document.querySelector('.app');
     if (app) app.dataset.activeSection = 'global-drop';
     if (document.body) document.body.dataset.activeSection = 'global-drop';
+    if (window.globalDropEngine?.syncTheme) window.globalDropEngine.syncTheme();
   };
 
   const hideGlobalDrop = () => {

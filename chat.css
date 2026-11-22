@@ -1733,13 +1733,45 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
 .nex-status-container,
 .groups-container,
 .announcements-container {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
   width: 100%;
   height: 100%;
-  overflow-y: auto;
-  padding: 24px 20px;
+  max-height: 100%;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y !important;
+  padding: 24px 20px calc(var(--bottom-nav-height, 66px) + 30px + env(safe-area-inset-bottom, 0px)) 20px !important;
   background: linear-gradient(180deg, rgba(11,17,30,0.96) 0%, rgba(15,23,42,0.9) 100%);
   position: relative;
   z-index: 15;
+  box-sizing: border-box !important;
+}
+
+body.light-mode .groups-container,
+body.light-theme .groups-container {
+  background: #f3f6f9 !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .groups-header h3,
+body.light-theme .groups-header h3 {
+  color: #0f172a !important;
+}
+
+body.light-mode .groups-header,
+body.light-theme .groups-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.groups-list {
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  touch-action: pan-y;
 }
 
 /* Headers */
