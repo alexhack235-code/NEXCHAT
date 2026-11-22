@@ -69,15 +69,49 @@
     <p style="font-size: 15px; color: #94a3b8; max-width: 460px; line-height: 1.6; margin: 0 0 32px 0;">
       CamShot Video Reels is currently locked for scheduled infrastructure enhancements and core system development. All reel feeds and uploads are temporarily quarantined.
     </p>
-    <a href="chat.html" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #050811; font-weight: 800; font-size: 14px; padding: 13px 28px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 24px rgba(0, 255, 136, 0.35); transition: transform 0.2s;">
-      <i class="fa-solid fa-arrow-left"></i> Return to NEXCHAT
-    </a>
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px;">
+      <a href="chat.html" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #050811; font-weight: 800; font-size: 14px; padding: 13px 28px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 24px rgba(0, 255, 136, 0.35); transition: transform 0.2s;">
+        <i class="fa-solid fa-arrow-left"></i> Return to NEXCHAT
+      </a>
+      <button type="button" id="reelsNotifyMeBtn" onclick="subscribeReelsLaunchNotification()" style="display: inline-flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(0, 255, 136, 0.45); color: #00ff88; font-weight: 800; font-size: 14px; padding: 13px 26px; border-radius: 14px; cursor: pointer; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0, 255, 136, 0.15); transition: all 0.2s;">
+        <i class="fa-solid fa-bell"></i> <span id="reelsNotifyBtnText">Notify Me When Reels Launch</span>
+      </button>
+    </div>
   </div>
   <script>
+    function subscribeReelsLaunchNotification() {
+      const btn = document.getElementById('reelsNotifyMeBtn');
+      const text = document.getElementById('reelsNotifyBtnText');
+      localStorage.setItem('nex_notify_reels_launch', 'true');
+      if (btn && text) {
+        btn.style.background = 'rgba(0, 255, 136, 0.2)';
+        btn.style.borderColor = '#00ff88';
+        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Notification Alert Activated!</span>';
+        btn.disabled = true;
+      }
+      try {
+        if (window.db && window.addDoc && window.collection) {
+          const uid = (typeof window.auth !== 'undefined' && window.auth.currentUser?.uid) || localStorage.getItem('nex_user_uid') || 'guest';
+          window.addDoc(window.collection(window.db, 'reels_waitlist'), {
+            uid: uid,
+            subscribedAt: new Date().toISOString()
+          }).catch(() => {});
+        }
+      } catch (_) {}
+    }
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('video, audio').forEach(el => {
         try { el.pause(); el.src = ''; } catch (_) {}
       });
+      if (localStorage.getItem('nex_notify_reels_launch') === 'true') {
+        const btn = document.getElementById('reelsNotifyMeBtn');
+        if (btn) {
+          btn.style.background = 'rgba(0, 255, 136, 0.2)';
+          btn.style.borderColor = '#00ff88';
+          btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Notification Alert Activated!</span>';
+          btn.disabled = true;
+        }
+      }
     });
   </script>
 

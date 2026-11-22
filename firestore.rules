@@ -3,6 +3,93 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ===============================================================
+    // Assumed Data Models & Schemas
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid} (Firebase Auth UID)
+    // Fields:
+    //   - uid: string (required on create/update, immutable)
+    //   - email: string (optional, max 255 chars)
+    //   - username: string (optional, max 100 chars)
+    //   - displayName: string (optional, max 100 chars)
+    //   - photoURL / avatar: string (optional URL or path, max 2048 chars)
+    //   - bio: string (optional, max 1000 chars)
+    //   - tokens: number (optional, user token balance, anti-privilege escalation)
+    //   - online: bool (optional)
+    //   - lastSeen: timestamp (optional)
+    //   - createdAt: timestamp (optional, immutable)
+    //   - isAdmin / isSuperAdmin / role / banned: privileged flags (superAdmin only)
+    //   - blockedUsers / mutedUsers / archivedChats: list of strings (max 500 items)
+    //   - ipAddresses / knownIps / recentIps / clientIps / detectedIps / verifiedIps: list of strings (max 4 IP addresses, each max 45 chars)
+    //   - ipAddress / lastIp: string (optional, max 45 chars)
+    //   - approvedChatUsers: list of strings (max 1000 items)
+    // Subcollections:
+    //   - linkedDevices/{deviceId} & devices/{deviceId}: Multi-device linked session metadata
+    //   - authorized_extensions/{extensionId}: Third-party app authorized scopes
+    //   - notifications/{notifId}: User alerts, mentions, system pings
+    //   - bookmarks/{bookmarkId}, contacts/{contactId}, preferences/{prefId}, settings/{settingId}, sessions/{sessionId}
+    //
+    // Collection: statuses & status & status_updates
+    // Document ID: {statusId} (Auto-generated)
+    // Fields:
+    //   - userId: string (required, creator UID, immutable)
+    //   - authorId: string (optional, creator UID, immutable)
+    //   - username: string (optional, max 100 chars)
+    //   - profilePic: string (optional URL or path, max 2048 chars)
+    //   - content / caption / text: string (optional, max 10000 chars)
+    //   - imageUrl / mediaUrl / videoUrl: string (optional URL or base64 data URL, max 1.5MB)
+    //   - musicTrack: map or null (optional, attached track metadata)
+    //   - mediaType / type: string (optional, 'image' | 'video' | 'text' | 'audio' | 'code')
+    //   - filter: string (optional, CSS filter name, max 100 chars)
+    //   - fontFamily: string (optional, typography name, max 100 chars)
+    //   - textAlign: string (optional, text alignment, max 50 chars)
+    //   - gradient: string (optional, CSS gradient background, max 500 chars)
+    //   - codeContent: string (optional, code block payload, max 20000 chars)
+    //   - codeLanguage: string (optional, syntax highlight language, max 50 chars)
+    //   - mode: string (optional, 'CHAIN' | 'TRIM', max 50 chars)
+    //   - threadId: string (optional, chain thread grouping ID, max 128 chars)
+    //   - chainIndex / chainTotal: number (optional, video sequence markers)
+    //   - timeWindow: map or null (optional, start, end, duration numbers)
+    //   - trimStart / trimEnd / duration: number (optional, video clip timestamps)
+    //   - isMuted: bool (optional, audio mute flag)
+    //   - timestamp / createdAt: timestamp or number (optional, creation time)
+    //   - createdAtMs: number (optional, epoch timestamp in ms)
+    //   - expiresAt: timestamp, string or number (optional, 24h expiration)
+    //   - expiresAtMs: number (optional, 24h epoch expiration timestamp in ms)
+    //   - views / likedBy / likes: list (optional, viewer tracking)
+    // Subcollections:
+    //   - views/{viewId}: View receipts with viewer UID and timestamp
+    //   - reactions/{reactionId}: Story emoji reactions
+    //
+    // Collection: system_announcements & announcements
+    // Document ID: {announcementId} (Auto-generated)
+    // Fields:
+    //   - text / message / title: string
+    //   - active: bool (optional, active broadcast filter)
+    //   - createdAt / timestamp: timestamp or string
+    // Access: Public read (allow read: if true;), SuperAdmin write only.
+    //
+    // Collection: messages & chats
+    // Document ID: {messageId} / {chatId}
+    // Fields & Subcollections: Direct end-to-end user communication, threads, typing, participants.
+    //
+    // Collection: channels
+    // Document ID: {channelId}
+    // Fields: creatorId, name, description, isPublic, isVerified, subscriberCount, lastPostSnippet.
+    // Subcollections: posts/{postId}, subscribers/{userId}.
+    //
+    // Collection: global_drops
+    // Document ID: {dropId}
+    // Fields: authorId / userId, content, videoUrl, mediaUrls, tags, likes, signals, echoes.
+    // Subcollections: comments/{commentId}, reactions/{reactionId}, replies/{replyId}, likes/{likeId}.
+    //
+    // Collection: reels & reels_waitlist
+    // Document ID: {reelId} / {docId}
+    // Fields: authorId, caption, videoUrl, thumbnailUrl, sound, country, C2PA provenance manifest.
+    // ===============================================================
+
+    // ===============================================================
     // CORE SECURITY & VALIDATION HELPER FUNCTIONS
     // ===============================================================
 
@@ -16,13 +103,13 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // 3. Super Admin Verification
+    // 3. Super Admin Verification (Bootstrap emails, admin token claim, developer UIDs, or database admin records)
     function isSuperAdmin() {
       return isAuthenticated() && (
-        (request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com', 'alexandergamedeveloper74@gmail.com'] &&
-         request.auth.token.email_verified == true) ||
+        request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com', 'alexandergamedeveloper74@gmail.com'] ||
         request.auth.token.admin == true ||
         request.auth.uid in ['demonalexander526', 'alexhack235', 'ZhvqSK7NNtQUP1sqszYfo1kzXSb2'] ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin'])
       );
@@ -71,7 +158,7 @@ service cloud.firestore {
              );
     }
 
-    // 7. Direct Message Sender / Recipient / Participant Helpers
+    // 7. Direct Message Participant Helpers
     function isMessageSender(data) {
       return ('from' in data && request.auth.uid == data.from) ||
              ('senderId' in data && request.auth.uid == data.senderId);
@@ -83,26 +170,39 @@ service cloud.firestore {
     }
 
     function isMessageParticipant(data) {
-      return isMessageSender(data) || isMessageRecipient(data);
+      return isMessageSender(data) || isMessageRecipient(data) || isSuperAdmin();
     }
 
+    // 8. Chat Room Participant Verification
     function isChatParticipant(chatId) {
       return isAuthenticated() && (
+        (
+          exists(/databases/$(database)/documents/chats/$(chatId)) &&
+          (
+            ('participants' in get(/databases/$(database)/documents/chats/$(chatId)).data &&
+             request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants) ||
+            ('members' in get(/databases/$(database)/documents/chats/$(chatId)).data &&
+             request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members) ||
+            ('userIds' in get(/databases/$(database)/documents/chats/$(chatId)).data &&
+             request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.userIds) ||
+            ('userId' in get(/databases/$(database)/documents/chats/$(chatId)).data &&
+             get(/databases/$(database)/documents/chats/$(chatId)).data.userId == request.auth.uid) ||
+            ('creatorId' in get(/databases/$(database)/documents/chats/$(chatId)).data &&
+             get(/databases/$(database)/documents/chats/$(chatId)).data.creatorId == request.auth.uid)
+          )
+        ) ||
+        chatId == request.auth.uid ||
+        chatId.matches('^' + request.auth.uid + '_[^_]+$') ||
+        chatId.matches('^[^_]+_' + request.auth.uid + '$') ||
+        chatId.matches('^' + request.auth.uid + '-[^-]+$') ||
+        chatId.matches('^[^-]+-' + request.auth.uid + '$') ||
         chatId.matches(request.auth.uid + '_.*') ||
         chatId.matches('.*_' + request.auth.uid) ||
-        chatId == request.auth.uid ||
-        (exists(/databases/$(database)/documents/chats/$(chatId)) && (
-          ('participants' in get(/databases/$(database)/documents/chats/$(chatId)).data &&
-           request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants) ||
-          ('members' in get(/databases/$(database)/documents/chats/$(chatId)).data &&
-           request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members) ||
-          ('creatorId' in get(/databases/$(database)/documents/chats/$(chatId)).data &&
-           request.auth.uid == get(/databases/$(database)/documents/chats/$(chatId)).data.creatorId)
-        ))
+        isSuperAdmin()
       );
     }
 
-    // 8. String & List Bounds Validators
+    // 9. String & URL & List Bounds Validators
     function validStringLength(field, minLen, maxLen) {
       return field in request.resource.data &&
              request.resource.data[field] is string &&
@@ -118,17 +218,12 @@ service cloud.firestore {
               request.resource.data[field].size() <= maxLen);
     }
 
+    // URL validation supporting standard web protocols, relative paths, and safe length bounds
     function isValidUrl(url) {
       return url is string &&
              (
-               (url.size() <= 2048 && (
-                 url.matches("^https?://.*") ||
-                 url.matches("^/.*") ||
-                 url.matches("^[a-zA-Z0-9_.-]+$") ||
-                 url.matches("^[a-zA-Z0-9_./-]+$") ||
-                 url == ""
-               )) ||
-               (url.size() <= 1048576 && (url.matches("^data:image/.*") || url.matches("^data:video/.*") || url.matches("^data:audio/.*") || url.matches("^blob:.*")))
+               (url.size() <= 2048 && (url.matches("^https?://.*") || url.matches("^/.*") || url == "")) ||
+               (url.size() <= 1500000 && (url.matches("^data:.*") || url.matches("^blob:.*")))
              );
     }
 
@@ -136,6 +231,11 @@ service cloud.firestore {
       return !(field in request.resource.data) ||
              request.resource.data[field] == null ||
              isValidUrl(request.resource.data[field]);
+    }
+
+    // Safe media string validator for Status Stories & Global Drops (supports both remote URLs and large base64 data URLs up to 1.5MB without regex execution limits)
+    function isValidStatusMedia(val) {
+      return val == null || (val is string && val.size() <= 1500000);
     }
 
     function isValidList(val, maxSize) {
@@ -148,104 +248,290 @@ service cloud.firestore {
              isValidList(request.resource.data[field], maxSize);
     }
 
+    // Optional Reactions Validator: Supports both array [] and map/object {} up to 100 items
+    function isValidOptionalReactions(field) {
+      return !(field in request.resource.data) ||
+             request.resource.data[field] == null ||
+             (request.resource.data[field] is list && request.resource.data[field].size() <= 100) ||
+             (request.resource.data[field] is map && request.resource.data[field].size() <= 100);
+    }
+
+    // IP Address List Validator: Maximum 4 IP addresses, each max 45 chars string
+    function isValidIpList(field, maxCount) {
+      return !(field in request.resource.data) ||
+             request.resource.data[field] == null ||
+             (request.resource.data[field] is list &&
+              request.resource.data[field].size() <= maxCount &&
+              (request.resource.data[field].size() < 1 || (request.resource.data[field][0] is string && request.resource.data[field][0].size() <= 45)) &&
+              (request.resource.data[field].size() < 2 || (request.resource.data[field][1] is string && request.resource.data[field][1].size() <= 45)) &&
+              (request.resource.data[field].size() < 3 || (request.resource.data[field][2] is string && request.resource.data[field][2].size() <= 45)) &&
+              (request.resource.data[field].size() < 4 || (request.resource.data[field][3] is string && request.resource.data[field][3].size() <= 45)));
+    }
+
+    // Extension Hub Scopes Validator (Max 10 scopes, each string max 64 chars)
+    function isValidScopeList(scopes) {
+      return scopes is list &&
+             scopes.size() <= 10 &&
+             (scopes.size() < 1 || (scopes[0] is string && scopes[0].size() <= 64)) &&
+             (scopes.size() < 2 || (scopes[1] is string && scopes[1].size() <= 64)) &&
+             (scopes.size() < 3 || (scopes[2] is string && scopes[2].size() <= 64)) &&
+             (scopes.size() < 4 || (scopes[3] is string && scopes[3].size() <= 64)) &&
+             (scopes.size() < 5 || (scopes[4] is string && scopes[4].size() <= 64)) &&
+             (scopes.size() < 6 || (scopes[5] is string && scopes[5].size() <= 64)) &&
+             (scopes.size() < 7 || (scopes[6] is string && scopes[6].size() <= 64)) &&
+             (scopes.size() < 8 || (scopes[7] is string && scopes[7].size() <= 64)) &&
+             (scopes.size() < 9 || (scopes[8] is string && scopes[8].size() <= 64)) &&
+             (scopes.size() < 10 || (scopes[9] is string && scopes[9].size() <= 64));
+    }
+
     function areImmutableFieldsUnchanged(fields) {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
     }
 
+    function isValidTimestampOrNumber(val) {
+      return val == null || val is timestamp || val is string || val is int || val is float || val is number;
+    }
+
+    function resourceExists() {
+      return resource != null;
+    }
+
     // ===============================================================
-    // DOMAIN VALIDATOR FUNCTIONS
+    // DOMAIN VALIDATORS (Granular Validator Function Pattern)
     // ===============================================================
 
+    // 1. User Profile Validator: Prevents privilege escalation on isAdmin, isSuperAdmin, role, banned, and tokens; enforces max 4 IPs
     function isValidUserCreate(data) {
-      return (!('role' in data) || data.role in ['user', 'member', 'creator']) &&
-             (!('isAdmin' in data) || data.isAdmin == false) &&
-             (!('isSuperAdmin' in data) || data.isSuperAdmin == false) &&
-             isValidOptionalString('username', 1, 100) &&
+      return (!('isAdmin' in data) || data.isAdmin == false || isSuperAdmin()) &&
+             (!('isSuperAdmin' in data) || data.isSuperAdmin == false || isSuperAdmin()) &&
+             (!('role' in data) || data.role in ['user', 'member', 'client', 'guest', 'creator'] || isSuperAdmin()) &&
+             (!('banned' in data) || data.banned == false || isSuperAdmin()) &&
+             (!('tokens' in data) || (data.tokens is number && data.tokens >= 0 && data.tokens <= 2000) || isSuperAdmin()) &&
+             isValidOptionalString('username', 0, 100) &&
              isValidOptionalString('displayName', 0, 100) &&
+             isValidOptionalString('bio', 0, 1000) &&
              isValidOptionalString('email', 0, 255) &&
              isValidOptionalUrl('photoURL') &&
              isValidOptionalUrl('avatar') &&
-             isValidOptionalString('bio', 0, 1000) &&
-             isValidOptionalList('contacts', 5000);
+             isValidOptionalList('blockedUsers', 500) &&
+             isValidOptionalList('mutedUsers', 500) &&
+             isValidOptionalList('archivedChats', 500) &&
+             isValidOptionalList('approvedChatUsers', 1000) &&
+             isValidOptionalList('contacts', 5000) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('lastIp', 0, 45) &&
+             isValidIpList('ipAddresses', 4) &&
+             isValidIpList('knownIps', 4) &&
+             isValidIpList('recentIps', 4) &&
+             isValidIpList('clientIps', 4) &&
+             isValidIpList('detectedIps', 4) &&
+             isValidIpList('verifiedIps', 4);
     }
 
     function isValidUserUpdate(data, prev) {
-      return areImmutableFieldsUnchanged(['uid', 'createdAt']) &&
-             (!data.diff(prev).affectedKeys().hasAny(['role', 'isAdmin', 'isSuperAdmin', 'banned'])) &&
-             isValidOptionalString('username', 1, 100) &&
+      return (!('isAdmin' in data) || (('isAdmin' in prev && data.isAdmin == prev.isAdmin) || (!('isAdmin' in prev) && data.isAdmin == false)) || isSuperAdmin()) &&
+             (!('isSuperAdmin' in data) || (('isSuperAdmin' in prev && data.isSuperAdmin == prev.isSuperAdmin) || (!('isSuperAdmin' in prev) && data.isSuperAdmin == false)) || isSuperAdmin()) &&
+             (!('role' in data) || (('role' in prev && data.role == prev.role) || (!('role' in prev) && data.role in ['user', 'member', 'client', 'guest', 'creator'])) || isSuperAdmin()) &&
+             (!('banned' in data) || (('banned' in prev && data.banned == prev.banned) || (!('banned' in prev) && data.banned == false)) || isSuperAdmin()) &&
+             (!('tokens' in data) || (data.tokens is number && data.tokens >= 0 && (('tokens' in prev && data.tokens <= prev.tokens) || (!('tokens' in prev) && data.tokens <= 2000))) || isSuperAdmin()) &&
+             (!('uid' in data) || !('uid' in prev) || data.uid == prev.uid) &&
+             isValidOptionalString('username', 0, 100) &&
              isValidOptionalString('displayName', 0, 100) &&
+             isValidOptionalString('bio', 0, 1000) &&
              isValidOptionalString('email', 0, 255) &&
              isValidOptionalUrl('photoURL') &&
              isValidOptionalUrl('avatar') &&
-             isValidOptionalString('bio', 0, 1000) &&
+             isValidOptionalList('blockedUsers', 500) &&
+             isValidOptionalList('mutedUsers', 500) &&
+             isValidOptionalList('archivedChats', 500) &&
+             isValidOptionalList('approvedChatUsers', 1000) &&
              isValidOptionalList('contacts', 5000) &&
-             isValidOptionalList('approvedChatUsers', 1000);
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('lastIp', 0, 45) &&
+             isValidIpList('ipAddresses', 4) &&
+             isValidIpList('knownIps', 4) &&
+             isValidIpList('recentIps', 4) &&
+             isValidIpList('clientIps', 4) &&
+             isValidIpList('detectedIps', 4) &&
+             isValidIpList('verifiedIps', 4);
     }
 
+    // 2. Linked Device Subcollection Validator (/users/{uid}/linkedDevices/{deviceId} & /users/{uid}/devices/{deviceId})
+    function isValidLinkedDevice(data) {
+      return isValidOptionalString('sessionId', 0, 128) &&
+             isValidOptionalString('deviceId', 0, 128) &&
+             isValidOptionalString('deviceName', 0, 128) &&
+             isValidOptionalString('label', 0, 128) &&
+             isValidOptionalString('deviceType', 0, 64) &&
+             isValidOptionalString('browser', 0, 64) &&
+             isValidOptionalString('os', 0, 64) &&
+             isValidOptionalString('platform', 0, 64) &&
+             isValidOptionalString('status', 0, 50) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('lastIp', 0, 45) &&
+             (!('linkedAt' in data) || isValidTimestampOrNumber(data.linkedAt)) &&
+             (!('lastActive' in data) || isValidTimestampOrNumber(data.lastActive)) &&
+             isValidIpList('ipAddresses', 4) &&
+             isValidIpList('knownIps', 4) &&
+             isValidIpList('recentIps', 4) &&
+             isValidIpList('clientIps', 4) &&
+             isValidIpList('detectedIps', 4) &&
+             isValidIpList('verifiedIps', 4);
+    }
+
+    // 3. Device Pairing Link Session Create & Update Validators (/link_sessions/{sessionId})
+    function isValidLinkSessionCreate(data, sessionId) {
+      return ('status' in data && data.status == 'pending') &&
+             (!('sessionId' in data) || (data.sessionId is string && data.sessionId == sessionId && data.sessionId.size() <= 128)) &&
+             isValidOptionalString('pairingCode', 0, 20) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             (!('deviceInfo' in data) || data.deviceInfo == null || data.deviceInfo is map) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt));
+    }
+
+    function isValidLinkSessionUpdate(data, prev) {
+      return ('status' in data && data.status is string && data.status in ['pending', 'approved', 'rejected', 'revoked', 'expired']) &&
+             (!('sessionId' in data) || !('sessionId' in prev) || data.sessionId == prev.sessionId) &&
+             (!('createdAt' in data) || !('createdAt' in prev) || data.createdAt == prev.createdAt) &&
+             (!('uid' in prev) || !('uid' in data) || data.uid == prev.uid) &&
+             (!('primaryUid' in prev) || !('primaryUid' in data) || data.primaryUid == prev.primaryUid) &&
+             isValidOptionalString('uid', 0, 128) &&
+             isValidOptionalString('primaryUid', 0, 128) &&
+             isValidOptionalString('pairingCode', 0, 20) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             (!('user' in data) || data.user == null || data.user is map) &&
+             (!('deviceInfo' in data) || data.deviceInfo == null || data.deviceInfo is map) &&
+             (!('approvedAt' in data) || isValidTimestampOrNumber(data.approvedAt)) &&
+             (!('rejectedAt' in data) || isValidTimestampOrNumber(data.rejectedAt)) &&
+             (!('revokedAt' in data) || isValidTimestampOrNumber(data.revokedAt)) &&
+             (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt));
+    }
+
+    // 4. Extension Hub Authorized Extension Validator (/users/{uid}/authorized_extensions/{extensionId})
+    function isValidAuthorizedExtension(data, extId) {
+      return extId is string &&
+             extId.size() >= 1 && extId.size() <= 64 &&
+             (!('extensionId' in data) || (data.extensionId is string && data.extensionId.size() >= 1 && data.extensionId.size() <= 64 && data.extensionId == extId)) &&
+             ('status' in data && data.status is string && data.status in ['approved', 'denied', 'pending']) &&
+             (!('scopes' in data) || data.scopes == null || isValidScopeList(data.scopes)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('extensionName', 0, 128);
+    }
+
+    // 5. Direct Message Validator
     function isValidMessageCreate(data) {
-      return isMessageSender(data) &&
+      return (
+               (('from' in data && data.from == request.auth.uid) && ('to' in data && data.to is string && data.to.size() <= 128)) ||
+               (('senderId' in data && data.senderId == request.auth.uid) && ('receiverId' in data && data.receiverId is string && data.receiverId.size() <= 128))
+             ) &&
              isValidOptionalString('text', 0, 10000) &&
              isValidOptionalString('content', 0, 10000) &&
              isValidOptionalString('message', 0, 10000) &&
              isValidOptionalString('type', 0, 50) &&
              isValidOptionalString('status', 0, 50) &&
+             isValidOptionalReactions('reactions') &&
              isValidOptionalList('deletedFor', 500);
     }
 
-    function isValidMessageUpdate(data, prev) {
+    // 6. Thread Message Validator (/chats/{chatId}/threads/{threadId}/messages/{msgId})
+    function isValidThreadMessage(data) {
       return (
-        // Sender editing text, reactions, or updating deletedFor
-        (
-          isMessageSender(prev) &&
-          areImmutableFieldsUnchanged(['from', 'senderId', 'to', 'receiverId', 'createdAt', 'timestamp']) &&
-          isValidOptionalString('text', 0, 10000) &&
-          isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        // Recipient updating status (read, delivered), reactions, or deletedFor
-        (
-          isMessageRecipient(prev) &&
-          areImmutableFieldsUnchanged(['from', 'senderId', 'to', 'receiverId', 'createdAt', 'timestamp', 'text', 'content', 'message']) &&
-          data.diff(prev).affectedKeys().hasOnly(['status', 'read', 'readAt', 'delivered', 'deliveredAt', 'reactions', 'deletedFor']) &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        // Either participant tombstoning (isDeleted, deletedForEveryone)
-        (
-          isMessageParticipant(prev) &&
-          areImmutableFieldsUnchanged(['from', 'senderId', 'to', 'receiverId', 'createdAt', 'timestamp']) &&
-          data.diff(prev).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        isSuperAdmin()
-      );
-    }
-
-    function isValidGroupCreate(data) {
-      return (
-        ('creatorId' in data && data.creatorId == request.auth.uid) ||
-        ('createdBy' in data && data.createdBy == request.auth.uid) ||
+        ('senderId' in data && data.senderId == request.auth.uid) ||
+        ('userId' in data && data.userId == request.auth.uid) ||
+        ('from' in data && data.from == request.auth.uid) ||
+        ('authorId' in data && data.authorId == request.auth.uid) ||
         isSuperAdmin()
       ) &&
-      validStringLength('name', 1, 128) &&
-      isValidOptionalString('description', 0, 1000) &&
-      isValidOptionalList('members', 100) &&
-      isValidOptionalList('admins', 100);
+      isValidOptionalString('text', 0, 10000) &&
+      isValidOptionalString('content', 0, 10000) &&
+      isValidOptionalString('message', 0, 10000) &&
+      isValidOptionalUrl('mediaUrl') &&
+      isValidOptionalUrl('attachmentUrl') &&
+      isValidOptionalUrl('imageUrl') &&
+      isValidOptionalReactions('reactions') &&
+      isValidOptionalList('deletedFor', 500);
     }
 
-    function isValidGroupAdminUpdate() {
-      return isValidOptionalString('name', 1, 128) &&
+    // 7. Presence Document Validator (/presence/{userId})
+    function isValidPresence(data, userId) {
+      return (
+        (!('userId' in data) || data.userId == request.auth.uid || data.userId == userId || isSuperAdmin()) &&
+        (!('uid' in data) || data.uid == request.auth.uid || data.uid == userId || isSuperAdmin())
+      ) &&
+      (!('online' in data) || data.online is bool) &&
+      (!('isStealth' in data) || data.isStealth is bool) &&
+      (!('stealth' in data) || data.stealth is bool) &&
+      (!('airGapStealth' in data) || data.airGapStealth is bool) &&
+      (!('stealthMode' in data) || data.stealthMode is bool) &&
+      (!('airGap' in data) || data.airGap is bool) &&
+      isValidOptionalString('status', 0, 100) &&
+      isValidOptionalString('state', 0, 100) &&
+      isValidOptionalString('customStatus', 0, 200) &&
+      isValidOptionalString('activeChatId', 0, 128) &&
+      isValidOptionalString('device', 0, 100) &&
+      isValidOptionalString('client', 0, 100) &&
+      (!('lastSeen' in data) || isValidTimestampOrNumber(data.lastSeen)) &&
+      (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+      (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt));
+    }
+
+    // 8. Nexbot Studio Config Validator (/nexbot_configs/{configId})
+    function isValidNexbotConfig(data) {
+      return (
+               ('authorId' in data && data.authorId == request.auth.uid) ||
+               ('userId' in data && data.userId == request.auth.uid) ||
+               ('uid' in data && data.uid == request.auth.uid) ||
+               isSuperAdmin()
+             ) &&
+             validStringLength('name', 1, 100) &&
              isValidOptionalString('description', 0, 1000) &&
-             isValidOptionalString('privacy', 0, 50) &&
-             isValidOptionalString('approval', 0, 50) &&
-             isValidOptionalString('inviteCode', 0, 64) &&
-             isValidOptionalUrl('profilePic') &&
-             isValidOptionalUrl('groupPic') &&
-             isValidOptionalUrl('icon') &&
-             isValidOptionalList('members', 100) &&
-             isValidOptionalList('admins', 100) &&
-             isValidOptionalList('moderators', 100);
+             isValidOptionalString('systemPrompt', 0, 15000) &&
+             isValidOptionalString('instructions', 0, 15000) &&
+             isValidOptionalString('model', 0, 100) &&
+             isValidOptionalUrl('avatar');
     }
 
+    // 9. Security Scanner Log Validator (/security_scan_logs/{logId})
+    function isValidSecurityScanLog(data) {
+      return (
+               ('userId' in data && data.userId == request.auth.uid) ||
+               ('ownerId' in data && data.ownerId == request.auth.uid) ||
+               ('uid' in data && data.uid == request.auth.uid) ||
+               isSuperAdmin()
+             ) &&
+             isValidOptionalString('scanType', 0, 100) &&
+             isValidOptionalString('status', 0, 50) &&
+             isValidOptionalString('findings', 0, 5000) &&
+             isValidOptionalString('summary', 0, 5000) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('lastIp', 0, 45) &&
+             isValidIpList('ipAddresses', 4) &&
+             isValidIpList('knownIps', 4) &&
+             isValidIpList('recentIps', 4) &&
+             isValidIpList('clientIps', 4) &&
+             isValidIpList('detectedIps', 4) &&
+             isValidIpList('verifiedIps', 4);
+    }
+
+    // 10. Quarantine Vault Item Validator (/quarantine_vault/{vaultId})
+    function isValidQuarantineVault(data) {
+      return (
+               ('userId' in data && data.userId == request.auth.uid) ||
+               ('ownerId' in data && data.ownerId == request.auth.uid) ||
+               ('uid' in data && data.uid == request.auth.uid) ||
+               isSuperAdmin()
+             ) &&
+             isValidOptionalString('fileName', 0, 255) &&
+             isValidOptionalString('reason', 0, 1000) &&
+             isValidOptionalString('threatLevel', 0, 50) &&
+             isValidOptionalUrl('fileUrl');
+    }
+
+    // 11. Group Message Validator
     function isValidGroupMessage(data) {
       return (
         ('senderId' in data && data.senderId == request.auth.uid) ||
@@ -255,54 +541,53 @@ service cloud.firestore {
       ) &&
       isValidOptionalString('text', 0, 10000) &&
       isValidOptionalString('content', 0, 10000) &&
+      isValidOptionalString('message', 0, 10000) &&
       isValidOptionalString('senderName', 0, 100) &&
       isValidOptionalUrl('senderAvatar') &&
+      isValidOptionalReactions('reactions') &&
       isValidOptionalList('deletedFor', 500);
     }
 
-    function isValidGroupMessageUpdate(data, prev, groupId) {
-      return (
-        // Sender editing text or reactions
-        (
-          (('senderId' in prev && prev.senderId == request.auth.uid) || ('from' in prev && prev.from == request.auth.uid)) &&
-          areImmutableFieldsUnchanged(['senderId', 'from', 'groupId', 'createdAt', 'timestamp']) &&
-          isValidOptionalString('text', 0, 10000) &&
-          isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        // Sender or moderator tombstoning message
-        (
-          (('senderId' in prev && prev.senderId == request.auth.uid) || ('from' in prev && prev.from == request.auth.uid) || isGroupModerator(groupId)) &&
-          areImmutableFieldsUnchanged(['senderId', 'from', 'groupId', 'createdAt', 'timestamp']) &&
-          data.diff(prev).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content', 'message']) &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        // Group members updating reactions, readBy, readAt, deletedFor
-        (
-          isGroupMember(groupId) &&
-          areImmutableFieldsUnchanged(['senderId', 'from', 'groupId', 'createdAt', 'timestamp']) &&
-          data.diff(prev).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor', 'status', 'read']) &&
-          isValidOptionalList('deletedFor', 500)
-        ) ||
-        isGroupModerator(groupId) ||
-        isSuperAdmin()
-      );
-    }
-
+    // 12. Status Story Create Validator
     function isValidStatusStoryCreate(data) {
       return (
-        ('userId' in data && data.userId == request.auth.uid) ||
-        ('authorId' in data && data.authorId == request.auth.uid) ||
-        isSuperAdmin()
+        ('userId' in data && (data.userId == request.auth.uid || isSuperAdmin())) ||
+        ('authorId' in data && (data.authorId == request.auth.uid || isSuperAdmin()))
       ) &&
-      isValidOptionalString('content', 0, 5000) &&
-      isValidOptionalString('caption', 0, 5000) &&
-      isValidOptionalString('text', 0, 5000) &&
-      isValidOptionalUrl('imageUrl') &&
-      isValidOptionalUrl('mediaUrl') &&
-      isValidOptionalUrl('videoUrl');
+      isValidOptionalString('content', 0, 10000) &&
+      isValidOptionalString('caption', 0, 10000) &&
+      isValidOptionalString('text', 0, 10000) &&
+      isValidOptionalString('username', 0, 100) &&
+      isValidOptionalString('profilePic', 0, 2048) &&
+      isValidOptionalString('mediaType', 0, 50) &&
+      isValidOptionalString('type', 0, 50) &&
+      isValidOptionalString('filter', 0, 100) &&
+      isValidOptionalString('fontFamily', 0, 100) &&
+      isValidOptionalString('textAlign', 0, 50) &&
+      isValidOptionalString('gradient', 0, 500) &&
+      isValidOptionalString('codeContent', 0, 20000) &&
+      isValidOptionalString('codeLanguage', 0, 50) &&
+      isValidOptionalString('mode', 0, 50) &&
+      isValidOptionalString('threadId', 0, 128) &&
+      (!('imageUrl' in data) || isValidStatusMedia(data.imageUrl)) &&
+      (!('mediaUrl' in data) || isValidStatusMedia(data.mediaUrl)) &&
+      (!('videoUrl' in data) || isValidStatusMedia(data.videoUrl)) &&
+      (!('musicTrack' in data) || data.musicTrack == null || data.musicTrack is map) &&
+      (!('timeWindow' in data) || data.timeWindow == null || data.timeWindow is map) &&
+      (!('isMuted' in data) || data.isMuted == null || data.isMuted is bool) &&
+      (!('chainIndex' in data) || data.chainIndex is number) &&
+      (!('chainTotal' in data) || data.chainTotal is number) &&
+      (!('trimStart' in data) || data.trimStart is number) &&
+      (!('trimEnd' in data) || data.trimEnd is number) &&
+      (!('duration' in data) || data.duration is number) &&
+      (!('createdAtMs' in data) || data.createdAtMs is number) &&
+      (!('expiresAtMs' in data) || data.expiresAtMs is number) &&
+      (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+      (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+      (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt));
     }
 
+    // 13. Reel Short Video Validator
     function isValidReel(data) {
       return (
         ('authorId' in data && data.authorId == request.auth.uid) ||
@@ -311,9 +596,18 @@ service cloud.firestore {
       ) &&
       isValidOptionalString('caption', 0, 2000) &&
       isValidOptionalUrl('videoUrl') &&
-      isValidOptionalUrl('thumbnailUrl');
+      isValidOptionalUrl('thumbnailUrl') &&
+      isValidOptionalString('sound', 0, 200) &&
+      isValidOptionalString('country', 0, 10) &&
+      isValidOptionalList('likes', 10000) &&
+      isValidOptionalString('provenanceStatus', 0, 100) &&
+      (!('isAuthentic' in data) || data.isAuthentic == null || data.isAuthentic is bool) &&
+      (!('authenticityScore' in data) || data.authenticityScore == null || (data.authenticityScore is number && data.authenticityScore >= 0)) &&
+      (!('c2paManifest' in data) || data.c2paManifest == null || data.c2paManifest is map || (data.c2paManifest is string && data.c2paManifest.size() <= 100000)) &&
+      (!('syntheticMetrics' in data) || data.syntheticMetrics == null || data.syntheticMetrics is map);
     }
 
+    // 14. Global Drop Validator
     function isValidGlobalDropCreate() {
       return isValidOptionalString('content', 0, 5000) &&
              isValidOptionalUrl('videoUrl') &&
@@ -322,6 +616,7 @@ service cloud.firestore {
              isValidOptionalList('tags', 50);
     }
 
+    // 15. Broadcast Channel Validators
     function isValidChannelCreate(data) {
       return ('creatorId' in data && data.creatorId == request.auth.uid) &&
              validStringLength('name', 1, 100) &&
@@ -352,54 +647,160 @@ service cloud.firestore {
       isValidOptionalUrl('mediaUrl');
     }
 
+    // 16. Escrow Contract Helpers & ChronEX Smart Escrow Guardian Validator
+    function isEscrowBuyer(data) {
+      return isAuthenticated() && (
+        ('buyer' in data && (data.buyer == request.auth.uid || (request.auth.token.email != null && data.buyer == request.auth.token.email))) ||
+        ('buyerId' in data && data.buyerId == request.auth.uid) ||
+        ('buyerUid' in data && data.buyerUid == request.auth.uid) ||
+        ('buyerUID' in data && data.buyerUID == request.auth.uid)
+      );
+    }
+
+    function isEscrowSeller(data) {
+      return isAuthenticated() && (
+        ('seller' in data && (data.seller == request.auth.uid || (request.auth.token.email != null && data.seller == request.auth.token.email))) ||
+        ('sellerId' in data && data.sellerId == request.auth.uid) ||
+        ('sellerUid' in data && data.sellerUid == request.auth.uid) ||
+        ('sellerUID' in data && data.sellerUID == request.auth.uid)
+      );
+    }
+
+    function isEscrowParty(data) {
+      return isAuthenticated() && (
+        isEscrowBuyer(data) ||
+        isEscrowSeller(data) ||
+        ('parties' in data && data.parties is list && request.auth.uid in data.parties)
+      );
+    }
+
+    function isValidEscrowContract(data) {
+      return (
+        ('buyer' in data && data.buyer is string && data.buyer.size() <= 128) ||
+        ('buyerId' in data && data.buyerId is string && data.buyerId.size() <= 128) ||
+        ('buyerUid' in data && data.buyerUid is string && data.buyerUid.size() <= 128) ||
+        ('buyerUID' in data && data.buyerUID is string && data.buyerUID.size() <= 128)
+      ) &&
+      (!('seller' in data) || (data.seller is string && data.seller.size() <= 128)) &&
+      (!('sellerId' in data) || (data.sellerId is string && data.sellerId.size() <= 128)) &&
+      (!('sellerUid' in data) || (data.sellerUid is string && data.sellerUid.size() <= 128)) &&
+      (!('sellerUID' in data) || (data.sellerUID is string && data.sellerUID.size() <= 128)) &&
+      (!('amount' in data) || (data.amount is number && data.amount >= 0)) &&
+      (!('tokensAmount' in data) || (data.tokensAmount is number && data.tokensAmount >= 0)) &&
+      isValidOptionalString('status', 0, 50) &&
+      isValidOptionalString('dealStatus', 0, 50) &&
+      isValidOptionalString('item', 0, 1000) &&
+      isValidOptionalString('title', 0, 200) &&
+      isValidOptionalString('description', 0, 2000) &&
+      isValidOptionalString('currency', 0, 30) &&
+      isValidOptionalString('deliverableHash', 0, 255) &&
+      isValidOptionalUrl('deliverableUrl') &&
+      isValidOptionalString('disputeReason', 0, 2000) &&
+      isValidOptionalString('disputeStatus', 0, 50) &&
+      isValidOptionalString('multiSigRequirement', 0, 255) &&
+      isValidOptionalString('arbitrationVerdict', 0, 2000) &&
+      isValidOptionalList('parties', 10) &&
+      (!('deliverable' in data) || data.deliverable == null || data.deliverable is map || (data.deliverable is string && data.deliverable.size() <= 10000)) &&
+      (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+      (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt));
+    }
+
+    // 17. Advertisement & Regional Marketplace Validator
     function isValidAdvertisement(data) {
-      return validStringLength('title', 1, 150) &&
-             isValidOptionalString('description', 0, 2000) &&
-             isValidOptionalUrl('imageUrl') &&
-             isValidOptionalUrl('linkUrl') &&
-             (!('price' in data) || (data.price is number && data.price >= 0));
+      return (
+        ('sellerUID' in data && data.sellerUID == request.auth.uid) ||
+        isSuperAdmin()
+      ) &&
+      (
+        validStringLength('title', 1, 150) ||
+        validStringLength('productName', 1, 150)
+      ) &&
+      isValidOptionalString('description', 0, 2000) &&
+      isValidOptionalString('productDescription', 0, 2000) &&
+      isValidOptionalString('country', 0, 10) &&
+      isValidOptionalString('shippingScope', 0, 20) &&
+      isValidOptionalString('currency', 0, 10) &&
+      isValidOptionalString('currencySymbol', 0, 10) &&
+      isValidOptionalString('productCategory', 0, 100) &&
+      isValidOptionalString('mediaType', 0, 50) &&
+      isValidOptionalString('sellerUsername', 0, 100) &&
+      isValidOptionalString('sellerEmail', 0, 255) &&
+      isValidOptionalString('status', 0, 50) &&
+      (!('productPrice' in data) || (data.productPrice is number && data.productPrice >= 0)) &&
+      (!('price' in data) || (data.price is number && data.price >= 0)) &&
+      isValidOptionalUrl('imageURL') &&
+      isValidOptionalUrl('imageUrl') &&
+      isValidOptionalUrl('linkUrl') &&
+      (!('views' in data) || (data.views is number && data.views >= 0)) &&
+      (!('durationHours' in data) || (data.durationHours is number && data.durationHours >= 0)) &&
+      (!('durationTokens' in data) || (data.durationTokens is number && data.durationTokens >= 0)) &&
+      (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+      (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+      (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt));
     }
 
+    // 18. Creator Badges Validator
     function isValidCreatorBadge() {
-      return isValidOptionalString('name', 1, 100) &&
-             isValidOptionalString('title', 1, 100) &&
-             isValidOptionalString('description', 0, 500) &&
-             isValidOptionalUrl('icon') &&
-             isValidOptionalUrl('imageUrl');
+      return isValidOptionalString('name', 0, 100) &&
+             isValidOptionalString('title', 0, 100) &&
+             isValidOptionalString('description', 0, 1000) &&
+             isValidOptionalString('rarity', 0, 50) &&
+             isValidOptionalString('color', 0, 30) &&
+             isValidOptionalString('icon', 0, 100) &&
+             isValidOptionalUrl('imageUrl') &&
+             isValidOptionalList('holders', 10000) &&
+             isValidOptionalList('claimedBy', 10000) &&
+             isValidOptionalString('claimedBy', 0, 128) &&
+             isValidOptionalString('userId', 0, 128);
     }
 
+    // 19. WebRTC Call Session Validator
+    function isValidCallSession(data) {
+      return (
+        ('callerId' in data && data.callerId == request.auth.uid) ||
+        ('receiverId' in data && data.receiverId == request.auth.uid) ||
+        ('participants' in data && data.participants is list && request.auth.uid in data.participants) ||
+        isSuperAdmin()
+      ) &&
+      isValidOptionalString('callType', 0, 50) &&
+      isValidOptionalString('status', 0, 50) &&
+      isValidOptionalList('participants', 50);
+    }
+
+    // 20. Telegram-Style "People Nearby" (Radar) Validator: nearby_radar/{uid}
     function isValidNearbyRadar(data, uid) {
-      return ('uid' in data && data.uid == uid) &&
-             (!('geohash' in data) || (data.geohash is string && data.geohash.size() <= 20)) &&
-             (!('latitude' in data) || (data.latitude is number && data.latitude >= -90.0 && data.latitude <= 90.0)) &&
-             (!('longitude' in data) || (data.longitude is number && data.longitude >= -180.0 && data.longitude <= 180.0));
+      return ('uid' in data && data.uid is string && data.uid == uid && data.uid == request.auth.uid) &&
+             isValidOptionalString('username', 0, 64) &&
+             isValidOptionalString('displayName', 0, 100) &&
+             isValidOptionalString('profilePic', 0, 2048) &&
+             (!('latitude' in data) || (data.latitude is number && data.latitude >= -90 && data.latitude <= 90)) &&
+             (!('longitude' in data) || (data.longitude is number && data.longitude >= -180 && data.longitude <= 180)) &&
+             (!('active' in data) || data.active is bool);
     }
 
+    // 21. Incident Report Validator
     function isValidReport(data) {
       return ('reportedBy' in data && data.reportedBy == request.auth.uid) &&
-             validStringLength('reason', 1, 500) &&
+             (
+               validStringLength('reason', 1, 500) ||
+               validStringLength('description', 1, 5000) ||
+               isValidOptionalString('category', 0, 100)
+             ) &&
              isValidOptionalString('targetId', 0, 128) &&
              isValidOptionalString('targetType', 0, 50);
-    }
-
-    function isValidLinkSessionCreate(data, sessionId) {
-      return (sessionId.size() <= 128) &&
-             validStringLength('pairingCode', 1, 20) &&
-             (!('deviceInfo' in data) || data.deviceInfo is map) &&
-             (!('ipAddress' in data) || (data.ipAddress is string && data.ipAddress.size() <= 45));
-    }
-
-    function isValidUserSubDoc(data, uid) {
-      return (!('userId' in data) || data.userId == uid) &&
-             (!('uid' in data) || data.uid == uid);
     }
 
     // ===============================================================
     // 1. USERS COLLECTION & SUBCOLLECTIONS
     // ===============================================================
     match /users/{uid} {
+      // Authenticated users can read directory profiles for contacts/chat lookup (unauthenticated denied)
       allow read: if isAuthenticated();
+
+      // Profile creation restricted to owner with anti-privilege escalation & payload bounds
       allow create: if isOwner(uid) && isValidUserCreate(request.resource.data);
+
+      // Updates restricted to owner, authenticated contact approvals, or SuperAdmin
       allow update: if (isOwner(uid) && isValidUserUpdate(request.resource.data, resource.data)) ||
                        (
                          isAuthenticated() &&
@@ -407,9 +808,49 @@ service cloud.firestore {
                          isValidOptionalList('approvedChatUsers', 1000)
                        ) ||
                        isSuperAdmin();
+
+      // Account deletion restricted to SuperAdmin
       allow delete: if isSuperAdmin();
 
-      // Private User Subcollections (preferences, settings, linkedDevices, devices, authorized_extensions, bookmarks, notifications, contacts, sessions)
+      // Linked Devices subcollection (Multi-device pairing with granular validator & IP limits)
+      match /linkedDevices/{deviceId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) && isValidLinkedDevice(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) && isValidLinkedDevice(request.resource.data);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      match /devices/{deviceId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) && isValidLinkedDevice(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) && isValidLinkedDevice(request.resource.data);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // Extension Hub Authorized Extensions subcollection (Owner-only with strict schema validation)
+      match /authorized_extensions/{extensionId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidAuthorizedExtension(request.resource.data, extensionId);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['extensionId', 'createdAt']) &&
+                         isValidAuthorizedExtension(request.resource.data, extensionId);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // Notifications Subcollection: Users can read/manage their own alerts; authenticated peers can dispatch pings/mentions
+      match /notifications/{notifId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if isOwner(uid) || (
+          isAuthenticated() && (
+            ('from' in request.resource.data && request.resource.data.from == request.auth.uid) ||
+            ('senderId' in request.resource.data && request.resource.data.senderId == request.auth.uid) ||
+            ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid)
+          )
+        ) || isSuperAdmin();
+        allow update, delete: if isOwner(uid) || isSuperAdmin();
+      }
+
       match /preferences/{prefId} {
         allow read, write: if isOwner(uid) || isSuperAdmin();
       }
@@ -418,37 +859,8 @@ service cloud.firestore {
         allow read, write: if isOwner(uid) || isSuperAdmin();
       }
 
-      match /linkedDevices/{deviceId} {
-        allow read, write: if isOwner(uid) || isSuperAdmin();
-      }
-
-      match /devices/{deviceId} {
-        allow read, write: if isOwner(uid) || isSuperAdmin();
-      }
-
-      match /authorized_extensions/{extensionId} {
-        allow read, write: if isOwner(uid) || isSuperAdmin();
-      }
-
       match /bookmarks/{bookmarkId} {
         allow read, write: if isOwner(uid) || isSuperAdmin();
-      }
-
-      match /notifications/{notifId} {
-        allow read: if isOwner(uid) || isSuperAdmin();
-        allow create: if (
-          isOwner(uid) ||
-          (
-            isAuthenticated() &&
-            (
-              ('from' in request.resource.data && request.resource.data.from == request.auth.uid) ||
-              ('senderId' in request.resource.data && request.resource.data.senderId == request.auth.uid) ||
-              ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid)
-            )
-          ) ||
-          isSuperAdmin()
-        );
-        allow update, delete: if isOwner(uid) || isSuperAdmin();
       }
 
       match /contacts/{contactId} {
@@ -461,13 +873,13 @@ service cloud.firestore {
 
       match /{subcollection}/{docId} {
         allow read: if isOwner(uid) || isSuperAdmin();
-        allow create, update: if (isOwner(uid) || isSuperAdmin()) && isValidUserSubDoc(request.resource.data, uid);
+        allow create, update: if isOwner(uid) || isSuperAdmin();
         allow delete: if isOwner(uid) || isSuperAdmin();
       }
     }
 
     // ===============================================================
-    // 2. DIRECT MESSAGES
+    // 2. DIRECT MESSAGES (End-to-End Privacy, Delivery Ticks & Reactions)
     // ===============================================================
     match /messages/{messageId} {
       allow read: if isAuthenticated() && (
@@ -477,14 +889,54 @@ service cloud.firestore {
         ('senderId' in resource.data && resource.data.senderId == request.auth.uid) ||
         isSuperAdmin()
       );
+
+      // Create: supports both from/to and senderId/receiverId schemas with data validation
       allow create: if isAuthenticated() && isValidMessageCreate(request.resource.data);
-      allow update: if isAuthenticated() && isValidMessageUpdate(request.resource.data, resource.data);
+
+      // Update:
+      // - Sender can edit message text, content, reactions, or deletedFor (immutable sender/receiver protected)
+      // - Recipient can update delivery status (sent, delivered, read), readAt, deliveredAt, reactions, and deletedFor
+      // - Either participant can mark tombstone deletion (isDeleted, deletedForEveryone, deletedAt, deletedFor)
+      // - SuperAdmin can manage or moderate
+      allow update: if isAuthenticated() && (
+        (
+          (request.auth.uid == resource.data.from || ('senderId' in resource.data && request.auth.uid == resource.data.senderId)) &&
+          areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalReactions('reactions') &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        (
+          (request.auth.uid == resource.data.to || ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId)) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'read', 'readAt', 'delivered', 'deliveredAt', 'reactions', 'deletedFor']) &&
+          isValidOptionalReactions('reactions') &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        (
+          isMessageParticipant(resource.data) &&
+          areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content']) &&
+              (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
+            )
+          ) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        isSuperAdmin()
+      );
+
+      // Delete: sender or SuperAdmin
       allow delete: if isAuthenticated() && (isMessageSender(resource.data) || isSuperAdmin());
     }
 
-    // Direct Chats & Chat Threads (Compatibility & Subcollections)
+    // Direct Chats & Chat Threads (Rooms, Participants, Typing Indicators)
     match /chats/{chatId} {
-      allow read: if isAuthenticated() && (isChatParticipant(chatId) || resource == null || isSuperAdmin());
+      allow read: if isAuthenticated() && (isChatParticipant(chatId) || !resourceExists() || isSuperAdmin());
       allow create: if isAuthenticated() && (
         isChatParticipant(chatId) ||
         (request.resource.data.participants is list && request.auth.uid in request.resource.data.participants && isValidList(request.resource.data.participants, 100)) ||
@@ -496,11 +948,50 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (isChatParticipant(chatId) || isSuperAdmin());
       allow delete: if isAuthenticated() && (resource.data.creatorId == request.auth.uid || resource.data.userId == request.auth.uid || isSuperAdmin());
 
+      // Chat Messages Subcollection
       match /messages/{messageId} {
         allow read: if isAuthenticated() && (isChatParticipant(chatId) || isMessageParticipant(resource.data) || isSuperAdmin());
         allow create: if isAuthenticated() && isChatParticipant(chatId) && isValidMessageCreate(request.resource.data);
-        allow update: if isAuthenticated() && isChatParticipant(chatId) && isValidMessageUpdate(request.resource.data, resource.data);
+        allow update: if isAuthenticated() && (
+          (
+            isMessageSender(resource.data) &&
+            areImmutableFieldsUnchanged(['from', 'senderId', 'to', 'receiverId', 'createdAt', 'timestamp']) &&
+            isValidOptionalString('text', 0, 10000) &&
+            isValidOptionalString('content', 0, 10000) &&
+            isValidOptionalReactions('reactions') &&
+            isValidOptionalList('deletedFor', 500)
+          ) ||
+          (
+            isChatParticipant(chatId) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'read', 'readAt', 'delivered', 'deliveredAt', 'reactions', 'deletedFor']) &&
+            isValidOptionalReactions('reactions') &&
+            isValidOptionalList('deletedFor', 500)
+          ) ||
+          (
+            isChatParticipant(chatId) &&
+            areImmutableFieldsUnchanged(['from', 'senderId', 'to', 'receiverId', 'createdAt', 'timestamp']) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content']) &&
+            isValidOptionalString('text', 0, 10000) &&
+            isValidOptionalString('content', 0, 10000) &&
+            isValidOptionalList('deletedFor', 500)
+          ) ||
+          isSuperAdmin()
+        );
         allow delete: if isAuthenticated() && ((isChatParticipant(chatId) && isMessageSender(resource.data)) || isSuperAdmin());
+      }
+
+      match /threads/{threadId} {
+        allow read: if isAuthenticated() && (isChatParticipant(chatId) || !resourceExists() || isSuperAdmin());
+        allow create: if isAuthenticated() && (isChatParticipant(chatId) || isSuperAdmin());
+        allow update: if isAuthenticated() && (isChatParticipant(chatId) || isSuperAdmin());
+        allow delete: if isAuthenticated() && (resource.data.creatorId == request.auth.uid || resource.data.userId == request.auth.uid || isSuperAdmin());
+
+        match /messages/{msgId} {
+          allow read: if isAuthenticated() && (isChatParticipant(chatId) || isSuperAdmin());
+          allow create: if isAuthenticated() && isChatParticipant(chatId) && isValidThreadMessage(request.resource.data);
+          allow update: if isAuthenticated() && (isChatParticipant(chatId) || isSuperAdmin());
+          allow delete: if isAuthenticated() && (resource.data.senderId == request.auth.uid || isSuperAdmin());
+        }
       }
 
       match /typing/{userId} {
@@ -516,7 +1007,6 @@ service cloud.firestore {
 
     match /chatThreads/{threadId} {
       allow read, write: if isAuthenticated();
-
       match /replies/{replyId} {
         allow read: if isAuthenticated();
         allow create: if isAuthenticated() && (request.resource.data.senderId == request.auth.uid || request.resource.data.authorId == request.auth.uid || isSuperAdmin());
@@ -529,44 +1019,46 @@ service cloud.firestore {
     // ===============================================================
     match /groups/{groupId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidGroupCreate(request.resource.data);
+
+      allow create: if isAuthenticated() &&
+                       (request.resource.data.creatorId == request.auth.uid || request.resource.data.createdBy == request.auth.uid || isSuperAdmin()) &&
+                       validStringLength('name', 1, 128) &&
+                       isValidOptionalString('description', 0, 1000) &&
+                       isValidList(request.resource.data.members, 1000) &&
+                       isValidList(request.resource.data.admins, 100);
+
       allow update: if isAuthenticated() && (
         (
           isGroupAdmin(groupId) &&
           areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
-          isValidGroupAdminUpdate()
+          isValidOptionalString('name', 1, 128) &&
+          isValidOptionalString('description', 0, 1000) &&
+          isValidOptionalList('members', 1000) &&
+          isValidOptionalList('admins', 100) &&
+          isValidOptionalList('moderators', 100)
         ) ||
         (
           isGroupModerator(groupId) &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt', 'name', 'privacy', 'approval', 'admins']) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinnedMessages', 'mutedMembers', 'settings', 'updatedAt'])
         ) ||
         (
           isGroupMember(groupId) &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt', 'name', 'privacy', 'approval']) &&
-          !(request.auth.uid in request.resource.data.members) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'admins', 'moderators', 'roles', 'updatedAt']) &&
-          isValidOptionalList('members', 100)
-        ) ||
-        (
-          (!('approval' in resource.data) || resource.data.approval != 'admin') &&
-          (!('privacy' in resource.data) || resource.data.privacy != 'private') &&
-          !(request.auth.uid in resource.data.members) &&
-          request.auth.uid in request.resource.data.members &&
-          (!('admins' in request.resource.data) || !(request.auth.uid in request.resource.data.admins)) &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt', 'name', 'description', 'privacy', 'approval', 'admins', 'moderators', 'inviteCode', 'settings']) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'roles', 'updatedAt']) &&
-          isValidList(request.resource.data.members, 100)
-        ) ||
-        (
-          isGroupMember(groupId) &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt', 'members', 'admins', 'moderators', 'roles', 'name', 'privacy', 'approval', 'inviteCode', 'settings']) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'lastMessageTime', 'lastSender', 'updatedAt']) &&
           isValidOptionalString('lastMessage', 0, 10000) &&
           isValidOptionalString('lastSender', 0, 128)
         ) ||
+        (
+          // Member self-join / leave
+          (!('privacy' in resource.data) || resource.data.privacy != 'private') &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt', 'admins']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'roles', 'updatedAt']) &&
+          isValidOptionalList('members', 1000)
+        ) ||
         isSuperAdmin()
       );
+
       allow delete: if isAuthenticated() && (
         ('creatorId' in resource.data && request.auth.uid == resource.data.creatorId) ||
         ('createdBy' in resource.data && request.auth.uid == resource.data.createdBy) ||
@@ -576,10 +1068,41 @@ service cloud.firestore {
       match /messages/{messageId} {
         allow read: if isAuthenticated() && (isGroupMember(groupId) || isSuperAdmin());
         allow create: if isAuthenticated() && isGroupMember(groupId) && isValidGroupMessage(request.resource.data);
-        allow update: if isAuthenticated() && isGroupMember(groupId) && isValidGroupMessageUpdate(request.resource.data, resource.data, groupId);
+        allow update: if isAuthenticated() && (
+          (
+            (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.from) &&
+            areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
+            isValidOptionalString('text', 0, 10000) &&
+            isValidOptionalString('content', 0, 10000) &&
+            isValidOptionalReactions('reactions') &&
+            isValidOptionalList('deletedFor', 500)
+          ) ||
+          (
+            (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.from || isGroupAdmin(groupId)) &&
+            areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
+              (
+                request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content']) &&
+                (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
+              )
+            ) &&
+            isValidOptionalString('text', 0, 10000) &&
+            isValidOptionalString('content', 0, 10000) &&
+            isValidOptionalList('deletedFor', 500)
+          ) ||
+          isGroupAdmin(groupId) ||
+          (
+            isGroupMember(groupId) &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor', 'status', 'read']) &&
+            isValidOptionalReactions('reactions') &&
+            isValidOptionalList('deletedFor', 500)
+          ) ||
+          isSuperAdmin()
+        );
         allow delete: if isAuthenticated() && (
-          ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
-          ('from' in resource.data && request.auth.uid == resource.data.from) ||
+          request.auth.uid == resource.data.senderId ||
+          request.auth.uid == resource.data.from ||
           isGroupAdmin(groupId) ||
           isSuperAdmin()
         );
@@ -604,9 +1127,38 @@ service cloud.firestore {
                        request.resource.data.groupId is string &&
                        isGroupMember(request.resource.data.groupId) &&
                        isValidGroupMessage(request.resource.data);
-      allow update: if isAuthenticated() &&
-                       isGroupMember(resource.data.groupId) &&
-                       isValidGroupMessageUpdate(request.resource.data, resource.data, resource.data.groupId);
+      allow update: if isAuthenticated() && (
+        (
+          (request.auth.uid == resource.data.from || request.auth.uid == resource.data.senderId) &&
+          areImmutableFieldsUnchanged(['from', 'senderId', 'groupId', 'createdAt', 'timestamp']) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalReactions('reactions') &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        (
+          (request.auth.uid == resource.data.from || request.auth.uid == resource.data.senderId || isGroupModerator(resource.data.groupId)) &&
+          areImmutableFieldsUnchanged(['from', 'senderId', 'groupId', 'createdAt', 'timestamp']) &&
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content', 'message']) &&
+              (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
+            )
+          ) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        isGroupModerator(resource.data.groupId) ||
+        (
+          isGroupMember(resource.data.groupId) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor', 'status', 'read']) &&
+          isValidOptionalReactions('reactions') &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        isSuperAdmin()
+      );
       allow delete: if isAuthenticated() && (
         request.auth.uid == resource.data.from ||
         request.auth.uid == resource.data.senderId ||
@@ -677,31 +1229,44 @@ service cloud.firestore {
       }
     }
 
+    match /pollVotes/{voteId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
     // ===============================================================
-    // 5. STATUSES & STORIES
+    // 5. NEX-STATUS & STORIES (Full Media Upload, Cloud Storage, Views & Purge)
     // ===============================================================
     match /statuses/{statusId} {
       allow read: if isAuthenticated();
+
       allow create: if isAuthenticated() && isValidStatusStoryCreate(request.resource.data);
+
       allow update: if isAuthenticated() && (
         (
           (('userId' in resource.data && isOwner(resource.data.userId)) ||
            ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
            isSuperAdmin()) &&
-          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt'])
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'createdAtMs']) &&
+          isValidStatusStoryCreate(request.resource.data)
         ) ||
         (
-          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'content', 'caption', 'text', 'imageUrl', 'mediaUrl', 'videoUrl', 'audioUrl', 'voiceUrl']) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
+          ]) &&
           isValidOptionalList('views', 10000) &&
           isValidOptionalList('likedBy', 10000) &&
           isValidOptionalList('likes', 10000)
-        )
+        ) ||
+        isSuperAdmin()
       );
+
       allow delete: if isAuthenticated() && (
         ('userId' in resource.data && isOwner(resource.data.userId)) ||
         ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-        isSuperAdmin()
+        isSuperAdmin() ||
+        (resource.data.expiresAtMs is number && resource.data.expiresAtMs <= request.time.toMillis())
       );
 
       match /views/{viewId} {
@@ -727,6 +1292,7 @@ service cloud.firestore {
       }
     }
 
+    // Backwards-compatible status endpoints
     match /status/{statusId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidStatusStoryCreate(request.resource.data);
@@ -735,20 +1301,24 @@ service cloud.firestore {
           (('userId' in resource.data && isOwner(resource.data.userId)) ||
            ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
            isSuperAdmin()) &&
-          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt'])
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'createdAtMs']) &&
+          isValidStatusStoryCreate(request.resource.data)
         ) ||
         (
-          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'content', 'caption', 'text', 'imageUrl', 'mediaUrl', 'videoUrl', 'audioUrl', 'voiceUrl']) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
+          ]) &&
           isValidOptionalList('views', 10000) &&
           isValidOptionalList('likedBy', 10000) &&
           isValidOptionalList('likes', 10000)
-        )
+        ) ||
+        isSuperAdmin()
       );
       allow delete: if isAuthenticated() && (
         ('userId' in resource.data && isOwner(resource.data.userId)) ||
         ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-        isSuperAdmin()
+        isSuperAdmin() ||
+        (resource.data.expiresAtMs is number && resource.data.expiresAtMs <= request.time.toMillis())
       );
 
       match /views/{viewId} {
@@ -772,20 +1342,24 @@ service cloud.firestore {
           (('userId' in resource.data && isOwner(resource.data.userId)) ||
            ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
            isSuperAdmin()) &&
-          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt'])
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'createdAtMs']) &&
+          isValidStatusStoryCreate(request.resource.data)
         ) ||
         (
-          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'content', 'caption', 'text', 'imageUrl', 'mediaUrl', 'videoUrl', 'audioUrl', 'voiceUrl']) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
+          ]) &&
           isValidOptionalList('views', 10000) &&
           isValidOptionalList('likedBy', 10000) &&
           isValidOptionalList('likes', 10000)
-        )
+        ) ||
+        isSuperAdmin()
       );
       allow delete: if isAuthenticated() && (
         ('userId' in resource.data && isOwner(resource.data.userId)) ||
         ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-        isSuperAdmin()
+        isSuperAdmin() ||
+        (resource.data.expiresAtMs is number && resource.data.expiresAtMs <= request.time.toMillis())
       );
 
       match /views/{viewId} {
@@ -802,11 +1376,14 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // 6. REELS
+    // 6. NEX-REELS (Short Video Feed, Comments, Likes, Predictions & Waitlist)
     // ===============================================================
     match /reels/{reelId} {
+      // Public read for viral reels video feed
       allow read: if true;
+
       allow create: if isAuthenticated() && isValidReel(request.resource.data);
+
       allow update: if isAuthenticated() && (
         (
           (request.auth.uid == resource.data.authorId || request.auth.uid == resource.data.userId) &&
@@ -825,10 +1402,13 @@ service cloud.firestore {
           ]) &&
           isValidOptionalList('likes', 10000) &&
           isValidOptionalString('provenanceStatus', 0, 100) &&
-          (!('views' in request.resource.data) || (request.resource.data.views is number && request.resource.data.views >= 0))
+          (!('views' in request.resource.data) || (request.resource.data.views is number && request.resource.data.views >= 0)) &&
+          (!('c2paManifest' in request.resource.data) || request.resource.data.c2paManifest == null || request.resource.data.c2paManifest is map || (request.resource.data.c2paManifest is string && request.resource.data.c2paManifest.size() <= 100000)) &&
+          (!('syntheticMetrics' in request.resource.data) || request.resource.data.syntheticMetrics == null || request.resource.data.syntheticMetrics is map)
         ) ||
         isSuperAdmin()
       );
+
       allow delete: if isAuthenticated() && (
         request.auth.uid == resource.data.authorId ||
         request.auth.uid == resource.data.userId ||
@@ -867,13 +1447,27 @@ service cloud.firestore {
         allow create: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || likeId == request.auth.uid);
         allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || likeId == request.auth.uid || isSuperAdmin());
       }
+
+      match /prediction_bets/{betId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+        allow update: if isSuperAdmin() || (isAuthenticated() && request.auth.uid == resource.data.userId);
+        allow delete: if isSuperAdmin();
+      }
+    }
+
+    // Reels Waitlist: Anyone can sign up for early reels creator access; SuperAdmin manages list
+    match /reels_waitlist/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isSuperAdmin();
     }
 
     // ===============================================================
-    // 7. GLOBAL DROPS
+    // 7. GLOBAL DROPS (Public Drops, Signals, Echoes & Dead Drops)
     // ===============================================================
     match /global_drops/{dropId} {
       allow read: if true;
+
       allow create: if (
         (isAuthenticated() && (
           ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid) ||
@@ -1035,24 +1629,34 @@ service cloud.firestore {
       }
     }
 
+    match /dead_drops/{dropId} {
+      allow read, write: if isAuthenticated() || isSuperAdmin();
+    }
+
     // ===============================================================
-    // 8. WEBRTC CALLS & CALL HISTORY
+    // 8. WEBRTC CALL SESSIONS, SIGNALING & CALL HISTORY
     // ===============================================================
-    match /calls/{callId} {
+    match /call_sessions/{callId} {
       allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.callerId ||
         request.auth.uid == resource.data.receiverId ||
+        ('participants' in resource.data && request.auth.uid in resource.data.participants) ||
         isSuperAdmin()
       );
-      allow create: if isAuthenticated() && (
-        request.auth.uid == request.resource.data.callerId ||
-        request.auth.uid == request.resource.data.receiverId
-      );
+
+      allow create: if isAuthenticated() && isValidCallSession(request.resource.data);
+
       allow update: if isAuthenticated() && (
-        ((request.auth.uid == resource.data.callerId || request.auth.uid == resource.data.receiverId) &&
-         areImmutableFieldsUnchanged(['callerId', 'createdAt'])) ||
+        (
+          (request.auth.uid == resource.data.callerId ||
+           request.auth.uid == resource.data.receiverId ||
+           ('participants' in resource.data && request.auth.uid in resource.data.participants)) &&
+          areImmutableFieldsUnchanged(['callerId', 'createdAt']) &&
+          isValidCallSession(request.resource.data)
+        ) ||
         isSuperAdmin()
       );
+
       allow delete: if isAuthenticated() && (
         request.auth.uid == resource.data.callerId ||
         request.auth.uid == resource.data.receiverId ||
@@ -1060,19 +1664,48 @@ service cloud.firestore {
       );
 
       match /iceCandidates/{candidateId} {
-        allow read, write: if isAuthenticated() && (
-          request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.callerId ||
-          request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.receiverId ||
-          isSuperAdmin()
-        );
+        allow read, write: if isAuthenticated();
       }
 
       match /sdp/{sdpId} {
-        allow read, write: if isAuthenticated() && (
-          request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.callerId ||
-          request.auth.uid == get(/databases/$(database)/documents/calls/$(callId)).data.receiverId ||
-          isSuperAdmin()
-        );
+        allow read, write: if isAuthenticated();
+      }
+
+      match /participants/{participantId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    match /calls/{callId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.callerId ||
+        request.auth.uid == resource.data.receiverId ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
+        request.auth.uid == request.resource.data.callerId ||
+        request.auth.uid == request.resource.data.receiverId
+      ) && isValidCallSession(request.resource.data);
+
+      allow update: if isAuthenticated() && (
+        ((request.auth.uid == resource.data.callerId || request.auth.uid == resource.data.receiverId) &&
+         areImmutableFieldsUnchanged(['callerId', 'createdAt'])) ||
+        isSuperAdmin()
+      );
+
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.callerId ||
+        request.auth.uid == resource.data.receiverId ||
+        isSuperAdmin()
+      );
+
+      match /iceCandidates/{candidateId} {
+        allow read, write: if isAuthenticated();
+      }
+
+      match /sdp/{sdpId} {
+        allow read, write: if isAuthenticated();
       }
     }
 
@@ -1099,12 +1732,31 @@ service cloud.firestore {
       );
     }
 
+    match /groupCalls/{groupCallId} {
+      allow read, write: if isAuthenticated();
+      match /participants/{participantId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    match /groupStages/{stageId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isSuperAdmin() || (isAuthenticated() && resource.data.hostUid == request.auth.uid);
+    }
+
+    match /p2pSignaling/{channelId} {
+      allow read, write: if isAuthenticated();
+    }
+
     // ===============================================================
-    // 9. CHANNELS, POSTS & SUBSCRIBERS
+    // 9. BROADCAST CHANNELS, POSTS & SUBSCRIBERS
     // ===============================================================
     match /channels/{channelId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() || (resource.data.isPublic == true);
+
       allow create: if isAuthenticated() && isValidChannelCreate(request.resource.data);
+
       allow update: if isAuthenticated() && (
         (
           (resource.data.creatorId == request.auth.uid || isSuperAdmin()) &&
@@ -1113,15 +1765,15 @@ service cloud.firestore {
         ) ||
         (
           areImmutableFieldsUnchanged(['creatorId', 'createdAt', 'name', 'handle', 'description', 'avatar', 'profilePic', 'icon', 'creatorName', 'isVerified', 'isPublic']) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['subscriberCount', 'followerCount']) &&
-          (!('subscriberCount' in request.resource.data) || (request.resource.data.subscriberCount is number && request.resource.data.subscriberCount >= 0)) &&
-          (!('followerCount' in request.resource.data) || (request.resource.data.followerCount is number && request.resource.data.followerCount >= 0))
-        )
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['subscriberCount', 'followerCount', 'subscribersCount', 'postsCount', 'lastPostSnippet', 'lastPostTime'])
+        ) ||
+        isSuperAdmin()
       );
+
       allow delete: if isAuthenticated() && (resource.data.creatorId == request.auth.uid || isSuperAdmin());
 
       match /posts/{postId} {
-        allow read: if isAuthenticated();
+        allow read: if isAuthenticated() || (exists(/databases/$(database)/documents/channels/$(channelId)) && get(/databases/$(database)/documents/channels/$(channelId)).data.isPublic == true);
         allow create: if isAuthenticated() && isValidPostCreate(request.resource.data, channelId);
         allow update: if isAuthenticated() && (
           (
@@ -1138,7 +1790,8 @@ service cloud.firestore {
           (
             areImmutableFieldsUnchanged(['authorId', 'createdAt', 'channelId', 'text', 'content', 'image', 'imageUrl', 'mediaUrl', 'authorName']) &&
             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'likes'])
-          )
+          ) ||
+          isSuperAdmin()
         );
         allow delete: if isAuthenticated() && (
           (exists(/databases/$(database)/documents/channels/$(channelId)) &&
@@ -1176,16 +1829,22 @@ service cloud.firestore {
     // ===============================================================
     match /link_sessions/{sessionId} {
       allow read: if true;
+
       allow create: if request.resource.data.status == 'pending' &&
                        isValidLinkSessionCreate(request.resource.data, sessionId);
+
       allow update: if isAuthenticated() && (
-        ('primaryUid' in request.resource.data && request.resource.data.primaryUid == request.auth.uid) ||
-        ('uid' in request.resource.data && request.resource.data.uid == request.auth.uid) ||
-        ('primaryUid' in resource.data && resource.data.primaryUid == request.auth.uid) ||
-        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
-        (resource.data.status == 'pending' && request.resource.data.status in ['rejected', 'expired']) ||
-        isSuperAdmin()
+        (
+          ('primaryUid' in request.resource.data && request.resource.data.primaryUid == request.auth.uid) ||
+          ('uid' in request.resource.data && request.resource.data.uid == request.auth.uid) ||
+          ('primaryUid' in resource.data && resource.data.primaryUid == request.auth.uid) ||
+          ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
+          (resource.data.status == 'pending' && request.resource.data.status in ['rejected', 'expired']) ||
+          isSuperAdmin()
+        ) &&
+        isValidLinkSessionUpdate(request.resource.data, resource.data)
       );
+
       allow delete: if (isAuthenticated() && (
         ('primaryUid' in resource.data && resource.data.primaryUid == request.auth.uid) ||
         ('uid' in resource.data && resource.data.uid == request.auth.uid)
@@ -1213,9 +1872,11 @@ service cloud.firestore {
     // ===============================================================
     match /advertisements/{adId} {
       allow read: if true;
+
       allow create: if isAuthenticated() &&
                        request.resource.data.sellerUID == request.auth.uid &&
                        isValidAdvertisement(request.resource.data);
+
       allow update: if isAuthenticated() && (
         isSuperAdmin() ||
         (
@@ -1229,15 +1890,65 @@ service cloud.firestore {
           request.resource.data.views >= resource.data.views
         )
       );
+
       allow delete: if isAuthenticated() && (
         request.auth.uid == resource.data.sellerUID ||
         isSuperAdmin()
       );
     }
 
+    // Multi-Sig P2P Escrow Contracts & ChronEX Smart Escrow Guardian
+    match /escrow_contracts/{contractId} {
+      allow read: if isAuthenticated() && (
+        isEscrowParty(resource.data) ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() &&
+                       (isEscrowBuyer(request.resource.data) || isSuperAdmin()) &&
+                       isValidEscrowContract(request.resource.data);
+
+      allow update: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (
+          isEscrowBuyer(resource.data) &&
+          areImmutableFieldsUnchanged(['buyer', 'buyerId', 'buyerUid', 'buyerUID', 'seller', 'sellerId', 'sellerUid', 'sellerUID', 'amount', 'tokensAmount', 'currency', 'createdAt']) &&
+          isValidEscrowContract(request.resource.data)
+        ) ||
+        (
+          isEscrowSeller(resource.data) &&
+          areImmutableFieldsUnchanged(['buyer', 'buyerId', 'buyerUid', 'buyerUID', 'seller', 'sellerId', 'sellerUid', 'sellerUID', 'amount', 'tokensAmount', 'currency', 'createdAt']) &&
+          isValidEscrowContract(request.resource.data)
+        )
+      );
+
+      allow delete: if isSuperAdmin();
+    }
+
     // ===============================================================
-    // 12. TOKENS, GIFTS & TRANSACTIONS
+    // 12. TOKENS, GIFTS & MONETIZATION
     // ===============================================================
+    match /tokens/{tokenId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.ownerId ||
+        tokenId == request.auth.uid ||
+        isSuperAdmin()
+      );
+      allow write: if isSuperAdmin();
+    }
+
+    match /vip_licenses/{licenseId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.holderId ||
+        request.auth.uid == resource.data.ownerId ||
+        licenseId == request.auth.uid ||
+        isSuperAdmin()
+      );
+      allow write: if isSuperAdmin();
+    }
+
     match /tokenGifts/{giftId} {
       allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.senderId ||
@@ -1268,11 +1979,28 @@ service cloud.firestore {
       allow update, delete: if isSuperAdmin();
     }
 
+    match /tokenTransactions/{txId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.recipientId ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && (request.resource.data.senderId == request.auth.uid || isSuperAdmin());
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /paymentHistory/{paymentId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isOwner(resource.data.userId) || isSuperAdmin());
+      allow write: if isSuperAdmin();
+    }
+
     // ===============================================================
     // 13. CREATOR BADGES & NEARBY RADAR
     // ===============================================================
     match /creator_badges/{badgeId} {
       allow read: if true;
+
       allow create: if isAuthenticated() && (
         isSuperAdmin() ||
         (
@@ -1286,6 +2014,7 @@ service cloud.firestore {
           isValidCreatorBadge()
         )
       );
+
       allow update: if isAuthenticated() && (
         isSuperAdmin() ||
         (
@@ -1301,6 +2030,7 @@ service cloud.firestore {
           isValidCreatorBadge()
         )
       );
+
       allow delete: if isSuperAdmin();
     }
 
@@ -1314,15 +2044,31 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // 14. VIDEOS & MESSAGE ACTIVITY
+    // 14. VIDEOS, CLIPS, CLANS & MESSAGE ACTIVITY
     // ===============================================================
+    match /clans/{clanId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.leaderId == request.auth.uid;
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.leaderId || request.auth.uid in resource.data.members || isSuperAdmin());
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.leaderId || isSuperAdmin());
+    }
+
+    match /clanInvites/{inviteId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.invitedUserId || request.auth.uid == resource.data.invitedBy || isSuperAdmin());
+      allow create: if isAuthenticated() && request.resource.data.invitedBy == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.invitedUserId || request.auth.uid == resource.data.invitedBy || isSuperAdmin());
+    }
+
+    match /clips/{clipId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.authorId || isSuperAdmin());
+    }
+
     match /videos/{videoId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.authorId ||
-        isSuperAdmin()
-      );
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.authorId || isSuperAdmin());
     }
 
     match /messageActivity/{activityId} {
@@ -1338,8 +2084,23 @@ service cloud.firestore {
       allow update, delete: if isSuperAdmin();
     }
 
+    match /typingStatus/{docId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+                               (request.resource.data.userId == request.auth.uid ||
+                                docId.matches(request.auth.uid + '_.*') ||
+                                docId.matches('.*_' + request.auth.uid)) &&
+                               isValidOptionalString('username', 0, 100);
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        docId.matches(request.auth.uid + '_.*') ||
+        docId.matches('.*_' + request.auth.uid) ||
+        isSuperAdmin()
+      );
+    }
+
     // ===============================================================
-    // 15. REPORTS & ANNOUNCEMENTS
+    // 15. REPORTS, MODERATION & SYSTEM ANNOUNCEMENTS
     // ===============================================================
     match /reports/{reportId} {
       allow create: if isAuthenticated() && isValidReport(request.resource.data);
@@ -1350,12 +2111,48 @@ service cloud.firestore {
       allow update, delete: if isSuperAdmin();
     }
 
-    match /announcements/{announcementId} {
+    match /blockedUsers/{blockId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.userId || isSuperAdmin());
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
+    match /contentModeration/{moderationId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /spamReports/{reportId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /contentFilters/{filterId} {
       allow read: if isAuthenticated();
       allow write: if isSuperAdmin();
     }
 
+    match /userVerification/{verificationId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /trustScores/{uid} {
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    match /reputation/{reputationId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // System Announcements & General Announcements:
+    // Client queries with where('active', '==', true) or orderBy('createdAt') will always cleanly succeed
     match /system_announcements/{announcementId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /announcements/{announcementId} {
       allow read: if true;
       allow write: if isSuperAdmin();
     }
@@ -1363,6 +2160,16 @@ service cloud.firestore {
     // ===============================================================
     // 16. SYSTEM CONFIG, SETTINGS & ADMIN AUDIT / SECURITY
     // ===============================================================
+    match /admins/{adminId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || request.auth.uid == adminId);
+      allow write: if isSuperAdmin();
+    }
+
+    match /system_settings/{settingId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
     match /system_config/{configId} {
       allow read: if isSuperAdmin() ||
                      configId in [
@@ -1382,12 +2189,26 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
-    match /system_settings/{settingId} {
-      allow read: if true;
+    match /appConfig/{configId} {
+      allow read: if isAuthenticated();
       allow write: if isSuperAdmin();
     }
 
-    match /ip_registrations/{ipKey} {
+    match /maintenance/{maintenanceId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /featureFlags/{flagId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /adminLogs/{logId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /adminAuditLog/{logId} {
       allow read, write: if isSuperAdmin();
     }
 
@@ -1395,104 +2216,206 @@ service cloud.firestore {
       allow read, write: if isSuperAdmin();
     }
 
+    match /adminSecurityLogs/{logId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /securityLogs/{logId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /securityAuditLogs/{auditId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /admin_telemetry/{docId} {
+      allow read: if isSuperAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin();
+    }
+
     match /admin_security/{docId} {
       allow read, write: if isSuperAdmin();
     }
 
+    match /admin_ip_verification/{docId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /userActivity/{activityId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isOwner(resource.data.userId) || isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /userRegistrations/{regId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /ip_registrations/{ipKey} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /videoActivity/{vidActId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /videoEngagement/{engId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /systemLogs/{logId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /analytics/{analyticsId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /tokenStatistics/{statId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /systemStats/{statId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /userStats/{uid} {
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    match /groupStats/{groupId} {
+      allow read: if isGroupMember(groupId) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    match /errorLogs/{errorId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /debugLogs/{debugId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /performanceMetrics/{metricId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /apiUsageLogs/{logId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /backupData/{backupId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /backupMetadata/{backupId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /migrationLogs/{migrationId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /featureUsageStats/{statId} {
+      allow read, write: if isSuperAdmin();
+    }
+
     // ===============================================================
-    // 16B. CYBER-SUITE & EXTENDED CHAT PROTOCOL COLLECTIONS
+    // 17. CYBER-SUITE & EXTENDED PROTOCOL COLLECTIONS
     // ===============================================================
     match /presence/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+      allow create: if isAuthenticated() &&
+                       (request.auth.uid == userId || isSuperAdmin()) &&
+                       isValidPresence(request.resource.data, userId);
+      allow update: if isAuthenticated() &&
+                       (request.auth.uid == userId || isSuperAdmin()) &&
+                       areImmutableFieldsUnchanged(['userId', 'uid', 'createdAt']) &&
+                       isValidPresence(request.resource.data, userId);
+      allow delete: if isAuthenticated() &&
+                       (request.auth.uid == userId || isSuperAdmin());
     }
 
     match /nexbot_configs/{configId} {
-      allow read: if true;
-      allow create: if isAuthenticated() && (request.resource.data.authorId == request.auth.uid || request.resource.data.userId == request.auth.uid || isSuperAdmin());
-      allow update, delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow read: if (
+        resource.data.isPublished == true ||
+        resource.data.published == true ||
+        resource.data.status == 'published'
+      ) || (
+        isAuthenticated() && (
+          resource.data.authorId == request.auth.uid ||
+          resource.data.userId == request.auth.uid ||
+          ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
+          isSuperAdmin()
+        )
+      );
+
+      allow create: if isAuthenticated() && isValidNexbotConfig(request.resource.data);
+
+      allow update: if isAuthenticated() && (
+        (
+          (resource.data.authorId == request.auth.uid || resource.data.userId == request.auth.uid || ('uid' in resource.data && resource.data.uid == request.auth.uid)) &&
+          areImmutableFieldsUnchanged(['authorId', 'userId', 'uid', 'createdAt']) &&
+          isValidNexbotConfig(request.resource.data)
+        ) ||
+        isSuperAdmin()
+      );
+
+      allow delete: if isAuthenticated() && (
+        resource.data.authorId == request.auth.uid ||
+        resource.data.userId == request.auth.uid ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
+        isSuperAdmin()
+      );
     }
 
     match /security_scan_logs/{logId} {
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
-      allow create: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.ownerId == request.auth.uid ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && isValidSecurityScanLog(request.resource.data);
       allow update, delete: if isSuperAdmin();
     }
 
     match /quarantine_vault/{vaultId} {
-      allow read, write: if isAuthenticated() && (resource.data.userId == request.auth.uid || request.resource.data.userId == request.auth.uid || isSuperAdmin());
-      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
-    }
-
-    match /call_sessions/{callId} {
-      allow read, update, delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.callerId ||
-        request.auth.uid == resource.data.receiverId ||
-        ('participants' in resource.data && request.auth.uid in resource.data.participants) ||
-        isSuperAdmin()
-      );
-      allow create: if isAuthenticated() && (
-        request.auth.uid == request.resource.data.callerId ||
-        request.auth.uid == request.resource.data.receiverId ||
-        ('participants' in request.resource.data && request.auth.uid in request.resource.data.participants) ||
-        isSuperAdmin()
-      );
-      match /iceCandidates/{candidateId} {
-        allow read, write: if isAuthenticated();
-      }
-      match /sdp/{sdpId} {
-        allow read, write: if isAuthenticated();
-      }
-      match /participants/{participantId} {
-        allow read, write: if isAuthenticated();
-      }
-    }
-
-    match /groupCalls/{groupCallId} {
-      allow read, write: if isAuthenticated();
-      match /participants/{participantId} {
-        allow read, write: if isAuthenticated();
-      }
-    }
-
-    match /tokens/{tokenId} {
-      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || tokenId == request.auth.uid || isSuperAdmin());
-      allow write: if isSuperAdmin();
-    }
-
-    match /vip_licenses/{licenseId} {
-      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || licenseId == request.auth.uid || isSuperAdmin());
-      allow write: if isSuperAdmin();
-    }
-
-    match /tokenTransactions/{txId} {
-      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.recipientId || isSuperAdmin());
-      allow create: if isAuthenticated() && (request.resource.data.senderId == request.auth.uid || isSuperAdmin());
-      allow update, delete: if isSuperAdmin();
-    }
-
-    match /paymentHistory/{paymentId} {
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
-      allow write: if isSuperAdmin();
-    }
-
-    match /escrow_contracts/{contractId} {
       allow read: if isAuthenticated() && (
-        resource.data.buyer == request.auth.uid ||
-        resource.data.seller == request.auth.uid ||
-        ('buyerUID' in resource.data && resource.data.buyerUID == request.auth.uid) ||
-        ('sellerUID' in resource.data && resource.data.sellerUID == request.auth.uid) ||
+        resource.data.userId == request.auth.uid ||
+        resource.data.ownerId == request.auth.uid ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
         isSuperAdmin()
       );
-      allow create: if isAuthenticated();
+
+      allow create: if isAuthenticated() && isValidQuarantineVault(request.resource.data);
+
       allow update: if isAuthenticated() && (
-        resource.data.buyer == request.auth.uid ||
-        resource.data.seller == request.auth.uid ||
-        ('buyerUID' in resource.data && resource.data.buyerUID == request.auth.uid) ||
-        ('sellerUID' in resource.data && resource.data.sellerUID == request.auth.uid) ||
+        (
+          (resource.data.userId == request.auth.uid || resource.data.ownerId == request.auth.uid || ('uid' in resource.data && resource.data.uid == request.auth.uid)) &&
+          areImmutableFieldsUnchanged(['userId', 'ownerId', 'uid', 'createdAt']) &&
+          isValidQuarantineVault(request.resource.data)
+        ) ||
         isSuperAdmin()
       );
-      allow delete: if isSuperAdmin();
+
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.ownerId == request.auth.uid ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
+        isSuperAdmin()
+      );
     }
 
     match /scheduled_messages/{messageId} {
@@ -1500,18 +2423,350 @@ service cloud.firestore {
       allow create: if isAuthenticated() && (request.resource.data.senderId == request.auth.uid || request.resource.data.from == request.auth.uid || isSuperAdmin());
     }
 
-    match /dead_drops/{dropId} {
-      allow read, write: if isAuthenticated() || isSuperAdmin();
+    match /rateLimits/{limitId} {
+      allow read, write: if isSuperAdmin() || (isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid));
     }
 
-    match /spamReports/{reportId} {
-      allow read: if isSuperAdmin();
-      allow create: if isAuthenticated();
-      allow update, delete: if isSuperAdmin();
+    match /userSessions/{sessionId} {
+      allow read, write: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid || isSuperAdmin());
+    }
+
+    match /deviceTokens/{tokenId} {
+      allow read, write: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid || isSuperAdmin());
+    }
+
+    match /offlineMessageQueue/{queueId} {
+      allow read, write: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid || isSuperAdmin());
     }
 
     // ===============================================================
-    // 17. ZERO-TRUST DEFAULT DENY BARRIER
+    // 18. USER PREFERENCES, THEMES, SETTINGS & ATMOSPHERE
+    // ===============================================================
+    match /userBackgrounds/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /groupBackgrounds/{groupId} {
+      allow read: if isGroupMember(groupId) || isSuperAdmin();
+      allow write: if isGroupAdmin(groupId) || isSuperAdmin();
+    }
+
+    match /directMessageBackgrounds/{docId} {
+      allow read, write: if isAuthenticated() && (
+        docId.matches(request.auth.uid + '_.*') ||
+        docId.matches('.*_' + request.auth.uid) ||
+        isSuperAdmin()
+      );
+    }
+
+    match /userSecurity/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /userSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /userPreferences/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /themeSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /notificationSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /privacySettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /securitySettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /accountSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /profileSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /chatSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /mediaSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /callSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /groupSettings/{groupId} {
+      allow read: if isGroupMember(groupId) || isSuperAdmin();
+      allow write: if isGroupAdmin(groupId) || isSuperAdmin();
+    }
+
+    match /marketplaceSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /userFeedback/{feedbackId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /supportTickets/{ticketId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isOwner(resource.data.userId) || isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /betaFeatures/{featureId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /experimentalFeatures/{featureId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /abTesting/{testId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // ===============================================================
+    // 19. GAMIFICATION, BADGES & REWARDS
+    // ===============================================================
+    match /userBadges/{badgeId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /groupBadges/{badgeId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /userAchievements/{achievementId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /userLevels/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /userProgress/{progressId} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isSuperAdmin());
+      allow write: if isSuperAdmin();
+    }
+
+    match /leaderboards/{leaderboardId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /challenges/{challengeId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /userChallenges/{challengeId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow delete: if isSuperAdmin();
+    }
+
+    match /groupChallenges/{challengeId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isGroupMember(request.resource.data.groupId) || isSuperAdmin());
+      allow delete: if isSuperAdmin();
+    }
+
+    match /competitions/{competitionId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /tournaments/{tournamentId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /gamification/{gamificationId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /rewards/{rewardId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /subscriptions/{subscriptionId} {
+      allow read: if isOwner(resource.data.userId) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    match /premiumFeatures/{featureId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // ===============================================================
+    // 20. SOCIAL FEATURES & LIVE STREAMS
+    // ===============================================================
+    match /socialFeatures/{featureId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /friendRequests/{requestId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.from;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        isSuperAdmin()
+      );
+    }
+
+    match /friends/{friendId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.friendId ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && (
+        request.auth.uid == request.resource.data.userId ||
+        request.auth.uid == request.resource.data.friendId
+      );
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.friendId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /followers/{followId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.followerId || isSuperAdmin());
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.followerId || isSuperAdmin());
+    }
+
+    match /socialPosts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.authorId || isSuperAdmin());
+    }
+
+    match /postLikes/{likeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.userId || isSuperAdmin());
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
+    match /postComments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
+    match /stories/{storyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
+    match /storyViews/{viewId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.viewerId == request.auth.uid;
+    }
+
+    match /liveStreams/{streamId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.hostId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.hostId || isSuperAdmin());
+    }
+
+    match /streamViewers/{viewerId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || viewerId == request.auth.uid || isSuperAdmin());
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || viewerId == request.auth.uid || isSuperAdmin());
+    }
+
+    match /streamChat/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid && validStringLength('text', 1, 1000);
+      allow delete: if isAuthenticated() && (resource.data.senderId == request.auth.uid || isSuperAdmin());
+    }
+
+    match /videoComments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && validStringLength('text', 1, 1000);
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
+    match /videoLikes/{likeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.userId || isSuperAdmin());
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
+    match /playlists/{playlistId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
+    match /playlistVideos/{videoId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.userId || isSuperAdmin());
+      allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
+    match /sharedMedia/{mediaId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.recipientId ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId ||
+        isSuperAdmin()
+      );
+    }
+
+    // ===============================================================
+    // 21. PASSWORD RESET VERIFICATION CODES (Zero-Trust 6-Digit TTL Vault)
+    // ===============================================================
+    match /password_reset_codes/{docId} {
+      allow create: if request.resource.data.keys().hasAll(['email', 'code', 'expiresAt', 'used'])
+                    && request.resource.data.code is string
+                    && request.resource.data.code.size() == 6
+                    && request.resource.data.used == false;
+      allow read: if true;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used', 'usedAt', 'attempts']);
+      allow delete: if isSuperAdmin();
+    }
+
+    // ===============================================================
+    // 22. ZERO-TRUST DEFAULT DENY BARRIER
     // ===============================================================
     match /{document=**} {
       allow read, write: if false;

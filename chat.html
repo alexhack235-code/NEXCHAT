@@ -4726,6 +4726,126 @@
                   </div>
                 </div>
 
+                <!-- WHATSAPP-STYLE STATUS PRIVACY SUITE -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 255, 136, 0.35); background: rgba(0, 255, 136, 0.03);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i class="fa-solid fa-circle-notch" style="color: #00ff88; font-size: 16px;"></i>
+                      <strong style="color: #00ff88; font-size: 13.5px;">Status Privacy Protocol (WhatsApp Architecture)</strong>
+                    </div>
+                    <span id="statusPrivacyModeBadge" style="font-size: 10.5px; padding: 2px 8px; border-radius: 12px; background: rgba(0, 255, 136, 0.15); color: #00ff88; font-weight: 700; border: 1px solid rgba(0, 255, 136, 0.3);">
+                      My Contacts
+                    </span>
+                  </div>
+                  <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 10px 0;">
+                    Changes to your status privacy will apply to any new status updates you transmit.
+                  </p>
+
+                  <div style="margin-bottom: 12px;">
+                    <label for="settingsDefaultStatusPrivacy" style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">Who can see my status updates:</label>
+                    <select id="settingsDefaultStatusPrivacy" class="settings-select" style="width: 100%;">
+                      <option value="contacts" selected>👥 My Contacts (All registered contacts)</option>
+                      <option value="public">🌐 Public (All NEX Operatives across the network)</option>
+                      <option value="contacts_except">🚫 My Contacts Except... (Exclude specific contacts)</option>
+                      <option value="only_share">🔒 Only Share With... (Enclave whitelist)</option>
+                    </select>
+                  </div>
+
+                  <div class="luxury-toggle-row" style="margin-top: 8px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">Stealth Peeking (Anonymous Viewer)</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">View status stories without sending view receipts or appearing in creator's viewer roster.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsStealthPeekingToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="luxury-toggle-row" style="margin-top: 8px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">Default Slide Display Duration</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Configure the default countdown timer for newly published status photos and text cards.</p>
+                    </div>
+                    <select id="settingsDefaultSlideDuration" class="settings-select" style="max-width: 140px;">
+                      <option value="5">5 Seconds</option>
+                      <option value="7" selected>7 Seconds (Default)</option>
+                      <option value="10">10 Seconds</option>
+                      <option value="15">15 Seconds</option>
+                      <option value="30">30 Seconds</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- NEXCHAT QUANTUM PROXY TUNNEL & IP CLOAK -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 212, 255, 0.35); background: rgba(0, 212, 255, 0.03);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i class="fa-solid fa-network-wired" style="color: #00d4ff; font-size: 16px;"></i>
+                      <strong style="color: #00d4ff; font-size: 13.5px;">Quantum Proxy Tunnel &amp; IP Cloak</strong>
+                    </div>
+                    <span id="proxyTunnelLiveBadge" style="font-size: 10.5px; padding: 2px 8px; border-radius: 12px; background: rgba(0, 212, 255, 0.12); color: #94a3b8; font-weight: 700; border: 1px solid rgba(255, 255, 255, 0.15);">
+                      OFF (Direct)
+                    </span>
+                  </div>
+                  <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 10px 0;">
+                    Route your chat connections through a custom IP address and port to conceal your physical location and protect your network data.
+                  </p>
+
+                  <div class="luxury-toggle-row" style="margin-bottom: 12px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">Enable Custom Proxy Tunnel</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">When enabled, NEXCHAT connects via your configured proxy host and port.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="proxyTunnelToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div id="proxyFieldsContainer" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                      <div style="flex: 2; min-width: 180px;">
+                        <label for="proxyHostInput" style="font-size: 11.5px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 4px;">Proxy Host / IP Address:</label>
+                        <input type="text" id="proxyHostInput" class="settings-search-input" placeholder="e.g. 192.168.1.1 or proxy.domain.com" style="width: 100%; border-radius: 8px; padding: 8px 12px; font-family: monospace; font-size: 12px;">
+                      </div>
+                      <div style="flex: 1; min-width: 100px;">
+                        <label for="proxyPortInput" style="font-size: 11.5px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 4px;">Port:</label>
+                        <input type="number" id="proxyPortInput" class="settings-search-input" placeholder="e.g. 1080" style="width: 100%; border-radius: 8px; padding: 8px 12px; font-family: monospace; font-size: 12px;">
+                      </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                      <div style="flex: 1; min-width: 140px;">
+                        <label for="proxyProtocolSelect" style="font-size: 11.5px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 4px;">Tunnel Protocol:</label>
+                        <select id="proxyProtocolSelect" class="settings-select" style="width: 100%;">
+                          <option value="socks5" selected>SOCKS5 (Fast &amp; Secure)</option>
+                          <option value="https">HTTPS / TLS Proxy</option>
+                          <option value="http">HTTP Proxy</option>
+                          <option value="shadowsocks">Shadowsocks Enclave</option>
+                        </select>
+                      </div>
+                      <div style="flex: 1; min-width: 140px;">
+                        <label for="proxyAuthInput" style="font-size: 11.5px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 4px;">Secret / Token (Optional):</label>
+                        <input type="password" id="proxyAuthInput" class="settings-search-input" placeholder="Optional Auth Token" style="width: 100%; border-radius: 8px; padding: 8px 12px; font-family: monospace; font-size: 12px;">
+                      </div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap;">
+                      <button type="button" id="btnLinkProxyToChats" class="btn-primary" style="flex: 1; min-width: 140px; font-size: 12px; font-weight: 700; padding: 8px 14px;">
+                        <i class="fa-solid fa-link"></i> Link Proxy to NEXCHAT
+                      </button>
+                      <button type="button" id="btnTestProxyPing" class="btn-secondary" style="flex: 1; min-width: 120px; font-size: 12px; font-weight: 700; padding: 8px 14px; border-color: rgba(0, 212, 255, 0.4); color: #00d4ff;">
+                        <i class="fa-solid fa-bolt"></i> Test Proxy Latency
+                      </button>
+                    </div>
+
+                    <div id="proxyPingStatusDisplay" style="font-size: 11.5px; font-family: monospace; color: #94a3b8; padding: 6px 10px; background: rgba(0,0,0,0.25); border-radius: 6px; border: 1px solid rgba(255,255,255,0.06); display: none;">
+                      <span id="proxyPingStatusText">Connecting...</span>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- NEXCHAT SENTINEL EMAIL NOTIFICATION VERIFIER -->
                 <div class="settings-card" style="border: 1px solid rgba(0, 240, 118, 0.35); background: rgba(0, 240, 118, 0.04);">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
@@ -6304,10 +6424,29 @@
 
             <div class="status-studio-footer-action-row">
               <div class="status-studio-meta-pills">
-                <div class="status-audience-pill" title="Audience privacy">
-                  <i class="fa-solid fa-earth-americas"></i>
-                  <span>Public</span>
+                <!-- WhatsApp-Style Status Audience Privacy Selector -->
+                <div class="status-audience-pill-select-wrap" title="Status Audience Privacy (WhatsApp Architecture)" style="display: inline-flex; align-items: center; background: rgba(0, 255, 136, 0.08); border: 1px solid rgba(0, 255, 136, 0.35); border-radius: 9999px; padding: 0 4px 0 8px;">
+                  <i class="fa-solid fa-shield-halved" style="color: #00ff88; font-size: 11px;"></i>
+                  <select id="statusPrivacySelect" style="background: transparent; border: none; color: #00ff88; font-size: 11.5px; font-weight: 800; padding: 6px 6px 6px 4px; cursor: pointer; outline: none;">
+                    <option value="contacts" selected style="background: #0d1527; color: #fff;">👥 My Contacts</option>
+                    <option value="public" style="background: #0d1527; color: #fff;">🌐 Public (All Operatives)</option>
+                    <option value="contacts_except" style="background: #0d1527; color: #fff;">🚫 Contacts Except...</option>
+                    <option value="only_share" style="background: #0d1527; color: #fff;">🔒 Only Share With...</option>
+                  </select>
                 </div>
+
+                <!-- Custom Display Duration Selector in Seconds -->
+                <div class="status-duration-pill-select-wrap" title="Slide display duration in seconds" style="display: inline-flex; align-items: center; background: rgba(0, 212, 255, 0.08); border: 1px solid rgba(0, 212, 255, 0.35); border-radius: 9999px; padding: 0 4px 0 8px;">
+                  <i class="fa-solid fa-stopwatch" style="color: #00d4ff; font-size: 11px;"></i>
+                  <select id="statusSlideDurationSelect" style="background: transparent; border: none; color: #00d4ff; font-size: 11.5px; font-weight: 800; padding: 6px 6px 6px 4px; cursor: pointer; outline: none;">
+                    <option value="5" style="background: #0d1527; color: #fff;">5s</option>
+                    <option value="7" selected style="background: #0d1527; color: #fff;">7s (Default)</option>
+                    <option value="10" style="background: #0d1527; color: #fff;">10s</option>
+                    <option value="15" style="background: #0d1527; color: #fff;">15s</option>
+                    <option value="30" style="background: #0d1527; color: #fff;">30s</option>
+                  </select>
+                </div>
+
                 <div class="status-ttl-badge" title="Status lifetime is 24 hours">
                   <i class="fa-regular fa-clock"></i>
                   <span>24h</span>
@@ -6659,8 +6798,12 @@
           </div>
         </div>
 
-        <!-- Top Right Action Controls: Volume, Pause/Play, Close -->
+        <!-- Top Right Action Controls: Countdown, Volume, Stealth, Pause/Play, Close -->
         <div class="status-viewer-top-actions">
+          <div id="statusViewerCountdownBadge" class="status-viewer-countdown-badge" title="Status countdown" style="display: inline-flex; align-items: center; gap: 5px; background: rgba(0, 255, 136, 0.12); border: 1.5px solid rgba(0, 255, 136, 0.4); color: #00ff88; font-size: 11.5px; font-weight: 800; padding: 4px 10px; border-radius: 9999px; backdrop-filter: blur(8px); margin-right: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; box-shadow: 0 0 12px rgba(0, 255, 136, 0.2);">
+            <i class="fa-solid fa-stopwatch" style="font-size: 11px;"></i>
+            <span id="statusViewerCountdownText">7s</span>
+          </div>
           <button type="button" id="statusViewerMuteBtn" class="status-viewer-icon-btn video-mute-toggle" title="Toggle Sound" style="display: none;">
             <i class="fa-solid fa-volume-high"></i>
           </button>

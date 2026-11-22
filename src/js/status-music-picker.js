@@ -382,18 +382,36 @@
 
     selectTrack(track) {
       this.selectedTrack = track;
-      this.closePicker();
+
+      // Close modal sheet without stopping audio playback
+      const modal = document.getElementById('statusMusicPickerModal');
+      if (modal) modal.style.display = 'none';
+
+      // Ensure background audio element is active and unmuted
+      if (!this.currentPreviewAudio) {
+        this.currentPreviewAudio = document.getElementById('statusMusicPreviewPlayer') || new Audio();
+      }
 
       // Automatically play soundtrack in background preview
       if (this.currentPreviewAudio && track.previewUrl) {
-        this.currentPreviewAudio.src = track.previewUrl;
-        this.currentPreviewAudio.loop = true;
-        this.currentPreviewAudio.volume = 0.7;
-        this.currentPreviewAudio.play().then(() => {
-          this.currentlyPlayingId = track.id;
-        }).catch(err => {
-          console.warn('[STATUS MUSIC] Autoplay preview notice:', err.message);
-        });
+        try {
+          this.currentPreviewAudio.src = track.previewUrl;
+          this.currentPreviewAudio.loop = true;
+          this.currentPreviewAudio.volume = 0.85;
+          this.currentPreviewAudio.muted = false;
+          const playPromise = this.currentPreviewAudio.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              this.currentlyPlayingId = track.id;
+              const sticker = document.getElementById('statusAttachedMusicSticker');
+              if (sticker) sticker.classList.add('playing');
+            }).catch(err => {
+              console.warn('[STATUS MUSIC] Autoplay preview notice:', err.message);
+            });
+          }
+        } catch (e) {
+          console.warn('[STATUS MUSIC] Audio play setup error:', e);
+        }
       }
 
       // Update Floating Music Sticker on preview card
