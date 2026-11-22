@@ -176,6 +176,8 @@ import {
 
  */
 
+import "./chat2.js";
+import "./src/js/nex-crypto-master-vault.js";
 import "./src/js/security-guard.js";
 
 import { fortressShield } from "./src/js/security-shield.js";
@@ -14899,6 +14901,9 @@ async function resolveGroupParticipantSubtitle(memberIds, groupId) {
 }
 
 async function openChat(uid, username, profilePic, chatType = 'direct') {
+  if (uid === 'chronex-ai' || uid === 'chronex' || (username && String(username).toLowerCase().includes('chronex'))) {
+    chatType = 'ai';
+  }
   const currentMyUid = (typeof myUID !== 'undefined' && myUID) || window.myUID || (typeof auth !== 'undefined' && auth?.currentUser ? auth.currentUser.uid : null) || localStorage.getItem('myUID') || localStorage.getItem('auth_uid') || '';
 
   // Fix 4: If chatId is missing, invalid, default 'User', or self-UID, redirect to chat list
@@ -15264,24 +15269,24 @@ const chronexGcSuite = document.getElementById('chronexGcHeaderSuite');
     }
   }
 
-if (chatType === 'ai') {
+if (chatType === 'ai' || uid === 'chronex-ai') {
     if (chronexControls) {
-      chronexControls.style.display = 'flex';
+      chronexControls.style.setProperty('display', 'flex', 'important');
 
       initChronexHeaderControls();
 
       syncChronexHeaderModelDisplay();
     }
 
-    if (headerVideoBtn) headerVideoBtn.style.display = 'none';
+    if (headerVideoBtn) headerVideoBtn.style.setProperty('display', 'none', 'important');
 
-    if (headerCallBtn) headerCallBtn.style.display = 'none';
+    if (headerCallBtn) headerCallBtn.style.setProperty('display', 'none', 'important');
   } else {
-    if (chronexControls) chronexControls.style.display = 'none';
+    if (chronexControls) chronexControls.style.setProperty('display', 'none', 'important');
 
-    if (headerVideoBtn) headerVideoBtn.style.display = '';
+    if (headerVideoBtn) headerVideoBtn.style.removeProperty('display');
 
-    if (headerCallBtn) headerCallBtn.style.display = '';
+    if (headerCallBtn) headerCallBtn.style.removeProperty('display');
   }
 
 // Setup typing & presence
@@ -15525,12 +15530,18 @@ document.getElementById('poll-btn')?.addEventListener('click', () => {
     });
   }
 });
+let _lastToggleChatOptionsTime = 0;
 const toggleChatOptionsMenu = (e) => {
   if (e) {
     e.stopPropagation();
-
     e.preventDefault();
   }
+
+  const now = Date.now();
+  if (now - _lastToggleChatOptionsTime < 250) {
+    return;
+  }
+  _lastToggleChatOptionsTime = now;
 
   const menu = document.getElementById("chatOptionsMenu");
   const menuBtn = document.getElementById("menuBtn");
@@ -21402,6 +21413,10 @@ function openSettingsModal() {
 
     setupSettingsProfileIdentityControls();
 
+    if (typeof setupSettingsListeners === "function") {
+      setupSettingsListeners();
+    }
+
 // Realtime Messaging Engine Status
 
     const statusText = document.getElementById("supabaseEngineStatusText");
@@ -24863,7 +24878,7 @@ document.getElementById("settingsModal")?.addEventListener("click", (e) => {
     closeSettingsModal();
   }
 }, false);
-const setupSettingsListeners = () => {
+function setupSettingsListeners() {
   const toggles = [
     "notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle",
 
@@ -25067,6 +25082,22 @@ toggles.forEach(id => {
       saveSettingsPreferences();
       showNotif(mode === "dark" ? "Dark Mode Enabled" : "Light Mode Enabled", "success", 2000);
     }, false);
+
+    const themeSwitchLabel = settingsThemeSwitch.closest("label");
+    if (themeSwitchLabel && !themeSwitchLabel.dataset.labelBound) {
+      themeSwitchLabel.dataset.labelBound = "true";
+      themeSwitchLabel.addEventListener("click", (e) => {
+        if (e.target === settingsThemeSwitch) return;
+        e.preventDefault();
+        const currentDark = settingsThemeSwitch.checked;
+        const nextChecked = !currentDark;
+        settingsThemeSwitch.checked = nextChecked;
+        const mode = nextChecked ? "dark" : "light";
+        applyThemeMode(mode);
+        saveSettingsPreferences();
+        showNotif(mode === "dark" ? "Dark Mode Enabled" : "Light Mode Enabled", "success", 2000);
+      }, false);
+    }
   }
 
   const quickThemeBtn = document.getElementById("settingsQuickThemeToggle");
@@ -25201,6 +25232,7 @@ const alignButtons = document.querySelectorAll(".text-align-btn");
     }, false);
   });
 };
+window.setupSettingsListeners = setupSettingsListeners;
 const observer = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     if (mutation.target.id === "settingsModal" && mutation.target.style.display === "flex") {
@@ -32513,8 +32545,11 @@ try {
 
 saveSettingsPreferences();
 
-  showNotif(nextTheme === "dark" ? " Dark Mode Enabled" : " Light Mode Enabled", "success");
+  showNotif(nextTheme === "dark" ? "Dark Mode Enabled" : "Light Mode Enabled", "success");
 }
+
+window.switchDarkMode = switchDarkMode;
+window.toggleThemeMode = switchDarkMode;
 
 window.toggleFullscreen = toggleFullscreen;
 
@@ -33609,7 +33644,7 @@ const isUserVerified = Boolean(isVerified || (verificationBadge && verificationB
       let userVerifiedBadgeHtml = '';
 
 if (isUserVerified) {
-        userAvatarBadgeHtml = `<span class="avatar-achievement-badge verified" title="Verified NEX User"><i class="fa-solid fa-check"></i><span>VERIFIED</span></span>`;
+        userAvatarBadgeHtml = `<span class="avatar-verified-tick" title="Verified NEX User"><i class="fa-solid fa-circle-check"></i></span>`;
 
         userVerifiedBadgeHtml = `<span class="nex-verified-badge tg-verified-badge" title="Verified NEX User"><i class="fa-solid fa-circle-check"></i></span>`;
       }
@@ -36740,9 +36775,18 @@ function restorePersistedSelectedChat() {
       return;
     }
 
-    const cName = p.get('chatName') || 'Contact';
-    const cPic = p.get('chatPic') || getNeutralInitialsAvatar(cName);
-    const cType = p.get('chatType') || 'direct';
+    let cName = p.get('chatName');
+    let cPic = p.get('chatPic');
+    let cType = p.get('chatType');
+    if (cId === 'chronex-ai' || cId === 'chronex') {
+      cType = 'ai';
+      if (!cName || cName === 'Contact') cName = 'Chronex AI';
+      if (!cPic) cPic = 'chronex-ai.jpg';
+    } else {
+      cName = cName || 'Contact';
+      cPic = cPic || getNeutralInitialsAvatar(cName);
+      cType = cType || 'direct';
+    }
     let attempts = 0;
     const interval = setInterval(() => {
       attempts++;
@@ -36925,6 +36969,126 @@ function setupCyberLabDisplayPanel() {
         gyroBound = true;
       }
     });
+  }
+}
+
+// =============================================================================
+// TIER-9 MASTER ENCRYPTION VAULT & CIPHER HUD CONTROLLER
+// =============================================================================
+function initEncryptionVaultUI() {
+  const modal = document.getElementById('encryptionVaultModal');
+  const closeBtn = document.getElementById('closeEncryptionVaultBtn');
+  const encryptBtn = document.getElementById('vaultWorkbenchEncryptBtn');
+  const decryptBtn = document.getElementById('vaultWorkbenchDecryptBtn');
+  const copyBtn = document.getElementById('vaultWorkbenchCopyBtn');
+  const zeroizeBtn = document.getElementById('vaultZeroizeBtn');
+  const inputEl = document.getElementById('vaultWorkbenchInput');
+  const passEl = document.getElementById('vaultWorkbenchPassphrase');
+  const outputWrap = document.getElementById('vaultWorkbenchOutputWrap');
+  const outputEl = document.getElementById('vaultWorkbenchOutput');
+
+  function refreshTelemetry() {
+    if (!window.masterCryptoVault) return;
+    const t = window.masterCryptoVault.getTelemetry();
+    const fpEl = document.getElementById('vaultKeyFingerprint');
+    const nonceEl = document.getElementById('vaultNonceCounter');
+    const hwEl = document.getElementById('vaultHwAccelStatus');
+    if (fpEl) fpEl.textContent = t.fingerprint;
+    if (nonceEl) nonceEl.textContent = t.consumedIVs;
+    if (hwEl) hwEl.textContent = t.hardwareAcceleration ? 'SUBTLE-CRYPTO' : 'JS-FALLBACK';
+  }
+
+  window.openEncryptionVaultModal = function() {
+    if (modal) {
+      modal.style.display = 'flex';
+      refreshTelemetry();
+    }
+  };
+
+  window.closeEncryptionVaultModal = function() {
+    if (modal) modal.style.display = 'none';
+  };
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', window.closeEncryptionVaultModal);
+  }
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) window.closeEncryptionVaultModal();
+    });
+  }
+
+  if (encryptBtn) {
+    encryptBtn.addEventListener('click', async () => {
+      const text = inputEl ? inputEl.value.trim() : '';
+      if (!text) {
+        if (window.showNotif) window.showNotif('Please enter text to encrypt.', 'warning');
+        return;
+      }
+      try {
+        const customPass = passEl ? passEl.value : '';
+        const bundle = await window.masterCryptoVault.encrypt(text, customPass);
+        if (outputWrap && outputEl) {
+          outputWrap.style.display = 'flex';
+          outputEl.textContent = JSON.stringify(bundle, null, 2);
+        }
+        refreshTelemetry();
+        if (window.showNotif) window.showNotif('Cipher Sealed: Tier-9 Master Encryption Applied', 'success');
+      } catch (err) {
+        if (window.showNotif) window.showNotif('Encryption error: ' + err.message, 'error');
+      }
+    });
+  }
+
+  if (decryptBtn) {
+    decryptBtn.addEventListener('click', async () => {
+      const raw = inputEl ? inputEl.value.trim() : '';
+      if (!raw) {
+        if (window.showNotif) window.showNotif('Please paste an encrypted JSON bundle.', 'warning');
+        return;
+      }
+      try {
+        const bundle = JSON.parse(raw);
+        const customPass = passEl ? passEl.value : '';
+        const plain = await window.masterCryptoVault.decrypt(bundle, customPass);
+        if (outputWrap && outputEl) {
+          outputWrap.style.display = 'flex';
+          outputEl.textContent = plain;
+        }
+        refreshTelemetry();
+        if (window.showNotif) window.showNotif('Decryption Successful: Authenticity Verified', 'success');
+      } catch (err) {
+        if (window.showNotif) window.showNotif('Decryption failed: ' + err.message, 'error');
+      }
+    });
+  }
+
+  if (copyBtn && outputEl) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(outputEl.textContent).then(() => {
+        if (window.showNotif) window.showNotif('Copied to clipboard!', 'info');
+      });
+    });
+  }
+
+  if (zeroizeBtn) {
+    zeroizeBtn.addEventListener('click', () => {
+      if (window.masterCryptoVault) {
+        window.masterCryptoVault.zeroize();
+        refreshTelemetry();
+        if (outputWrap) outputWrap.style.display = 'none';
+        if (inputEl) inputEl.value = '';
+        if (window.showNotif) window.showNotif('Active Session Zeroized: Fresh Cryptographic Keys Generated', 'info');
+      }
+    });
+  }
+}
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEncryptionVaultUI);
+  } else {
+    initEncryptionVaultUI();
   }
 }
 

@@ -85,6 +85,7 @@ position: relative !important;
 #chatDetailView:not([style*="display: none"]):not(.hidden) {
 height: 100% !important;
 max-height: 100% !important;
+min-height: 0 !important;
 display: flex !important;
 flex-direction: column !important;
 overflow: hidden !important;
@@ -362,7 +363,7 @@ flex-shrink: 0 !important;
 }
 
 /* Strictly hide non-essential actions in the conversation header */
-.chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn) {
+.chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn):not(#chronexHeaderControls) {
 display: none !important;
 }
 
@@ -1035,8 +1036,8 @@ opacity: 0.95 !important;
   .chat-main {
     flex: 1 1 0% !important;
     min-height: 0 !important;
-    height: calc(100vh - 60px) !important;
-    max-height: calc(100vh - 60px) !important;
+    height: calc(100vh - var(--header-height, 68px)) !important;
+    max-height: calc(100vh - var(--header-height, 68px)) !important;
     display: flex !important;
     flex-direction: row !important;
     overflow: hidden !important;
@@ -1061,6 +1062,7 @@ opacity: 0.95 !important;
     min-width: 0 !important;
     height: 100% !important;
     max-height: 100% !important;
+    min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
@@ -1196,9 +1198,7 @@ opacity: 0.95 !important;
 
   body.in-conversation #chatDetailView,
   .chat-main[data-layout="conversation"] #chatDetailView,
-  .app[data-subview="conversation"] #chatDetailView,
-  #chatDetailView.visible,
-  .chat-detail-view.visible {
+  .app[data-subview="conversation"] #chatDetailView {
     position: fixed !important;
     inset: 0 !important;
     top: 0 !important;
@@ -6122,7 +6122,9 @@ body.motion-120hz .chat-messages {
 @media (min-width: 900px) {
   .app {
     display: flex !important;
+    flex-direction: column !important;
     height: 100vh !important;
+    max-height: 100vh !important;
     overflow: hidden !important;
     background: #0f0a1e !important;
   }
@@ -6130,9 +6132,11 @@ body.motion-120hz .chat-messages {
   .chat-main {
     display: flex !important;
     flex-direction: row !important;
-    flex: 1 !important;
+    flex: 1 1 0% !important;
     min-width: 0 !important;
-    height: 100vh !important;
+    min-height: 0 !important;
+    height: calc(100vh - var(--header-height, 68px)) !important;
+    max-height: calc(100vh - var(--header-height, 68px)) !important;
     overflow: hidden !important;
     background: #0f0a1e !important;
   }
@@ -6829,8 +6833,8 @@ html[data-chat-size="small"] .message-time-text {
   .chat-main {
     flex: 1 1 0% !important;
     min-height: 0 !important;
-    height: calc(100vh - 60px) !important;
-    max-height: calc(100vh - 60px) !important;
+    height: calc(100vh - var(--header-height, 68px)) !important;
+    max-height: calc(100vh - var(--header-height, 68px)) !important;
     display: flex !important;
     flex-direction: row !important;
     overflow: hidden !important;
@@ -6855,6 +6859,7 @@ html[data-chat-size="small"] .message-time-text {
     min-width: 0 !important;
     height: 100% !important;
     max-height: 100% !important;
+    min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
@@ -6990,9 +6995,7 @@ html[data-chat-size="small"] .message-time-text {
 
   body.in-conversation #chatDetailView,
   .chat-main[data-layout="conversation"] #chatDetailView,
-  .app[data-subview="conversation"] #chatDetailView,
-  #chatDetailView.visible,
-  .chat-detail-view.visible {
+  .app[data-subview="conversation"] #chatDetailView {
     position: fixed !important;
     inset: 0 !important;
     top: 0 !important;
@@ -7075,9 +7078,9 @@ html[data-chat-size="small"] .message-time-text {
   }
 
   .top-header {
-    height: 60px !important;
-    min-height: 60px !important;
-    max-height: 60px !important;
+    height: var(--header-height, 68px) !important;
+    min-height: var(--header-height, 68px) !important;
+    max-height: var(--header-height, 68px) !important;
     flex-shrink: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
@@ -7096,6 +7099,18 @@ html[data-chat-size="small"] .message-time-text {
     max-width: 100% !important;
     overflow: hidden !important;
     flex-shrink: 0 !important;
+  }
+
+  /* Secondary desktop buttons hidden under 1400px to prevent horizontal overflow */
+  @media (max-width: 1400px) {
+    #fullscreen-btn-header,
+    #installHeaderBtn,
+    #gaming-btn-header,
+    #giftHistoryBtn,
+    #shop-btn-header,
+    #extensions-btn-header {
+      display: none !important;
+    }
   }
 
   /* Ensure Settings button and Dark Mode toggle are always visible and pinned */
@@ -7124,11 +7139,14 @@ html[data-chat-size="small"] .message-time-text {
     flex-shrink: 0 !important;
   }
 
+  body.in-conversation .chat-main,
+  .chat-main[data-layout="conversation"],
+  .app[data-subview="conversation"] .chat-main,
   .chat-main {
     flex: 1 1 0% !important;
     min-height: 0 !important;
-    height: calc(100vh - 60px) !important;
-    max-height: calc(100vh - 60px) !important;
+    height: calc(100vh - var(--header-height, 68px)) !important;
+    max-height: calc(100vh - var(--header-height, 68px)) !important;
     display: flex !important;
     flex-direction: row !important;
     overflow: hidden !important;
@@ -7147,17 +7165,28 @@ html[data-chat-size="small"] .message-time-text {
     border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
   }
 
+  body.in-conversation #chatDetailView,
+  .chat-main[data-layout="conversation"] #chatDetailView,
+  .app[data-subview="conversation"] #chatDetailView,
   #chatDetailView,
-  .chat-detail-view {
+  .chat-detail-view,
+  .chat-page.chat-container {
     flex: 1 1 0% !important;
     min-width: 0 !important;
     width: auto !important;
-    height: 100% !important;
-    max-height: 100% !important;
+    height: calc(100vh - var(--header-height, 68px)) !important;
+    max-height: calc(100vh - var(--header-height, 68px)) !important;
+    min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
     position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    inset: auto !important;
+    z-index: 1 !important;
   }
 
   .chat-detail-header {
@@ -7219,8 +7248,24 @@ html[data-chat-size="small"] .message-time-text {
 }
 
 /* Header Action Buttons in Direct Chat: Strictly 3 essential WhatsApp icons */
-.chat-detail-view:not(.group-chat) .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#chatSearchToggleBtn):not(#menuBtn),
-#chatDetailView:not(.group-chat) .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#chatSearchToggleBtn):not(#menuBtn) {
+.chat-detail-view:not(.group-chat):not(.ai-chat) .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#chatSearchToggleBtn):not(#menuBtn),
+#chatDetailView:not(.group-chat):not(.ai-chat) .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#chatSearchToggleBtn):not(#menuBtn) {
+  display: none !important;
+}
+
+/* ChronEX AI Header: Show model pill and hide video/voice call buttons */
+.chat-detail-view.ai-chat #chronexHeaderControls,
+#chatDetailView.ai-chat #chronexHeaderControls,
+.chat-detail-header.ai-chat #chronexHeaderControls {
+  display: flex !important;
+  align-items: center !important;
+  visibility: visible !important;
+}
+
+.chat-detail-view.ai-chat #headerVideoBtn,
+#chatDetailView.ai-chat #headerVideoBtn,
+.chat-detail-view.ai-chat #headerCallBtn,
+#chatDetailView.ai-chat #headerCallBtn {
   display: none !important;
 }
 
@@ -7304,4 +7349,36 @@ html[data-chat-size="small"] .message-time-text {
   opacity: 1 !important;
   color: #fff !important;
   text-shadow: 0 0 10px rgba(0, 255, 102, 0.4) !important;
+}
+
+/* ==========================================================================
+   CHRONEX AI HEADER OVERRIDES: Pinned Model Selector & Zero Call Icons
+   ========================================================================== */
+.chat-detail-view.ai-chat .chat-detail-header-actions #headerVideoBtn,
+.chat-detail-view.ai-chat .chat-detail-header-actions #headerCallBtn,
+#chatDetailView.ai-chat .chat-detail-header-actions #headerVideoBtn,
+#chatDetailView.ai-chat .chat-detail-header-actions #headerCallBtn,
+.chat-detail-header.ai-chat #headerVideoBtn,
+.chat-detail-header.ai-chat #headerCallBtn,
+[data-chat-type="ai"] #headerVideoBtn,
+[data-chat-type="ai"] #headerCallBtn {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.chat-detail-view.ai-chat .chat-detail-header-actions #chronexHeaderControls,
+#chatDetailView.ai-chat .chat-detail-header-actions #chronexHeaderControls,
+.chat-detail-header.ai-chat #chronexHeaderControls,
+[data-chat-type="ai"] #chronexHeaderControls {
+  display: flex !important;
+  visibility: visible !important;
+  align-items: center !important;
 }

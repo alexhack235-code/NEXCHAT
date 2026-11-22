@@ -974,7 +974,8 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
 
 /* Chat Options Dropdown Menu */
 .chat-options-dropdown {
-  position: absolute;
+  position: fixed !important;
+  z-index: 1050 !important;
   top: 70px;
   right: 18px;
   background: var(--bg-surface-elevated);
@@ -4264,6 +4265,42 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
   color: #041019;
   border: 1px solid rgba(0, 255, 102, 0.6);
   box-shadow: 0 2px 8px rgba(0, 255, 102, 0.4);
+}
+
+.avatar-achievement-badge.verified span {
+  display: none !important;
+}
+
+/* Professional Circular Verified Tick Overlay & Luminous Avatar Ring */
+.avatar-verified-tick {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #00ff66;
+  color: #0b141a;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.75), 0 2px 5px rgba(0, 0, 0, 0.6);
+  border: 2px solid #0b141a;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.avatar-verified-tick i {
+  font-size: 11px;
+  line-height: 1;
+  color: #041019;
+}
+
+.chat-avatar-wrapper:has(.avatar-verified-tick) .chat-avatar,
+.chat-avatar-wrapper:has(.avatar-achievement-badge.verified) .chat-avatar {
+  border: 1.5px solid #00ff66 !important;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.4) !important;
 }
 
 .avatar-achievement-badge.ai {
@@ -11371,7 +11408,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
 
 /* Streamlined group action buttons: Video call, Phone call, Menu */
 .chat-detail-view.group-chat .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn),
-.chat-detail-header.group-chat .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn) {
+.chat-detail-header.group-chat .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn):not(#chronexHeaderControls) {
   display: none !important;
 }
 
@@ -16350,7 +16387,7 @@ body:not(.group-active) #tacticalMeshBanner {
   flex-shrink: 0 !important;
 }
 
-.chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn) {
+.chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn):not(#chronexHeaderControls) {
   display: none !important;
 }
 
@@ -18654,7 +18691,9 @@ body.in-conversation #activeChatHeader {
   .chat-main[data-layout="conversation"] .chat-header,
   .app[data-subview="conversation"] header.top-header,
   .app[data-subview="conversation"] .top-header,
-  .app[data-subview="conversation"] header.chat-header {
+  .app[data-subview="conversation"] header.chat-header,
+  .chat-main[data-layout="conversation"] #headerLogoContainer,
+  body.in-conversation #headerLogoContainer {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
@@ -18665,11 +18704,6 @@ body.in-conversation #activeChatHeader {
 
 #headerLogoContainer {
   display: flex !important;
-}
-
-.chat-main[data-layout="conversation"] #headerLogoContainer,
-body.in-conversation #headerLogoContainer {
-  display: none !important;
 }
 
 /* Ensure Chat FAB cluster is always visible on chat list view */
@@ -19338,7 +19372,9 @@ body,
 @media (min-width: 900px) {
   .app {
     display: flex !important;
+    flex-direction: column !important;
     height: 100vh !important;
+    max-height: 100vh !important;
     overflow: hidden !important;
     background: #0f0a1e !important;
   }
@@ -19346,10 +19382,13 @@ body,
   .chat-main {
     display: flex !important;
     flex-direction: row !important;
-    flex: 1 !important;
+    flex: 1 1 0% !important;
     min-width: 0 !important;
-    height: 100vh !important;
+    min-height: 0 !important;
+    height: calc(100vh - var(--header-height, 68px)) !important;
+    max-height: calc(100vh - var(--header-height, 68px)) !important;
     overflow: hidden !important;
+    position: relative !important;
     background: #0f0a1e !important;
   }
 
@@ -19834,32 +19873,63 @@ textarea {
 /* ==========================================================================
    USER-TO-USER CHAT FULL-HEIGHT CONTAINER & STICKY HEADER SPEC
    ========================================================================== */
-.chat-detail-view,
-#chatDetailView,
-.chat-page.chat-container {
-  height: 100vh !important;
-  height: 100dvh !important;
-  max-height: 100vh !important;
-  max-height: 100dvh !important;
-  min-height: 100vh !important;
-  min-height: 100dvh !important;
-  padding: 0 !important;
-  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-  display: flex !important;
-  flex-direction: column !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  margin: 0 !important;
+@media (max-width: 899px) {
+  .chat-detail-view,
+  #chatDetailView,
+  .chat-page.chat-container {
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    padding: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+  }
+
+  body.in-conversation .chat-main,
+  .chat-main[data-layout="conversation"] {
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 }
 
-body.in-conversation .chat-main,
-.chat-main[data-layout="conversation"] {
-  height: 100vh !important;
-  height: 100dvh !important;
-  max-height: 100vh !important;
-  max-height: 100dvh !important;
-  margin: 0 !important;
-  padding: 0 !important;
+@media (min-width: 900px) {
+  body.in-conversation #chatDetailView,
+  .chat-main[data-layout="conversation"] #chatDetailView,
+  .app[data-subview="conversation"] #chatDetailView,
+  .chat-detail-view,
+  #chatDetailView,
+  .chat-page.chat-container {
+    height: calc(100vh - var(--header-height, 68px)) !important;
+    max-height: calc(100vh - var(--header-height, 68px)) !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    flex: 1 1 0% !important;
+  }
+
+  body.in-conversation .chat-main,
+  .chat-main[data-layout="conversation"] {
+    height: calc(100vh - var(--header-height, 68px)) !important;
+    max-height: calc(100vh - var(--header-height, 68px)) !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 }
 
 .chat-detail-header {
@@ -20182,4 +20252,36 @@ body.in-conversation .chat-main,
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+}
+
+/* ==========================================================================
+   CHRONEX AI HEADER OVERRIDES: Pinned Model Selector & Zero Call Icons
+   ========================================================================== */
+.chat-detail-view.ai-chat .chat-detail-header-actions #headerVideoBtn,
+.chat-detail-view.ai-chat .chat-detail-header-actions #headerCallBtn,
+#chatDetailView.ai-chat .chat-detail-header-actions #headerVideoBtn,
+#chatDetailView.ai-chat .chat-detail-header-actions #headerCallBtn,
+.chat-detail-header.ai-chat #headerVideoBtn,
+.chat-detail-header.ai-chat #headerCallBtn,
+[data-chat-type="ai"] #headerVideoBtn,
+[data-chat-type="ai"] #headerCallBtn {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.chat-detail-view.ai-chat .chat-detail-header-actions #chronexHeaderControls,
+#chatDetailView.ai-chat .chat-detail-header-actions #chronexHeaderControls,
+.chat-detail-header.ai-chat #chronexHeaderControls,
+[data-chat-type="ai"] #chronexHeaderControls {
+  display: flex !important;
+  visibility: visible !important;
+  align-items: center !important;
 }
