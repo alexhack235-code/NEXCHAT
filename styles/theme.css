@@ -32,9 +32,24 @@
 
 /* Base Body Deep Navy Override */
 body.dark-mode,
-body {
+body:not(.light-mode):not(.light-theme) {
   background-color: var(--bg-navy) !important;
   color: var(--text-main);
+}
+
+/* Light Mode Overrides for Theme Variables */
+body.light-mode,
+body.light-theme {
+  --bg-navy: #f3f6f9;
+  --bg-navy-light: #ffffff;
+  --bg-navy-card: #f8fafc;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-cyan: #00a87d;
+  --bubble-sent-bg: #dcf8c6;
+  --bubble-received-bg: #ffffff;
+  background-color: var(--bg-app, #f3f6f9) !important;
+  color: #0f172a !important;
 }
 
 /* Pulsing NEXCHAT Cyan Online Beacon */

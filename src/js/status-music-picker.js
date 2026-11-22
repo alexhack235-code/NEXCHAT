@@ -382,7 +382,19 @@
 
     selectTrack(track) {
       this.selectedTrack = track;
-      this.stopPreviewPlayback();
+      this.closePicker();
+
+      // Automatically play soundtrack in background preview
+      if (this.currentPreviewAudio && track.previewUrl) {
+        this.currentPreviewAudio.src = track.previewUrl;
+        this.currentPreviewAudio.loop = true;
+        this.currentPreviewAudio.volume = 0.7;
+        this.currentPreviewAudio.play().then(() => {
+          this.currentlyPlayingId = track.id;
+        }).catch(err => {
+          console.warn('[STATUS MUSIC] Autoplay preview notice:', err.message);
+        });
+      }
 
       // Update Floating Music Sticker on preview card
       const sticker = document.getElementById('statusAttachedMusicSticker');
@@ -395,13 +407,31 @@
         title.textContent = track.trackName;
         artist.textContent = track.artistName;
         sticker.style.display = 'flex';
+        sticker.classList.add('playing');
+
+        if (!sticker.dataset.interactiveBound) {
+          sticker.dataset.interactiveBound = 'true';
+          sticker.style.cursor = 'pointer';
+          sticker.title = 'Click to toggle background music playback';
+          sticker.addEventListener('click', (e) => {
+            if (e.target.closest('#statusRemoveMusicBtn')) return;
+            if (this.currentPreviewAudio) {
+              if (this.currentPreviewAudio.paused) {
+                this.currentPreviewAudio.play().then(() => {
+                  sticker.classList.add('playing');
+                }).catch(() => {});
+              } else {
+                this.currentPreviewAudio.pause();
+                sticker.classList.remove('playing');
+              }
+            }
+          });
+        }
       }
 
       if (window.showNotif) {
         window.showNotif(`Added music: ${track.trackName} - ${track.artistName}`, 'success', 2500);
       }
-
-      this.closePicker();
     }
 
     removeTrack() {
@@ -409,7 +439,10 @@
       this.stopPreviewPlayback();
 
       const sticker = document.getElementById('statusAttachedMusicSticker');
-      if (sticker) sticker.style.display = 'none';
+      if (sticker) {
+        sticker.style.display = 'none';
+        sticker.classList.remove('playing');
+      }
 
       if (window.showNotif) {
         window.showNotif('Music track removed from status', 'info', 2000);

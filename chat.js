@@ -20368,6 +20368,17 @@ const codeInput = document.getElementById('statusCodeStoryInput');
   if (codeInput) codeInput.value = '';
 const audioCaption = document.getElementById('statusAudioCaptionInput');
   if (audioCaption) audioCaption.value = '';
+  const dropZoneEl = document.getElementById('statusMediaDropZone');
+  if (dropZoneEl) dropZoneEl.classList.remove('has-preview');
+  if (window.statusMusicPickerEngine) {
+    window.statusMusicPickerEngine.stopPreviewPlayback();
+    window.statusMusicPickerEngine.currentTrack = null;
+  }
+  const musicSticker = document.getElementById('statusAttachedMusicSticker');
+  if (musicSticker) {
+    musicSticker.style.display = 'none';
+    musicSticker.classList.remove('playing');
+  }
 }
 function switchStatusModalTab(tab) {
   const mediaBtn = document.getElementById('statusTabMediaBtn');
@@ -20473,26 +20484,30 @@ const fileInput = document.getElementById('statusMediaModalFileInput');
   });
 if (dropZone && !dropZone.dataset.clickBound) {
     dropZone.dataset.clickBound = 'true';
-dropZone.addEventListener('click', (e) => {
-      if (e.target !== removeBtn && !removeBtn?.contains(e.target) && e.target !== manualTrimBtn && !manualTrimBtn?.contains(e.target)) {
-        fileInput?.click();
+    dropZone.addEventListener('click', (e) => {
+      // If media preview is active, do not open file dialog on preview/controls clicks
+      if (previewBox && previewBox.style.display !== 'none') {
+        return;
+      }
+      fileInput?.click();
+    });
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (!dropZone.classList.contains('has-preview')) {
+        dropZone.style.borderColor = '#00ff88';
+        dropZone.style.background = 'rgba(0, 255, 136, 0.08)';
       }
     });
-dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.style.borderColor = '#00ff88';
-      dropZone.style.background = 'rgba(0, 255, 136, 0.08)';
-    });
-dropZone.addEventListener('dragleave', () => {
+    dropZone.addEventListener('dragleave', () => {
       dropZone.style.borderColor = '';
       dropZone.style.background = '';
     });
-dropZone.addEventListener('drop', (e) => {
+    dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropZone.style.borderColor = '';
       dropZone.style.background = '';
       const file = e.dataTransfer?.files?.[0];
-if (file && fileInput) {
+      if (file && fileInput) {
         const dt = new DataTransfer();
         dt.items.add(file);
         fileInput.files = dt.files;
@@ -20500,13 +20515,14 @@ if (file && fileInput) {
       }
     });
   }
-fileInput?.addEventListener('change', (e) => {
+  fileInput?.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
-if (!file) return;
-validateStatusMediaDuration(file, (isValid) => {
+    if (!file) return;
+    validateStatusMediaDuration(file, (isValid) => {
       if (!isValid) {
         selectedStatusMediaFile = null;
-if (fileInput) fileInput.value = '';
+        if (dropZone) dropZone.classList.remove('has-preview');
+        if (fileInput) fileInput.value = '';
         if (previewBox) previewBox.style.display = 'none';
         if (dropPlaceholder) dropPlaceholder.style.display = 'block';
         if (videoPreview) { videoPreview.pause(); videoPreview.src = ''; videoPreview.style.filter = 'none'; }
@@ -20514,24 +20530,25 @@ if (fileInput) fileInput.value = '';
         if (manualTrimBtn) manualTrimBtn.style.display = 'none';
         return;
       }
-selectedStatusMediaFile = file;
+      selectedStatusMediaFile = file;
       const fileUrl = URL.createObjectURL(file);
-if (dropPlaceholder) dropPlaceholder.style.display = 'none';
+      if (dropPlaceholder) dropPlaceholder.style.display = 'none';
       if (previewBox) previewBox.style.display = 'block';
-if (file.type.startsWith('video/')) {
+      if (dropZone) dropZone.classList.add('has-preview');
+      if (file.type.startsWith('video/')) {
         if (imgPreview) {
           imgPreview.style.display = 'none';
           imgPreview.src = '';
         }
-if (videoPreview) {
+        if (videoPreview) {
           videoPreview.style.display = 'block';
           videoPreview.style.filter = selectedStatusFilter;
           videoPreview.src = fileUrl;
         }
-if (window.NexTransmitterTrimmer) {
+        if (window.NexTransmitterTrimmer) {
           window.NexTransmitterTrimmer.activateTrimmer(file, undefined, videoPreview);
         }
-if (manualTrimBtn) manualTrimBtn.style.display = 'none';
+        if (manualTrimBtn) manualTrimBtn.style.display = 'none';
       } else {
         if (window.NexTransmitterTrimmer) {
           window.NexTransmitterTrimmer.hideTrimmer();
@@ -20541,20 +20558,21 @@ if (manualTrimBtn) manualTrimBtn.style.display = 'none';
           videoPreview.style.display = 'none';
           videoPreview.src = '';
         }
-if (imgPreview) {
+        if (imgPreview) {
           imgPreview.style.display = 'block';
           imgPreview.style.filter = selectedStatusFilter;
           imgPreview.src = fileUrl;
         }
-if (manualTrimBtn) manualTrimBtn.style.display = 'none';
+        if (manualTrimBtn) manualTrimBtn.style.display = 'none';
       }
     });
   });
-removeBtn?.addEventListener('click', (e) => {
+  removeBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
-selectedStatusMediaFile = null;
+    selectedStatusMediaFile = null;
+    if (dropZone) dropZone.classList.remove('has-preview');
     if (window.NexTransmitterTrimmer) window.NexTransmitterTrimmer.hideTrimmer();
-if (fileInput) fileInput.value = '';
+    if (fileInput) fileInput.value = '';
     if (previewBox) previewBox.style.display = 'none';
     if (dropPlaceholder) dropPlaceholder.style.display = 'block';
     if (videoPreview) { videoPreview.pause(); videoPreview.src = ''; videoPreview.style.filter = 'none'; }

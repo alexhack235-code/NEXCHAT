@@ -4652,6 +4652,44 @@
             </div>
           </div>
 
+          <!-- GRAPH 10B: Real-Time Crashlytics & Caught Errors Live Log -->
+          <div class="telemetry-graph-card red-accent" data-telemetry-category="security" id="cardTelemetryLiveErrors" style="border-color: rgba(239, 68, 68, 0.4); background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.06), transparent 70%), var(--bg-card);">
+            <div class="telemetry-card-top">
+              <div class="telemetry-card-title-wrap">
+                <div class="telemetry-card-icon" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.1);">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                  <h3 class="telemetry-card-heading">Live Crashlytics &amp; Caught Errors Feed</h3>
+                  <div class="telemetry-card-subheading">Real-time Sentry/Crashlytics stream: API rejections, runtime exceptions, and Firebase permissions</div>
+                </div>
+              </div>
+              <div class="telemetry-badge-group">
+                <span class="telemetry-stat-badge red" id="badgeLiveErrorCount"><i class="fa-solid fa-bug"></i> <span id="crashlyticsCountDisplay">0</span> Logged</span>
+                <button type="button" id="btnTestCrashlytics" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                  <i class="fa-solid fa-vial"></i> Test Event
+                </button>
+                <button type="button" id="btnClearCrashlytics" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #94a3b8; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 8px; cursor: pointer;">
+                  <i class="fa-solid fa-trash"></i> Clear
+                </button>
+              </div>
+            </div>
+
+            <!-- Scrollable Live Error Stream Viewport -->
+            <div class="telemetry-error-viewport" id="crashlyticsErrorFeed" style="max-height: 280px; overflow-y: auto; padding: 12px; background: rgba(5, 8, 16, 0.85); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; margin: 12px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;">
+              <div id="crashlyticsEmptyState" style="text-align: center; padding: 32px 16px; color: #64748b; font-size: 12px;">
+                <i class="fa-solid fa-shield-heart" style="font-size: 24px; color: #10b981; margin-bottom: 8px; display: block;"></i>
+                No critical runtime errors detected. System operating with zero unhandled exceptions.
+              </div>
+            </div>
+
+            <div class="telemetry-card-footer">
+              <span class="telemetry-footer-item"><i class="fa-solid fa-bell text-red-400"></i> Auto-Reporting: Active</span>
+              <span class="telemetry-footer-item"><i class="fa-solid fa-database text-purple-400"></i> Local &amp; Firestore Buffered</span>
+              <span class="telemetry-footer-item"><i class="fa-solid fa-circle-check text-emerald-400"></i> Auto-Heal Watchdog Linked</span>
+            </div>
+          </div>
+
           <!-- GRAPH 11: GlobalDrop Activity Matrix -->
           <div class="telemetry-graph-card" data-telemetry-category="media" id="cardTelemetryGlobalDrop">
             <div class="telemetry-card-top">
@@ -12118,7 +12156,78 @@ For support or further inquiries, reply directly to this chat.`;
               <div style="font-size:13px;line-height:1.6;color:#f8fafc;">${message}</div>
               <div style="margin-top:14px;font-size:11px;color:#64748b;">Target Module: ${extension}</div>
             </div>
-            </body></html>
+              <script src="./src/js/nex-crashlytics.js"></script>
+  <script>
+    (function initAdminCrashlyticsFeed() {
+      const feedEl = document.getElementById('crashlyticsErrorFeed');
+      const countEl = document.getElementById('crashlyticsCountDisplay');
+      const emptyEl = document.getElementById('crashlyticsEmptyState');
+      const btnTest = document.getElementById('btnTestCrashlytics');
+      const btnClear = document.getElementById('btnClearCrashlytics');
+
+      function renderErrors() {
+        if (!feedEl || !window.NexCrashlytics) return;
+        const errors = window.NexCrashlytics.getRecentErrors();
+        if (countEl) countEl.textContent = errors.length;
+
+        if (errors.length === 0) {
+          feedEl.innerHTML = `
+            <div id="crashlyticsEmptyState" style="text-align: center; padding: 32px 16px; color: #64748b; font-size: 12px;">
+              <i class="fa-solid fa-shield-heart" style="font-size: 24px; color: #10b981; margin-bottom: 8px; display: block;"></i>
+              No critical runtime errors detected. System operating with zero unhandled exceptions.
+            </div>
+          `;
+          return;
+        }
+
+        feedEl.innerHTML = errors.map(err => `
+          <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(239, 68, 68, 0.25); border-left: 3px solid #ef4444; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px;">
+              <span style="font-weight: 800; color: #f87171; letter-spacing: 0.5px;">${err.type || 'ERROR'}</span>
+              <span style="color: #64748b; font-size: 10px;">${err.timeFormatted || err.timestamp || ''}</span>
+            </div>
+            <div style="font-size: 12px; font-weight: 600; color: #e2e8f0; word-break: break-word;">
+              ${err.message || 'Unknown error'}
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; color: #94a3b8; margin-top: 4px; flex-wrap: wrap;">
+              <span><i class="fa-solid fa-file-code"></i> ${err.filename || err.url || 'app'}</span>
+              <span>•</span>
+              <span><i class="fa-solid fa-mobile-screen"></i> ${err.isMobile ? 'Mobile Device' : 'Desktop Client'}</span>
+              <span>•</span>
+              <span style="color: #00ff88;"><i class="fa-solid fa-check"></i> Captured & Logged</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      if (window.NexCrashlytics) {
+        window.NexCrashlytics.subscribe(() => renderErrors());
+      }
+
+      btnTest?.addEventListener('click', () => {
+        if (window.NexCrashlytics) {
+          window.NexCrashlytics.logError({
+            type: 'SYNTHETIC_API_TEST',
+            message: 'Simulated API fetch timeout on /api/chat.js (Latency: 5200ms)',
+            filename: '/api/chat.js',
+            severity: 'warning'
+          });
+          renderErrors();
+        }
+      });
+
+      btnClear?.addEventListener('click', () => {
+        if (window.NexCrashlytics) {
+          window.NexCrashlytics.clearErrors();
+          renderErrors();
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', renderErrors);
+      renderErrors();
+    })();
+  </script>
+</body></html>
         `;
 
         iframe.srcdoc = previewHtml;
