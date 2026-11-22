@@ -25,3 +25,7 @@ scratch/
 .system_generated
 cloudflared.exe
 *.exe
+native
+native/
+*.dll
+*.lib

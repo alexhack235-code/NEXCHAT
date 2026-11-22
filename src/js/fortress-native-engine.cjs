@@ -10,13 +10,16 @@ let lib = null;
 let nativeLoaded = false;
 
 try {
-  koffi = require('koffi');
-  const libPath = process.platform === 'win32'
-    ? path.resolve(__dirname, '../../native/fortress_native.dll')
-    : path.resolve(__dirname, '../../native/libfortress_native.so');
+  if (process.env.FORTRESS_NATIVE === 'true') {
+    const dynamicReq = typeof __non_webpack_require__ === 'function' ? __non_webpack_require__ : require;
+    koffi = dynamicReq('koffi');
+    const libPath = process.platform === 'win32'
+      ? path.resolve(__dirname, '../../native/fortress_native.dll')
+      : path.resolve(__dirname, '../../native/libfortress_native.so');
 
-  lib = koffi.load(libPath);
-  nativeLoaded = true;
+    lib = koffi.load(libPath);
+    nativeLoaded = true;
+  }
 } catch (e) {
   nativeLoaded = false;
 }

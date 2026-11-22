@@ -6,20 +6,29 @@ if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir, { recursive: true });
 }
 
+// Clean stale deep folders in dist to prevent old artifacts from inflating bundle size
+['src', 'assets'].forEach(f => {
+  const p = path.join(distDir, f);
+  if (fs.existsSync(p)) {
+    try { fs.rmSync(p, { recursive: true, force: true }); } catch (_) {}
+  }
+});
+
 function copyRecursive(src, dest) {
   if (!fs.existsSync(src)) return;
   const stat = fs.statSync(src);
   if (stat.isDirectory()) {
     const base = path.basename(src);
-    if (['Builds', 'node_modules', '.git', 'dist-apk', 'android'].includes(base)) return;
+    if (['Builds', 'node_modules', '.git', 'dist-apk', 'android', 'Scenes', 'Scripts', 'Resources', 'WebGLTemplates', 'languages', 'native'].includes(base)) return;
     if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
     for (const child of fs.readdirSync(src)) {
       copyRecursive(path.join(src, child), path.join(dest, child));
     }
   } else {
     const ext = path.extname(src).toLowerCase();
-    if (['.exe', '.dll', '.pdb', '.so', '.dylib'].includes(ext)) return;
-    if (stat.size > 25 * 1024 * 1024) return; // Skip files over 25MB exceeding Vercel limits
+    if (['.exe', '.dll', '.pdb', '.so', '.dylib', '.lib', '.meta', '.cs', '.unity'].includes(ext)) return;
+    if (path.basename(src).includes('NormalDX') || path.basename(src).includes('Displacement')) return;
+    if (stat.size > 8 * 1024 * 1024) return; // Skip files over 8MB to protect Vercel deploy limits
     fs.copyFileSync(src, dest);
   }
 }
