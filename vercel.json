@@ -239,45 +239,6 @@
   "functions": {
     "api/*.js": {
       "maxDuration": 10
-    },
-    "api/translate.js": {
-      "maxDuration": 10
-    },
-    "api/chat.js": {
-      "maxDuration": 10
-    },
-    "api/heal.js": {
-      "maxDuration": 10
-    },
-    "api/health.js": {
-      "maxDuration": 10
-    },
-    "api/upload.js": {
-      "maxDuration": 10
-    },
-    "api/serve-blob.js": {
-      "maxDuration": 10
-    },
-    "api/reels.js": {
-      "maxDuration": 10
-    },
-    "api/send-email-alert.js": {
-      "maxDuration": 10
-    },
-    "api/vault.js": {
-      "maxDuration": 10
-    },
-    "api/summarize.js": {
-      "maxDuration": 10
-    },
-    "api/transcribe.js": {
-      "maxDuration": 10
-    },
-    "api/imagekit-auth.js": {
-      "maxDuration": 10
-    },
-    "api/ai.js": {
-      "maxDuration": 10
     }
   }
 }
