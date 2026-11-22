@@ -1400,6 +1400,117 @@ service cloud.firestore {
     }
 
     // ===============================================================
+    // 16B. CYBER-SUITE & EXTENDED CHAT PROTOCOL COLLECTIONS
+    // ===============================================================
+    match /presence/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+    }
+
+    match /nexbot_configs/{configId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && (request.resource.data.authorId == request.auth.uid || request.resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow update, delete: if isAuthenticated() && (resource.data.authorId == request.auth.uid || resource.data.userId == request.auth.uid || isSuperAdmin());
+    }
+
+    match /security_scan_logs/{logId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /quarantine_vault/{vaultId} {
+      allow read, write: if isAuthenticated() && (resource.data.userId == request.auth.uid || request.resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
+    }
+
+    match /call_sessions/{callId} {
+      allow read, update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.callerId ||
+        request.auth.uid == resource.data.receiverId ||
+        ('participants' in resource.data && request.auth.uid in resource.data.participants) ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && (
+        request.auth.uid == request.resource.data.callerId ||
+        request.auth.uid == request.resource.data.receiverId ||
+        ('participants' in request.resource.data && request.auth.uid in request.resource.data.participants) ||
+        isSuperAdmin()
+      );
+      match /iceCandidates/{candidateId} {
+        allow read, write: if isAuthenticated();
+      }
+      match /sdp/{sdpId} {
+        allow read, write: if isAuthenticated();
+      }
+      match /participants/{participantId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    match /groupCalls/{groupCallId} {
+      allow read, write: if isAuthenticated();
+      match /participants/{participantId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    match /tokens/{tokenId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || tokenId == request.auth.uid || isSuperAdmin());
+      allow write: if isSuperAdmin();
+    }
+
+    match /vip_licenses/{licenseId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || licenseId == request.auth.uid || isSuperAdmin());
+      allow write: if isSuperAdmin();
+    }
+
+    match /tokenTransactions/{txId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.recipientId || isSuperAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.senderId == request.auth.uid || isSuperAdmin());
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /paymentHistory/{paymentId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow write: if isSuperAdmin();
+    }
+
+    match /escrow_contracts/{contractId} {
+      allow read: if isAuthenticated() && (
+        resource.data.buyer == request.auth.uid ||
+        resource.data.seller == request.auth.uid ||
+        ('buyerUID' in resource.data && resource.data.buyerUID == request.auth.uid) ||
+        ('sellerUID' in resource.data && resource.data.sellerUID == request.auth.uid) ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        resource.data.buyer == request.auth.uid ||
+        resource.data.seller == request.auth.uid ||
+        ('buyerUID' in resource.data && resource.data.buyerUID == request.auth.uid) ||
+        ('sellerUID' in resource.data && resource.data.sellerUID == request.auth.uid) ||
+        isSuperAdmin()
+      );
+      allow delete: if isSuperAdmin();
+    }
+
+    match /scheduled_messages/{messageId} {
+      allow read, update, delete: if isAuthenticated() && (resource.data.senderId == request.auth.uid || resource.data.from == request.auth.uid || isSuperAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.senderId == request.auth.uid || request.resource.data.from == request.auth.uid || isSuperAdmin());
+    }
+
+    match /dead_drops/{dropId} {
+      allow read, write: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /spamReports/{reportId} {
+      allow read: if isSuperAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // ===============================================================
     // 17. ZERO-TRUST DEFAULT DENY BARRIER
     // ===============================================================
     match /{document=**} {
