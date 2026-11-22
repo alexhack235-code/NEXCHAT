@@ -1,20 +1,22 @@
 /**
  * =============================================================================
- * NEXCHAT - NEXTRANSMITTER VIDEO TRIMMER & STATUS CHAIN ENGINE (v2.0)
+ * NEXCHAT - WHATSAPP-STYLE STATUS VIDEO TRIMMER & MESH CHAIN ENGINE (v3.0)
  * Global Namespace: window.NexTransmitterTrimmer
  * =============================================================================
  * Capabilities:
- * 1. Automatic Duration Gate: Replaces hard rejection with interactive trimmer
- *    when video duration exceeds 120s (e.g. 23:40 detected).
- * 2. Offscreen Canvas Filmstrip Extractor: Samples 16 video frames across duration
+ * 1. Automatic Activation: When ANY video is selected for status upload,
+ *    activates the top rectangular filmstrip trimmer bar above the preview stage.
+ * 2. Draggable Start/End Scrubber: Dual handles with neon green bounding box
+ *    to trim/shorten video duration with real-time frame seeking.
+ * 3. Timestamp Indicator & Duration Pill: Live playhead vs duration readout
+ *    (e.g. "0:00 / 0:30") synced with laser playhead.
+ * 4. Audio Mute Toggle: Instant mute/unmute audio control synced with video element.
+ * 5. High-Contrast Filmstrip Extractor: Samples 16 video frames across duration
  *    into high-performance thumbnail tiles with zero UI thread freezing.
- * 3. WhatsApp-Style Interactive Scrubber: Dual handles, 120s window dragging,
- *    and range slider synchronization with laser playhead.
- * 4. AI Best Moment Detector: One-tap auto-selection of optimal highlight (0:42 - 2:42).
- * 5. Dual Modes:
- *    - TRIM: Selects 120s highlight segment for single status dispatch.
- *    - CHAIN: Automatically segments into N x 120s sequential status thread parts.
- * 6. Zero-Cloud / Instant Time-Offset Playback & Hardware MediaRecorder Slicing.
+ * 6. Dual Modes:
+ *    - TRIM: Selects highlight segment for single status dispatch (max 120s).
+ *    - CHAIN: Automatically segments videos >120s into sequential status thread parts.
+ * 7. Seamless Wiring: Automatically attaches to `statusMediaModalFileInput`.
  *
  * STRICTLY 0 UNICODE EMOJIS: Pure FontAwesome 6 vector glyphs only.
  * PURE WINDOWS CRLF LINE ENDINGS. ES2022 COMPLIANT.
@@ -32,14 +34,15 @@
       this.activeFile = null;
       this.fileObjectUrl = null;
       this.videoDuration = 0;
-      this.windowDuration = STATUS_LIMIT;
+      this.windowDuration = 30;
       this.currentStart = 0;
-      this.currentEnd = STATUS_LIMIT;
+      this.currentEnd = 30;
+      this.isMuted = false;
       this.mode = 'TRIM'; // 'TRIM' | 'CHAIN'
       this.chainCount = 1;
       this.chainParts = [];
-      this.aiBestStart = 42; // Auto-best moment 0:42 - 2:42
-      this.aiBestEnd = 162;
+      this.aiBestStart = 0;
+      this.aiBestEnd = 30;
       this.isPlaying = false;
       this.isDragging = false;
       this.dragTarget = null; // 'window' | 'start' | 'end'
@@ -47,7 +50,7 @@
       this.dragStartOffset = 0;
       this.filmstripFrames = [];
       this.isGeneratingFilmstrip = false;
-      this.isSlicing = false;
+      this.videoEl = null;
 
       this.init();
     }
@@ -61,42 +64,56 @@
     }
 
     bindDOM() {
-      // Mode switch buttons
-      document.getElementById('trimmerModeTrimBtn')?.addEventListener('click', () => this.setMode('TRIM'));
-      document.getElementById('trimmerModeChainBtn')?.addEventListener('click', () => this.setMode('CHAIN'));
+      // Audio mute toggle button
+      document.getElementById('statusTrimmerAudioMuteBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleMute();
+      });
 
       // AI Best Moment auto-selection button
-      document.getElementById('trimmerApplyAiBtn')?.addEventListener('click', () => this.applyAiBestMoment());
+      document.getElementById('statusTrimmerAiBestBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.applyAiBestMoment();
+      });
 
-      // Video preview stage play/pause toggle
-      const video = document.getElementById('trimmerVideoPreview');
-      const playBtn = document.getElementById('trimmerPlayToggleBtn');
-
-      if (playBtn && video) {
-        playBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.togglePreviewPlayback();
-        });
-
-        video.addEventListener('timeupdate', () => this.handleVideoTimeUpdate());
-        video.addEventListener('ended', () => {
-          this.isPlaying = false;
-          if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-        });
-      }
-
-      // Range slider scrubber
-      const slider = document.getElementById('trimmerRangeSlider');
-      if (slider) {
-        slider.addEventListener('input', (e) => {
-          const maxStart = Math.max(0, this.videoDuration - this.windowDuration);
-          const newStart = (parseFloat(e.target.value) / 100) * maxStart;
-          this.setWindowPosition(newStart);
-        });
-      }
+      // Mode switch buttons for long videos (>120s)
+      document.getElementById('trimmerModeTrimBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.setMode('TRIM');
+      });
+      document.getElementById('trimmerModeChainBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.setMode('CHAIN');
+      });
 
       // Timeline gesture bindings
       this.bindTimelineGestures();
+
+      // Seamlessly wire to statusMediaModalFileInput if not already bound
+      this.wireFileInput();
+    }
+
+    wireFileInput() {
+      const fileInput = document.getElementById('statusMediaModalFileInput');
+      if (fileInput && !fileInput.dataset.trimmerAutoBound) {
+        fileInput.dataset.trimmerAutoBound = 'true';
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files?.[0];
+          if (file && file.type.startsWith('video/')) {
+            this.activateTrimmer(file);
+          } else if (!file || !file.type.startsWith('video/')) {
+            this.hideTrimmer();
+          }
+        });
+      }
+
+      const removeBtn = document.getElementById('removeStatusMediaPreviewBtn');
+      if (removeBtn && !removeBtn.dataset.trimmerAutoBound) {
+        removeBtn.dataset.trimmerAutoBound = 'true';
+        removeBtn.addEventListener('click', () => {
+          this.hideTrimmer();
+        });
+      }
     }
 
     bindTimelineGestures() {
@@ -108,7 +125,7 @@
 
       // Click anywhere on track to center window
       track.addEventListener('click', (e) => {
-        if (e.target.closest('#trimmerWindowOverlay')) return;
+        if (e.target.closest('#trimmerWindowOverlay') || this.videoDuration <= 0) return;
         const rect = track.getBoundingClientRect();
         const clickRatio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
         const clickedTime = clickRatio * this.videoDuration;
@@ -155,21 +172,30 @@
           this.setWindowPosition(newStart);
         } else if (this.dragTarget === 'start') {
           let newStart = Math.max(0, this.dragStartOffset + deltaSec);
-          newStart = Math.min(newStart, this.currentEnd - 2);
+          newStart = Math.min(newStart, this.currentEnd - 1.0); // Minimum 1 second duration
           if (this.currentEnd - newStart > STATUS_LIMIT) {
             newStart = this.currentEnd - STATUS_LIMIT;
           }
           this.currentStart = newStart;
+          this.windowDuration = this.currentEnd - this.currentStart;
           this.updateOverlayGeometry();
+          if (this.videoEl) {
+            this.videoEl.currentTime = this.currentStart;
+          }
+          this.updateTimeIndicators(this.currentStart);
         } else if (this.dragTarget === 'end') {
           let newEnd = Math.min(this.videoDuration, (this.dragStartOffset + this.windowDuration) + deltaSec);
-          newEnd = Math.max(newEnd, this.currentStart + 2);
+          newEnd = Math.max(newEnd, this.currentStart + 1.0); // Minimum 1 second duration
           if (newEnd - this.currentStart > STATUS_LIMIT) {
             newEnd = this.currentStart + STATUS_LIMIT;
           }
           this.currentEnd = newEnd;
-          this.windowDuration = Math.min(STATUS_LIMIT, this.currentEnd - this.currentStart);
+          this.windowDuration = this.currentEnd - this.currentStart;
           this.updateOverlayGeometry();
+          if (this.videoEl) {
+            this.videoEl.currentTime = this.currentEnd;
+          }
+          this.updateTimeIndicators(this.currentEnd);
         }
       };
 
@@ -188,12 +214,11 @@
     }
 
     // =========================================================================
-    // GATEKEEPER & INSPECTOR
+    // ACTIVATION & GATEKEEPER
     // =========================================================================
-    inspectMediaPayload(file, onProceedStandard) {
+    activateTrimmer(file, explicitDuration, targetVideoEl) {
       if (!file || !file.type.startsWith('video/')) {
         this.hideTrimmer();
-        if (typeof onProceedStandard === 'function') onProceedStandard(file);
         return;
       }
 
@@ -201,117 +226,178 @@
       if (this.fileObjectUrl) URL.revokeObjectURL(this.fileObjectUrl);
       this.fileObjectUrl = URL.createObjectURL(file);
 
-      const mediaEl = document.createElement('video');
-      mediaEl.preload = 'metadata';
-      mediaEl.src = this.fileObjectUrl;
+      const video = targetVideoEl || document.getElementById('statusModalVideoPreview');
+      this.videoEl = video;
 
-      mediaEl.onloadedmetadata = () => {
-        const dur = mediaEl.duration;
-        mediaEl.removeAttribute('src');
-        mediaEl.load();
-
-        if (dur && !isNaN(dur) && isFinite(dur) && dur > 120.5) {
-          // Duration > 120s detected: Activate interactive NexTransmitterTrimmer!
-          this.activateTrimmer(file, dur);
-        } else {
-          // Video <= 120s: Can proceed directly, but allow trimming if user desires
-          this.hideTrimmer();
-          if (typeof onProceedStandard === 'function') onProceedStandard(file);
-        }
-      };
-
-      mediaEl.onerror = () => {
-        this.hideTrimmer();
-        if (typeof onProceedStandard === 'function') onProceedStandard(file);
-      };
-    }
-
-    activateTrimmer(file, duration) {
-      this.activeFile = file;
-      this.videoDuration = duration;
-      this.chainCount = Math.ceil(duration / STATUS_LIMIT);
-      this.chainParts = this.generateChainSlices(duration, STATUS_LIMIT);
-      this.windowDuration = Math.min(STATUS_LIMIT, duration);
-      this.currentStart = 0;
-      this.currentEnd = Math.min(STATUS_LIMIT, duration);
-      this.mode = 'TRIM';
-
-      // Auto-Best Moment: 0:42 to 2:42 (or center slice if duration < 162)
-      if (duration >= 162) {
-        this.aiBestStart = 42;
-        this.aiBestEnd = 162;
-      } else {
-        this.aiBestStart = 0;
-        this.aiBestEnd = Math.min(STATUS_LIMIT, duration);
-      }
-
-      // Hide default drop zone preview
+      // Ensure drop placeholder is hidden and preview box is visible
       const dropPlaceholder = document.getElementById('statusDropPlaceholder');
       const previewBox = document.getElementById('statusMediaPreviewBox');
+      const imgPreview = document.getElementById('statusModalImgPreview');
+
       if (dropPlaceholder) dropPlaceholder.style.display = 'none';
-      if (previewBox) previewBox.style.display = 'none';
+      if (previewBox) previewBox.style.display = 'block';
+      if (imgPreview) {
+        imgPreview.style.display = 'none';
+        imgPreview.src = '';
+      }
 
-      // Show Trimmer Card
-      const card = document.getElementById('nexTransmitterTrimmerCard');
-      if (card) card.style.display = 'flex';
+      // Show top WhatsApp-style status video trimmer bar
+      const topBar = document.getElementById('statusVideoTopTrimmerBar');
+      if (topBar) topBar.style.display = 'flex';
 
-      // Load preview video
-      const video = document.getElementById('trimmerVideoPreview');
       if (video) {
+        video.style.display = 'block';
         video.src = this.fileObjectUrl;
-        video.currentTime = this.currentStart;
+        video.muted = this.isMuted;
+        video.playsInline = true;
+        this.bindVideoEvents(video);
       }
 
-      // Update Header & Warning Banner
-      const formattedDur = this.formatTime(duration);
-      const durHeader = document.getElementById('trimmerDurationDetected');
-      if (durHeader) durHeader.textContent = 'TTL: 24H • ' + Math.round(duration) + 's DETECTED';
+      if (typeof explicitDuration === 'number' && explicitDuration > 0) {
+        this.setupDuration(explicitDuration);
+      } else {
+        // Probe metadata offscreen
+        const probe = document.createElement('video');
+        probe.preload = 'metadata';
+        probe.src = this.fileObjectUrl;
 
-      const warningText = document.getElementById('trimmerWarningText');
-      if (warningText) {
-        warningText.textContent = formattedDur + ' detected — Status capped at 2:00';
+        const onMeta = () => {
+          let dur = probe.duration;
+          if (!dur || isNaN(dur) || !isFinite(dur) || dur <= 0) {
+            dur = 30; // fallback safe default
+          }
+          this.setupDuration(dur);
+          try {
+            probe.removeAttribute('src');
+            probe.load();
+          } catch (_) {}
+        };
+
+        probe.onloadedmetadata = onMeta;
+        probe.onerror = () => onMeta();
+      }
+    }
+
+    bindVideoEvents(video) {
+      if (!video || video.dataset.trimmerEventsBound) return;
+      video.dataset.trimmerEventsBound = 'true';
+
+      video.addEventListener('timeupdate', () => this.handleVideoTimeUpdate());
+      video.addEventListener('ended', () => {
+        this.isPlaying = false;
+        if (this.videoEl) {
+          this.videoEl.currentTime = this.currentStart;
+        }
+      });
+      video.addEventListener('play', () => { this.isPlaying = true; });
+      video.addEventListener('pause', () => { this.isPlaying = false; });
+    }
+
+    setupDuration(duration) {
+      this.videoDuration = duration;
+      const isOverLimit = duration > STATUS_LIMIT;
+
+      if (isOverLimit) {
+        this.windowDuration = STATUS_LIMIT;
+        this.currentStart = 0;
+        this.currentEnd = STATUS_LIMIT;
+        this.chainCount = Math.ceil(duration / STATUS_LIMIT);
+        this.chainParts = this.generateChainSlices(duration, STATUS_LIMIT);
+
+        // Auto-Best Moment: 0:42 to 2:42 (or center slice if duration < 162)
+        if (duration >= 162) {
+          this.aiBestStart = 42;
+          this.aiBestEnd = 162;
+        } else {
+          this.aiBestStart = 0;
+          this.aiBestEnd = STATUS_LIMIT;
+        }
+
+        const longBanner = document.getElementById('trimmerLongVideoBanner');
+        if (longBanner) longBanner.style.display = 'flex';
+        const warnText = document.getElementById('trimmerWarningText');
+        if (warnText) {
+          warnText.textContent = `${this.formatTime(duration)} detected — Capped at 2:00`;
+        }
+        const chainLabel = document.getElementById('trimmerChainModeLabel');
+        if (chainLabel) {
+          chainLabel.textContent = `Split into ${this.chainCount}x Chain`;
+        }
+        this.renderChainBreakdown();
+      } else {
+        this.windowDuration = duration;
+        this.currentStart = 0;
+        this.currentEnd = duration;
+        this.chainCount = 1;
+        this.chainParts = [];
+        this.aiBestStart = 0;
+        this.aiBestEnd = duration;
+
+        const longBanner = document.getElementById('trimmerLongVideoBanner');
+        if (longBanner) longBanner.style.display = 'none';
+        const chainBreakdown = document.getElementById('trimmerChainBreakdown');
+        if (chainBreakdown) chainBreakdown.style.display = 'none';
       }
 
-      const chainBadge = document.getElementById('trimmerChainCountBadge');
-      if (chainBadge) chainBadge.textContent = this.chainCount + ' parts';
-
-      const chainModeLabel = document.getElementById('trimmerChainModeLabel');
-      if (chainModeLabel) {
-        chainModeLabel.textContent = 'Split into ' + this.chainCount + ' x 2-min chain (Status Thread)';
-      }
-
-      const aiText = document.getElementById('trimmerAiBadgeText');
-      if (aiText) {
-        aiText.textContent = 'Auto-best moment: ' + this.formatTime(this.aiBestStart) + '-' + this.formatTime(this.aiBestEnd) + ' detected by AI';
-      }
-
-      // Position Window & Render Parts
-      this.setWindowPosition(0);
       this.setMode('TRIM');
-      this.renderChainBreakdown();
+      this.updateOverlayGeometry();
+      this.updateTimeIndicators(0);
+      this.updateMuteButtonUI();
       this.updateSubmitButtonUI();
 
-      // Start offscreen filmstrip thumbnail generation
+      // Extract high-performance filmstrip thumbnails from video
       this.generateFilmstripThumbnails(this.fileObjectUrl, duration);
-
-      if (window.showNotif) {
-        window.showNotif('Intelligent Trimmer Active: ' + formattedDur + ' capped at 2:00', 'info', 3000);
-      }
     }
 
     hideTrimmer() {
-      const card = document.getElementById('nexTransmitterTrimmerCard');
-      if (card) card.style.display = 'none';
-      const video = document.getElementById('trimmerVideoPreview');
-      if (video) {
-        video.pause();
-        video.removeAttribute('src');
-        video.load();
+      const topBar = document.getElementById('statusVideoTopTrimmerBar');
+      if (topBar) topBar.style.display = 'none';
+
+      if (this.fileObjectUrl) {
+        URL.revokeObjectURL(this.fileObjectUrl);
+        this.fileObjectUrl = null;
       }
+
+      if (this.videoEl) {
+        this.videoEl.pause();
+        this.videoEl.removeAttribute('src');
+        this.videoEl.load();
+        this.videoEl = null;
+      }
+
       this.isPlaying = false;
       this.activeFile = null;
       this.videoDuration = 0;
+      this.currentStart = 0;
+      this.currentEnd = 0;
+      this.isMuted = false;
+      this.updateMuteButtonUI();
       this.updateSubmitButtonUI();
+    }
+
+    // =========================================================================
+    // AUDIO MUTE TOGGLE
+    // =========================================================================
+    toggleMute() {
+      this.isMuted = !this.isMuted;
+      if (this.videoEl) {
+        this.videoEl.muted = this.isMuted;
+      }
+      this.updateMuteButtonUI();
+    }
+
+    updateMuteButtonUI() {
+      const muteBtn = document.getElementById('statusTrimmerAudioMuteBtn');
+      if (!muteBtn) return;
+      if (this.isMuted) {
+        muteBtn.classList.add('muted');
+        muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+        muteBtn.title = 'Unmute audio';
+      } else {
+        muteBtn.classList.remove('muted');
+        muteBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        muteBtn.title = 'Mute audio';
+      }
     }
 
     // =========================================================================
@@ -322,14 +408,12 @@
       if (!stripContainer || this.isGeneratingFilmstrip) return;
       this.isGeneratingFilmstrip = true;
 
-      // Seed placeholder cells
+      // Seed placeholder cells with sleek gradient tiles
       stripContainer.innerHTML = '';
       for (let i = 0; i < FILMSTRIP_FRAME_COUNT; i++) {
         const frame = document.createElement('div');
         frame.className = 'trimmer-filmstrip-cell';
-        frame.style.flex = '1';
-        frame.style.height = '100%';
-        frame.style.background = '#1e3a32';
+        frame.style.background = (i % 2 === 0) ? '#0c1a24' : '#08131b';
         stripContainer.appendChild(frame);
       }
 
@@ -355,7 +439,7 @@
         const interval = duration / FILMSTRIP_FRAME_COUNT;
 
         for (let i = 0; i < FILMSTRIP_FRAME_COUNT; i++) {
-          const targetTime = Math.min(duration - 0.1, i * interval + (interval / 2));
+          const targetTime = Math.min(duration - 0.05, i * interval + (interval / 2));
           offVideo.currentTime = targetTime;
 
           await new Promise((resolve) => {
@@ -386,7 +470,7 @@
     }
 
     // =========================================================================
-    // WINDOW POSITIONING & SLIDER SYNC
+    // WINDOW POSITIONING & OVERLAY GEOMETRY
     // =========================================================================
     setWindowPosition(startSec) {
       const maxStart = Math.max(0, this.videoDuration - this.windowDuration);
@@ -394,79 +478,97 @@
       this.currentEnd = Math.min(this.videoDuration, this.currentStart + this.windowDuration);
       this.updateOverlayGeometry();
 
-      // Range slider sync
-      const slider = document.getElementById('trimmerRangeSlider');
-      if (slider && maxStart > 0) {
-        slider.value = ((this.currentStart / maxStart) * 100).toFixed(1);
-      }
-
       // Seek video to start of window
-      const video = document.getElementById('trimmerVideoPreview');
-      if (video && (!this.isPlaying || video.currentTime < this.currentStart || video.currentTime > this.currentEnd)) {
-        video.currentTime = this.currentStart;
+      if (this.videoEl) {
+        this.videoEl.currentTime = this.currentStart;
       }
+      this.updateTimeIndicators(this.currentStart);
     }
 
     updateOverlayGeometry() {
       const overlay = document.getElementById('trimmerWindowOverlay');
-      if (overlay && this.videoDuration > 0) {
-        const leftPct = (this.currentStart / this.videoDuration) * 100;
-        const widthPct = ((this.currentEnd - this.currentStart) / this.videoDuration) * 100;
+      const scrimLeft = document.getElementById('trimmerScrimLeft');
+      const scrimRight = document.getElementById('trimmerScrimRight');
+
+      if (this.videoDuration <= 0) return;
+
+      const leftPct = (this.currentStart / this.videoDuration) * 100;
+      const widthPct = ((this.currentEnd - this.currentStart) / this.videoDuration) * 100;
+      const rightPct = Math.max(0, 100 - (leftPct + widthPct));
+
+      if (overlay) {
         overlay.style.left = Math.max(0, leftPct) + '%';
-        overlay.style.width = Math.min(100 - leftPct, widthPct) + '%';
+        overlay.style.width = Math.min(100 - leftPct, Math.max(1, widthPct)) + '%';
       }
 
-      const readout = document.getElementById('trimmerWindowTimeReadout');
-      if (readout) {
-        const selDur = Math.round(this.currentEnd - this.currentStart);
-        readout.textContent = this.formatTime(this.currentStart) + ' — ' + this.formatTime(this.currentEnd) + ' (' + selDur + 's selected)';
+      if (scrimLeft) {
+        scrimLeft.style.width = Math.max(0, leftPct) + '%';
       }
+      if (scrimRight) {
+        scrimRight.style.width = Math.max(0, rightPct) + '%';
+      }
+
+      const selectedSec = Math.max(1, Math.round(this.currentEnd - this.currentStart));
+      const timeReadout = document.getElementById('trimmerWindowTimeReadout');
+      if (timeReadout) {
+        timeReadout.textContent = `${this.formatTime(this.currentStart)} - ${this.formatTime(this.currentEnd)}`;
+      }
+
+      const durBadge = document.getElementById('statusTrimmerDurationBadge');
+      if (durBadge) {
+        durBadge.textContent = `${selectedSec}s`;
+      }
+    }
+
+    updateTimeIndicators(currentTime) {
+      const indicator = document.getElementById('statusTrimmerTimestampIndicator');
+      if (!indicator) return;
+
+      const cur = typeof currentTime === 'number' ? currentTime : this.currentStart;
+      const total = this.videoDuration || 0;
+      indicator.textContent = `${this.formatTime(cur)} / ${this.formatTime(total)}`;
     }
 
     applyAiBestMoment() {
-      this.setWindowPosition(this.aiBestStart);
-      if (window.showNotif) {
-        window.showNotif('AI Best Moment Selected: ' + this.formatTime(this.aiBestStart) + ' — ' + this.formatTime(this.aiBestEnd), 'success', 2500);
-      }
-    }
-
-    // =========================================================================
-    // PREVIEW PLAYBACK & TIMEUPDATE
-    // =========================================================================
-    togglePreviewPlayback() {
-      const video = document.getElementById('trimmerVideoPreview');
-      const playBtn = document.getElementById('trimmerPlayToggleBtn');
-      if (!video) return;
-
-      if (video.paused) {
-        if (video.currentTime >= this.currentEnd || video.currentTime < this.currentStart) {
-          video.currentTime = this.currentStart;
-        }
-        video.play().then(() => {
-          this.isPlaying = true;
-          if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-        }).catch(() => {});
+      if (this.videoDuration <= 0) return;
+      if (this.videoDuration <= STATUS_LIMIT) {
+        this.currentStart = 0;
+        this.currentEnd = this.videoDuration;
       } else {
-        video.pause();
-        this.isPlaying = false;
-        if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        this.currentStart = this.aiBestStart;
+        this.currentEnd = Math.min(this.videoDuration, this.currentStart + STATUS_LIMIT);
+      }
+      this.windowDuration = this.currentEnd - this.currentStart;
+      this.updateOverlayGeometry();
+
+      if (this.videoEl) {
+        this.videoEl.currentTime = this.currentStart;
+      }
+      this.updateTimeIndicators(this.currentStart);
+
+      if (window.showNotif) {
+        window.showNotif(`AI Highlight: ${this.formatTime(this.currentStart)} — ${this.formatTime(this.currentEnd)}`, 'info', 2500);
       }
     }
 
+    // =========================================================================
+    // VIDEO PLAYBACK TIMEUPDATE & LASER PLAYHEAD
+    // =========================================================================
     handleVideoTimeUpdate() {
-      const video = document.getElementById('trimmerVideoPreview');
-      if (!video || this.videoDuration <= 0) return;
+      if (!this.videoEl || this.videoDuration <= 0) return;
 
-      const cur = video.currentTime;
+      const cur = this.videoEl.currentTime;
 
       // Bound playback to current selection window in TRIM mode
-      if (this.mode === 'TRIM' && cur >= this.currentEnd) {
-        video.pause();
-        video.currentTime = this.currentStart;
-        this.isPlaying = false;
-        const playBtn = document.getElementById('trimmerPlayToggleBtn');
-        if (playBtn) playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-        return;
+      if (this.mode === 'TRIM') {
+        if (cur >= this.currentEnd) {
+          this.videoEl.currentTime = this.currentStart;
+          return;
+        }
+        if (cur < this.currentStart - 0.2) {
+          this.videoEl.currentTime = this.currentStart;
+          return;
+        }
       }
 
       // Sync laser playhead
@@ -475,11 +577,8 @@
         playhead.style.left = ((cur / this.videoDuration) * 100) + '%';
       }
 
-      // Sync timer badge
-      const timerBadge = document.getElementById('trimmerLiveTimerBadge');
-      if (timerBadge) {
-        timerBadge.textContent = this.formatTime(cur) + ' / ' + this.formatTime(this.videoDuration);
-      }
+      // Sync timestamp readout
+      this.updateTimeIndicators(cur);
     }
 
     // =========================================================================
@@ -526,15 +625,15 @@
       const publishBtn = document.getElementById('publishStatusBtn');
       if (!publishBtn) return;
 
-      if (!this.activeFile || this.videoDuration <= 120.5) {
-        publishBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> [TRANSMIT_TO_MESH]';
+      if (!this.activeFile || this.videoDuration <= STATUS_LIMIT) {
+        publishBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>Share Status</span>';
         return;
       }
 
       if (this.mode === 'TRIM') {
-        publishBtn.innerHTML = '<i class="fa-solid fa-scissors"></i> [TRANSMIT_TO_MESH]';
+        publishBtn.innerHTML = '<i class="fa-solid fa-scissors"></i> <span>Share Trimmed</span>';
       } else {
-        publishBtn.innerHTML = '<i class="fa-solid fa-link"></i> [TRANSMIT_CHAIN_1/' + this.chainCount + '_TO_MESH]';
+        publishBtn.innerHTML = '<i class="fa-solid fa-link"></i> <span>Share Chain (1/' + this.chainCount + ')</span>';
       }
     }
 
@@ -561,20 +660,23 @@
     }
 
     getTrimmingPayload() {
-      if (!this.activeFile || this.videoDuration <= 120.5) {
+      if (!this.activeFile || this.videoDuration <= 0) {
         return null;
       }
+
+      const isTrimmed = (this.currentStart > 0.1 || (this.videoDuration - this.currentEnd) > 0.1);
 
       return {
         mode: this.mode, // 'TRIM' | 'CHAIN'
         file: this.activeFile,
         totalDuration: this.videoDuration,
-        startTime: this.currentStart,
-        endTime: this.currentEnd,
-        duration: Math.round(this.currentEnd - this.currentStart),
+        startTime: parseFloat(this.currentStart.toFixed(2)),
+        endTime: parseFloat(this.currentEnd.toFixed(2)),
+        duration: Math.max(1, Math.round(this.currentEnd - this.currentStart)),
         chainCount: this.chainCount,
         parts: this.chainParts,
-        isTrimmed: true
+        isTrimmed: isTrimmed,
+        isMuted: !!this.isMuted
       };
     }
 

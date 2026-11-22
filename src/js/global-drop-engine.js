@@ -2255,29 +2255,20 @@ class GlobalDropEngine {
   }
 
   toggleTheme() {
-    if (typeof window.toggleThemeMode === 'function') {
-      window.toggleThemeMode();
-    } else if (typeof window.switchDarkMode === 'function') {
-      window.switchDarkMode();
-    } else {
-      const isDark = document.body.classList.contains('dark-mode') || document.body.classList.contains('dark-theme');
-      const nextTheme = isDark ? 'light' : 'dark';
-      document.body.classList.toggle('dark-mode', nextTheme === 'dark');
-      document.body.classList.toggle('light-mode', nextTheme === 'light');
-      document.body.classList.toggle('dark-theme', nextTheme === 'dark');
-      document.body.classList.toggle('light-theme', nextTheme === 'light');
-      document.documentElement.style.colorScheme = nextTheme;
-      try {
-        localStorage.setItem('darkMode', String(nextTheme === 'dark'));
-      } catch (_) {}
-    }
+    const currentTheme = localStorage.getItem('global_drop_theme') || 'dark';
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    try {
+      localStorage.setItem('global_drop_theme', nextTheme);
+    } catch (_) {}
     this.syncTheme();
+    if (typeof window.showNotif === 'function') {
+      window.showNotif(`GlobalDrop ${nextTheme === 'dark' ? 'Dark' : 'Light'} Mode Activated`, 'info', 1800);
+    }
   }
 
   syncTheme() {
-    const isLight = document.body.classList.contains('light-mode') || 
-                    document.body.classList.contains('light-theme') || 
-                    localStorage.getItem('darkMode') === 'false';
+    const savedTheme = localStorage.getItem('global_drop_theme') || 'dark';
+    const isLight = savedTheme === 'light';
     const drawer = document.getElementById('globalDropDrawer');
     const container = document.getElementById('globalDropContainer');
     const themeBtn = document.getElementById('globalDropDrawerThemeBtn');
@@ -2300,7 +2291,7 @@ class GlobalDropEngine {
         icon.className = isLight ? 'fa-solid fa-sun' : 'fa-regular fa-moon';
         icon.style.color = isLight ? '#f59e0b' : '#ffd700';
       }
-      themeBtn.title = isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+      themeBtn.title = isLight ? 'Switch GlobalDrop to Dark Mode' : 'Switch GlobalDrop to Light Mode';
     }
   }
 

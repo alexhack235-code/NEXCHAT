@@ -7357,24 +7357,31 @@ html[data-chat-size="small"] .message-time-text {
   scrollbar-width: none !important;
 }
 
-/* 4. CHANNELS LIST: NATURAL WHATSAPP FEED STYLING */
+/* 4. CHANNELS LIST: NATURAL WHATSAPP FEED STYLING WITH 16PX FLUSH MARGIN */
 .channels-list {
-  padding: 8px 16px !important;
+  padding: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
+.updates-channel-item,
 .channels-list-item,
 .channel-row {
-  padding: 12px 14px !important;
-  border-radius: 12px !important;
-  margin-bottom: 6px !important;
-  transition: background 0.15s ease !important;
+  padding: 12px 16px !important;
+  gap: 14px !important;
+  border-radius: 0 !important;
+  margin-bottom: 0 !important;
+  box-sizing: border-box !important;
+  transition: background 0.18s ease, transform 0.18s ease !important;
   border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
   background: transparent !important;
 }
 
+.updates-channel-item:hover,
 .channels-list-item:hover,
 .channel-row:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: linear-gradient(90deg, rgba(0, 255, 136, 0.06) 0%, rgba(255, 255, 255, 0.03) 100%) !important;
 }
 
 /* 5. REELS PAGE: FLUID UNCONSTRAINED VIEWPORT & CLEAN FLOATING CONTROLS */

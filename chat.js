@@ -4759,33 +4759,8 @@ document.documentElement.style.colorScheme = resolvedTheme;
     cardLight.style.boxShadow = resolvedTheme === "light" ? "0 0 15px rgba(245, 158, 11, 0.15)" : "none";
   }
 
-  // Sync GlobalDrop Drawer Theme button & container
-  const globalDropDrawerThemeBtn = document.getElementById("globalDropDrawerThemeBtn");
-  if (globalDropDrawerThemeBtn) {
-    const gdIcon = globalDropDrawerThemeBtn.querySelector("i");
-    if (gdIcon) {
-      gdIcon.className = resolvedTheme === "dark" ? "fa-regular fa-moon" : "fa-solid fa-sun";
-      gdIcon.style.color = resolvedTheme === "dark" ? "#ffd700" : "#f59e0b";
-    }
-    globalDropDrawerThemeBtn.title = resolvedTheme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode";
-  }
-  const gdDrawer = document.getElementById("globalDropDrawer");
-  if (gdDrawer) {
-    gdDrawer.classList.toggle("light-theme", resolvedTheme === "light");
-    gdDrawer.classList.toggle("light-mode", resolvedTheme === "light");
-    gdDrawer.classList.toggle("dark-theme", resolvedTheme === "dark");
-    gdDrawer.classList.toggle("dark-mode", resolvedTheme === "dark");
-  }
-  const gdContainer = document.getElementById("globalDropContainer");
-  if (gdContainer) {
-    gdContainer.classList.toggle("light-theme", resolvedTheme === "light");
-    gdContainer.classList.toggle("light-mode", resolvedTheme === "light");
-    gdContainer.classList.toggle("dark-theme", resolvedTheme === "dark");
-    gdContainer.classList.toggle("dark-mode", resolvedTheme === "dark");
-  }
-  if (window.globalDropEngine?.syncTheme) {
-    try { window.globalDropEngine.syncTheme(); } catch (_) {}
-  }
+  // GlobalDrop and Admin Dashboard maintain independent theme state in their own controllers
+  // so NEXCHAT settings theme changes do not overwrite GlobalDrop or Admin Dashboard.
 localStorage.setItem("darkMode", String(resolvedTheme === "dark"));
 try {
     const settings = JSON.parse(localStorage.getItem("nexchat_settings") || "{}");
@@ -4795,8 +4770,10 @@ try {
 return resolvedTheme;
 }
 window.addEventListener("load", () => {
+  const savedSettings = JSON.parse(localStorage.getItem("nexchat_settings") || "{}");
   const savedDarkMode = localStorage.getItem("darkMode");
-applyThemeMode(savedDarkMode === "true" ? "dark" : "light");
+  const resolvedTarget = savedSettings.theme || (savedDarkMode === "false" ? "light" : "dark");
+  applyThemeMode(resolvedTarget);
   const savedAccent = localStorage.getItem("nexchat_accent_theme") || "emerald";
 applyCyberAccentTheme(savedAccent, false);
 });
@@ -19146,16 +19123,17 @@ callback(isValid, duration);
   };
 mediaEl.onloadedmetadata = () => {
     const dur = mediaEl.duration;
-if (dur && !isNaN(dur) && isFinite(dur) && dur > 120.5) {
+if (dur && !isNaN(dur) && isFinite(dur)) {
       if (window.NexTransmitterTrimmer && file.type.startsWith('video/')) {
-        window.NexTransmitterTrimmer.activateTrimmer(file, dur);
-return finish(true, dur);
+        return finish(true, dur);
       }
-const m = Math.floor(dur / 60);
-      const s = Math.floor(dur % 60);
-      const formatted = `${m}:${s < 10 ? '0' : ''}${s}`;
-showNotif(`Status upload limit exceeded: Media is ${formatted}. Status uploads are capped at 2 minutes (120s max). Please trim your file.`, 'error', 5000);
-return finish(false, dur);
+      if (dur > 120.5) {
+        const m = Math.floor(dur / 60);
+        const s = Math.floor(dur % 60);
+        const formatted = `${m}:${s < 10 ? '0' : ''}${s}`;
+        showNotif(`Status upload limit exceeded: Media is ${formatted}. Status uploads are capped at 2 minutes (120s max). Please trim your file.`, 'error', 5000);
+        return finish(false, dur);
+      }
     }
 return finish(true, dur);
   };
@@ -19556,6 +19534,38 @@ const audioStage = document.getElementById('statusViewerAudioStage');
   const codeStage = document.getElementById('statusViewerCodeStage');
   const interactiveContainer = document.getElementById('statusViewerInteractiveContainer');
 cleanupStorySlide();
+// WhatsApp-Style Background Music Track Playback & Floating Sticker
+if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
+  try {
+    const musicAudio = new Audio(currentSlide.musicTrack.previewUrl);
+    musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
+    musicAudio.loop = true;
+    musicAudio.play().catch(err => console.warn('[STATUS MUSIC] Playback notice:', err.message));
+    window._statusViewerMusicAudio = musicAudio;
+
+    const stage = document.getElementById('statusViewerStage');
+    if (stage) {
+      let sticker = document.getElementById('statusViewerMusicStickerBadge');
+      if (!sticker) {
+        sticker = document.createElement('div');
+        sticker.id = 'statusViewerMusicStickerBadge';
+        sticker.className = 'status-viewer-music-sticker-badge';
+        stage.appendChild(sticker);
+      }
+      sticker.innerHTML = `
+        <div class="music-sticker-disc-icon"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
+        <img src="${currentSlide.musicTrack.artworkUrl || 'logo.jpg'}" class="music-sticker-art" alt="Track Art" onerror="this.src='logo.jpg';">
+        <div class="music-sticker-info">
+          <span class="music-sticker-title">${currentSlide.musicTrack.trackName || 'Soundtrack'}</span>
+          <span class="music-sticker-artist">${currentSlide.musicTrack.artistName || 'Artist'}</span>
+        </div>
+      `;
+      sticker.style.display = 'flex';
+    }
+  } catch (mErr) {
+    console.warn('[STATUS MUSIC] Setup error:', mErr.message);
+  }
+}
 // Preload next slide media
 const nextSlide = currentGrp.slides?.[currentStorySlideIndex + 1];
 if (nextSlide && window.NexStatusEliteSuite) {
@@ -19845,6 +19855,38 @@ function setupViewerControls() {
   const stage = document.getElementById('statusViewerStage');
 const closeViewer = () => {
     cleanupStorySlide();
+// WhatsApp-Style Background Music Track Playback & Floating Sticker
+if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
+  try {
+    const musicAudio = new Audio(currentSlide.musicTrack.previewUrl);
+    musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
+    musicAudio.loop = true;
+    musicAudio.play().catch(err => console.warn('[STATUS MUSIC] Playback notice:', err.message));
+    window._statusViewerMusicAudio = musicAudio;
+
+    const stage = document.getElementById('statusViewerStage');
+    if (stage) {
+      let sticker = document.getElementById('statusViewerMusicStickerBadge');
+      if (!sticker) {
+        sticker = document.createElement('div');
+        sticker.id = 'statusViewerMusicStickerBadge';
+        sticker.className = 'status-viewer-music-sticker-badge';
+        stage.appendChild(sticker);
+      }
+      sticker.innerHTML = `
+        <div class="music-sticker-disc-icon"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
+        <img src="${currentSlide.musicTrack.artworkUrl || 'logo.jpg'}" class="music-sticker-art" alt="Track Art" onerror="this.src='logo.jpg';">
+        <div class="music-sticker-info">
+          <span class="music-sticker-title">${currentSlide.musicTrack.trackName || 'Soundtrack'}</span>
+          <span class="music-sticker-artist">${currentSlide.musicTrack.artistName || 'Artist'}</span>
+        </div>
+      `;
+      sticker.style.display = 'flex';
+    }
+  } catch (mErr) {
+    console.warn('[STATUS MUSIC] Setup error:', mErr.message);
+  }
+}
 if (modal) {
       modal.classList.remove('active', 'open', 'status-held');
 modal.style.display = 'none';
@@ -20007,6 +20049,38 @@ sendReply();
 }
 function startStoryProgress() {
   cleanupStorySlide();
+// WhatsApp-Style Background Music Track Playback & Floating Sticker
+if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
+  try {
+    const musicAudio = new Audio(currentSlide.musicTrack.previewUrl);
+    musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
+    musicAudio.loop = true;
+    musicAudio.play().catch(err => console.warn('[STATUS MUSIC] Playback notice:', err.message));
+    window._statusViewerMusicAudio = musicAudio;
+
+    const stage = document.getElementById('statusViewerStage');
+    if (stage) {
+      let sticker = document.getElementById('statusViewerMusicStickerBadge');
+      if (!sticker) {
+        sticker = document.createElement('div');
+        sticker.id = 'statusViewerMusicStickerBadge';
+        sticker.className = 'status-viewer-music-sticker-badge';
+        stage.appendChild(sticker);
+      }
+      sticker.innerHTML = `
+        <div class="music-sticker-disc-icon"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
+        <img src="${currentSlide.musicTrack.artworkUrl || 'logo.jpg'}" class="music-sticker-art" alt="Track Art" onerror="this.src='logo.jpg';">
+        <div class="music-sticker-info">
+          <span class="music-sticker-title">${currentSlide.musicTrack.trackName || 'Soundtrack'}</span>
+          <span class="music-sticker-artist">${currentSlide.musicTrack.artistName || 'Artist'}</span>
+        </div>
+      `;
+      sticker.style.display = 'flex';
+    }
+  } catch (mErr) {
+    console.warn('[STATUS MUSIC] Setup error:', mErr.message);
+  }
+}
 isStoryPaused = false;
 const pauseBtn = document.getElementById('statusViewerPauseBtn');
 if (pauseBtn) {
@@ -20104,6 +20178,38 @@ nextStorySlide();
 }
 function nextStorySlide() {
   cleanupStorySlide();
+// WhatsApp-Style Background Music Track Playback & Floating Sticker
+if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
+  try {
+    const musicAudio = new Audio(currentSlide.musicTrack.previewUrl);
+    musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
+    musicAudio.loop = true;
+    musicAudio.play().catch(err => console.warn('[STATUS MUSIC] Playback notice:', err.message));
+    window._statusViewerMusicAudio = musicAudio;
+
+    const stage = document.getElementById('statusViewerStage');
+    if (stage) {
+      let sticker = document.getElementById('statusViewerMusicStickerBadge');
+      if (!sticker) {
+        sticker = document.createElement('div');
+        sticker.id = 'statusViewerMusicStickerBadge';
+        sticker.className = 'status-viewer-music-sticker-badge';
+        stage.appendChild(sticker);
+      }
+      sticker.innerHTML = `
+        <div class="music-sticker-disc-icon"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
+        <img src="${currentSlide.musicTrack.artworkUrl || 'logo.jpg'}" class="music-sticker-art" alt="Track Art" onerror="this.src='logo.jpg';">
+        <div class="music-sticker-info">
+          <span class="music-sticker-title">${currentSlide.musicTrack.trackName || 'Soundtrack'}</span>
+          <span class="music-sticker-artist">${currentSlide.musicTrack.artistName || 'Artist'}</span>
+        </div>
+      `;
+      sticker.style.display = 'flex';
+    }
+  } catch (mErr) {
+    console.warn('[STATUS MUSIC] Setup error:', mErr.message);
+  }
+}
   const currentGrp = activeStoriesList[currentStoryGroupIndex];
 if (!currentGrp) return;
 if (currentStorySlideIndex < currentGrp.slides.length - 1) {
@@ -20146,6 +20252,38 @@ if (window.NexStatusEliteSuite) {
 }
 function prevStorySlide() {
   cleanupStorySlide();
+// WhatsApp-Style Background Music Track Playback & Floating Sticker
+if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
+  try {
+    const musicAudio = new Audio(currentSlide.musicTrack.previewUrl);
+    musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
+    musicAudio.loop = true;
+    musicAudio.play().catch(err => console.warn('[STATUS MUSIC] Playback notice:', err.message));
+    window._statusViewerMusicAudio = musicAudio;
+
+    const stage = document.getElementById('statusViewerStage');
+    if (stage) {
+      let sticker = document.getElementById('statusViewerMusicStickerBadge');
+      if (!sticker) {
+        sticker = document.createElement('div');
+        sticker.id = 'statusViewerMusicStickerBadge';
+        sticker.className = 'status-viewer-music-sticker-badge';
+        stage.appendChild(sticker);
+      }
+      sticker.innerHTML = `
+        <div class="music-sticker-disc-icon"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
+        <img src="${currentSlide.musicTrack.artworkUrl || 'logo.jpg'}" class="music-sticker-art" alt="Track Art" onerror="this.src='logo.jpg';">
+        <div class="music-sticker-info">
+          <span class="music-sticker-title">${currentSlide.musicTrack.trackName || 'Soundtrack'}</span>
+          <span class="music-sticker-artist">${currentSlide.musicTrack.artistName || 'Artist'}</span>
+        </div>
+      `;
+      sticker.style.display = 'flex';
+    }
+  } catch (mErr) {
+    console.warn('[STATUS MUSIC] Setup error:', mErr.message);
+  }
+}
 if (currentStorySlideIndex > 0) {
     currentStorySlideIndex--;
 showCurrentStorySlide();
@@ -20389,8 +20527,14 @@ if (videoPreview) {
           videoPreview.style.filter = selectedStatusFilter;
           videoPreview.src = fileUrl;
         }
-if (manualTrimBtn) manualTrimBtn.style.display = 'inline-flex';
+if (window.NexTransmitterTrimmer) {
+          window.NexTransmitterTrimmer.activateTrimmer(file, undefined, videoPreview);
+        }
+if (manualTrimBtn) manualTrimBtn.style.display = 'none';
       } else {
+        if (window.NexTransmitterTrimmer) {
+          window.NexTransmitterTrimmer.hideTrimmer();
+        }
         if (videoPreview) {
           videoPreview.pause();
           videoPreview.style.display = 'none';
@@ -20563,6 +20707,7 @@ compImg.src = uploadedUrl;
         } catch (_) {}
       }
 const effectiveUid = auth?.currentUser?.uid || (typeof getAuth === 'function' ? getAuth()?.currentUser?.uid : null) || myUID;
+      const attachedMusic = window.statusMusicPickerEngine ? window.statusMusicPickerEngine.getSelectedMusic() : null;
       const statusDoc = {
         userId: effectiveUid || 'user',
 username: auth?.currentUser?.displayName || myUsername || 'User',
@@ -20570,6 +20715,7 @@ profilePic: auth?.currentUser?.photoURL || myProfilePic || 'logo.jpg',
 content: contentText || '',
 imageUrl: uploadedUrl || null,
 mediaUrl: uploadedUrl || null,
+musicTrack: attachedMusic || null,
 mediaType: activeTab === 'audio' ? 'audio' : (activeTab === 'code' ? 'code' : (isMedia ? (fileType.startsWith('video/') ? 'video' : 'image') : 'text')),
 filter: isMedia ? selectedStatusFilter : 'none',
 fontFamily: activeTab === 'text' ? selectedStatusFont : null,
@@ -20585,6 +20731,9 @@ expiresAtMs: Math.round(expiresAtMs)
       };
 if (db) {
         const trimmerPayload = window.NexTransmitterTrimmer?.getTrimmingPayload();
+        if (trimmerPayload?.isMuted) {
+          statusDoc.isMuted = true;
+        }
 if (trimmerPayload && trimmerPayload.mode === 'CHAIN' && trimmerPayload.parts && trimmerPayload.parts.length > 0) {
           const threadId = `thread_${now}_${Math.random().toString(36).substring(2, 8)}`;
 for (let i = 0; i < trimmerPayload.parts.length; i++) {
@@ -20604,11 +20753,12 @@ duration: pt.duration
 trimStart: pt.start,
 trimEnd: pt.end,
 duration: Math.round(pt.duration),
+isMuted: !!trimmerPayload.isMuted,
 createdAtMs: now + (i * 50)
             };
 await addDoc(collection(db, 'statuses'), partDoc);
           }
-        } else if (trimmerPayload && trimmerPayload.mode === 'TRIM') {
+        } else if (trimmerPayload && (trimmerPayload.mode === 'TRIM' || trimmerPayload.isTrimmed)) {
           const trimDoc = {
             ...statusDoc,
 mode: 'TRIM',
@@ -20619,7 +20769,8 @@ timeWindow: {
 end: trimmerPayload.endTime,
 duration: trimmerPayload.duration
             },
-duration: trimmerPayload.duration
+duration: trimmerPayload.duration,
+isMuted: !!trimmerPayload.isMuted
           };
 await addDoc(collection(db, 'statuses'), trimDoc);
         } else {

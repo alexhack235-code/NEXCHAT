@@ -27,10 +27,11 @@
       creatorId: 'system_camshot',
       creatorName: 'CamShot Studio',
       isVerified: true,
-      followerCount: 149,
+      followerCount: 149000,
+      unreadCount: 2,
       createdAt: Date.now() - 86400000 * 10,
       lastPostSnippet: 'CamShot Pro Cine Anamorphic presets v2.4 live for all verified creators.',
-      lastPostTime: '10:27 a.m.',
+      lastPostTime: '10:27 AM',
       posts: [
         {
           id: 'post_camshot_1',
@@ -60,10 +61,11 @@
       creatorId: 'system_nexchat',
       creatorName: 'LOCALHOST Admin',
       isVerified: true,
-      followerCount: 149,
+      followerCount: 149000,
+      unreadCount: 0,
       createdAt: Date.now() - 86400000 * 5,
       lastPostSnippet: 'Testing broadcast update delivery across localhost node cluster.',
-      lastPostTime: '10:27 a.m.',
+      lastPostTime: '09:41 AM',
       posts: [
         {
           id: 'post_lh_1',
@@ -85,9 +87,10 @@
       creatorName: 'NEXCHAT Protocol',
       isVerified: true,
       followerCount: 248900,
+      unreadCount: 3,
       createdAt: Date.now() - 86400000 * 30,
       lastPostSnippet: 'NEXCHAT v4.2 Security Protocol rollout complete. Quantum forward secrecy enabled for all active nodes.',
-      lastPostTime: '10:15 a.m.',
+      lastPostTime: '10:15 AM',
       posts: [
         {
           id: 'post_nex_1',
@@ -117,9 +120,10 @@
       creatorName: 'ChronEX Neural Core',
       isVerified: true,
       followerCount: 184200,
+      unreadCount: 0,
       createdAt: Date.now() - 86400000 * 20,
       lastPostSnippet: 'Deep reasoning engine calibrated at 99.8% precision with multi-lingual audio transcription.',
-      lastPostTime: '08:30 a.m.',
+      lastPostTime: '08:30 AM',
       posts: [
         {
           id: 'post_chronex_1',
@@ -141,6 +145,7 @@
       creatorName: 'Cyber Defense Command',
       isVerified: true,
       followerCount: 96400,
+      unreadCount: 1,
       createdAt: Date.now() - 86400000 * 15,
       lastPostSnippet: 'Biometric authorization active across all secondary linked hardware keys.',
       lastPostTime: 'Yesterday',
@@ -201,6 +206,12 @@
               if (!existing.posts || existing.posts.length === 0) existing.posts = def.posts;
               if (def.avatar && (!existing.avatar || existing.avatar.includes('icon-192'))) existing.avatar = def.avatar;
               if (def.handle) existing.handle = def.handle;
+              if (def.followerCount && (!existing.followerCount || existing.followerCount < 1000)) {
+                existing.followerCount = def.followerCount;
+              }
+              if (def.unreadCount !== undefined && existing.unreadCount === undefined) {
+                existing.unreadCount = def.unreadCount;
+              }
             }
           });
           this.channels = parsed;
@@ -276,6 +287,23 @@
 
       };
 
+    }
+
+    formatFollowerCount(count) {
+      if (!count && count !== 0) return '149K followers';
+      if (count === 149 || count === '149') return '149K followers';
+      const num = typeof count === 'string' ? parseFloat(count) : Number(count);
+      if (isNaN(num)) return '149K followers';
+      if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M followers';
+      }
+      if (num >= 1000) {
+        return (num / 1000).toFixed(num >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'K followers';
+      }
+      if (num > 0 && num < 1000) {
+        return num + 'K followers';
+      }
+      return '0 followers';
     }
 
     injectStyles() {
@@ -786,7 +814,19 @@
 
         }
 
-        /* Updates Tab Channel Card Rows */
+        /* Updates Tab Channel Card Rows - WhatsApp 16px Natural Alignment */
+
+        .updates-channels-followed-list {
+
+          display: flex;
+
+          flex-direction: column;
+
+          width: 100%;
+
+          box-sizing: border-box;
+
+        }
 
         .updates-channel-item {
 
@@ -794,39 +834,109 @@
 
           align-items: center;
 
-          gap: 12px;
+          gap: 14px;
 
-          padding: 9px 16px;
+          padding: 12px 16px;
 
           cursor: pointer;
 
-          transition: background 0.15s ease;
+          position: relative;
 
-          border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+          box-sizing: border-box;
+
+          background: transparent;
 
         }
 
         .updates-channel-item:hover {
 
-          background: rgba(255, 255, 255, 0.04);
+          background: linear-gradient(90deg, rgba(0, 255, 136, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
+
+          transform: translateX(2px);
+
+        }
+
+        .updates-channel-avatar-wrap {
+
+          position: relative;
+
+          flex-shrink: 0;
+
+          width: 52px;
+
+          height: 52px;
 
         }
 
         .updates-channel-avatar {
 
-          width: 48px;
+          width: 52px;
 
-          height: 48px;
+          height: 52px;
+
+          min-width: 52px;
+
+          min-height: 52px;
 
           border-radius: 50%;
 
           object-fit: cover;
 
-          background: #202c33;
+          background: #182229;
 
-          border: 1.5px solid rgba(0, 255, 102, 0.35);
+          border: 1.5px solid rgba(0, 255, 136, 0.35);
 
-          flex-shrink: 0;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 10px rgba(0, 255, 136, 0.12);
+
+          transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+
+          display: block;
+
+        }
+
+        .updates-channel-item:hover .updates-channel-avatar {
+
+          transform: scale(1.05);
+
+          border-color: #00ff88;
+
+          box-shadow: 0 0 16px rgba(0, 255, 136, 0.4);
+
+        }
+
+        .channel-avatar-unread-dot {
+
+          position: absolute;
+
+          bottom: 1px;
+
+          right: 1px;
+
+          width: 12px;
+
+          height: 12px;
+
+          background: #00ff88;
+
+          border: 2px solid #111b21;
+
+          border-radius: 50%;
+
+          box-shadow: 0 0 8px #00ff88;
+
+          animation: channelDotPulse 2s infinite ease-in-out;
+
+        }
+
+        @keyframes channelDotPulse {
+
+          0%, 100% { transform: scale(1); box-shadow: 0 0 6px #00ff88; }
+
+          50% { transform: scale(1.2); box-shadow: 0 0 12px #00ff88; }
 
         }
 
@@ -835,6 +945,12 @@
           flex: 1 1 auto;
 
           min-width: 0;
+
+          display: flex;
+
+          flex-direction: column;
+
+          gap: 4px;
 
         }
 
@@ -846,6 +962,8 @@
 
           justify-content: space-between;
 
+          gap: 8px;
+
         }
 
         .updates-channel-name-wrap {
@@ -854,25 +972,83 @@
 
           align-items: center;
 
-          gap: 5px;
+          gap: 4px;
 
           min-width: 0;
+
+          flex: 1;
 
         }
 
         .updates-channel-name {
 
-          font-size: 15px;
+          font-size: 15.5px;
 
-          font-weight: 600;
+          font-weight: 700;
 
-          color: #e9edef;
+          color: #f1f5f9;
 
           white-space: nowrap;
 
           overflow: hidden;
 
           text-overflow: ellipsis;
+
+          letter-spacing: -0.2px;
+
+        }
+
+        .channel-verified-badge {
+
+          display: inline-flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          color: #00ff88;
+
+          font-size: 13px;
+
+          margin-left: 3px;
+
+          flex-shrink: 0;
+
+          filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.7));
+
+          animation: verifiedBadgeShimmer 3s infinite ease-in-out;
+
+        }
+
+        @keyframes verifiedBadgeShimmer {
+
+          0%, 100% { filter: drop-shadow(0 0 4px rgba(0, 255, 136, 0.5)); transform: scale(1); }
+
+          50% { filter: drop-shadow(0 0 9px rgba(0, 255, 136, 0.9)); transform: scale(1.08); }
+
+        }
+
+        .updates-channel-followers-inline {
+
+          font-size: 10.5px;
+
+          font-family: 'JetBrains Mono', monospace;
+
+          color: #64748b;
+
+          background: rgba(255, 255, 255, 0.04);
+
+          border: 1px solid rgba(255, 255, 255, 0.08);
+
+          padding: 1px 7px;
+
+          border-radius: 4px;
+
+          margin-left: 6px;
+
+          letter-spacing: 0.2px;
+
+          white-space: nowrap;
 
         }
 
@@ -880,15 +1056,37 @@
 
           font-size: 11.5px;
 
+          font-family: 'JetBrains Mono', monospace;
+
           color: #8696a0;
 
           flex-shrink: 0;
 
         }
 
+        .updates-channel-time.unread {
+
+          color: #00ff88;
+
+          font-weight: 700;
+
+        }
+
+        .updates-channel-bottom {
+
+          display: flex;
+
+          align-items: center;
+
+          justify-content: space-between;
+
+          gap: 8px;
+
+        }
+
         .updates-channel-snippet {
 
-          font-size: 13px;
+          font-size: 13.5px;
 
           color: #8696a0;
 
@@ -898,7 +1096,125 @@
 
           text-overflow: ellipsis;
 
-          margin-top: 3px;
+          flex: 1;
+
+          min-width: 0;
+
+        }
+
+        .updates-channel-actions {
+
+          display: flex;
+
+          align-items: center;
+
+          gap: 8px;
+
+          flex-shrink: 0;
+
+        }
+
+        .updates-channel-unread-pill {
+
+          min-width: 20px;
+
+          height: 20px;
+
+          border-radius: 10px;
+
+          background: #00ff88;
+
+          color: #06100c;
+
+          font-size: 11px;
+
+          font-weight: 800;
+
+          font-family: 'JetBrains Mono', monospace;
+
+          display: inline-flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          padding: 0 6px;
+
+          box-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+
+          animation: channelPillPulse 2s infinite ease-in-out;
+
+        }
+
+        @keyframes channelPillPulse {
+
+          0%, 100% { box-shadow: 0 0 6px rgba(0, 255, 136, 0.4); transform: scale(1); }
+
+          50% { box-shadow: 0 0 14px rgba(0, 255, 136, 0.85); transform: scale(1.06); }
+
+        }
+
+        .channel-list-follow-pill {
+
+          border-radius: 9999px;
+
+          font-size: 11px;
+
+          font-weight: 700;
+
+          padding: 3px 11px;
+
+          cursor: pointer;
+
+          border: 1px solid rgba(0, 255, 136, 0.35);
+
+          background: rgba(0, 255, 136, 0.1);
+
+          color: #00ff88;
+
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+          display: inline-flex;
+
+          align-items: center;
+
+          gap: 4px;
+
+          outline: none;
+
+        }
+
+        .channel-list-follow-pill:hover {
+
+          background: #00ff88;
+
+          color: #06100c;
+
+          box-shadow: 0 0 14px rgba(0, 255, 136, 0.5);
+
+          transform: translateY(-1px);
+
+        }
+
+        .channel-list-follow-pill.following {
+
+          background: rgba(255, 255, 255, 0.06);
+
+          border-color: rgba(255, 255, 255, 0.14);
+
+          color: #94a3b8;
+
+        }
+
+        .channel-list-follow-pill.following:hover {
+
+          background: rgba(239, 68, 68, 0.14);
+
+          border-color: rgba(239, 68, 68, 0.4);
+
+          color: #ef4444;
+
+          box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 
         }
 
@@ -906,9 +1222,11 @@
 
         .channels-discover-strip {
 
-          padding: 12px 16px 14px 16px;
+          padding: 16px 16px 18px 16px;
 
           border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+          box-sizing: border-box;
 
         }
 
@@ -916,17 +1234,45 @@
 
           font-size: 13.5px;
 
-          font-weight: 600;
+          font-weight: 700;
 
-          color: #8696a0;
+          color: #94a3b8;
 
-          margin-bottom: 10px;
+          margin-bottom: 12px;
 
           display: flex;
 
           align-items: center;
 
           justify-content: space-between;
+
+        }
+
+        .discover-title-left {
+
+          display: flex;
+
+          align-items: center;
+
+          gap: 8px;
+
+        }
+
+        .discover-pill-count {
+
+          font-size: 10.5px;
+
+          font-family: 'JetBrains Mono', monospace;
+
+          color: #00ff88;
+
+          background: rgba(0, 255, 136, 0.1);
+
+          border: 1px solid rgba(0, 255, 136, 0.25);
+
+          padding: 2px 7px;
+
+          border-radius: 9999px;
 
         }
 
@@ -940,7 +1286,9 @@
 
           scrollbar-width: none;
 
-          padding-bottom: 4px;
+          padding-bottom: 6px;
+
+          box-sizing: border-box;
 
         }
 
@@ -952,17 +1300,17 @@
 
         .channel-spotlight-card {
 
-          width: 140px;
+          width: 148px;
 
-          min-width: 140px;
+          min-width: 148px;
 
-          background: #182229;
+          background: linear-gradient(145deg, rgba(17, 27, 33, 0.9) 0%, rgba(13, 20, 25, 0.95) 100%);
 
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(0, 255, 136, 0.16);
 
-          border-radius: 14px;
+          border-radius: 16px;
 
-          padding: 14px 10px 12px 10px;
+          padding: 16px 12px 14px 12px;
 
           display: flex;
 
@@ -974,31 +1322,95 @@
 
           position: relative;
 
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+          backdrop-filter: blur(12px);
+
+          -webkit-backdrop-filter: blur(12px);
+
+          transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+
+          cursor: pointer;
+
+          box-sizing: border-box;
+
+        }
+
+        .channel-spotlight-card:hover {
+
+          transform: translateY(-4px) scale(1.02);
+
+          border-color: rgba(0, 255, 136, 0.45);
+
+          box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7), 0 0 22px rgba(0, 255, 136, 0.2);
+
+        }
+
+        .spotlight-avatar-wrap {
+
+          position: relative;
+
+          margin-bottom: 10px;
+
         }
 
         .spotlight-avatar {
 
-          width: 50px;
+          width: 52px;
 
-          height: 50px;
+          height: 52px;
 
           border-radius: 50%;
 
           object-fit: cover;
 
-          margin-bottom: 8px;
+          border: 2px solid rgba(0, 255, 136, 0.35);
 
-          border: 1.5px solid rgba(0, 255, 102, 0.4);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 10px rgba(0, 255, 136, 0.15);
+
+          transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+
+          display: block;
+
+        }
+
+        .channel-spotlight-card:hover .spotlight-avatar {
+
+          transform: scale(1.06);
+
+          border-color: #00ff88;
+
+          box-shadow: 0 0 16px rgba(0, 255, 136, 0.45);
+
+        }
+
+        .spotlight-verified-corner {
+
+          position: absolute;
+
+          bottom: 0;
+
+          right: -2px;
+
+          color: #00ff88;
+
+          background: #111b21;
+
+          border-radius: 50%;
+
+          font-size: 13px;
+
+          filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.7));
 
         }
 
         .spotlight-name {
 
-          font-size: 13px;
+          font-size: 13.5px;
 
           font-weight: 700;
 
-          color: #e9edef;
+          color: #f1f5f9;
 
           white-space: nowrap;
 
@@ -1008,15 +1420,31 @@
 
           width: 100%;
 
+          margin-bottom: 2px;
+
+          letter-spacing: -0.2px;
+
+        }
+
+        .spotlight-followers {
+
+          font-size: 11px;
+
+          font-family: 'JetBrains Mono', monospace;
+
+          color: #8696a0;
+
+          margin-bottom: 10px;
+
         }
 
         .spotlight-btn-follow {
 
-          margin-top: 10px;
+          margin-top: auto;
 
           width: 100%;
 
-          padding: 5px 0;
+          padding: 6px 0;
 
           font-size: 12px;
 
@@ -1024,23 +1452,125 @@
 
           border-radius: 9999px;
 
-          background: #00a884;
+          background: rgba(0, 255, 136, 0.12);
 
-          color: #111b21;
+          color: #00ff88;
 
-          border: none;
+          border: 1px solid rgba(0, 255, 136, 0.4);
 
           cursor: pointer;
+
+          transition: all 0.2s ease;
+
+          display: inline-flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          gap: 5px;
+
+          outline: none;
+
+        }
+
+        .spotlight-btn-follow:hover {
+
+          background: #00ff88;
+
+          color: #06100c;
+
+          box-shadow: 0 0 14px rgba(0, 255, 136, 0.5);
+
+          transform: translateY(-1px);
 
         }
 
         .spotlight-btn-follow.following {
 
-          background: #202c33;
+          background: rgba(255, 255, 255, 0.08);
+
+          border-color: rgba(255, 255, 255, 0.16);
+
+          color: #94a3b8;
+
+        }
+
+        .spotlight-btn-follow.following:hover {
+
+          background: rgba(239, 68, 68, 0.14);
+
+          border-color: rgba(239, 68, 68, 0.4);
+
+          color: #ef4444;
+
+          box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+
+        }
+
+        .channels-empty-hub {
+
+          padding: 32px 20px;
+
+          text-align: center;
 
           color: #8696a0;
 
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-sizing: border-box;
+
+        }
+
+        .channels-empty-icon-wrap {
+
+          width: 56px;
+
+          height: 56px;
+
+          border-radius: 50%;
+
+          background: rgba(0, 255, 136, 0.08);
+
+          border: 1px solid rgba(0, 255, 136, 0.25);
+
+          display: inline-flex;
+
+          align-items: center;
+
+          justify-content: center;
+
+          color: #00ff88;
+
+          font-size: 24px;
+
+          margin-bottom: 14px;
+
+          box-shadow: 0 0 16px rgba(0, 255, 136, 0.15);
+
+        }
+
+        .channels-empty-title {
+
+          font-size: 15px;
+
+          font-weight: 700;
+
+          color: #f1f5f9;
+
+          margin: 0 0 6px 0;
+
+        }
+
+        .channels-empty-subtitle {
+
+          font-size: 12.5px;
+
+          color: #64748b;
+
+          line-height: 1.45;
+
+          max-width: 300px;
+
+          margin: 0 auto;
 
         }
 
@@ -2832,11 +3362,17 @@
 
         followed.forEach(c => {
 
+          const formattedFollowers = this.formatFollowerCount(c.followerCount);
+          const unreadCount = c.unreadCount || 0;
+
           html += `
 
             <div class="updates-channel-item" data-feed-id="${c.id}">
 
-              <img src="${c.avatar || 'favicons/icon-192.png'}" alt="${c.name}" class="updates-channel-avatar">
+              <div class="updates-channel-avatar-wrap">
+                <img src="${c.avatar || 'favicons/icon-192.png'}" alt="${c.name}" class="updates-channel-avatar" onerror="this.src='favicons/icon-192.png'">
+                ${unreadCount > 0 ? '<span class="channel-avatar-unread-dot"></span>' : ''}
+              </div>
 
               <div class="updates-channel-content">
 
@@ -2846,15 +3382,28 @@
 
                     <span class="updates-channel-name">${c.name}</span>
 
-                    ${c.isVerified ? '<i class="fa-solid fa-circle-check" style="color: #00ff66; font-size: 12px;"></i>' : ''}
+                    ${c.isVerified ? '<span class="channel-verified-badge" title="Verified Channel"><i class="fa-solid fa-circle-check"></i></span>' : ''}
+
+                    <span class="updates-channel-followers-inline">${formattedFollowers}</span>
 
                   </div>
 
-                  <span class="updates-channel-time">${c.lastPostTime || 'Today'}</span>
+                  <span class="updates-channel-time ${unreadCount > 0 ? 'unread' : ''}">${c.lastPostTime || 'Today'}</span>
 
                 </div>
 
-                <div class="updates-channel-snippet">${c.lastPostSnippet || c.description}</div>
+                <div class="updates-channel-bottom">
+
+                  <div class="updates-channel-snippet">${c.lastPostSnippet || c.description}</div>
+
+                  <div class="updates-channel-actions">
+                    ${unreadCount > 0 ? `<span class="updates-channel-unread-pill">${unreadCount}</span>` : ''}
+                    <button type="button" class="channel-list-follow-pill following" data-channel-toggle-follow="${c.id}" title="Following channel">
+                      <span>Following</span>
+                    </button>
+                  </div>
+
+                </div>
 
               </div>
 
@@ -2866,6 +3415,18 @@
 
         html += `</div>`;
 
+      } else {
+
+        html += `
+          <div class="channels-empty-hub">
+            <div class="channels-empty-icon-wrap">
+              <i class="fa-solid fa-tower-broadcast"></i>
+            </div>
+            <h4 class="channels-empty-title">Stay updated on topics you care about</h4>
+            <p class="channels-empty-subtitle">Follow verified broadcast channels to receive real-time direct wire updates</p>
+          </div>
+        `;
+
       }
 
       html += `
@@ -2874,11 +3435,14 @@
 
           <div class="channels-discover-title">
 
-            <span>Find channels to follow</span>
+            <div class="discover-title-left">
+              <span>Find channels to follow</span>
+              <span class="discover-pill-count">${unFollowed.length || this.channels.length} available</span>
+            </div>
 
-            <button type="button" class="channels-explore-pill-btn" onclick="window.broadcastChannelsEngine.openModal('explore')" style="background: transparent; color: #00ff66; border: none; font-size: 12.5px; cursor: pointer; padding: 0;">
+            <button type="button" class="channels-explore-pill-btn" onclick="window.broadcastChannelsEngine.openModal('explore')" style="background: transparent; color: #00ff88; border: none; font-size: 12.5px; cursor: pointer; padding: 0;" title="Explore all channels">
 
-              See all <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+              <span>See all</span> <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
 
             </button>
 
@@ -2890,23 +3454,27 @@
 
       const discoverCards = unFollowed.length > 0 ? unFollowed : this.channels;
 
-      discoverCards.slice(0, 5).forEach(c => {
+      discoverCards.slice(0, 8).forEach(c => {
 
         const isFollow = this.followedChannelIds.has(c.id);
+        const formattedFollowers = this.formatFollowerCount(c.followerCount);
 
         html += `
 
           <div class="channel-spotlight-card" data-feed-id="${c.id}">
 
-            <img src="${c.avatar || 'favicons/icon-192.png'}" alt="${c.name}" class="spotlight-avatar">
+            <div class="spotlight-avatar-wrap">
+              <img src="${c.avatar || 'favicons/icon-192.png'}" alt="${c.name}" class="spotlight-avatar" onerror="this.src='favicons/icon-192.png'">
+              ${c.isVerified ? '<span class="spotlight-verified-corner" title="Verified Channel"><i class="fa-solid fa-circle-check"></i></span>' : ''}
+            </div>
 
-            <span class="spotlight-name">${c.name}</span>
+            <span class="spotlight-name" title="${c.name}">${c.name}</span>
 
-            <span style="font-size: 11px; color: #8696a0; margin-top: 2px;">${c.followerCount >= 1000 ? (c.followerCount / 1000).toFixed(0) + 'K' : c.followerCount} followers</span>
+            <span class="spotlight-followers">${formattedFollowers}</span>
 
             <button type="button" class="spotlight-btn-follow ${isFollow ? 'following' : ''}" data-spotlight-follow="${c.id}">
 
-              ${isFollow ? 'Following' : 'Follow'}
+              ${isFollow ? '<i class="fa-solid fa-check"></i> <span>Following</span>' : '<i class="fa-solid fa-plus"></i> <span>Follow</span>'}
 
             </button>
 
@@ -2935,6 +3503,20 @@
           const chanId = el.getAttribute('data-feed-id');
 
           this.openChannelFeed(chanId);
+
+        });
+
+      });
+
+      container.querySelectorAll('[data-channel-toggle-follow]').forEach(btn => {
+
+        btn.addEventListener('click', (e) => {
+
+          e.stopPropagation();
+
+          const chanId = btn.getAttribute('data-channel-toggle-follow');
+
+          this.toggleFollow(chanId, btn);
 
         });
 

@@ -485,9 +485,11 @@
         <!-- Channels / Broadcasts Section -->
         <section class="updates-channels-section" id="updatesChannelsSection" aria-label="Channels">
           <div class="updates-section-header-row channels-header-row">
-            <h3 class="updates-section-title">Channels</h3>
-            <button type="button" class="channels-explore-pill-btn" id="channelsExploreBtn" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();" title="Explore channels">
-              Explore
+            <div class="channels-header-title-wrap">
+              <h3 class="updates-section-title">Channels</h3>
+            </div>
+            <button type="button" class="channels-explore-pill-btn" id="channelsExploreBtn" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();" title="Explore broadcast channels">
+              <i class="fa-solid fa-compass"></i> <span>Explore</span>
             </button>
           </div>
 
@@ -934,7 +936,7 @@
 
         <!-- Bottom Footer: Dark Mode Moon Icon -->
         <div class="x-drawer-footer">
-          <button type="button" class="x-drawer-theme-btn" id="globalDropDrawerThemeBtn" title="Toggle Display Mode" onclick="if(window.globalDropEngine?.toggleTheme){window.globalDropEngine.toggleTheme();}else if(typeof window.toggleThemeMode==='function'){window.toggleThemeMode();}else if(typeof window.switchDarkMode==='function'){window.switchDarkMode();}">
+          <button type="button" class="x-drawer-theme-btn" id="globalDropDrawerThemeBtn" title="Toggle GlobalDrop Light / Dark Mode" onclick="if(window.globalDropEngine?.toggleTheme){window.globalDropEngine.toggleTheme();}">
             <i class="fa-regular fa-moon"></i>
           </button>
         </div>
@@ -3707,108 +3709,6 @@
                     <input type="range" id="wallpaperDimmingSlider" min="0" max="90" value="40" step="5" class="cyber-range-slider" style="width: 100%; margin-top: 8px;">
                   </div>
 
-                  
-            <!-- NEX-TRANSMITTER INTELLIGENT VIDEO TRIMMER & STATUS CHAIN COMPONENT -->
-            <div id="nexTransmitterTrimmerCard" class="nex-transmitter-trimmer-card" style="display: none;">
-              <!-- Card Header -->
-              <div class="trimmer-card-header">
-                <div class="trimmer-header-brand">
-                  <span class="trimmer-brand-tag">[NEX//TRANSMITTER]</span>
-                  <span class="trimmer-cursor-blink">_</span>
-                </div>
-                <div class="trimmer-header-meta">
-                  <span id="trimmerDurationDetected">TTL: 24H • 0s DETECTED</span>
-                </div>
-              </div>
-
-              <!-- Warning Banner -->
-              <div class="trimmer-warning-banner">
-                <div class="trimmer-warning-left">
-                  <i class="fa-solid fa-triangle-exclamation"></i>
-                  <span id="trimmerWarningText">0:00 detected &mdash; Status capped at 2:00</span>
-                </div>
-                <span class="trimmer-chain-parts-badge" id="trimmerChainCountBadge">1 part</span>
-              </div>
-
-              <!-- Video Preview Stage with Live Scrubhead -->
-              <div class="trimmer-preview-stage">
-                <video id="trimmerVideoPreview" playsinline preload="auto"></video>
-                <!-- Video Scrim Overlay -->
-                <div class="trimmer-preview-scrim">
-                  <button type="button" class="trimmer-play-toggle-btn" id="trimmerPlayToggleBtn" title="Play / Pause">
-                    <i class="fa-solid fa-play"></i>
-                  </button>
-                  <div class="trimmer-preview-timer" id="trimmerLiveTimerBadge">0:00 / 0:00</div>
-                </div>
-              </div>
-
-              <!-- Filmstrip Timeline Track with Interactive 2-Min Selection Overlay -->
-              <div class="trimmer-timeline-container">
-                <div class="trimmer-timeline-label-row">
-                  <span><i class="fa-solid fa-film"></i> TIMELINE SELECTION (2-MINUTE CAP)</span>
-                  <span id="trimmerWindowTimeReadout" class="trimmer-window-readout">0:00 &mdash; 2:00 (120s selected)</span>
-                </div>
-
-                <div class="trimmer-timeline-track" id="trimmerTimelineTrack">
-                  <!-- Real Video Filmstrip Thumbnail Strip -->
-                  <div class="trimmer-filmstrip-strip" id="trimmerFilmstripStrip"></div>
-
-                  <!-- Playback Playhead Position Indicator -->
-                  <div class="trimmer-playhead" id="trimmerPlayhead" style="left: 0%;"></div>
-
-                  <!-- Interactive 2-Minute Selection Window Overlay -->
-                  <div class="trimmer-window-overlay" id="trimmerWindowOverlay" style="left: 0%; width: 50%;">
-                    <div class="trimmer-handle trimmer-handle-left" id="trimmerHandleLeft">
-                      <i class="fa-solid fa-grip-lines-vertical"></i>
-                    </div>
-                    <div class="trimmer-window-center-grip">
-                      <span class="trimmer-window-pill">2:00 WINDOW</span>
-                    </div>
-                    <div class="trimmer-handle trimmer-handle-right" id="trimmerHandleRight">
-                      <i class="fa-solid fa-grip-lines-vertical"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Range Slider Scrubber Control -->
-              <div class="trimmer-range-control-row">
-                <input type="range" id="trimmerRangeSlider" class="trimmer-range-slider" min="0" max="100" value="0" step="0.1" />
-              </div>
-
-              <!-- AI Best Moment Auto-Badge -->
-              <div class="trimmer-ai-badge" id="trimmerAiBadge">
-                <div class="trimmer-ai-info">
-                  <i class="fa-solid fa-wand-magic-sparkles"></i>
-                  <span id="trimmerAiBadgeText">Auto-best moment: 0:42-2:42 detected by AI</span>
-                </div>
-                <button type="button" class="trimmer-apply-ai-btn" id="trimmerApplyAiBtn">
-                  <i class="fa-solid fa-check"></i> Apply
-                </button>
-              </div>
-
-              <!-- Mode Switcher Buttons (TRIM vs CHAIN) -->
-              <div class="trimmer-mode-switcher">
-                <button type="button" class="trimmer-mode-btn active" id="trimmerModeTrimBtn" data-mode="TRIM">
-                  <i class="fa-solid fa-scissors"></i>
-                  <span>Trim to 2:00</span>
-                </button>
-                <button type="button" class="trimmer-mode-btn" id="trimmerModeChainBtn" data-mode="CHAIN">
-                  <i class="fa-solid fa-link"></i>
-                  <span id="trimmerChainModeLabel">Split into 2 x 2-min chain (Status Thread)</span>
-                </button>
-              </div>
-
-              <!-- Chain Parts Preview Breakdown (Displayed when Mode == CHAIN) -->
-              <div class="trimmer-chain-breakdown" id="trimmerChainBreakdown" style="display: none;">
-                <div class="trimmer-chain-title">
-                  <i class="fa-solid fa-layer-group"></i>
-                  <span>STATUS THREAD TRANSMISSION SCHEDULE:</span>
-                </div>
-                <div class="trimmer-chain-parts-grid" id="trimmerChainPartsGrid"></div>
-              </div>
-            </div>
-
             <div style="margin-top: 14px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <strong>Wallpaper Ambient Blur: <span id="wallpaperBlurValue" style="color: #00f2ff;">0px</span></strong>
@@ -6160,6 +6060,76 @@
                 </div>
 
                 <div id="statusMediaPreviewBox" class="status-media-preview-box" style="display: none;">
+                  <!-- WHATSAPP-STYLE STATUS VIDEO TOP TRIMMER BAR -->
+                  <div id="statusVideoTopTrimmerBar" class="status-video-top-trimmer-bar" style="display: none;">
+                    <div class="trimmer-top-controls-bar">
+                      <div class="trimmer-controls-left">
+                        <button type="button" id="statusTrimmerAudioMuteBtn" class="status-trimmer-tool-btn" title="Toggle audio mute">
+                          <i class="fa-solid fa-volume-high"></i>
+                        </button>
+                        <span class="trimmer-video-badge"><i class="fa-solid fa-film"></i> VIDEO</span>
+                      </div>
+                      
+                      <div class="trimmer-controls-center">
+                        <span id="statusTrimmerTimestampIndicator" class="status-trimmer-timestamp-indicator">0:00 / 0:30</span>
+                        <span id="statusTrimmerDurationBadge" class="status-trimmer-duration-pill">30s</span>
+                      </div>
+
+                      <div class="trimmer-controls-right">
+                        <button type="button" id="statusTrimmerAiBestBtn" class="status-trimmer-ai-pill-btn" title="AI Auto-detect best moment">
+                          <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Best Moment</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Filmstrip Scrubber Track -->
+                    <div class="trimmer-filmstrip-outer">
+                      <div class="trimmer-timeline-track" id="trimmerTimelineTrack">
+                        <!-- Frame Thumbnails Strip -->
+                        <div class="trimmer-filmstrip-strip" id="trimmerFilmstripStrip"></div>
+
+                        <!-- Laser Playhead Indicator -->
+                        <div class="trimmer-playhead" id="trimmerPlayhead" style="left: 0%;"></div>
+
+                        <!-- Dimmed Scrims Outside Selected Window -->
+                        <div class="trimmer-scrim-left" id="trimmerScrimLeft" style="width: 0%;"></div>
+                        <div class="trimmer-scrim-right" id="trimmerScrimRight" style="left: 100%; width: 0%;"></div>
+
+                        <!-- Neon Green Bounding Box Selection Window Overlay -->
+                        <div class="trimmer-window-overlay" id="trimmerWindowOverlay" style="left: 0%; width: 100%;">
+                          <div class="trimmer-handle trimmer-handle-left" id="trimmerHandleLeft" title="Drag to adjust start time">
+                            <i class="fa-solid fa-chevron-left"></i>
+                          </div>
+                          <div class="trimmer-window-center-grip">
+                            <span class="trimmer-window-pill" id="trimmerWindowTimeReadout">0:00 - 0:30</span>
+                          </div>
+                          <div class="trimmer-handle trimmer-handle-right" id="trimmerHandleRight" title="Drag to adjust end time">
+                            <i class="fa-solid fa-chevron-right"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Long Video Banner (Shown when duration > 120s) -->
+                    <div id="trimmerLongVideoBanner" class="trimmer-long-video-banner" style="display: none;">
+                      <div class="trimmer-long-video-left">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span id="trimmerWarningText">Video exceeds 2m &mdash; Trim to 2:00 or Split into Thread</span>
+                      </div>
+                      <div class="trimmer-mode-switcher">
+                        <button type="button" class="trimmer-mode-btn active" id="trimmerModeTrimBtn" data-mode="TRIM">
+                          <i class="fa-solid fa-scissors"></i> <span>Trim</span>
+                        </button>
+                        <button type="button" class="trimmer-mode-btn" id="trimmerModeChainBtn" data-mode="CHAIN">
+                          <i class="fa-solid fa-link"></i> <span id="trimmerChainModeLabel">Chain Thread</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="trimmer-chain-breakdown" id="trimmerChainBreakdown" style="display: none;">
+                      <div class="trimmer-chain-parts-grid" id="trimmerChainPartsGrid"></div>
+                    </div>
+                  </div>
+
                   <div class="status-studio-preview-card">
                     <img id="statusModalImgPreview" src="logo.jpg" alt="Preview" class="status-studio-preview-media" style="display: none;">
                     <video id="statusModalVideoPreview" src="" controls playsinline class="status-studio-preview-media" style="display: none;"></video>
@@ -6172,6 +6142,20 @@
                       <button type="button" id="statusManualTrimBtn" class="status-preview-tool-btn" style="display: none;" title="Trim Video Duration">
                         <i class="fa-solid fa-scissors"></i> <span>Trim</span>
                       </button>
+                      <button type="button" id="statusAddMusicBtn" class="status-preview-tool-btn" title="Add Music Soundtrack (WhatsApp Style)">
+                        <i class="fa-solid fa-music"></i> <span>Music</span>
+                      </button>
+                    </div>
+
+                    <!-- Floating Music Sticker Chip on Media Preview -->
+                    <div id="statusAttachedMusicSticker" class="status-attached-music-sticker" style="display: none;">
+                      <div class="music-sticker-disc-icon"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
+                      <img id="statusAttachedMusicArt" src="logo.jpg" class="music-sticker-art" alt="Track Art">
+                      <div class="music-sticker-info">
+                        <span id="statusAttachedMusicTitle" class="music-sticker-title">Track Name</span>
+                        <span id="statusAttachedMusicArtist" class="music-sticker-artist">Artist</span>
+                      </div>
+                      <button type="button" id="statusRemoveMusicBtn" class="music-sticker-remove-btn" title="Remove Music Track"><i class="fa-solid fa-xmark"></i></button>
                     </div>
 
                     <!-- Visual Filter Presets Strip -->
@@ -8669,6 +8653,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 <script defer src="./src/js/locked-chats-manager.js"></script>
 <script defer src="./src/js/archived-chats-engine.js"></script>
     <script defer src="./src/js/nex-status-trimmer.js"></script>
+    <script defer src="./src/js/status-music-picker.js"></script>
     <script type="module" src="./src/js/chronex-ghost-engine.js"></script>
     <script type="module" src="./src/js/chronex-smart-escrow.js"></script>
     <script type="module" src="./src/js/quantum-stegano-voice.js"></script>
@@ -10668,6 +10653,51 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
         <span style="font-size: 11px; color: #8696a0;">NEX PROTOCOL v9.0 // 100% CLIENT-SIDE</span>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- WHATSAPP-STYLE SEARCHABLE STATUS MUSIC PICKER MODAL -->
+<div id="statusMusicPickerModal" class="status-music-picker-modal" style="display: none;">
+  <div class="status-music-picker-backdrop" id="statusMusicPickerBackdrop"></div>
+  <div class="status-music-picker-sheet">
+    <div class="music-picker-header">
+      <div class="music-picker-title-wrap">
+        <i class="fa-solid fa-music" style="color: #00ff66;"></i>
+        <h3 class="music-picker-title">Status Music Library</h3>
+      </div>
+      <button type="button" class="music-picker-close-btn" id="closeStatusMusicPickerBtn" title="Close Music Library">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Search Box -->
+    <div class="music-picker-search-bar">
+      <i class="fa-solid fa-magnifying-glass music-search-icon"></i>
+      <input type="text" id="statusMusicSearchInput" placeholder="Search songs, artists, or soundtracks..." class="music-search-field" autocomplete="off">
+      <button type="button" id="statusMusicClearSearchBtn" class="music-search-clear" style="display: none;"><i class="fa-solid fa-circle-xmark"></i></button>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="music-picker-genre-pills">
+      <button type="button" class="music-genre-pill active" data-genre="top hits">Top Hits</button>
+      <button type="button" class="music-genre-pill" data-genre="afrobeats">Afrobeats</button>
+      <button type="button" class="music-genre-pill" data-genre="pop">Pop</button>
+      <button type="button" class="music-genre-pill" data-genre="hip hop">Hip-Hop</button>
+      <button type="button" class="music-genre-pill" data-genre="r&b">R&B</button>
+      <button type="button" class="music-genre-pill" data-genre="chill">Chill</button>
+      <button type="button" class="music-genre-pill" data-genre="cinematic">Cinematic</button>
+    </div>
+
+    <!-- Track List Container -->
+    <div class="music-picker-list" id="statusMusicTrackList">
+      <div class="music-picker-loading" id="statusMusicLoadingState">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        <span>Loading trending music...</span>
+      </div>
+    </div>
+
+    <!-- Hidden Audio Preview Player -->
+    <audio id="statusMusicPreviewPlayer" preload="none"></audio>
   </div>
 </div>
 
