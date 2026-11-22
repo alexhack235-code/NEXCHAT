@@ -119,7 +119,27 @@ export async function uploadMediaBlob(file, options = {}) {
 export async function uploadAnyMedia(file, options = {}) {
   if (!file) throw new Error('No file provided for upload');
   
-  // 1. Primary: Cloudinary Multi-Vault (All file types: Images, Audio, Voice, Docs, Videos)
+  // 1. High-Speed Regional ImageKit Multi-Vault (Prioritized if preferImageKit is requested, e.g. for GlobalDrop or Geo-CDN routing)
+  if (options.preferImageKit) {
+    try {
+      const ikRes = await uploadToImageKit(file, options);
+      if (ikRes && ikRes.url) {
+        return {
+          url: ikRes.url,
+          downloadUrl: ikRes.downloadUrl || ikRes.url,
+          fileId: ikRes.fileId,
+          fileName: ikRes.name || file.name || 'file',
+          fileSize: ikRes.size || file.size,
+          fileType: ikRes.fileType || file.type || 'application/octet-stream',
+          vault: ikRes.vault || 'ImageKit'
+        };
+      }
+    } catch (ikErr) {
+      console.warn('[STORAGE] ImageKit preferred upload notice, attempting Cloudinary fallback:', ikErr?.message || ikErr);
+    }
+  }
+
+  // 2. Primary / Secondary: Cloudinary Multi-Vault (All file types: Images, Audio, Voice, Docs, Videos)
   try {
     const res = await uploadMediaToCloudinary(file, options);
     return {
@@ -136,22 +156,24 @@ export async function uploadAnyMedia(file, options = {}) {
     console.warn('[STORAGE] Cloudinary pool upload notice, attempting ImageKit fallback:', err?.message || err);
   }
 
-  // 2. High-Speed Intermittent: ImageKit Multi-Vault Pool (Vaults 1 to 30, Zero Egress Fees)
-  try {
-    const ikRes = await uploadToImageKit(file, options);
-    if (ikRes && ikRes.url) {
-      return {
-        url: ikRes.url,
-        downloadUrl: ikRes.downloadUrl || ikRes.url,
-        fileId: ikRes.fileId,
-        fileName: ikRes.name || file.name || 'file',
-        fileSize: ikRes.size || file.size,
-        fileType: ikRes.fileType || file.type || 'application/octet-stream',
-        vault: ikRes.vault || 'ImageKit'
-      };
+  // 3. High-Speed Intermittent: ImageKit Multi-Vault Pool (Vaults 1 to 12, Zero Egress Fees)
+  if (!options.preferImageKit) {
+    try {
+      const ikRes = await uploadToImageKit(file, options);
+      if (ikRes && ikRes.url) {
+        return {
+          url: ikRes.url,
+          downloadUrl: ikRes.downloadUrl || ikRes.url,
+          fileId: ikRes.fileId,
+          fileName: ikRes.name || file.name || 'file',
+          fileSize: ikRes.size || file.size,
+          fileType: ikRes.fileType || file.type || 'application/octet-stream',
+          vault: ikRes.vault || 'ImageKit'
+        };
+      }
+    } catch (ikErr) {
+      console.warn('[STORAGE] ImageKit pool upload notice, attempting Vercel Blob fallback:', ikErr?.message || ikErr);
     }
-  } catch (ikErr) {
-    console.warn('[STORAGE] ImageKit pool upload notice, attempting Vercel Blob fallback:', ikErr?.message || ikErr);
   }
 
   // 3. Secondary Fallback: Vercel Blob (if serverless API route available)

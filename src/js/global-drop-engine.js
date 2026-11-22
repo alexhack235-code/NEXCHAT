@@ -782,7 +782,7 @@ class GlobalDropEngine {
         try {
           const isVideo = file.type && file.type.startsWith('video/');
           const timeoutDuration = isVideo ? 60000 : 12000;
-          const uploadPromise = uploadAnyMedia(file, { folder: 'global_drops', uid });
+          const uploadPromise = uploadAnyMedia(file, { folder: 'global_drops', uid, preferImageKit: true });
           const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Media upload timed out')), timeoutDuration));
           const res = await Promise.race([uploadPromise, timeoutPromise]).catch(async (err) => {
             console.warn('[GLOBAL DROP] Media upload timed out or failed, using client fallback:', err);
@@ -836,7 +836,7 @@ class GlobalDropEngine {
       if (this.recordedVoiceBlob) {
         try {
           const voiceFile = new File([this.recordedVoiceBlob], `drop_voice_${Date.now()}.webm`, { type: 'audio/webm' });
-          const vRes = await uploadAnyMedia(voiceFile, { folder: 'global_drops', uid });
+          const vRes = await uploadAnyMedia(voiceFile, { folder: 'global_drops', uid, preferImageKit: true });
           voiceUrl = vRes.url || vRes.downloadUrl;
           detectedMediaType = 'voice';
         } catch (vErr) {
