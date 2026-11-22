@@ -15876,32 +15876,28 @@ function applyBackgroundImage(imageUrl) {
   const messagesArea = document.getElementById("messages-area");
 if (imageUrl) {
     const isSvg = String(imageUrl).startsWith('data:image/svg');
-    const bgSize = isSvg ? 'auto' : '100% 100%';
+    const bgSize = isSvg ? 'auto' : 'cover';
     const bgRepeat = isSvg ? 'repeat' : 'no-repeat';
-if (app) {
-      app.style.backgroundImage = `url('${imageUrl}')`;
-app.style.backgroundSize = bgSize;
-app.style.backgroundPosition = 'center center';
-app.style.backgroundRepeat = bgRepeat;
-app.style.backgroundColor = 'transparent';
-app.setAttribute('data-custom-bg', 'true');
+    const cleanUrl = String(imageUrl).replace(/[\n\r\t]/g, '');
+    document.documentElement.style.setProperty('--chat-wallpaper', "url('" + cleanUrl + "')");
+    if (document.body) document.body.style.setProperty('--chat-wallpaper', "url('" + cleanUrl + "')");
+    if (chatDetail) {
+      chatDetail.classList.add('has-custom-wallpaper', 'chat-background');
+      chatDetail.style.removeProperty('background');
+      chatDetail.style.removeProperty('background-color');
+      chatDetail.style.setProperty('--chat-wallpaper', "url('" + cleanUrl + "')");
+      chatDetail.style.setProperty('background-image', "url('" + cleanUrl + "')", 'important');
+      chatDetail.style.setProperty('background-size', bgSize, 'important');
+      chatDetail.style.setProperty('background-position', 'center center', 'important');
+      chatDetail.style.setProperty('background-repeat', bgRepeat, 'important');
     }
-if (chatDetail) {
-      chatDetail.style.backgroundImage = `url('${imageUrl}')`;
-chatDetail.style.backgroundSize = bgSize;
-chatDetail.style.backgroundPosition = 'center center';
-chatDetail.style.backgroundRepeat = bgRepeat;
-chatDetail.style.backgroundColor = 'transparent';
-chatDetail.classList.add('has-custom-wallpaper');
-if (isSvg) chatDetail.setAttribute('data-wallpaper-type', 'svg');
-else chatDetail.removeAttribute('data-wallpaper-type');
+    if (messagesArea) {
+      messagesArea.classList.add('has-custom-wallpaper', 'chat-background');
+      messagesArea.style.removeProperty('background');
+      messagesArea.style.setProperty('background-image', 'none', 'important');
+      messagesArea.style.setProperty('background-color', 'rgba(6, 10, 20, 0.40)', 'important');
     }
-if (messagesArea) {
-      messagesArea.classList.add('has-custom-wallpaper');
-messagesArea.style.backgroundImage = 'none';
-messagesArea.style.backgroundColor = 'rgba(6, 9, 18, 0.35)';
-    }
-updateBackgroundPreview(imageUrl);
+    updateBackgroundPreview(cleanUrl);
   } else {
     if (app) {
       app.style.backgroundImage = "none";
@@ -15996,10 +15992,15 @@ async function loadChatBackground(chatId, chatType) {
   const uid = chatId || currentChatUser;
   const type = chatType || currentChatType;
 try {
-    const cachedBg = localStorage.getItem(`chat_bg_${uid}`);
-if (cachedBg) {
+    const cleanUid = String(uid || '').replace(/^@/, '').toLowerCase();
+    const cachedBg = localStorage.getItem(`chat_bg_${uid}`) || localStorage.getItem(`chat_bg_${cleanUid}`);
+    if (cachedBg) {
       applyBackgroundImage(cachedBg);
-return;
+      return;
+    }
+    const globalBg = localStorage.getItem('nexchat_background');
+    if (globalBg && type !== 'ai') {
+      applyBackgroundImage(globalBg);
     }
 if (type === 'ai') {
       applyBackgroundImage(null);
@@ -22080,11 +22081,17 @@ if (welcomePanel) {
   }
 if (chatDetailView) {
     chatDetailView.style.setProperty('display', 'flex', 'important');
-if (!chatDetailView.classList.contains('has-custom-wallpaper')) {
-      chatDetailView.style.setProperty('background', '#0f0a1e', 'important');
-    } else {
+    const hasWp = chatDetailView.classList.contains('has-custom-wallpaper') ||
+      Boolean(localStorage.getItem(`chat_bg_${currentChatUser}`)) ||
+      Boolean(localStorage.getItem('nexchat_background'));
+    if (hasWp) {
+      chatDetailView.classList.add('has-custom-wallpaper', 'chat-background');
       chatDetailView.style.removeProperty('background');
-chatDetailView.style.removeProperty('background-color');
+      chatDetailView.style.removeProperty('background-color');
+      const curWp = localStorage.getItem(`chat_bg_${currentChatUser}`) || localStorage.getItem('nexchat_background');
+      if (curWp && typeof applyActiveWallpaper === 'function') applyActiveWallpaper(curWp);
+    } else {
+      chatDetailView.style.setProperty('background', '#0f0a1e', 'important');
     }
 chatDetailView.classList.remove('hidden', 'entering');
 chatDetailView.classList.add('visible');

@@ -409,6 +409,10 @@
           <button type="button" id="aegisPrivacyBtnMobile" class="header-icon-btn mobile-action-btn aegis-privacy-toggle-btn" title="Aegis Privacy Shield (Anti-Shoulder Surfing)" aria-label="Toggle Aegis Privacy Shield" data-aegis-active="false">
             <i class="fa-solid fa-user-secret" style="color: #00f3ff;"></i>
           </button>
+          <button id="mobileAlertsBtn" class="header-icon-btn mobile-action-btn" title="Alerts & Announcements" onclick="if(window.handleNavigation) window.handleNavigation('announcements');" style="font-size: 12px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; position: relative; color: #94a3b8;" aria-label="Alerts">
+            <i class="fa-solid fa-bell"></i>
+            <span class="nav-status-beacon" id="mobileAlertsBeacon" style="display: none; background: #00ff88; width: 6px; height: 6px; position: absolute; top: 4px; right: 4px; border-radius: 50%;"></span>
+          </button>
           <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats" onclick="if(window.openSearch) window.openSearch();">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
@@ -1261,6 +1265,10 @@
           <div class="chat-search-pill-wrapper">
             <i class="fa-solid fa-magnifying-glass chat-search-pill-icon" style="cursor: pointer;" title="Search" onclick="if(window.openSearch) window.openSearch(); else { const inp=document.getElementById('searchInput'); if(inp) inp.focus(); }"></i>
             <input type="text" id="searchInput" class="search-bar chat-search-pill-input" placeholder="Search chats or ask ChronEX AI..." autocomplete="off" />
+            <button type="button" id="chatSearchAlertsBtn" class="chat-search-pill-alert-btn" title="System Alerts & Announcements" onclick="if(window.handleNavigation) window.handleNavigation('announcements');" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; padding: 4px 8px; display: inline-flex; align-items: center; justify-content: center; position: relative;" aria-label="Alerts">
+              <i class="fa-solid fa-bell"></i>
+              <span class="nav-status-beacon" id="searchAlertsBeacon" style="display: none; background: #00ff88; width: 5px; height: 5px; position: absolute; top: 3px; right: 4px; border-radius: 50%;"></span>
+            </button>
           </div>
         </div>
 

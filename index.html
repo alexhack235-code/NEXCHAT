@@ -269,6 +269,10 @@
 
     <!-- Quantum Decryption Typewriter Terminal Console -->
     <div class="intro-typewriter-console" id="introTypewriterConsole">
+      <div style="background: rgba(0, 255, 136, 0.08); border-bottom: 1px solid rgba(0, 255, 136, 0.2); padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-family: monospace; color: #00ff88;">
+        <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-satellite-dish"></i> PRE-LAUNCH // NOV 23, 2026</span>
+        <span id="indexConsoleCountdown" style="font-weight: 800; color: #00d4ff; background: rgba(0, 212, 255, 0.12); padding: 2px 8px; border-radius: 4px;">COUNTDOWN ACTIVE</span>
+      </div>
       <div class="intro-console-header">
         <div class="intro-console-badge">
           <span class="beacon-pulse"></span>
@@ -483,6 +487,27 @@
 <script type="module" src="pwa-install.js?v=10.0"></script>
 <script type="module" src="firebase-config.js"></script>
 <script type="module" src="auth.js?v=10.0"></script>
+  <script>
+    (function initIndexCountdown() {
+      const targetTimestamp = new Date('2026-11-23T00:00:00+01:00').getTime();
+      const el = document.getElementById('indexConsoleCountdown');
+      if (!el) return;
+      function tick() {
+        const diff = Math.max(0, targetTimestamp - Date.now());
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        const pad = n => String(n).padStart(2, '0');
+        if (diff <= 0) {
+          el.textContent = '🚀 PRE-LAUNCH ACTIVE';
+        } else {
+          el.textContent = `T-MINUS ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+      }
+      setInterval(tick, 1000);
+      tick();
+    })();
+  </script>
 </body>
 </html>
 

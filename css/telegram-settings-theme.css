@@ -845,3 +845,267 @@ body.light-theme #settingsModal .settings-input {
     box-sizing: border-box !important;
   }
 }
+
+/* ==========================================================================
+   NEXCHAT CORE APP LIGHT THEME SPECIFICATION
+   Applied when body has .light-mode or .light-theme
+   ========================================================================== */
+body.light-mode,
+body.light-theme {
+  background-color: #f3f6f9 !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .app,
+body.light-theme .app {
+  background: #f3f6f9 !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .top-header,
+body.light-theme .top-header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .header-icon-btn,
+body.light-theme .header-icon-btn,
+body.light-mode .back-button,
+body.light-theme .back-button {
+  background: rgba(0, 0, 0, 0.04) !important;
+  color: #334155 !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .header-icon-btn:hover,
+body.light-theme .header-icon-btn:hover,
+body.light-mode .back-button:hover,
+body.light-theme .back-button:hover {
+  background: rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .token-display,
+body.light-theme .token-display {
+  background: #f1f5f9 !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .token-label,
+body.light-theme .token-label {
+  color: #64748b !important;
+}
+
+body.light-mode .chat-main,
+body.light-theme .chat-main {
+  background: #f3f6f9 !important;
+}
+
+body.light-mode .chat-list-view,
+body.light-theme .chat-list-view,
+body.light-mode .chats-sidebar,
+body.light-theme .chats-sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .chat-search-container,
+body.light-theme .chat-search-container {
+  background: #ffffff !important;
+}
+
+body.light-mode .chat-search-pill-wrapper,
+body.light-theme .chat-search-pill-wrapper {
+  background: #f1f5f9 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .chat-search-pill-input,
+body.light-theme .chat-search-pill-input {
+  color: #0f172a !important;
+}
+
+body.light-mode .chat-search-pill-input::placeholder,
+body.light-theme .chat-search-pill-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+body.light-mode .chat-search-pill-icon,
+body.light-theme .chat-search-pill-icon {
+  color: #64748b !important;
+}
+
+body.light-mode .filter-tab,
+body.light-theme .filter-tab {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+body.light-mode .filter-tab.active,
+body.light-theme .filter-tab.active {
+  background: #00C896 !important;
+  color: #ffffff !important;
+}
+
+body.light-mode .chat-list-item,
+body.light-theme .chat-list-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+  background: transparent !important;
+}
+
+body.light-mode .chat-list-item:hover,
+body.light-theme .chat-list-item:hover,
+body.light-mode .chat-list-item.active,
+body.light-theme .chat-list-item.active {
+  background: #f1f5f9 !important;
+}
+
+body.light-mode .chat-name,
+body.light-theme .chat-name {
+  color: #0f172a !important;
+}
+
+body.light-mode .chat-preview,
+body.light-theme .chat-preview,
+body.light-mode .preview-text,
+body.light-theme .preview-text,
+body.light-mode .chat-item-time,
+body.light-theme .chat-item-time {
+  color: #64748b !important;
+}
+
+body.light-mode .chat-area,
+body.light-theme .chat-area,
+body.light-mode #chatArea:not(.has-custom-wallpaper),
+body.light-theme #chatArea:not(.has-custom-wallpaper),
+body.light-mode .chat-panel:not(.has-custom-wallpaper),
+body.light-theme .chat-panel:not(.has-custom-wallpaper),
+body.light-mode .chat-detail-view:not(.has-custom-wallpaper):not(.chat-background),
+body.light-theme .chat-detail-view:not(.has-custom-wallpaper):not(.chat-background) {
+  background: #f8fafc !important;
+}
+
+body.light-mode .chat-detail-view.has-custom-wallpaper,
+body.light-theme .chat-detail-view.has-custom-wallpaper,
+body.light-mode #chatDetailView.has-custom-wallpaper,
+body.light-theme #chatDetailView.has-custom-wallpaper {
+  background-image: var(--chat-wallpaper) !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+body.light-mode .chat-header-bar,
+body.light-theme .chat-header-bar,
+body.light-mode .chat-header,
+body.light-theme .chat-header {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .chat-header-name,
+body.light-theme .chat-header-name,
+body.light-mode .chat-title,
+body.light-theme .chat-title {
+  color: #0f172a !important;
+}
+
+body.light-mode .messages-area:not(.has-custom-wallpaper),
+body.light-theme .messages-area:not(.has-custom-wallpaper) {
+  background: #f1f5f9 !important;
+}
+
+body.light-mode .messages-area.has-custom-wallpaper,
+body.light-theme .messages-area.has-custom-wallpaper {
+  background-image: none !important;
+  background-color: rgba(255, 255, 255, 0.40) !important;
+}
+
+body.light-mode .message.sent .bubble,
+body.light-theme .message.sent .bubble,
+body.light-mode .message-bubble.sent,
+body.light-theme .message-bubble.sent {
+  background: #dcf8c6 !important;
+  color: #111827 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .message.received .bubble,
+body.light-theme .message.received .bubble,
+body.light-mode .message-bubble.received,
+body.light-theme .message-bubble.received {
+  background: #ffffff !important;
+  color: #111827 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .bubble .message-text,
+body.light-theme .bubble .message-text,
+body.light-mode .message-bubble .message-text,
+body.light-theme .message-bubble .message-text {
+  color: #111827 !important;
+}
+
+body.light-mode .bubble .message-time,
+body.light-theme .bubble .message-time,
+body.light-mode .message-bubble .message-time,
+body.light-theme .message-bubble .message-time {
+  color: #64748b !important;
+}
+
+body.light-mode .chat-input-bar,
+body.light-theme .chat-input-bar,
+body.light-mode .chat-footer,
+body.light-theme .chat-footer,
+body.light-mode .chat-input-container,
+body.light-theme .chat-input-container {
+  background: #ffffff !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-mode .chat-input,
+body.light-theme .chat-input,
+body.light-mode .chat-input-field,
+body.light-theme .chat-input-field,
+body.light-mode textarea.chat-textarea,
+body.light-theme textarea.chat-textarea {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(0, 0, 0, 0.09) !important;
+}
+
+body.light-mode .chat-empty-state,
+body.light-theme .chat-empty-state,
+body.light-mode .empty-chat-placeholder,
+body.light-theme .empty-chat-placeholder {
+  color: #64748b !important;
+}
+
+body.light-mode .chat-empty-state h2,
+body.light-theme .chat-empty-state h2 {
+  color: #0f172a !important;
+}
+
+body.light-mode .bottom-nav,
+body.light-theme .bottom-nav {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-mode .bottom-nav .nav-item,
+body.light-theme .bottom-nav .nav-item {
+  color: #64748b !important;
+}
+
+body.light-mode .bottom-nav .nav-item.active,
+body.light-theme .bottom-nav .nav-item.active {
+  color: #00C896 !important;
+}

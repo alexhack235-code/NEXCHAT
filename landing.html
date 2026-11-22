@@ -184,6 +184,44 @@
         End-to-End Encrypted. Authentic Vector Wallpapers. Hacker Terminal CLI. 1:1 Voice Calling & Status Editor. Unstoppable Speed.
       </p>
 
+      <!-- LIVE PRE-LAUNCH COUNTDOWN MATRIX (Nov 23, 2026) -->
+      <div class="prelaunch-countdown-card" id="prelaunchCountdownCard" data-reveal style="margin: 22px auto 28px; max-width: 560px; width: 100%; background: rgba(12, 19, 35, 0.78); border: 1px solid rgba(0, 255, 136, 0.35); border-radius: 20px; padding: 18px 22px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 255, 136, 0.12); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #00ff88, #00d4ff, transparent);"></div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: 2px; color: #00ff88; text-transform: uppercase;">
+            <span class="badge-pulsing-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 10px #00ff88;"></span>
+            PRE-LAUNCH SEQUENCE // NOV 23, 2026
+          </div>
+          <div style="font-size: 11px; color: #94a3b8; font-family: monospace; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-clock" style="color: #00d4ff;"></i> 00:00 WAT / 23:00 UTC
+          </div>
+        </div>
+
+        <div class="countdown-digits-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; margin-bottom: 14px;">
+          <div style="background: rgba(6, 11, 22, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 4px;">
+            <div id="heroCdDays" style="font-size: clamp(20px, 3.8vw, 30px); font-weight: 800; font-family: 'Space Grotesk', monospace; color: #ffffff; line-height: 1;">00</div>
+            <div style="font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #64748b; text-transform: uppercase; margin-top: 5px;">Days</div>
+          </div>
+          <div style="background: rgba(6, 11, 22, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 4px;">
+            <div id="heroCdHours" style="font-size: clamp(20px, 3.8vw, 30px); font-weight: 800; font-family: 'Space Grotesk', monospace; color: #00ff88; line-height: 1;">07</div>
+            <div style="font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #64748b; text-transform: uppercase; margin-top: 5px;">Hours</div>
+          </div>
+          <div style="background: rgba(6, 11, 22, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 4px;">
+            <div id="heroCdMinutes" style="font-size: clamp(20px, 3.8vw, 30px); font-weight: 800; font-family: 'Space Grotesk', monospace; color: #00d4ff; line-height: 1;">45</div>
+            <div style="font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #64748b; text-transform: uppercase; margin-top: 5px;">Minutes</div>
+          </div>
+          <div style="background: rgba(6, 11, 22, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 4px;">
+            <div id="heroCdSeconds" style="font-size: clamp(20px, 3.8vw, 30px); font-weight: 800; font-family: 'Space Grotesk', monospace; color: #a78bfa; line-height: 1;">00</div>
+            <div style="font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #64748b; text-transform: uppercase; margin-top: 5px;">Seconds</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #94a3b8; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 10px; flex-wrap: wrap; gap: 6px;">
+          <span style="display: inline-flex; align-items: center; gap: 6px;"><i class="fa-solid fa-server" style="color: #00ff88;"></i> 12 ImageKit Vaults: <strong>ONLINE</strong></span>
+          <span style="display: inline-flex; align-items: center; gap: 6px;"><i class="fa-solid fa-shield-halved" style="color: #00d4ff;"></i> WebCrypto Enclave: <strong>ARMED</strong></span>
+        </div>
+      </div>
+
       <div class="hero-actions" data-reveal>
         <a href="index.html" class="hero-btn primary">
           <span><i class="fa-solid fa-bolt"></i> Launch NEXCHAT</span>
@@ -1177,5 +1215,47 @@
   </footer>
 
   <script type="module" src="js/landing-scroll.js"></script>
+  <script>
+    (function initPrelaunchCountdown() {
+      // Target: November 23, 2026 00:00 WAT (23:00 UTC Nov 22)
+      // Exactly matching user prompt 7h 52m from 07:08:41-08:00
+      const targetTimestamp = new Date('2026-11-23T00:00:00+01:00').getTime();
+
+      function updateCountdown() {
+        const now = Date.now();
+        const diff = Math.max(0, targetTimestamp - now);
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        const pad = n => String(n).padStart(2, '0');
+
+        const dEl = document.getElementById('heroCdDays');
+        const hEl = document.getElementById('heroCdHours');
+        const mEl = document.getElementById('heroCdMinutes');
+        const sEl = document.getElementById('heroCdSeconds');
+        const topEl = document.getElementById('topBarCountdown');
+
+        if (dEl) dEl.textContent = pad(days);
+        if (hEl) hEl.textContent = pad(hours);
+        if (mEl) mEl.textContent = pad(minutes);
+        if (sEl) sEl.textContent = pad(seconds);
+
+        if (topEl) {
+          if (diff <= 0) {
+            topEl.textContent = '🚀 PRE-LAUNCH ACTIVE NOW';
+            topEl.style.color = '#00ff88';
+          } else {
+            topEl.textContent = `T-MINUS ${pad(hours + days * 24)}h ${pad(minutes)}m ${pad(seconds)}s`;
+          }
+        }
+      }
+
+      setInterval(updateCountdown, 1000);
+      updateCountdown();
+    })();
+  </script>
 </body>
 </html>
