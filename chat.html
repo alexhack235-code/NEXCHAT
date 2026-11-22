@@ -112,10 +112,22 @@
       .x-composer.mobile-modal-open .x-composer-modal-header {
         display: flex !important;
       }
-      .app[data-active-section="global-drop"] ~ .global-drop-mobile-fab,
-      body[data-active-section="global-drop"] .global-drop-mobile-fab,
       .global-drop-mobile-fab {
+        display: none !important;
+      }
+      body:not(.settings-open) .app[data-active-section="global-drop"]:not(.settings-open) ~ .global-drop-mobile-fab:not(.hidden),
+      body[data-active-section="global-drop"]:not(.settings-open) .global-drop-mobile-fab:not(.hidden) {
         display: flex !important;
+      }
+      body.settings-open .global-drop-mobile-fab,
+      body.settings-open #globalDropMobileFab,
+      .app.settings-open ~ .global-drop-mobile-fab,
+      .app[data-active-section="settings"] ~ .global-drop-mobile-fab,
+      .settings-modal.open ~ .global-drop-mobile-fab,
+      .settings-modal[style*="display: flex"] ~ .global-drop-mobile-fab,
+      .modal.open ~ .global-drop-mobile-fab,
+      #globalDropMobileFab.hidden {
+        display: none !important;
       }
     }
     @media (min-width: 900px) {

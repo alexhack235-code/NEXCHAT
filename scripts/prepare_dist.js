@@ -10,17 +10,22 @@ function copyRecursive(src, dest) {
   if (!fs.existsSync(src)) return;
   const stat = fs.statSync(src);
   if (stat.isDirectory()) {
+    const base = path.basename(src);
+    if (['Builds', 'node_modules', '.git', 'dist-apk', 'android'].includes(base)) return;
     if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
     for (const child of fs.readdirSync(src)) {
       copyRecursive(path.join(src, child), path.join(dest, child));
     }
   } else {
+    const ext = path.extname(src).toLowerCase();
+    if (['.exe', '.dll', '.pdb', '.so', '.dylib'].includes(ext)) return;
+    if (stat.size > 25 * 1024 * 1024) return; // Skip files over 25MB exceeding Vercel limits
     fs.copyFileSync(src, dest);
   }
 }
 
 // Copy root static folders
-const folders = ['public', 'assets', 'src', 'favicons', 'js', 'css', 'styles', 'Builds', 'Canada'];
+const folders = ['public', 'assets', 'src', 'favicons', 'js', 'css', 'styles', 'Canada'];
 for (const folder of folders) {
   const srcPath = path.resolve(folder);
   if (fs.existsSync(srcPath)) {

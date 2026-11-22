@@ -1145,7 +1145,16 @@ function setupGlobalDropNavigation() {
       globalDropContainer.style.removeProperty('display');
       globalDropContainer.style.setProperty('display', 'flex', 'important');
     }
-    if (fab) fab.style.display = 'flex';
+    const settingsModal = document.getElementById('settingsModal');
+    const isSettingsOpen = document.body.classList.contains('settings-open') || 
+                           (settingsModal && (settingsModal.style.display === 'flex' || settingsModal.classList.contains('open')));
+    if (fab && !isSettingsOpen) {
+      fab.style.removeProperty('display');
+      fab.classList.remove('hidden');
+    } else if (fab) {
+      fab.style.setProperty('display', 'none', 'important');
+      fab.classList.add('hidden');
+    }
 
     document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
       btn.classList.toggle('active', btn.id === 'nav-global-drop' || btn.dataset.nav === 'global-drop');
@@ -1161,7 +1170,10 @@ function setupGlobalDropNavigation() {
       globalDropContainer.style.removeProperty('display');
       globalDropContainer.style.setProperty('display', 'none', 'important');
     }
-    if (fab) fab.style.display = 'none';
+    if (fab) {
+      fab.style.setProperty('display', 'none', 'important');
+      fab.classList.add('hidden');
+    }
   };
 
   navBtn?.addEventListener('click', () => {

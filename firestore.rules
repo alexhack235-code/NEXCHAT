@@ -28,6 +28,43 @@ service cloud.firestore {
     //   - blockedUsers / mutedUsers / archivedChats: list of strings (max 500 items)
     //   - ipAddresses / knownIps / recentIps / clientIps / detectedIps / verifiedIps: list of strings (max 4 IP addresses, each max 45 chars)
     //   - ipAddress / lastIp: string (optional, max 45 chars)
+    // Subcollection: preferences/{prefId}
+    //   - theme / language / wallpaper / category / key: string (optional)
+    //   - fontSize: string or number (optional)
+    //   - soundEffects / soundEnabled / notificationsEnabled / autoDownload / readReceipts: bool (optional)
+    //   - typingIndicator / stealthMode / airGap / active / enabled: bool (optional)
+    //   - value: any primitive or map (optional)
+    //   - options / customPreferences: map (optional)
+    //   - createdAt / updatedAt / timestamp: timestamp/number (optional)
+    // Subcollection: settings/{settingId}
+    //   - category / type / name / key: string (optional)
+    //   - enabled / active: bool (optional)
+    //   - value / options / preferences / settings: map or primitive (optional)
+    //   - createdAt / updatedAt / timestamp: timestamp/number (optional)
+    // Subcollection: bookmarks/{bookmarkId}
+    //   - targetId / itemId / dropId / messageId / reelId / postId: string (optional, max 128 chars)
+    //   - targetType / itemType / type: string (optional, max 50 chars)
+    //   - title / snippet / content / text: string (optional, max 200-2000 chars)
+    //   - url / mediaUrl / thumbnailUrl: string URL (optional, max 2048 chars)
+    //   - authorId / authorName / authorUsername: string (optional)
+    //   - tags: list of strings (optional, max 20 items)
+    //   - createdAt / timestamp: timestamp/number (optional, immutable)
+    // Subcollection: notifications/{notifId}
+    //   - type: string (optional, e.g. 'message', 'like', 'reply', 'mention', 'system', max 50 chars)
+    //   - title: string (optional, max 200 chars)
+    //   - body / message / content / text: string (optional, max 2000 chars)
+    //   - from / senderId / authorId: string (optional, sender UID)
+    //   - to / recipientId / userId / uid: string (optional, recipient UID)
+    //   - senderName / senderUsername / senderAvatar / senderPhoto: string (optional)
+    //   - targetId / targetUrl / dropId / chatId / link: string (optional)
+    //   - read / isRead: bool (optional)
+    //   - readAt / createdAt / timestamp: timestamp/number (optional)
+    // Subcollection: contacts/{contactId}
+    //   - contactUid / uid / name / displayName / email / phone: string (optional)
+    // Subcollection: sessions/{sessionId}
+    //   - sessionId / status / ipAddress: string (optional)
+    //   - deviceInfo: map (optional)
+    //   - createdAt / lastActive: timestamp/number (optional)
     // Subcollection: linkedDevices/{deviceId}
     //   - sessionId: string (optional, max 128 chars)
     //   - deviceId: string (optional, max 128 chars)
@@ -97,6 +134,26 @@ service cloud.firestore {
     // Fields:
     //   - participants / members / userIds: list of strings (room member UIDs)
     //   - creatorId / userId: string (creator UID, immutable)
+    // Subcollection: messages/{messageId}
+    //   - from / senderId / userId / authorId: string (required sender UID, immutable)
+    //   - to / receiverId / recipientId: string (optional recipient UID)
+    //   - text / content / message: string (optional, max 10000 chars)
+    //   - chatId: string (optional, matches parent chatId)
+    //   - senderName / senderUsername: string (optional, max 100 chars)
+    //   - senderAvatar / senderProfilePic / mediaUrl / attachmentUrl / imageUrl: string URL (optional)
+    //   - attachmentName / type / status / clientMsgId / replyToId / chatType: string (optional)
+    //   - reactions: list or map (optional, max 100 items)
+    //   - deletedFor: list of strings (optional, max 500 items)
+    //   - read / delivered / isEdited / edited / isEncrypted / isDeleted / deletedForEveryone: bool (optional)
+    //   - time / timestamp / createdAt / readAt / deliveredAt / deletedAt: timestamp/number (optional)
+    //   - envelope / replyTo / attachment: map (optional)
+    // Subcollection: typing/{userId}
+    //   - isTyping: bool (optional)
+    //   - updatedAt / timestamp: timestamp/number (optional)
+    // Subcollection: participants/{participantId}
+    //   - userId: string (required)
+    //   - role / status: string (optional)
+    //   - joinedAt: timestamp/number (optional)
     // Subcollection: threads/{threadId}
     //   - creatorId / userId: string (thread starter UID, immutable)
     // Subcollection: threads/{threadId}/messages/{msgId}
@@ -212,6 +269,22 @@ service cloud.firestore {
     //   - pinned: bool (optional)
     //   - createdAt: timestamp (optional, immutable)
     //   - createdAtMs: int/number (optional)
+    // Subcollection: comments/{commentId}
+    //   - authorId / userId: string (required commenter UID, immutable)
+    //   - authorName / authorHandle / authorPhoto: string (optional)
+    //   - text / content / message: string (required, 1 to 2000 chars)
+    //   - likes / signals / likesCount / signalsCount: interaction tracking
+    //   - createdAt / createdAtMs / timestamp: timestamp/number (optional, immutable)
+    // Subcollection: reactions/{reactionId}
+    //   - userId: string (required user UID)
+    //   - reaction / emoji / type: string (required, 1 to 50 chars)
+    //   - createdAt / timestamp: timestamp/number (optional)
+    // Subcollection: bookmarks/{bookmarkId}
+    //   - userId / uid: string (required bookmark owner UID)
+    //   - dropId: string (optional, drop UID)
+    //   - notes: string (optional, max 500 chars)
+    //   - tags: list (optional, max 10 items)
+    //   - createdAt / timestamp: timestamp/number (optional)
     // Subcollection: replies/{replyId}
     //   - authorId / userId: string (required, replier UID, immutable)
     //   - authorName / authorHandle / authorPhoto: string (optional)
@@ -846,6 +919,308 @@ service cloud.firestore {
              (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
              isValidOptionalString('ipAddress', 0, 45) &&
              isValidOptionalString('extensionName', 0, 128);
+    }
+
+    // User Preference Subcollection Validator (/users/{uid}/preferences/{prefId})
+    function isValidUserPreference(data) {
+      return isValidOptionalString('theme', 0, 50) &&
+             isValidOptionalString('language', 0, 20) &&
+             isValidOptionalString('wallpaper', 0, 2048) &&
+             isValidOptionalString('id', 0, 100) &&
+             isValidOptionalString('prefId', 0, 100) &&
+             isValidOptionalString('key', 0, 100) &&
+             isValidOptionalString('category', 0, 100) &&
+             (!('fontSize' in data) || data.fontSize == null || data.fontSize is string || data.fontSize is number) &&
+             (!('soundEffects' in data) || data.soundEffects is bool) &&
+             (!('soundEnabled' in data) || data.soundEnabled is bool) &&
+             (!('sound' in data) || data.sound is bool) &&
+             (!('notificationsEnabled' in data) || data.notificationsEnabled is bool) &&
+             (!('autoDownload' in data) || data.autoDownload is bool) &&
+             (!('readReceipts' in data) || data.readReceipts is bool) &&
+             (!('typingIndicator' in data) || data.typingIndicator is bool) &&
+             (!('stealthMode' in data) || data.stealthMode is bool) &&
+             (!('airGap' in data) || data.airGap is bool) &&
+             (!('active' in data) || data.active is bool) &&
+             (!('enabled' in data) || data.enabled is bool) &&
+             (!('value' in data) || data.value == null || data.value is string || data.value is number || data.value is bool || data.value is map || data.value is list) &&
+             (!('options' in data) || data.options == null || data.options is map) &&
+             (!('customPreferences' in data) || data.customPreferences == null || data.customPreferences is map) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('uid' in data) || data.uid == request.auth.uid) &&
+             (!('userId' in data) || data.userId == request.auth.uid) &&
+             (!('isAdmin' in data) || data.isAdmin == false || isSuperAdmin()) &&
+             (!('role' in data) || data.role in ['user', 'member', 'client', 'guest'] || isSuperAdmin());
+    }
+
+    // User Setting Subcollection Validator (/users/{uid}/settings/{settingId})
+    function isValidUserSetting(data) {
+      return isValidOptionalString('id', 0, 100) &&
+             isValidOptionalString('settingId', 0, 100) &&
+             isValidOptionalString('category', 0, 100) &&
+             isValidOptionalString('type', 0, 100) &&
+             isValidOptionalString('name', 0, 100) &&
+             isValidOptionalString('key', 0, 100) &&
+             (!('enabled' in data) || data.enabled is bool) &&
+             (!('active' in data) || data.active is bool) &&
+             (!('value' in data) || data.value == null || data.value is string || data.value is number || data.value is bool || data.value is map || data.value is list) &&
+             (!('options' in data) || data.options == null || data.options is map) &&
+             (!('preferences' in data) || data.preferences == null || data.preferences is map) &&
+             (!('settings' in data) || data.settings == null || data.settings is map) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('uid' in data) || data.uid == request.auth.uid) &&
+             (!('userId' in data) || data.userId == request.auth.uid) &&
+             (!('isAdmin' in data) || data.isAdmin == false || isSuperAdmin()) &&
+             (!('role' in data) || data.role in ['user', 'member', 'client', 'guest'] || isSuperAdmin());
+    }
+
+    // User Bookmark Subcollection Validator (/users/{uid}/bookmarks/{bookmarkId})
+    function isValidUserBookmark(data) {
+      return isValidOptionalString('id', 0, 128) &&
+             isValidOptionalString('bookmarkId', 0, 128) &&
+             isValidOptionalString('targetId', 0, 128) &&
+             isValidOptionalString('itemId', 0, 128) &&
+             isValidOptionalString('dropId', 0, 128) &&
+             isValidOptionalString('messageId', 0, 128) &&
+             isValidOptionalString('reelId', 0, 128) &&
+             isValidOptionalString('postId', 0, 128) &&
+             isValidOptionalString('targetType', 0, 50) &&
+             isValidOptionalString('itemType', 0, 50) &&
+             isValidOptionalString('type', 0, 50) &&
+             isValidOptionalString('title', 0, 200) &&
+             isValidOptionalString('content', 0, 2000) &&
+             isValidOptionalString('snippet', 0, 2000) &&
+             isValidOptionalString('text', 0, 2000) &&
+             isValidOptionalUrl('url') &&
+             isValidOptionalUrl('mediaUrl') &&
+             isValidOptionalUrl('thumbnailUrl') &&
+             isValidOptionalString('authorId', 0, 128) &&
+             isValidOptionalString('authorName', 0, 100) &&
+             isValidOptionalString('authorUsername', 0, 100) &&
+             isValidOptionalList('tags', 20) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('uid' in data) || data.uid == request.auth.uid) &&
+             (!('userId' in data) || data.userId == request.auth.uid);
+    }
+
+    // User Notification Subcollection Validator (/users/{uid}/notifications/{notifId})
+    function isValidUserNotification(data) {
+      return isValidOptionalString('id', 0, 128) &&
+             isValidOptionalString('notifId', 0, 128) &&
+             isValidOptionalString('type', 0, 50) &&
+             isValidOptionalString('title', 0, 200) &&
+             isValidOptionalString('body', 0, 2000) &&
+             isValidOptionalString('message', 0, 2000) &&
+             isValidOptionalString('content', 0, 2000) &&
+             isValidOptionalString('text', 0, 2000) &&
+             isValidOptionalString('from', 0, 128) &&
+             isValidOptionalString('senderId', 0, 128) &&
+             isValidOptionalString('authorId', 0, 128) &&
+             isValidOptionalString('to', 0, 128) &&
+             isValidOptionalString('recipientId', 0, 128) &&
+             isValidOptionalString('userId', 0, 128) &&
+             isValidOptionalString('uid', 0, 128) &&
+             isValidOptionalString('senderName', 0, 100) &&
+             isValidOptionalString('senderUsername', 0, 100) &&
+             isValidOptionalUrl('senderAvatar') &&
+             isValidOptionalUrl('senderPhoto') &&
+             isValidOptionalString('targetId', 0, 2048) &&
+             isValidOptionalString('targetUrl', 0, 2048) &&
+             isValidOptionalString('dropId', 0, 128) &&
+             isValidOptionalString('chatId', 0, 128) &&
+             isValidOptionalString('link', 0, 2048) &&
+             (!('read' in data) || data.read is bool) &&
+             (!('isRead' in data) || data.isRead is bool) &&
+             (!('readAt' in data) || isValidTimestampOrNumber(data.readAt)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('time' in data) || isValidTimestampOrNumber(data.time)) &&
+             (!('data' in data) || data.data == null || data.data is map);
+    }
+
+    // User Subcollection Generic Document Validator (Anti-Privilege Escalation & Scope Protection)
+    function isValidUserSubcollectionDoc(data, uid) {
+      return (!('isAdmin' in data) || data.isAdmin == false || isSuperAdmin()) &&
+             (!('isSuperAdmin' in data) || data.isSuperAdmin == false || isSuperAdmin()) &&
+             (!('role' in data) || data.role in ['user', 'member', 'client', 'guest'] || isSuperAdmin()) &&
+             (!('banned' in data) || data.banned == false || isSuperAdmin()) &&
+             (!('uid' in data) || data.uid == uid) &&
+             (!('userId' in data) || data.userId == uid);
+    }
+
+    // Chat Message Participant Helpers
+    function isChatMessageSender(data) {
+      return ('from' in data && request.auth.uid == data.from) ||
+             ('senderId' in data && request.auth.uid == data.senderId) ||
+             ('userId' in data && request.auth.uid == data.userId) ||
+             ('authorId' in data && request.auth.uid == data.authorId);
+    }
+
+    function isChatMessageRecipient(data) {
+      return ('to' in data && request.auth.uid == data.to) ||
+             ('receiverId' in data && request.auth.uid == data.receiverId) ||
+             ('recipientId' in data && request.auth.uid == data.recipientId);
+    }
+
+    function isChatMessageParticipant(data) {
+      return isChatMessageSender(data) || isChatMessageRecipient(data);
+    }
+
+    // Chat Message Create Validator (/chats/{chatId}/messages/{messageId})
+    function isValidChatMessageCreate(data, chatId) {
+      return isChatMessageSender(data) &&
+             (!('chatId' in data) || data.chatId == chatId) &&
+             isValidOptionalString('text', 0, 10000) &&
+             isValidOptionalString('content', 0, 10000) &&
+             isValidOptionalString('message', 0, 10000) &&
+             isValidOptionalString('senderName', 0, 100) &&
+             isValidOptionalString('senderUsername', 0, 100) &&
+             isValidOptionalUrl('senderAvatar') &&
+             isValidOptionalUrl('senderProfilePic') &&
+             isValidOptionalUrl('mediaUrl') &&
+             isValidOptionalUrl('attachmentUrl') &&
+             isValidOptionalUrl('imageUrl') &&
+             isValidOptionalString('attachmentName', 0, 255) &&
+             isValidOptionalString('type', 0, 50) &&
+             isValidOptionalString('status', 0, 50) &&
+             isValidOptionalString('clientMsgId', 0, 128) &&
+             isValidOptionalString('replyToId', 0, 128) &&
+             isValidOptionalString('chatType', 0, 50) &&
+             isValidOptionalReactions('reactions') &&
+             isValidOptionalList('deletedFor', 500) &&
+             (!('read' in data) || data.read is bool) &&
+             (!('delivered' in data) || data.delivered is bool) &&
+             (!('isEdited' in data) || data.isEdited is bool) &&
+             (!('edited' in data) || data.edited is bool) &&
+             (!('isEncrypted' in data) || data.isEncrypted is bool) &&
+             (!('isDeleted' in data) || data.isDeleted is bool) &&
+             (!('deletedForEveryone' in data) || data.deletedForEveryone is bool) &&
+             (!('time' in data) || isValidTimestampOrNumber(data.time)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('deletedAt' in data) || isValidTimestampOrNumber(data.deletedAt)) &&
+             (!('readAt' in data) || isValidTimestampOrNumber(data.readAt)) &&
+             (!('deliveredAt' in data) || isValidTimestampOrNumber(data.deliveredAt)) &&
+             (!('ttl' in data) || data.ttl is int || data.ttl is number) &&
+             (!('burnTimeout' in data) || data.burnTimeout is int || data.burnTimeout is number) &&
+             (!('attachment' in data) || data.attachment == null || data.attachment is map || data.attachment is string) &&
+             (!('envelope' in data) || data.envelope == null || data.envelope is map) &&
+             (!('replyTo' in data) || data.replyTo == null || data.replyTo is map);
+    }
+
+    // Chat Message Update Validator (/chats/{chatId}/messages/{messageId})
+    function isValidChatMessageUpdate(data, prev) {
+      return (
+        // 1. Sender editing message text/content/reactions
+        (
+          isChatMessageSender(prev) &&
+          areImmutableFieldsUnchanged(['from', 'senderId', 'userId', 'authorId', 'chatId', 'createdAt', 'timestamp', 'time']) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalString('message', 0, 10000) &&
+          (!('isEdited' in data) || data.isEdited is bool) &&
+          (!('edited' in data) || data.edited is bool) &&
+          (!('editedAt' in data) || isValidTimestampOrNumber(data.editedAt)) &&
+          isValidOptionalReactions('reactions') &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        // 2. Room participant / recipient updating status ('read', 'delivered'), timestamps, reactions, deletedFor
+        (
+          data.diff(prev).affectedKeys().hasOnly(['status', 'read', 'readAt', 'readBy', 'delivered', 'deliveredAt', 'reactions', 'deletedFor']) &&
+          areImmutableFieldsUnchanged(['from', 'senderId', 'userId', 'authorId', 'chatId', 'createdAt', 'timestamp', 'time']) &&
+          isValidOptionalString('status', 0, 50) &&
+          (!('read' in data) || data.read is bool) &&
+          (!('delivered' in data) || data.delivered is bool) &&
+          (!('readAt' in data) || isValidTimestampOrNumber(data.readAt)) &&
+          (!('deliveredAt' in data) || isValidTimestampOrNumber(data.deliveredAt)) &&
+          isValidOptionalReactions('reactions') &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        // 3. Tombstone deletion by sender or participant
+        (
+          areImmutableFieldsUnchanged(['from', 'senderId', 'userId', 'authorId', 'chatId', 'createdAt', 'timestamp', 'time']) &&
+          (
+            data.diff(prev).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
+            (
+              data.diff(prev).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content', 'message']) &&
+              (('isDeleted' in data && data.isDeleted == true) || ('deletedForEveryone' in data && data.deletedForEveryone == true))
+            )
+          ) &&
+          (!('isDeleted' in data) || data.isDeleted is bool) &&
+          (!('deletedForEveryone' in data) || data.deletedForEveryone is bool) &&
+          (!('deletedAt' in data) || isValidTimestampOrNumber(data.deletedAt)) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalString('message', 0, 10000) &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        isSuperAdmin()
+      );
+    }
+
+    // Global Drop Comment Validator (/global_drops/{dropId}/comments/{commentId})
+    function isValidDropComment(data) {
+      return (
+               (isAuthenticated() && (
+                 ('authorId' in data && data.authorId == request.auth.uid) ||
+                 ('userId' in data && data.userId == request.auth.uid)
+               )) ||
+               (!isAuthenticated() && (
+                 ('authorId' in data && data.authorId is string && data.authorId.size() > 0 && data.authorId.size() <= 128) ||
+                 ('userId' in data && data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128)
+               )) ||
+               isSuperAdmin()
+             ) &&
+             (
+               validStringLength('text', 1, 2000) ||
+               validStringLength('content', 1, 2000) ||
+               validStringLength('message', 1, 2000)
+             ) &&
+             isValidOptionalString('authorName', 0, 100) &&
+             isValidOptionalString('authorHandle', 0, 100) &&
+             isValidOptionalUrl('authorPhoto') &&
+             isValidOptionalString('dropId', 0, 128) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('createdAtMs' in data) || data.createdAtMs is int || data.createdAtMs is number) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('likesCount' in data) || (data.likesCount is number && data.likesCount >= 0)) &&
+             (!('signalsCount' in data) || (data.signalsCount is number && data.signalsCount >= 0)) &&
+             isValidOptionalList('likes', 1000) &&
+             isValidOptionalList('signals', 1000);
+    }
+
+    // Global Drop Reaction Validator (/global_drops/{dropId}/reactions/{reactionId})
+    function isValidDropReaction(data) {
+      return (
+               ('reaction' in data && data.reaction is string && data.reaction.size() >= 1 && data.reaction.size() <= 50) ||
+               ('emoji' in data && data.emoji is string && data.emoji.size() >= 1 && data.emoji.size() <= 50) ||
+               ('type' in data && data.type is string && data.type.size() >= 1 && data.type.size() <= 50)
+             ) &&
+             (
+               (isAuthenticated() && (!('userId' in data) || data.userId == request.auth.uid)) ||
+               (!isAuthenticated() && (!('userId' in data) || (data.userId is string && data.userId.size() <= 128))) ||
+               isSuperAdmin()
+             ) &&
+             isValidOptionalString('dropId', 0, 128) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp));
+    }
+
+    // Global Drop Bookmark Validator (/global_drops/{dropId}/bookmarks/{bookmarkId})
+    function isValidDropBookmark(data) {
+      return (
+               (!('userId' in data) || data.userId == request.auth.uid) &&
+               (!('uid' in data) || data.uid == request.auth.uid)
+             ) &&
+             isValidOptionalString('dropId', 0, 128) &&
+             isValidOptionalString('notes', 0, 500) &&
+             isValidOptionalList('tags', 10) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp));
     }
 
     // Direct Message Validator: Supports either from or senderId for sender, and either to or receiverId for recipient
@@ -1626,17 +2001,50 @@ service cloud.firestore {
       // Account deletion restricted to SuperAdmin
       allow delete: if isSuperAdmin();
 
-      // Linked Devices subcollection (Multi-device pairing with standard fields & IP limits)
+      // 1. User Preferences subcollection (/users/{uid}/preferences/{prefId})
+      match /preferences/{prefId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidUserPreference(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['id', 'prefId', 'createdAt']) &&
+                         isValidUserPreference(request.resource.data);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // 2. User Settings subcollection (/users/{uid}/settings/{settingId})
+      match /settings/{settingId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidUserSetting(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['id', 'settingId', 'createdAt']) &&
+                         isValidUserSetting(request.resource.data);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // 3. Linked Devices & Devices subcollections (/users/{uid}/linkedDevices/{deviceId})
       match /linkedDevices/{deviceId} {
         allow read: if isOwner(uid) || isSuperAdmin();
         allow create: if (isOwner(uid) || isSuperAdmin()) &&
                          isValidLinkedDevice(request.resource.data);
         allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['deviceId', 'linkedAt', 'createdAt']) &&
                          isValidLinkedDevice(request.resource.data);
         allow delete: if isOwner(uid) || isSuperAdmin();
       }
 
-      // Extension Hub Authorized Extensions subcollection (Owner-only with strict schema validation)
+      match /devices/{deviceId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidLinkedDevice(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['deviceId', 'linkedAt', 'createdAt']) &&
+                         isValidLinkedDevice(request.resource.data);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // 4. Extension Hub Authorized Extensions subcollection (/users/{uid}/authorized_extensions/{extensionId})
       match /authorized_extensions/{extensionId} {
         allow read: if isOwner(uid) || isSuperAdmin();
         allow create: if (isOwner(uid) || isSuperAdmin()) &&
@@ -1647,7 +2055,39 @@ service cloud.firestore {
         allow delete: if isOwner(uid) || isSuperAdmin();
       }
 
-      // User Usage & Storage Intelligence Metrics Subcollection
+      // 5. Bookmarks subcollection (/users/{uid}/bookmarks/{bookmarkId})
+      match /bookmarks/{bookmarkId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidUserBookmark(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['id', 'bookmarkId', 'targetId', 'targetType', 'createdAt']) &&
+                         isValidUserBookmark(request.resource.data);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // 6. Notifications subcollection (/users/{uid}/notifications/{notifId})
+      match /notifications/{notifId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (
+          isOwner(uid) ||
+          (
+            isAuthenticated() &&
+            (
+              ('from' in request.resource.data && request.resource.data.from == request.auth.uid) ||
+              ('senderId' in request.resource.data && request.resource.data.senderId == request.auth.uid) ||
+              ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid)
+            )
+          ) ||
+          isSuperAdmin()
+        ) && isValidUserNotification(request.resource.data);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['from', 'senderId', 'authorId', 'createdAt', 'timestamp']) &&
+                         isValidUserNotification(request.resource.data);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // 7. User Usage & Storage Intelligence Metrics Subcollections
       match /usage_metrics/{metricId} {
         allow read: if isOwner(uid) || isSuperAdmin();
         allow create, update: if (isOwner(uid) || isSuperAdmin()) &&
@@ -1662,7 +2102,7 @@ service cloud.firestore {
         allow delete: if isOwner(uid) || isSuperAdmin();
       }
 
-      // User Scheduled Messages Queue Subcollection
+      // 8. User Scheduled Messages Queue Subcollections
       match /scheduled_messages/{messageId} {
         allow read: if isOwner(uid) || isSuperAdmin();
         allow create: if (isOwner(uid) || isSuperAdmin()) &&
@@ -1678,6 +2118,48 @@ service cloud.firestore {
                          isValidScheduledMessageCreate(request.resource.data);
         allow update: if (isOwner(uid) || isSuperAdmin()) &&
                          isValidScheduledMessageUpdate(request.resource.data, resource.data);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // 9. Contacts, Sessions & Activity subcollections
+      match /contacts/{contactId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidUserSubcollectionDoc(request.resource.data, uid);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['createdAt']) &&
+                         isValidUserSubcollectionDoc(request.resource.data, uid);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      match /sessions/{sessionId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidUserSubcollectionDoc(request.resource.data, uid);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['createdAt']) &&
+                         isValidUserSubcollectionDoc(request.resource.data, uid);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      match /activity/{activityId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidUserSubcollectionDoc(request.resource.data, uid);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['createdAt']) &&
+                         isValidUserSubcollectionDoc(request.resource.data, uid);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // 10. Fallback Guarded Match for any additional subcollections under /users/{uid}/
+      match /{subcollection}/{docId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidUserSubcollectionDoc(request.resource.data, uid);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['createdAt', 'uid', 'userId']) &&
+                         isValidUserSubcollectionDoc(request.resource.data, uid);
         allow delete: if isOwner(uid) || isSuperAdmin();
       }
     }
@@ -1738,6 +2220,52 @@ service cloud.firestore {
         resource.data.userId == request.auth.uid ||
         isSuperAdmin()
       );
+
+      // Direct Chat Room Messages Subcollection (/chats/{chatId}/messages/{messageId})
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && (
+          isChatParticipant(chatId) ||
+          isChatMessageParticipant(resource.data) ||
+          isSuperAdmin()
+        );
+
+        allow create: if isAuthenticated() &&
+                         isChatParticipant(chatId) &&
+                         isValidChatMessageCreate(request.resource.data, chatId);
+
+        allow update: if isAuthenticated() &&
+                         isChatParticipant(chatId) &&
+                         isValidChatMessageUpdate(request.resource.data, resource.data);
+
+        allow delete: if isAuthenticated() && (
+          (isChatParticipant(chatId) && isChatMessageSender(resource.data)) ||
+          isSuperAdmin()
+        );
+      }
+
+      // Chat Typing Status Subcollection (/chats/{chatId}/typing/{userId})
+      match /typing/{userId} {
+        allow read: if isAuthenticated() && (
+          isChatParticipant(chatId) ||
+          isSuperAdmin()
+        );
+        allow write: if isAuthenticated() && (
+          (isChatParticipant(chatId) && (userId == request.auth.uid || isOwner(userId))) ||
+          isSuperAdmin()
+        );
+      }
+
+      // Chat Participants Subcollection (/chats/{chatId}/participants/{participantId})
+      match /participants/{participantId} {
+        allow read: if isAuthenticated() && (
+          isChatParticipant(chatId) ||
+          isSuperAdmin()
+        );
+        allow write: if isAuthenticated() && (
+          (isChatParticipant(chatId) && (participantId == request.auth.uid || isOwner(participantId))) ||
+          isSuperAdmin()
+        );
+      }
 
       match /threads/{threadId} {
         allow read: if isAuthenticated() && (
@@ -2519,7 +3047,258 @@ service cloud.firestore {
         (resource.data.expiresAtMs is int && resource.data.expiresAtMs <= request.time.toMillis())
       );
 
+      // Subcollection: comments/{commentId}
+      match /comments/{commentId} {
+        allow read: if true;
+
+        allow create: if (
+          (isAuthenticated() && (
+            ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid) ||
+            ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid)
+          )) ||
+          (!isAuthenticated() && (
+            ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128) ||
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128)
+          )) ||
+          isSuperAdmin()
+        ) && isValidDropComment(request.resource.data);
+
+        allow update: if (
+          (
+            isAuthenticated() &&
+            (
+              ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+              ('userId' in resource.data && isOwner(resource.data.userId))
+            ) &&
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+            (isValidOptionalString('text', 0, 2000) || isValidOptionalString('content', 0, 2000))
+          ) ||
+          (
+            !isAuthenticated() &&
+            (
+              ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId) ||
+              ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId)
+            ) &&
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+            (isValidOptionalString('text', 0, 2000) || isValidOptionalString('content', 0, 2000))
+          ) ||
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'signals', 'signalsCount']) &&
+            isValidOptionalList('likes', 1000) &&
+            isValidOptionalList('signals', 1000) &&
+            (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+            (!('signalsCount' in request.resource.data) || (request.resource.data.signalsCount is number && request.resource.data.signalsCount >= 0))
+          ) ||
+          isSuperAdmin()
+        );
+
+        allow delete: if (
+          (isAuthenticated() && (
+            ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+            ('userId' in resource.data && isOwner(resource.data.userId))
+          )) ||
+          (!isAuthenticated() && (
+            ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+            ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*'))
+          )) ||
+          isSuperAdmin()
+        );
+      }
+
+      // Subcollection: reactions/{reactionId}
+      match /reactions/{reactionId} {
+        allow read: if true;
+
+        allow create: if (
+          (isAuthenticated() && (
+            (!('userId' in request.resource.data) || request.resource.data.userId == request.auth.uid) ||
+            reactionId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            reactionId.size() <= 128
+          )) ||
+          isSuperAdmin()
+        ) && isValidDropReaction(request.resource.data);
+
+        allow update: if (
+          (isAuthenticated() && (
+            resource.data.userId == request.auth.uid ||
+            reactionId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            reactionId.matches('^guest_.*')
+          )) ||
+          isSuperAdmin()
+        ) && isValidDropReaction(request.resource.data);
+
+        allow delete: if (
+          (isAuthenticated() && (
+            resource.data.userId == request.auth.uid ||
+            reactionId == request.auth.uid ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            reactionId.matches('^guest_.*')
+          ))
+        );
+      }
+
+      // Subcollection: bookmarks/{bookmarkId}
+      match /bookmarks/{bookmarkId} {
+        allow read: if isAuthenticated() && (
+          (resource != null && 'userId' in resource.data && resource.data.userId == request.auth.uid) ||
+          bookmarkId == request.auth.uid ||
+          isSuperAdmin()
+        );
+
+        allow create: if isAuthenticated() && (
+          (!('userId' in request.resource.data) || request.resource.data.userId == request.auth.uid) ||
+          bookmarkId == request.auth.uid
+        ) && isValidDropBookmark(request.resource.data);
+
+        allow update: if isAuthenticated() && (
+          resource.data.userId == request.auth.uid ||
+          bookmarkId == request.auth.uid ||
+          isSuperAdmin()
+        ) && isValidDropBookmark(request.resource.data);
+
+        allow delete: if isAuthenticated() && (
+          resource.data.userId == request.auth.uid ||
+          bookmarkId == request.auth.uid ||
+          isSuperAdmin()
+        );
+      }
+
       // Subcollection: replies/{replyId}
+      // Subcollection: comments/{commentId}
+      match /comments/{commentId} {
+        allow read: if true;
+
+        allow create: if (
+          (isAuthenticated() && (
+            ('authorId' in request.resource.data && request.resource.data.authorId == request.auth.uid) ||
+            ('userId' in request.resource.data && request.resource.data.userId == request.auth.uid)
+          )) ||
+          (!isAuthenticated() && (
+            ('authorId' in request.resource.data && request.resource.data.authorId is string && request.resource.data.authorId.size() > 0 && request.resource.data.authorId.size() <= 128) ||
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() > 0 && request.resource.data.userId.size() <= 128)
+          )) ||
+          isSuperAdmin()
+        ) && isValidDropComment(request.resource.data);
+
+        allow update: if (
+          (
+            isAuthenticated() &&
+            (
+              ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+              ('userId' in resource.data && isOwner(resource.data.userId))
+            ) &&
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+            (isValidOptionalString('text', 0, 2000) || isValidOptionalString('content', 0, 2000))
+          ) ||
+          (
+            !isAuthenticated() &&
+            (
+              ('authorId' in resource.data && 'authorId' in request.resource.data && request.resource.data.authorId == resource.data.authorId) ||
+              ('userId' in resource.data && 'userId' in request.resource.data && request.resource.data.userId == resource.data.userId)
+            ) &&
+            areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+            (isValidOptionalString('text', 0, 2000) || isValidOptionalString('content', 0, 2000))
+          ) ||
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'signals', 'signalsCount']) &&
+            isValidOptionalList('likes', 1000) &&
+            isValidOptionalList('signals', 1000) &&
+            (!('likesCount' in request.resource.data) || (request.resource.data.likesCount is number && request.resource.data.likesCount >= 0)) &&
+            (!('signalsCount' in request.resource.data) || (request.resource.data.signalsCount is number && request.resource.data.signalsCount >= 0))
+          ) ||
+          isSuperAdmin()
+        );
+
+        allow delete: if (
+          (isAuthenticated() && (
+            ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
+            ('userId' in resource.data && isOwner(resource.data.userId))
+          )) ||
+          (!isAuthenticated() && (
+            ('authorId' in resource.data && resource.data.authorId is string && resource.data.authorId.matches('^guest_.*')) ||
+            ('userId' in resource.data && resource.data.userId is string && resource.data.userId.matches('^guest_.*'))
+          )) ||
+          isSuperAdmin()
+        );
+      }
+
+      // Subcollection: reactions/{reactionId}
+      match /reactions/{reactionId} {
+        allow read: if true;
+
+        allow create: if (
+          (isAuthenticated() && (
+            (!('userId' in request.resource.data) || request.resource.data.userId == request.auth.uid) ||
+            reactionId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            ('userId' in request.resource.data && request.resource.data.userId is string && request.resource.data.userId.size() <= 128) ||
+            reactionId.size() <= 128
+          )) ||
+          isSuperAdmin()
+        ) && isValidDropReaction(request.resource.data);
+
+        allow update: if (
+          (isAuthenticated() && (
+            resource.data.userId == request.auth.uid ||
+            reactionId == request.auth.uid
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            reactionId.matches('^guest_.*')
+          )) ||
+          isSuperAdmin()
+        ) && isValidDropReaction(request.resource.data);
+
+        allow delete: if (
+          (isAuthenticated() && (
+            resource.data.userId == request.auth.uid ||
+            reactionId == request.auth.uid ||
+            isSuperAdmin()
+          )) ||
+          (!isAuthenticated() && (
+            (resource.data.userId is string && resource.data.userId.matches('^guest_.*')) ||
+            reactionId.matches('^guest_.*')
+          ))
+        );
+      }
+
+      // Subcollection: bookmarks/{bookmarkId}
+      match /bookmarks/{bookmarkId} {
+        allow read: if isAuthenticated() && (
+          (resource != null && 'userId' in resource.data && resource.data.userId == request.auth.uid) ||
+          bookmarkId == request.auth.uid ||
+          isSuperAdmin()
+        );
+
+        allow create: if isAuthenticated() && (
+          (!('userId' in request.resource.data) || request.resource.data.userId == request.auth.uid) ||
+          bookmarkId == request.auth.uid
+        ) && isValidDropBookmark(request.resource.data);
+
+        allow update: if isAuthenticated() && (
+          resource.data.userId == request.auth.uid ||
+          bookmarkId == request.auth.uid ||
+          isSuperAdmin()
+        ) && isValidDropBookmark(request.resource.data);
+
+        allow delete: if isAuthenticated() && (
+          resource.data.userId == request.auth.uid ||
+          bookmarkId == request.auth.uid ||
+          isSuperAdmin()
+        );
+      }
+
+      
       match /replies/{replyId} {
         allow read: if true;
 
@@ -3854,47 +4633,80 @@ service cloud.firestore {
     }
 
     match /userSettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /userPreferences/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserPreference(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserPreference(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /themeSettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserPreference(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserPreference(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /notificationSettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /privacySettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /securitySettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /accountSettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /profileSettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /chatSettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /mediaSettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /callSettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /groupSettings/{groupId} {
@@ -3903,7 +4715,10 @@ service cloud.firestore {
     }
 
     match /marketplaceSettings/{uid} {
-      allow read, write: if isOwner(uid) || isSuperAdmin();
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow create: if (isOwner(uid) || isSuperAdmin()) && isValidUserSetting(request.resource.data);
+      allow update: if (isOwner(uid) || isSuperAdmin()) && areImmutableFieldsUnchanged(['createdAt']) && isValidUserSetting(request.resource.data);
+      allow delete: if isOwner(uid) || isSuperAdmin();
     }
 
     match /userFeedback/{feedbackId} {

@@ -1722,7 +1722,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   color: #000000;
   border: none;
   font-size: 22px;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 18px var(--x-green-glow);

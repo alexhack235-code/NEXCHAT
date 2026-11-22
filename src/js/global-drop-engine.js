@@ -2221,6 +2221,11 @@ class GlobalDropEngine {
 
     document.getElementById('globalDropDrawerSettingsLink')?.addEventListener('click', () => {
       closeDrawer();
+      const fab = document.getElementById('globalDropMobileFab');
+      if (fab) {
+        fab.style.setProperty('display', 'none', 'important');
+        fab.classList.add('hidden');
+      }
       if (typeof window.openSettingsModal === 'function') {
         window.openSettingsModal();
       } else {

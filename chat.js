@@ -21369,8 +21369,14 @@ function openSettingsModal() {
     modal.style.display = "flex";
     modal.classList.add("open");
     document.body.classList.add("settings-open");
+    if (app) app.classList.add("settings-open");
     const bottomNav = document.querySelector('.bottom-nav');
     if (bottomNav) bottomNav.style.setProperty('display', 'none', 'important');
+    const fab = document.getElementById('globalDropMobileFab');
+    if (fab) {
+      fab.style.setProperty('display', 'none', 'important');
+      fab.classList.add('hidden');
+    }
 
     document.body.style.overflow = "hidden";
 
@@ -22058,9 +22064,21 @@ function closeSettingsModal(updateHistory = true) {
     modal.style.display = "none";
     modal.classList.remove("open");
     document.body.classList.remove("settings-open");
+    const app = document.querySelector('.app');
+    if (app) app.classList.remove("settings-open");
     document.body.style.overflow = "";
     const bottomNav = document.querySelector('.bottom-nav');
     if (bottomNav) bottomNav.style.removeProperty('display');
+    const fab = document.getElementById('globalDropMobileFab');
+    if (fab) {
+      if (app && app.dataset.activeSection === 'global-drop') {
+        fab.style.removeProperty('display');
+        fab.classList.remove('hidden');
+      } else {
+        fab.style.setProperty('display', 'none', 'important');
+        fab.classList.add('hidden');
+      }
+    }
 
     if (window._lastActiveNavSection && window._lastActiveNavSection !== 'chats') {
       if (typeof handleNavigation === 'function') {
