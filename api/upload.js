@@ -32,19 +32,19 @@ const PRIVATE_VAULTS = {
   5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_5', ''), name: 'PRIVATE VAULT 5' },
 };
 const REELS_VAULTS = {
-  0: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_0', ''), access: 'public', name: 'NEX-REELS VAULT 0' },
-  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_1', ''), access: 'private', name: 'NEX-REELS VAULT 1' },
-  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_2', ''), access: 'private', name: 'NEX-REELS VAULT 2' },
-  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_3', ''), access: 'private', name: 'NEX-REELS VAULT 3' },
-  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_4', ''), access: 'private', name: 'NEX-REELS VAULT 4' },
-  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_5', ''), access: 'private', name: 'NEX-REELS VAULT 5' },
+  0: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_0', readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_1', readBlobToken('BLOB_READ_WRITE_TOKEN'))), access: 'public', name: 'NEX-REELS VAULT 0' },
+  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_1', readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_2', readBlobToken('BLOB_READ_WRITE_TOKEN_MEDIA'))), access: 'private', name: 'NEX-REELS VAULT 1' },
+  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_2', readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_3', readBlobToken('BLOB_READ_WRITE_TOKEN'))), access: 'private', name: 'NEX-REELS VAULT 2' },
+  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_3', readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_4', readBlobToken('BLOB_READ_WRITE_TOKEN'))), access: 'private', name: 'NEX-REELS VAULT 3' },
+  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_4', readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_5', readBlobToken('BLOB_READ_WRITE_TOKEN'))), access: 'private', name: 'NEX-REELS VAULT 4' },
+  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_5', readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_1', readBlobToken('BLOB_READ_WRITE_TOKEN'))), access: 'private', name: 'NEX-REELS VAULT 5' },
 };
 const STATUS_VAULTS = {
-  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_1', ''), access: 'public', name: 'NEX-STATUS VAULT 1' },
-  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_2', ''), access: 'public', name: 'NEX-STATUS VAULT 2' },
-  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_3', ''), access: 'public', name: 'NEX-STATUS VAULT 3' },
-  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_4', ''), access: 'public', name: 'NEX-STATUS VAULT 4' },
-  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_5', ''), access: 'public', name: 'NEX-STATUS VAULT 5' },
+  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_1', readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_1', readBlobToken('BLOB_READ_WRITE_TOKEN'))), access: 'public', name: 'NEX-STATUS VAULT 1' },
+  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_2', readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_2', readBlobToken('BLOB_READ_WRITE_TOKEN_MEDIA'))), access: 'public', name: 'NEX-STATUS VAULT 2' },
+  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_3', readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_3', readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_1'))), access: 'public', name: 'NEX-STATUS VAULT 3' },
+  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_4', readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_4', readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_2'))), access: 'public', name: 'NEX-STATUS VAULT 4' },
+  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_5', readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_5', readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_3'))), access: 'public', name: 'NEX-STATUS VAULT 5' },
 };
 
 // Security constants

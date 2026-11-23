@@ -9060,7 +9060,7 @@ if (unreadDocIds.length > 0) {
       try {
         const batch = writeBatch(db);
 unreadDocIds.slice(0, 50).forEach(docId => {
-          batch.update(doc(db, "messages", docId), { read: true });
+          batch.set(doc(db, "messages", docId), { read: true }, { merge: true });
         });
 batch.commit().catch(e => console.warn("Error marking messages as read in batch:", e));
       } catch (e) {

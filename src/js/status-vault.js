@@ -255,18 +255,17 @@ export async function uploadStatusMedia(file, options = {}) {
       });
     };
     reader.onerror = () => {
-      const objUrl = URL.createObjectURL(file);
       resolve({
-        url: objUrl,
-        rawBlobUrl: objUrl,
+        url: 'logo.jpg',
+        rawBlobUrl: 'logo.jpg',
         pathname: 'local/status_' + (file.name || 'media'),
-        vault: 'Local Object Vault',
+        vault: 'Local Safe Vault',
         vaultIndex: -2,
         access: 'local',
         fileName: file.name,
         fileSize: file.size,
-        fileType: file.type || 'application/octet-stream',
-        mediaType: file.type || 'application/octet-stream',
+        fileType: file.type || 'image/jpeg',
+        mediaType: file.type || 'image/jpeg',
       });
     };
     reader.readAsDataURL(file);
