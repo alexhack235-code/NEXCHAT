@@ -45,6 +45,7 @@
         addMusicBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
+          this._ensureAudioPlayer();
           this.openPicker();
         });
       }
@@ -101,16 +102,8 @@
         this.removeTrack();
       });
 
-      // Preview Audio element
-      this.currentPreviewAudio = document.getElementById('statusMusicPreviewPlayer');
-      if (this.currentPreviewAudio) {
-        this.currentPreviewAudio.addEventListener('ended', () => {
-          this.stopPreviewPlayback();
-        });
-        this.currentPreviewAudio.addEventListener('error', () => {
-          this.stopPreviewPlayback();
-        });
-      }
+      // Prepare singleton Preview Audio element cleanly
+      this._ensureAudioPlayer();
     }
 
     openPicker() {
@@ -334,31 +327,60 @@
       });
     }
 
-    togglePreviewPlayback(track) {
-      if (!this.currentPreviewAudio) return;
+    _ensureAudioPlayer() {
+      if (!this.currentPreviewAudio) {
+        this.currentPreviewAudio = document.getElementById('statusMusicPreviewPlayer');
+        if (!this.currentPreviewAudio) {
+          this.currentPreviewAudio = new Audio();
+          this.currentPreviewAudio.id = 'statusMusicPreviewPlayer';
+          this.currentPreviewAudio.preload = 'auto';
+          document.body.appendChild(this.currentPreviewAudio);
+        }
+        this.currentPreviewAudio.setAttribute('playsinline', '');
+        this.currentPreviewAudio.addEventListener('ended', () => {
+          if (!this.currentPreviewAudio?.loop) this.stopPreviewPlayback();
+        });
+        this.currentPreviewAudio.addEventListener('error', () => {
+          this.stopPreviewPlayback();
+        });
+      }
+      return this.currentPreviewAudio;
+    }
 
-      if (this.currentlyPlayingId === track.id) {
+    togglePreviewPlayback(track) {
+      const audio = this._ensureAudioPlayer();
+      if (!audio || !track?.previewUrl) return;
+
+      if (this.currentlyPlayingId === track.id && !audio.paused) {
         this.stopPreviewPlayback();
         return;
       }
 
-      this.currentPreviewAudio.src = track.previewUrl;
-      this.currentPreviewAudio.currentTime = 0;
-      this.currentPreviewAudio.play().then(() => {
-        this.currentlyPlayingId = track.id;
-        this.updatePlayStateUI();
-      }).catch(err => {
-        console.warn('[MUSIC PICKER] Audio play blocked:', err.message);
-        this.stopPreviewPlayback();
-      });
+      try { audio.pause(); } catch (_) {}
+      audio.loop = false;
+      audio.muted = false;
+      audio.volume = 0.85;
+      audio.src = track.previewUrl;
+      audio.currentTime = 0;
+      const playPromise = audio.play();
+      this.currentlyPlayingId = track.id;
+      this.updatePlayStateUI();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(err => {
+          console.warn('[MUSIC PICKER] Audio play blocked:', err.message);
+          this.stopPreviewPlayback();
+          if (typeof window.showNotif === 'function') {
+            window.showNotif('Tap Play again to preview track', 'info', 2000);
+          }
+        });
+      }
     }
 
     stopPreviewPlayback() {
       if (this.currentPreviewAudio) {
         try {
           this.currentPreviewAudio.pause();
-          this.currentPreviewAudio.removeAttribute('src');
-          this.currentPreviewAudio.load();
+          this.currentPreviewAudio.currentTime = 0;
         } catch (_) {}
       }
       this.currentlyPlayingId = null;
@@ -387,19 +409,17 @@
       const modal = document.getElementById('statusMusicPickerModal');
       if (modal) modal.style.display = 'none';
 
-      // Ensure background audio element is active and unmuted
-      if (!this.currentPreviewAudio) {
-        this.currentPreviewAudio = document.getElementById('statusMusicPreviewPlayer') || new Audio();
-      }
-
-      // Automatically play soundtrack in background preview
-      if (this.currentPreviewAudio && track.previewUrl) {
+      // Reuse unlocked singleton audio player cleanly on direct tap gesture
+      const audio = this._ensureAudioPlayer();
+      if (audio && track.previewUrl) {
         try {
-          this.currentPreviewAudio.src = track.previewUrl;
-          this.currentPreviewAudio.loop = true;
-          this.currentPreviewAudio.volume = 0.85;
-          this.currentPreviewAudio.muted = false;
-          const playPromise = this.currentPreviewAudio.play();
+          audio.pause();
+          audio.src = track.previewUrl;
+          audio.currentTime = 0;
+          audio.loop = true;
+          audio.volume = 0.85;
+          audio.muted = false;
+          const playPromise = audio.play();
           if (playPromise !== undefined) {
             playPromise.then(() => {
               this.currentlyPlayingId = track.id;

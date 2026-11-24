@@ -129,7 +129,8 @@ import { broadcastTyping, subscribeToChatPresence, unsubscribeChatPresence } fro
 import { joinCall as joinLiveKitCall, leaveCall as leaveLiveKitCall } from "./src/js/livekit-call.js";
 import {
   findPendingSession, approvePairingSession, rejectPairingSession,
-getLinkedDevices, unlinkDevice, listenForSessionRevocation, detectDeviceInfo
+  getLinkedDevices, unlinkDevice, listenForSessionRevocation, detectDeviceInfo,
+  registerCurrentLoggedDevice, getCachedRememberedDevices, getOrCreateDeviceSessionId, listenForCurrentDeviceRevocation
 } from "./src/js/link-device.js";
 import { openWallpaperModal, applyActiveWallpaper, WALLPAPER_PRESETS } from "./src/js/wallpaper-presets.js";
 import {
@@ -510,58 +511,68 @@ window.addEventListener('error', (event) => {
 // Neutralizes mobile address-bar collapse, virtual keyboard shifts,
 // and eliminates overflowing pixels across Reels, Status & Chat.
 // ─────────────────────────────────────────────────────────────
+let currentChatUser = null;
+let currentChatUserId = null;
+let currentChatType = 'direct'; // 'direct' or 'group'
+let currentChatName = null;
+// ─────────────────────────────────────────────────────────────
+// [NEX-VIEWPORT] Dynamic Visual Viewport & Keyboard Resizing Engine
+// Neutralizes mobile address-bar collapse, virtual keyboard shifts,
+// and eliminates jumping across Reels, Status & Chat.
+// ─────────────────────────────────────────────────────────────
 function initNexDynamicViewportEngine() {
-  let lastVh = 0;
+  let lastVh = window.innerHeight || 0;
   let syncViewportTicking = false;
-const performSync = () => {
+  let keyboardAnchorTimer = null;
+  const performSync = (isResize = false) => {
     syncViewportTicking = false;
-try {
+    try {
       const isDesktop = window.innerWidth >= 900;
       const vh = isDesktop ? window.innerHeight : (window.visualViewport ? window.visualViewport.height : window.innerHeight);
-if (Math.abs(vh - lastVh) > 1) {
+      const heightDelta = lastVh - vh;
+      if (Math.abs(heightDelta) > 2) {
         lastVh = vh;
-if (isDesktop) {
+        if (isDesktop) {
           document.documentElement.style.removeProperty('--visual-viewport-height');
         } else {
-          document.documentElement.style.setProperty('--visual-viewport-height', vh + 'px');
+          document.documentElement.style.setProperty('--visual-viewport-height', Math.round(vh) + 'px');
         }
-      }
-// Keep active message list anchored when virtual keyboard toggles or viewport resizes
-const messagesArea = document.getElementById('messages-area');
-      const messageInput = document.getElementById('message-input');
-if (messagesArea && (document.activeElement === messageInput || (typeof currentChatType !== 'undefined' && currentChatType === 'ai'))) {
-        const hasMessages = messagesArea.querySelectorAll('.message-wrapper, .nex-msg-wrapper').length > 0;
-        if (hasMessages) {
-          messagesArea.scrollTop = messagesArea.scrollHeight;
-        } else {
-          messagesArea.scrollTop = 0;
+        // Only gently anchor to bottom ONCE after keyboard finishes opening (>80px shrink) if already near bottom
+        if (isResize && heightDelta > 80) {
+          clearTimeout(keyboardAnchorTimer);
+          keyboardAnchorTimer = setTimeout(() => {
+            const messagesArea = document.getElementById('messages-area');
+            const messageInput = document.getElementById('message-input');
+            if (messagesArea && (document.activeElement === messageInput || currentChatType === 'ai')) {
+              const distFromBottom = messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight;
+              if (distFromBottom < 220) {
+                messagesArea.scrollTo({ top: messagesArea.scrollHeight, behavior: 'auto' });
+              }
+            }
+          }, 90);
         }
       }
     } catch (err) {
       // Graceful fallback
     }
   };
-const syncViewport = () => {
+  const syncViewport = (ev) => {
+    const isResize = ev?.type === 'resize' || !ev;
     if (!syncViewportTicking) {
       syncViewportTicking = true;
-requestAnimationFrame(performSync);
+      requestAnimationFrame(() => performSync(isResize));
     }
   };
-if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined') {
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', syncViewport, { passive: true });
-window.visualViewport.addEventListener('scroll', syncViewport, { passive: true });
     }
-window.addEventListener('resize', syncViewport, { passive: true });
-window.addEventListener('orientationchange', () => setTimeout(syncViewport, 120));
-performSync();
+    window.addEventListener('resize', syncViewport, { passive: true });
+    window.addEventListener('orientationchange', () => setTimeout(() => syncViewport(), 120), { passive: true });
+    performSync(false);
   }
 }
 initNexDynamicViewportEngine();
-let currentChatUser = null;
-let currentChatUserId = null;
-let currentChatType = 'direct'; // 'direct' or 'group'
-let currentChatName = null;
 let typingStatusUnsubscribe = null;
 let userStatusUnsubscribe = null;
 let pendingRequestsListener = null;
@@ -2621,6 +2632,7 @@ return;
 return _origNativeAlert.apply(window, arguments);
   };
 }
+const _recentNotifMap = new Map();
 function showNotif(msg, type = "info", duration = 3000) {
   // If user disabled popup notifications in Settings, suppress the toast popup
 if (isNotificationsMuted()) {
@@ -2637,6 +2649,18 @@ let cleanMsg = String(msg || '')
 if (cleanMsg.toLowerCase().startsWith('new message from')) {
     return;
   }
+// Anti-spam throttle: prevent identical toast storms (max 1 per 4s)
+const dedupeKey = `${type}:${cleanMsg.toLowerCase()}`;
+const now = Date.now();
+const lastShownAt = _recentNotifMap.get(dedupeKey) || 0;
+if (now - lastShownAt < 4000) {
+    return;
+  }
+_recentNotifMap.set(dedupeKey, now);
+if (_recentNotifMap.size > 40) {
+    const firstKey = _recentNotifMap.keys().next().value;
+    _recentNotifMap.delete(firstKey);
+  }
 const iconHtml = type === 'success'
 ? '<i class="fa-solid fa-circle-check" style="margin-right:8px;font-size:15px;color:#fff;"></i>'
 : type === 'error'
@@ -2651,6 +2675,10 @@ if (type === "error") {
     }
 return;
   }
+// Cap simultaneous visible toasts at 2 to prevent layout pile-ups
+while (container.children.length >= 2) {
+    container.firstElementChild?.remove();
+  }
 const notif = document.createElement("div");
 notif.className = `notification ${type}`;
 notif.style.cssText = `
@@ -2660,8 +2688,10 @@ notif.style.cssText = `
     background: ${type === "success" ? "#10b981" : type === "error" ? "#ef4444" : type === "warning" ? "#f59e0b" : "#0284c7"};
     color: white;
     font-weight: 600;
-    animation: toastPop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    animation: toastPop 0.22s cubic-bezier(0.22, 1.35, 0.36, 1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     font-size: 13.5px;
     max-width: 95%;
     display: inline-flex;
@@ -2674,8 +2704,8 @@ notif.innerHTML = iconHtml + '<span>' + escapeHtml(cleanMsg) + '</span>';
 container.appendChild(notif);
 playNotificationSound(type);
 setTimeout(() => {
-    notif.style.animation = "toastFadeOut 0.25s ease forwards";
-setTimeout(() => notif.remove(), 250);
+    notif.style.animation = "toastFadeOut 0.2s ease forwards";
+setTimeout(() => notif.remove(), 210);
   }, duration);
 }
 function playNotificationSound(type = "info") {
@@ -3530,6 +3560,131 @@ document.getElementById('closeInfoBtn2')?.addEventListener('click', () => {
   const infoSidebar = document.getElementById('infoSidebar');
 if (infoSidebar) infoSidebar.style.display = 'none';
 });
+const _nexQuickProfileCache = new Map();
+window.openUserProfileModal = function openUserProfileModal(targetUid, seedData = {}) {
+  if (!targetUid && !seedData?.displayName) return;
+  const uid = String(targetUid || '').trim();
+  const contactHit = Array.isArray(window.loadedContactData)
+    ? window.loadedContactData.find(c => c && (c.id === uid || c.uid === uid))
+    : null;
+  const cached = (uid && _nexQuickProfileCache.get(uid)) || {};
+  const initialName = seedData.displayName || cached.displayName || contactHit?.name || contactHit?.username || cached.username || 'Member';
+  const initialHandle = (seedData.username || cached.username || contactHit?.username || '').replace(/^@/, '');
+  const initialAvatar = seedData.avatar || cached.avatar || contactHit?.profilePic || contactHit?.profilePicUrl || '';
+  const initialBio = seedData.bio || cached.bio || contactHit?.bio || contactHit?.status || 'NEXCHAT End-to-End Encrypted Node';
+  const roleLabel = seedData.role && seedData.role !== 'member' ? seedData.role.toUpperCase() : '';
+
+  let modal = document.getElementById('nexQuickProfileModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'nexQuickProfileModal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:99995;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(4,8,14,0.74);';
+    modal.innerHTML = `
+      <div class="nex-quick-profile-card" style="width:100%;max-width:340px;background:#111b21;border:1px solid rgba(0,255,102,0.28);border-radius:20px;padding:22px 20px 18px;box-shadow:0 20px 48px rgba(0,0,0,0.65);color:#e9edef;text-align:center;position:relative;transform:translateZ(0);transition:transform 260ms cubic-bezier(0.22,1.35,0.36,1),opacity 180ms ease;">
+        <button type="button" id="nexQuickProfileClose" style="position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,0.08);color:#aebac1;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-xmark"></i></button>
+        <div id="nexQuickProfileAvatarWrap" style="width:82px;height:82px;margin:4px auto 12px;border-radius:50%;overflow:hidden;border:2px solid #00ff66;display:flex;align-items:center;justify-content:center;background:#1f2c34;font-size:30px;font-weight:700;color:#fff;"></div>
+        <div id="nexQuickProfileName" style="font-size:18px;font-weight:700;color:#f1f5f9;line-height:1.25;"></div>
+        <div id="nexQuickProfileHandle" style="font-size:13px;color:#00ff66;margin-top:2px;"></div>
+        <div id="nexQuickProfileRole" style="display:none;margin:8px auto 0;padding:2px 10px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:0.5px;background:rgba(0,255,102,0.14);color:#00ff66;border:1px solid rgba(0,255,102,0.35);width:fit-content;"></div>
+        <p id="nexQuickProfileBio" style="font-size:12.5px;color:#94a3b8;margin:10px 0 16px;line-height:1.4;word-break:break-word;"></p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button type="button" id="nexQuickProfileDmBtn" style="flex:1;padding:10px 14px;border-radius:12px;border:none;background:#00a884;color:#052e16;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="fa-solid fa-comment-dots"></i> <span>Message</span></button>
+          <button type="button" id="nexQuickProfileInfoBtn" style="padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.06);color:#e9edef;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="fa-solid fa-circle-info"></i> <span>Details</span></button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    const closeFn = () => { modal.style.display = 'none'; };
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeFn(); });
+    modal.querySelector('#nexQuickProfileClose')?.addEventListener('click', closeFn);
+  }
+
+  const card = modal.querySelector('.nex-quick-profile-card');
+  const avWrap = modal.querySelector('#nexQuickProfileAvatarWrap');
+  const nameEl = modal.querySelector('#nexQuickProfileName');
+  const handleEl = modal.querySelector('#nexQuickProfileHandle');
+  const roleEl = modal.querySelector('#nexQuickProfileRole');
+  const bioEl = modal.querySelector('#nexQuickProfileBio');
+  const dmBtn = modal.querySelector('#nexQuickProfileDmBtn');
+  const infoBtn = modal.querySelector('#nexQuickProfileInfoBtn');
+
+  const renderProfileFields = (nameVal, handleVal, avatarVal, bioVal, roleVal) => {
+    if (nameEl) nameEl.textContent = nameVal || 'Member';
+    if (handleEl) {
+      handleEl.textContent = handleVal ? `@${handleVal}` : '';
+      handleEl.style.display = handleVal ? 'block' : 'none';
+    }
+    if (roleEl) {
+      roleEl.textContent = roleVal || '';
+      roleEl.style.display = roleVal ? 'inline-block' : 'none';
+    }
+    if (bioEl) bioEl.textContent = bioVal || 'NEXCHAT End-to-End Encrypted Node';
+    if (avWrap) {
+      const hasAv = avatarVal && avatarVal !== 'favicon.png' && avatarVal !== 'logo.jpg' && avatarVal !== 'default-avatar.png';
+      if (hasAv) {
+        avWrap.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = avatarVal;
+        img.alt = nameVal || 'User';
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+        img.onerror = () => { avWrap.textContent = (nameVal || 'U').charAt(0).toUpperCase(); };
+        avWrap.appendChild(img);
+      } else {
+        avWrap.textContent = (nameVal || 'U').trim().replace(/^~\s*/, '').charAt(0).toUpperCase() || 'U';
+      }
+    }
+  };
+
+  renderProfileFields(initialName, initialHandle, initialAvatar, initialBio, roleLabel);
+
+  const isSelfOrSpecial = !uid || uid === myUID || uid === 'chronex-ai' || uid === 'group_defense_bot';
+  if (dmBtn) {
+    dmBtn.style.display = isSelfOrSpecial ? 'none' : 'flex';
+    dmBtn.onclick = () => {
+      modal.style.display = 'none';
+      const resolved = (uid && _nexQuickProfileCache.get(uid)) || {};
+      const finalName = resolved.displayName || resolved.username || initialName;
+      const finalAvatar = resolved.avatar || initialAvatar || 'logo.jpg';
+      if (typeof openChat === 'function') openChat(uid, finalName, finalAvatar, 'direct');
+    };
+  }
+  if (infoBtn) {
+    infoBtn.style.display = (!uid || uid === 'group_defense_bot') ? 'none' : 'flex';
+    infoBtn.onclick = () => {
+      modal.style.display = 'none';
+      if (typeof showUserInfoPanel === 'function') showUserInfoPanel(uid);
+    };
+  }
+
+  modal.style.display = 'flex';
+  if (card) {
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.92) translateY(8px)';
+    requestAnimationFrame(() => {
+      card.style.opacity = '1';
+      card.style.transform = 'scale(1) translateY(0)';
+    });
+  }
+
+  if (uid && uid !== 'group_defense_bot' && uid !== 'chronex-ai') {
+    getDoc(doc(db, 'users', uid)).then((snap) => {
+      if (!snap || !snap.exists()) return;
+      const d = snap.data() || {};
+      const merged = {
+        displayName: d.name || d.displayName || d.username || initialName,
+        username: (d.username || initialHandle || '').replace(/^@/, ''),
+        avatar: d.profilePic || d.profilePicUrl || d.photoURL || initialAvatar,
+        bio: d.bio || d.about || d.statusText || initialBio
+      };
+      _nexQuickProfileCache.set(uid, merged);
+      if (modal.style.display === 'flex') {
+        renderProfileFields(merged.displayName, merged.username, merged.avatar, merged.bio, roleLabel);
+      }
+    }).catch(() => {});
+  }
+};
+window.showUserProfile = window.openUserProfileModal;
+window.openChatInfoModal = window.openUserProfileModal;
 async function showGroupAdminPanel(groupId) {
   try {
     const groupDoc = await getDoc(doc(db, 'groups', groupId));
@@ -6898,39 +7053,42 @@ playBtn.style.boxShadow = '0 0 10px rgba(0,255,102,0.35)';
 audio.addEventListener('play', () => {
     playBtn.innerHTML = '<i class="fa-solid fa-pause" style="font-size:12px;"></i>';
   });
-audio.addEventListener('pause', () => {
+  let lastRenderedWaveIndex = -1;
+  const resetBarsToIdle = () => {
+    lastRenderedWaveIndex = -1;
+    for (let i = 0; i < barEls.length; i++) {
+      barEls[i].style.background = 'rgba(255,255,255,0.42)';
+      barEls[i].style.transform = 'scaleY(1)';
+    }
+  };
+  audio.addEventListener('pause', () => {
     playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
-barEls.forEach((b, i) => {
-      b.style.background = 'rgba(255,255,255,0.45)';
-b.style.height = `${barHeights[i]}px`;
-    });
+    resetBarsToIdle();
   });
-audio.addEventListener('ended', () => {
+  audio.addEventListener('ended', () => {
     playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
-updateTimer(0);
-barEls.forEach((b, i) => {
-      b.style.background = 'rgba(255,255,255,0.45)';
-b.style.height = `${barHeights[i]}px`;
-    });
+    updateTimer(0);
+    resetBarsToIdle();
   });
-audio.addEventListener('timeupdate', () => {
+  audio.addEventListener('timeupdate', () => {
     updateTimer();
     const cur = audio.currentTime;
     const tot = (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : (totalDuration || 1);
     const progress = Math.min(1, Math.max(0, cur / tot));
     const activeIndex = Math.floor(progress * barEls.length);
-barEls.forEach((b, i) => {
-      if (i <= activeIndex) {
-        b.style.background = '#00ff66';
-if (!audio.paused) {
-          const pulse = Math.sin((cur * 12) + i) * 3;
-b.style.height = `${Math.max(4, barHeights[i] + pulse)}px`;
-        }
-      } else {
-        b.style.background = 'rgba(255,255,255,0.35)';
-b.style.height = `${barHeights[i]}px`;
-      }
-    });
+    if (activeIndex === lastRenderedWaveIndex) return;
+    const startIdx = lastRenderedWaveIndex >= 0 ? Math.min(lastRenderedWaveIndex, activeIndex) : 0;
+    const endIdx = Math.max(lastRenderedWaveIndex, activeIndex);
+    for (let i = Math.max(0, startIdx); i <= Math.min(barEls.length - 1, endIdx); i++) {
+      barEls[i].style.background = (i <= activeIndex) ? '#00ff66' : 'rgba(255,255,255,0.35)';
+    }
+    if (lastRenderedWaveIndex >= 0 && lastRenderedWaveIndex < barEls.length) {
+      barEls[lastRenderedWaveIndex].style.transform = 'scaleY(1)';
+    }
+    if (activeIndex >= 0 && activeIndex < barEls.length && !audio.paused) {
+      barEls[activeIndex].style.transform = 'scaleY(1.22)';
+    }
+    lastRenderedWaveIndex = activeIndex;
   });
 // Clicking waveform to seek
 waveTrack.onclick = (e) => {
@@ -6944,17 +7102,31 @@ if (tot > 0) {
 updateTimer();
     }
   };
+  const aiToolsToggleBtn = document.createElement("button");
+  aiToolsToggleBtn.type = "button";
+  aiToolsToggleBtn.className = "voice-speed-pill nex-voice-ai-toggle";
+  aiToolsToggleBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles" style="font-size:9px;color:#00f2fe;"></i> <span>AI</span>';
+  aiToolsToggleBtn.style.cssText = "background:rgba(0,242,254,0.1);border:1px solid rgba(0,242,254,0.28);color:#00f2fe;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;";
 metaRow.appendChild(timeLabel);
 metaRow.appendChild(speedBtn);
+metaRow.appendChild(aiToolsToggleBtn);
 midSection.appendChild(waveTrack);
 midSection.appendChild(metaRow);
 playerCard.appendChild(playBtn);
 playerCard.appendChild(midSection);
 container.appendChild(playerCard);
-// Action Row: Transcribe, Translate, AI Summary (One set of buttons only)
+// Action Row: Transcribe, Translate, AI Summary (collapsed by default to keep chat fast & clean)
 const actionRow = document.createElement("div");
 actionRow.className = "voice-actions-row";
-actionRow.style.cssText = "display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;";
+actionRow.style.cssText = "display:none;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;";
+  aiToolsToggleBtn.onclick = (e) => {
+    e.stopPropagation();
+    const opening = actionRow.style.display === 'none';
+    actionRow.style.display = opening ? 'flex' : 'none';
+    if (opening && window.NexChapteredVoice && typeof window.NexChapteredVoice.inspectAndMountChapters === 'function') {
+      window.NexChapteredVoice.inspectAndMountChapters(container);
+    }
+  };
 const transcribeBtn = document.createElement("button");
 transcribeBtn.type = "button";
 transcribeBtn.className = "nex-action-pill btn-voice-transcribe";
@@ -8991,7 +9163,28 @@ const localAiPayload = currentChatType === 'ai' ? uniqueLocalAiMessages : [];
 if (currentChatType === 'direct' && myUID && currentChatUser) {
       cacheDirectChatMessages(myUID, currentChatUser, allMessages);
     }
-const messageFragment = document.createDocumentFragment();
+    const newSignature = allMessages.map(m => {
+      const id = m.docId || m.id || m.clientMsgId || '';
+      const rLen = Array.isArray(m.reactions) ? m.reactions.length : (m.reactions ? Object.keys(m.reactions).length : 0);
+      return `${id}:${m.status || ''}:${m.read ? '1' : '0'}:${m.edited ? '1' : '0'}:${m.isDeleted ? '1' : '0'}:${rLen}`;
+    }).join(';');
+    if (allMessages.length > 0 && messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.currentSignature === newSignature && messagesDiv.dataset.isCachedPreview !== 'true') {
+      return;
+    }
+    const existingWrapperMap = new Map();
+    const existingDateMap = new Map();
+    if (messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.isCachedPreview !== 'true') {
+      messagesDiv.querySelectorAll('.message-wrapper[data-doc-id]').forEach(el => {
+        const key = el.dataset.docId;
+        if (key && !existingWrapperMap.has(key)) existingWrapperMap.set(key, el);
+      });
+      messagesDiv.querySelectorAll('.nex-date-separator-container[data-date-pill]').forEach(el => {
+        const pillKey = el.dataset.datePill;
+        if (pillKey && !existingDateMap.has(pillKey)) existingDateMap.set(pillKey, el);
+      });
+    }
+    const desiredMessageNodes = [];
+    const isIncrementalAppend = messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.isCachedPreview !== 'true';
 if (allMessages.length === 0) {
       if (!isInitialLoadComplete) {
         if (!messagesDiv.children.length) {
@@ -9086,10 +9279,16 @@ const mDateObj = m.time?.toDate?.() || new Date(m.time || m.timestamp || Date.no
       const datePillText = mDateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 if (datePillText && datePillText !== lastRenderedDatePill) {
         lastRenderedDatePill = datePillText;
-        const dateSepDiv = document.createElement("div");
-dateSepDiv.className = "nex-date-separator-container";
-dateSepDiv.innerHTML = '<span class="nex-date-separator-pill">' + escapeHtml(datePillText) + '</span>';
-messageFragment.appendChild(dateSepDiv);
+        let dateSepDiv = existingDateMap.get(datePillText);
+        if (dateSepDiv) {
+          existingDateMap.delete(datePillText);
+        } else {
+          dateSepDiv = document.createElement("div");
+          dateSepDiv.className = "nex-date-separator-container";
+          dateSepDiv.dataset.datePill = datePillText;
+          dateSepDiv.innerHTML = '<span class="nex-date-separator-pill">' + escapeHtml(datePillText) + '</span>';
+        }
+        desiredMessageNodes.push(dateSepDiv);
       }
 // --- CHRONEX THREAD SYNTHESIS CARD BRANCH ---
 if (m.isThreadSynthesis) {
@@ -9124,7 +9323,7 @@ ${formattedSummary}
 </div>
 </div>
 `;
-messagesDiv.appendChild(synthDiv);
+desiredMessageNodes.push(synthDiv);
 return;
       }
 const msgSenderId = m.senderId || m.from;
@@ -9132,14 +9331,51 @@ const msgSenderId = m.senderId || m.from;
       const isAI = m.from === 'chronex-ai' || m.isAiResponse || msgSenderId === 'chronex-ai';
       const isDeletedTombstone = !!(m.isDeleted || m.deletedForEveryone);
 if (isAI) isOwn = false;
-const div = document.createElement("div");
-div.className = `message-wrapper ${isOwn ? "sent" : "received"}`;
       const effectiveMid = m.docId || m.id || m.clientMsgId || '';
+      const rowSig = `${effectiveMid}|${m.text || ''}|${m.status || ''}|${m.read ? '1' : '0'}|${m.edited ? '1' : '0'}|${isDeletedTombstone ? '1' : '0'}|${JSON.stringify(m.reactions || '')}`;
+      if (effectiveMid && existingWrapperMap.has(effectiveMid)) {
+        const cachedNode = existingWrapperMap.get(effectiveMid);
+        existingWrapperMap.delete(effectiveMid);
+        if (cachedNode.dataset.rowSig === rowSig) {
+          desiredMessageNodes.push(cachedNode);
+          return;
+        }
+        // Fast-path: only delivery tick / read status changed -> update tick icon in place without rebuilding DOM
+        if (cachedNode.dataset.baseSig === `${effectiveMid}|${m.text || ''}|${m.edited ? '1' : '0'}|${isDeletedTombstone ? '1' : '0'}|${JSON.stringify(m.reactions || '')}`) {
+          const tickEl = cachedNode.querySelector('.tick-pending, .tick-sent, .tick-delivered, .tick-read');
+          if (tickEl && isOwn) {
+            if (m.status === 'sending' || m.status === 'pending') {
+              tickEl.className = 'fa-solid fa-clock tick-pending';
+              tickEl.style.color = '';
+              tickEl.style.opacity = '0.75';
+            } else if (m.status === 'read' || m.read) {
+              tickEl.className = 'fa-solid fa-check-double tick-read';
+              tickEl.style.color = '#53bdeb';
+              tickEl.style.opacity = '';
+            } else if (m.status === 'delivered') {
+              tickEl.className = 'fa-solid fa-check-double tick-delivered';
+              tickEl.style.color = 'rgba(255,255,255,0.7)';
+              tickEl.style.opacity = '';
+            } else {
+              tickEl.className = 'fa-solid fa-check tick-sent';
+              tickEl.style.color = 'rgba(255,255,255,0.7)';
+              tickEl.style.opacity = '';
+            }
+            cachedNode.dataset.rowSig = rowSig;
+            desiredMessageNodes.push(cachedNode);
+            return;
+          }
+        }
+      }
+const div = document.createElement("div");
+div.className = `message-wrapper ${isOwn ? "sent" : "received"}${isIncrementalAppend ? " nex-msg-enter" : ""}`;
 if (effectiveMid) {
         div.dataset.docId = effectiveMid;
 div.dataset.messageId = effectiveMid;
 div.id = `msg-wrapper-${effectiveMid}`;
       }
+div.dataset.rowSig = rowSig;
+div.dataset.baseSig = `${effectiveMid}|${m.text || ''}|${m.edited ? '1' : '0'}|${isDeletedTombstone ? '1' : '0'}|${JSON.stringify(m.reactions || '')}`;
 div.dataset.senderUid = msgSenderId || m.from || m.senderId || (isOwn ? myUID : '');
 div.dataset.senderName = m.senderName || m.senderUsername || m.userName || '';
 // Absolute overlay selection checkbox outside bubble
@@ -9584,15 +9820,25 @@ if (Math.hypot(dx, dy) > 12) {
 bubble._reactionsData = m.reactions;
 renderMessageReactionsTray(bubble, m.reactions, m.docId, currentChatType === 'group' ? 'groupMessages' : 'messages');
 div.appendChild(bubble);
-messageFragment.appendChild(div);
+desiredMessageNodes.push(div);
     });
-const newSignature = allMessages.map(m => (m.docId || m.id || m.clientMsgId || '') + ':' + (m.status || '') + ':' + (m.read ? '1' : '0')).join(';');
-if (messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.currentSignature === newSignature) {
-      messagesDiv.dataset.isCachedPreview = 'false';
-      return;
+if (!isIncrementalAppend) {
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < desiredMessageNodes.length; i++) frag.appendChild(desiredMessageNodes[i]);
+  messagesDiv.replaceChildren(frag);
+} else {
+  const desiredSet = new Set(desiredMessageNodes);
+  for (let i = messagesDiv.children.length - 1; i >= 0; i--) {
+    const child = messagesDiv.children[i];
+    if (!desiredSet.has(child)) child.remove();
+  }
+  for (let i = 0; i < desiredMessageNodes.length; i++) {
+    const node = desiredMessageNodes[i];
+    if (messagesDiv.children[i] !== node) {
+      messagesDiv.insertBefore(node, messagesDiv.children[i] || null);
     }
-messagesDiv.innerHTML = "";
-messagesDiv.appendChild(messageFragment);
+  }
+}
 messagesDiv.dataset.renderedChatKey = activeChatKey;
 messagesDiv.dataset.currentSignature = newSignature;
 messagesDiv.dataset.isCachedPreview = 'false';
@@ -9936,8 +10182,13 @@ window.updateNavChatsBadge = updateNavChatsBadge;
 function updateNavUpdatesBeacon(hasUnread) {
   const beacon = document.getElementById('navUpdatesBeacon');
 if (!beacon) return;
-beacon.classList.add('has-unread');
-beacon.style.setProperty('display', 'block', 'important');
+  if (hasUnread) {
+    beacon.classList.add('has-unread');
+    beacon.style.setProperty('display', 'block', 'important');
+  } else {
+    beacon.classList.remove('has-unread');
+    beacon.style.setProperty('display', 'none', 'important');
+  }
 }
 window.updateNavUpdatesBeacon = updateNavUpdatesBeacon;
 function updateNavAlertsBeacon(hasUnread) {
@@ -12223,9 +12474,10 @@ preview.style.display = "block";
 }
 document.getElementById("remove-attachment")?.addEventListener("click", (e) => {
   e.preventDefault();
-removeAttachment();
+removeAttachment(true);
 });
-function removeAttachment() {
+function removeAttachment(notifyUser = false) {
+  const hadAttachment = Boolean(selectedFile || currentAttachmentPreviewUrl);
   selectedFile = null;
 window.isAttachmentViewOnce = false;
   const voToggleBtn = document.getElementById('btnToggleViewOnceAttachment');
@@ -12240,12 +12492,14 @@ const fileInput = document.getElementById("file-input");
 if (fileInput) fileInput.value = "";
 const preview = document.getElementById("attachment-preview");
 if (preview) preview.style.display = "none";
-const removedBanner = document.getElementById('attachmentRemovedBanner');
-if (removedBanner) {
-    removedBanner.style.display = 'flex';
-setTimeout(() => { if (removedBanner) removedBanner.style.display = 'none'; }, 2200);
-  }
-showNotif("Attachment removed", "info", 1000);
+if (notifyUser && hadAttachment) {
+  const removedBanner = document.getElementById('attachmentRemovedBanner');
+  if (removedBanner) {
+      removedBanner.style.display = 'flex';
+  setTimeout(() => { if (removedBanner) removedBanner.style.display = 'none'; }, 1800);
+    }
+  showNotif("Attachment removed", "info", 1200);
+}
 try { document.dispatchEvent(new CustomEvent('selectedFileChanged')); } catch (e) { }
 }
 async function uploadFileToStorage(file, chatId, isGroup = false) {
@@ -12278,6 +12532,8 @@ const r = circle ? (circle.r?.baseVal?.value || 18) : 18;
         circle.style.strokeDashoffset = `${circumference}`;
       }
 if (modal) modal.style.display = 'flex';
+      const isVideo = file.type?.startsWith('video/') || ['mp4', 'webm', 'mov', 'mkv'].includes(fileExt);
+      const isImg = file.type?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(fileExt);
       const uploadActionType = isVideo ? 'sending_video' : (isImg ? 'sending_photo' : 'sending_file');
       if (window.broadcastUserAction) window.broadcastUserAction(uploadActionType, chatId);
       const updateProgress = (progress, text) => {
@@ -12285,8 +12541,6 @@ if (modal) modal.style.display = 'flex';
 if (sizeEl) sizeEl.textContent = text || `${((totalSize * progress / 100) / 1024 / 1024).toFixed(2)} / ${totalSizeMB} MB`;
 if (circle) circle.style.strokeDashoffset = `${circumference - (circumference * progress / 100)}`;
       };
-const isVideo = file.type?.startsWith('video/') || ['mp4', 'webm', 'mov', 'mkv'].includes(fileExt);
-      const isImg = file.type?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(fileExt);
 // 1. If Video, use Cloudinary unsigned video upload
 if (isVideo) {
         uploadVideoToCloudinary(file, {
@@ -12362,21 +12616,21 @@ uploadTask.on('state_changed',
 (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
             const uploadedMB = (snapshot.bytesTransferred / 1024 / 1024).toFixed(2);
-            const dashOffset = 314 - (314 * progress / 100);
-percentageEl.textContent = `${Math.round(progress)}%`;
-sizeEl.textContent = `${uploadedMB} / ${totalSizeMB} MB`;
-circle.style.strokeDashoffset = dashOffset;
+            const dashOffset = circumference - (circumference * progress / 100);
+if (percentageEl) percentageEl.textContent = `${Math.round(progress)}%`;
+if (sizeEl) sizeEl.textContent = `${uploadedMB} / ${totalSizeMB} MB`;
+if (circle) circle.style.strokeDashoffset = dashOffset;
           },
 (error) => {
             console.error("? Error uploading file:", error);
-modal.style.display = 'none';
+if (modal) modal.style.display = 'none';
 showNotif(`Upload failed: ${error.message}`, 'error');
 reject(error);
           },
 async () => {
             try {
               const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-modal.style.display = 'none';
+if (modal) modal.style.display = 'none';
 showNotif(`${file.name} uploaded successfully`, 'success', 3000);
 resolve({
                 fileName: file.name,
@@ -12386,7 +12640,7 @@ downloadURL: downloadURL,
 uploadedAt: serverTimestamp()
               });
             } catch (error) {
-              modal.style.display = 'none';
+              if (modal) modal.style.display = 'none';
 reject(error);
             }
           }
@@ -12738,56 +12992,77 @@ document.getElementById('closeGiftHistoryBtn')?.addEventListener('click', closeG
 let currentPendingPairSession = null;
 async function loadLinkedDevices() {
   const currentLabelEl = document.getElementById("currentDeviceLabel");
+  const currentSessionId = getOrCreateDeviceSessionId();
 if (currentLabelEl) {
     const dev = detectDeviceInfo();
 currentLabelEl.textContent = `${dev.label} • Active now`;
   }
 const listEl = document.getElementById("otherLinkedDevicesList");
 if (!listEl || !myUID) return;
-listEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;">Loading linked devices...</p>';
-try {
-    const devices = await getLinkedDevices(myUID);
-if (!devices || devices.length === 0) {
-      listEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;padding:8px 0;">No other devices linked yet.</p>';
-return;
+  const renderDevices = (devicesList) => {
+    const badge = document.getElementById("linkedSessionsCountBadge");
+    const activeList = Array.isArray(devicesList) ? devicesList : [];
+    if (badge) badge.textContent = `${activeList.length} Active`;
+    if (activeList.length === 0) {
+      listEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;padding:8px 0;">No logged devices recorded yet.</p>';
+      return;
     }
-const badge = document.getElementById("linkedSessionsCountBadge");
-if (badge) badge.textContent = `${devices ? devices.length : 0} Active`;
-listEl.innerHTML = '';
-devices.forEach((dev) => {
+    const sorted = [...activeList].sort((a, b) => {
+      const aMe = (a.sessionId || a.id) === currentSessionId ? 1 : 0;
+      const bMe = (b.sessionId || b.id) === currentSessionId ? 1 : 0;
+      return bMe - aMe;
+    });
+    const frag = document.createDocumentFragment();
+    sorted.forEach((dev) => {
+      const devSid = dev.sessionId || dev.id || '';
+      const isCurrentDevice = devSid === currentSessionId;
       const item = document.createElement('div');
-item.className = 'setting-item';
-item.style.cssText = 'padding: 8px 10px; background: rgba(255,255,255,0.04); border-radius: 8px; justify-content: space-between; align-items: center; display: flex;';
-const icon = dev.deviceType === 'Mobile' ? 'fa-mobile-screen' : (dev.deviceType === 'Tablet' ? 'fa-tablet-screen-button' : 'fa-laptop');
-      const timeStr = dev.linkedAt?.toDate ? dev.linkedAt.toDate().toLocaleDateString() : 'Recent';
-item.innerHTML = `
-<div style="display: flex; align-items: center; gap: 10px;">
-<i class="fa-solid ${icon}" style="font-size: 18px; color: var(--accent-secondary);"></i>
-<div>
-<strong style="color: #fff; font-size: 12.5px;">${escape(dev.label || 'Linked Device')}</strong>
-<p style="margin: 2px 0 0 0; color: var(--text-muted); font-size: 11px;">Linked: ${timeStr}</p>
+      item.className = 'setting-item';
+      item.style.cssText = `padding: 10px 12px; background: ${isCurrentDevice ? 'rgba(0,255,102,0.08)' : 'rgba(255,255,255,0.04)'}; border: 1px solid ${isCurrentDevice ? 'rgba(0,255,102,0.28)' : 'rgba(255,255,255,0.06)'}; border-radius: 10px; justify-content: space-between; align-items: center; display: flex; gap: 10px;`;
+      const icon = dev.deviceType === 'Mobile' ? 'fa-mobile-screen' : (dev.deviceType === 'Tablet' ? 'fa-tablet-screen-button' : 'fa-laptop');
+      const timeStr = dev.lastActive?.toDate
+        ? dev.lastActive.toDate().toLocaleDateString()
+        : (dev.linkedAt?.toDate ? dev.linkedAt.toDate().toLocaleDateString() : 'Active');
+      item.innerHTML = `
+<div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+<i class="fa-solid ${icon}" style="font-size: 18px; color: ${isCurrentDevice ? '#00ff66' : 'var(--accent-secondary)'}; flex-shrink: 0;"></i>
+<div style="min-width: 0;">
+<strong style="color: #fff; font-size: 12.5px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;"><span>${escape(dev.label || 'Logged Device')}</span>${isCurrentDevice ? '<span style="font-size:9.5px;padding:1px 6px;border-radius:99px;background:rgba(0,255,102,0.2);color:#00ff66;border:1px solid rgba(0,255,102,0.4);">THIS DEVICE</span>' : ''}</strong>
+<p style="margin: 2px 0 0 0; color: var(--text-muted); font-size: 11px;">${escape(dev.os || 'OS')} • Last active: ${timeStr}</p>
 </div>
 </div>
-<button class="btn-danger unlink-device-btn" data-session-id="${dev.sessionId}" style="padding: 4px 10px; font-size: 11px; cursor: pointer; border-radius: 6px;">
-<i class="fa-solid fa-link-slash"></i> Log out
-</button>
+${isCurrentDevice ? '' : `<button class="btn-danger unlink-device-btn" data-session-id="${devSid}" style="padding: 5px 10px; font-size: 11px; cursor: pointer; border-radius: 6px; flex-shrink: 0;"><i class="fa-solid fa-link-slash"></i> Log out</button>`}
 `;
-const unlinkBtn = item.querySelector('.unlink-device-btn');
-if (unlinkBtn) {
+      const unlinkBtn = item.querySelector('.unlink-device-btn');
+      if (unlinkBtn) {
         unlinkBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
-if (confirm(`Log out from ${dev.label || 'this device'}?`)) {
-            await unlinkDevice(myUID, dev.sessionId);
-showNotif('Device unlinked and logged out.', 'info', 2000);
-loadLinkedDevices();
+          if (confirm(`Log out from ${dev.label || 'this device'}?`)) {
+            await unlinkDevice(myUID, devSid);
+            showNotif('Device logged out & forgotten.', 'info', 2000);
+            loadLinkedDevices();
           }
         });
       }
-listEl.appendChild(item);
+      frag.appendChild(item);
     });
+    listEl.replaceChildren(frag);
+  };
+
+  const cachedDevs = getCachedRememberedDevices(myUID);
+  if (cachedDevs.length > 0) {
+    renderDevices(cachedDevs);
+  } else {
+    listEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;">Loading remembered devices...</p>';
+  }
+try {
+    const devices = await getLinkedDevices(myUID);
+    renderDevices(devices);
   } catch (err) {
     console.warn('Error loading linked devices:', err);
-listEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;">Could not load linked devices.</p>';
+    if (cachedDevs.length === 0) {
+      listEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;">Could not load remembered devices.</p>';
+    }
   }
 }
 function setupLinkedDeviceListeners() {
@@ -13465,6 +13740,7 @@ if (cleanName === window.myUsername) {
         closeEditSection();
 return;
       }
+      const originalBtnHtml = saveNameBtn.innerHTML;
 // [FORTRESS AI Cloud Defender: Username Identity Ingress Guard]
 if (window.fortressGuard) {
         const inspection = window.fortressGuard(cleanName, 'Profile Username');
@@ -13480,7 +13756,6 @@ if (!uid) {
 return;
       }
 saveNameBtn.disabled = true;
-      const originalBtnHtml = saveNameBtn.innerHTML;
 saveNameBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
 try {
         // Update Firebase Auth profile
@@ -16489,6 +16764,18 @@ loadStatuses();
 if (window.loadUserBackgroundOnAuth) {
             window.loadUserBackgroundOnAuth();
           }
+          // Auto-remember this logged device & listen for remote revocation
+          registerCurrentLoggedDevice(myUID, { email: user.email || '', username: typeof myUsername !== 'undefined' ? myUsername : '' }).catch(() => {});
+          if (window._nexDeviceRevocationUnsub) {
+            try { window._nexDeviceRevocationUnsub(); } catch (_) {}
+          }
+          window._nexDeviceRevocationUnsub = listenForCurrentDeviceRevocation(myUID, async () => {
+            try {
+              if (typeof showNotif === 'function') showNotif('Session revoked from another device. Logging out...', 'warning', 3000);
+              await signOut(auth);
+            } catch (_) {}
+            window.location.replace('index.html');
+          });
         } catch (contactErr) {
           console.error("Error loading contacts:", contactErr);
         }
@@ -18466,41 +18753,6 @@ async function loadGroupMessages(groupId) {
 if (window.NexWarRoomEngine && typeof window.NexWarRoomEngine.mountGroupWarRoom === 'function') {
     try { window.NexWarRoomEngine.mountGroupWarRoom(groupId); } catch (e) {}
   }
-// VIP Gated Channel Access Sentinel
-try {
-    if (groupId && window.NexVipSubscriptionEngine) {
-      const gDoc = await getDoc(doc(db, 'groups', groupId));
-if (gDoc.exists()) {
-        const gData = gDoc.data();
-if (window.NexVipSubscriptionEngine.isChannelGated(gData)) {
-          const hasAccess = window.NexVipSubscriptionEngine.hasActiveSubscription(gData, myUID);
-if (!hasAccess) {
-            window.NexVipSubscriptionEngine.openSubscribeModal(gData);
-if (messagesDiv) {
-              messagesDiv.innerHTML = `
-<div style="padding: 50px 20px; text-align: center; color: #94a3b8; max-width: 500px; margin: 40px auto; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px;">
-<div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,215,0,0.15); border: 1px solid #ffd700; color: #ffd700; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px;">
-<i class="fa-solid fa-lock"></i>
-</div>
-<h3 style="color: #fff; font-size: 18px; margin-bottom: 8px;">VIP Gated Channel</h3>
-<p style="font-size: 13px; margin-bottom: 16px; color: #cbd5e1;">This channel requires an active VIP creator pass (${gData.subscriptionFeeTokens || 500} NEX / $${gData.subscriptionFeeUsd || 3.50} USD per month). Please subscribe to access discussions.</p>
-<button type="button" id="btnUnlockVipChannelNow" style="padding: 10px 20px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-weight: 800; border: none; border-radius: 10px; cursor: pointer;">
-<i class="fa-brands fa-whatsapp"></i> Unlock VIP Access
-</button>
-</div>
-`;
-messagesDiv.querySelector('#btnUnlockVipChannelNow')?.addEventListener('click', () => {
-                window.NexVipSubscriptionEngine.openSubscribeModal(gData);
-              });
-            }
-return;
-          }
-        }
-      }
-    }
-  } catch (gGateErr) {
-    console.warn('[VIP GATE CHECK]', gGateErr);
-  }
 if (!messagesDiv) {
     console.error("Messages area not found!");
 return;
@@ -18524,25 +18776,34 @@ supabaseRoomUnsubscribe = null;
 if (typeof unsubscribeChatPresence === 'function') {
     try { unsubscribeChatPresence(); } catch (_) {}
   }
-try {
-    const cachedGroup = getCachedGroupChatMessages(groupId);
-if (cachedGroup && cachedGroup.length > 0) {
-      cancelChatLoadFeedback();
-    } else {
-      const chatKey = getGroupChatCacheKey(groupId);
-if (typeof loadChatHistoryFromIndexedDB === 'function') {
-        loadChatHistoryFromIndexedDB(chatKey).then((idbMsgs) => {
-          if (currentChatUser === groupId && idbMsgs && idbMsgs.length > 0) {
-            cacheGroupChatMessages(groupId, idbMsgs);
-            if (typeof groupStore !== 'undefined' && groupStore.getState().currentGroupId === groupId && (!groupStore.getState().messages || groupStore.getState().messages.length === 0)) {
-              groupStore.setState({ messages: idbMsgs, isLoadingMessages: false });
-            }
-            cancelChatLoadFeedback();
-          }
-        }).catch(() => {});
+  // Background VIP gate sentinel check without blocking instant GroupChat mount
+  if (groupId && window.NexVipSubscriptionEngine) {
+    getDoc(doc(db, 'groups', groupId)).then((gDoc) => {
+      if (currentChatUser !== groupId || !gDoc || !gDoc.exists()) return;
+      const gData = gDoc.data();
+      if (window.NexVipSubscriptionEngine.isChannelGated(gData) && !window.NexVipSubscriptionEngine.hasActiveSubscription(gData, myUID)) {
+        try { GroupChat.close(); } catch (_) {}
+        window.NexVipSubscriptionEngine.openSubscribeModal(gData);
+        messagesDiv.innerHTML = `
+<div style="padding: 50px 20px; text-align: center; color: #94a3b8; max-width: 500px; margin: 40px auto; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px;">
+<div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,215,0,0.15); border: 1px solid #ffd700; color: #ffd700; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px;">
+<i class="fa-solid fa-lock"></i>
+</div>
+<h3 style="color: #fff; font-size: 18px; margin-bottom: 8px;">VIP Gated Channel</h3>
+<p style="font-size: 13px; margin-bottom: 16px; color: #cbd5e1;">This channel requires an active VIP creator pass (${gData.subscriptionFeeTokens || 500} NEX / $${gData.subscriptionFeeUsd || 3.50} USD per month). Please subscribe to access discussions.</p>
+<button type="button" id="btnUnlockVipChannelNow" style="padding: 10px 20px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-weight: 800; border: none; border-radius: 10px; cursor: pointer;">
+<i class="fa-brands fa-whatsapp"></i> Unlock VIP Access
+</button>
+</div>
+`;
+        messagesDiv.querySelector('#btnUnlockVipChannelNow')?.addEventListener('click', () => {
+          window.NexVipSubscriptionEngine.openSubscribeModal(gData);
+        });
       }
-cancelChatLoadFeedback();
-    }
+    }).catch((gGateErr) => console.warn('[VIP GATE CHECK]', gGateErr));
+  }
+try {
+    cancelChatLoadFeedback();
 const messageInput = document.getElementById('message-input');
     const pinnedBarContainer = document.getElementById('pinnedMessagesBar');
     const typingContainer = document.getElementById('typingIndicator');
@@ -19545,9 +19806,14 @@ if (mins < 60) return `${mins}m ago`;
 if (hours < 24) return `${hours}h ago`;
 return 'Yesterday';
     };
+    const statusFeedSig = activeStoriesList.map(g => `${g.userId}:${g.lastUpdated}:${g.slides?.length || 0}:${g.isViewed ? '1' : '0'}`).join(';');
+    if (window._lastStatusFeedSignature === statusFeedSig && horizontalFeed && horizontalFeed.childElementCount > 0) {
+      return;
+    }
+    window._lastStatusFeedSignature = statusFeedSig;
 // 1. Render Horizontal List: WhatsApp Rounded Portrait Cards
 if (horizontalFeed) {
-      horizontalFeed.innerHTML = '';
+      const hFrag = document.createDocumentFragment();
 contactStories.forEach((grp) => {
         const globalIdx = activeStoriesList.findIndex(g => g.userId === grp.userId);
         const cardDiv = document.createElement('div');
@@ -19563,13 +19829,13 @@ const latestSlide = grp.slides?.[grp.slides.length - 1];
 cardDiv.innerHTML = `
 <div class="status-story-card-backdrop">
 ${isVideo
-? `<video src="${previewBg}" class="status-card-bg-img" muted playsinline></video>`
-: `<img src="${previewBg}" alt="${escape(grp.userName)}" class="status-card-bg-img" onerror="this.src='logo.jpg'" />`
+? `<video src="${previewBg}" class="status-card-bg-img" preload="metadata" muted playsinline></video>`
+: `<img src="${previewBg}" alt="${escape(grp.userName)}" class="status-card-bg-img" loading="lazy" decoding="async" onerror="this.src='logo.jpg'" />`
             }
 <div class="status-card-gradient-overlay"></div>
 </div>
 <div class="status-card-avatar-wrap ${grp.isViewed ? 'viewed' : 'unread'}">
-<img src="${safeAvatar}" alt="${escape(grp.userName)}" class="status-card-avatar-img" onerror="this.src='logo.jpg'" />
+<img src="${safeAvatar}" alt="${escape(grp.userName)}" class="status-card-avatar-img" loading="lazy" decoding="async" onerror="this.src='logo.jpg'" />
 </div>
 <div class="status-card-copy">
 <span class="status-card-name">${escape(grp.userName)}</span>
@@ -19578,6 +19844,7 @@ ${isVideo
 `;
 cardDiv.addEventListener('click', () => {
           grp.isViewed = true;
+          window._lastStatusFeedSignature = null;
           const wrap = cardDiv.querySelector('.status-card-avatar-wrap');
 if (wrap) {
             wrap.classList.remove('unread');
@@ -19585,13 +19852,14 @@ wrap.classList.add('viewed');
           }
 viewStatusGroup(globalIdx !== -1 ? globalIdx : 0);
         });
-horizontalFeed.appendChild(cardDiv);
+hFrag.appendChild(cardDiv);
       });
+      horizontalFeed.replaceChildren(hFrag);
     }
 // 2. Render Vertical List (Telemetry Stream: Recent & Viewed updates)
 if (recentList && viewedList) {
-      recentList.innerHTML = '';
-viewedList.innerHTML = '';
+      const recentFrag = document.createDocumentFragment();
+      const viewedFrag = document.createDocumentFragment();
 let hasViewed = false;
       let hasRecent = false;
 activeStoriesList.forEach((grp, idx) => {
@@ -19605,7 +19873,7 @@ row.className = 'status-row-item';
 const safeRowAvatar = getValidImageSrc(grp.avatarUrl, 'logo.jpg');
 row.innerHTML = `
 <div class="status-row-avatar ${grp.isViewed ? 'viewed' : 'unread'}">
-<img src="${safeRowAvatar}" alt="${escape(grp.userName)}" onerror="this.src='logo.jpg'" />
+<img src="${safeRowAvatar}" alt="${escape(grp.userName)}" loading="lazy" decoding="async" onerror="this.src='logo.jpg'" />
 </div>
 <div class="status-row-info">
 <h4 class="status-row-name">
@@ -19620,19 +19888,22 @@ row.innerHTML = `
 `;
 row.addEventListener('click', () => viewStatusGroup(idx));
 // Display all active user status nodes in the Live Telemetry Stream
-recentList.appendChild(row);
+recentFrag.appendChild(row);
 hasRecent = true;
 if (grp.isViewed) {
           hasViewed = true;
 // Clone to archived list if user wishes to inspect viewed history
 const viewedClone = row.cloneNode(true);
 viewedClone.addEventListener('click', () => viewStatusGroup(idx));
-viewedList.appendChild(viewedClone);
+viewedFrag.appendChild(viewedClone);
         }
       });
 if (!hasRecent && recentList) {
         recentList.innerHTML = '<div style="padding: 32px 16px; text-align: center; color: var(--text-muted);"><i class="fa-regular fa-clock" style="font-size: 24px; color: #64748b; margin-bottom: 8px; display: block;"></i><p style="font-size: 13px; font-weight: 600; color: #cbd5e1; margin: 0;">No status updates yet</p><p style="font-size: 11.5px; color: #64748b; margin-top: 4px;">Tap your node above or the camera button to share a 24-hour update.</p></div>';
+      } else {
+        recentList.replaceChildren(recentFrag);
       }
+      viewedList.replaceChildren(viewedFrag);
 if (viewedSection) {
         viewedSection.style.display = hasViewed ? 'block' : 'none';
       }
@@ -19719,8 +19990,19 @@ cleanupStorySlide();
 // WhatsApp-Style Background Music Track Playback & Floating Sticker
 if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
   try {
-    const musicAudio = new Audio(currentSlide.musicTrack.previewUrl);
+    let musicAudio = window._nexStatusViewerAudioEl;
+    if (!musicAudio) {
+      musicAudio = document.getElementById('statusViewerMusicAudioEl') || new Audio();
+      musicAudio.id = 'statusViewerMusicAudioEl';
+      musicAudio.setAttribute('playsinline', '');
+      musicAudio.preload = 'auto';
+      window._nexStatusViewerAudioEl = musicAudio;
+    }
+    musicAudio.pause();
+    musicAudio.src = currentSlide.musicTrack.previewUrl;
+    musicAudio.currentTime = 0;
     musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
+    musicAudio.muted = false;
     musicAudio.loop = true;
     musicAudio.play().catch(err => console.warn('[STATUS MUSIC] Playback notice:', err.message));
     window._statusViewerMusicAudio = musicAudio;
@@ -19768,8 +20050,7 @@ if (audioStage) {
 if (avatar) avatar.src = getValidImageSrc(currentGrp.avatarUrl, 'logo.jpg');
 if (window.NexStatusEliteSuite) {
         window.NexStatusEliteSuite.playVoiceSlide(currentSlide.mediaUrl, canvas, timer, () => {
-          const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
-if (fill) fill.style.width = '100%';
+          setStatusProgressPct(currentStorySlideIndex, 100);
 if (typeof nextStorySlide === 'function') nextStorySlide();
         });
       }
@@ -19927,17 +20208,18 @@ if (typeof setDoc === 'function') {
 // Render segmented progress bars
 if (progressBars) {
     progressBars.innerHTML = '';
+    const pFrag = document.createDocumentFragment();
 currentGrp.slides.forEach((sl, sIdx) => {
       const seg = document.createElement('div');
 seg.className = 'status-progress-segment';
       const fill = document.createElement('div');
 fill.className = 'status-progress-fill';
 fill.id = `statusProgressFill_${sIdx}`;
-if (sIdx < currentStorySlideIndex) fill.style.width = '100%';
-else fill.style.width = '0%';
+fill.style.transform = `scaleX(${sIdx < currentStorySlideIndex ? '1' : '0'})`;
 seg.appendChild(fill);
-progressBars.appendChild(seg);
+pFrag.appendChild(seg);
     });
+    progressBars.replaceChildren(pFrag);
   }
 if (pauseBtn) {
     pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
@@ -19955,7 +20237,19 @@ setupViewerControls();
 startStoryProgress();
 }
 let activeAudioTimeUpdate = null;
+let storyProgressRafId = 0;
+function setStatusProgressPct(idx, pct) {
+  const fill = document.getElementById(`statusProgressFill_${idx}`);
+  if (fill) {
+    const ratio = Math.max(0, Math.min(1, pct / 100));
+    fill.style.transform = `scaleX(${ratio.toFixed(4)})`;
+  }
+}
 function cleanupStorySlide() {
+  if (storyProgressRafId) {
+    cancelAnimationFrame(storyProgressRafId);
+    storyProgressRafId = 0;
+  }
   if (storyProgressTimer) {
     clearInterval(storyProgressTimer);
 clearTimeout(storyProgressTimer);
@@ -20123,22 +20417,88 @@ showNotif('Could not delete status update', 'error', 3000);
       }
     };
   }
-// Press & Hold on media stage: Pauses progress and hides HUD for pure full-screen viewing
+// Press & Hold (180ms threshold) + Smooth Spring Swipe-Down-to-Close & Swipe-Left/Right Story Switcher
 if (stage && !stage.dataset.hasHoldListener) {
     stage.dataset.hasHoldListener = 'true';
+    let holdTimer = 0;
+    let swipeStartX = 0;
+    let swipeStartY = 0;
+    let isSwipingStage = false;
+    let activeAxis = null;
+    const resetStageTransform = () => {
+      stage.style.transition = 'transform 300ms cubic-bezier(0.22, 1.35, 0.36, 1), opacity 220ms ease';
+      stage.style.transform = 'translate3d(0, 0, 0) scale(1)';
+      stage.style.opacity = '1';
+      setTimeout(() => { stage.style.transition = ''; stage.style.willChange = 'auto'; }, 310);
+    };
     const onHoldStart = (e) => {
       if (e.target.closest('button, input, textarea')) return;
-setStoryPaused(true);
-if (modal) modal.classList.add('status-held');
+      isSwipingStage = true;
+      activeAxis = null;
+      swipeStartX = e.clientX || 0;
+      swipeStartY = e.clientY || 0;
+      clearTimeout(holdTimer);
+      setStoryPaused(true);
+      holdTimer = setTimeout(() => {
+        if (isSwipingStage && !activeAxis && modal) modal.classList.add('status-held');
+      }, 180);
     };
-    const onHoldEnd = () => {
+    const onStageMove = (e) => {
+      if (!isSwipingStage) return;
+      const dx = (e.clientX || 0) - swipeStartX;
+      const dy = (e.clientY || 0) - swipeStartY;
+      if (!activeAxis && (Math.abs(dx) > 14 || Math.abs(dy) > 14)) {
+        activeAxis = Math.abs(dy) >= Math.abs(dx) ? 'y' : 'x';
+        clearTimeout(holdTimer);
+        if (modal) modal.classList.remove('status-held');
+        stage.style.willChange = 'transform';
+        stage.style.transition = 'none';
+      }
+      if (activeAxis === 'y' && dy > 0) {
+        const pull = Math.min(220, dy * 0.72);
+        const sc = Math.max(0.84, 1 - (pull / 900));
+        stage.style.transform = `translate3d(0, ${pull.toFixed(1)}px, 0) scale(${sc.toFixed(3)})`;
+        stage.style.opacity = String(Math.max(0.45, 1 - (pull / 380)));
+      }
+    };
+    const onHoldEnd = (e) => {
+      if (!isSwipingStage) return;
+      isSwipingStage = false;
+      clearTimeout(holdTimer);
+      if (modal) modal.classList.remove('status-held');
+      const dx = ((e && e.clientX) || swipeStartX) - swipeStartX;
+      const dy = ((e && e.clientY) || swipeStartY) - swipeStartY;
+      if (activeAxis === 'y' && dy > 88) {
+        activeAxis = null;
+        resetStageTransform();
+        closeViewer();
+        return;
+      }
+      if (activeAxis === 'x' && Math.abs(dx) > 60) {
+        activeAxis = null;
+        resetStageTransform();
+        if (dx < 0 && currentStoryGroupIndex < activeStoriesList.length - 1) {
+          currentStoryGroupIndex++;
+          currentStorySlideIndex = 0;
+          showCurrentStorySlide();
+        } else if (dx > 0 && currentStoryGroupIndex > 0) {
+          currentStoryGroupIndex--;
+          currentStorySlideIndex = 0;
+          showCurrentStorySlide();
+        } else {
+          setStoryPaused(false);
+        }
+        return;
+      }
+      activeAxis = null;
+      resetStageTransform();
       setStoryPaused(false);
-if (modal) modal.classList.remove('status-held');
     };
-stage.addEventListener('pointerdown', onHoldStart);
-stage.addEventListener('pointerup', onHoldEnd);
-stage.addEventListener('pointercancel', onHoldEnd);
-stage.addEventListener('pointerleave', onHoldEnd);
+    stage.style.touchAction = 'none';
+    stage.addEventListener('pointerdown', onHoldStart);
+    stage.addEventListener('pointermove', onStageMove, { passive: true });
+    stage.addEventListener('pointerup', onHoldEnd);
+    stage.addEventListener('pointercancel', onHoldEnd);
   }
 // Keyboard hotkeys (ArrowLeft, ArrowRight, Space, Escape)
 if (modal && !modal.dataset.hasKeyListeners) {
@@ -20223,23 +20583,30 @@ function startStoryProgress() {
   // Background Music Playback (if present and not already playing)
   if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
     try {
-      if (!window._statusViewerMusicAudio || window._statusViewerMusicAudio.src !== currentSlide.musicTrack.previewUrl) {
-        if (window._statusViewerMusicAudio) {
-          try { window._statusViewerMusicAudio.pause(); } catch(_) {}
-        }
-        const musicAudio = new Audio(currentSlide.musicTrack.previewUrl);
+      let musicAudio = window._nexStatusViewerAudioEl;
+      if (!musicAudio) {
+        musicAudio = document.getElementById('statusViewerMusicAudioEl') || new Audio();
+        musicAudio.id = 'statusViewerMusicAudioEl';
+        musicAudio.setAttribute('playsinline', '');
+        musicAudio.preload = 'auto';
+        window._nexStatusViewerAudioEl = musicAudio;
+      }
+      if (musicAudio.src !== currentSlide.musicTrack.previewUrl || musicAudio.paused) {
+        musicAudio.pause();
+        musicAudio.src = currentSlide.musicTrack.previewUrl;
+        musicAudio.currentTime = 0;
         musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
+        musicAudio.muted = false;
         musicAudio.loop = true;
         musicAudio.play().catch(err => console.warn('[STATUS MUSIC] Playback notice:', err.message));
-        window._statusViewerMusicAudio = musicAudio;
       }
+      window._statusViewerMusicAudio = musicAudio;
     } catch (mErr) {
       console.warn('[STATUS MUSIC] Setup error:', mErr.message);
     }
   }
 
-  const currentFill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
-  if (currentFill) currentFill.style.width = '0%';
+  setStatusProgressPct(currentStorySlideIndex, 0);
 // 1. VIDEO SLIDE: Driven purely by HTML5 video timeupdate and onended with trim & chain boundaries
 const isVideoStory = Boolean((currentSlide.mediaType === 'video' || /\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i.test(currentSlide.mediaUrl || '')) && currentSlide.mediaUrl);
   if (isVideoStory) {
@@ -20259,20 +20626,17 @@ video.ontimeupdate = () => {
       if (isStoryPaused) return;
 if (winEnd != null && video.currentTime >= (winEnd - 0.12)) {
         video.ontimeupdate = null;
-        const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
-if (fill) fill.style.width = '100%';
+        setStatusProgressPct(currentStorySlideIndex, 100);
 nextStorySlide();
 return;
       }
 const elapsed = Math.max(0, video.currentTime - winStart);
       const pct = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
-      const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
-if (fill) fill.style.width = `${pct}%`;
+      setStatusProgressPct(currentStorySlideIndex, pct);
     };
 video.onended = () => {
       video.ontimeupdate = null;
-      const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
-if (fill) fill.style.width = '100%';
+      setStatusProgressPct(currentStorySlideIndex, 100);
 nextStorySlide();
     };
 video.onerror = (e) => {
@@ -20294,8 +20658,7 @@ if (audioEl) {
         if (isStoryPaused) return;
 if (audioEl.duration && !isNaN(audioEl.duration) && isFinite(audioEl.duration) && audioEl.duration > 0) {
           const pct = Math.min(100, Math.max(0, (audioEl.currentTime / audioEl.duration) * 100));
-          const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
-if (fill) fill.style.width = `${pct}%`;
+          setStatusProgressPct(currentStorySlideIndex, pct);
         }
       };
 audioEl.addEventListener('timeupdate', onAudioTimeUpdate);
@@ -20303,7 +20666,7 @@ activeAudioTimeUpdate = { el: audioEl, fn: onAudioTimeUpdate };
     }
 return;
   }
-// 3. STATIC SLIDES (Image, Text, Code): Default 7-second timer
+// 3. STATIC SLIDES (Image, Text, Code): Smooth 60-120Hz rAF GPU-composited timer
 startStaticStoryTimer(7000);
 }
 function startStaticStoryTimer(durationMs = 7000) {
@@ -20319,32 +20682,37 @@ function startStaticStoryTimer(durationMs = 7000) {
   if (countdownBadge) countdownBadge.style.display = 'inline-flex';
   if (countdownEl) countdownEl.textContent = `${totalSec}s`;
 
-  const INTERVAL_MS = 50;
-  const increment = (INTERVAL_MS / durationMs) * 100;
+  if (storyProgressRafId) {
+    cancelAnimationFrame(storyProgressRafId);
+    storyProgressRafId = 0;
+  }
   storyProgressValue = 0;
   let elapsedMs = 0;
+  let lastFrameTs = performance.now();
+  let lastShownSec = totalSec;
 
-  storyProgressTimer = setInterval(() => {
-    if (isStoryPaused) return;
-    storyProgressValue += increment;
-    elapsedMs += INTERVAL_MS;
-
-    const remainingSec = Math.max(0, Math.ceil((durationMs - elapsedMs) / 1000));
-    if (countdownEl) {
-      countdownEl.textContent = `${remainingSec}s`;
+  const stepFrame = (now) => {
+    const dt = Math.min(80, Math.max(0, now - lastFrameTs));
+    lastFrameTs = now;
+    if (!isStoryPaused) {
+      elapsedMs += dt;
+      storyProgressValue = Math.min(100, (elapsedMs / durationMs) * 100);
+      const remainingSec = Math.max(0, Math.ceil((durationMs - elapsedMs) / 1000));
+      if (countdownEl && remainingSec !== lastShownSec) {
+        lastShownSec = remainingSec;
+        countdownEl.textContent = `${remainingSec}s`;
+      }
+      setStatusProgressPct(currentStorySlideIndex, storyProgressValue);
+      if (elapsedMs >= durationMs) {
+        storyProgressRafId = 0;
+        if (countdownEl) countdownEl.textContent = '0s';
+        nextStorySlide();
+        return;
+      }
     }
-
-    const currentFill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
-    if (currentFill) {
-      currentFill.style.width = `${Math.min(100, storyProgressValue)}%`;
-    }
-    if (storyProgressValue >= 100 || elapsedMs >= durationMs) {
-      clearInterval(storyProgressTimer);
-      storyProgressTimer = null;
-      if (countdownEl) countdownEl.textContent = '0s';
-      nextStorySlide();
-    }
-  }, INTERVAL_MS);
+    storyProgressRafId = requestAnimationFrame(stepFrame);
+  };
+  storyProgressRafId = requestAnimationFrame(stepFrame);
 }
 function nextStorySlide() {
   cleanupStorySlide();
@@ -21399,48 +21767,45 @@ fileInput.click();
 const messageInput = document.getElementById('message-input');
 if (messageInput) {
     // Ultra-Fast RAF Throttled AutoResize (Zero Keypress Latency)
-let autoResizeRafLock = false;
+    let autoResizeRafId = 0;
     let lastTextLength = 0;
     let cachedLineHeight = 0;
-    let lastAssignedHeight = 38;
+    let lastAssignedHeight = 48;
+    const isSingleLineInput = messageInput.tagName === 'INPUT';
+    if (isSingleLineInput) {
+      messageInput.style.height = '48px';
+    }
 const autoResize = () => {
-      if (!messageInput) return;
-// Single-line 48px WhatsApp input box - preserve exact 48px height
-if (messageInput.tagName === 'INPUT') {
-        messageInput.style.height = '48px';
-return;
-      }
-const text = messageInput.value;
-      const len = text.length;
-if (len === 0) {
-        if (lastAssignedHeight !== 48) {
-          messageInput.style.height = '48px';
-lastAssignedHeight = 48;
+      if (!messageInput || isSingleLineInput) return;
+      if (autoResizeRafId) return;
+      autoResizeRafId = requestAnimationFrame(() => {
+        autoResizeRafId = 0;
+        if (!messageInput) return;
+        const text = messageInput.value;
+        const len = text.length;
+        if (len === 0) {
+          if (lastAssignedHeight !== 48) {
+            messageInput.style.height = '48px';
+            lastAssignedHeight = 48;
+          }
+          lastTextLength = 0;
+          return;
         }
-lastTextLength = 0;
-return;
-      }
-if (!cachedLineHeight) {
-        const computed = window.getComputedStyle(messageInput);
-cachedLineHeight = parseFloat(computed.lineHeight) || 20;
-      }
-if (len < lastTextLength) {
-        if (lastAssignedHeight > 38) {
+        if (!cachedLineHeight) {
+          const computed = window.getComputedStyle(messageInput);
+          cachedLineHeight = parseFloat(computed.lineHeight) || 20;
+        }
+        if (len < lastTextLength && lastAssignedHeight > 38) {
           messageInput.style.height = '38px';
-          const scrollH = messageInput.scrollHeight;
-          const clampedHeight = Math.min(Math.max(scrollH, 38), 100);
-messageInput.style.height = clampedHeight + 'px';
-lastAssignedHeight = clampedHeight;
         }
-      } else {
         const scrollH = messageInput.scrollHeight;
         const clampedHeight = Math.min(Math.max(scrollH, 38), 100);
-if (clampedHeight !== lastAssignedHeight) {
+        if (clampedHeight !== lastAssignedHeight) {
           messageInput.style.height = clampedHeight + 'px';
-lastAssignedHeight = clampedHeight;
+          lastAssignedHeight = clampedHeight;
         }
-      }
-lastTextLength = len;
+        lastTextLength = len;
+      });
     };
 window.adjustTextareaHeight = autoResize;
 // NEXCHAT SLASH COMMANDS HUB
@@ -21860,7 +22225,7 @@ darkModeToggle.style.cursor = "grabbing";
 darkModeToggle?.addEventListener("touchstart", (e) => {
     isSliding = true;
 startX = e.touches[0].clientX;
-  });
+  }, { passive: true });
 document.addEventListener("mousemove", (e) => {
     if (!isSliding || !darkModeToggle) return;
 currentX = e.clientX - startX;
@@ -21868,7 +22233,7 @@ currentX = e.clientX - startX;
 document.addEventListener("touchmove", (e) => {
     if (!isSliding || !darkModeToggle) return;
 currentX = e.touches[0].clientX - startX;
-  });
+  }, { passive: true });
 document.addEventListener("mouseup", () => {
     if (!isSliding || !darkModeToggle) return;
 isSliding = false;
@@ -21885,7 +22250,7 @@ if (Math.abs(currentX) > 15) {
       switchDarkMode();
     }
 currentX = 0;
-  });
+  }, { passive: true });
 darkModeToggle?.addEventListener("click", () => {
     if (!isSliding) {
       switchDarkMode();
@@ -22747,15 +23112,21 @@ createdAt: groupData.lastMessageTime
     }, (err) => {
       console.warn('[GLOBAL INCOMING GROUPS] Listener notice:', err?.message);
     });
-// 4. Fallback badge polling loop
+// 4. Fallback badge polling loop (dirty-checked to avoid redundant style writes)
 if (!window._realtimePollInterval) {
+      window._lastNavChatsBadgeTotal = -1;
       window._realtimePollInterval = setInterval(() => {
         if (!myUID || document.hidden) return;
         const badges = document.querySelectorAll('#contactList .unread-badge');
         let total = 0;
-badges.forEach(b => { total += (parseInt(b.textContent, 10) || 0); });
-updateNavChatsBadge(total);
-      }, 2500);
+        for (let i = 0; i < badges.length; i++) {
+          total += (parseInt(badges[i].textContent, 10) || 0);
+        }
+        if (total !== window._lastNavChatsBadgeTotal) {
+          window._lastNavChatsBadgeTotal = total;
+          updateNavChatsBadge(total);
+        }
+      }, 3000);
     }
   } catch (err) {
     console.warn('[GLOBAL INCOMING] Setup notice:', err);
@@ -23069,22 +23440,20 @@ contactDataList.sort((a, b) => {
       const timeB = b.latestTime?.toDate ? b.latestTime.toDate() : (b.latestTime ? new Date(b.latestTime) : new Date(0));
 return timeB - timeA;
     });
-contactList.innerHTML = "";
-contactList.appendChild(chronexLi);
+const existingChronex = contactList.querySelector('li[data-chat-id="chronex-ai"]');
+if (!existingChronex) {
+  contactList.prepend(chronexLi);
+}
 window.loadedContactData = contactDataList;
 try {
       localStorage.setItem('nex_cached_contacts_' + myUID, JSON.stringify(contactDataList.slice(0, 10)));
     } catch (_) {}
 const seenContactIds = new Set();
+let insertAnchor = (contactList.querySelector('li[data-chat-id="chronex-ai"]') || chronexLi).nextSibling;
 contactDataList.forEach(data => {
       const { uid, name, pic, latestMsg, latestTime, unreadCount, isVerified, verificationBadge, online, lastSeen } = data;
 if (!uid || seenContactIds.has(uid)) return;
 seenContactIds.add(uid);
-const existingEl = contactList.querySelector(`li[data-chat-id="${CSS.escape(uid)}"]`);
-if (existingEl) existingEl.remove();
-const li = document.createElement("li");
-li.className = "chat-list-item chat-item";
-li.setAttribute('data-chat-id', uid);
 const isUserVerified = Boolean(isVerified || (verificationBadge && verificationBadge !== 'NONE'));
       let userAvatarBadgeHtml = '';
       let userVerifiedBadgeHtml = '';
@@ -23098,7 +23467,7 @@ const isPicValid = pic && typeof pic === 'string' &&
 (pic.startsWith('http://') || pic.startsWith('https://') || pic.startsWith('data:image/') || pic.startsWith('/') || pic.startsWith('./') || pic.endsWith('.jpg') || pic.endsWith('.png') || pic.endsWith('.webp') || pic.endsWith('.svg'));
 const safePic = escapeHtml(pic || '');
       let avatar = isPicValid
-? `<img src="${safePic}" class="chat-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}">` + `<div class="chat-avatar avatar-placeholder hidden" style="display:none !important; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
+? `<img src="${safePic}" class="chat-avatar" loading="lazy" decoding="async" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}">` + `<div class="chat-avatar avatar-placeholder hidden" style="display:none !important; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
 : `<div class="chat-avatar avatar-placeholder" style="background:#202c33; color:#e9edef; display:flex !important; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`;
 let lastMessageSnippet = "No messages yet";
       let lastMessageTime = "";
@@ -23150,6 +23519,56 @@ else lastMessageTime = date.toLocaleDateString('en-US', { month: 'short', day: '
         }
       }
 const unreadBadgeHTML = unreadCount > 0 ? `<div class="unread-badge" title="${unreadCount} unread">${unreadCount > 99 ? '99+' : unreadCount}</div>` : '';
+const rowSig = `${name}|${pic || ''}|${lastMessageSnippet}|${lastMessageTime}|${unreadCount}|${isContactOnline ? '1' : '0'}`;
+const existingEl = contactList.querySelector(`li[data-chat-id="${CSS.escape(uid)}"]`);
+if (existingEl && existingEl.dataset.boundDirect === 'true') {
+  if (existingEl.dataset.rowSig !== rowSig) {
+    existingEl.dataset.rowSig = rowSig;
+    const previewEl = existingEl.querySelector('.chat-preview');
+    if (previewEl && previewEl.innerHTML !== lastMessageSnippet) previewEl.innerHTML = lastMessageSnippet;
+    const timeEl = existingEl.querySelector('.chat-item-time');
+    if (timeEl) {
+      if (timeEl.textContent !== lastMessageTime) timeEl.textContent = lastMessageTime;
+      timeEl.classList.toggle('unread', unreadCount > 0);
+    }
+    const contentEl = existingEl.querySelector('.chat-item-content');
+    if (contentEl) contentEl.classList.toggle('unread', unreadCount > 0);
+    const beaconEl = existingEl.querySelector('.chat-online-beacon');
+    if (beaconEl) {
+      beaconEl.classList.toggle('is-online', isContactOnline);
+      beaconEl.style.setProperty('display', isContactOnline ? 'block' : 'none', 'important');
+    }
+    const timeContainer = existingEl.querySelector('.chat-time-container');
+    if (timeContainer) {
+      const oldBadge = timeContainer.querySelector('.unread-badge');
+      if (unreadCount > 0) {
+        const badgeText = unreadCount > 99 ? '99+' : String(unreadCount);
+        if (oldBadge) {
+          oldBadge.textContent = badgeText;
+        } else {
+          const nb = document.createElement('div');
+          nb.className = 'unread-badge';
+          nb.title = `${unreadCount} unread`;
+          nb.textContent = badgeText;
+          timeContainer.appendChild(nb);
+        }
+      } else if (oldBadge) {
+        oldBadge.remove();
+      }
+    }
+  }
+  if (existingEl !== insertAnchor) {
+    contactList.insertBefore(existingEl, insertAnchor);
+  }
+  insertAnchor = existingEl.nextSibling;
+  return;
+}
+if (existingEl) existingEl.remove();
+const li = document.createElement("li");
+li.className = "chat-list-item chat-item";
+li.setAttribute('data-chat-id', uid);
+li.dataset.boundDirect = 'true';
+li.dataset.rowSig = rowSig;
 li.innerHTML = `
 <div class="chat-avatar-container" style="position: relative;">
 ${avatar}
@@ -23213,8 +23632,8 @@ longPressTimer = null;
 const menuBtn = li.querySelector(".chat-menu-btn");
 if (menuBtn) {
         let menuBtnTouchMoved = false;
-menuBtn.addEventListener("touchstart", () => { menuBtnTouchMoved = false; });
-menuBtn.addEventListener("touchmove", () => { menuBtnTouchMoved = true; });
+menuBtn.addEventListener("touchstart", () => { menuBtnTouchMoved = false; }, { passive: true });
+menuBtn.addEventListener("touchmove", () => { menuBtnTouchMoved = true; }, { passive: true });
 menuBtn.addEventListener("click", (e) => {
           if (menuBtnTouchMoved) {
             menuBtnTouchMoved = false;
@@ -23224,7 +23643,8 @@ e.stopPropagation();
 if (typeof showChatContextMenu === 'function') showChatContextMenu(e, uid);
         });
       }
-contactList.appendChild(li);
+contactList.insertBefore(li, insertAnchor);
+insertAnchor = li.nextSibling;
     });
 // Update Bottom Nav Chats Unread Badge Pill
 const totalUnreadCount = contactDataList.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
@@ -24617,108 +25037,170 @@ setReplyTo(null);
     };
   }
 });
-function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
-  if (!wrapper || !bubble) return;
-if (bubble.dataset.swipeBound === 'true') return;
-bubble.dataset.swipeBound = 'true';
-// Do NOT use overflow:hidden on message bubble or wrapper so reply icon isn't cut
-bubble.style.overflow = 'visible';
-wrapper.style.overflow = 'visible';
-let replyIndicator = wrapper.querySelector('.swipe-reply-indicator');
-if (!replyIndicator) {
-    replyIndicator = document.createElement('div');
-replyIndicator.className = 'swipe-reply-indicator';
-replyIndicator.innerHTML = '<i class="fa-solid fa-reply"></i>';
-wrapper.appendChild(replyIndicator);
-  }
-replyIndicator.style.setProperty('left', '12px', 'important');
-replyIndicator.style.setProperty('right', 'auto', 'important');
-replyIndicator.style.opacity = '0';
-replyIndicator.style.transform = 'translateY(-50%) scale(0.5)';
-let startX = 0;
+function initNexDelegatedSwipeReply(containerEl) {
+  const container = containerEl || document.getElementById('messages-area');
+  if (!container || container.dataset.delegatedSwipeBound === 'true') return;
+  container.dataset.delegatedSwipeBound = 'true';
+
+  let activeBubble = null;
+  let activeWrapper = null;
+  let activeIndicator = null;
+  let startX = 0;
   let startY = 0;
   let isSwiping = false;
   let isLockedHorizontal = false;
   let hasTriggered = false;
-const HORIZONTAL_THRESHOLD = 80;
-  const VERTICAL_CANCEL_THRESHOLD = 30;
-const onTouchStart = (e) => {
+  let pendingRaf = false;
+  let latestDx = 0;
+  let cleanupTimer = null;
+
+  const HORIZONTAL_THRESHOLD = 66;
+  const VERTICAL_CANCEL_THRESHOLD = 28;
+
+  const ensureIndicator = (wrapper) => {
+    let ind = wrapper.querySelector('.swipe-reply-indicator');
+    if (!ind) {
+      ind = document.createElement('div');
+      ind.className = 'swipe-reply-indicator';
+      ind.innerHTML = '<i class="fa-solid fa-reply"></i>';
+      ind.style.setProperty('left', '12px', 'important');
+      ind.style.setProperty('right', 'auto', 'important');
+      ind.style.opacity = '0';
+      ind.style.transform = 'translate3d(0, -50%, 0) scale(0.45)';
+      wrapper.appendChild(ind);
+    }
+    return ind;
+  };
+
+  const applySwipeFrame = () => {
+    pendingRaf = false;
+    if (!activeBubble || !isLockedHorizontal) return;
+    // Elastic logarithmic rubber-band damping for buttery bubble feel
+    const dampedX = 62 * Math.log1p(Math.max(0, latestDx) / 38);
+    activeBubble.style.transform = `translate3d(${dampedX.toFixed(1)}px, 0, 0)`;
+    if (activeIndicator) {
+      const progress = Math.min(1, Math.max(0, latestDx / HORIZONTAL_THRESHOLD));
+      const pop = progress >= 1 ? 1.16 : (0.45 + progress * 0.6);
+      activeIndicator.style.opacity = progress.toFixed(2);
+      activeIndicator.style.transform = `translate3d(${(dampedX * 0.14).toFixed(1)}px, -50%, 0) scale(${pop.toFixed(2)})`;
+    }
+  };
+
+  const snapBack = () => {
+    const bubble = activeBubble;
+    const indicator = activeIndicator;
+    const wasLocked = isLockedHorizontal;
+    activeBubble = null;
+    activeWrapper = null;
+    activeIndicator = null;
+    isSwiping = false;
+    isLockedHorizontal = false;
+    latestDx = 0;
+
+    if (bubble) {
+      if (wasLocked) {
+        // Better-than-WhatsApp damped spring overshoot release
+        bubble.style.transition = 'transform 340ms cubic-bezier(0.22, 1.35, 0.36, 1)';
+        bubble.style.transform = 'translate3d(0px, 0, 0)';
+        setTimeout(() => {
+          bubble.style.willChange = 'auto';
+          bubble.style.transition = '';
+        }, 350);
+      } else {
+        bubble.style.willChange = 'auto';
+      }
+    }
+    if (indicator) {
+      indicator.classList.remove('active');
+      indicator.style.transition = 'transform 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease';
+      indicator.style.opacity = '0';
+      indicator.style.transform = 'translate3d(0, -50%, 0) scale(0.45)';
+    }
+  };
+
+  container.addEventListener('touchstart', (e) => {
     if (!e.touches || e.touches.length !== 1) return;
-startX = e.touches[0].clientX;
-startY = e.touches[0].clientY;
-isSwiping = true;
-isLockedHorizontal = false;
-hasTriggered = false;
-bubble.style.transition = 'none';
-  };
-const onTouchMove = (e) => {
-    if (!isSwiping || hasTriggered) return;
-if (!e.touches || e.touches.length !== 1) return;
-const currentX = e.touches[0].clientX;
-    const currentY = e.touches[0].clientY;
-    const dx = currentX - startX;
-    const dy = currentY - startY;
-// If vertical > 30px, cancel swipe, allow scroll
-if (Math.abs(dy) > VERTICAL_CANCEL_THRESHOLD) {
-      isSwiping = false;
-isLockedHorizontal = false;
-bubble.style.transition = 'transform 0.2s ease';
-bubble.style.transform = 'translateX(0px)';
-replyIndicator.style.opacity = '0';
-return;
-    }
-if (!isLockedHorizontal) {
-      if (dx > 12 && Math.abs(dy) < 15) {
+    const targetBubble = e.target.closest('.message-bubble');
+    if (!targetBubble || !targetBubble._nexSwipeData) return;
+    if (cleanupTimer) { clearTimeout(cleanupTimer); cleanupTimer = null; }
+
+    activeBubble = targetBubble;
+    activeWrapper = targetBubble._nexSwipeData.wrapper;
+    activeIndicator = null;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isSwiping = true;
+    isLockedHorizontal = false;
+    hasTriggered = false;
+    latestDx = 0;
+  }, { passive: true });
+
+  container.addEventListener('touchmove', (e) => {
+    if (!isSwiping || !activeBubble || !e.touches || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+
+    if (!isLockedHorizontal) {
+      if (Math.abs(dy) > VERTICAL_CANCEL_THRESHOLD || dx < -12) {
+        snapBack();
+        return;
+      }
+      if (dx > 12 && dx > Math.abs(dy) * 1.25) {
         isLockedHorizontal = true;
-      } else if (dx < -12) {
-        isSwiping = false;
-return;
+        activeBubble.style.transition = 'none';
+        activeBubble.style.willChange = 'transform';
+        activeIndicator = ensureIndicator(activeWrapper);
+        activeIndicator.style.transition = 'none';
+      } else {
+        return;
       }
     }
-if (isLockedHorizontal && dx > 0) {
-      if (e.cancelable) e.preventDefault();
-const translate = Math.min(45, dx * 0.45);
-bubble.style.transform = `translateX(${translate}px)`;
-const progress = Math.min(1, Math.max(0, dx / HORIZONTAL_THRESHOLD));
-replyIndicator.style.opacity = String(progress);
-replyIndicator.style.transform = `translateY(-50%) scale(${0.5 + progress * 0.5})`;
-// Trigger condition: horizontal > 80px AND vertical < 30px
-if (dx >= HORIZONTAL_THRESHOLD && Math.abs(dy) < VERTICAL_CANCEL_THRESHOLD && !hasTriggered) {
+
+    if (isLockedHorizontal && dx > 0) {
+      latestDx = dx;
+      if (!pendingRaf) {
+        pendingRaf = true;
+        requestAnimationFrame(applySwipeFrame);
+      }
+      if (dx >= HORIZONTAL_THRESHOLD && Math.abs(dy) < VERTICAL_CANCEL_THRESHOLD && !hasTriggered) {
         hasTriggered = true;
-replyIndicator.classList.add('active');
-if (navigator.vibrate) navigator.vibrate(25);
-if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
-openReplyForMessage(msg, isOwn);
+        if (activeIndicator) activeIndicator.classList.add('active');
+        if (navigator.vibrate) try { navigator.vibrate(15); } catch (_) {}
+        if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
+        const swipeMeta = activeBubble._nexSwipeData;
+        if (swipeMeta) openReplyForMessage(swipeMeta.msg, swipeMeta.isOwn);
       }
     }
-  };
-const onTouchEnd = (e) => {
-    if (isSwiping || isLockedHorizontal) {
-      const clientX = (e && e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : 0;
-if (clientX && (clientX - startX > 80) && !hasTriggered) {
+  }, { passive: true });
+
+  const onEndOrCancel = (e) => {
+    if (!isSwiping && !isLockedHorizontal) return;
+    if (activeBubble && !hasTriggered && e && e.changedTouches && e.changedTouches[0]) {
+      const dx = e.changedTouches[0].clientX - startX;
+      if (dx >= HORIZONTAL_THRESHOLD && isLockedHorizontal) {
         hasTriggered = true;
-replyIndicator.classList.add('active');
-if (navigator.vibrate) navigator.vibrate(25);
-if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
-openReplyForMessage(msg, isOwn);
+        if (activeIndicator) activeIndicator.classList.add('active');
+        if (navigator.vibrate) try { navigator.vibrate(15); } catch (_) {}
+        if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
+        const swipeMeta = activeBubble._nexSwipeData;
+        if (swipeMeta) openReplyForMessage(swipeMeta.msg, swipeMeta.isOwn);
       }
     }
-isSwiping = false;
-isLockedHorizontal = false;
-bubble.style.transition = 'transform 0.15s ease';
-bubble.style.transform = 'translateX(0px)';
-setTimeout(() => {
-      replyIndicator.style.opacity = '0';
-replyIndicator.classList.remove('active');
-replyIndicator.style.transform = 'translateY(-50%) scale(0.5)';
-    }, 150);
-startX = 0;
-startY = 0;
+    snapBack();
   };
-bubble.addEventListener('touchstart', onTouchStart, { passive: true });
-bubble.addEventListener('touchmove', onTouchMove, { passive: false });
-bubble.addEventListener('touchend', onTouchEnd, { passive: true });
-bubble.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
+  container.addEventListener('touchend', onEndOrCancel, { passive: true });
+  container.addEventListener('touchcancel', onEndOrCancel, { passive: true });
+}
+
+function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
+  if (!wrapper || !bubble) return;
+  bubble._nexSwipeData = { wrapper, msg, isOwn };
+  if (bubble.dataset.swipeBound === 'true') return;
+  bubble.dataset.swipeBound = 'true';
+  // Ensure parent container has single delegated zero-block spring controller
+  const parentStream = wrapper.parentElement || document.getElementById('messages-area');
+  initNexDelegatedSwipeReply(parentStream);
 }
 // AI Polish Wand Functionality (Ultra-Fast 0ms Local + Asynchronous Cloud AI)
 async function triggerAiPolishDraft() {
@@ -25418,6 +25900,110 @@ if (chkGyro.checked && !gyroBound && window.DeviceOrientationEvent) {
 gyroBound = true;
       }
     });
+  }
+// 9. Adaptive Performance Tier (Low-End Zero-Blur vs High-End Android Liquid Glass Presets)
+  const applyDisplayTierClasses = () => {
+    const isLowHardware = (typeof navigator !== 'undefined') && (
+      (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+      (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+    );
+    const savedLowEnd = localStorage.getItem('nex_low_end_mode');
+    const savedGlass = localStorage.getItem('nex_liquid_glass_fx');
+    const glassPreset = localStorage.getItem('nex_glass_preset') || 'material';
+    const lowEndActive = savedLowEnd !== null ? (savedLowEnd === 'true') : Boolean(isLowHardware);
+    const glassActive = !lowEndActive && (savedGlass === 'true');
+    if (document.body) {
+      document.body.classList.toggle('nex-low-end', lowEndActive);
+      document.body.classList.toggle('nex-liquid-glass', glassActive);
+      document.body.dataset.glassPreset = glassPreset;
+    }
+    return { lowEndActive, glassActive, glassPreset };
+  };
+  const { lowEndActive: initLowEnd, glassActive: initGlass, glassPreset: initPreset } = applyDisplayTierClasses();
+  const chkGlass = document.getElementById('chkLiquidGlassFx');
+  const chkLowEnd = document.getElementById('chkLowEndFastMode');
+  const selGlassPreset = document.getElementById('selLiquidGlassPreset');
+  if (selGlassPreset && !selGlassPreset.dataset.bound) {
+    selGlassPreset.dataset.bound = 'true';
+    selGlassPreset.value = initPreset || 'material';
+    selGlassPreset.addEventListener('change', () => {
+      const nextPreset = selGlassPreset.value || 'material';
+      localStorage.setItem('nex_glass_preset', nextPreset);
+      localStorage.setItem('nex_liquid_glass_fx', 'true');
+      localStorage.setItem('nex_low_end_mode', 'false');
+      if (chkGlass) chkGlass.checked = true;
+      if (chkLowEnd) chkLowEnd.checked = false;
+      applyDisplayTierClasses();
+      if (typeof showNotif === 'function') {
+        showNotif(`Glass Display Preset: ${selGlassPreset.options[selGlassPreset.selectedIndex]?.text || nextPreset}`, 'success', 2000);
+      }
+    });
+  }
+  if (chkGlass && !chkGlass.dataset.bound) {
+    chkGlass.dataset.bound = 'true';
+    chkGlass.checked = initGlass;
+    chkGlass.addEventListener('change', () => {
+      const enabled = chkGlass.checked;
+      localStorage.setItem('nex_liquid_glass_fx', enabled ? 'true' : 'false');
+      if (enabled && chkLowEnd && chkLowEnd.checked) {
+        chkLowEnd.checked = false;
+        localStorage.setItem('nex_low_end_mode', 'false');
+      } else if (enabled && localStorage.getItem('nex_low_end_mode') === null) {
+        localStorage.setItem('nex_low_end_mode', 'false');
+      }
+      applyDisplayTierClasses();
+      if (typeof showNotif === 'function') {
+        showNotif(enabled ? 'Liquid Glass FX Activated' : 'Liquid Glass FX Disabled', 'success', 2000);
+      }
+    });
+  }
+  if (chkLowEnd && !chkLowEnd.dataset.bound) {
+    chkLowEnd.dataset.bound = 'true';
+    chkLowEnd.checked = initLowEnd;
+    chkLowEnd.addEventListener('change', () => {
+      const enabled = chkLowEnd.checked;
+      localStorage.setItem('nex_low_end_mode', enabled ? 'true' : 'false');
+      if (enabled && chkGlass && chkGlass.checked) {
+        chkGlass.checked = false;
+        localStorage.setItem('nex_liquid_glass_fx', 'false');
+      }
+      applyDisplayTierClasses();
+      if (typeof showNotif === 'function') {
+        showNotif(enabled ? 'Low-End Turbo Boost (Zero Blur) Enabled' : 'Standard Display Pipeline Active', 'info', 2000);
+      }
+    });
+  }
+}
+window.setupCyberLabDisplayPanel = setupCyberLabDisplayPanel;
+// Eagerly apply hardware display tier on boot before settings drawer is opened
+if (typeof document !== 'undefined') {
+  const applyBootTier = () => {
+    try {
+      const isLowHw = (typeof navigator !== 'undefined') && (
+        (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+        (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+      );
+      const savedLow = localStorage.getItem('nex_low_end_mode');
+      const savedGlass = localStorage.getItem('nex_liquid_glass_fx');
+      const preset = localStorage.getItem('nex_glass_preset') || 'material';
+      const lowActive = savedLow !== null ? (savedLow === 'true') : Boolean(isLowHw);
+      const glassActive = !lowActive && (savedGlass === 'true');
+      if (document.body) {
+        document.body.classList.toggle('nex-low-end', lowActive);
+        document.body.classList.toggle('nex-liquid-glass', glassActive);
+        document.body.dataset.glassPreset = preset;
+      }
+      if (document.readyState !== 'loading') {
+        setupCyberLabDisplayPanel();
+      }
+    } catch (_) {}
+  };
+  if (document.body) applyBootTier();
+  else document.addEventListener('DOMContentLoaded', applyBootTier);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      try { setupCyberLabDisplayPanel(); } catch (_) {}
+    }, { once: true });
   }
 }
 // =============================================================================

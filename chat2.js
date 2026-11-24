@@ -936,11 +936,17 @@ export async function translateMessageElement(bubbleEl, requestedTarget = null) 
 /**
  * Message Translation Button Injector
  */
-export function injectTranslateButtons() {
-  const bubbles = document.querySelectorAll('.message-bubble');
+export function injectTranslateButtons(targetRoot = null) {
+  const scope = targetRoot && targetRoot.querySelectorAll ? targetRoot : document.getElementById('messages-area');
+  if (!scope) return;
+  const bubbles = scope.classList?.contains('message-bubble') ? [scope] : scope.querySelectorAll('.message-bubble');
   bubbles.forEach(b => {
-    if (b.querySelector('.nex-msg-translate-btn')) return;
+    if (b.dataset.transInjected === 'true' || b.querySelector('.nex-msg-translate-btn')) {
+      b.dataset.transInjected = 'true';
+      return;
+    }
     if (b.classList.contains('is-sticker-message') || b.classList.contains('is-clip-message')) return;
+    b.dataset.transInjected = 'true';
 
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -1058,20 +1064,30 @@ export function initChat2() {
   syncLocalChatsToDOM();
   injectTranslateButtons();
 
-  // Watch for newly appended messages reactively instead of polling every second
+  // Watch ONLY direct childList additions (zero subtree/countdown thrashing)
   const messagesArea = document.getElementById('messages-area') || document.querySelector('.chat-messages');
   if (messagesArea && window.MutationObserver) {
+    const pendingNodes = [];
     let translateScheduled = false;
-    const msgObserver = new MutationObserver(() => {
-      if (!translateScheduled) {
+    const msgObserver = new MutationObserver((mutations) => {
+      for (let i = 0; i < mutations.length; i++) {
+        const added = mutations[i].addedNodes;
+        for (let j = 0; j < added.length; j++) {
+          if (added[j].nodeType === 1) pendingNodes.push(added[j]);
+        }
+      }
+      if (pendingNodes.length && !translateScheduled) {
         translateScheduled = true;
         requestAnimationFrame(() => {
-          injectTranslateButtons();
+          const batch = pendingNodes.splice(0, pendingNodes.length);
+          for (let i = 0; i < batch.length; i++) {
+            injectTranslateButtons(batch[i]);
+          }
           translateScheduled = false;
         });
       }
     });
-    msgObserver.observe(messagesArea, { childList: true, subtree: true });
+    msgObserver.observe(messagesArea, { childList: true });
   }
 
   // React to local chats change via custom event

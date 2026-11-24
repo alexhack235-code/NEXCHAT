@@ -206,7 +206,7 @@ body.light-theme,
   gap: 10px;
   cursor: pointer;
   box-shadow: 0 4px 18px var(--x-green-glow);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .x-nav-drop-btn:hover {
@@ -516,7 +516,7 @@ body.light-theme,
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .x-topic-chip:hover {
@@ -663,7 +663,7 @@ body.light-theme,
   font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   margin-left: 4px;
 }
 
@@ -912,7 +912,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .x-voice-record-btn.recording {
@@ -1185,7 +1185,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   font-size: 14px;
 }
 
@@ -1512,7 +1512,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   padding: 10px 16px;
   border: 1px solid transparent;
   color: var(--x-text-secondary);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .x-search-box:focus-within {
@@ -1571,7 +1571,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   font-weight: 700;
   cursor: pointer;
   align-self: flex-start;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .x-subscribe-btn:hover {
@@ -1708,7 +1708,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .x-follow-btn:hover {
@@ -1756,7 +1756,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   box-shadow: 0 4px 18px var(--x-green-glow);
   cursor: pointer;
   z-index: 100;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .global-drop-mobile-fab:hover {
@@ -1874,7 +1874,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .x-thread-back-btn:hover,
@@ -2094,7 +2094,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   justify-content: center;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .x-thread-tool-btn:hover {
@@ -2110,7 +2110,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .x-thread-reply-btn:disabled {
@@ -2239,7 +2239,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   color: var(--x-text-secondary);
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   padding: 4px;
 }
 
@@ -2456,7 +2456,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   border-radius: 9999px;
   border: none;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .x-profile-follow-btn:hover {
@@ -2489,7 +2489,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .x-profile-dm-btn:hover,
@@ -2602,7 +2602,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   white-space: nowrap;
   padding: 0 6px;
 }

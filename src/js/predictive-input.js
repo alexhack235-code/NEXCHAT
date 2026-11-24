@@ -702,16 +702,33 @@
       }
 
       // 3. Attach keyboard listeners for Sub-Millisecond Inline Autocorrect on Spacebar & Punctuation
+      this._layoutHidesBar = null;
       this.input.addEventListener('keydown', (e) => this.handleKeyDown(e));
-      this.input.addEventListener('input', (e) => this.handleTyping(e));
-      this.input.addEventListener('focus', () => this.computePredictions(0));
+      this.input.addEventListener('input', (e) => this.handleTyping(e), { passive: true });
+      this.input.addEventListener('focus', () => {
+        if (!this._isBarSuppressedByLayout()) this.computePredictions(0);
+      }, { passive: true });
 
       // Hide suggestions when clicking outside
       document.addEventListener('click', (e) => {
         if (!e.target.closest('#predictiveWordBar') && !e.target.closest('#message-input')) {
-          if (this.bar) this.bar.style.display = 'none';
+          if (this.bar && this.bar.style.display !== 'none') this.bar.style.display = 'none';
         }
       });
+    }
+
+    _isBarSuppressedByLayout() {
+      if (this._layoutHidesBar !== null) return this._layoutHidesBar;
+      if (!this.bar || typeof window === 'undefined' || !window.getComputedStyle) {
+        this._layoutHidesBar = false;
+        return false;
+      }
+      const prev = this.bar.style.display;
+      this.bar.style.display = 'flex';
+      const computed = window.getComputedStyle(this.bar).display;
+      this.bar.style.display = prev;
+      this._layoutHidesBar = (computed === 'none');
+      return this._layoutHidesBar;
     }
 
     /**
@@ -830,7 +847,11 @@
         undoPosition: newCursor
       };
 
-      this.input.dispatchEvent(new Event('input', { bubbles: true }));
+      if (!this._isBarSuppressedByLayout()) {
+        this.computePredictions();
+      } else if (typeof window.adjustTextareaHeight === 'function') {
+        requestAnimationFrame(() => window.adjustTextareaHeight());
+      }
       this.flashCorrectionFeedback(rawWord, replacement);
 
       if (navigator.vibrate) {
@@ -919,13 +940,14 @@
      * Real-time typing handler with ultra-fast 8ms micro-coalesce
      */
     handleTyping() {
+      if (this._isBarSuppressedByLayout()) return;
       clearTimeout(this.debounceTimer);
       // 35ms fluid coalesce prevents thread congestion and keystroke lag
       this.debounceTimer = setTimeout(() => this.computePredictions(), 35);
     }
 
     computePredictions(delayOverride) {
-      if (!this.input || !this.chipsContainer) return;
+      if (!this.input || !this.chipsContainer || this._isBarSuppressedByLayout()) return;
       const val = this.input.value;
 
       if (!val || !val.trim()) {

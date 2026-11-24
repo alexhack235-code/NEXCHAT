@@ -29,24 +29,7 @@
     }
 
     bindUI() {
-      // Observer to detect newly rendered audio containers and inject chapter navigation
-      const observer = new MutationObserver((mutations) => {
-        for (const m of mutations) {
-          m.addedNodes.forEach(node => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              this.inspectAndMountChapters(node);
-            }
-          });
-        }
-      });
-
-      const target = document.getElementById('messages-area') || document.body;
-      observer.observe(target, { childList: true, subtree: true });
-
-      // Initial pass
-      document.querySelectorAll('.message-bubble, .audio-bubble, .voice-note-card').forEach(el => {
-        this.inspectAndMountChapters(el);
-      });
+      // Lazy on-demand chapter mounting (no global MutationObserver subtree overhead)
     }
 
     /**

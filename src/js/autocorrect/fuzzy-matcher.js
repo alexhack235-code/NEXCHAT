@@ -101,32 +101,68 @@
       this._row1 = new Float32Array(34);
       this._row2 = new Float32Array(34);
 
-      // Lazy index placeholders (0ms startup latency)
+      // Lazy index placeholders (0ms startup & 0ms typing latency)
       this.wordsByLength = null;
       this.soundexMap = null;
       this._isIndexed = false;
+      this._indexingInProgress = false;
+      this._scheduleIdleIndex();
     }
 
-    _ensureIndexed() {
-      if (this._isIndexed) return;
-      this._isIndexed = true;
+    _scheduleIdleIndex() {
+      if (this._isIndexed || this._indexingInProgress) return;
+      this._indexingInProgress = true;
       this.wordsByLength = Object.create(null);
       this.soundexMap = Object.create(null);
 
-      const maxSoundexWords = Math.min(6000, this.wordsList.length);
-      for (let i = 0; i < this.wordsList.length; i++) {
-        const w = this.wordsList[i];
-        const len = w.length;
-        if (!this.wordsByLength[len]) this.wordsByLength[len] = [];
-        this.wordsByLength[len].push({ word: w, rank: i });
+      let cursor = 0;
+      const total = this.wordsList.length;
+      const maxSoundexWords = Math.min(6000, total);
+      const CHUNK_SIZE = 2500;
 
-        if (i < maxSoundexWords) {
-          const sCode = soundex(w);
-          if (!this.soundexMap[sCode]) this.soundexMap[sCode] = [];
-          if (this.soundexMap[sCode].length < 4) {
-            this.soundexMap[sCode].push(w);
+      const processChunk = (deadline) => {
+        const end = Math.min(cursor + CHUNK_SIZE, total);
+        while (cursor < end) {
+          const w = this.wordsList[cursor];
+          const len = w.length;
+          if (!this.wordsByLength[len]) this.wordsByLength[len] = [];
+          this.wordsByLength[len].push({ word: w, rank: cursor });
+
+          if (cursor < maxSoundexWords) {
+            const sCode = soundex(w);
+            if (!this.soundexMap[sCode]) this.soundexMap[sCode] = [];
+            if (this.soundexMap[sCode].length < 4) {
+              this.soundexMap[sCode].push(w);
+            }
+          }
+          cursor++;
+          if (deadline && typeof deadline.timeRemaining === 'function' && deadline.timeRemaining() < 2 && cursor < end) {
+            break;
           }
         }
+        if (cursor < total) {
+          if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+            window.requestIdleCallback(processChunk, { timeout: 600 });
+          } else {
+            setTimeout(() => processChunk(null), 32);
+          }
+        } else {
+          this._isIndexed = true;
+          this._indexingInProgress = false;
+        }
+      };
+
+      if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(processChunk, { timeout: 800 });
+      } else {
+        setTimeout(() => processChunk(null), 200);
+      }
+    }
+
+    _ensureIndexed() {
+      // Non-blocking: warm chunks asynchronously via _scheduleIdleIndex()
+      if (!this._isIndexed && !this._indexingInProgress) {
+        this._scheduleIdleIndex();
       }
     }
 
@@ -265,7 +301,7 @@
       }
 
       // D. Fallback if candidate pool is small (< 10): sample top 60 frequent words of matching length
-      if (candidates.size < 10 && this.wordsByLength) {
+      if (candidates.size < 10 && this._isIndexed && this.wordsByLength) {
         const bucket = this.wordsByLength[wLen];
         if (bucket) {
           const take = Math.min(bucket.length, 60);
@@ -297,7 +333,7 @@
       }
 
       // 6. Phonetic Soundex fallback for pronounced words (e.g. 'fon' -> 'phone', 'enuf' -> 'enough')
-      if (!bestCandidate) {
+      if (!bestCandidate && this._isIndexed && this.soundexMap) {
         const sCode = soundex(word);
         if (this.soundexMap[sCode] && this.soundexMap[sCode].length > 0) {
           bestCandidate = this.soundexMap[sCode][0];

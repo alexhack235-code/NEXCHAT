@@ -268,32 +268,154 @@ export async function rejectPairingSession(sessionId) {
   });
 }
 
+export function getOrCreateDeviceSessionId() {
+  try {
+    let id = localStorage.getItem('nex_device_session_id');
+    if (!id) {
+      const rand = (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+        ? crypto.randomUUID().slice(0, 12)
+        : Math.random().toString(36).slice(2, 12);
+      id = `dev_${Date.now().toString(36)}_${rand}`;
+      localStorage.setItem('nex_device_session_id', id);
+    }
+    return id;
+  } catch (_) {
+    return `dev_${Date.now().toString(36)}`;
+  }
+}
+
+export function getCachedRememberedDevices(uid) {
+  if (!uid) return [];
+  try {
+    const raw = localStorage.getItem(`nex_remembered_devices_${uid}`);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveCachedRememberedDevices(uid, list) {
+  if (!uid || !Array.isArray(list)) return;
+  try {
+    localStorage.setItem(`nex_remembered_devices_${uid}`, JSON.stringify(list));
+  } catch (_) {}
+}
+
 /**
- * Retrieves all active linked devices for a user.
+ * Automatically registers and remembers the current logged-in device in Firestore & local cache.
+ */
+export async function registerCurrentLoggedDevice(uid, userMeta = {}) {
+  if (!uid) return null;
+  const sessionId = getOrCreateDeviceSessionId();
+  const deviceInfo = detectDeviceInfo();
+  const isCapacitor = !!(typeof window !== 'undefined' && (window.Capacitor || window.location?.protocol === 'capacitor:'));
+  const label = isCapacitor ? `NEXCHAT App (${deviceInfo.os})` : (deviceInfo.label || 'Web Browser');
+  const regFlagKey = `nex_dev_registered_${uid}_${sessionId}`;
+  const isFirstReg = !localStorage.getItem(regFlagKey);
+
+  const localEntry = {
+    id: sessionId,
+    sessionId,
+    label,
+    deviceType: isCapacitor ? 'Mobile' : (deviceInfo.deviceType || 'Desktop'),
+    browser: isCapacitor ? 'Capacitor WebView' : (deviceInfo.browser || 'Browser'),
+    os: deviceInfo.os || 'OS',
+    screen: deviceInfo.screen || '',
+    isPrimaryAuth: true,
+    status: 'active',
+    lastActiveMs: Date.now()
+  };
+
+  try {
+    const existing = getCachedRememberedDevices(uid).filter(d => d && (d.sessionId || d.id) !== sessionId);
+    saveCachedRememberedDevices(uid, [localEntry, ...existing].slice(0, 15));
+  } catch (_) {}
+
+  try {
+    const deviceRecordRef = doc(db, 'users', uid, 'linkedDevices', sessionId);
+    const payload = {
+      sessionId,
+      label: localEntry.label,
+      deviceType: localEntry.deviceType,
+      browser: localEntry.browser,
+      os: localEntry.os,
+      screen: localEntry.screen,
+      isPrimaryAuth: true,
+      status: 'active',
+      email: userMeta.email || '',
+      username: userMeta.username || '',
+      lastActive: serverTimestamp(),
+      lastActiveMs: Date.now(),
+    };
+    if (isFirstReg) {
+      payload.linkedAt = serverTimestamp();
+    }
+    await setDoc(deviceRecordRef, payload, { merge: true });
+    try { localStorage.setItem(regFlagKey, '1'); } catch (_) {}
+  } catch (err) {
+    console.warn('[LINK-DEVICE] Remember device sync notice:', err?.message);
+  }
+  return localEntry;
+}
+
+/**
+ * Retrieves all active linked & remembered logged devices for a user.
  */
 export async function getLinkedDevices(uid) {
   if (!uid) return [];
   const q = query(collection(db, 'users', uid, 'linkedDevices'));
   const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const docs = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(d => d.status !== 'revoked');
+  saveCachedRememberedDevices(uid, docs);
+  return docs;
 }
 
 /**
- * Revokes / unlinks a device remotely.
+ * Revokes / unlinks a remembered device remotely.
  */
 export async function unlinkDevice(uid, sessionId) {
   if (!uid || !sessionId) return;
 
-  // 1. Delete from user's linkedDevices collection
+  try {
+    const cached = getCachedRememberedDevices(uid).filter(d => (d.sessionId || d.id) !== sessionId);
+    saveCachedRememberedDevices(uid, cached);
+    localStorage.removeItem(`nex_dev_registered_${uid}_${sessionId}`);
+  } catch (_) {}
+
+  // 1. Mark revoked & delete from user's linkedDevices collection
   await deleteDoc(doc(db, 'users', uid, 'linkedDevices', sessionId)).catch(() => {});
 
-  // 2. Mark session doc as revoked to immediately kick the secondary device
+  // 2. Mark QR pairing session doc as revoked if present
   try {
     await updateDoc(doc(db, 'link_sessions', sessionId), {
       status: 'revoked',
       revokedAt: serverTimestamp(),
     });
   } catch {}
+}
+
+/**
+ * Listens for remote logout / revocation on this device's remembered device record.
+ */
+export function listenForCurrentDeviceRevocation(uid, onRevoked) {
+  if (!uid) return () => {};
+  const sessionId = getOrCreateDeviceSessionId();
+  let hadDoc = false;
+  return onSnapshot(doc(db, 'users', uid, 'linkedDevices', sessionId), (snap) => {
+    if (snap.exists()) {
+      hadDoc = true;
+      if (snap.data()?.status === 'revoked') {
+        try { localStorage.removeItem(`nex_dev_registered_${uid}_${sessionId}`); } catch (_) {}
+        if (onRevoked) onRevoked();
+      }
+    } else if (hadDoc) {
+      try { localStorage.removeItem(`nex_dev_registered_${uid}_${sessionId}`); } catch (_) {}
+      if (onRevoked) onRevoked();
+    }
+  }, () => {});
 }
 
 /**

@@ -189,10 +189,11 @@ async function open(groupId, messagesContainer, options = {}) {
     _scroller.setItems(processed);
   }
 
-  // Initialize read receipt observer
-  _readObserver = createReadObserver(messagesContainer, async (messageId) => {
+  // Initialize read receipt observer (debounced batched Firestore commits)
+  _readObserver = createReadObserver(messagesContainer, async (messageIds) => {
     try {
-      await batchMarkAsRead([messageId], currentUid, db);
+      const ids = Array.isArray(messageIds) ? messageIds : [messageIds];
+      if (ids.length > 0) await batchMarkAsRead(ids, currentUid, db);
     } catch (e) {
       // Silent fail for read receipts
     }
@@ -241,11 +242,49 @@ async function open(groupId, messagesContainer, options = {}) {
   });
   _storeUnsubs.push(msgSub);
 
-  _storeUnsubs.push(groupStore.subscribe('members', () => {
-    if (_scroller && groupStore.getState().messages) {
-      const processed = _processMessages(groupStore.getState().messages, currentUid);
-      _scroller.setItems(processed);
-    }
+  _storeUnsubs.push(groupStore.subscribe('members', (members) => {
+    if (!_scroller || !_scroller._rendered || !members || members.size === 0) return;
+    _scroller._rendered.querySelectorAll('.nex-msg-wrapper[data-sender-id]').forEach((wrapper) => {
+      const uid = wrapper.dataset.senderId;
+      const profile = uid ? members.get(uid) : null;
+      if (!profile) return;
+      const name = profile.displayName || profile.username;
+      const handle = profile.username ? `@${String(profile.username).replace(/^@/, '')}` : '';
+      const nameEl = wrapper.querySelector('.nex-msg-sender-name');
+      if (nameEl && name) {
+        const desired = `~ ${String(name).trim().replace(/^~\s*/, '')}`;
+        if (nameEl.textContent !== desired) nameEl.textContent = desired;
+      }
+      const phoneEl = wrapper.querySelector('.nex-msg-sender-phone');
+      if (phoneEl && handle && phoneEl.textContent !== handle) {
+        phoneEl.textContent = handle;
+      }
+      if (profile.avatar && profile.avatar !== 'favicon.png' && profile.avatar !== 'logo.jpg' && profile.avatar !== 'default-avatar.png') {
+        const avatarWrap = wrapper.querySelector('.nex-msg-avatar-wrap');
+        if (avatarWrap && avatarWrap.style.visibility !== 'hidden') {
+          let img = avatarWrap.querySelector('img.nex-msg-avatar');
+          const fallback = avatarWrap.querySelector('.nex-msg-avatar-fallback');
+          if (img) {
+            if (img.getAttribute('src') !== profile.avatar) img.src = profile.avatar;
+            img.style.display = '';
+            if (fallback) fallback.style.display = 'none';
+          } else if (fallback) {
+            img = document.createElement('img');
+            img.className = 'nex-msg-avatar';
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            img.alt = name || 'User';
+            img.src = profile.avatar;
+            img.onerror = function() {
+              this.style.display = 'none';
+              fallback.style.display = 'flex';
+            };
+            fallback.style.display = 'none';
+            avatarWrap.insertBefore(img, fallback);
+          }
+        }
+      }
+    });
   }));
 
   _storeUnsubs.push(groupStore.subscribe('typingUsers', (typingUsers) => {

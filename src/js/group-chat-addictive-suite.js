@@ -289,53 +289,79 @@
         }
       }
 
-      // Hook active chat switch
-      setInterval(() => {
+      this._lastHudVisibility = null;
+      this._lastHudSignature = null;
+
+      const syncHudState = () => {
         const isGroup = window.currentChatType === 'group' && !!window.currentChatUser;
+        if (this._lastHudVisibility !== isGroup) {
+          this._lastHudVisibility = isGroup;
+          bar.style.display = isGroup ? 'flex' : 'none';
+        }
         if (isGroup) {
           this.currentGroupId = window.currentChatUser;
           const data = this.getGroupSynergyData(this.currentGroupId);
-          bar.style.display = 'flex';
           this.updateSynergyHudDisplay(data);
-        } else {
-          bar.style.display = 'none';
         }
-      }, 1000);
+      };
+
+      syncHudState();
+      // Coalesced lightweight guard (dirty-checked inside updateSynergyHudDisplay, 0 DOM work when idle)
+      setInterval(syncHudState, 2000);
     }
 
     updateSynergyHudDisplay(data) {
       const bar = document.getElementById('groupSynergyHudBar');
-      if (!bar) return;
-
-      const pct = Math.min(100, Math.floor((data.xp / data.targetXp) * 100));
+      if (!bar || !data) return;
 
       const isCollapsed = localStorage.getItem('nex_group_synergy_collapsed') === 'true';
-      if (isCollapsed) {
-        bar.classList.add('collapsed');
-      } else {
-        bar.classList.remove('collapsed');
+      const sig = `${this.currentGroupId || ''}|${data.level}|${data.xp}|${data.targetXp}|${data.streakDays}|${isCollapsed ? '1' : '0'}`;
+      if (this._lastHudSignature === sig) return;
+      this._lastHudSignature = sig;
+
+      const pct = Math.min(100, Math.floor((data.xp / data.targetXp) * 100));
+      bar.classList.toggle('collapsed', isCollapsed);
+
+      if (!bar.dataset.hudBuilt) {
+        bar.dataset.hudBuilt = 'true';
+        bar.innerHTML = `
+          <div class="synergy-level-badge">
+            <i class="fa-solid fa-shield-halved" style="color: #00ff66;"></i>
+            <span class="synergy-level-label"></span>
+          </div>
+          <div class="synergy-progress-wrap">
+            <div class="synergy-progress-bar"></div>
+            <span class="synergy-xp-text"></span>
+          </div>
+          <div class="synergy-streak-pill">
+            <i class="fa-solid fa-fire" style="color: #f97316;"></i>
+            <span class="synergy-streak-label"></span>
+          </div>
+          <button type="button" class="btn-group-hall-of-fame" title="Hall of Fame">
+            <i class="fa-solid fa-trophy" style="color: #ffd700;"></i>
+          </button>
+          <button type="button" class="btn-group-synergy-toggle" style="background:transparent;border:none;color:#8696a0;cursor:pointer;padding:2px 4px;" title="Hide synergy bar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        `;
+        const hofBtn = bar.querySelector('.btn-group-hall-of-fame');
+        if (hofBtn) hofBtn.addEventListener('click', () => window.NexGroupChatSuite?.openHallOfFameModal?.());
+        const toggleBtn = bar.querySelector('.btn-group-synergy-toggle');
+        if (toggleBtn) toggleBtn.addEventListener('click', () => {
+          localStorage.setItem('nex_group_synergy_collapsed', 'true');
+          bar.classList.add('collapsed');
+          this._lastHudSignature = null;
+        });
       }
 
-      bar.innerHTML = `
-        <div class="synergy-level-badge">
-          <i class="fa-solid fa-shield-halved" style="color: #00ff66;"></i>
-          <span>LVL ${data.level} ${data.title.toUpperCase()}</span>
-        </div>
-        <div class="synergy-progress-wrap">
-          <div class="synergy-progress-bar" style="width: ${pct}%;"></div>
-          <span class="synergy-xp-text">${data.xp} / ${data.targetXp} XP</span>
-        </div>
-        <div class="synergy-streak-pill">
-          <i class="fa-solid fa-fire" style="color: #f97316;"></i>
-          <span>${data.streakDays}d Streak</span>
-        </div>
-        <button type="button" class="btn-group-hall-of-fame" onclick="window.NexGroupChatSuite.openHallOfFameModal()" title="Hall of Fame">
-          <i class="fa-solid fa-trophy" style="color: #ffd700;"></i>
-        </button>
-        <button type="button" class="btn-group-synergy-toggle" style="background:transparent;border:none;color:#8696a0;cursor:pointer;padding:2px 4px;" title="Hide synergy bar" onclick="localStorage.setItem('nex_group_synergy_collapsed', 'true'); document.getElementById('groupSynergyHudBar')?.classList.add('collapsed');">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      `;
+      const lvlEl = bar.querySelector('.synergy-level-label');
+      const progEl = bar.querySelector('.synergy-progress-bar');
+      const xpEl = bar.querySelector('.synergy-xp-text');
+      const streakEl = bar.querySelector('.synergy-streak-label');
+      if (lvlEl) lvlEl.textContent = `LVL ${data.level} ${data.title.toUpperCase()}`;
+      if (progEl) progEl.style.width = `${pct}%`;
+      if (xpEl) xpEl.textContent = `${data.xp} / ${data.targetXp} XP`;
+      if (streakEl) streakEl.textContent = `${data.streakDays}d Streak`;
     }
 
     triggerLevelUpCelebration(groupId, level, title) {

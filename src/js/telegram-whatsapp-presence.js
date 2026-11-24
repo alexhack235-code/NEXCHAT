@@ -401,7 +401,9 @@
      * Periodic ticker every 10 seconds to update contact list status dots
      */
     startContactPresenceTicker() {
+      if (!this._lastBeaconState) this._lastBeaconState = new Map();
       setInterval(() => {
+        if (typeof document !== 'undefined' && document.hidden) return;
         // Re-evaluate active chat partner if open to expire stale presence
         if (this.currentPartnerUid && window.currentChatType === 'direct') {
           const dataToCheck = this.lastPartnerData || window.cachedUsers?.find(u => u.uid === this.currentPartnerUid || u.id === this.currentPartnerUid);
@@ -410,16 +412,17 @@
             const statusEl = document.getElementById('activeChatStatus');
             const wasShowingOnline = statusEl && (statusEl.textContent.toLowerCase().includes('online'));
             if (wasShowingOnline && !currentlyOnline) {
-              console.log('[PRESENCE] Heartbeat TTL expired for active partner. Transitioning to offline.');
               this.updateHeaderPresenceDisplay(dataToCheck, dataToCheck.username || 'User');
             }
           }
         }
-        // Also re-evaluate loaded contacts to expire stale online beacons in contactList
+        // Dirty-checked contact beacon updates (0 DOM churn when state unchanged)
         if (window.loadedContactData && Array.isArray(window.loadedContactData)) {
           window.loadedContactData.forEach(contact => {
             if (!contact || !contact.uid || contact.uid === 'chronex-ai') return;
             const isOnline = this.isUserActuallyOnline(contact);
+            if (this._lastBeaconState.get(contact.uid) === isOnline) return;
+            this._lastBeaconState.set(contact.uid, isOnline);
             try {
               if (typeof CSS !== 'undefined' && CSS.escape) {
                 const beacon = document.querySelector('#contactList li[data-chat-id="' + CSS.escape(contact.uid) + '"] .chat-online-beacon');

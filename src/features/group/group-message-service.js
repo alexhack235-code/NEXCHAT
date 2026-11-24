@@ -785,12 +785,14 @@ async function _resolveUserProfiles(messages) {
         _userProfileCache.set(uid, { uid, username: 'Unknown User', avatar: 'favicon.png' });
       }
     } catch (_) {
-      _userProfileCache.set(uid, { uid, username: 'Unknown User', avatar: 'favicon.png' });
+      // Do not permanently poison cache on transient timeout
     }
   }));
 
-  // Update store members map
-  groupStore.setState({ members: new Map(_userProfileCache) });
+  if (_userProfileCache.size > 0) {
+    // Update store members map only once after batch resolution
+    groupStore.setState({ members: new Map(_userProfileCache) });
+  }
 }
 
 /**

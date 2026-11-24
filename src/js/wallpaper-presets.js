@@ -153,26 +153,33 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
     const bgRepeat = isSvg ? 'repeat' : 'no-repeat';
     const cleanUrl = String(wallpaperUrl).replace(/[\n\r\t]/g, '');
 
+    if (!isSvg && typeof Image !== 'undefined') {
+      const pre = new Image();
+      pre.decoding = 'async';
+      pre.src = cleanUrl;
+    }
+
     document.documentElement.style.setProperty('--chat-wallpaper', `url("${cleanUrl}")`);
+    document.documentElement.style.setProperty('--chat-wallpaper-size', bgSize);
+    document.documentElement.style.setProperty('--chat-wallpaper-repeat', bgRepeat);
     if (document.body) document.body.style.setProperty('--chat-wallpaper', `url("${cleanUrl}")`);
     try { localStorage.setItem('nexchat_background', cleanUrl); } catch (_) {}
 
     if (chatDetail) {
       chatDetail.classList.add('has-custom-wallpaper', 'chat-background');
       chatDetail.style.setProperty('--chat-wallpaper', `url("${cleanUrl}")`);
-      chatDetail.style.setProperty('background-image', `url("${cleanUrl}")`, 'important');
-      chatDetail.style.setProperty('background-size', bgSize, 'important');
-      chatDetail.style.setProperty('background-position', 'center center', 'important');
-      chatDetail.style.setProperty('background-repeat', bgRepeat, 'important');
+      chatDetail.style.setProperty('--chat-wallpaper-size', bgSize);
+      chatDetail.style.setProperty('--chat-wallpaper-repeat', bgRepeat);
+      chatDetail.style.removeProperty('background-image');
       chatDetail.style.removeProperty('background');
-      chatDetail.style.removeProperty('background-color');
+      chatDetail.style.backgroundColor = '#0b0f19';
       if (isSvg) chatDetail.setAttribute('data-wallpaper-type', 'svg');
       else chatDetail.removeAttribute('data-wallpaper-type');
     }
     if (messagesArea) {
       messagesArea.classList.add('has-custom-wallpaper', 'chat-background');
       messagesArea.style.setProperty('background-image', 'none', 'important');
-      messagesArea.style.setProperty('background-color', 'rgba(6, 10, 20, 0.40)', 'important');
+      messagesArea.style.setProperty('background-color', 'rgba(6, 10, 20, 0.36)', 'important');
     }
     if (app) {
       app.setAttribute('data-custom-bg', 'true');

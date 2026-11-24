@@ -148,8 +148,13 @@ class ChronexBriefEngine {
     }
 
     if (next) {
+      this.setupMessageObserver();
       this.reprocessAllMessages();
     } else {
+      if (this.observer) {
+        this.observer.disconnect();
+        this.observer = null;
+      }
       this.restoreOriginalTexts();
     }
   }
@@ -168,7 +173,7 @@ class ChronexBriefEngine {
     });
   }
 
-  // Real-time MutationObserver for incoming group messages
+  // Real-time MutationObserver for incoming group messages (scoped lazily to direct children only when active)
   setupMessageObserver() {
     const container = document.getElementById('messages-area');
     if (!container) return;
@@ -176,12 +181,14 @@ class ChronexBriefEngine {
     if (this.observer) {
       this.observer.disconnect();
     }
+    if (!this.isActive) return;
 
     this.observer = new MutationObserver((mutations) => {
       if (!this.isActive) return;
 
       for (const m of mutations) {
-        m.addedNodes.forEach(node => {
+        for (let i = 0; i < m.addedNodes.length; i++) {
+          const node = m.addedNodes[i];
           if (node.nodeType === Node.ELEMENT_NODE) {
             if (node.classList?.contains('nex-msg-wrapper') || node.classList?.contains('message-wrapper')) {
               this.processMessageElement(node);
@@ -190,11 +197,11 @@ class ChronexBriefEngine {
               wrappers?.forEach(w => this.processMessageElement(w));
             }
           }
-        });
+        }
       }
     });
 
-    this.observer.observe(container, { childList: true, subtree: true });
+    this.observer.observe(container, { childList: true });
   }
 
   reprocessAllMessages() {

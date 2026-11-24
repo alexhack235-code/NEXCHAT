@@ -165,15 +165,33 @@ export class VirtualScroller {
    * Completely avoids position:absolute, eliminate message overlapping,
    * sticker collisions, and scroll tear.
    */
+  _computeItemSig(item) {
+    if (!item) return '';
+    if (item.type === 'date-separator') {
+      const t = item.date?.getTime ? item.date.getTime() : String(item.date || '');
+      return `date:${t}`;
+    }
+    if (item.type === 'system' || item.type === 'unread-divider') {
+      return `${item.type}:${item.id || ''}:${item.text || ''}`;
+    }
+    const reactions = item.reactions ? JSON.stringify(item.reactions) : '';
+    const replyKey = item.replyTo ? (item.replyTo.id || item.replyTo.text || '1') : '';
+    return `${item.id || item.clientMsgId || ''}|${item.text || ''}|${item.edited ? '1' : '0'}|${item.isDeleted ? '1' : '0'}|${item.status || ''}|${item.hideSenderHeader ? '1' : '0'}|${item.hideAvatar ? '1' : '0'}|${item.senderName || ''}|${item.senderAvatar || ''}|${reactions}|${replyKey}`;
+  }
+
   _render() {
     if (this._destroyed) return;
 
     if (this._items.length === 0) {
-      this._rendered.innerHTML = '';
+      if (this._rendered.childElementCount > 0) {
+        this._rendered.innerHTML = '';
+      }
+      this._nodePool.clear();
       return;
     }
 
-    const fragment = document.createDocumentFragment();
+    const hadMountedItems = this._nodePool.size > 0;
+    const desiredNodes = [];
     const activeIds = new Set();
 
     for (let i = 0; i < this._items.length; i++) {
@@ -182,11 +200,15 @@ export class VirtualScroller {
 
       const itemId = String(item.id || item.clientMsgId || `idx-${i}`);
       activeIds.add(itemId);
+      const itemSig = this._computeItemSig(item);
 
       let node = this._nodePool.get(itemId);
       if (!node) {
         node = document.createElement('div');
         node.classList.add('nex-vs-item');
+        if (hadMountedItems && item.type !== 'date-separator' && item.type !== 'system') {
+          node.classList.add('nex-msg-enter');
+        }
         node.dataset.vsId = itemId;
         node.dataset.vsIndex = String(i);
         node.style.position = 'relative';
@@ -195,6 +217,7 @@ export class VirtualScroller {
         node.style.width = '100%';
         node.style.boxSizing = 'border-box';
         node._lastRenderedItem = item;
+        node._lastRenderedSig = itemSig;
 
         this._nodePool.set(itemId, node);
 
@@ -203,24 +226,43 @@ export class VirtualScroller {
         }
       } else {
         node.dataset.vsIndex = String(i);
-        if (node._lastRenderedItem !== item && this._renderItem) {
+        if (node._lastRenderedSig !== itemSig && this._renderItem) {
           node._lastRenderedItem = item;
+          node._lastRenderedSig = itemSig;
           this._renderItem(item, node, i);
         }
       }
 
-      fragment.appendChild(node);
+      desiredNodes.push(node);
     }
 
-    // Mount all nodes in clean document order
-    this._rendered.innerHTML = '';
-    this._rendered.appendChild(fragment);
-
-    // Garbage collect unmounted nodes from pool
+    // Garbage collect unmounted nodes from pool & remove from DOM
     for (const [id, node] of this._nodePool.entries()) {
       if (!activeIds.has(id)) {
-        node.remove();
+        if (node.parentNode) node.remove();
         this._nodePool.delete(id);
+      }
+    }
+
+    // Keyed in-place reconciliation: NEVER clear _rendered.innerHTML so existing bubbles stay intact with zero flicker
+    if (this._rendered.childElementCount === 0) {
+      const fragment = document.createDocumentFragment();
+      for (let i = 0; i < desiredNodes.length; i++) {
+        fragment.appendChild(desiredNodes[i]);
+      }
+      this._rendered.appendChild(fragment);
+    } else {
+      const desiredSet = new Set(desiredNodes);
+      for (let i = this._rendered.children.length - 1; i >= 0; i--) {
+        const child = this._rendered.children[i];
+        if (!desiredSet.has(child)) child.remove();
+      }
+      for (let i = 0; i < desiredNodes.length; i++) {
+        const node = desiredNodes[i];
+        const currentAtIdx = this._rendered.children[i];
+        if (currentAtIdx !== node) {
+          this._rendered.insertBefore(node, currentAtIdx || null);
+        }
       }
     }
 
@@ -239,10 +281,6 @@ export class VirtualScroller {
   setItems(items) {
     this._items = items || [];
     this._scheduleRender();
-
-    if (this._isNearBottom) {
-      requestAnimationFrame(() => this.scrollToBottom(false));
-    }
   }
 
   /**

@@ -38,21 +38,7 @@
         this.analyzeText(text);
       });
 
-      // Also observe messages-area
-      const area = document.getElementById('messages-area');
-      if (area) {
-        const obs = new MutationObserver((mutations) => {
-          for (const m of mutations) {
-            m.addedNodes.forEach(n => {
-              if (n.nodeType === Node.ELEMENT_NODE) {
-                const text = n.textContent || '';
-                this.analyzeText(text);
-              }
-            });
-          }
-        });
-        obs.observe(area, { childList: true });
-      }
+      // Event-driven incoming message check only (avoids MutationObserver DOM scans on history loads)
     }
 
     analyzeText(text) {

@@ -143,7 +143,9 @@ export function renderMessageBubble(message, container, options = {}) {
     if (isSticker) {
       wrapper.classList.add('is-sticker-message');
     }
+    const effectiveSenderId = message.senderId || message.from || options.senderId || '';
     wrapper.dataset.messageId = message.id;
+    wrapper.dataset.senderId = effectiveSenderId;
     wrapper.id = 'msg-' + message.id;
 
     // Context menu & Long-press handler to open Delete Modal
@@ -201,6 +203,8 @@ export function renderMessageBubble(message, container, options = {}) {
         avatarWrap.style.width = '28px';
         avatarWrap.style.height = '0';
         avatarWrap.style.visibility = 'hidden';
+        avatarWrap.style.pointerEvents = 'none';
+        avatarWrap.style.minHeight = '0';
       } else {
 
       const initialChar = (options.senderName || 'U')
@@ -223,6 +227,8 @@ export function renderMessageBubble(message, container, options = {}) {
       if (hasCustomPic) {
         const avatarImg = document.createElement('img');
         avatarImg.className = 'nex-msg-avatar';
+        avatarImg.loading = 'lazy';
+        avatarImg.decoding = 'async';
         avatarImg.src = options.senderAvatar;
         avatarImg.alt = options.senderName || 'User';
         avatarImg.onerror = function() {
@@ -235,6 +241,26 @@ export function renderMessageBubble(message, container, options = {}) {
       } else {
         avatarWrap.appendChild(initialCircle);
       }
+
+      avatarWrap.style.cursor = 'pointer';
+      avatarWrap.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (touchMoved || !effectiveSenderId) return;
+        const seed = {
+          uid: effectiveSenderId,
+          displayName: options.senderName || 'Member',
+          username: options.senderUsername || '',
+          avatar: options.senderAvatar || '',
+          role: options.senderRole || 'member'
+        };
+        if (typeof window.openUserProfileModal === 'function') {
+          window.openUserProfileModal(effectiveSenderId, seed);
+        } else if (typeof window.showUserProfile === 'function') {
+          window.showUserProfile(effectiveSenderId, seed);
+        } else if (typeof window.openChatInfoModal === 'function') {
+          window.openChatInfoModal(effectiveSenderId, seed);
+        }
+      });
       }
 
       wrapper.appendChild(avatarWrap);
@@ -253,7 +279,6 @@ export function renderMessageBubble(message, container, options = {}) {
     }
 
     // 2. WhatsApp Group Identity: 1 single row, Left = DisplayName (~ ALEXANDER), Right = Phone/Username in small grey
-    const effectiveSenderId = message.senderId || message.from || options.senderId || 'user';
     const rawDispName = String(message.senderName || options.senderName || 'Member').trim().replace(/^~\s*/, '');
     let rawUsername = String(message.senderUsername || options.senderUsername || '').trim().replace(/^@/, '');
     const senderPhoneOrHandle = options.senderPhone || (rawUsername ? `@${rawUsername}` : '');
@@ -301,14 +326,23 @@ export function renderMessageBubble(message, container, options = {}) {
     }
 
     // Tapping sender tag opens user profile
+    senderDiv.style.cursor = 'pointer';
     senderDiv.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (!effectiveSenderId) return;
+      const seed = {
+        uid: effectiveSenderId,
+        displayName: rawDispName,
+        username: rawUsername,
+        avatar: options.senderAvatar || '',
+        role: options.senderRole || 'member'
+      };
       if (typeof window.openUserProfileModal === 'function') {
-        window.openUserProfileModal(effectiveSenderId);
+        window.openUserProfileModal(effectiveSenderId, seed);
       } else if (typeof window.showUserProfile === 'function') {
-        window.showUserProfile(effectiveSenderId);
+        window.showUserProfile(effectiveSenderId, seed);
       } else if (typeof window.openChatInfoModal === 'function') {
-        window.openChatInfoModal(effectiveSenderId);
+        window.openChatInfoModal(effectiveSenderId, seed);
       }
     });
 

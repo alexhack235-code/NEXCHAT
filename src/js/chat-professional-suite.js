@@ -455,6 +455,8 @@
       }
 
       const dock = document.createElement('div');
+      const supportsFineHover = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      if (!supportsFineHover) { dock.remove(); return; }
       dock.className = 'nex-msg-hover-dock';
       dock.innerHTML = `
         <div class="nex-quick-reactions-strip">
@@ -1870,7 +1872,7 @@ ${text}`;
        18. INTERACTIVE VOICE WAVEFORM PLAYER & AI TRANSCRIBER
        ------------------------------------------------------------------------ */
     attachVoiceWaveformPlayer(wrapper) {
-      if (wrapper.dataset.wavePlayerReady === 'true') return;
+      if (wrapper.dataset.wavePlayerReady === 'true' || wrapper.querySelector('.nex-voice-card-wrapper')) return;
       const audioEl = wrapper.querySelector('audio');
       if (!audioEl) return;
       wrapper.dataset.wavePlayerReady = 'true';

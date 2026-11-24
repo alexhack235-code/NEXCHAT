@@ -1324,15 +1324,15 @@
 
           box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 
-          backdrop-filter: blur(12px);
-
-          -webkit-backdrop-filter: blur(12px);
-
-          transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+          transition: transform 0.22s cubic-bezier(0.22, 1.35, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease;
 
           cursor: pointer;
 
           box-sizing: border-box;
+
+          contain: layout style;
+
+          touch-action: manipulation;
 
         }
 
@@ -1869,8 +1869,8 @@
           right: 0 !important;
           bottom: 0 !important;
           width: 100vw !important;
-          height: 100dvh !important;
           height: 100vh !important;
+          height: 100dvh !important;
           margin: 0 !important;
           padding: 0 !important;
           border-radius: 0 !important;
@@ -2216,17 +2216,19 @@
           color: #fff !important;
         }
 
-        /* Timeline (Messages Middle) - padding 8px left/right, gap 8px */
+        /* Timeline (Messages Middle) - padding 10px left/right, gap 10px */
         .whatsapp-channel-timeline {
           flex: 1 1 auto !important;
           overflow-y: auto !important;
           overflow-x: hidden !important;
-          padding: 8px !important;
+          padding: 10px !important;
           display: flex !important;
           flex-direction: column !important;
-          gap: 8px !important;
+          gap: 10px !important;
           box-sizing: border-box !important;
           -webkit-overflow-scrolling: touch !important;
+          overscroll-behavior-y: contain !important;
+          touch-action: pan-y !important;
         }
 
         /* Update Row */
@@ -2237,19 +2239,26 @@
           flex-direction: column !important;
           align-items: flex-start !important;
           box-sizing: border-box !important;
+          contain: layout style !important;
+          touch-action: pan-y !important;
         }
 
-        /* Update Card - Width 100% - 16px (or calc(100% - 16px)), NOT 80% */
+        /* Update Card - Full Production Width & Crisp Specular Border */
         .whatsapp-channel-card {
           width: 100% !important;
           max-width: 100% !important;
-          background: #1f2c34 !important;
-          border: 1px solid rgba(255, 255, 255, 0.06) !important;
-          border-radius: 12px !important;
-          padding: 12px 14px !important;
+          background: #1b2831 !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
+          border-radius: 14px !important;
+          padding: 13px 15px !important;
           box-sizing: border-box !important;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28) !important;
           position: relative !important;
+          transition: transform 0.18s cubic-bezier(0.22, 1.35, 0.36, 1) !important;
+        }
+
+        .whatsapp-channel-action-chip:active {
+          transform: scale(0.92) !important;
         }
 
         .whatsapp-channel-card-media {
@@ -3670,7 +3679,7 @@
             <div class="whatsapp-channel-card" data-post-id="${p.id}">
               ${p.image ? `
                 <div class="whatsapp-channel-card-media">
-                  <img src="${p.image}" alt="Update media" class="whatsapp-channel-card-img" />
+                  <img src="${p.image}" alt="Update media" class="whatsapp-channel-card-img" loading="lazy" decoding="async" />
                 </div>
               ` : ''}
               <div class="whatsapp-channel-card-text">${this.escapeAndFormat(p.text || '')}</div>

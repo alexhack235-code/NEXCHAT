@@ -10,8 +10,53 @@ import {
   signInWithCredential,
   GoogleAuthProvider,
   setPersistence,
-  browserLocalPersistence
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+function rememberLoggedDeviceAccount(user, fallbackEmail = '') {
+  if (!user || !user.uid) return;
+  try {
+    let devId = localStorage.getItem('nex_device_session_id');
+    if (!devId) {
+      devId = `dev_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem('nex_device_session_id', devId);
+    }
+    const email = user.email || fallbackEmail || '';
+    if (email) localStorage.setItem('nex_last_login_email', email);
+    const listRaw = localStorage.getItem('nex_remembered_accounts');
+    const existing = listRaw ? JSON.parse(listRaw) : [];
+    const filtered = Array.isArray(existing) ? existing.filter(a => a && a.uid !== user.uid) : [];
+    const entry = {
+      uid: user.uid,
+      email,
+      displayName: user.displayName || email.split('@')[0] || 'User',
+      photoURL: user.photoURL || '',
+      deviceSessionId: devId,
+      lastLoginAt: Date.now()
+    };
+    localStorage.setItem('nex_remembered_accounts', JSON.stringify([entry, ...filtered].slice(0, 5)));
+  } catch (_) {}
+}
+
+if (typeof document !== 'undefined') {
+  const prefillSavedEmail = () => {
+    try {
+      const emailEl = document.getElementById('loginEmail');
+      const rememberEl = document.getElementById('rememberMe');
+      const lastEmail = localStorage.getItem('nex_last_login_email') || localStorage.getItem('auth_email') || '';
+      if (emailEl && !emailEl.value && lastEmail && (!rememberEl || rememberEl.checked)) {
+        emailEl.value = lastEmail;
+      }
+    } catch (_) {}
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', prefillSavedEmail);
+  } else {
+    prefillSavedEmail();
+  }
+}
 import { setDoc, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { ref, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
@@ -703,14 +748,20 @@ if (loginForm) {
     showLoginLoader('Checking credentials...');
 
     try {
-      setPersistence(auth, browserLocalPersistence).catch(() => { });
+      const rememberEl = document.getElementById('rememberMe');
+      const shouldRemember = !rememberEl || rememberEl.checked !== false;
+      const targetPersistence = shouldRemember ? indexedDBLocalPersistence : browserSessionPersistence;
+      await setPersistence(auth, targetPersistence).catch(() => setPersistence(auth, browserLocalPersistence).catch(() => {}));
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       showResult('Successfully signed in!');
 
-      // Cache session UID immediately
+      // Cache session UID & remember logged device/account immediately
       try {
         localStorage.setItem('auth_uid', cred.user.uid);
         localStorage.setItem('auth_email', email);
+        if (shouldRemember) {
+          rememberLoggedDeviceAccount(cred.user, email);
+        }
       } catch (_) { }
 
       // Update online status in Firestore (with 2s race) and non-blocking RTDB
@@ -846,6 +897,7 @@ async function processGoogleUser(user, credentialResult) {
     localStorage.setItem('auth_username', username);
     localStorage.setItem('auth_avatar', avatar);
     localStorage.setItem('currentUser', JSON.stringify(primaryUserData));
+    rememberLoggedDeviceAccount(user, user.email || '');
   } catch (storageErr) {
     console.warn('[AUTH] Local storage session notice:', storageErr);
   }
@@ -898,8 +950,8 @@ async function handleGoogleSignIn() {
   showLoginLoader('Connecting with Google...');
 
   try {
-    // DO NOT await setPersistence synchronously right before popup!
-    setPersistence(auth, browserLocalPersistence).catch(() => { });
+    // Synchronize auth state to IndexedDB/localStorage rather than sessionStorage
+    setPersistence(auth, indexedDBLocalPersistence).catch(() => { });
 
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
@@ -909,7 +961,17 @@ async function handleGoogleSignIn() {
       result = await signInWithPopup(auth, provider);
     } catch (popupErr) {
       console.warn('[AUTH] Popup attempt notice:', popupErr.code, popupErr.message);
-      if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/cancelled-popup-request') {
+      const isCapacitorOrPartitioned = Boolean(
+        window.Capacitor?.isNativePlatform?.() ||
+        navigator.userAgent?.includes('; wv)') ||
+        popupErr.code === 'auth/popup-blocked'
+      );
+      if (popupErr.code === 'auth/popup-blocked') {
+        // Avoid cross-origin redirect in WebView/partitioned browsers where sessionStorage drops initial state;
+        // throwing 'auth/popup-blocked' surfaces our direct 1-tap Retry Popup button cleanly!
+        throw popupErr;
+      }
+      if (popupErr.code === 'auth/cancelled-popup-request' && !isCapacitorOrPartitioned) {
         showLoginLoader('Redirecting to Google sign in...');
         await signInWithRedirect(auth, provider);
         return;
@@ -974,7 +1036,18 @@ async function handleGoogleSignIn() {
     } else {
       let rawMsg = error?.message || 'Google sign-in failed. Please try again.';
       rawMsg = rawMsg.replace(/^Firebase:\s*Error\s*\(([^)]+)\)\.?/i, '$1:').trim();
-      errorHtml = `
+      const isStorageStateErr = rawMsg.toLowerCase().includes('missing initial state') || rawMsg.toLowerCase().includes('sessionstorage');
+      errorHtml = isStorageStateErr
+        ? `
+        <div class="auth-error-detail">
+          <strong>Sign-In State Blocked by Browser Storage</strong>
+          <p style="margin: 4px 0 8px; font-size: 12px;">Your browser or WebView blocked third-party session storage during Google redirect. Tap below to retry with popup sign-in, or sign in with your email and password.</p>
+          <button type="button" class="quick-guest-btn" onclick="document.getElementById('googleLoginBtn')?.click()">
+            <i class="fa-brands fa-google"></i> Retry Popup Sign-In
+          </button>
+        </div>
+      `
+        : `
         <div class="auth-error-detail">
           <strong>Authentication Notice (${errCode || 'Info'})</strong>
           <p style="margin: 4px 0 8px; font-size: 12px;">${rawMsg}</p>
@@ -994,18 +1067,22 @@ async function checkRedirectAuth() {
       await processGoogleUser(result.user, result);
     }
   } catch (err) {
-    console.error('Redirect sign-in error:', err);
     hideLoginLoader();
-    if (err.code !== 'auth/null-user') {
-      let rawMsg = err.message || 'Google sign-in failed';
-      rawMsg = rawMsg.replace(/^Firebase:\s*Error\s*\(([^)]+)\)\.?/i, '$1:').trim();
-      showResult(`
-        <div class="auth-error-detail">
-          <strong>Google Sign-In (${err.code || 'Notice'})</strong>
-          <p style="margin: 4px 0 8px; font-size: 12px;">${rawMsg}</p>
-        </div>
-      `, true);
+    const msgLower = String(err?.message || '').toLowerCase();
+    // Suppress benign missing-initial-state noise when storage partitioning is active and no redirect is pending
+    if (err.code === 'auth/null-user' || msgLower.includes('missing initial state') || msgLower.includes('sessionstorage')) {
+      console.warn('[AUTH] Storage-partitioned WebView skipped redirect state recovery:', err?.message || err?.code);
+      return;
     }
+    console.error('Redirect sign-in error:', err);
+    let rawMsg = err.message || 'Google sign-in failed';
+    rawMsg = rawMsg.replace(/^Firebase:\s*Error\s*\(([^)]+)\)\.?/i, '$1:').trim();
+    showResult(`
+      <div class="auth-error-detail">
+        <strong>Google Sign-In (${err.code || 'Notice'})</strong>
+        <p style="margin: 4px 0 8px; font-size: 12px;">${rawMsg}</p>
+      </div>
+    `, true);
   }
 }
 

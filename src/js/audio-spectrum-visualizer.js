@@ -204,20 +204,12 @@
     }
 
     observeDynamicAudioElements() {
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          for (const node of mutation.addedNodes) {
-            if (node.nodeType !== 1) continue;
-            if (node.tagName === 'AUDIO') {
-              this.attachAudioElement(node);
-            } else if (node.querySelectorAll) {
-              node.querySelectorAll('audio').forEach(a => this.attachAudioElement(a));
-            }
-          }
+      // Passive event delegation on 'play' replaces expensive document.body MutationObserver(subtree: true)
+      document.addEventListener('play', (e) => {
+        if (e.target && e.target.tagName === 'AUDIO') {
+          this.attachAudioElement(e.target);
         }
-      });
-
-      observer.observe(document.body, { childList: true, subtree: true });
+      }, { capture: true, passive: true });
     }
 
     /**

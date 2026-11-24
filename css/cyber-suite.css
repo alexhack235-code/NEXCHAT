@@ -79,7 +79,7 @@
   font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   user-select: none;
 }
 
@@ -198,7 +198,7 @@
   align-items: center;
   justify-content: center;
   font-size: 15px;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .audio-control-btn.cancel-btn {
@@ -261,7 +261,7 @@
   gap: 4px;
   padding: 2px 5px;
   border-radius: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .voice-transcribe-btn:hover {
@@ -278,7 +278,7 @@
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .voice-speed-pill:hover, .voice-speed-pill.active {
@@ -367,7 +367,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .stegano-tab-btn.active {
@@ -389,7 +389,7 @@
   text-align: center;
   cursor: pointer;
   background: rgba(139, 92, 246, 0.05);
-  transition: all 0.25s;
+  transition: transform 0.25s, opacity 0.25s, background-color 0.25s, border-color 0.25s, color 0.25s;
 }
 
 .stegano-dropzone:hover {
@@ -463,7 +463,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 4px 18px rgba(139, 92, 246, 0.4);
 }
 
@@ -486,7 +486,7 @@
   font-weight: 700;
   color: #c4b5fd;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .stegano-chat-pill:hover {
@@ -615,7 +615,7 @@
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .canvas-tool-btn:hover {
@@ -675,7 +675,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 4px 18px rgba(0, 243, 255, 0.35);
 }
 
@@ -777,7 +777,7 @@
   font-weight: 800;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
   box-shadow: 0 4px 18px rgba(0, 255, 102, 0.35);
 }
 
@@ -943,7 +943,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .sandbox-run-btn:hover {
@@ -964,7 +964,7 @@
   font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .run-sandbox-chip:hover {
@@ -994,7 +994,7 @@
   padding: 3px 8px;
   margin-top: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
   user-select: none;
 }
 
@@ -1087,7 +1087,7 @@
   font-size: 12px;
   padding: 2px 6px;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .translate-speak-btn:hover {
@@ -1215,7 +1215,7 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
   margin-bottom: 8px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .ghost-chat-item:hover {
@@ -1267,7 +1267,7 @@
   background: rgba(255, 255, 255, 0.04);
   border: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .theme-card:hover {
@@ -1388,7 +1388,7 @@
   padding: 4px 9px;
   cursor: pointer;
   font-size: 12px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .telemetry-refresh-btn:hover {
@@ -1419,7 +1419,7 @@
   padding: 6px 12px;
   border-radius: 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .loc-tab-btn.active, .loc-tab-btn:hover {
@@ -1465,7 +1465,7 @@
   padding: 12px;
   display: flex;
   flex-direction: column;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   position: relative;
   overflow: hidden;
 }
@@ -1568,7 +1568,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .op-btn-chat {
@@ -1638,7 +1638,7 @@
   cursor: pointer !important;
   white-space: nowrap !important;
   box-sizing: border-box !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .nex-canvas-footer .canvas-footer-btn:hover {
@@ -1723,7 +1723,7 @@
   font-size: 11.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .search-contact-toggle-btn:hover {

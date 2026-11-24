@@ -7,7 +7,7 @@
 
 /* 1. Header Stealth Toggle Button */
 .status-viewer-icon-btn.stealth-mode-toggle {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   color: #8b949e;
   border-radius: 50%;
 }
@@ -200,7 +200,7 @@
   padding: 3px 8px;
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .status-code-copy-btn:hover {
@@ -275,7 +275,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .status-poll-option-btn:hover {
@@ -429,7 +429,7 @@
   border-radius: 99px;
   margin: 12px auto 6px auto;
   cursor: grab;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .status-viewers-drawer-handle:hover {
@@ -510,7 +510,7 @@
   justify-content: center;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .status-viewers-close-btn:hover {
@@ -528,7 +528,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 8px 14px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .status-viewers-search-box:focus-within {
@@ -574,7 +574,7 @@
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .status-viewer-row-item:hover {
@@ -656,7 +656,7 @@
   justify-content: center;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .status-viewer-dm-btn:hover {
@@ -719,7 +719,7 @@
   padding: 6px 16px 6px 10px !important;
   color: #f1f5f9 !important;
   cursor: pointer !important;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 16px rgba(0, 255, 136, 0.2) !important;
 }
 
@@ -907,7 +907,7 @@
   justify-content: center;
   font-size: 15px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .status-studio-close-btn:hover {
@@ -943,7 +943,7 @@
   font-weight: 600 !important;
   border-radius: 10px !important;
   cursor: pointer !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid transparent !important;
   color: #94a3b8 !important;
@@ -986,7 +986,7 @@
   text-align: center;
   cursor: pointer;
   background: radial-gradient(circle at 50% 35%, rgba(0, 255, 136, 0.08), rgba(6, 10, 16, 0.95));
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
   position: relative;
   width: 100%;
   max-width: 310px;
@@ -1077,7 +1077,7 @@
   border-radius: 99px;
   margin-top: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   box-shadow: 0 0 16px rgba(0, 255, 136, 0.2);
 }
 
@@ -1146,29 +1146,34 @@
   top: 10px;
   left: 10px;
   right: 10px;
+  max-width: calc(100% - 20px);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
   z-index: 25;
   pointer-events: auto;
+  box-sizing: border-box;
 }
 
 .status-preview-tool-btn {
-  background: rgba(10, 16, 26, 0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10, 16, 26, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.18);
   color: #f1f5f9;
   border-radius: 99px;
-  padding: 6px 13px;
+  padding: 6px 12px;
   font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 100%;
+  transition: transform 0.18s cubic-bezier(0.22, 1.35, 0.36, 1), background 0.18s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
 }
 
 .status-preview-tool-btn:hover {
@@ -1234,7 +1239,7 @@
   border-radius: 12px;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   font-family: inherit;
 }
 
@@ -1265,7 +1270,7 @@
   border-radius: 14px;
   padding: 8px 14px;
   box-sizing: border-box;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .status-caption-input-inner:focus-within {
@@ -1406,7 +1411,7 @@
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
 }
 
@@ -1450,7 +1455,7 @@
   padding: 4px 8px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .status-font-pill:hover {
@@ -1482,7 +1487,7 @@
   justify-content: center;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .status-align-pill:hover {
@@ -1545,7 +1550,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 0 20px rgba(0, 255, 136, 0.35);
 }
 
@@ -1764,7 +1769,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   font-family: inherit;
 }
 
@@ -1786,7 +1791,7 @@
   align-items: center !important;
   gap: 8px !important;
   box-shadow: 0 0 20px rgba(0, 255, 136, 0.4) !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   font-family: inherit !important;
 }
 
@@ -2189,7 +2194,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .trimmer-apply-ai-btn:hover {
@@ -2221,7 +2226,7 @@
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 
@@ -2280,7 +2285,7 @@
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .trimmer-part-chip:hover {
@@ -2311,7 +2316,7 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 0 14px rgba(0, 255, 136, 0.25);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   margin-left: 8px;
 }
 
@@ -2414,7 +2419,7 @@
   justify-content: center;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   box-shadow: 0 0 10px rgba(0, 255, 136, 0.15);
 }
 
@@ -2491,7 +2496,7 @@
   align-items: center;
   gap: 5px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .status-trimmer-ai-pill-btn:hover {
@@ -2697,9 +2702,9 @@
   bottom: 58px;
   left: 14px;
   right: 14px;
-  background: rgba(11, 20, 26, 0.88);
+  max-width: calc(100% - 28px);
+  background: rgba(11, 20, 26, 0.92);
   border: 1px solid rgba(0, 255, 102, 0.4);
-  backdrop-filter: blur(12px);
   border-radius: 30px;
   padding: 6px 12px 6px 8px;
   display: flex;
@@ -2707,7 +2712,9 @@
   gap: 10px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 255, 102, 0.2);
   z-index: 10;
-  animation: musicStickerPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: musicStickerPop 0.25s cubic-bezier(0.22, 1.35, 0.36, 1);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 @keyframes musicStickerPop {
@@ -2773,7 +2780,7 @@
   justify-content: center;
   cursor: pointer;
   font-size: 11px;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   flex-shrink: 0;
 }
 
@@ -2856,7 +2863,7 @@
   justify-content: center;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .music-picker-close-btn:hover {
@@ -2912,6 +2919,7 @@
   padding: 6px 18px 10px 18px;
   overflow-x: auto;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .music-picker-genre-pills::-webkit-scrollbar {
@@ -2920,6 +2928,7 @@
 
 .music-genre-pill {
   flex-shrink: 0;
+  white-space: nowrap;
   padding: 5px 14px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.06);
@@ -2928,7 +2937,7 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.16s cubic-bezier(0.22, 1.35, 0.36, 1), background 0.18s ease, color 0.18s ease;
 }
 
 .music-genre-pill:hover {
@@ -2949,6 +2958,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 .music-picker-loading {
@@ -2971,7 +2982,7 @@
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .music-track-item:hover {
@@ -3067,7 +3078,7 @@
   font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   flex-shrink: 0;
 }
 

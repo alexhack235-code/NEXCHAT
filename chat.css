@@ -826,10 +826,10 @@ html, body {
 
 .app[data-custom-bg="true"] .messages-area,
 .messages-area.has-custom-wallpaper {
-  background-color: rgba(11, 20, 26, 0.78) !important;
+  background-color: rgba(11, 20, 26, 0.72) !important;
   background-image: none !important;
-  backdrop-filter: blur(2px) !important;
-  -webkit-backdrop-filter: blur(2px) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 body.light-mode .messages-area.has-custom-wallpaper,
@@ -1220,7 +1220,7 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
   font-size: 10.5px;
   cursor: pointer;
   margin-left: 2px;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .msg-reply-trigger-btn:hover {
@@ -1246,7 +1246,7 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
   border-radius: 9999px;
   font-size: 11px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   user-select: none;
 }
 
@@ -1289,7 +1289,7 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 25;
 }
 
@@ -1358,7 +1358,7 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
 .cancel-reply-btn {
   width: 32px !important; height: 32px !important; min-width: 32px !important; flex-shrink: 0 !important;
   display: flex !important; align-items: center !important; justify-content: center !important; z-index: 10 !important;
-  background: rgba(255, 255, 255, 0.08) !important; border: none !important; border-radius: 50% !important; color: #8696a0 !important; cursor: pointer !important; padding: 0 !important; margin: 0 !important; font-size: 13px !important; transition: all 0.15s ease !important;
+  background: rgba(255, 255, 255, 0.08) !important; border: none !important; border-radius: 50% !important; color: #8696a0 !important; cursor: pointer !important; padding: 0 !important; margin: 0 !important; font-size: 13px !important; transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 .cancel-reply-btn:hover {
   background: rgba(255, 255, 255, 0.16) !important; color: #ffffff !important;
@@ -1480,7 +1480,7 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
   cursor: pointer;
   font-size: 18px;
   font-weight: 700;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   flex-shrink: 0;
   align-self: flex-end;
@@ -1686,7 +1686,7 @@ body.light-mode .app[data-custom-bg="true"] .messages-area {
   padding: 0 8px;
   border-radius: 16px;
   color: #8696a0;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nav-item .nav-label {
@@ -2998,7 +2998,7 @@ body.light-theme .groups-header {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   font-size: 14px;
 }
 
@@ -3040,7 +3040,7 @@ body.light-theme .groups-header {
   font-size: 14.5px;
   font-family: inherit;
   outline: none;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 .search-input-modern::placeholder {
@@ -3103,7 +3103,7 @@ body.light-theme .groups-header {
   white-space: nowrap;
   flex-shrink: 0;
   min-height: 36px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .search-tab-pill:hover {
@@ -3164,7 +3164,7 @@ body.light-theme .groups-header {
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 14px;
   cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
@@ -3290,7 +3290,7 @@ body.light-theme .groups-header {
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .search-action-btn-modern.btn-user {
@@ -3777,7 +3777,7 @@ body.light-theme .groups-header {
   font-weight: 500;
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   white-space: nowrap;
 }
 
@@ -4451,7 +4451,7 @@ body.light-theme .groups-header {
   justify-content: center;
   cursor: pointer;
   opacity: 0.6;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -4636,7 +4636,7 @@ body:not(.dark-mode) .updates-appbar-title {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 body:not(.dark-mode) .updates-header-icon-btn {
@@ -5164,7 +5164,7 @@ body:not(.dark-mode) .channel-follow-card {
   font-weight: 600;
   padding: 6px 18px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   white-space: nowrap;
 }
 
@@ -5334,11 +5334,13 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
 
 .status-progress-fill {
   height: 100%;
+  width: 100%;
   background: #00C896;
   border-radius: 99px;
   box-shadow: 0 0 8px rgba(0, 200, 150, 0.6);
-  width: 0%;
-  transition: width 0.05s linear;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
 }
 
 /* Top App Bar */
@@ -5376,7 +5378,7 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   justify-content: center !important;
   font-size: 15px !important;
   cursor: pointer !important;
-  transition: all 0.18s ease !important;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
 }
@@ -5614,7 +5616,7 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   justify-content: center;
   font-size: 18px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -5698,7 +5700,7 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   justify-content: center !important;
   font-size: 14px !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   flex-shrink: 0 !important;
   box-shadow: 0 0 10px rgba(0, 200, 150, 0.3) !important;
 }
@@ -5749,7 +5751,7 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .status-delete-btn:hover {
@@ -6189,7 +6191,7 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   user-select: none;
 }
 
@@ -6280,7 +6282,7 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   justify-content: center !important;
   cursor: pointer !important;
   flex-shrink: 0 !important;
-  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
   box-shadow: 0 2px 8px rgba(0, 255, 102, 0.35) !important;
   padding: 0 !important;
 }
@@ -6379,7 +6381,7 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   cursor: pointer !important;
   line-height: 1.3 !important;
   font-family: inherit !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .audio-speed-pill:hover {
@@ -6401,7 +6403,7 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   gap: 3px !important;
   line-height: 1.3 !important;
   font-family: inherit !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   white-space: nowrap !important;
 }
 
@@ -6769,7 +6771,7 @@ body.settings-open .bottom-nav,
   font-weight: 600;
   text-align: left;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   width: 100%;
 }
 
@@ -6997,7 +6999,7 @@ body.settings-open .bottom-nav,
   font-weight: 500;
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .radio-pill input[type="radio"] {
@@ -7036,7 +7038,7 @@ body.settings-open .bottom-nav,
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .install-platform-grid button i {
@@ -7431,7 +7433,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
     display: inline-flex !important;
     align-items: center !important;
     gap: 8px !important;
-    transition: all 0.2s ease !important;
+    transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
     cursor: pointer !important;
   }
 
@@ -7559,7 +7561,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   color: #fff;
   font-size: 12px;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .settings-search-input:focus {
@@ -7654,7 +7656,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .chronex-header-model-pill:hover {
@@ -7693,7 +7695,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   color: #f0f6fc;
   cursor: pointer;
   text-align: left;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   width: 100%;
 }
 
@@ -7735,7 +7737,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   border: 1px solid rgba(0, 255, 102, 0.22);
   margin-bottom: 8px;
   border-radius: 14px;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .chat-list-item.chronex-ai-item:hover,
@@ -7825,7 +7827,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   flex-shrink: 0 !important;
   box-sizing: border-box !important;
   position: relative !important;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
   color: #f0f6fc !important;
 }
 
@@ -8006,7 +8008,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .chronex-mode-chip:hover {
@@ -8040,7 +8042,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   border-radius: 14px;
   text-align: left;
   cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   color: #f0f6fc;
 }
 
@@ -8096,7 +8098,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
 }
@@ -8353,7 +8355,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nexbot-close-btn:hover {
@@ -8384,7 +8386,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nexbot-view-toggle-btn.active {
@@ -8434,7 +8436,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nexbot-nav-tab:hover {
@@ -8514,7 +8516,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   color: #f1f5f9;
   font-size: 13.5px;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   box-sizing: border-box;
 }
 
@@ -8537,7 +8539,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   line-height: 1.5;
   resize: vertical;
   box-sizing: border-box;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nexbot-textarea:focus {
@@ -8590,7 +8592,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .archetype-btn i {
@@ -8641,7 +8643,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .spark-fill-btn:hover {
@@ -8669,7 +8671,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .btn-copy-code:hover {
@@ -8728,7 +8730,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nexbot-btn.primary {
@@ -8806,7 +8808,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   color: #f1f5f9;
   font-size: 12.5px;
   outline: none;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nexbot-prompt-input:focus {
@@ -8832,7 +8834,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .quick-prompt-pill:hover {
@@ -8851,7 +8853,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nexbot-target-pills .target-pill:hover {
@@ -9531,7 +9533,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .radar-filter-pill.active {
@@ -9692,7 +9694,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 .vault-tier-card:hover {
@@ -9777,7 +9779,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .tier-action-btn.disabled {
@@ -9909,7 +9911,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
   overflow: hidden;
   user-select: none;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 .ghost-countdown-pill.critical {
@@ -10247,7 +10249,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
   z-index: 10;
 }
 
@@ -10274,7 +10276,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   justify-content: center;
   cursor: pointer;
   font-size: 11.5px;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .nex-format-btn:hover {
@@ -10414,7 +10416,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .nex-starter-chip:hover {
@@ -10448,7 +10450,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   outline: 2px solid #00f2ff !important;
   box-shadow: 0 0 16px rgba(0, 242, 255, 0.45) !important;
   border-radius: 12px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 /* ========================================================
@@ -10483,7 +10485,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   justify-content: center;
   font-size: 11px;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
   padding: 0;
   margin: 0 1px;
 }
@@ -10531,7 +10533,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   gap: 6px;
   border-radius: 9999px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .filter-tab.add-group-tab:hover {
   background: rgba(0, 242, 254, 0.25);
@@ -10633,7 +10635,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   justify-content: center;
   font-size: 18px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .calls-icon-btn:hover {
@@ -10784,7 +10786,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   color: #f1f5f9;
   font-size: 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 .calls-quick-action-item:hover .calls-action-circle {
@@ -10949,7 +10951,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .call-callback-btn:hover {
@@ -11135,7 +11137,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   height: 64px;
   margin: 0 auto;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   user-select: none;
 }
 
@@ -11181,7 +11183,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   justify-content: center;
   font-size: 22px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .calls-dial-call-btn {
@@ -11259,7 +11261,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   color: #cbd5e1;
   font-size: 13.5px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .calls-radio-label input[type="radio"] {
@@ -11392,7 +11394,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   justify-content: center;
   cursor: pointer;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .picker-call-btn:hover {
@@ -11477,7 +11479,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   color: #aebac1 !important;
   font-size: 17px !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .chat-detail-view.group-chat #headerVideoBtn:hover,
@@ -11855,7 +11857,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   justify-content: center !important;
   cursor: pointer !important;
   font-size: 13px !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   margin-left: 6px !important;
   padding: 0 !important;
 }
@@ -11905,7 +11907,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   font-size: 12.5px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   padding: 0 12px !important;
   text-decoration: none !important;
   box-sizing: border-box !important;
@@ -12057,7 +12059,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   font-size: 12.5px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -12083,7 +12085,7 @@ html[data-chat-size="extra-large"] .nex-msg-text {
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   box-shadow: 0 2px 10px rgba(0, 255, 102, 0.3) !important;
 }
 
@@ -12463,7 +12465,7 @@ body:not(.group-active) #tacticalMeshBanner {
   border-bottom: 1px solid rgba(0, 255, 102, 0.15) !important;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4) !important;
   z-index: 95 !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   overflow: hidden !important;
   width: 100% !important;
   box-sizing: border-box !important;
@@ -12499,7 +12501,7 @@ body:not(.group-active) #tacticalMeshBanner {
   cursor: pointer !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
   user-select: none !important;
 }
 
@@ -12531,7 +12533,7 @@ body:not(.group-active) #tacticalMeshBanner {
   cursor: pointer !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   box-shadow: 0 0 12px rgba(0, 255, 102, 0.25) !important;
 }
 
@@ -12587,7 +12589,7 @@ body:not(.group-active) #tacticalMeshBanner {
   color: #00f2fe !important;
   border-color: rgba(0, 242, 254, 0.3) !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .group-meta-pill.group-hq-pill:hover {
@@ -12677,7 +12679,7 @@ body:not(.group-active) #tacticalMeshBanner {
   align-items: center !important;
   gap: 4px !important;
   flex-shrink: 0 !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .undo-pill-btn:hover {
@@ -12866,7 +12868,7 @@ body:not(.group-active) #tacticalMeshBanner {
   align-items: center !important;
   gap: 6px !important;
   cursor: pointer !important;
-  transition: all 0.25s ease !important;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease !important;
   height: 32px !important;
   white-space: nowrap !important;
 }
@@ -12896,7 +12898,7 @@ body:not(.group-active) #tacticalMeshBanner {
   align-items: center !important;
   gap: 5px !important;
   cursor: pointer !important;
-  transition: all 0.25s ease !important;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease !important;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.25) !important;
   height: 32px !important;
   white-space: nowrap !important;
@@ -12923,7 +12925,7 @@ body:not(.group-active) #tacticalMeshBanner {
   font-weight: 600;
   cursor: pointer;
   width: fit-content;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   user-select: none;
 }
 
@@ -12995,7 +12997,7 @@ body:not(.group-active) #tacticalMeshBanner {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .chronex-play-orig-btn:hover,
@@ -13019,7 +13021,7 @@ body:not(.group-active) #tacticalMeshBanner {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .chronex-play-trans-btn:hover,
@@ -13120,7 +13122,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .chronex-hud-audio-btn:hover,
@@ -13140,7 +13142,7 @@ body:not(.group-active) #tacticalMeshBanner {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
   font-size: 14px;
 }
 
@@ -13224,7 +13226,7 @@ body:not(.group-active) #tacticalMeshBanner {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(0, 242, 255, 0.12);
   border-radius: 12px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .chronex-bullet-item:hover {
@@ -13283,7 +13285,7 @@ body:not(.group-active) #tacticalMeshBanner {
   font-size: 10.5px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .chronex-jump-pill:hover {
@@ -13353,7 +13355,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .chronex-hud-copy-btn:hover {
@@ -13481,7 +13483,7 @@ body:not(.group-active) #tacticalMeshBanner {
   font-size: 10px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .chronex-slice-btn:hover {
@@ -13512,7 +13514,7 @@ body:not(.group-active) #tacticalMeshBanner {
   font-size: 11px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   user-select: none;
 }
 
@@ -13541,7 +13543,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   white-space: nowrap;
 }
 
@@ -13671,7 +13673,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .live-vc-toggle-btn:hover {
@@ -13698,7 +13700,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .live-vc-leave-btn:hover {
@@ -13785,7 +13787,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .live-vc-mode-pill:hover {
@@ -13832,7 +13834,7 @@ body:not(.group-active) #tacticalMeshBanner {
   border-radius: 16px;
   background: rgba(15, 23, 42, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .live-vc-user-card.speaking {
@@ -13907,7 +13909,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .live-vc-user-card.speaking .live-vc-mic-status {
@@ -14105,7 +14107,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .live-vc-action-btn:hover {
@@ -14137,7 +14139,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 0 22px rgba(0, 242, 255, 0.22);
   user-select: none;
   -webkit-user-select: none;
@@ -14195,7 +14197,7 @@ body:not(.group-active) #tacticalMeshBanner {
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .chronex-live-vc-toggle-pill:hover {
@@ -14316,7 +14318,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .live-vc-header-btn:hover {
@@ -14371,7 +14373,7 @@ body:not(.group-active) #tacticalMeshBanner {
   gap: 6px;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   z-index: 10;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
@@ -14537,7 +14539,7 @@ body:not(.group-active) #tacticalMeshBanner {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .live-vc-transcript-close-btn:hover {
@@ -14652,7 +14654,7 @@ body:not(.group-active) #tacticalMeshBanner {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .live-vc-transcript-btn:hover {
@@ -14702,7 +14704,7 @@ body:not(.group-active) #tacticalMeshBanner {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 10;
   animation: chronexPillGlow 2.5s infinite alternate ease-in-out;
 }
@@ -15028,7 +15030,7 @@ body:not(.group-active) #tacticalMeshBanner {
   font-weight: 600;
   padding: 4px 10px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   user-select: none;
 }
 
@@ -15434,7 +15436,7 @@ body:not(.group-active) #tacticalMeshBanner {
   font-size: 11px !important;
   font-weight: 700 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .ghost-header-toggle-btn.active {
@@ -15488,7 +15490,7 @@ body:not(.group-active) #tacticalMeshBanner {
   gap: 8px !important;
   width: 100% !important;
   margin-top: 8px !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   touch-action: manipulation !important;
   pointer-events: auto !important;
 }
@@ -15703,7 +15705,7 @@ body:not(.group-active) #tacticalMeshBanner {
   text-align: center !important;
   gap: 4px !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .stegano-cover-card.active {
@@ -15789,7 +15791,7 @@ body:not(.group-active) #tacticalMeshBanner {
   gap: 8px !important;
   cursor: pointer !important;
   box-shadow: 0 0 18px rgba(168, 85, 247, 0.4) !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .btn-stegano-synthesize:disabled {
@@ -16783,7 +16785,7 @@ body:not(.group-active) #tacticalMeshBanner {
   border-bottom: 1px solid rgba(0, 255, 136, 0.2) !important;
   font-size: 11px !important;
   gap: 8px !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 .group-synergy-hud-bar.collapsed {
   display: none !important;
@@ -17575,7 +17577,7 @@ body.channel-route-active #chatContainer {
   display: inline-flex !important;
   align-items: center !important;
   gap: 5px !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .whatsapp-channel-react-btn:hover,
@@ -17597,7 +17599,7 @@ body.channel-route-active #chatContainer {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .whatsapp-channel-input-bar {
@@ -17773,7 +17775,7 @@ body.channel-route-active #chatContainer {
   justify-content: center !important;
   gap: 8px !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .channel-dropdown-action-btn {
@@ -17846,7 +17848,7 @@ body.channel-route-active #chatContainer {
   align-items: center !important;
   gap: 6px !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .whatsapp-channel-action-chip:hover {
@@ -18365,7 +18367,7 @@ body {
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .nex-modal-close-btn:hover,
@@ -18418,7 +18420,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-radius: 12px !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .nex-picker-item:hover,
@@ -19112,7 +19114,7 @@ body.in-conversation #bottomNav {
   color: #e9edef !important;
   font-size: 15px !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
   flex-shrink: 0 !important;
   padding: 0 !important;
 }
@@ -19212,7 +19214,7 @@ body.in-conversation #bottomNav {
   box-shadow: 0 4px 14px rgba(0, 168, 132, 0.35) !important;
   border: none !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   box-sizing: border-box !important;
 }
 
@@ -19385,20 +19387,46 @@ body,
 .chat-background,
 .chat-detail-view.has-custom-wallpaper,
 #chatDetailView.has-custom-wallpaper {
-  background-image: var(--chat-wallpaper) !important;
-  background-size: cover !important;
-  background-position: center center !important;
-  background-repeat: no-repeat !important;
+  position: relative;
+  background-image: none !important;
   background-color: #0b0f19 !important;
+  isolation: isolate;
+}
+
+.chat-detail-view.has-custom-wallpaper::before,
+#chatDetailView.has-custom-wallpaper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--chat-wallpaper);
+  background-size: var(--chat-wallpaper-size, cover);
+  background-position: center center;
+  background-repeat: var(--chat-wallpaper-repeat, no-repeat);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.chat-detail-view.has-custom-wallpaper[data-wallpaper-type="svg"]::before,
+#chatDetailView.has-custom-wallpaper[data-wallpaper-type="svg"]::before {
+  background-size: auto;
+  background-repeat: repeat;
+}
+
+.chat-detail-view.has-custom-wallpaper > *,
+#chatDetailView.has-custom-wallpaper > * {
+  position: relative;
+  z-index: 1;
 }
 
 .messages-area.has-custom-wallpaper,
 #messages-area.has-custom-wallpaper {
   background-image: none !important;
-  background-color: rgba(6, 10, 20, 0.40) !important;
+  background-color: rgba(6, 10, 20, 0.36) !important;
 }
 
-/* Remove all fade / opacity transitions and blur filters that trigger GPU black frame drops on Intel graphics */
+/* Remove heavy blur & transition churn on core scrolling containers */
 .chat-detail-view,
 #chatDetailView,
 .chat-main,
@@ -19414,6 +19442,14 @@ body,
   -webkit-backdrop-filter: none !important;
   transition: none !important;
   animation: none !important;
+}
+
+.messages-area,
+#messages-area,
+#chat-list,
+.chat-list {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 /* RULE 3 & RULE 5: Exact desktop 2-column flex layout (Screen width >= 900px) */
@@ -19778,7 +19814,7 @@ textarea {
   width: 32px !important;
   height: 32px !important;
   border-radius: 50% !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .reply-preview button:hover,
@@ -19838,7 +19874,7 @@ textarea {
   gap: 6px !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
   min-height: 60px !important;
   width: 100% !important;
   min-width: 0 !important;
@@ -20332,4 +20368,135 @@ textarea {
   display: flex !important;
   visibility: visible !important;
   align-items: center !important;
+}
+
+/* ==========================================================================
+   NEXCHAT ADAPTIVE MOTION ENGINE, LOW-END FAST PATH & LIQUID GLASS FX
+   ========================================================================== */
+@keyframes nexMsgEnterSpring {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.nex-msg-enter {
+  animation: nexMsgEnterSpring 280ms cubic-bezier(0.22, 1.35, 0.36, 1) backwards !important;
+  transform-origin: center bottom;
+}
+
+.chat-list-item,
+.message-wrapper,
+.nex-msg-wrapper {
+  touch-action: pan-y !important;
+  contain: layout style;
+}
+
+/* Low-End Turbo Boost (Zero Blur) + Default Zero-Blur Scroll Protection */
+body.nex-low-end .app div,
+body.nex-low-end .app header,
+body.nex-low-end .app nav,
+body.nex-low-end .app section,
+body.nex-low-end .app aside,
+body:not(.nex-liquid-glass) [class*="card"],
+body:not(.nex-liquid-glass) [class*="dock"],
+body:not(.nex-liquid-glass) [class*="pill"],
+body:not(.nex-liquid-glass) [class*="drawer"],
+body:not(.nex-liquid-glass) [class*="sheet"],
+body:not(.nex-liquid-glass) [class*="header"],
+body:not(.nex-liquid-glass) [class*="nav"],
+body:not(.nex-liquid-glass) [class*="bar"],
+body:not(.nex-liquid-glass) .chat-list-item,
+body:not(.nex-liquid-glass) .message-bubble,
+body:not(.nex-liquid-glass) .messages-area,
+body:not(.nex-liquid-glass) .status-story-card,
+body:not(.nex-liquid-glass) .status-row-item {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.nex-low-end .nex-msg-enter {
+  animation: none !important;
+}
+
+/* Flagship Liquid Glass Display FX (Activated via Settings -> Cyber Lab) */
+body.nex-liquid-glass:not(.nex-low-end) .chat-detail-header,
+body.nex-liquid-glass:not(.nex-low-end) .active-chat-header,
+body.nex-liquid-glass:not(.nex-low-end) .whatsapp-channel-header {
+  background: rgba(15, 23, 36, 0.68) !important;
+  backdrop-filter: blur(22px) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(175%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 -1px 0 rgba(0, 255, 102, 0.12), 0 8px 24px rgba(0, 0, 0, 0.32) !important;
+}
+
+body.nex-liquid-glass:not(.nex-low-end) .message-form,
+body.nex-liquid-glass:not(.nex-low-end) .bottom-nav,
+body.nex-liquid-glass:not(.nex-low-end) .nex-quick-profile-card,
+body.nex-liquid-glass:not(.nex-low-end) .modal-content,
+body.nex-liquid-glass:not(.nex-low-end) .whatsapp-channel-card,
+body.nex-liquid-glass:not(.nex-low-end) .channel-spotlight-card,
+body.nex-liquid-glass:not(.nex-low-end) .status-preview-tool-btn,
+body.nex-liquid-glass:not(.nex-low-end) .status-attached-music-sticker {
+  background: rgba(14, 22, 34, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(165%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 28px rgba(0, 0, 0, 0.38) !important;
+}
+
+body.nex-liquid-glass:not(.nex-low-end) .message-bubble.sent {
+  background: linear-gradient(145deg, rgba(0, 148, 108, 0.86), rgba(0, 92, 75, 0.90)) !important;
+  border: 1px solid rgba(0, 255, 136, 0.28) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 14px rgba(0, 0, 0, 0.24) !important;
+}
+
+body.nex-liquid-glass:not(.nex-low-end) .message-bubble.received {
+  background: rgba(30, 42, 54, 0.78) !important;
+  backdrop-filter: blur(12px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 4px 12px rgba(0, 0, 0, 0.22) !important;
+}
+
+/* Flagship Android Display Glass Style Presets */
+body.nex-liquid-glass[data-glass-preset="crystal"]:not(.nex-low-end) .chat-detail-header,
+body.nex-liquid-glass[data-glass-preset="crystal"]:not(.nex-low-end) .message-form,
+body.nex-liquid-glass[data-glass-preset="crystal"]:not(.nex-low-end) .bottom-nav,
+body.nex-liquid-glass[data-glass-preset="crystal"]:not(.nex-low-end) .whatsapp-channel-card {
+  background: rgba(18, 28, 46, 0.62) !important;
+  backdrop-filter: blur(26px) saturate(195%) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(195%) !important;
+  border-color: rgba(148, 210, 255, 0.24) !important;
+}
+
+body.nex-liquid-glass[data-glass-preset="emerald"]:not(.nex-low-end) .chat-detail-header,
+body.nex-liquid-glass[data-glass-preset="emerald"]:not(.nex-low-end) .message-form,
+body.nex-liquid-glass[data-glass-preset="emerald"]:not(.nex-low-end) .bottom-nav,
+body.nex-liquid-glass[data-glass-preset="emerald"]:not(.nex-low-end) .whatsapp-channel-card {
+  background: rgba(8, 26, 20, 0.70) !important;
+  backdrop-filter: blur(22px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+  border-color: rgba(0, 255, 102, 0.30) !important;
+  box-shadow: inset 0 1px 0 rgba(0, 255, 102, 0.18), 0 10px 26px rgba(0, 0, 0, 0.38) !important;
+}
+
+body.nex-liquid-glass[data-glass-preset="obsidian"]:not(.nex-low-end) .chat-detail-header,
+body.nex-liquid-glass[data-glass-preset="obsidian"]:not(.nex-low-end) .message-form,
+body.nex-liquid-glass[data-glass-preset="obsidian"]:not(.nex-low-end) .bottom-nav,
+body.nex-liquid-glass[data-glass-preset="obsidian"]:not(.nex-low-end) .whatsapp-channel-card {
+  background: rgba(8, 10, 14, 0.80) !important;
+  backdrop-filter: blur(18px) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(135%) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+.status-story-card,
+.status-row-item {
+  contain: layout style;
+  touch-action: pan-x pan-y;
 }

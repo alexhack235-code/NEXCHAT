@@ -58,7 +58,7 @@ font-size: 11.5px !important;
 font-weight: 700 !important;
 letter-spacing: 1px !important;
 cursor: pointer !important;
-transition: all 0.25s ease !important;
+transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease !important;
 white-space: nowrap !important;
 box-shadow: 0 0 12px rgba(0, 255, 102, 0.15) !important;
 }
@@ -271,7 +271,7 @@ font-size: 18px !important;
 cursor: pointer !important;
 padding: 0 !important;
 margin: 0 !important;
-transition: all 0.18s ease !important;
+transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease !important;
 }
 
 .chat-detail-header .back-btn:hover {
@@ -384,7 +384,7 @@ font-size: 18px !important;
 cursor: pointer !important;
 padding: 0 !important;
 margin: 0 !important;
-transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .chat-detail-header-actions #headerVideoBtn:hover,
@@ -478,7 +478,7 @@ cursor: pointer !important;
 font-size: 18px !important;
 padding: 0 !important;
 margin-bottom: 2px !important;
-transition: all 0.15s ease !important;
+transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 flex-shrink: 0 !important;
 }
 
@@ -517,7 +517,7 @@ justify-content: center !important;
 cursor: pointer !important;
 flex-shrink: 0 !important;
 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
-transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
 margin: 0 !important;
 padding: 0 !important;
 align-self: flex-end !important;
@@ -551,7 +551,7 @@ align-items: center !important;
 justify-content: center !important;
 cursor: pointer !important;
 font-size: 15px !important;
-transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 border-radius: 50% !important;
 padding: 0 !important;
 margin-right: 4px !important;
@@ -845,7 +845,7 @@ opacity: 0.95 !important;
   padding: 0 !important;
   margin: 0 !important;
   font-size: 13px !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .cancel-reply-btn:hover {
@@ -1564,7 +1564,7 @@ font-size: 11px !important;
 cursor: pointer !important;
 align-self: center !important;
 margin: 0 6px !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .media-forward-btn:hover {
@@ -1697,7 +1697,7 @@ border: 1px solid rgba(255, 255, 255, 0.06) !important;
 background: #202c33 !important;
 color: #8696a0 !important;
 cursor: pointer !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 flex-shrink: 0 !important;
 box-shadow: none !important;
 outline: none !important;
@@ -2178,7 +2178,7 @@ background: transparent !important;
 border: none !important;
 cursor: pointer !important;
 padding: 6px 0 !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 outline: none !important;
 box-shadow: none !important;
 border-radius: 0 !important;
@@ -2195,7 +2195,7 @@ padding: 0 16px !important;
 border-radius: 16px !important;
 color: #8696a0 !important;
 font-size: 17px !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 box-sizing: border-box !important;
 }
 
@@ -2383,7 +2383,7 @@ border-radius: 12px;
 background: rgba(255, 255, 255, 0.03);
 border: 1px solid rgba(255, 255, 255, 0.08);
 cursor: pointer;
-transition: all 0.2s ease;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 text-align: left;
 }
 
@@ -2943,7 +2943,7 @@ border: none !important;
 color: #aebac1 !important;
 font-size: 17px !important;
 cursor: pointer !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .chat-detail-view.group-chat #headerVideoBtn:hover,
@@ -3873,7 +3873,7 @@ display: inline-flex !important;
 align-items: center !important;
 gap: 5px !important;
 white-space: nowrap !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .spaces-create-btn:hover {
@@ -3892,7 +3892,7 @@ cursor: pointer !important;
 display: flex !important;
 align-items: center !important;
 justify-content: center !important;
-transition: all 0.2s !important;
+transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s !important;
 flex-shrink: 0 !important;
 }
 
@@ -4005,7 +4005,7 @@ border-radius: 12px !important;
 box-sizing: border-box !important;
 position: relative !important;
 overflow: hidden !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .podium-speaker.active-speaking {
@@ -4150,7 +4150,7 @@ color: #cbd5e1 !important;
 font-size: 11px !important;
 font-weight: 700 !important;
 cursor: pointer !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 box-sizing: border-box !important;
 }
 
@@ -4209,7 +4209,7 @@ border: 1px solid rgba(255, 255, 255, 0.08) !important;
 border-radius: 14px !important;
 box-sizing: border-box !important;
 width: 100% !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 position: relative !important;
 overflow: hidden !important;
 }
@@ -4304,7 +4304,7 @@ padding: 6px 14px !important;
 font-size: 11.5px !important;
 font-weight: 700 !important;
 cursor: pointer !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .join-space-btn:hover {
@@ -4365,7 +4365,7 @@ border: 1px solid rgba(0, 243, 255, 0.35) !important;
 color: #00C896 !important;
 cursor: pointer !important;
 white-space: nowrap !important;
-transition: all 0.2s ease !important;
+transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
@@ -4517,7 +4517,7 @@ font-size: 11.5px !important;
   border: none !important;
   cursor: pointer !important;
   padding: 4px 1px !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   outline: none !important;
   box-sizing: border-box !important;
 }
@@ -4543,7 +4543,7 @@ body.mobile-preview .bottom-nav .nav-item {
   border-radius: 14px !important;
   color: #8696a0 !important;
   font-size: 16px !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   box-sizing: border-box !important;
 }
 
@@ -4686,7 +4686,7 @@ body.mobile-preview .bottom-nav .nav-item {
   justify-content: center !important;
   cursor: pointer !important;
   font-size: 14px !important;
-  transition: all 0.2s !important;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s !important;
   flex-shrink: 0 !important;
 }
 
@@ -4757,7 +4757,7 @@ body.mobile-preview .bottom-nav .nav-item {
   justify-content: center !important;
   cursor: pointer !important;
   font-size: 13px !important;
-  transition: all 0.2s !important;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s !important;
 }
 
 .announcements-action-btn:hover {
@@ -4894,7 +4894,7 @@ body.mobile-preview .bottom-nav .nav-item {
   align-items: center !important;
   gap: 6px !important;
   white-space: nowrap !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
 }
 
 .dispatch-filter-pill:hover {
@@ -5073,7 +5073,7 @@ body.mobile-preview .bottom-nav .nav-item {
   display: inline-flex !important;
   align-items: center !important;
   gap: 5px !important;
-  transition: all 0.18s !important;
+  transition: transform 0.18s, opacity 0.18s, background-color 0.18s, border-color 0.18s, color 0.18s !important;
 }
 
 .announcement-card-action-btn:hover {
@@ -5417,7 +5417,7 @@ body[data-active-section="global-drop"] .chat-main {
   font-weight: 600 !important;
   color: #e9edef !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   white-space: nowrap !important;
 }
 
@@ -5492,7 +5492,7 @@ body[data-active-section="global-drop"] .chat-main {
   padding: 2px 7px !important;
   border-radius: 6px !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
 }
 
 .btn-retry-failed-msg:hover {
@@ -5855,7 +5855,7 @@ body[data-active-section="global-drop"] .chat-main {
   color: #e9edef !important;
   font-size: 15px !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
   flex-shrink: 0 !important;
   padding: 0 !important;
 }
@@ -5955,7 +5955,7 @@ body[data-active-section="global-drop"] .chat-main {
   box-shadow: 0 4px 14px rgba(0, 168, 132, 0.35) !important;
   border: none !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
   box-sizing: border-box !important;
 }
 
@@ -6453,6 +6453,8 @@ textarea {
   overflow-wrap: anywhere !important;
   padding: 0 !important;
   box-sizing: border-box !important;
+  touch-action: pan-y !important;
+  contain: layout style !important;
 }
 
 /* Bubble base: max-width calc(75% - 8px), overflow visible */
@@ -6466,6 +6468,7 @@ textarea {
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
   box-sizing: border-box !important;
+  touch-action: pan-y !important;
 }
 
 /* Outgoing bubble: margin-left auto, margin-right 8px, max-width calc(75% - 8px), overflow visible */

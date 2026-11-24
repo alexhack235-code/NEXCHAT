@@ -19,7 +19,7 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   margin-left: 8px;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
 }
@@ -145,7 +145,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .streak-close-btn:hover {
@@ -255,7 +255,7 @@
   align-items: center;
   text-align: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   position: relative;
 }
 
@@ -381,7 +381,7 @@
   justify-content: center;
   gap: 10px;
   box-shadow: 0 6px 20px rgba(255, 215, 0, 0.35);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .streak-claim-action-btn:hover:not(:disabled) {
@@ -401,7 +401,7 @@
 /* ======================================================= */
 .ghost-toggle-btn {
   color: #c084fc !important;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .ghost-toggle-btn.active {
@@ -457,7 +457,7 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   text-align: left;
 }
 
@@ -580,7 +580,7 @@
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .smart-chip:hover {
@@ -608,7 +608,7 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   flex-shrink: 0;
 }
 
@@ -681,7 +681,7 @@
   font-size: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .soundboard-fx-btn:hover {
@@ -815,7 +815,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .audio-close-btn:hover {
@@ -964,7 +964,7 @@
   padding: 12px 8px;
   text-align: center;
   position: relative;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .speaker-avatar-wrap {
@@ -1099,7 +1099,7 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .stage-ctrl-btn:hover {
@@ -1132,7 +1132,7 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .stage-leave-btn:hover {
@@ -1161,7 +1161,7 @@
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 10px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .stage-mini-card:hover {
@@ -1193,7 +1193,7 @@
   font-size: 10.5px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .join-stage-btn:hover {
@@ -1302,7 +1302,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .cyberdrop-close-btn:hover {
@@ -1372,7 +1372,7 @@
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .radar-peer-blip:hover {
@@ -1448,7 +1448,7 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 11px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .copy-beam-code-btn:hover {
@@ -1488,7 +1488,7 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .beam-connect-btn:hover {
@@ -1509,7 +1509,7 @@
   justify-content: center;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .cyberdrop-zone:hover,
@@ -1551,7 +1551,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .select-beam-files-btn:hover {
@@ -1705,7 +1705,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .cipher-close-btn:hover {
@@ -1765,7 +1765,7 @@
   border-radius: 50%;
   border: 2px solid rgba(245, 158, 11, 0.4);
   background: transparent;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .pin-dot.filled {
@@ -1798,7 +1798,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s;
+  transition: transform 0.15s, opacity 0.15s, background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .pin-key:hover {
@@ -1858,7 +1858,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .cipher-lock-btn:hover {
@@ -1899,7 +1899,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .create-secret-room-btn:hover {
@@ -1921,7 +1921,7 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .secret-room-card:hover {
@@ -1971,7 +1971,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .open-secret-room-btn:hover {
@@ -2018,7 +2018,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .incinerator-action-btn:hover {
@@ -2114,7 +2114,7 @@
   justify-content: center;
   font-size: 15px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   margin-right: 10px;
   flex-shrink: 0;
 }
@@ -2181,7 +2181,7 @@
   font-size: 11.5px !important;
   font-weight: 700 !important;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   white-space: nowrap;
 }
 .unblock-btn:hover {
@@ -2211,7 +2211,7 @@
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: left;
 }
 
@@ -2247,7 +2247,7 @@
   z-index: 120;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   perspective: 600px;
 }
 
@@ -2316,7 +2316,7 @@
   border-bottom: 1px solid rgba(0, 255, 102, 0.15);
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
   z-index: 45;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
@@ -2350,7 +2350,7 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   user-select: none;
 }
 
@@ -2382,7 +2382,7 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   box-shadow: 0 0 12px rgba(0, 255, 102, 0.25);
 }
 
@@ -2483,7 +2483,7 @@
   justify-content: center;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .sticker-close-btn:hover {
@@ -2519,7 +2519,7 @@
   border-radius: 9999px;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .sticker-tab-pill.active {
@@ -2592,7 +2592,7 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   text-align: center;
   padding: 8px;
 }
@@ -2738,7 +2738,7 @@
   padding: 16px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .sticker-upload-dropzone:hover,
@@ -2765,7 +2765,7 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   text-align: center;
 }
 
@@ -2827,7 +2827,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .sticker-action-send:hover {
@@ -3035,7 +3035,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
@@ -3336,7 +3336,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .call-dock-btn:hover {
@@ -3492,7 +3492,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .clip-ctrl-btn:hover {
   transform: scale(1.1);
@@ -3523,7 +3523,7 @@
 /* Mode toggle button in input bar */
 .clip-mode-toggle-btn {
   color: #94a3b8;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 .clip-mode-toggle-btn.active-video-mode {
   color: #00ff66;
@@ -3583,7 +3583,7 @@
   font-weight: 800;
   color: #fef08a;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   user-select: none;
 }
 .chat-streak-badge:hover {
@@ -3796,7 +3796,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 .lootbox-claim-btn.ready {
   background: linear-gradient(135deg, #00ff66 0%, #00d4ff 100%);
@@ -3863,7 +3863,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   border-bottom: 2px solid transparent;
 }
 .arcade-tab-btn.active {
@@ -3895,7 +3895,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .wager-pill.active {
   background: rgba(0, 255, 102, 0.15);
@@ -3917,7 +3917,7 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .rps-choice-btn:hover {
   background: rgba(255, 255, 255, 0.08);
@@ -3953,7 +3953,7 @@
   justify-content: center;
   gap: 8px;
   box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .arcade-action-btn:disabled {
   opacity: 0.4;
@@ -4040,7 +4040,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .trivia-opt-btn:hover {
   background: rgba(255, 255, 255, 0.08);
@@ -4123,7 +4123,7 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .theater-preset-pill:hover {
   background: rgba(0, 212, 255, 0.15);
@@ -4234,7 +4234,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .theater-share-btn:hover {
   background: rgba(0, 212, 255, 0.25);
@@ -4277,7 +4277,7 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   text-align: center;
 }
 .drop-pot-pill.active, .drop-recip-pill.active {
@@ -4312,7 +4312,7 @@
   letter-spacing: 0.5px;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(251, 191, 36, 0.35);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .token-drop-dispatch-btn:hover {
   transform: translateY(-1px);
@@ -4401,7 +4401,7 @@
   font-weight: 800;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .token-rain-claim-btn:hover {
   background: #f59e0b;
@@ -4503,7 +4503,7 @@
   color: #94a3b8;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.18s;
+  transition: transform 0.18s, opacity 0.18s, background-color 0.18s, border-color 0.18s, color 0.18s;
 }
 .morpher-pill.active {
   background: rgba(0, 212, 255, 0.25);
@@ -4578,7 +4578,7 @@
   border-radius: 12px;
   color: #ffffff;
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.18s cubic-bezier(0.2, 0.8, 0.3, 1), background-color 0.18s cubic-bezier(0.2, 0.8, 0.3, 1), border-color 0.18s cubic-bezier(0.2, 0.8, 0.3, 1), color 0.18s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 .soundboard-pad-btn:hover {
   background: rgba(0, 255, 102, 0.15);
@@ -4655,7 +4655,7 @@
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .color-swatch-btn.active {
   transform: scale(1.22);
@@ -4709,7 +4709,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .canvas-tool-btn:hover {
   background: rgba(255, 255, 255, 0.15);
@@ -4727,7 +4727,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .canvas-send-btn:hover {
   box-shadow: 0 0 16px rgba(0, 240, 255, 0.5);
@@ -4926,7 +4926,7 @@
   font-weight: 700;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .holo-action-btn:hover {
   background: rgba(0, 212, 255, 0.3);
@@ -4958,7 +4958,7 @@
   margin-left: auto;
   padding: 10px 14px;
   border-radius: 14px 14px 4px 14px;
-  transition: all 0.25s ease;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 .preview-message-bubble p {
   margin: 0 0 4px 0;
@@ -4985,7 +4985,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .theme-card-option:hover {
   background: #1a2333;
@@ -5033,7 +5033,7 @@
   font-size: 13px;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35);
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .theme-save-btn:hover {
   transform: translateY(-1px);
@@ -5093,7 +5093,7 @@
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.25s;
+  transition: transform 0.25s, opacity 0.25s, background-color 0.25s, border-color 0.25s, color 0.25s;
 }
 .biometric-scanner-orb:hover {
   transform: scale(1.06);
@@ -5150,7 +5150,7 @@
   font-size: 13px;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(0, 212, 255, 0.35);
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .bio-primary-btn:hover {
   transform: translateY(-1px);
@@ -5166,7 +5166,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .bio-secondary-btn:hover {
   background: rgba(255, 255, 255, 0.1);
@@ -5263,7 +5263,7 @@
 .voice-dictate-btn {
   color: #94a3b8;
   font-size: 14px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .voice-dictate-btn:hover {
   color: #00d4ff;
@@ -5318,7 +5318,7 @@
   font-weight: 700;
   color: #94a3b8;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: transform 0.15s, opacity 0.15s, background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .voice-speed-pill.active {
   background: #00d4ff;
@@ -5351,7 +5351,7 @@
   padding: 32px 18px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .p2p-drop-zone:hover, .p2p-drop-zone.dragover {
   border-color: #00ff66;
@@ -5422,7 +5422,7 @@
   letter-spacing: 0.5px;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(0, 255, 102, 0.35);
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .p2p-beam-btn:hover {
   transform: translateY(-1px);
@@ -5474,7 +5474,7 @@
   color: #ffffff;
   font-size: 13px;
   outline: none;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .poll-text-input:focus {
   border-color: #00ff66;
@@ -5488,7 +5488,7 @@
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .poll-add-opt-btn:hover {
   background: rgba(0, 212, 255, 0.1);
@@ -5508,7 +5508,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .poll-wager-pill:hover {
   background: rgba(255, 255, 255, 0.1);
@@ -5531,7 +5531,7 @@
   letter-spacing: 0.5px;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(0, 255, 102, 0.35);
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .poll-launch-btn:hover {
   transform: translateY(-1px);
@@ -5597,7 +5597,7 @@
   min-height: 38px;
   display: flex;
   align-items: center;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .poll-option-row:hover {
   border-color: rgba(0, 212, 255, 0.35);
@@ -5668,7 +5668,7 @@
   font-size: 10px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: transform 0.15s, opacity 0.15s, background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .poll-vote-btn:hover {
   background: #00ff66;
@@ -5710,7 +5710,7 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: transform 0.15s, opacity 0.15s, background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .resolve-pick-opt-btn:hover {
   background: #f59e0b;
@@ -5784,7 +5784,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   position: relative;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .stage-speaker-card:hover {
   background: rgba(255, 255, 255, 0.06);
@@ -5813,7 +5813,7 @@
   border-radius: 50%;
   border: 2px solid transparent;
   pointer-events: none;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .stage-speaker-card.speaking-active .speaker-speaking-ring {
   border-color: #00ff66;
@@ -5891,7 +5891,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .stage-dock-btn:hover {
   background: rgba(255, 255, 255, 0.15);
@@ -6011,7 +6011,7 @@
   font-size: 13px;
   outline: none;
   resize: vertical;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .schedule-text-area:focus {
   border-color: #00d4ff;
@@ -6031,7 +6031,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .schedule-delay-pill:hover {
   background: rgba(255, 255, 255, 0.1);
@@ -6054,7 +6054,7 @@
   letter-spacing: 0.5px;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(0, 212, 255, 0.35);
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .schedule-submit-btn:hover {
   transform: translateY(-1px);
@@ -6175,7 +6175,7 @@
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .syndicate-tab-btn:hover {
   background: rgba(255, 255, 255, 0.08);
@@ -6197,7 +6197,7 @@
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .syndicate-card:hover {
   background: rgba(255, 255, 255, 0.06);
@@ -6240,7 +6240,7 @@
   font-size: 11px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .syndicate-join-btn:hover {
   background: #00d4ff;
@@ -6275,7 +6275,7 @@
   font-size: 10px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: transform 0.15s, opacity 0.15s, background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .sector-raid-btn.attack {
   background: rgba(239, 68, 68, 0.18);
@@ -6326,7 +6326,7 @@
   font-weight: 800;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 /* --- Feature 2: Holographic Scratch & Win Mystery Cards --- */
@@ -6372,7 +6372,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .scratch-tier-pill.active {
   background: rgba(0, 212, 255, 0.2);
@@ -6392,7 +6392,7 @@
   letter-spacing: 0.5px;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(0, 212, 255, 0.35);
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .scratch-bubble-card {
   width: 100%;
@@ -6616,7 +6616,7 @@
   font-size: 13px;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(0, 255, 102, 0.35);
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 /* --- Feature 4: Quantum AR Face Masks & Holo-Visors --- */
@@ -6671,7 +6671,7 @@
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: transform 0.15s, opacity 0.15s, background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .ar-option-btn:hover {
   background: rgba(0, 212, 255, 0.12);
@@ -6905,7 +6905,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .bounty-pill.active {
   background: rgba(0, 255, 102, 0.18);
@@ -6925,7 +6925,7 @@
   letter-spacing: 0.5px;
   cursor: pointer;
   box-shadow: 0 4px 18px rgba(0, 255, 102, 0.35);
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .bounty-contract-card {
   width: 100%;
@@ -6998,7 +6998,7 @@
   font-size: 10px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: transform 0.15s, opacity 0.15s, background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 .bounty-submit-solution-btn:hover {
   background: #00d4ff;
@@ -7283,7 +7283,7 @@
   font-size: 11px;
   font-weight: 800;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 .panic-execute-btn.decoy {
   background: rgba(0, 212, 255, 0.15);
@@ -7429,7 +7429,7 @@
   padding: 10px;
   cursor: pointer;
   text-align: left;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .synth-profile-card:hover {
   background: rgba(0, 243, 255, 0.05);
@@ -8596,7 +8596,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .matrix-quick-btn:hover {
   background: #00f3ff;
@@ -8714,7 +8714,7 @@
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 6px;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .matrix-feature-item:hover {
   background: rgba(0, 243, 255, 0.03);
@@ -9135,7 +9135,7 @@ body.crt-phosphor-active::after {
   font-size: 11px;
   font-weight: 800;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .reel-open-camshot-btn:hover {
   background: #ffd700;
@@ -9285,7 +9285,7 @@ body.crt-phosphor-active::after {
   cursor: pointer;
   padding: 3px 6px;
   border-radius: 50%;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .msg-reply-trigger-btn:hover {
@@ -9660,7 +9660,7 @@ body.crt-phosphor-active::after {
   justify-content: center;
   font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nex-floating-call-dock .mini-dock-btn:hover {
@@ -9787,7 +9787,7 @@ body.crt-phosphor-active::after {
   border-radius: 50%;
   border: 2px solid rgba(0, 255, 136, 0.4);
   background: transparent;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .auth-pin-dots .pin-dot.filled {
@@ -9829,7 +9829,7 @@ body.crt-phosphor-active::after {
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -9868,7 +9868,7 @@ body.crt-phosphor-active::after {
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .auth-cancel-btn:hover {
@@ -9958,7 +9958,7 @@ body.crt-phosphor-active::after {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .vault-action-btn:hover {
@@ -10026,7 +10026,7 @@ body.crt-phosphor-active::after {
   border-radius: 6px;
   font-size: 11.5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -10249,7 +10249,7 @@ body.crt-phosphor-active::after {
   align-items: center;
   gap: 4px;
   margin-top: 5px;
-  transition: all 0.2s;
+  transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
   user-select: none;
 }
 

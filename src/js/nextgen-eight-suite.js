@@ -933,13 +933,15 @@
         isDragging = false;
       };
 
+      node.style.touchAction = 'none';
       node.addEventListener('mousedown', onMouseDown);
       window.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onMouseUp);
 
-      node.addEventListener('touchstart', onMouseDown, { passive: false });
-      window.addEventListener('touchmove', onMouseMove, { passive: false });
-      window.addEventListener('touchend', onMouseUp);
+      node.addEventListener('touchstart', onMouseDown, { passive: true });
+      stage.addEventListener('touchmove', onMouseMove, { passive: true });
+      stage.addEventListener('touchend', onMouseUp, { passive: true });
+      stage.addEventListener('touchcancel', onMouseUp, { passive: true });
     }
   };
 

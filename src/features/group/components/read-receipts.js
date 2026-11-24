@@ -270,19 +270,32 @@ export async function batchMarkAsRead(messageIds, uid, db, groupId = null) {
  */
 export function createReadObserver(container, onVisible) {
   const visibleTimers = new Map();
-  
+  const pendingBatchIds = new Set();
+  let flushTimer = null;
+
+  const flushPending = () => {
+    flushTimer = null;
+    if (pendingBatchIds.size === 0) return;
+    const batchIds = Array.from(pendingBatchIds);
+    pendingBatchIds.clear();
+    if (onVisible) onVisible(batchIds);
+  };
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       const msgId = entry.target.dataset.messageId;
       if (!msgId) return;
-      
+
       if (entry.isIntersecting) {
         if (!visibleTimers.has(msgId)) {
           const timer = setTimeout(() => {
-            onVisible(msgId);
+            pendingBatchIds.add(msgId);
             observer.unobserve(entry.target);
             visibleTimers.delete(msgId);
-          }, 2000);
+            if (!flushTimer) {
+              flushTimer = setTimeout(flushPending, 1200);
+            }
+          }, 800);
           visibleTimers.set(msgId, timer);
         }
       } else {
@@ -296,6 +309,17 @@ export function createReadObserver(container, onVisible) {
     root: container,
     threshold: 0.5
   });
-  
+
+  const origDisconnect = observer.disconnect.bind(observer);
+  observer.disconnect = () => {
+    if (flushTimer) {
+      clearTimeout(flushTimer);
+      flushPending();
+    }
+    for (const timer of visibleTimers.values()) clearTimeout(timer);
+    visibleTimers.clear();
+    origDisconnect();
+  };
+
   return observer;
 }

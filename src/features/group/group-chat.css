@@ -48,18 +48,26 @@
   margin-bottom: 6px;
   width: 100%;
   box-sizing: border-box;
+  touch-action: pan-y;
+  contain: layout style;
 }
 
 .nex-msg-wrapper.received {
   justify-content: flex-start;
   padding-left: 2px;
-  animation: nex-slide-in-left 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
 .nex-msg-wrapper.sent {
   justify-content: flex-end;
   padding-right: 2px;
-  animation: nex-slide-in-right 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+.nex-vs-item.nex-msg-enter > .nex-msg-wrapper.received {
+  animation: nex-slide-in-left 0.24s cubic-bezier(0.22, 1.25, 0.36, 1) forwards;
+}
+
+.nex-vs-item.nex-msg-enter > .nex-msg-wrapper.sent {
+  animation: nex-slide-in-right 0.24s cubic-bezier(0.22, 1.25, 0.36, 1) forwards;
 }
 
 .nex-msg-wrapper.system {
@@ -76,13 +84,20 @@
   flex-shrink: 0;
   display: flex;
   align-items: flex-start;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 34px;
   margin-top: 2px;
+  position: relative;
+  z-index: 6;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nex-msg-avatar {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -92,9 +107,13 @@
   font-size: 12px;
   font-weight: 700;
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   background-color: var(--nex-bg-card, #1a1d23);
+  transition: transform 0.14s cubic-bezier(0.22, 1.35, 0.36, 1);
+}
+
+.nex-msg-avatar-wrap:active .nex-msg-avatar {
+  transform: scale(0.9);
 }
 
 .nex-msg-avatar.nex-msg-avatar-fallback {
@@ -234,7 +253,11 @@
   line-height: 1.4;
   letter-spacing: 0.15px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+body.nex-liquid-glass .nex-system-pill {
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .nex-system-pill i,
@@ -494,6 +517,8 @@
   border-color: #00ff66 !important;
   color: #ffffff !important;
 }
+
+.nex-reaction-pill:hover {
   background: var(--nex-bg-card-hover);
 }
 
@@ -868,7 +893,7 @@
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px);
-  transition: all var(--nex-transition);
+  transition: transform var(--nex-transition), opacity var(--nex-transition), background-color var(--nex-transition), border-color var(--nex-transition), color var(--nex-transition);
 }
 
 .nex-scroll-to-bottom.visible {
@@ -1241,7 +1266,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 /* 4. Invite QR Content & Buttons */
