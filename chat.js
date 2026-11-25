@@ -3993,6 +3993,7 @@ if (app) {
 delete app.dataset.subview;
   }
 document.body.classList.remove('in-conversation');
+if (typeof syncBottomNavActiveTab === 'function') syncBottomNavActiveTab('chats');
   const globalChatHeader = document.querySelector('header.chat-header, header.top-header, .top-header');
 if (globalChatHeader) globalChatHeader.style.removeProperty('display');
   const headerLogoCont = document.getElementById('headerLogoContainer');
@@ -4256,6 +4257,42 @@ loadContacts(); // Reload to update UI
 showNotif("Failed to unarchive chat", "error");
   }
 }
+function syncBottomNavActiveTab(section) {
+  const norm = String(section || 'chats').toLowerCase().trim();
+  const aliasMap = {
+    chat: 'chats',
+    chats: 'chats',
+    messages: 'chats',
+    status: 'updates',
+    updates: 'updates',
+    groups: 'communities',
+    communities: 'communities',
+    news: 'announcements',
+    alerts: 'announcements',
+    announcements: 'announcements',
+    call: 'calls',
+    calls: 'calls',
+    camshot: 'reels',
+    reels: 'reels',
+    market: 'marketplace',
+    marketplace: 'marketplace',
+    'global-drop': 'global-drop'
+  };
+  const resolved = aliasMap[norm] || norm;
+  const nav = document.querySelector('.bottom-nav');
+  if (nav) {
+    nav.classList.remove('is-swiping');
+    nav.style.setProperty('--nex-nav-swipe-x', '0px');
+  }
+  document.querySelectorAll('.bottom-nav .nav-item, .nav-item').forEach((item) => {
+    const attr = String(item.getAttribute('data-nav') || '').toLowerCase().trim();
+    const mappedAttr = aliasMap[attr] || attr;
+    item.classList.toggle('active', Boolean(mappedAttr) && mappedAttr === resolved);
+  });
+}
+if (typeof window !== 'undefined') {
+  window.syncBottomNavActiveTab = syncBottomNavActiveTab;
+}
 function handleNavigation(section) {
   // Dismiss any floating notifications/tooltips when switching screens to prevent screen-to-screen leaks
   const notifContainer = document.getElementById("notificationContainer");
@@ -4285,6 +4322,7 @@ return;
 document.getElementById("mobileMoreSheet")?.classList.remove("open");
 // Cleanly restore layout when switching sections
 document.body.classList.remove('in-conversation');
+syncBottomNavActiveTab(section);
 const chatListView = document.getElementById("chatListView");
   const statusContainer = document.getElementById("statusContainer");
   const groupsContainer = document.getElementById("groupsContainer");
@@ -4430,51 +4468,112 @@ break;
 if (typeof window !== "undefined") {
   window.handleNavigation = handleNavigation;
 }
-// WhatsApp-style Horizontal Tab Swipe Gesture Navigation
+// WhatsApp-style Horizontal Tab Swipe Gesture Navigation with Live Bottom-Nav Pill Sync
 function initWhatsAppTabSwipeNavigation() {
-  const tabs = ['chats', 'updates', 'communities', 'calls'];
+  const tabs = ['chats', 'updates', 'global-drop', 'calls'];
+  const aliasMap = { chat: 'chats', messages: 'chats', status: 'updates', call: 'calls' };
   let touchStartX = 0;
   let touchStartY = 0;
   let touchStartTime = 0;
-const appEl = document.querySelector('.app') || document.body;
-appEl.addEventListener('touchstart', (e) => {
+  let swipeTracking = false;
+  let swipeRaf = 0;
+  let pendingSwipeX = 0;
+  const appEl = document.querySelector('.app') || document.body;
+
+  const getCurrentTab = () => {
+    const raw = (appEl?.dataset?.activeSection || document.body?.dataset?.activeSection ||
+      document.querySelector('.bottom-nav .nav-item.active')?.getAttribute('data-nav') || 'chats').toLowerCase().trim();
+    return aliasMap[raw] || raw;
+  };
+
+  const resetSwipeIndicator = () => {
+    if (swipeRaf) {
+      cancelAnimationFrame(swipeRaf);
+      swipeRaf = 0;
+    }
+    const nav = document.querySelector('.bottom-nav');
+    if (nav) {
+      nav.classList.remove('is-swiping');
+      nav.style.setProperty('--nex-nav-swipe-x', '0px');
+    }
+  };
+
+  appEl.addEventListener('touchstart', (e) => {
+    touchStartTime = 0;
+    swipeTracking = false;
+    resetSwipeIndicator();
     if (e.touches.length !== 1) return;
     if (document.body.classList.contains('in-conversation') ||
         document.body.classList.contains('settings-open') ||
         (document.getElementById('settingsModal') && (document.getElementById('settingsModal').style.display === 'flex' || document.getElementById('settingsModal').classList.contains('open')))) return;
     const target = e.target;
-    if (target.closest('.modal, .settings-modal, .luxury-settings-suite, #settingsModal, .bottom-drawer, .media-lightbox-modal, .status-viewer-modal, #messages-area, input, textarea, select, .settings-sidebar, .settings-nav-tab, .settings-pane-container, .settings-card, .global-drop-container, #globalDropContainer, .groups-container, #groupsContainer, .x-drawer, .x-thread-modal-overlay, .x-profile-modal-overlay')) return;
-touchStartX = e.touches[0].clientX;
+    if (target.closest('.modal, .settings-modal, .luxury-settings-suite, #settingsModal, .bottom-drawer, .media-lightbox-modal, .status-viewer-modal, #messages-area, input, textarea, select, .settings-sidebar, .settings-nav-tab, .settings-pane-container, .settings-card, .channels-cards-scroll, .status-horizontal-list, .status-horizontal-items, .x-topics-scroll, .groups-container, #groupsContainer, .x-drawer, .x-thread-modal-overlay, .x-profile-modal-overlay')) return;
+    touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchStartTime = Date.now();
+    swipeTracking = true;
   }, { passive: true });
-appEl.addEventListener('touchend', (e) => {
+
+  appEl.addEventListener('touchmove', (e) => {
+    if (!swipeTracking || !touchStartTime || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    if (Math.abs(dy) > Math.abs(dx) * 1.15 && Math.abs(dy) > 14) {
+      swipeTracking = false;
+      resetSwipeIndicator();
+      return;
+    }
+    if (Math.abs(dx) > 16 && Math.abs(dx) > Math.abs(dy) * 1.35) {
+      const currentIdx = tabs.indexOf(getCurrentTab());
+      const canGoNext = dx < 0 && currentIdx !== -1 && currentIdx < tabs.length - 1;
+      const canGoPrev = dx > 0 && currentIdx > 0;
+      if (!canGoNext && !canGoPrev) return;
+      // Nudge bottom nav pill toward destination tab (-dx = move pill right toward next tab)
+      pendingSwipeX = Math.max(-28, Math.min(28, -dx * 0.18));
+      if (!swipeRaf) {
+        swipeRaf = requestAnimationFrame(() => {
+          swipeRaf = 0;
+          const nav = document.querySelector('.bottom-nav');
+          if (nav) {
+            nav.classList.add('is-swiping');
+            nav.style.setProperty('--nex-nav-swipe-x', `${pendingSwipeX.toFixed(1)}px`);
+          }
+        });
+      }
+    }
+  }, { passive: true });
+
+  appEl.addEventListener('touchcancel', () => {
+    touchStartTime = 0;
+    swipeTracking = false;
+    resetSwipeIndicator();
+  }, { passive: true });
+
+  appEl.addEventListener('touchend', (e) => {
+    const wasTracking = swipeTracking;
+    const startedAt = touchStartTime;
+    touchStartTime = 0;
+    swipeTracking = false;
+    resetSwipeIndicator();
+    if (!wasTracking || !startedAt || Date.now() - startedAt > 550) return;
     if (document.body.classList.contains('in-conversation') ||
         document.body.classList.contains('settings-open') ||
         (document.getElementById('settingsModal') && (document.getElementById('settingsModal').style.display === 'flex' || document.getElementById('settingsModal').classList.contains('open')))) return;
-    if (!touchStartTime || Date.now() - touchStartTime > 450) return;
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
-const dx = touchEndX - touchStartX;
+    const dx = touchEndX - touchStartX;
     const dy = touchEndY - touchStartY;
-if (Math.abs(dx) > 65 && Math.abs(dx) > Math.abs(dy) * 2.0) {
-      const activeNav = document.querySelector('.bottom-nav .nav-item.active');
-      let currentSection = activeNav ? activeNav.getAttribute('data-nav') : 'chats';
-if (currentSection === 'reels' || currentSection === 'marketplace' || currentSection === 'announcements') {
-        currentSection = 'communities';
-      }
-let currentIndex = tabs.indexOf(currentSection);
-if (currentIndex === -1) currentIndex = 0;
-if (dx < 0 && currentIndex < tabs.length - 1) {
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.65) {
+      let currentSection = getCurrentTab();
+      let currentIndex = tabs.indexOf(currentSection);
+      if (currentIndex === -1) currentIndex = 0;
+      const navFn = typeof window.handleNavigation === 'function' ? window.handleNavigation : handleNavigation;
+      if (dx < 0 && currentIndex < tabs.length - 1) {
         const nextSection = tabs[currentIndex + 1];
-if (typeof handleNavigation === 'function') {
-          handleNavigation(nextSection);
-        }
+        if (typeof navFn === 'function') navFn(nextSection);
       } else if (dx > 0 && currentIndex > 0) {
         const prevSection = tabs[currentIndex - 1];
-if (typeof handleNavigation === 'function') {
-          handleNavigation(prevSection);
-        }
+        if (typeof navFn === 'function') navFn(prevSection);
       }
     }
   }, { passive: true });

@@ -1172,13 +1172,22 @@ function setupGlobalDropNavigation() {
       fab.classList.add('hidden');
     }
 
-    document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
-      btn.classList.toggle('active', btn.id === 'nav-global-drop' || btn.dataset.nav === 'global-drop');
-    });
+    document.body.classList.remove('in-conversation');
+    if (typeof window.syncBottomNavActiveTab === 'function') {
+      window.syncBottomNavActiveTab('global-drop');
+    } else {
+      document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.id === 'nav-global-drop' || btn.dataset.nav === 'global-drop');
+      });
+    }
 
     const app = document.querySelector('.app');
-    if (app) app.dataset.activeSection = 'global-drop';
+    if (app) {
+      app.dataset.activeSection = 'global-drop';
+      delete app.dataset.subview;
+    }
     if (document.body) document.body.dataset.activeSection = 'global-drop';
+    window._lastActiveNavSection = 'global-drop';
     if (window.globalDropEngine?.syncTheme) window.globalDropEngine.syncTheme();
   };
 

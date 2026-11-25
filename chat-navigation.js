@@ -111,14 +111,17 @@ window.handleNavigation = function (navSection) {
     }
 
     // Update active tab styling
-    document.querySelectorAll('.nav-item').forEach((item) => {
-        const navAttr = item.getAttribute('data-nav');
-        if (navAttr && (navAttr === normalized || sections[navAttr] === target)) {
-            item.classList.add('active');
-        } else {
-            item.classList.remove('active');
-        }
-    });
+    const aliasMap = { chat: 'chats', messages: 'chats', status: 'updates', call: 'calls', groups: 'communities', news: 'announcements', alerts: 'announcements', camshot: 'reels', market: 'marketplace' };
+    const resolvedNav = aliasMap[normalized] || normalized;
+    if (typeof window.syncBottomNavActiveTab === 'function') {
+        window.syncBottomNavActiveTab(resolvedNav);
+    } else {
+        document.querySelectorAll('.nav-item').forEach((item) => {
+            const navAttr = (item.getAttribute('data-nav') || '').toLowerCase().trim();
+            const mappedAttr = aliasMap[navAttr] || navAttr;
+            item.classList.toggle('active', Boolean(mappedAttr) && (mappedAttr === resolvedNav || sections[navAttr] === target));
+        });
+    }
 };
 
 window.__nexchatNavigationReady = true;

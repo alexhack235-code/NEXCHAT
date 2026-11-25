@@ -19414,10 +19414,50 @@ body,
   background-repeat: repeat;
 }
 
-.chat-detail-view.has-custom-wallpaper > *,
-#chatDetailView.has-custom-wallpaper > * {
+/* Elevate ONLY in-flow conversation layers above ::before wallpaper — NEVER override position on absolute/fixed overlays & drawers */
+.chat-detail-view.has-custom-wallpaper > .chat-detail-header,
+#chatDetailView.has-custom-wallpaper > .chat-detail-header {
+  z-index: 100;
+}
+
+.chat-detail-view.has-custom-wallpaper > .in-chat-search-bar,
+#chatDetailView.has-custom-wallpaper > .in-chat-search-bar,
+.chat-detail-view.has-custom-wallpaper > .group-synergy-hud,
+#chatDetailView.has-custom-wallpaper > #groupSynergyHudBar,
+.chat-detail-view.has-custom-wallpaper > .nex-pinboard-root-wrapper,
+#chatDetailView.has-custom-wallpaper > #pinnedMessagesBar,
+.chat-detail-view.has-custom-wallpaper > .chat-banners-container,
+#chatDetailView.has-custom-wallpaper > #chatBannersContainer,
+.chat-detail-view.has-custom-wallpaper > .messages-area,
+#chatDetailView.has-custom-wallpaper > #messages-area,
+.chat-detail-view.has-custom-wallpaper > .chat-input-wrapper,
+#chatDetailView.has-custom-wallpaper > #messageInputArea {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+}
+
+#chatDetailView > #drmWatermarkCanvas,
+#chatDetailView > .drm-watermark-canvas,
+#chatDetailView > #nexDragDropOverlay,
+#chatDetailView > .nex-drag-drop-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none;
+}
+
+/* Smooth swipe-along active pill in mobile bottom navigation */
+.bottom-nav {
+  --nex-nav-swipe-x: 0px;
+}
+
+.bottom-nav .nav-item .nav-icon-wrapper {
+  transition: transform 0.24s cubic-bezier(0.22, 1.35, 0.36, 1), background-color 0.2s ease, color 0.2s ease;
+  will-change: transform;
+}
+
+.bottom-nav.is-swiping .nav-item.active .nav-icon-wrapper {
+  transition: none !important;
+  transform: translate3d(var(--nex-nav-swipe-x, 0px), 0, 0) scale(0.97);
 }
 
 .messages-area.has-custom-wallpaper,
