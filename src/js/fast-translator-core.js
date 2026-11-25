@@ -102,10 +102,6 @@ export { EXPANDED_MULTILINGUAL_DICTIONARY, resolveCountryToLanguage };
 export function normalizeLangCode(lang) {
   if (!lang || typeof lang !== 'string') return 'es';
   const l = lang.trim().toLowerCase();
-  if (typeof resolveCountryToLanguage === 'function') {
-    const fromCountry = resolveCountryToLanguage(l);
-    if (fromCountry && fromCountry !== l) return fromCountry;
-  }
   const map = {
     'spanish': 'es', 'es': 'es', 'español': 'es',
     'french': 'fr', 'fr': 'fr', 'français': 'fr',
@@ -130,52 +126,103 @@ export function normalizeLangCode(lang) {
     'germany': 'de',
     'romania': 'ro', 'romanian': 'ro', 'ro': 'ro',
     'turkey': 'tr', 'turkish': 'tr', 'tr': 'tr',
-    'korea': 'ko', 'korean': 'ko', 'ko': 'ko'
+    'korea': 'ko', 'korean': 'ko', 'ko': 'ko',
+    'netherlands': 'nl', 'dutch': 'nl', 'nl': 'nl',
+    'poland': 'pl', 'polish': 'pl', 'pl': 'pl',
+    'vietnam': 'vi', 'vietnamese': 'vi', 'vi': 'vi',
+    'thailand': 'th', 'thai': 'th', 'th': 'th'
   };
-  return map[l] || l;
+  if (map[l]) return map[l];
+  if (typeof resolveCountryToLanguage === 'function') {
+    const fromCountry = resolveCountryToLanguage(l);
+    if (fromCountry && fromCountry !== l) return fromCountry;
+  }
+  return l;
 }
 
 // ---------------------------------------------------------------------------
-// TIER 1 FAST DIRECT TRANSLATE (0ms SYNCHRONOUS RESOLUTION)
+// TIER 1 FAST DIRECT TRANSLATE (0ms SYNCHRONOUS O(1) MAP RESOLUTION)
 // ---------------------------------------------------------------------------
+const dictMapCache = new Map();
+const tokenRegexSplit = /\s+/;
+const punctStripRegex = /[¡!¿?.,;:()[\]"'«»]/g;
+
+function getLangDictMap(langKey, dict) {
+  let map = dictMapCache.get(langKey);
+  if (map) return map;
+  map = new Map();
+  const keys = Object.keys(dict);
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    const v = dict[k];
+    if (typeof v !== 'string') continue;
+    const lk = k.toLowerCase();
+    if (!map.has(lk)) map.set(lk, v);
+    const sk = lk.replace(punctStripRegex, '').trim();
+    if (sk && !map.has(sk)) map.set(sk, v);
+  }
+  dictMapCache.set(langKey, map);
+  return map;
+}
+
 export function fastTranslateSync(rawText, targetLang = 'es') {
   if (!rawText || typeof rawText !== 'string') return null;
   const clean = rawText.trim();
   if (!clean) return '';
 
   const normLang = normalizeLangCode(targetLang);
-  const cacheKey = `${normLang}:${clean.toLowerCase()}`;
-  const cached = translationLRU.get(cacheKey) || translationLRU.get(`${targetLang}:${clean.toLowerCase()}`);
+  const lower = clean.toLowerCase();
+  const cacheKey = `${normLang}:${lower}`;
+  const cached = translationLRU.get(cacheKey) || translationLRU.get(`${targetLang}:${lower}`);
   if (cached) return cached;
 
-  const lower = clean.toLowerCase();
-  const stripped = lower.replace(/[¡!¿?.,]/g, '').trim();
-
-  const dict = EXPANDED_MULTILINGUAL_DICTIONARY[normLang] || EXPANDED_MULTILINGUAL_DICTIONARY[targetLang];
+  const langKey = EXPANDED_MULTILINGUAL_DICTIONARY[normLang] ? normLang : targetLang;
+  const dict = EXPANDED_MULTILINGUAL_DICTIONARY[langKey];
   if (dict) {
-    // 1. Direct whole-phrase or sentence match (< 0.000005s)
-    if (dict[lower]) {
-      translationLRU.set(cacheKey, dict[lower]);
-      return dict[lower];
-    }
-    if (dict[stripped]) {
-      translationLRU.set(cacheKey, dict[stripped]);
-      return dict[stripped];
+    const dictMap = getLangDictMap(langKey, dict);
+    const stripped = lower.replace(punctStripRegex, '').trim();
+
+    // 1. Direct O(1) whole-phrase or sentence match (< 0.005ms)
+    const directHit = dictMap.get(lower) || (stripped ? dictMap.get(stripped) : undefined);
+    if (directHit) {
+      translationLRU.set(cacheKey, directHit);
+      return directHit;
     }
 
-    // 2. Tokenized multi-word dictionary fallback for short phrases (<= 4 words)
-    const tokens = stripped.split(/\s+/);
-    if (tokens.length >= 2 && tokens.length <= 4) {
-      const parts = tokens.map(t => dict[t]);
-      if (parts.every(Boolean)) {
-        const assembled = parts.join(' ');
-        translationLRU.set(cacheKey, assembled);
-        return assembled;
+    // 2. Greedy bigram + unigram tokenized assembly for short phrases (<= 8 words)
+    if (stripped) {
+      const tokens = stripped.split(tokenRegexSplit);
+      if (tokens.length >= 2 && tokens.length <= 8) {
+        const parts = [];
+        let ok = true;
+        for (let i = 0; i < tokens.length;) {
+          if (i + 1 < tokens.length) {
+            const bigram = `${tokens[i]} ${tokens[i + 1]}`;
+            const biHit = dictMap.get(bigram);
+            if (biHit) {
+              parts.push(biHit);
+              i += 2;
+              continue;
+            }
+          }
+          const uniHit = dictMap.get(tokens[i]);
+          if (!uniHit) {
+            ok = false;
+            break;
+          }
+          parts.push(uniHit);
+          i += 1;
+        }
+        if (ok && parts.length > 0) {
+          const assembled = parts.join(' ');
+          translationLRU.set(cacheKey, assembled);
+          return assembled;
+        }
       }
     }
   }
 
-  // Instant fallback to AI Translation API (< 0.000010s)
+  // Instant fallback to parallel fast translation (< 300ms)
   return null;
 }
 
@@ -205,52 +252,54 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
     const langNameMap = {
       'en': 'English', 'es': 'Spanish', 'fr': 'French', 'de': 'German',
       'it': 'Italian', 'pt': 'Portuguese', 'ru': 'Russian', 'ar': 'Arabic',
-      'hi': 'Hindi', 'zh': 'Chinese', 'ja': 'Japanese', 'pidgin': 'Nigerian Pidgin',
-      'pcm': 'Nigerian Pidgin', 'tl': 'Tagalog', 'sw': 'Swahili', 'yo': 'Yoruba',
-      'ha': 'Hausa', 'ig': 'Igbo', 'tr': 'Turkish'
+      'hi': 'Hindi', 'zh': 'Chinese', 'ja': 'Japanese', 'ko': 'Korean',
+      'ro': 'Romanian', 'nl': 'Dutch', 'pl': 'Polish', 'vi': 'Vietnamese',
+      'th': 'Thai', 'id': 'Indonesian', 'ms': 'Malay', 'ur': 'Urdu',
+      'pidgin': 'Nigerian Pidgin', 'pcm': 'Nigerian Pidgin',
+      'tl': 'Tagalog', 'sw': 'Swahili', 'yo': 'Yoruba', 'ha': 'Hausa', 'ig': 'Igbo', 'tr': 'Turkish'
     };
     const langName = langNameMap[normLang] || langNameMap[targetLang] || targetLang;
 
-    // Fast Runner 1: Direct Neural Google GTX (< 150ms). Skip for non-ISO codes like pcm/pidgin
+    // Fast Concurrent Race: Google GTX vs MyMemory (< 300ms typical)
     if (typeof fetch === 'function' && normLang !== 'pcm' && normLang !== 'pidgin') {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 2500);
-        const apiTarget = normLang === 'en' ? 'en' : normLang;
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(apiTarget)}&dt=t&q=${encodeURIComponent(clean)}`, {
-          signal: controller.signal
-        });
-        clearTimeout(timer);
-        if (res.ok) {
+      const apiTarget = normLang === 'en' ? 'en' : (normLang === 'zh' ? 'zh-CN' : normLang);
+      const raceGtx = async () => {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timer = controller ? setTimeout(() => controller.abort(), 2400) : null;
+        try {
+          const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(apiTarget)}&dt=t&q=${encodeURIComponent(clean)}`, {
+            signal: controller?.signal
+          });
+          if (!res.ok) throw new Error('GTX HTTP ' + res.status);
           const data = await res.json();
-          if (Array.isArray(data) && Array.isArray(data[0])) {
-            const trans = data[0].map(item => item[0]).filter(Boolean).join('').trim();
-            if (trans && trans.toLowerCase() !== clean.toLowerCase()) {
-              translationLRU.set(cacheKey, trans);
-              return trans;
-            }
-          }
+          const trans = Array.isArray(data?.[0]) ? data[0].map(item => item?.[0] || '').filter(Boolean).join('').trim() : '';
+          if (trans && trans.toLowerCase() !== clean.toLowerCase()) return trans;
+          throw new Error('GTX unchanged');
+        } finally {
+          if (timer) clearTimeout(timer);
         }
-      } catch (_) {}
-    }
-
-    // Fast Runner 2: Edge MT Endpoint (MyMemory) fallback
-    if (typeof fetch === 'function' && typeof AbortController !== 'undefined') {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 2500);
-        const apiTarget = (normLang === 'pcm' || normLang === 'pidgin') ? 'en' : normLang;
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=autodetect|${encodeURIComponent(apiTarget)}`, {
-          signal: controller.signal
-        });
-        clearTimeout(timer);
-        if (res.ok) {
+      };
+      const raceMyMemory = async () => {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timer = controller ? setTimeout(() => controller.abort(), 2400) : null;
+        try {
+          const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=en|${encodeURIComponent(apiTarget)}`, {
+            signal: controller?.signal
+          });
+          if (!res.ok) throw new Error('MM HTTP ' + res.status);
           const data = await res.json();
-          const trans = data?.responseData?.translatedText?.trim();
-          if (trans && !trans.toUpperCase().includes('MYMEMORY WARNING') && trans.toLowerCase() !== clean.toLowerCase()) {
-            translationLRU.set(cacheKey, trans);
-            return trans;
-          }
+          const trans = data?.responseData?.translatedText?.trim() || '';
+          if (trans && !trans.toUpperCase().includes('MYMEMORY WARNING') && trans.toLowerCase() !== clean.toLowerCase()) return trans;
+          throw new Error('MM invalid');
+        } finally {
+          if (timer) clearTimeout(timer);
+        }
+      };
+      try {
+        const fastest = await Promise.any([raceGtx(), raceMyMemory()]);
+        if (fastest) {
+          translationLRU.set(cacheKey, fastest);
+          return fastest;
         }
       } catch (_) {}
     }
@@ -259,18 +308,26 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
     if (typeof window !== 'undefined') {
       try {
         let cleanAi = '';
-        if (window.chronexAI && typeof window.chronexAI.translateText === 'function') {
-          cleanAi = await window.chronexAI.translateText(clean, langName);
-        } else if (typeof fetch === 'function') {
-          const transResp = await fetch('/api/translate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: clean, targetLang: langName, sourceLang: 'auto' })
-          });
-          if (transResp.ok) {
-            const data = await transResp.json();
-            cleanAi = (data.translatedText || data.result || data.response || '').trim();
+        if (typeof fetch === 'function' && window.location?.protocol?.startsWith('http')) {
+          const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const timer = controller ? setTimeout(() => controller.abort(), 3500) : null;
+          try {
+            const transResp = await fetch('/api/translate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: clean, targetLang: langName, sourceLang: 'auto' }),
+              signal: controller?.signal
+            });
+            if (transResp.ok) {
+              const data = await transResp.json();
+              cleanAi = (data.translatedText || data.result || data.response || '').trim();
+            }
+          } finally {
+            if (timer) clearTimeout(timer);
           }
+        }
+        if (!cleanAi && window.chronexAI && typeof window.chronexAI.translateText === 'function') {
+          cleanAi = await window.chronexAI.translateText(clean, langName);
         }
         if (cleanAi && cleanAi.toLowerCase() !== clean.toLowerCase()) {
           translationLRU.set(cacheKey, cleanAi);

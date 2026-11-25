@@ -453,7 +453,8 @@
           --active-bubble-color: ${theme.color};
         }
 
-        .message-bubble.sent:not(.is-sticker-message):not(.is-clip-message) {
+        body:not([class*="bubble-theme-"]) .message-bubble.sent:not(.is-sticker-message):not(.is-clip-message),
+        body.bubble-theme-neon-onyx .message-bubble.sent:not(.is-sticker-message):not(.is-clip-message) {
           background: ${theme.gradient} !important;
           border: ${theme.border} !important;
           box-shadow: ${theme.shadow} !important;

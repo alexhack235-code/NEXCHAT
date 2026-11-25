@@ -30,61 +30,18 @@ RULES:
 
 function generateIntelligentFallback(message, isSummarize = false) {
   if (isSummarize) {
-    return '• Outlined key discussion points and objectives.\n• Confirmed operational deployment timeline.';
+    return 'No summary available while AI providers are offline.';
   }
   const clean = String(message || '').toLowerCase().trim();
 
-  // Greetings
   if (/^(hi|hello|hey|greetings|good\s+(morning|afternoon|evening)|yo)\b/i.test(clean) && clean.length < 30) {
-    return `Hello! I am **ChronEX AI**, the autonomous intelligence engine for NEXCHAT.\n\n` +
-           `I operate with low-latency speed to assist you across the platform:\n` +
-           `- **Full-Stack Engineering:** Architecture, debugging, and code in Python, JavaScript/TypeScript, Rust, Go, and C++.\n` +
-           `- **Cryptographic Security:** End-to-end encryption protocols (AES-256-GCM, ECDH P-256), token verification, and air-gapped vaults.\n` +
-           `- **Workflow Automation:** Real-time diagnostics, chat synthesis, and multimodal inspection.\n\n` +
-           `How can I assist your workflow today?`;
+    return `Hello! ChronEX AI live cloud models are currently unavailable because upstream API keys returned an authorization, billing, or quota error. Please configure an active Gemini or Groq API key on the server to restore live responses.`;
   }
 
-  // System / Platform status
-  if (/(status|health|uptime|system\s+status|how\s+are\s+things)/i.test(clean)) {
-    return `### ChronEX Neural Gateway Status\n\n` +
-           `- **Intelligence Engine:** Online with automatic multi-key failover\n` +
-           `- **Vault Security:** NIST AES-256-GCM / ECDH P-256 enabled\n` +
-           `- **Synchronization:** Real-Time Firestore & Supabase active\n` +
-           `- **Core Modules:** All platform subsystems operational\n\n` +
-           `Ready to process your commands.`;
-  }
-
-  // Code or Programming Questions
-  if (/(code|function|class|bug|error|syntax|python|javascript|typescript|rust|java|c\+\+|sql|api)/i.test(clean)) {
-    return `### Technical Analysis & Implementation\n\n` +
-           `Regarding your request on **${clean.slice(0, 50)}**:\n\n` +
-           `To ensure optimal performance and memory safety, follow this architectural pattern:\n\n` +
-           `\`\`\`typescript\n// Modular high-throughput implementation\nexport async function executeTask<T>(input: T): Promise<{ success: boolean; data: T }> {\n  try {\n    // Input sanitization and bounded execution\n    const validated = structuredClone(input);\n    return { success: true, data: validated };\n  } catch (err) {\n    return { success: false, data: input };\n  }\n}\n\`\`\`\n\n` +
-           `Key best practices:\n` +
-           `1. **Zero-blocking concurrency:** Use non-blocking asynchronous event loops.\n` +
-           `2. **Error boundaries:** Guarantee that failures fail closed safely.\n` +
-           `3. **Type safety:** Enforce explicit contracts at all module boundaries.\n\n` +
-           `Let me know if you would like me to specialize this for your database or service!`;
-  }
-
-  // Cryptography / Security
-  if (/(encrypt|decrypt|crypto|cipher|security|e2ee|aes|ecdh|vault|hash|token)/i.test(clean)) {
-    return `### Cryptographic Architecture Analysis\n\n` +
-           `In NEXCHAT's fortress security model:\n\n` +
-           `- **Key Exchange:** ECDH P-256 generates a mutual zero-knowledge shared secret.\n` +
-           `- **Payload Encryption:** NIST AES-256-GCM secures text and media envelopes with an authenticated tag.\n` +
-           `- **Air-Gap Verification:** Keys are derived client-side in secure worker memory without leaving the browser sandbox.\n\n` +
-           `All payloads are validated against cryptographic checksums prior to local state persistence.`;
-  }
-
-  // Dynamic context-aware answer for any general query
-  return `### ChronEX AI Analysis\n\n` +
-         `Regarding **"${message.length > 80 ? message.substring(0, 80) + '...' : message}"**:\n\n` +
-         `Here is the recommended technical approach:\n\n` +
-         `1. **Core Architecture:** Structure the solution with clear separation of concerns, ensuring asynchronous processing and minimal runtime overhead.\n` +
-         `2. **Reliability & Redundancy:** Implement automatic retry mechanisms with exponential backoff and multi-tiered fallback handlers.\n` +
-         `3. **Verification:** Validate all inputs against strict schemas before passing to downstream engines.\n\n` +
-         `Would you like me to walk through a concrete implementation or adapt this to a specific framework?`;
+  return `### ChronEX AI Service Notice\n\n` +
+         `ChronEX AI could not reach a live model right now because the configured Groq/Gemini API keys returned an authorization, restriction, billing, or quota error.\n\n` +
+         `- **No guessed answer was generated** so inaccurate results are avoided.\n` +
+         `- **To restore live AI:** Update active \`GROQ_KEYS\` or billing-enabled \`GEMINI_API_KEYS\` in Vercel environment variables.`;
 }
 
 function sanitizeToTwoBullets(raw) {
@@ -218,7 +175,7 @@ export default async function handler(req, res) {
         replyText = gem?.text;
       } else {
         const groq = await callGroqAI(active.key, groqMessages, {
-          model: isSummarize ? 'qwen/qwen3.8-27b' : 'llama-3.3-70b-versatile',
+          model: isSummarize ? 'llama-3.1-8b-instant' : 'llama-3.3-70b-versatile',
           max_tokens: isSummarize ? 256 : 1024,
           temperature: isSummarize ? 0.2 : 0.7
         });

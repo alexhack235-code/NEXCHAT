@@ -7066,123 +7066,376 @@ body.settings-open .bottom-nav,
 }
 
 /* ==========================================================================
-   MESSAGE BUBBLE THEMES
+   MESSAGE BUBBLE THEMES (20 FROSTED GLASSMORPHISM STYLES + CLASSICS)
    ========================================================================== */
-body.bubble-theme-telegram-glass .message.sent,
-body.bubble-theme-telegram-glass .my-message,
-body.bubble-theme-telegram-glass .group-msg-row.my-msg .group-msg-bubble {
-  background: rgba(43, 82, 120, 0.65) !important;
-  backdrop-filter: blur(16px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28) !important;
-  color: #ffffff !important;
+body[class*="bubble-theme-"] {
+  --nex-glass-blur: 16px;
+  --nex-glass-alpha: 0.65;
+  --nex-glass-rim-alpha: 0.24;
 }
 
-body.bubble-theme-telegram-glass .message.received,
-body.bubble-theme-telegram-glass .other-message,
-body.bubble-theme-telegram-glass .group-msg-row.other-msg .group-msg-bubble {
-  background: rgba(24, 37, 51, 0.65) !important;
-  backdrop-filter: blur(16px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22) !important;
+body.nex-no-specular-rim {
+  --nex-glass-rim-alpha: 0;
+}
+
+/* Shared translucent glass optics across all 20 glass themes */
+body[class*="bubble-theme-"]:not(.bubble-theme-cyberpunk-gold):not(.bubble-theme-minimal-slate):not(.bubble-theme-neon-onyx):not(.nex-low-end) .message-bubble,
+body[class*="bubble-theme-"]:not(.bubble-theme-cyberpunk-gold):not(.bubble-theme-minimal-slate):not(.bubble-theme-neon-onyx):not(.nex-low-end) .nex-msg-bubble,
+body[class*="bubble-theme-"]:not(.bubble-theme-cyberpunk-gold):not(.bubble-theme-minimal-slate):not(.bubble-theme-neon-onyx):not(.nex-low-end) .group-msg-bubble,
+body[class*="bubble-theme-"]:not(.bubble-theme-cyberpunk-gold):not(.bubble-theme-minimal-slate):not(.bubble-theme-neon-onyx):not(.nex-low-end) .nex-glass-preview-bubble {
+  backdrop-filter: blur(var(--nex-glass-blur, 16px)) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(var(--nex-glass-blur, 16px)) saturate(175%) !important;
+}
+
+/* 1. Telegram High Glassmorphism */
+body.bubble-theme-telegram-glass .message-bubble.sent, body.bubble-theme-telegram-glass .message-wrapper.sent .message-bubble, body.bubble-theme-telegram-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-telegram-glass .message.sent, body.bubble-theme-telegram-glass .my-message, body.bubble-theme-telegram-glass .group-msg-row.my-msg .group-msg-bubble, body.bubble-theme-telegram-glass .nex-glass-preview-bubble.sent {
+  background: rgba(43, 82, 120, var(--nex-glass-alpha, 0.65)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.24)) !important;
+  color: #ffffff !important;
+}
+body.bubble-theme-telegram-glass .message-bubble.received, body.bubble-theme-telegram-glass .message-wrapper.received .message-bubble, body.bubble-theme-telegram-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-telegram-glass .message.received, body.bubble-theme-telegram-glass .other-message, body.bubble-theme-telegram-glass .group-msg-row.other-msg .group-msg-bubble, body.bubble-theme-telegram-glass .nex-glass-preview-bubble.received {
+  background: rgba(24, 37, 51, var(--nex-glass-alpha, 0.65)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.16)) !important;
   color: #e2e8f0 !important;
 }
 
-body.bubble-theme-glass-frost .message.sent,
-body.bubble-theme-glass-frost .my-message,
-body.bubble-theme-glass-frost .group-msg-row.my-msg .group-msg-bubble {
-  background: rgba(16, 185, 129, 0.35) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(16, 185, 129, 0.45) !important;
-  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.18) !important;
-}
-
-body.bubble-theme-glass-frost .message.received,
-body.bubble-theme-glass-frost .other-message,
-body.bubble-theme-glass-frost .group-msg-row.other-msg .group-msg-bubble {
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-}
-
-body.bubble-theme-liquid-crystal .message.sent,
-body.bubble-theme-liquid-crystal .my-message,
-body.bubble-theme-liquid-crystal .group-msg-row.my-msg .group-msg-bubble {
-  background: rgba(0, 200, 255, 0.28) !important;
-  backdrop-filter: blur(20px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(190%) !important;
-  border: 1px solid rgba(0, 212, 255, 0.35) !important;
-  box-shadow: 0 8px 30px rgba(0, 212, 255, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+/* 2. Liquid Crystal Glass */
+body.bubble-theme-liquid-crystal .message-bubble.sent, body.bubble-theme-liquid-crystal .message-wrapper.sent .message-bubble, body.bubble-theme-liquid-crystal .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-liquid-crystal .message.sent, body.bubble-theme-liquid-crystal .my-message, body.bubble-theme-liquid-crystal .group-msg-row.my-msg .group-msg-bubble, body.bubble-theme-liquid-crystal .nex-glass-preview-bubble.sent {
+  background: rgba(0, 175, 240, 0.34) !important;
+  border: 1px solid rgba(0, 212, 255, 0.44) !important;
+  box-shadow: 0 8px 28px rgba(0, 212, 255, 0.2), inset 0 1px 1px rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.36)) !important;
   color: #ffffff !important;
 }
-
-body.bubble-theme-liquid-crystal .message.received,
-body.bubble-theme-liquid-crystal .other-message,
-body.bubble-theme-liquid-crystal .group-msg-row.other-msg .group-msg-bubble {
-  background: rgba(15, 23, 42, 0.55) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+body.bubble-theme-liquid-crystal .message-bubble.received, body.bubble-theme-liquid-crystal .message-wrapper.received .message-bubble, body.bubble-theme-liquid-crystal .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-liquid-crystal .message.received, body.bubble-theme-liquid-crystal .other-message, body.bubble-theme-liquid-crystal .group-msg-row.other-msg .group-msg-bubble, body.bubble-theme-liquid-crystal .nex-glass-preview-bubble.received {
+  background: rgba(15, 28, 48, var(--nex-glass-alpha, 0.6)) !important;
+  border: 1px solid rgba(148, 210, 255, 0.2) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.2)) !important;
   color: #f1f5f9 !important;
 }
 
-body.bubble-theme-midnight-obsidian .message.sent,
-body.bubble-theme-midnight-obsidian .my-message,
-body.bubble-theme-midnight-obsidian .group-msg-row.my-msg .group-msg-bubble {
-  background: rgba(18, 24, 38, 0.72) !important;
-  backdrop-filter: blur(18px) contrast(110%) !important;
-  -webkit-backdrop-filter: blur(18px) contrast(110%) !important;
-  border: 1px solid rgba(0, 240, 118, 0.28) !important;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+/* 3. Midnight Obsidian Glass */
+body.bubble-theme-midnight-obsidian .message-bubble.sent, body.bubble-theme-midnight-obsidian .message-wrapper.sent .message-bubble, body.bubble-theme-midnight-obsidian .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-midnight-obsidian .message.sent, body.bubble-theme-midnight-obsidian .my-message, body.bubble-theme-midnight-obsidian .group-msg-row.my-msg .group-msg-bubble, body.bubble-theme-midnight-obsidian .nex-glass-preview-bubble.sent {
+  background: rgba(14, 22, 34, 0.78) !important;
+  border: 1px solid rgba(0, 240, 118, 0.36) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.16)) !important;
   color: #f8fafc !important;
 }
-
-body.bubble-theme-midnight-obsidian .message.received,
-body.bubble-theme-midnight-obsidian .other-message,
-body.bubble-theme-midnight-obsidian .group-msg-row.other-msg .group-msg-bubble {
-  background: rgba(10, 15, 26, 0.78) !important;
-  backdrop-filter: blur(18px) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+body.bubble-theme-midnight-obsidian .message-bubble.received, body.bubble-theme-midnight-obsidian .message-wrapper.received .message-bubble, body.bubble-theme-midnight-obsidian .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-midnight-obsidian .message.received, body.bubble-theme-midnight-obsidian .other-message, body.bubble-theme-midnight-obsidian .group-msg-row.other-msg .group-msg-bubble, body.bubble-theme-midnight-obsidian .nex-glass-preview-bubble.received {
+  background: rgba(8, 12, 20, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.12)) !important;
   color: #cbd5e1 !important;
 }
 
-body.bubble-theme-cyberpunk-gold .message.sent,
-body.bubble-theme-cyberpunk-gold .my-message {
+/* 4. Emerald Aurora Frost Glass */
+body.bubble-theme-glass-frost .message-bubble.sent, body.bubble-theme-glass-frost .message-wrapper.sent .message-bubble, body.bubble-theme-glass-frost .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-glass-frost .message.sent, body.bubble-theme-glass-frost .my-message, body.bubble-theme-glass-frost .group-msg-row.my-msg .group-msg-bubble, body.bubble-theme-glass-frost .nex-glass-preview-bubble.sent {
+  background: rgba(16, 185, 129, 0.36) !important;
+  border: 1px solid rgba(52, 211, 153, 0.48) !important;
+  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.26)) !important;
+  color: #ffffff !important;
+}
+body.bubble-theme-glass-frost .message-bubble.received, body.bubble-theme-glass-frost .message-wrapper.received .message-bubble, body.bubble-theme-glass-frost .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-glass-frost .message.received, body.bubble-theme-glass-frost .other-message, body.bubble-theme-glass-frost .group-msg-row.other-msg .group-msg-bubble, body.bubble-theme-glass-frost .nex-glass-preview-bubble.received {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.18)) !important;
+  color: #f1f5f9 !important;
+}
+
+/* 5. Crimson Velvet Glass */
+body.bubble-theme-crimson-velvet-glass .message-bubble.sent, body.bubble-theme-crimson-velvet-glass .message-wrapper.sent .message-bubble, body.bubble-theme-crimson-velvet-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-crimson-velvet-glass .nex-glass-preview-bubble.sent {
+  background: rgba(190, 24, 93, 0.38) !important;
+  border: 1px solid rgba(251, 113, 133, 0.45) !important;
+  box-shadow: 0 6px 24px rgba(190, 24, 93, 0.22), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.25)) !important;
+  color: #fff1f2 !important;
+}
+body.bubble-theme-crimson-velvet-glass .message-bubble.received, body.bubble-theme-crimson-velvet-glass .message-wrapper.received .message-bubble, body.bubble-theme-crimson-velvet-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-crimson-velvet-glass .nex-glass-preview-bubble.received {
+  background: rgba(45, 16, 28, 0.65) !important;
+  border: 1px solid rgba(251, 113, 133, 0.22) !important;
+  color: #ffe4e6 !important;
+}
+
+/* 6. Arctic Ice Glass */
+body.bubble-theme-arctic-ice-glass .message-bubble.sent, body.bubble-theme-arctic-ice-glass .message-wrapper.sent .message-bubble, body.bubble-theme-arctic-ice-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-arctic-ice-glass .nex-glass-preview-bubble.sent {
+  background: rgba(125, 211, 252, 0.26) !important;
+  border: 1px solid rgba(186, 230, 253, 0.5) !important;
+  box-shadow: 0 6px 24px rgba(56, 189, 248, 0.2), inset 0 1px 1px rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.38)) !important;
+  color: #f0f9ff !important;
+}
+body.bubble-theme-arctic-ice-glass .message-bubble.received, body.bubble-theme-arctic-ice-glass .message-wrapper.received .message-bubble, body.bubble-theme-arctic-ice-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-arctic-ice-glass .nex-glass-preview-bubble.received {
+  background: rgba(226, 232, 240, 0.14) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  color: #f8fafc !important;
+}
+
+/* 7. Cyber Violet Glass */
+body.bubble-theme-cyber-violet-glass .message-bubble.sent, body.bubble-theme-cyber-violet-glass .message-wrapper.sent .message-bubble, body.bubble-theme-cyber-violet-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-cyber-violet-glass .nex-glass-preview-bubble.sent {
+  background: rgba(139, 92, 246, 0.36) !important;
+  border: 1px solid rgba(196, 181, 253, 0.45) !important;
+  box-shadow: 0 6px 26px rgba(139, 92, 246, 0.24), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.28)) !important;
+  color: #f5f3ff !important;
+}
+body.bubble-theme-cyber-violet-glass .message-bubble.received, body.bubble-theme-cyber-violet-glass .message-wrapper.received .message-bubble, body.bubble-theme-cyber-violet-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-cyber-violet-glass .nex-glass-preview-bubble.received {
+  background: rgba(30, 20, 52, 0.68) !important;
+  border: 1px solid rgba(167, 139, 250, 0.24) !important;
+  color: #ede9fe !important;
+}
+
+/* 8. Solar Amber Glass */
+body.bubble-theme-solar-amber-glass .message-bubble.sent, body.bubble-theme-solar-amber-glass .message-wrapper.sent .message-bubble, body.bubble-theme-solar-amber-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-solar-amber-glass .nex-glass-preview-bubble.sent {
+  background: rgba(217, 119, 6, 0.36) !important;
+  border: 1px solid rgba(251, 191, 36, 0.48) !important;
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.2), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.26)) !important;
+  color: #fffbeb !important;
+}
+body.bubble-theme-solar-amber-glass .message-bubble.received, body.bubble-theme-solar-amber-glass .message-wrapper.received .message-bubble, body.bubble-theme-solar-amber-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-solar-amber-glass .nex-glass-preview-bubble.received {
+  background: rgba(42, 28, 12, 0.65) !important;
+  border: 1px solid rgba(251, 191, 36, 0.22) !important;
+  color: #fef3c7 !important;
+}
+
+/* 9. Rose Quartz Glass */
+body.bubble-theme-rose-quartz-glass .message-bubble.sent, body.bubble-theme-rose-quartz-glass .message-wrapper.sent .message-bubble, body.bubble-theme-rose-quartz-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-rose-quartz-glass .nex-glass-preview-bubble.sent {
+  background: rgba(244, 63, 94, 0.32) !important;
+  border: 1px solid rgba(253, 164, 175, 0.48) !important;
+  box-shadow: 0 6px 24px rgba(244, 63, 94, 0.2), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.28)) !important;
+  color: #fff1f2 !important;
+}
+body.bubble-theme-rose-quartz-glass .message-bubble.received, body.bubble-theme-rose-quartz-glass .message-wrapper.received .message-bubble, body.bubble-theme-rose-quartz-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-rose-quartz-glass .nex-glass-preview-bubble.received {
+  background: rgba(45, 22, 32, 0.62) !important;
+  border: 1px solid rgba(253, 164, 175, 0.22) !important;
+  color: #ffe4e6 !important;
+}
+
+/* 10. Neon Cyan Glass */
+body.bubble-theme-neon-cyan-glass .message-bubble.sent, body.bubble-theme-neon-cyan-glass .message-wrapper.sent .message-bubble, body.bubble-theme-neon-cyan-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-neon-cyan-glass .nex-glass-preview-bubble.sent {
+  background: rgba(6, 182, 212, 0.34) !important;
+  border: 1px solid rgba(34, 211, 238, 0.55) !important;
+  box-shadow: 0 6px 24px rgba(6, 182, 212, 0.25), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.3)) !important;
+  color: #ecfeff !important;
+}
+body.bubble-theme-neon-cyan-glass .message-bubble.received, body.bubble-theme-neon-cyan-glass .message-wrapper.received .message-bubble, body.bubble-theme-neon-cyan-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-neon-cyan-glass .nex-glass-preview-bubble.received {
+  background: rgba(12, 34, 46, 0.66) !important;
+  border: 1px solid rgba(34, 211, 238, 0.24) !important;
+  color: #cffafe !important;
+}
+
+/* 11. Emerald Matrix Glass */
+body.bubble-theme-emerald-matrix-glass .message-bubble.sent, body.bubble-theme-emerald-matrix-glass .message-wrapper.sent .message-bubble, body.bubble-theme-emerald-matrix-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-emerald-matrix-glass .nex-glass-preview-bubble.sent {
+  background: rgba(0, 180, 90, 0.32) !important;
+  border: 1px solid rgba(0, 255, 136, 0.45) !important;
+  box-shadow: 0 6px 26px rgba(0, 255, 136, 0.18), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.22)) !important;
+  color: #ecfdf5 !important;
+}
+body.bubble-theme-emerald-matrix-glass .message-bubble.received, body.bubble-theme-emerald-matrix-glass .message-wrapper.received .message-bubble, body.bubble-theme-emerald-matrix-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-emerald-matrix-glass .nex-glass-preview-bubble.received {
+  background: rgba(8, 28, 20, 0.7) !important;
+  border: 1px solid rgba(0, 255, 136, 0.22) !important;
+  color: #d1fae5 !important;
+}
+
+/* 12. Graphite Titanium Glass */
+body.bubble-theme-graphite-smoke-glass .message-bubble.sent, body.bubble-theme-graphite-smoke-glass .message-wrapper.sent .message-bubble, body.bubble-theme-graphite-smoke-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-graphite-smoke-glass .nex-glass-preview-bubble.sent {
+  background: rgba(71, 85, 105, 0.56) !important;
+  border: 1px solid rgba(203, 213, 225, 0.28) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.22)) !important;
+  color: #f8fafc !important;
+}
+body.bubble-theme-graphite-smoke-glass .message-bubble.received, body.bubble-theme-graphite-smoke-glass .message-wrapper.received .message-bubble, body.bubble-theme-graphite-smoke-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-graphite-smoke-glass .nex-glass-preview-bubble.received {
+  background: rgba(30, 41, 59, 0.62) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  color: #e2e8f0 !important;
+}
+
+/* 13. Deep Cobalt Ocean Glass */
+body.bubble-theme-cobalt-deep-glass .message-bubble.sent, body.bubble-theme-cobalt-deep-glass .message-wrapper.sent .message-bubble, body.bubble-theme-cobalt-deep-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-cobalt-deep-glass .nex-glass-preview-bubble.sent {
+  background: rgba(37, 99, 235, 0.42) !important;
+  border: 1px solid rgba(96, 165, 250, 0.48) !important;
+  box-shadow: 0 6px 24px rgba(37, 99, 235, 0.24), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.26)) !important;
+  color: #eff6ff !important;
+}
+body.bubble-theme-cobalt-deep-glass .message-bubble.received, body.bubble-theme-cobalt-deep-glass .message-wrapper.received .message-bubble, body.bubble-theme-cobalt-deep-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-cobalt-deep-glass .nex-glass-preview-bubble.received {
+  background: rgba(17, 29, 58, 0.68) !important;
+  border: 1px solid rgba(96, 165, 250, 0.22) !important;
+  color: #dbeafe !important;
+}
+
+/* 14. Royal Amethyst Glass */
+body.bubble-theme-royal-amethyst-glass .message-bubble.sent, body.bubble-theme-royal-amethyst-glass .message-wrapper.sent .message-bubble, body.bubble-theme-royal-amethyst-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-royal-amethyst-glass .nex-glass-preview-bubble.sent {
+  background: rgba(168, 85, 247, 0.36) !important;
+  border: 1px solid rgba(216, 180, 254, 0.46) !important;
+  box-shadow: 0 6px 24px rgba(168, 85, 247, 0.22), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.26)) !important;
+  color: #faf5ff !important;
+}
+body.bubble-theme-royal-amethyst-glass .message-bubble.received, body.bubble-theme-royal-amethyst-glass .message-wrapper.received .message-bubble, body.bubble-theme-royal-amethyst-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-royal-amethyst-glass .nex-glass-preview-bubble.received {
+  background: rgba(42, 18, 62, 0.66) !important;
+  border: 1px solid rgba(216, 180, 254, 0.22) !important;
+  color: #f3e8ff !important;
+}
+
+/* 15. Sunset Coral Glass */
+body.bubble-theme-sunset-coral-glass .message-bubble.sent, body.bubble-theme-sunset-coral-glass .message-wrapper.sent .message-bubble, body.bubble-theme-sunset-coral-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-sunset-coral-glass .nex-glass-preview-bubble.sent {
+  background: rgba(249, 115, 22, 0.36) !important;
+  border: 1px solid rgba(253, 186, 116, 0.46) !important;
+  box-shadow: 0 6px 24px rgba(249, 115, 22, 0.2), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.26)) !important;
+  color: #fff7ed !important;
+}
+body.bubble-theme-sunset-coral-glass .message-bubble.received, body.bubble-theme-sunset-coral-glass .message-wrapper.received .message-bubble, body.bubble-theme-sunset-coral-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-sunset-coral-glass .nex-glass-preview-bubble.received {
+  background: rgba(48, 22, 14, 0.65) !important;
+  border: 1px solid rgba(253, 186, 116, 0.22) !important;
+  color: #ffedd5 !important;
+}
+
+/* 16. Mint Breeze Glass */
+body.bubble-theme-mint-breeze-glass .message-bubble.sent, body.bubble-theme-mint-breeze-glass .message-wrapper.sent .message-bubble, body.bubble-theme-mint-breeze-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-mint-breeze-glass .nex-glass-preview-bubble.sent {
+  background: rgba(20, 184, 166, 0.36) !important;
+  border: 1px solid rgba(94, 234, 212, 0.46) !important;
+  box-shadow: 0 6px 24px rgba(20, 184, 166, 0.2), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.28)) !important;
+  color: #f0fdfa !important;
+}
+body.bubble-theme-mint-breeze-glass .message-bubble.received, body.bubble-theme-mint-breeze-glass .message-wrapper.received .message-bubble, body.bubble-theme-mint-breeze-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-mint-breeze-glass .nex-glass-preview-bubble.received {
+  background: rgba(12, 40, 38, 0.65) !important;
+  border: 1px solid rgba(94, 234, 212, 0.22) !important;
+  color: #ccfbf1 !important;
+}
+
+/* 17. Champagne Gold Glass */
+body.bubble-theme-champagne-gold-glass .message-bubble.sent, body.bubble-theme-champagne-gold-glass .message-wrapper.sent .message-bubble, body.bubble-theme-champagne-gold-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-champagne-gold-glass .nex-glass-preview-bubble.sent {
+  background: rgba(202, 138, 4, 0.34) !important;
+  border: 1px solid rgba(253, 224, 71, 0.45) !important;
+  box-shadow: 0 6px 24px rgba(234, 179, 8, 0.2), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.3)) !important;
+  color: #fefce8 !important;
+}
+body.bubble-theme-champagne-gold-glass .message-bubble.received, body.bubble-theme-champagne-gold-glass .message-wrapper.received .message-bubble, body.bubble-theme-champagne-gold-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-champagne-gold-glass .nex-glass-preview-bubble.received {
+  background: rgba(38, 32, 12, 0.68) !important;
+  border: 1px solid rgba(253, 224, 71, 0.24) !important;
+  color: #fef9c3 !important;
+}
+
+/* 18. Indigo Nebula Glass */
+body.bubble-theme-indigo-nebula-glass .message-bubble.sent, body.bubble-theme-indigo-nebula-glass .message-wrapper.sent .message-bubble, body.bubble-theme-indigo-nebula-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-indigo-nebula-glass .nex-glass-preview-bubble.sent {
+  background: rgba(99, 102, 241, 0.38) !important;
+  border: 1px solid rgba(165, 180, 252, 0.48) !important;
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.24), inset 0 1px 0 rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.28)) !important;
+  color: #eef2ff !important;
+}
+body.bubble-theme-indigo-nebula-glass .message-bubble.received, body.bubble-theme-indigo-nebula-glass .message-wrapper.received .message-bubble, body.bubble-theme-indigo-nebula-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-indigo-nebula-glass .nex-glass-preview-bubble.received {
+  background: rgba(24, 25, 58, 0.68) !important;
+  border: 1px solid rgba(165, 180, 252, 0.22) !important;
+  color: #e0e7ff !important;
+}
+
+/* 19. Chrome Mirror Glass */
+body.bubble-theme-chrome-mirror-glass .message-bubble.sent, body.bubble-theme-chrome-mirror-glass .message-wrapper.sent .message-bubble, body.bubble-theme-chrome-mirror-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-chrome-mirror-glass .nex-glass-preview-bubble.sent {
+  background: rgba(148, 163, 184, 0.28) !important;
+  border: 1px solid rgba(255, 255, 255, 0.42) !important;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.42)) !important;
+  color: #ffffff !important;
+}
+body.bubble-theme-chrome-mirror-glass .message-bubble.received, body.bubble-theme-chrome-mirror-glass .message-wrapper.received .message-bubble, body.bubble-theme-chrome-mirror-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-chrome-mirror-glass .nex-glass-preview-bubble.received {
+  background: rgba(30, 36, 48, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  color: #f1f5f9 !important;
+}
+
+/* 20. Pearl Ivory Glass */
+body.bubble-theme-pearl-ivory-glass .message-bubble.sent, body.bubble-theme-pearl-ivory-glass .message-wrapper.sent .message-bubble, body.bubble-theme-pearl-ivory-glass .nex-msg-wrapper.sent .nex-msg-bubble, body.bubble-theme-pearl-ivory-glass .nex-glass-preview-bubble.sent {
+  background: rgba(241, 245, 249, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.36) !important;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, var(--nex-glass-rim-alpha, 0.36)) !important;
+  color: #ffffff !important;
+}
+body.bubble-theme-pearl-ivory-glass .message-bubble.received, body.bubble-theme-pearl-ivory-glass .message-wrapper.received .message-bubble, body.bubble-theme-pearl-ivory-glass .nex-msg-wrapper.received .nex-msg-bubble, body.bubble-theme-pearl-ivory-glass .nex-glass-preview-bubble.received {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #f8fafc !important;
+}
+
+/* Solid Classic Themes */
+body.bubble-theme-cyberpunk-gold .message-bubble.sent, body.bubble-theme-cyberpunk-gold .message.sent, body.bubble-theme-cyberpunk-gold .my-message, body.bubble-theme-cyberpunk-gold .nex-glass-preview-bubble.sent {
   background: linear-gradient(135deg, #c59b27 0%, #ffd700 100%) !important;
   color: #000000 !important;
   font-weight: 600 !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   box-shadow: 0 6px 24px rgba(255, 215, 0, 0.38) !important;
 }
-
-body.bubble-theme-cyberpunk-gold .message.received,
-body.bubble-theme-cyberpunk-gold .other-message {
+body.bubble-theme-cyberpunk-gold .message-bubble.received, body.bubble-theme-cyberpunk-gold .message.received, body.bubble-theme-cyberpunk-gold .other-message, body.bubble-theme-cyberpunk-gold .nex-glass-preview-bubble.received {
   background: #14171f !important;
   border: 1px solid rgba(255, 215, 0, 0.32) !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
 }
-
-body.bubble-theme-minimal-slate .message.sent,
-body.bubble-theme-minimal-slate .my-message {
+body.bubble-theme-minimal-slate .message-bubble.sent, body.bubble-theme-minimal-slate .message.sent, body.bubble-theme-minimal-slate .my-message, body.bubble-theme-minimal-slate .nex-glass-preview-bubble.sent {
   background: #334155 !important;
   color: #f8fafc !important;
   border: 1px solid #475569 !important;
   box-shadow: none !important;
 }
-
-body.bubble-theme-minimal-slate .message.received,
-body.bubble-theme-minimal-slate .other-message {
+body.bubble-theme-minimal-slate .message-bubble.received, body.bubble-theme-minimal-slate .message.received, body.bubble-theme-minimal-slate .other-message, body.bubble-theme-minimal-slate .nex-glass-preview-bubble.received {
   background: #1e293b !important;
   color: #cbd5e1 !important;
   border: 1px solid #334155 !important;
   box-shadow: none !important;
+}
+
+#glassBubbleSwatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(126px, 1fr));
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.glass-swatch-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #e2e8f0;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-align: left;
+  transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+}
+
+.glass-swatch-btn:active {
+  transform: scale(0.96);
+}
+
+.glass-swatch-btn.is-active {
+  background: rgba(0, 255, 136, 0.16);
+  border-color: #00ff88;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.28);
+}
+
+.glass-swatch-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.glass-swatch-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+
+#tab-chats .auto-trans-badge {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  border-radius: 999px !important;
+  padding: 4px 10px !important;
+  font-size: 10px !important;
 }
 
 /* Chat text size options (Pixel-perfect scale & zero-overlay geometry) */
@@ -16163,11 +16416,14 @@ body:not(.group-active) #tacticalMeshBanner {
   outline: 1.5px solid rgba(0, 240, 255, 0.5) !important;
 }
 
-/* Time must be bottom-right with padding-bottom 18px on bubble so time never overlaps text */
+/* Compact, crisp message bubble spacing without vertical bloat */
 .nex-msg-bubble,
 .message-bubble {
-  padding: 8px 12px 18px 12px !important;
+  padding: 5px 10px 4px 10px !important;
+  min-height: 0 !important;
   position: relative !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
 }
 
 .nex-msg-meta,
@@ -16177,18 +16433,12 @@ body:not(.group-active) #tacticalMeshBanner {
   align-items: center !important;
   justify-content: flex-end !important;
   gap: 4px !important;
-  margin-top: 4px !important;
-  margin-bottom: 2px !important;
+  margin-top: 1px !important;
+  margin-bottom: 0 !important;
   margin-left: auto !important;
   float: right !important;
   clear: both !important;
   line-height: 1 !important;
-}
-.message-bubble,
-.nex-msg-bubble {
-  padding: 8px 12px 10px 12px !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
 }
 
 .message-time-text {
@@ -16206,8 +16456,8 @@ body:not(.group-active) #tacticalMeshBanner {
   background: rgba(0, 0, 0, 0.25) !important;
   border-left: 3px solid #00FF88 !important;
   border-radius: 4px !important;
-  padding: 6px 8px !important;
-  margin-bottom: 6px !important;
+  padding: 5px 8px !important;
+  margin-bottom: 4px !important;
   max-width: 100% !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
@@ -16218,8 +16468,9 @@ body:not(.group-active) #tacticalMeshBanner {
 .nex-msg-text {
   position: static !important;
   display: block !important;
-  margin-top: 2px !important;
-  line-height: 1.42 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  line-height: 1.32 !important;
 }
 
 
@@ -16528,16 +16779,17 @@ body:not(.group-active) #tacticalMeshBanner {
 .nex-msg-bubble,
 .message-bubble {
   max-width: 82% !important;
-  min-width: 80px !important;
+  min-width: 72px !important;
+  min-height: 0 !important;
   width: fit-content !important;
-  padding: 8px 10px 6px 10px !important;
-  border-radius: 12px !important;
+  padding: 5px 10px 4px 10px !important;
+  border-radius: 14px !important;
   position: relative !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
   box-sizing: border-box !important;
   font-size: 14px !important;
-  line-height: 1.42 !important;
+  line-height: 1.32 !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
   overflow: visible !important;
 }
@@ -20463,7 +20715,7 @@ body:not(.nex-liquid-glass) [class*="header"],
 body:not(.nex-liquid-glass) [class*="nav"],
 body:not(.nex-liquid-glass) [class*="bar"],
 body:not(.nex-liquid-glass) .chat-list-item,
-body:not(.nex-liquid-glass) .message-bubble,
+body:not(.nex-liquid-glass):not([class*="bubble-theme-"]) .message-bubble,
 body:not(.nex-liquid-glass) .messages-area,
 body:not(.nex-liquid-glass) .status-story-card,
 body:not(.nex-liquid-glass) .status-row-item {
@@ -20475,13 +20727,14 @@ body.nex-low-end .nex-msg-enter {
   animation: none !important;
 }
 
-/* Flagship Liquid Glass Display FX (Activated via Settings -> Cyber Lab) */
+/* Flagship Liquid Glass Display FX (Enabled on capable devices + Cyber Lab / Chat & Bubbles) */
 body.nex-liquid-glass:not(.nex-low-end) .chat-detail-header,
 body.nex-liquid-glass:not(.nex-low-end) .active-chat-header,
-body.nex-liquid-glass:not(.nex-low-end) .whatsapp-channel-header {
-  background: rgba(15, 23, 36, 0.68) !important;
-  backdrop-filter: blur(22px) saturate(175%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(175%) !important;
+body.nex-liquid-glass:not(.nex-low-end) .whatsapp-channel-header,
+body.nex-liquid-glass:not(.nex-low-end) .top-header {
+  background: rgba(15, 23, 36, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(175%) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
   box-shadow: inset 0 -1px 0 rgba(0, 255, 102, 0.12), 0 8px 24px rgba(0, 0, 0, 0.32) !important;
 }
@@ -20490,6 +20743,8 @@ body.nex-liquid-glass:not(.nex-low-end) .message-form,
 body.nex-liquid-glass:not(.nex-low-end) .bottom-nav,
 body.nex-liquid-glass:not(.nex-low-end) .nex-quick-profile-card,
 body.nex-liquid-glass:not(.nex-low-end) .modal-content,
+body.nex-liquid-glass:not(.nex-low-end) #search-modal,
+body.nex-liquid-glass:not(.nex-low-end) .fab-action-sheet-panel,
 body.nex-liquid-glass:not(.nex-low-end) .whatsapp-channel-card,
 body.nex-liquid-glass:not(.nex-low-end) .channel-spotlight-card,
 body.nex-liquid-glass:not(.nex-low-end) .status-preview-tool-btn,
@@ -20501,13 +20756,15 @@ body.nex-liquid-glass:not(.nex-low-end) .status-attached-music-sticker {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 28px rgba(0, 0, 0, 0.38) !important;
 }
 
-body.nex-liquid-glass:not(.nex-low-end) .message-bubble.sent {
+body.nex-liquid-glass:not(.nex-low-end):not([class*="bubble-theme-"]) .message-bubble.sent,
+body.nex-liquid-glass.bubble-theme-neon-onyx:not(.nex-low-end) .message-bubble.sent {
   background: linear-gradient(145deg, rgba(0, 148, 108, 0.86), rgba(0, 92, 75, 0.90)) !important;
   border: 1px solid rgba(0, 255, 136, 0.28) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 4px 14px rgba(0, 0, 0, 0.24) !important;
 }
 
-body.nex-liquid-glass:not(.nex-low-end) .message-bubble.received {
+body.nex-liquid-glass:not(.nex-low-end):not([class*="bubble-theme-"]) .message-bubble.received,
+body.nex-liquid-glass.bubble-theme-neon-onyx:not(.nex-low-end) .message-bubble.received {
   background: rgba(30, 42, 54, 0.78) !important;
   backdrop-filter: blur(12px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
@@ -20551,4 +20808,192 @@ body.nex-liquid-glass[data-glass-preset="obsidian"]:not(.nex-low-end) .whatsapp-
 .status-row-item {
   contain: layout style;
   touch-action: pan-x pan-y;
+}
+
+/* ==========================================================================
+   TELEGRAM / NATIVE-GRADE SILKY 60FPS SMOOTHNESS ENGINE
+   ========================================================================== */
+@keyframes nexTabSlideFromRight {
+  0% {
+    opacity: 0.42;
+    transform: translate3d(30px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes nexTabSlideFromLeft {
+  0% {
+    opacity: 0.42;
+    transform: translate3d(-30px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes nexConvPushEnter {
+  0% {
+    opacity: 0.72;
+    transform: translate3d(34px, 0, 0) scale(0.992);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.app,
+.nex-tab-stage {
+  overflow-x: hidden;
+}
+
+.nex-tab-enter-right,
+#chatListView.nex-tab-enter-right,
+#statusContainer.nex-tab-enter-right,
+#globalDropContainer.nex-tab-enter-right,
+#callHistoryContainer.nex-tab-enter-right,
+#groupsContainer.nex-tab-enter-right,
+#announcementsContainer.nex-tab-enter-right {
+  animation: nexTabSlideFromRight 250ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  will-change: transform, opacity;
+}
+
+.nex-tab-enter-left,
+#chatListView.nex-tab-enter-left,
+#statusContainer.nex-tab-enter-left,
+#globalDropContainer.nex-tab-enter-left,
+#callHistoryContainer.nex-tab-enter-left,
+#groupsContainer.nex-tab-enter-left,
+#announcementsContainer.nex-tab-enter-left {
+  animation: nexTabSlideFromLeft 250ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  will-change: transform, opacity;
+}
+
+.nex-tab-dragging,
+#chatListView.nex-tab-dragging,
+#statusContainer.nex-tab-dragging,
+#globalDropContainer.nex-tab-dragging,
+#callHistoryContainer.nex-tab-dragging {
+  transition: none !important;
+  animation: none !important;
+  will-change: transform, opacity;
+}
+
+.nex-tab-spring-reset,
+#chatListView.nex-tab-spring-reset,
+#statusContainer.nex-tab-spring-reset,
+#globalDropContainer.nex-tab-spring-reset,
+#callHistoryContainer.nex-tab-spring-reset {
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease !important;
+  transform: translate3d(0, 0, 0) !important;
+  opacity: 1 !important;
+}
+
+#chatDetailView.nex-conv-slide-in {
+  animation: nexConvPushEnter 240ms cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  will-change: transform, opacity;
+}
+
+#chatDetailView.nex-interactive-drag {
+  transition: none !important;
+  animation: none !important;
+  will-change: transform;
+  box-shadow: -14px 0 34px rgba(0, 0, 0, 0.48) !important;
+}
+
+#chatDetailView.nex-conv-spring-back {
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* Crisp Zero-Delay Tactile Micro-Press Across Cards & Action Controls */
+.chat-list-item,
+.status-story-card,
+.status-row-item,
+.bottom-nav .nav-item,
+.send-btn,
+.composer-action-btn,
+.chat-scroll-down-btn,
+.status-preview-tool-btn,
+.status-attached-music-sticker,
+.x-tab-btn,
+.x-topic-chip,
+.whatsapp-channel-card,
+.header-btn {
+  touch-action: manipulation;
+  transition: transform 150ms cubic-bezier(0.22, 1.35, 0.36, 1), background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.chat-list-item:active,
+.status-row-item:active,
+.status-story-card:active,
+.whatsapp-channel-card:active {
+  transform: scale(0.982);
+}
+
+.bottom-nav .nav-item:active .nav-icon-wrapper,
+.send-btn:active,
+.composer-action-btn:active,
+.chat-scroll-down-btn:active,
+.status-preview-tool-btn:active,
+.header-btn:active,
+.x-tab-btn:active,
+.x-topic-chip:active {
+  transform: scale(0.92);
+}
+
+/* Scroll-Linked Header Elevation */
+.chat-detail-header.is-scrolled,
+.active-chat-header.is-scrolled {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.34);
+  border-bottom-color: rgba(0, 255, 102, 0.16) !important;
+}
+
+/* Sleek 5px Custom Scrollbars on Core Scroll Surfaces */
+.messages-area::-webkit-scrollbar,
+#chat-list::-webkit-scrollbar,
+.music-picker-list::-webkit-scrollbar,
+.global-drop-container::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.messages-area::-webkit-scrollbar-thumb,
+#chat-list::-webkit-scrollbar-thumb,
+.music-picker-list::-webkit-scrollbar-thumb,
+.global-drop-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+
+.messages-area::-webkit-scrollbar-thumb:hover,
+#chat-list::-webkit-scrollbar-thumb:hover,
+.music-picker-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 102, 0.38);
+}
+
+/* Low-End & Reduced-Motion Fast Path */
+@media (prefers-reduced-motion: reduce) {
+  .nex-tab-enter-right,
+  .nex-tab-enter-left,
+  #chatDetailView.nex-conv-slide-in,
+  .music-track-item.nex-track-reveal {
+    animation: none !important;
+  }
+  .nex-tab-spring-reset,
+  #chatDetailView.nex-conv-spring-back,
+  .status-music-picker-sheet {
+    transition: none !important;
+  }
+}
+
+body.nex-low-end .nex-tab-enter-right,
+body.nex-low-end .nex-tab-enter-left,
+body.nex-low-end #chatDetailView.nex-conv-slide-in,
+body.nex-low-end .music-track-item.nex-track-reveal {
+  animation: none !important;
 }

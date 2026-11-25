@@ -1182,19 +1182,35 @@ export const WORLD_COUNTRIES_DATABASE = [
   }
 ];
 
+const COUNTRY_BY_LANG_CODE = new Set(WORLD_COUNTRIES_DATABASE.map(c => c.langCode.toLowerCase()));
+['ja', 'ko', 'hi', 'ur', 'zh', 'ar', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'tr', 'ro', 'id', 'ms', 'sw', 'tl', 'nl', 'pl', 'vi', 'th', 'pcm', 'yo', 'ig', 'ha', 'en'].forEach(c => COUNTRY_BY_LANG_CODE.add(c));
+
 export function resolveCountryToLanguage(input) {
   if (!input || typeof input !== 'string') return 'en';
   const clean = input.trim().toLowerCase();
+  if (!clean) return 'en';
 
-  // 1. Direct ISO code match
-  const directMatch = WORLD_COUNTRIES_DATABASE.find(c => 
-    c.code.toLowerCase() === clean || 
-    c.name.toLowerCase() === clean || 
-    c.langCode.toLowerCase() === clean ||
-    c.langName.toLowerCase().includes(clean)
+  // 1. Direct language ISO code ALWAYS wins (e.g. 'ja' -> 'ja', 'ar' -> 'ar', 'pl' -> 'pl')
+  if (COUNTRY_BY_LANG_CODE.has(clean)) return clean;
+
+  // 2. Exact country name or exact country ISO code match
+  const exactCountry = WORLD_COUNTRIES_DATABASE.find(c =>
+    c.name.toLowerCase() === clean ||
+    c.code.toLowerCase() === clean ||
+    c.langName.toLowerCase() === clean
   );
+  if (exactCountry) return exactCountry.langCode;
 
-  return directMatch ? directMatch.langCode : clean;
+  // 3. Word/slash-token match on langName/name only for terms >= 3 chars (prevents 'ja' matching 'azerbaijani')
+  if (clean.length >= 3) {
+    const tokenMatch = WORLD_COUNTRIES_DATABASE.find(c => {
+      const words = `${c.name} ${c.langName}`.toLowerCase().split(/[^a-z]+/);
+      return words.includes(clean);
+    });
+    if (tokenMatch) return tokenMatch.langCode;
+  }
+
+  return clean;
 }
 
 export default WORLD_COUNTRIES_DATABASE;

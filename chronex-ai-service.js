@@ -284,67 +284,18 @@ class ChronexAI {
       } catch (_) {}
     }
 
-    // 5. Code Assistance Intent
-    if (cleanMsg.includes("code") || cleanMsg.includes("function") || cleanMsg.includes("python") || cleanMsg.includes("javascript") || cleanMsg.includes("rust") || cleanMsg.includes("script")) {
-      if (cleanMsg.includes("python") || cleanMsg.includes(".py")) {
-        return `Here is a clean, production-ready Python snippet tailored for high-speed execution:\n\n` +
-               `\`\`\`python\nimport asyncio\nfrom typing import Dict, Any\n\nclass NexusStreamProcessor:\n    def __init__(self, node_id: str):\n        self.node_id = node_id\n        self.active = True\n\n    async def process_payload(self, data: Dict[str, Any]) -> Dict[str, Any]:\n        \"\"\"Process asynchronous message packet with zero thread blocking.\"\"\"\n        await asyncio.sleep(0.01)\n        return {\"status\": \"processed\", \"node\": self.node_id, \"bytes\": len(str(data))}\n\n# Execution example\nif __name__ == '__main__':\n    processor = NexusStreamProcessor(node_id='alpha-01')\n    result = asyncio.run(processor.process_payload({'metric': 100}))\n    print(result)\n\`\`\`\n\nLet me know if you would like me to adapt this to your specific database or API structure!`;
-      } else if (cleanMsg.includes("rust") || cleanMsg.includes(".rs")) {
-        return `Here is an optimized Rust implementation with memory safety and zero runtime overhead:\n\n` +
-               `\`\`\`rust\nuse std::error::Error;\n\n#[derive(Debug, Clone)]\npub struct DataPacket {\n    pub id: u64,\n    pub payload: Vec<u8>,\n}\n\nimpl DataPacket {\n    pub fn new(id: u64, payload: Vec<u8>) -> Self {\n        Self { id, payload }\n    }\n\n    pub fn verify_checksum(&self) -> bool {\n        !self.payload.is_empty()\n    }\n}\n\nfn main() -> Result<(), Box<dyn Error>> {\n    let packet = DataPacket::new(101, vec![0x6f, 0xbc, 0x1e, 0x17]);\n    println!(\"Packet {:?} valid: {}\", packet.id, packet.verify_checksum());\n    Ok(())\n}\n\`\`\`\n\nWould you like to integrate this with Tokio async runtime or WebAssembly?`;
-      } else {
-        return `Here is a modern, modular JavaScript / TypeScript implementation for high-throughput performance:\n\n` +
-               `\`\`\`javascript\n/**\n * Asynchronous task runner with queue throttling and exponential backoff\n */\nexport class TaskExecutor {\n  constructor(concurrency = 4) {\n    this.concurrency = concurrency;\n    this.running = 0;\n    this.queue = [];\n  }\n\n  async execute(taskFn) {\n    if (this.running >= this.concurrency) {\n      await new Promise(resolve => this.queue.push(resolve));\n    }\n    this.running++;\n    try {\n      return await taskFn();\n    } finally {\n      this.running--;\n      if (this.queue.length > 0) this.queue.shift()();\n    }\n  }\n}\n\`\`\`\n\nTell me your specific requirements and I will customize the implementation for you!`;
-      }
-    }
-
-    // 6. Conversational Follow-up Context Recognition
-    if (lastTurns.length > 0) {
-      const lastAssistantTurn = [...lastTurns].reverse().find(t => t.role === 'assistant');
-      if (lastAssistantTurn && (cleanMsg === 'yes' || cleanMsg === 'no' || cleanMsg === 'continue' || cleanMsg === 'why' || cleanMsg === 'how' || cleanMsg.startsWith('tell me more') || cleanMsg.startsWith('explain'))) {
-        return `Building on our previous discussion regarding the topic:\n\n` +
-               `The key factor to consider is maintaining architectural simplicity while scaling concurrency. In NEXCHAT, asynchronous event loops ensure that neither client rendering nor background database synchronizations block user input.\n\n` +
-               `What specific part of this workflow would you like to dive deeper into?`;
-      }
-    }
-
-    // 7. General Intelligent Fallback
     if (options && options.mode === 'summary') {
-      return "• Outlined key discussion points and objectives.\n• Confirmed next action items.";
+      return rawMsg;
     }
     if (options && options.mode === 'translate') {
       return rawMsg.replace(/^(?:translate(?:\s+this)?(?:\s+into\s+\w+)?:\s*)/i, '').replace(/^["'“”‘’]+|["'“”‘’]+$/g, '').trim();
     }
-    // Intelligent, context-aware synthesis instead of generic template prompt
-    if (cleanMsg.length < 25 && !cleanMsg.includes('?')) {
-      return `I'm here to assist with **${rawMsg}**. Let me know if you would like code examples, architectural breakdowns, or step-by-step guidance!`;
-    }
 
-    // Security & Cryptography inquiries
-    if (/(encrypt|decrypt|crypto|cipher|security|e2ee|aes|ecdh|vault|hash|token|airgap)/i.test(cleanMsg)) {
-      return `### Cryptographic Architecture Analysis\n\n` +
-             `In NEXCHAT's architecture, security is guaranteed through zero-knowledge cryptographic layers:\n\n` +
-             `- **Key Exchange:** Ephemeral ECDH P-256 establishes forward-secret session keys.\n` +
-             `- **Symmetric Cipher:** NIST AES-256-GCM protects payloads with authenticated tag verification.\n` +
-             `- **Stealth Air-Gap:** Derived secrets are kept in isolated client runtime memory.\n\n` +
-             `All packets are cryptographically verified before persistent indexing.`;
-    }
-
-    // Architecture & Real-Time Mesh
-    if (/(webrtc|mesh|realtime|websocket|latency|database|firestore|supabase|backend)/i.test(cleanMsg)) {
-      return `### NEXCHAT Distributed Architecture\n\n` +
-             `- **Real-Time Data Plane:** Dual-channel synchronization combining high-frequency WebSockets and persistent Firestore storage.\n` +
-             `- **Peer-to-Peer Mesh:** Direct WebRTC media conduits with ICE candidate negotiation and STUN/TURN fallback.\n` +
-             `- **State Resilience:** Offline-first IndexedDB caching guarantees sub-10ms UI interaction even during transient network drops.`;
-    }
-
-    // General Technical & Conversational Synthesis
-    return `### ChronEX Neural Synthesis\n\n` +
-           `Regarding **"${rawMsg.length > 70 ? rawMsg.substring(0, 70) + '...' : rawMsg}"**:\n\n` +
-           `1. **Core Concept:** The key priority is maintaining modularity, asynchronous throughput, and defensive execution.\n` +
-           `2. **Recommended Action:** Ensure error boundaries surround the execution path and validate data contracts at the interface boundary.\n` +
-           `3. **Optimization:** Utilize non-blocking workers and client-side caching to eliminate processing latency.\n\n` +
-           `Tell me if you would like me to generate specialized code or deep-dive into any particular component!`;
+    // Honest non-hallucinating fallback when live LLM keys fail or are restricted
+    return `### ChronEX AI Live Uplink Unavailable\n\n` +
+           `ChronEX AI could not connect to an active cloud model (configured Gemini/Groq keys returned an auth, billing, restriction, or quota error).\n\n` +
+           `- **No synthetic answer was guessed** so false or hallucinated responses are avoided.\n` +
+           `- Add a working Gemini/OpenAI API key in your Settings or server environment variables to restore live ChronEX AI replies.`;
   }
 
   async getPythonResponse(message) {
@@ -797,7 +748,7 @@ class ChronexAI {
         if (keyInfo && keyInfo.key) {
           const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
           const fetchTimer = controller ? setTimeout(() => controller.abort(), 2000) : null;
-          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${keyInfo.key}`;
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keyInfo.key}`;
 
           const resp = await fetch(endpoint, {
             method: 'POST',

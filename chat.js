@@ -4303,6 +4303,31 @@ function syncBottomNavActiveTab(section) {
 if (typeof window !== 'undefined') {
   window.syncBottomNavActiveTab = syncBottomNavActiveTab;
 }
+function getSectionSlideElement(section) {
+  const s = String(section || 'chats').toLowerCase().trim();
+  if (s === 'updates' || s === 'status') return document.getElementById('statusContainer');
+  if (s === 'global-drop') return document.getElementById('globalDropContainer');
+  if (s === 'calls' || s === 'call') return document.getElementById('callHistoryContainer');
+  if (s === 'communities' || s === 'groups') return document.getElementById('groupsContainer');
+  if (s === 'announcements' || s === 'news' || s === 'alerts') return document.getElementById('announcementsContainer');
+  return document.getElementById('chatListView');
+}
+
+function playSectionEnterAnimation(targetEl, direction) {
+  if (!targetEl || !direction || document.body.classList.contains('nex-low-end')) return;
+  const cls = direction > 0 ? 'nex-tab-enter-right' : 'nex-tab-enter-left';
+  targetEl.classList.remove('nex-tab-enter-right', 'nex-tab-enter-left', 'nex-tab-dragging', 'nex-tab-spring-reset');
+  targetEl.style.removeProperty('transform');
+  targetEl.style.removeProperty('opacity');
+  void targetEl.offsetWidth;
+  targetEl.classList.add(cls);
+  if (targetEl._nexEnterTimer) clearTimeout(targetEl._nexEnterTimer);
+  targetEl._nexEnterTimer = setTimeout(() => {
+    targetEl.classList.remove('nex-tab-enter-right', 'nex-tab-enter-left');
+    targetEl._nexEnterTimer = 0;
+  }, 290);
+}
+
 function handleNavigation(section) {
   // Dismiss any floating notifications/tooltips when switching screens to prevent screen-to-screen leaks
   const notifContainer = document.getElementById("notificationContainer");
@@ -4328,11 +4353,30 @@ moreSheet.setAttribute("aria-hidden", "false");
     }
 return;
   }
+// Determine directional slide animation relative to previous tab
+const tabOrder = ['chats', 'updates', 'global-drop', 'calls'];
+const navAlias = { chat: 'chats', messages: 'chats', status: 'updates', call: 'calls' };
+const normTarget = navAlias[String(section || 'chats').toLowerCase().trim()] || String(section || 'chats').toLowerCase().trim();
+const prevSection = window._nexLastNavSection || 'chats';
+const prevIdx = tabOrder.indexOf(prevSection);
+const nextIdx = tabOrder.indexOf(normTarget);
+const slideDir = (prevIdx !== -1 && nextIdx !== -1 && prevIdx !== nextIdx) ? (nextIdx > prevIdx ? 1 : -1) : 0;
+if (tabOrder.includes(normTarget)) window._nexLastNavSection = normTarget;
+
 // Dismiss any active sheets or transient pickers when switching views
 document.getElementById("mobileMoreSheet")?.classList.remove("open");
 ['stickerStoreModal', 'stickerStudioModal', 'emoji-picker'].forEach((id) => {
   const m = document.getElementById(id);
   if (m) m.style.display = 'none';
+});
+// Clear any active drag transforms cleanly before switching views
+['chatListView', 'statusContainer', 'globalDropContainer', 'callHistoryContainer', 'groupsContainer', 'announcementsContainer'].forEach((id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.remove('nex-tab-dragging', 'nex-tab-spring-reset');
+    el.style.removeProperty('transform');
+    el.style.removeProperty('opacity');
+  }
 });
 // Cleanly restore layout when switching sections
 document.body.classList.remove('in-conversation');
@@ -4368,6 +4412,8 @@ if (section === "chats" || section === "messages") {
   }
 if (chatDetailView) {
     chatDetailView.style.removeProperty("display");
+    chatDetailView.classList.remove('nex-interactive-drag', 'nex-conv-spring-back', 'nex-conv-slide-in');
+    chatDetailView.style.removeProperty("transform");
 chatDetailView.style.setProperty("display", "none", "important");
   }
 if (statusContainer) {
@@ -4482,11 +4528,14 @@ if (typeof loadCallHistory === "function") loadCallHistory();
       }
 break;
   }
+  if (slideDir && (typeof window === 'undefined' || window.innerWidth < 900 || document.body.classList.contains('mobile-preview'))) {
+    playSectionEnterAnimation(getSectionSlideElement(normTarget), slideDir);
+  }
 }
 if (typeof window !== "undefined") {
   window.handleNavigation = handleNavigation;
 }
-// WhatsApp-style Horizontal Tab Swipe Gesture Navigation with Live Bottom-Nav Pill Sync
+// WhatsApp-style Interactive Horizontal Tab Swipe + Live Edge-Swipe-Back Physics
 function initWhatsAppTabSwipeNavigation() {
   const tabs = ['chats', 'updates', 'global-drop', 'calls'];
   const aliasMap = { chat: 'chats', messages: 'chats', status: 'updates', call: 'calls' };
@@ -4496,6 +4545,8 @@ function initWhatsAppTabSwipeNavigation() {
   let swipeTracking = false;
   let swipeRaf = 0;
   let pendingSwipeX = 0;
+  let pendingViewDx = 0;
+  let draggedViewEl = null;
   const appEl = document.querySelector('.app') || document.body;
 
   const getCurrentTab = () => {
@@ -4504,7 +4555,7 @@ function initWhatsAppTabSwipeNavigation() {
     return aliasMap[raw] || raw;
   };
 
-  const resetSwipeIndicator = () => {
+  const resetSwipeIndicator = (springBack = false) => {
     if (swipeRaf) {
       cancelAnimationFrame(swipeRaf);
       swipeRaf = 0;
@@ -4514,18 +4565,38 @@ function initWhatsAppTabSwipeNavigation() {
       nav.classList.remove('is-swiping');
       nav.style.setProperty('--nex-nav-swipe-x', '0px');
     }
+    if (draggedViewEl) {
+      const viewRef = draggedViewEl;
+      draggedViewEl = null;
+      viewRef.classList.remove('nex-tab-dragging');
+      if (springBack && !document.body.classList.contains('nex-low-end')) {
+        viewRef.classList.add('nex-tab-spring-reset');
+        viewRef.style.transform = 'translate3d(0, 0, 0)';
+        viewRef.style.opacity = '1';
+        setTimeout(() => {
+          viewRef.classList.remove('nex-tab-spring-reset');
+          viewRef.style.removeProperty('transform');
+          viewRef.style.removeProperty('opacity');
+        }, 250);
+      } else {
+        viewRef.classList.remove('nex-tab-spring-reset');
+        viewRef.style.removeProperty('transform');
+        viewRef.style.removeProperty('opacity');
+      }
+    }
   };
 
   appEl.addEventListener('touchstart', (e) => {
     touchStartTime = 0;
     swipeTracking = false;
-    resetSwipeIndicator();
+    pendingViewDx = 0;
+    resetSwipeIndicator(false);
     if (e.touches.length !== 1) return;
     if (document.body.classList.contains('in-conversation') ||
         document.body.classList.contains('settings-open') ||
         (document.getElementById('settingsModal') && (document.getElementById('settingsModal').style.display === 'flex' || document.getElementById('settingsModal').classList.contains('open')))) return;
     const target = e.target;
-    if (target.closest('.modal, .settings-modal, .luxury-settings-suite, #settingsModal, .bottom-drawer, .media-lightbox-modal, .status-viewer-modal, #messages-area, input, textarea, select, .settings-sidebar, .settings-nav-tab, .settings-pane-container, .settings-card, .channels-cards-scroll, .status-horizontal-list, .status-horizontal-items, .x-topics-scroll, .groups-container, #groupsContainer, .x-drawer, .x-thread-modal-overlay, .x-profile-modal-overlay')) return;
+    if (target.closest('.modal, .settings-modal, .luxury-settings-suite, #settingsModal, .bottom-drawer, .media-lightbox-modal, .status-viewer-modal, #messages-area, input, textarea, select, .settings-sidebar, .settings-nav-tab, .settings-pane-container, .settings-card, .channels-cards-scroll, .status-horizontal-list, .status-horizontal-items, .x-topics-scroll, .groups-container, #groupsContainer, .x-drawer, .x-thread-modal-overlay, .x-profile-modal-overlay, .music-picker-genre-pills')) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchStartTime = Date.now();
@@ -4538,16 +4609,17 @@ function initWhatsAppTabSwipeNavigation() {
     const dy = e.touches[0].clientY - touchStartY;
     if (Math.abs(dy) > Math.abs(dx) * 1.15 && Math.abs(dy) > 14) {
       swipeTracking = false;
-      resetSwipeIndicator();
+      resetSwipeIndicator(true);
       return;
     }
-    if (Math.abs(dx) > 16 && Math.abs(dx) > Math.abs(dy) * 1.35) {
-      const currentIdx = tabs.indexOf(getCurrentTab());
+    if (Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.25) {
+      const curTab = getCurrentTab();
+      const currentIdx = tabs.indexOf(curTab);
       const canGoNext = dx < 0 && currentIdx !== -1 && currentIdx < tabs.length - 1;
       const canGoPrev = dx > 0 && currentIdx > 0;
-      if (!canGoNext && !canGoPrev) return;
-      // Nudge bottom nav pill toward destination tab (-dx = move pill right toward next tab)
-      pendingSwipeX = Math.max(-28, Math.min(28, -dx * 0.18));
+      pendingSwipeX = (canGoNext || canGoPrev) ? Math.max(-28, Math.min(28, -dx * 0.18)) : Math.max(-8, Math.min(8, -dx * 0.06));
+      pendingViewDx = (canGoNext || canGoPrev) ? Math.max(-95, Math.min(95, dx * 0.44)) : Math.max(-26, Math.min(26, dx * 0.14));
+      draggedViewEl = getSectionSlideElement(curTab);
       if (!swipeRaf) {
         swipeRaf = requestAnimationFrame(() => {
           swipeRaf = 0;
@@ -4555,6 +4627,11 @@ function initWhatsAppTabSwipeNavigation() {
           if (nav) {
             nav.classList.add('is-swiping');
             nav.style.setProperty('--nex-nav-swipe-x', `${pendingSwipeX.toFixed(1)}px`);
+          }
+          if (draggedViewEl && !document.body.classList.contains('nex-low-end')) {
+            draggedViewEl.classList.add('nex-tab-dragging');
+            draggedViewEl.style.transform = `translate3d(${pendingViewDx.toFixed(1)}px, 0, 0)`;
+            draggedViewEl.style.opacity = String(Math.max(0.78, 1 - Math.abs(pendingViewDx) / 520));
           }
         });
       }
@@ -4564,7 +4641,7 @@ function initWhatsAppTabSwipeNavigation() {
   appEl.addEventListener('touchcancel', () => {
     touchStartTime = 0;
     swipeTracking = false;
-    resetSwipeIndicator();
+    resetSwipeIndicator(true);
   }, { passive: true });
 
   appEl.addEventListener('touchend', (e) => {
@@ -4572,46 +4649,157 @@ function initWhatsAppTabSwipeNavigation() {
     const startedAt = touchStartTime;
     touchStartTime = 0;
     swipeTracking = false;
-    resetSwipeIndicator();
-    if (!wasTracking || !startedAt || Date.now() - startedAt > 550) return;
+    if (!wasTracking || !startedAt) {
+      resetSwipeIndicator(true);
+      return;
+    }
     if (document.body.classList.contains('in-conversation') ||
         document.body.classList.contains('settings-open') ||
-        (document.getElementById('settingsModal') && (document.getElementById('settingsModal').style.display === 'flex' || document.getElementById('settingsModal').classList.contains('open')))) return;
+        (document.getElementById('settingsModal') && (document.getElementById('settingsModal').style.display === 'flex' || document.getElementById('settingsModal').classList.contains('open')))) {
+      resetSwipeIndicator(false);
+      return;
+    }
+    const elapsed = Math.max(1, Date.now() - startedAt);
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
     const dx = touchEndX - touchStartX;
     const dy = touchEndY - touchStartY;
-    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.65) {
+    const velocity = Math.abs(dx) / elapsed;
+    const passesDistance = Math.abs(dx) > 52 && Math.abs(dx) > Math.abs(dy) * 1.45;
+    const passesFlick = velocity > 0.38 && Math.abs(dx) > 26 && Math.abs(dx) > Math.abs(dy) * 1.35 && elapsed < 500;
+    if (elapsed <= 650 && (passesDistance || passesFlick)) {
       let currentSection = getCurrentTab();
       let currentIndex = tabs.indexOf(currentSection);
       if (currentIndex === -1) currentIndex = 0;
       const navFn = typeof window.handleNavigation === 'function' ? window.handleNavigation : handleNavigation;
       if (dx < 0 && currentIndex < tabs.length - 1) {
-        const nextSection = tabs[currentIndex + 1];
-        if (typeof navFn === 'function') navFn(nextSection);
+        resetSwipeIndicator(false);
+        try { if (navigator.vibrate) navigator.vibrate(8); } catch (_) {}
+        if (typeof navFn === 'function') navFn(tabs[currentIndex + 1]);
+        return;
       } else if (dx > 0 && currentIndex > 0) {
-        const prevSection = tabs[currentIndex - 1];
-        if (typeof navFn === 'function') navFn(prevSection);
+        resetSwipeIndicator(false);
+        try { if (navigator.vibrate) navigator.vibrate(8); } catch (_) {}
+        if (typeof navFn === 'function') navFn(tabs[currentIndex - 1]);
+        return;
+      }
+    }
+    resetSwipeIndicator(true);
+  }, { passive: true });
+
+  // Interactive iOS / Telegram-style Left-Edge Swipe-Back inside Conversation
+  let edgeBackDragging = false;
+  let edgeBackStartTime = 0;
+  let edgeBackDx = 0;
+  let edgeBackRaf = 0;
+
+  const restoreEdgeSwipe = (animateBack = true) => {
+    if (edgeBackRaf) { cancelAnimationFrame(edgeBackRaf); edgeBackRaf = 0; }
+    const detail = document.getElementById('chatDetailView');
+    const list = document.getElementById('chatListView');
+    if (detail) {
+      detail.classList.remove('nex-interactive-drag');
+      if (animateBack && !document.body.classList.contains('nex-low-end')) {
+        detail.classList.add('nex-conv-spring-back');
+        detail.style.transform = 'translate3d(0, 0, 0)';
+        setTimeout(() => {
+          detail.classList.remove('nex-conv-spring-back');
+          detail.style.removeProperty('transform');
+          if (document.body.classList.contains('in-conversation') && window.innerWidth <= 899 && list) {
+            list.style.setProperty('display', 'none', 'important');
+          }
+        }, 250);
+      } else {
+        detail.classList.remove('nex-conv-spring-back');
+        detail.style.removeProperty('transform');
+      }
+    }
+    edgeBackDragging = false;
+    edgeBackDx = 0;
+  };
+
+  document.addEventListener('touchstart', (e) => {
+    if (!document.body.classList.contains('in-conversation')) return;
+    if (window.innerWidth >= 900) return;
+    if (e.touches.length === 1 && e.touches[0].clientX < 46) {
+      window._edgeBackStartX = e.touches[0].clientX;
+      window._edgeBackStartY = e.touches[0].clientY;
+      edgeBackStartTime = Date.now();
+      edgeBackDragging = true;
+      edgeBackDx = 0;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!edgeBackDragging || !window._edgeBackStartX || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - window._edgeBackStartX;
+    const dy = Math.abs(e.touches[0].clientY - (window._edgeBackStartY || 0));
+    if (dy > Math.abs(dx) * 1.15 && dy > 14 && edgeBackDx < 12) {
+      window._edgeBackStartX = null;
+      restoreEdgeSwipe(true);
+      return;
+    }
+    if (dx > 8) {
+      edgeBackDx = Math.min(window.innerWidth, dx);
+      if (!edgeBackRaf) {
+        edgeBackRaf = requestAnimationFrame(() => {
+          edgeBackRaf = 0;
+          const detail = document.getElementById('chatDetailView');
+          const list = document.getElementById('chatListView');
+          if (list && document.body.classList.contains('in-conversation')) {
+            list.classList.remove('hidden');
+            list.style.setProperty('display', 'flex', 'important');
+          }
+          if (detail) {
+            detail.classList.add('nex-interactive-drag');
+            detail.style.transform = `translate3d(${edgeBackDx.toFixed(1)}px, 0, 0)`;
+          }
+        });
       }
     }
   }, { passive: true });
-document.addEventListener('touchstart', (e) => {
-    if (!document.body.classList.contains('in-conversation')) return;
-if (e.touches.length === 1 && e.touches[0].clientX < 45) {
-      window._edgeBackStartX = e.touches[0].clientX;
-window._edgeBackStartY = e.touches[0].clientY;
+
+  document.addEventListener('touchend', (e) => {
+    if (!document.body.classList.contains('in-conversation') || !window._edgeBackStartX) {
+      if (edgeBackDragging) restoreEdgeSwipe(true);
+      return;
     }
-  }, { passive: true });
-document.addEventListener('touchend', (e) => {
-    if (!document.body.classList.contains('in-conversation') || !window._edgeBackStartX) return;
     const dx = e.changedTouches[0].clientX - window._edgeBackStartX;
     const dy = Math.abs(e.changedTouches[0].clientY - (window._edgeBackStartY || 0));
-window._edgeBackStartX = null;
-if (dx > 70 && dx > dy * 1.8) {
-      document.body.classList.remove('in-conversation');
-      const backBtn = document.getElementById('backToChatListBtn') || document.querySelector('.back-btn');
-if (backBtn) backBtn.click();
+    const dt = Math.max(1, Date.now() - (edgeBackStartTime || Date.now()));
+    const velocity = dx / dt;
+    window._edgeBackStartX = null;
+    edgeBackDragging = false;
+    if (edgeBackRaf) { cancelAnimationFrame(edgeBackRaf); edgeBackRaf = 0; }
+    const detail = document.getElementById('chatDetailView');
+    if ((dx > Math.min(100, window.innerWidth * 0.28) || (dx > 40 && velocity > 0.42)) && dx > dy * 1.45) {
+      try { if (navigator.vibrate) navigator.vibrate(10); } catch (_) {}
+      if (detail && !document.body.classList.contains('nex-low-end')) {
+        detail.classList.remove('nex-interactive-drag');
+        detail.style.transition = 'transform 190ms cubic-bezier(0.22, 1, 0.36, 1)';
+        detail.style.transform = 'translate3d(100%, 0, 0)';
+        setTimeout(() => {
+          detail.style.removeProperty('transition');
+          detail.style.removeProperty('transform');
+          document.body.classList.remove('in-conversation');
+          const backBtn = document.getElementById('backToChatListBtn') || document.querySelector('.back-btn');
+          if (backBtn) backBtn.click();
+          else if (typeof showChatListView === 'function') showChatListView();
+        }, 190);
+      } else {
+        restoreEdgeSwipe(false);
+        document.body.classList.remove('in-conversation');
+        const backBtn = document.getElementById('backToChatListBtn') || document.querySelector('.back-btn');
+        if (backBtn) backBtn.click();
+      }
+    } else {
+      restoreEdgeSwipe(true);
     }
+  }, { passive: true });
+
+  document.addEventListener('touchcancel', () => {
+    window._edgeBackStartX = null;
+    if (edgeBackDragging) restoreEdgeSwipe(true);
   }, { passive: true });
 }
 if (typeof document !== 'undefined') {
@@ -9555,11 +9743,11 @@ max-width: 72%;
 display: flex;
 flex-direction: column;
 position: relative;
-padding: 7px 11px 6px 11px;
-border-radius: 16px;
+padding: 5px 10px 4px 10px;
+border-radius: 15px;
 max-width: calc(75% - 8px);
 ${isOwn ? 'margin-left: auto; margin-right: 8px;' : 'margin-right: auto; margin-left: 0;'}
-min-width: 88px;
+min-width: 72px;
 overflow: visible;
 word-break: break-word;
 overflow-wrap: anywhere;
@@ -9568,8 +9756,8 @@ background: ${isOwn ? "linear-gradient(135deg, #005c4b 0%, #059669 100%)" : "#1f
 border: ${isOwn ? "none" : "1px solid rgba(255, 255, 255, 0.05)"};
 color: ${isOwn ? "#ffffff" : "#e9edef"};
 font-family: inherit;
-font-size: 14.5px;
-line-height: 1.45;
+font-size: 14px;
+line-height: 1.32;
 transition: transform 0.15s ease;
 box-sizing: border-box;
 `);
@@ -14793,10 +14981,11 @@ playLuxuryChimeSound();
 showNotif("Harmonic Chime audio played (Web Audio)", "info", 1500);
       };
     }
-// Bubble style selector
+// Bubble style selector & 20 Glassmorphism controls
 const bubbleStyleSelect = document.getElementById("bubbleStyleSelect");
 if (bubbleStyleSelect && !bubbleStyleSelect.dataset.bound) {
       bubbleStyleSelect.dataset.bound = 'true';
+      initChatBubbleGlassControls();
 bubbleStyleSelect.onchange = () => {
         applyBubbleTheme(bubbleStyleSelect.value);
 saveSettingsPreferences();
@@ -15351,21 +15540,161 @@ try {
     });
   }
 } catch (_) {}
-function applyBubbleTheme(theme) {
-  document.body.classList.remove(
-    "bubble-theme-neon-onyx",
-    "bubble-theme-telegram-glass",
-    "bubble-theme-liquid-crystal",
-    "bubble-theme-midnight-obsidian",
-    "bubble-theme-glass-frost",
-    "bubble-theme-cyberpunk-gold",
-    "bubble-theme-minimal-slate"
-  );
-if (theme && theme !== "neon-onyx") {
-    document.body.classList.add(`bubble-theme-${theme}`);
-  }
+const NEXCHAT_GLASS_THEMES = [
+  { id: "telegram-glass", label: "Telegram Frosted Glass", swatch: "linear-gradient(135deg, rgba(0,168,132,0.62), rgba(5,150,105,0.82))", glass: true },
+  { id: "liquid-crystal", label: "Liquid Crystal", swatch: "linear-gradient(135deg, rgba(16,185,129,0.58), rgba(6,182,212,0.78))", glass: true },
+  { id: "midnight-obsidian", label: "Midnight Obsidian Glass", swatch: "linear-gradient(135deg, rgba(30,41,59,0.78), rgba(15,23,42,0.92))", glass: true },
+  { id: "glass-frost", label: "Pure Glass Frost", swatch: "linear-gradient(135deg, rgba(148,163,184,0.48), rgba(226,232,240,0.34))", glass: true },
+  { id: "crimson-velvet-glass", label: "Crimson Velvet Glass", swatch: "linear-gradient(135deg, rgba(225,29,72,0.62), rgba(159,18,57,0.8))", glass: true },
+  { id: "arctic-ice-glass", label: "Arctic Ice Glass", swatch: "linear-gradient(135deg, rgba(56,189,248,0.55), rgba(14,116,144,0.75))", glass: true },
+  { id: "cyber-violet-glass", label: "Cyber Violet Glass", swatch: "linear-gradient(135deg, rgba(139,92,246,0.62), rgba(109,40,217,0.8))", glass: true },
+  { id: "solar-amber-glass", label: "Solar Amber Glass", swatch: "linear-gradient(135deg, rgba(245,158,11,0.58), rgba(180,83,9,0.78))", glass: true },
+  { id: "rose-quartz-glass", label: "Rose Quartz Glass", swatch: "linear-gradient(135deg, rgba(244,114,182,0.55), rgba(190,24,93,0.72))", glass: true },
+  { id: "neon-cyan-glass", label: "Neon Cyan Glass", swatch: "linear-gradient(135deg, rgba(34,211,238,0.58), rgba(8,145,178,0.78))", glass: true },
+  { id: "emerald-matrix-glass", label: "Emerald Matrix Glass", swatch: "linear-gradient(135deg, rgba(16,185,129,0.62), rgba(4,120,87,0.82))", glass: true },
+  { id: "graphite-smoke-glass", label: "Graphite Smoke Glass", swatch: "linear-gradient(135deg, rgba(71,85,105,0.65), rgba(30,41,59,0.85))", glass: true },
+  { id: "cobalt-deep-glass", label: "Cobalt Deep Glass", swatch: "linear-gradient(135deg, rgba(37,99,235,0.62), rgba(30,64,175,0.82))", glass: true },
+  { id: "royal-amethyst-glass", label: "Royal Amethyst Glass", swatch: "linear-gradient(135deg, rgba(168,85,247,0.58), rgba(126,34,206,0.8))", glass: true },
+  { id: "sunset-coral-glass", label: "Sunset Coral Glass", swatch: "linear-gradient(135deg, rgba(251,113,133,0.58), rgba(249,115,22,0.72))", glass: true },
+  { id: "mint-breeze-glass", label: "Mint Breeze Glass", swatch: "linear-gradient(135deg, rgba(52,211,153,0.55), rgba(13,148,136,0.75))", glass: true },
+  { id: "champagne-gold-glass", label: "Champagne Gold Glass", swatch: "linear-gradient(135deg, rgba(250,204,21,0.52), rgba(161,98,7,0.72))", glass: true },
+  { id: "indigo-nebula-glass", label: "Indigo Nebula Glass", swatch: "linear-gradient(135deg, rgba(99,102,241,0.62), rgba(67,56,202,0.82))", glass: true },
+  { id: "chrome-mirror-glass", label: "Chrome Mirror Glass", swatch: "linear-gradient(135deg, rgba(203,213,225,0.5), rgba(100,116,139,0.7))", glass: true },
+  { id: "pearl-ivory-glass", label: "Pearl Ivory Glass", swatch: "linear-gradient(135deg, rgba(248,250,252,0.48), rgba(148,163,184,0.6))", glass: true },
+  { id: "neon-onyx", label: "Neon Onyx Classic", swatch: "linear-gradient(135deg, #005c4b, #059669)", glass: false },
+  { id: "cyberpunk-gold", label: "Cyberpunk Gold Classic", swatch: "linear-gradient(135deg, #b45309, #f59e0b)", glass: false },
+  { id: "minimal-slate", label: "Minimal Slate Classic", swatch: "linear-gradient(135deg, #334155, #1e293b)", glass: false }
+];
+
+function applyChatBubbleGlassVars() {
   try {
-    localStorage.setItem('nex_bubble_theme', theme || 'neon-onyx');
+    const blur = Math.min(32, Math.max(4, parseInt(localStorage.getItem('nex_bubble_blur') || '16', 10) || 16));
+    const alphaPct = Math.min(95, Math.max(25, parseInt(localStorage.getItem('nex_bubble_opacity') || '74', 10) || 74));
+    const specularOn = localStorage.getItem('nex_bubble_specular') !== 'false';
+
+    document.documentElement.style.setProperty('--nex-glass-blur', `${blur}px`);
+    document.documentElement.style.setProperty('--nex-glass-alpha', (alphaPct / 100).toFixed(2));
+    document.body.classList.toggle('nex-no-specular-rim', !specularOn);
+
+    const blurSlider = document.getElementById('bubbleBlurRange');
+    const blurValEl = document.getElementById('bubbleBlurValue');
+    if (blurSlider) blurSlider.value = String(blur);
+    if (blurValEl) blurValEl.textContent = `${blur}px`;
+
+    const alphaSlider = document.getElementById('bubbleGlassOpacityRange');
+    const alphaValEl = document.getElementById('bubbleGlassOpacityValue');
+    if (alphaSlider) alphaSlider.value = String(alphaPct);
+    if (alphaValEl) alphaValEl.textContent = `${alphaPct}%`;
+
+    const rimChk = document.getElementById('chkBubbleSpecularRim');
+    if (rimChk) rimChk.checked = specularOn;
+  } catch (_) {}
+}
+
+function renderGlassBubbleSwatches(activeTheme) {
+  const host = document.getElementById('glassBubbleSwatches');
+  if (!host) return;
+  if (!host.dataset.rendered) {
+    host.dataset.rendered = 'true';
+    host.innerHTML = '';
+    NEXCHAT_GLASS_THEMES.filter(t => t.glass).forEach((t) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'glass-swatch-btn';
+      btn.dataset.theme = t.id;
+      btn.title = t.label;
+      btn.setAttribute('aria-label', t.label);
+      btn.innerHTML = `<span class="glass-swatch-dot" style="background:${t.swatch}"></span><span class="glass-swatch-name">${t.label.replace(' Glass', '')}</span>`;
+      btn.onclick = () => {
+        applyBubbleTheme(t.id);
+        if (typeof saveSettingsPreferences === 'function') saveSettingsPreferences();
+        showNotif(`Applied ${t.label}`, 'success', 1600);
+      };
+      host.appendChild(btn);
+    });
+  }
+  host.querySelectorAll('.glass-swatch-btn').forEach((btn) => {
+    btn.classList.toggle('is-active', btn.dataset.theme === activeTheme);
+  });
+}
+
+function initChatBubbleGlassControls() {
+  const theme = localStorage.getItem('nex_bubble_theme') || 'telegram-glass';
+  renderGlassBubbleSwatches(theme);
+  applyChatBubbleGlassVars();
+
+  const chatGlassChk = document.getElementById('chkChatBubblesLiquidGlass');
+  const mainGlassChk = document.getElementById('chkLiquidGlassFx');
+  if (chatGlassChk) {
+    chatGlassChk.checked = document.body.classList.contains('nex-liquid-glass');
+    if (!chatGlassChk.dataset.bound) {
+      chatGlassChk.dataset.bound = 'true';
+      chatGlassChk.onchange = () => {
+        const enabled = chatGlassChk.checked && !document.body.classList.contains('nex-low-end');
+        if (mainGlassChk) {
+          mainGlassChk.checked = enabled;
+          mainGlassChk.dispatchEvent(new Event('change'));
+        } else {
+          document.body.classList.toggle('nex-liquid-glass', enabled);
+          try { localStorage.setItem('nex_liquid_glass_fx', enabled ? 'true' : 'false'); } catch (_) {}
+        }
+      };
+    }
+  }
+
+  const rimChk = document.getElementById('chkBubbleSpecularRim');
+  if (rimChk && !rimChk.dataset.bound) {
+    rimChk.dataset.bound = 'true';
+    rimChk.onchange = () => {
+      try { localStorage.setItem('nex_bubble_specular', rimChk.checked ? 'true' : 'false'); } catch (_) {}
+      applyChatBubbleGlassVars();
+    };
+  }
+
+  const blurSlider = document.getElementById('bubbleBlurRange');
+  if (blurSlider && !blurSlider.dataset.bound) {
+    blurSlider.dataset.bound = 'true';
+    blurSlider.oninput = () => {
+      try { localStorage.setItem('nex_bubble_blur', blurSlider.value); } catch (_) {}
+      applyChatBubbleGlassVars();
+    };
+  }
+
+  const alphaSlider = document.getElementById('bubbleGlassOpacityRange');
+  if (alphaSlider && !alphaSlider.dataset.bound) {
+    alphaSlider.dataset.bound = 'true';
+    alphaSlider.oninput = () => {
+      try { localStorage.setItem('nex_bubble_opacity', alphaSlider.value); } catch (_) {}
+      applyChatBubbleGlassVars();
+    };
+  }
+}
+
+function applyBubbleTheme(theme) {
+  const chosen = theme || localStorage.getItem('nex_bubble_theme') || 'telegram-glass';
+  NEXCHAT_GLASS_THEMES.forEach((t) => {
+    document.body.classList.remove(`bubble-theme-${t.id}`);
+  });
+  if (chosen && chosen !== "neon-onyx") {
+    document.body.classList.add(`bubble-theme-${chosen}`);
+  }
+  const meta = NEXCHAT_GLASS_THEMES.find(t => t.id === chosen);
+  if (meta && meta.glass && !document.body.classList.contains('nex-low-end')) {
+    document.body.classList.add('nex-liquid-glass');
+    try { localStorage.setItem('nex_liquid_glass_fx', 'true'); } catch (_) {}
+    const mainGlassChk = document.getElementById('chkLiquidGlassFx');
+    const chatGlassChk = document.getElementById('chkChatBubblesLiquidGlass');
+    if (mainGlassChk) mainGlassChk.checked = true;
+    if (chatGlassChk) chatGlassChk.checked = true;
+  }
+  const bubbleSelect = document.getElementById('bubbleStyleSelect');
+  if (bubbleSelect && bubbleSelect.value !== chosen) {
+    bubbleSelect.value = chosen;
+  }
+  renderGlassBubbleSwatches(chosen);
+  applyChatBubbleGlassVars();
+  try {
+    localStorage.setItem('nex_bubble_theme', chosen);
   } catch (_) {}
 }
 async function loadBlockedUsersList() {
@@ -15475,7 +15804,10 @@ if (ghostEl) ghostEl.checked = prefs.ghostMode === true;
 if (directChatEl) directChatEl.checked = prefs.directChatAutoAccept !== false;
 if (enterKeyEl) enterKeyEl.checked = prefs.enterKeySend !== false;
 if (aiStreamingEl) aiStreamingEl.checked = prefs.aiStreaming !== false;
-if (bubbleSelect && prefs.bubbleTheme) bubbleSelect.value = prefs.bubbleTheme;
+const activeBubbleTheme = prefs.bubbleTheme || localStorage.getItem('nex_bubble_theme') || 'telegram-glass';
+if (bubbleSelect) bubbleSelect.value = activeBubbleTheme;
+applyBubbleTheme(activeBubbleTheme);
+initChatBubbleGlassControls();
 if (aiModelSelect && prefs.aiModel) aiModelSelect.value = prefs.aiModel;
 const autoTranslateToggleEl = document.getElementById("autoTranslateOnLoadToggle");
     const autoTranslateTargetLangEl = document.getElementById("autoTranslateTargetLangSelect");
@@ -20215,11 +20547,25 @@ if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
       }
     }
 
+    const targetVol = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
     const discIcon = sticker?.querySelector('.music-sticker-disc-icon i');
     const playPromise = musicAudio.play();
     if (playPromise && typeof playPromise.then === 'function') {
       playPromise.then(() => {
         if (discIcon) discIcon.classList.add('fa-spin');
+        if (!musicAudio.muted && !document.body.classList.contains('nex-low-end')) {
+          if (musicAudio._nexFadeRaf) cancelAnimationFrame(musicAudio._nexFadeRaf);
+          const startVol = Math.min(targetVol, 0.05);
+          musicAudio.volume = startVol;
+          const t0 = performance.now();
+          const ramp = (now) => {
+            if (musicAudio.paused || musicAudio.muted) { musicAudio._nexFadeRaf = 0; return; }
+            const p = Math.min(1, (now - t0) / 180);
+            musicAudio.volume = startVol + (targetVol - startVol) * (1 - Math.pow(1 - p, 3));
+            musicAudio._nexFadeRaf = p < 1 ? requestAnimationFrame(ramp) : 0;
+          };
+          musicAudio._nexFadeRaf = requestAnimationFrame(ramp);
+        }
       }).catch(err => {
         console.warn('[STATUS MUSIC] Playback notice:', err.message);
         if (discIcon) discIcon.classList.remove('fa-spin');
@@ -22854,8 +23200,32 @@ if (chatDetailView) {
     } else {
       chatDetailView.style.setProperty('background', '#0f0a1e', 'important');
     }
-chatDetailView.classList.remove('hidden', 'entering');
+chatDetailView.classList.remove('hidden', 'entering', 'nex-interactive-drag', 'nex-conv-spring-back');
+chatDetailView.style.removeProperty('transform');
 chatDetailView.classList.add('visible');
+    if (isMobile && !document.body.classList.contains('nex-low-end')) {
+      chatDetailView.classList.remove('nex-conv-slide-in');
+      void chatDetailView.offsetWidth;
+      chatDetailView.classList.add('nex-conv-slide-in');
+      if (chatDetailView._nexConvTimer) clearTimeout(chatDetailView._nexConvTimer);
+      chatDetailView._nexConvTimer = setTimeout(() => {
+        chatDetailView.classList.remove('nex-conv-slide-in');
+        chatDetailView._nexConvTimer = 0;
+      }, 270);
+    }
+    const msgArea = document.getElementById('messages-area');
+    if (msgArea && !msgArea.dataset.scrollElevBound) {
+      msgArea.dataset.scrollElevBound = 'true';
+      let elevRaf = 0;
+      msgArea.addEventListener('scroll', () => {
+        if (elevRaf) return;
+        elevRaf = requestAnimationFrame(() => {
+          elevRaf = 0;
+          const hdr = document.querySelector('#chatDetailView .chat-detail-header');
+          if (hdr) hdr.classList.toggle('is-scrolled', msgArea.scrollTop > 12);
+        });
+      }, { passive: true });
+    }
   }
 try {
     if (!history.state || history.state.nexchatView !== 'conversation') {
@@ -26180,7 +26550,7 @@ gyroBound = true;
     const savedGlass = localStorage.getItem('nex_liquid_glass_fx');
     const glassPreset = localStorage.getItem('nex_glass_preset') || 'material';
     const lowEndActive = savedLowEnd !== null ? (savedLowEnd === 'true') : Boolean(isLowHardware);
-    const glassActive = !lowEndActive && (savedGlass === 'true');
+    const glassActive = !lowEndActive && (savedGlass !== 'false');
     if (document.body) {
       document.body.classList.toggle('nex-low-end', lowEndActive);
       document.body.classList.toggle('nex-liquid-glass', glassActive);
@@ -26256,7 +26626,10 @@ if (typeof document !== 'undefined') {
       const savedGlass = localStorage.getItem('nex_liquid_glass_fx');
       const preset = localStorage.getItem('nex_glass_preset') || 'material';
       const lowActive = savedLow !== null ? (savedLow === 'true') : Boolean(isLowHw);
-      const glassActive = !lowActive && (savedGlass === 'true');
+      const glassActive = !lowActive && (savedGlass !== 'false');
+      if (typeof applyBubbleTheme === 'function') {
+        applyBubbleTheme(localStorage.getItem('nex_bubble_theme') || 'telegram-glass');
+      }
       if (document.body) {
         document.body.classList.toggle('nex-low-end', lowActive);
         document.body.classList.toggle('nex-liquid-glass', glassActive);

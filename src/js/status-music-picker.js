@@ -344,8 +344,10 @@
         pill.addEventListener('click', () => {
           document.querySelectorAll('.music-genre-pill').forEach(p => p.classList.remove('active'));
           pill.classList.add('active');
+          try { pill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch (_) {}
           const genre = pill.getAttribute('data-genre') || 'top hits';
           this.activeGenre = genre;
+          this._animateNextRender = true;
           if (searchInput) searchInput.value = '';
           if (clearBtn) clearBtn.style.display = 'none';
           this.searchMusic(genre, true);
@@ -361,11 +363,139 @@
 
       // Prepare singleton Preview Audio element cleanly
       this._ensureAudioPlayer();
+      this._bindSheetDragDismiss();
+    }
+
+    _fadeAudioTo(audio, targetVolume = 0.85, durationMs = 180) {
+      if (!audio) return;
+      if (audio._nexFadeRaf) {
+        cancelAnimationFrame(audio._nexFadeRaf);
+        audio._nexFadeRaf = 0;
+      }
+      const lowEnd = document.body?.classList?.contains('nex-low-end');
+      if (lowEnd || durationMs <= 0) {
+        audio.volume = targetVolume;
+        return;
+      }
+      const startVol = Math.min(targetVolume, 0.05);
+      audio.volume = startVol;
+      const startTime = performance.now();
+      const step = (now) => {
+        if (audio.paused) {
+          audio._nexFadeRaf = 0;
+          return;
+        }
+        const t = Math.min(1, (now - startTime) / durationMs);
+        const eased = 1 - Math.pow(1 - t, 3);
+        audio.volume = Math.min(1, Math.max(0, startVol + (targetVolume - startVol) * eased));
+        if (t < 1) {
+          audio._nexFadeRaf = requestAnimationFrame(step);
+        } else {
+          audio._nexFadeRaf = 0;
+        }
+      };
+      audio._nexFadeRaf = requestAnimationFrame(step);
+    }
+
+    _bindSheetDragDismiss() {
+      const sheet = document.getElementById('statusMusicPickerSheet') || document.querySelector('#statusMusicPickerModal .status-music-picker-sheet');
+      const backdrop = document.getElementById('statusMusicPickerBackdrop');
+      const handle = document.getElementById('musicPickerDragHandle') || sheet?.querySelector('.music-picker-header');
+      const listEl = document.getElementById('statusMusicTrackList');
+      if (!sheet || sheet.dataset.dragDismissBound) return;
+      sheet.dataset.dragDismissBound = 'true';
+
+      let startY = 0;
+      let startTime = 0;
+      let dragging = false;
+      let lastDy = 0;
+      let dragRaf = 0;
+
+      const applyTransform = (dy) => {
+        if (dragRaf) cancelAnimationFrame(dragRaf);
+        dragRaf = requestAnimationFrame(() => {
+          dragRaf = 0;
+          sheet.style.transform = `translate3d(0, ${Math.max(0, dy).toFixed(1)}px, 0)`;
+          if (backdrop) {
+            const fade = Math.max(0.15, 1 - Math.min(1, dy / 340) * 0.85);
+            backdrop.style.opacity = String(fade);
+          }
+        });
+      };
+
+      const onTouchStart = (e) => {
+        if (e.touches.length !== 1) return;
+        const fromList = e.target.closest('#statusMusicTrackList');
+        const fromGrip = e.target.closest('#musicPickerDragHandle, .music-picker-header');
+        if (!fromGrip && (!fromList || (listEl && listEl.scrollTop > 2))) return;
+        startY = e.touches[0].clientY;
+        startTime = Date.now();
+        lastDy = 0;
+        dragging = fromGrip ? true : false;
+        if (dragging) sheet.classList.add('dragging');
+      };
+
+      const onTouchMove = (e) => {
+        if (!startTime || e.touches.length !== 1) return;
+        const dy = e.touches[0].clientY - startY;
+        if (!dragging) {
+          // Engage list pull-down only when at top and clearly swiping down
+          if (dy > 10 && (!listEl || listEl.scrollTop <= 0)) {
+            dragging = true;
+            startY = e.touches[0].clientY;
+            sheet.classList.add('dragging');
+          } else if (dy < -6) {
+            startTime = 0;
+          }
+          return;
+        }
+        lastDy = Math.max(0, dy);
+        if (lastDy > 0) applyTransform(lastDy);
+      };
+
+      const onTouchEnd = () => {
+        if (dragRaf) { cancelAnimationFrame(dragRaf); dragRaf = 0; }
+        const elapsed = Math.max(1, Date.now() - startTime);
+        const velocity = lastDy / elapsed;
+        startTime = 0;
+        if (!dragging) return;
+        dragging = false;
+        sheet.classList.remove('dragging');
+        if (lastDy > 90 || (lastDy > 35 && velocity > 0.45)) {
+          sheet.style.transform = 'translate3d(0, 100%, 0)';
+          if (backdrop) backdrop.style.opacity = '0';
+          setTimeout(() => {
+            this.closePicker();
+            sheet.style.transform = '';
+            if (backdrop) backdrop.style.opacity = '';
+          }, 210);
+        } else {
+          sheet.style.transform = 'translate3d(0, 0, 0)';
+          if (backdrop) backdrop.style.opacity = '';
+          setTimeout(() => { if (!sheet.classList.contains('dragging')) sheet.style.transform = ''; }, 260);
+        }
+      };
+
+      [handle, listEl].forEach((zone) => {
+        if (!zone) return;
+        zone.addEventListener('touchstart', onTouchStart, { passive: true });
+        zone.addEventListener('touchmove', onTouchMove, { passive: true });
+        zone.addEventListener('touchend', onTouchEnd, { passive: true });
+        zone.addEventListener('touchcancel', onTouchEnd, { passive: true });
+      });
     }
 
     openPicker() {
       const modal = document.getElementById('statusMusicPickerModal');
       if (!modal) return;
+      const sheet = document.getElementById('statusMusicPickerSheet') || modal.querySelector('.status-music-picker-sheet');
+      const backdrop = document.getElementById('statusMusicPickerBackdrop');
+      if (sheet) {
+        sheet.classList.remove('dragging');
+        sheet.style.transform = '';
+      }
+      if (backdrop) backdrop.style.opacity = '';
+      this._animateNextRender = true;
       modal.style.display = 'flex';
 
       const searchInput = document.getElementById('statusMusicSearchInput');
@@ -380,6 +510,13 @@
     closePicker() {
       const modal = document.getElementById('statusMusicPickerModal');
       if (modal) modal.style.display = 'none';
+      const sheet = document.getElementById('statusMusicPickerSheet') || modal?.querySelector('.status-music-picker-sheet');
+      const backdrop = document.getElementById('statusMusicPickerBackdrop');
+      if (sheet) {
+        sheet.classList.remove('dragging');
+        sheet.style.transform = '';
+      }
+      if (backdrop) backdrop.style.opacity = '';
       if (!this.selectedTrack) {
         this.stopPreviewPlayback();
       }
@@ -554,12 +691,16 @@
         return;
       }
 
-      listEl.innerHTML = tracks.map(t => {
+      const shouldAnimateReveal = Boolean(this._animateNextRender || listEl.querySelector('.music-picker-loading'));
+      this._animateNextRender = false;
+
+      listEl.innerHTML = tracks.map((t, idx) => {
         const isSelected = this.selectedTrack && this.selectedTrack.id === t.id;
         const isPlaying = this.currentlyPlayingId === t.id;
+        const animClass = shouldAnimateReveal && idx < 12 ? 'nex-track-reveal' : '';
 
         return `
-          <div class="music-track-item ${isSelected ? 'selected' : ''} ${isPlaying ? 'playing' : ''}" data-track-id="${t.id}">
+          <div class="music-track-item ${isSelected ? 'selected' : ''} ${isPlaying ? 'playing' : ''} ${animClass}" data-track-id="${t.id}" style="--track-idx:${Math.min(idx, 10)}">
             <div class="music-track-artwork-wrap" data-play-id="${t.id}">
               <img src="${t.artworkUrl}" class="music-track-artwork" alt="${t.trackName}" onerror="this.src='logo.jpg';">
               <div class="music-track-play-overlay">
@@ -661,8 +802,12 @@
         const playPromise = audio.play();
         this.currentlyPlayingId = track.id;
         this.updatePlayStateUI();
-        if (playPromise && typeof playPromise.catch === 'function') {
-          playPromise.catch(err => {
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.then(() => {
+            if (this.currentlyPlayingId === track.id && !audio.paused) {
+              this._fadeAudioTo(audio, 0.85, 180);
+            }
+          }).catch(err => {
             console.warn('[MUSIC PICKER] Audio play blocked:', err.message);
             this.stopPreviewPlayback();
             if (typeof window.showNotif === 'function') {
@@ -769,6 +914,7 @@
             playPromise.then(() => {
               this.currentlyPlayingId = track.id;
               if (sticker) sticker.classList.add('playing');
+              this._fadeAudioTo(audio, 0.85, 180);
             }).catch(err => {
               console.warn('[STATUS MUSIC] Autoplay preview notice:', err.message);
               if (sticker) sticker.classList.remove('playing');

@@ -621,21 +621,31 @@ touch-action: pan-y !important;
 user-select: text !important;
 }
 
-/* Sent Messages (WhatsApp cyber dark emerald) */
-.message.sent, .my-message, .message-bubble.sent {
+/* Sent Messages (Classic fallback; yields cleanly to all 20 Glass Themes) */
+body:not([class*="bubble-theme-"]) .message.sent,
+body:not([class*="bubble-theme-"]) .my-message,
+body:not([class*="bubble-theme-"]) .message-bubble.sent,
+body.bubble-theme-neon-onyx .message.sent,
+body.bubble-theme-neon-onyx .my-message,
+body.bubble-theme-neon-onyx .message-bubble.sent {
 align-self: flex-end !important;
 background: linear-gradient(135deg, #005c4b 0%, #059669 100%) !important;
 color: #ffffff !important;
-border-radius: 12px !important;
+border-radius: 14px !important;
 border: none !important;
 }
 
-/* Received Messages (WhatsApp dark obsidian) */
-.message.received, .other-message, .message-bubble.received {
+/* Received Messages (Classic fallback; yields cleanly to all 20 Glass Themes) */
+body:not([class*="bubble-theme-"]) .message.received,
+body:not([class*="bubble-theme-"]) .other-message,
+body:not([class*="bubble-theme-"]) .message-bubble.received,
+body.bubble-theme-neon-onyx .message.received,
+body.bubble-theme-neon-onyx .other-message,
+body.bubble-theme-neon-onyx .message-bubble.received {
 align-self: flex-start !important;
 background: #1f2c34 !important;
 color: #e9edef !important;
-border-radius: 2px 12px 12px 12px !important;
+border-radius: 2px 14px 14px 14px !important;
 border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
@@ -3663,14 +3673,17 @@ min-width: 0 !important;
 font-size: 15.5px !important;
 }
 
-/* WhatsApp Emerald Sent Bubble - 100% Solid & Crisp with Zero Edge Cut */
-.message-bubble.sent,
-.message.sent,
-.my-message {
+/* WhatsApp Emerald Sent Bubble - Classic Fallback Only (Respects 20 Glass Themes) */
+body:not([class*="bubble-theme-"]) .message-bubble.sent,
+body:not([class*="bubble-theme-"]) .message.sent,
+body:not([class*="bubble-theme-"]) .my-message,
+body.bubble-theme-neon-onyx .message-bubble.sent,
+body.bubble-theme-neon-onyx .message.sent,
+body.bubble-theme-neon-onyx .my-message {
 background: #005c4b !important;
 background-color: #005c4b !important;
 color: #ffffff !important;
-border-radius: 12px !important;
+border-radius: 14px !important;
 box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -6459,10 +6472,11 @@ textarea {
 /* Bubble base: max-width calc(75% - 8px), overflow visible */
 .message-bubble {
   max-width: 82% !important;
-  min-width: 80px !important;
+  min-width: 72px !important;
+  min-height: 0 !important;
   overflow: visible !important;
-  border-radius: 16px !important;
-  padding-bottom: 18px !important;
+  border-radius: 14px !important;
+  padding: 5px 10px 4px 10px !important;
   position: relative !important;
   word-break: break-word !important;
   overflow-wrap: anywhere !important;
@@ -6532,10 +6546,21 @@ textarea {
 .message-bubble {
   display: flex !important;
   flex-direction: column !important;
-  min-width: 88px !important;
+  min-width: 72px !important;
+  min-height: 0 !important;
   box-sizing: border-box !important;
   position: relative !important;
-  padding: 7px 11px 6px 11px !important;
+  padding: 5px 10px 4px 10px !important;
+  line-height: 1.32 !important;
+}
+
+.message-bubble .message-text-content,
+.message-bubble p,
+.message-bubble .message-text,
+.nex-msg-text {
+  line-height: 1.32 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .message-bubble.is-sticker-message,
@@ -6604,9 +6629,10 @@ html[data-chat-size="small"] .message-time-text {
   bottom: auto !important;
   right: auto !important;
   align-self: flex-end !important;
-  margin-top: 3px !important;
+  margin-top: 1px !important;
   margin-bottom: 0 !important;
-  font-size: 10.5px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
   float: none !important;
@@ -6620,20 +6646,20 @@ html[data-chat-size="small"] .message-time-text {
 .nex-msg-translate-btn {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 3px !important;
   background: rgba(0, 242, 255, 0.08) !important;
   border: 1px solid rgba(0, 242, 255, 0.22) !important;
-  border-radius: 6px !important;
+  border-radius: 5px !important;
   color: #00f2ff !important;
-  font-size: 10px !important;
+  font-size: 9.5px !important;
   font-weight: 600 !important;
-  padding: 2px 7px !important;
+  padding: 1px 6px !important;
   cursor: pointer !important;
-  margin-top: 4px !important;
-  margin-bottom: 2px !important;
+  margin-top: 2px !important;
+  margin-bottom: 0 !important;
   align-self: flex-start !important;
   position: static !important;
-  line-height: 1.3 !important;
+  line-height: 1.15 !important;
 }
 
 .nex-msg-translate-btn:hover {
