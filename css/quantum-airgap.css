@@ -152,6 +152,11 @@
   justify-content: center;
   perspective: 1200px;
   overflow: hidden;
+  pointer-events: none;
+}
+
+.quantum-peek-overlay.open {
+  pointer-events: auto;
 }
 
 .quantum-peek-backdrop {
@@ -165,10 +170,12 @@
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   opacity: 0;
   transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
 }
 
 .quantum-peek-overlay.open .quantum-peek-backdrop {
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* 4. 3D FROSTED LENS CASING WITH HARDWARE ACCELERATION */
@@ -181,9 +188,11 @@
   transform-style: preserve-3d;
   will-change: transform, opacity;
   z-index: 2;
+  pointer-events: none;
 }
 
 .quantum-peek-lens {
+  pointer-events: auto;
   position: relative;
   background: linear-gradient(160deg, rgba(14, 23, 42, 0.94) 0%, rgba(6, 10, 20, 0.98) 100%);
   border: 1px solid var(--stealth-border-glass);

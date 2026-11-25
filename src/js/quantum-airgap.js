@@ -18,6 +18,9 @@
       this.activePeekChatId = null;
       this.activePeekChatType = 'direct';
       this.longPressTimer = null;
+      this._dismissTimer = null;
+      this._lastTouchTs = 0;
+      this._suppressNextClickUntil = 0;
       this.touchStartX = 0;
       this.touchStartY = 0;
       this.isPeeking = false;
@@ -289,7 +292,13 @@
         list._hasAirGapLongPressBound = true;
 
         const onPointerStart = (e) => {
-          if (e.target.closest('button, a, input, textarea, .chat-menu-btn')) return;
+          if (e.type === 'touchstart') {
+            this._lastTouchTs = Date.now();
+          } else if (e.type === 'mousedown') {
+            if (Date.now() - this._lastTouchTs < 800) return;
+            if (typeof e.button === 'number' && e.button !== 0) return;
+          }
+          if (e.target.closest('button, a, input, textarea, .chat-menu-btn, .swipe-action-btn')) return;
           const chatItem = e.target.closest('.chat-item, .chat-list-item, li[data-chat-id]');
           if (!chatItem) return;
 
@@ -298,15 +307,17 @@
 
           if (this.longPressTimer) clearTimeout(this.longPressTimer);
           this.longPressTimer = setTimeout(() => {
+            this.longPressTimer = null;
+            this._suppressNextClickUntil = Date.now() + 650;
             this.triggerAirGapPeek(chatItem);
-          }, 400);
+          }, 520);
         };
 
         const onPointerMove = (e) => {
           if (!this.longPressTimer) return;
           const currentX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
           const currentY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
-          if (Math.hypot(currentX - this.touchStartX, currentY - this.touchStartY) > 10) {
+          if (Math.hypot(currentX - this.touchStartX, currentY - this.touchStartY) > 8) {
             clearTimeout(this.longPressTimer);
             this.longPressTimer = null;
           }
@@ -319,10 +330,20 @@
           }
         };
 
+        const onClickCapture = (e) => {
+          if (Date.now() < this._suppressNextClickUntil) {
+            e.preventDefault();
+            e.stopPropagation();
+            this._suppressNextClickUntil = 0;
+          }
+        };
+
         list.addEventListener('touchstart', onPointerStart, { passive: true });
         list.addEventListener('touchmove', onPointerMove, { passive: true });
         list.addEventListener('touchend', onPointerEnd, { passive: true });
         list.addEventListener('touchcancel', onPointerEnd, { passive: true });
+        list.addEventListener('scroll', onPointerEnd, { passive: true });
+        list.addEventListener('click', onClickCapture, true);
 
         list.addEventListener('mousedown', onPointerStart, { passive: true });
         list.addEventListener('mousemove', onPointerMove, { passive: true });
@@ -332,6 +353,10 @@
 
     async triggerAirGapPeek(chatItem) {
       if (!chatItem) return;
+      if (this._dismissTimer) {
+        clearTimeout(this._dismissTimer);
+        this._dismissTimer = null;
+      }
       this.isPeeking = true;
 
       if (typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -366,9 +391,16 @@
       if (loadingEl) loadingEl.style.display = 'flex';
 
       const modal = document.getElementById('quantumPeekLensModal');
+      const lens = document.getElementById('quantumPeekLens');
+      if (lens) {
+        lens.style.opacity = '';
+        lens.style.transform = '';
+      }
       if (modal) {
+        modal.classList.remove('open');
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
+        void modal.offsetWidth;
         if (typeof requestAnimationFrame === 'function') {
           requestAnimationFrame(() => modal.classList.add('open'));
         } else {
@@ -391,7 +423,10 @@
         if (typeof window !== 'undefined' && typeof window.fetchSupabaseRoomMessages === 'function' && chatType === 'direct' && window.myUID) {
           const roomId = `direct_${[window.myUID, chatId].sort().join('_')}`;
           try {
-            const msgs = await window.fetchSupabaseRoomMessages(roomId, 8);
+            const msgs = await Promise.race([
+              window.fetchSupabaseRoomMessages(roomId, 8),
+              new Promise(r => setTimeout(() => r(null), 3500))
+            ]);
             if (msgs && msgs.length > 0) previewMessages = msgs;
           } catch (_) {}
         }
@@ -545,28 +580,40 @@
     }
 
     dismissAirGapLens() {
-      if (!this.isPeeking) return;
+      const modal = document.getElementById('quantumPeekLensModal');
+      if (!modal || (!this.isPeeking && modal.style.display === 'none')) return;
       this.isPeeking = false;
+      if (this.longPressTimer) {
+        clearTimeout(this.longPressTimer);
+        this.longPressTimer = null;
+      }
+      if (this._dismissTimer) {
+        clearTimeout(this._dismissTimer);
+        this._dismissTimer = null;
+      }
       this.unbind3DTiltTracking();
 
       if (typeof document !== 'undefined' && document.activeElement && typeof document.activeElement.blur === 'function') {
         try { document.activeElement.blur(); } catch (_) {}
       }
 
-      const modal = document.getElementById('quantumPeekLensModal');
       const lens = document.getElementById('quantumPeekLens');
       if (lens) {
         lens.style.transform = 'scale(0.85) translateY(20px)';
         lens.style.opacity = '0';
       }
-      if (modal) {
-        modal.classList.remove('open');
-        setTimeout(() => {
+      modal.classList.remove('open');
+      this._dismissTimer = setTimeout(() => {
+        this._dismissTimer = null;
+        if (!this.isPeeking) {
           modal.style.display = 'none';
           modal.setAttribute('aria-hidden', 'true');
-          if (lens) lens.style.transform = '';
-        }, 250);
-      }
+          if (lens) {
+            lens.style.transform = '';
+            lens.style.opacity = '';
+          }
+        }
+      }, 260);
       this.playSynthPulse('disengage');
     }
 
