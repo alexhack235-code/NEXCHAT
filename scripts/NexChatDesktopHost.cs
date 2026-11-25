@@ -253,6 +253,9 @@ namespace NexChatDesktopHost
                 case ".mp3": return "audio/mpeg";
                 case ".ogg": return "audio/ogg";
                 case ".webm": return "video/webm";
+                case ".webp": return "image/webp";
+                case ".glb": return "model/gltf-binary";
+                case ".gltf": return "model/gltf+json";
                 case ".wasm": return "application/wasm";
                 case ".woff": return "font/woff";
                 case ".woff2": return "font/woff2";
@@ -291,7 +294,7 @@ namespace NexChatDesktopHost
                 {
                     FileName = browserExe,
                     Arguments = string.Format(
-                        "--app=\"{0}\" --user-data-dir=\"{1}\" --window-size=1280,820 --no-first-run --no-default-browser-check --disable-features=Translate,OptimizationHints",
+                        "--app=\"{0}\" --user-data-dir=\"{1}\" --window-size=1280,820 --no-first-run --no-default-browser-check --disable-background-mode --disable-features=Translate,OptimizationHints",
                         targetUrl, userProfile),
                     UseShellExecute = false
                 };
