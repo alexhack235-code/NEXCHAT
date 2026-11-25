@@ -6296,16 +6296,15 @@ body.motion-120hz .chat-messages {
     z-index: 5 !important;
   }
 
-  /* Toast Notifications: Centered on screen */
+  /* Toast Notifications: Centered cleanly inside all viewports */
+  #notificationContainer,
   .notification-container {
-    position: fixed !important;
-    top: 20px !important;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
+    left: 12px !important;
+    right: 12px !important;
+    transform: none !important;
+    width: auto !important;
     max-width: 420px !important;
-    width: calc(100% - 32px) !important;
-    z-index: 100050 !important;
+    margin: 0 auto !important;
   }
 }
 
@@ -7243,14 +7242,14 @@ html[data-chat-size="small"] .message-time-text {
   }
 
   .chat-detail-header {
-    height: 60px !important;
     min-height: 60px !important;
-    max-height: 60px !important;
+    height: auto !important;
+    max-height: none !important;
     flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 0 16px !important;
+    padding: 6px 16px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     width: 100% !important;
     box-sizing: border-box !important;

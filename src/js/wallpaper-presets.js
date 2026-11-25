@@ -148,12 +148,15 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
   const chatDetail = document.getElementById('chatDetailView');
 
   if (wallpaperUrl) {
-    const isSvg = String(wallpaperUrl).startsWith('data:image/svg');
+    let rawUrl = String(wallpaperUrl).replace(/[\n\r\t]/g, '').trim();
+    const wrappedMatch = rawUrl.match(/^url\((['"]?)(.*?)\1\)$/i);
+    if (wrappedMatch && wrappedMatch[2]) rawUrl = wrappedMatch[2].trim();
+    const isSvg = rawUrl.startsWith('data:image/svg');
     const bgSize = isSvg ? 'auto' : 'cover';
     const bgRepeat = isSvg ? 'repeat' : 'no-repeat';
-    const cleanUrl = String(wallpaperUrl).replace(/[\n\r\t]/g, '');
+    const cleanUrl = rawUrl;
 
-    if (!isSvg && typeof Image !== 'undefined') {
+    if (!isSvg && cleanUrl && typeof Image !== 'undefined') {
       const pre = new Image();
       pre.decoding = 'async';
       pre.src = cleanUrl;

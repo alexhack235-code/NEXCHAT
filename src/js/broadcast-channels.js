@@ -319,49 +319,30 @@
         /* Channels Engine Modal & Feed Styles */
 
         .channels-modal-overlay {
-
           position: fixed;
-
           top: 0;
-
           left: 0;
-
           right: 0;
-
           bottom: 0;
-
           background: rgba(11, 20, 26, 0.88);
-
           backdrop-filter: blur(8px);
-
           -webkit-backdrop-filter: blur(8px);
-
           z-index: 10005;
-
-          display: flex;
-
+          display: none;
+          visibility: hidden;
           align-items: center;
-
           justify-content: center;
-
           padding: 14px;
-
           opacity: 0;
-
           pointer-events: none;
-
           transition: opacity 0.22s ease;
-
           box-sizing: border-box;
-
         }
-
         .channels-modal-overlay.open {
-
+          display: flex;
+          visibility: visible;
           opacity: 1;
-
           pointer-events: auto;
-
         }
 
         .channels-modal-card {

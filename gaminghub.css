@@ -750,6 +750,28 @@ body {
   box-shadow: 0 6px 20px rgba(0, 242, 255, 0.45);
 }
 
+@media (max-width: 600px) {
+  .ea-form {
+    flex-direction: column;
+    width: 100%;
+  }
+  .ea-input-wrapper {
+    min-width: 0 !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .ea-submit-btn {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+    padding: 12px 14px;
+    font-size: 12px;
+    box-sizing: border-box;
+  }
+}
+
 /* Confirmed Card */
 .ea-confirmed-card {
   display: flex;

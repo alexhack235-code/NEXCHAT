@@ -425,6 +425,12 @@
       }
 
       // Close store modal
+      const storeModalEl = document.getElementById('stickerStoreModal');
+      if (storeModalEl) {
+        storeModalEl.addEventListener('click', (e) => {
+          if (e.target === storeModalEl) this.closeStoreModal();
+        });
+      }
       const closeStoreBtn = document.getElementById('closeStickerStoreBtn');
       if (closeStoreBtn) {
         closeStoreBtn.addEventListener('click', () => this.closeStoreModal());

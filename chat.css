@@ -2307,20 +2307,33 @@ body.light-theme .groups-header {
 }
 
 /* Toast Notifications Container */
+#notificationContainer,
 .notification-container {
-  position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 16px);
-  bottom: auto;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 32px);
-  max-width: 420px;
+  position: fixed !important;
+  top: calc(env(safe-area-inset-top, 0px) + 14px) !important;
+  bottom: auto !important;
+  left: 12px !important;
+  right: 12px !important;
+  transform: none !important;
+  width: auto !important;
+  max-width: 420px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
   z-index: 100050 !important;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  pointer-events: none;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  pointer-events: none !important;
+}
+
+#notificationContainer > .notification,
+.notification-container > .nex-toast {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+  word-break: break-word !important;
 }
 
 .nex-toast {
@@ -19613,24 +19626,23 @@ body,
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    height: 60px !important;
     min-height: 60px !important;
-    padding: 0 16px !important;
+    height: auto !important;
+    padding: 6px 16px !important;
     background: rgba(15, 10, 30, 0.95) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     z-index: 5 !important;
   }
 
-  /* Toast Notifications: Centered on screen */
+  /* Toast Notifications: Centered cleanly inside all viewports */
+  #notificationContainer,
   .notification-container {
-    position: fixed !important;
-    top: 20px !important;
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
+    left: 12px !important;
+    right: 12px !important;
+    transform: none !important;
+    width: auto !important;
     max-width: 420px !important;
-    width: calc(100% - 32px) !important;
-    z-index: 100050 !important;
+    margin: 0 auto !important;
   }
 }
 

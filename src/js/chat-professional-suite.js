@@ -105,9 +105,11 @@
       });
 
       headerText.style.display = 'flex';
-      headerText.style.alignItems = 'center';
-      headerText.style.flexWrap = 'wrap';
-      headerText.style.gap = '6px';
+      headerText.style.flexDirection = 'column';
+      headerText.style.justifyContent = 'center';
+      headerText.style.gap = '1px';
+      bar.style.marginTop = '1px';
+      bar.style.lineHeight = '1.1';
       headerText.appendChild(bar);
     }
 

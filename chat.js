@@ -2649,6 +2649,10 @@ let cleanMsg = String(msg || '')
 if (cleanMsg.toLowerCase().startsWith('new message from')) {
     return;
   }
+// Do not flash scary permission toasts while Firebase Auth is signed out or initializing
+if (cleanMsg.toLowerCase().includes('insufficient permissions') && !(typeof auth !== 'undefined' && auth && auth.currentUser)) {
+    return;
+  }
 // Anti-spam throttle: prevent identical toast storms (max 1 per 4s)
 const dedupeKey = `${type}:${cleanMsg.toLowerCase()}`;
 const now = Date.now();
@@ -3972,6 +3976,12 @@ function showChatListView() {
     if (themeModal) themeModal.style.display = 'none';
     const profilePicMod = document.getElementById('profilePicModal');
     if (profilePicMod) profilePicMod.style.display = 'none';
+    const stickerStoreMod = document.getElementById('stickerStoreModal');
+    if (stickerStoreMod) stickerStoreMod.style.display = 'none';
+    const stickerStudioMod = document.getElementById('stickerStudioModal');
+    if (stickerStudioMod) stickerStudioMod.style.display = 'none';
+    const emojiPickEl = document.getElementById('emoji-picker');
+    if (emojiPickEl) emojiPickEl.style.display = 'none';
     const sleepBanner = document.getElementById('sleepProtocolBanner');
     if (sleepBanner) sleepBanner.style.setProperty('display', 'none', 'important');
   } catch (_) {}
@@ -4318,8 +4328,12 @@ moreSheet.setAttribute("aria-hidden", "false");
     }
 return;
   }
-// Dismiss any active sheets when switching views
+// Dismiss any active sheets or transient pickers when switching views
 document.getElementById("mobileMoreSheet")?.classList.remove("open");
+['stickerStoreModal', 'stickerStudioModal', 'emoji-picker'].forEach((id) => {
+  const m = document.getElementById(id);
+  if (m) m.style.display = 'none';
+});
 // Cleanly restore layout when switching sections
 document.body.classList.remove('in-conversation');
 syncBottomNavActiveTab(section);
@@ -4359,6 +4373,7 @@ chatDetailView.style.setProperty("display", "none", "important");
 if (statusContainer) {
     statusContainer.style.removeProperty("display");
 if (section === "status" || section === "updates") {
+      statusContainer.classList.remove("hidden");
       statusContainer.style.setProperty("display", "flex", "important");
     } else {
       statusContainer.style.setProperty("display", "none", "important");
@@ -4367,6 +4382,7 @@ if (section === "status" || section === "updates") {
 if (groupsContainer) {
     groupsContainer.style.removeProperty("display");
 if (section === "communities" || section === "groups") {
+      groupsContainer.classList.remove("hidden");
       groupsContainer.style.setProperty("display", "flex", "important");
     } else {
       groupsContainer.style.setProperty("display", "none", "important");
@@ -4375,6 +4391,7 @@ if (section === "communities" || section === "groups") {
 if (announcementsContainer) {
     announcementsContainer.style.removeProperty("display");
 if (section === "announcements") {
+      announcementsContainer.classList.remove("hidden");
       announcementsContainer.style.setProperty("display", "flex", "important");
     } else {
       announcementsContainer.style.setProperty("display", "none", "important");
@@ -4383,6 +4400,7 @@ if (section === "announcements") {
 if (callHistoryContainer) {
     callHistoryContainer.style.removeProperty("display");
 if (section === "calls") {
+      callHistoryContainer.classList.remove("hidden");
       callHistoryContainer.style.setProperty("display", "block", "important");
     } else {
       callHistoryContainer.style.setProperty("display", "none", "important");

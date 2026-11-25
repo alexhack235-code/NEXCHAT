@@ -7178,18 +7178,44 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   #reelsExtHubBtn {
     display: none !important;
   }
+  .reels-header-left {
+    flex: 0 0 auto !important;
+    min-width: 36px !important;
+  }
+  .reels-header-center {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  .reels-feed-tabs {
+    gap: 8px !important;
+  }
+  .feed-tab-btn {
+    font-size: 14px !important;
+    white-space: nowrap !important;
+  }
   .reels-header-right {
-    gap: 6px !important;
-    max-width: calc(100% - 90px) !important;
+    gap: 5px !important;
+    flex: 0 0 auto !important;
+    max-width: none !important;
     justify-content: flex-end !important;
+  }
+  .reels-header-icon-btn,
+  .reels-header-back-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    font-size: 14px !important;
+    flex-shrink: 0 !important;
   }
   .reels-header {
     padding: 0 10px !important;
     padding-top: env(safe-area-inset-top, 0px) !important;
     height: calc(52px + env(safe-area-inset-top, 0px)) !important;
+    width: 100% !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
-    overflow-x: hidden !important;
+    overflow: hidden !important;
   }
 }
 
@@ -8453,4 +8479,41 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   left: 0 !important;
   right: 0 !important;
   z-index: 20 !important;
+}
+
+@media (max-width: 768px) {
+  .reels-header {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 0 8px !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+  .reels-header-left,
+  .reels-header-right {
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+    gap: 5px !important;
+  }
+  .reels-header-center {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  .reels-feed-tabs {
+    gap: 8px !important;
+  }
+  .feed-tab-btn {
+    font-size: 13.5px !important;
+    white-space: nowrap !important;
+  }
+  .reels-header-back-btn,
+  .reels-header-icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    font-size: 13.5px !important;
+    flex-shrink: 0 !important;
+  }
 }

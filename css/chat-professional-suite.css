@@ -2670,7 +2670,11 @@ body.privacy-shield-active .chat-header {
   transition: background 0.2s ease, backdrop-filter 0.2s ease;
 }
 
-.messages-area > * {
+.messages-area > .messages-list,
+.messages-area > .empty-state,
+.messages-area > .nex-welcome-stage,
+.messages-area > .message-wrapper,
+.messages-area > .nex-group-chat-wrapper {
   position: relative;
   z-index: 2;
 }
