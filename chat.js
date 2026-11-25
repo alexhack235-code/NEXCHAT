@@ -19834,6 +19834,13 @@ mediaType: (d.mediaType === 'video' || (typeof d.mediaType === 'string' && d.med
                 ? 'audio'
                 : (d.mediaType === 'code' || d.type === 'code' ? 'code' : ((d.imageUrl || d.mediaUrl) ? 'image' : 'text'))),
 gradient: d.gradient || null,
+filter: d.filter || 'none',
+fontFamily: d.fontFamily || null,
+textAlign: d.textAlign || null,
+codeContent: d.codeContent || null,
+codeLanguage: d.codeLanguage || null,
+isMuted: Boolean(d.isMuted),
+musicTrack: d.musicTrack || null,
 caption: d.content || d.text || d.caption || '',
 timestamp: d.createdAtMs || (d.timestamp?.toMillis ? d.timestamp.toMillis() : now),
 expiresAtMs: expTime,
@@ -19923,7 +19930,7 @@ if (mins < 60) return `${mins}m ago`;
 if (hours < 24) return `${hours}h ago`;
 return 'Yesterday';
     };
-    const statusFeedSig = activeStoriesList.map(g => `${g.userId}:${g.lastUpdated}:${g.slides?.length || 0}:${g.isViewed ? '1' : '0'}`).join(';');
+    const statusFeedSig = activeStoriesList.map(g => `${g.userId}:${g.lastUpdated}:${g.slides?.length || 0}:${g.slides?.map(s => (s.id || '') + ':' + (s.musicTrack?.id || '')).join(',') || ''}:${g.isViewed ? '1' : '0'}`).join(';');
     if (window._lastStatusFeedSignature === statusFeedSig && horizontalFeed && horizontalFeed.childElementCount > 0) {
       return;
     }
@@ -20041,6 +20048,36 @@ function viewStatusGroup(groupIndex) {
   if (!activeStoriesList || activeStoriesList.length === 0) return;
 currentStoryGroupIndex = Math.max(0, Math.min(groupIndex, activeStoriesList.length - 1));
 currentStorySlideIndex = 0;
+  // Ensure creator music preview does not overlap Status Viewer
+  try { window.statusMusicPickerEngine?.stopPreviewPlayback(); } catch (_) {}
+  // Synchronously prime/unlock singleton viewer audio inside user tap gesture (critical for iOS WebKit)
+  const firstSlide = activeStoriesList[currentStoryGroupIndex]?.slides?.[0];
+  if (!firstSlide?.musicTrack?.previewUrl) {
+    try {
+      let viewerAudio = window._nexStatusViewerAudioEl || document.getElementById('statusViewerMusicAudioEl');
+      if (!viewerAudio) {
+        viewerAudio = new Audio();
+        viewerAudio.id = 'statusViewerMusicAudioEl';
+        viewerAudio.preload = 'auto';
+        viewerAudio.playsInline = true;
+        viewerAudio.setAttribute('playsinline', '');
+        viewerAudio.setAttribute('webkit-playsinline', '');
+        if (document.body && viewerAudio.parentNode !== document.body) {
+          document.body.appendChild(viewerAudio);
+        }
+        window._nexStatusViewerAudioEl = viewerAudio;
+      }
+      if (!viewerAudio.dataset.iosUnlocked) {
+        viewerAudio.dataset.iosUnlocked = 'true';
+        viewerAudio.muted = true;
+        viewerAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+        const p = viewerAudio.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => { try { viewerAudio.pause(); viewerAudio.muted = false; } catch (_) {} }).catch(() => {});
+        }
+      }
+    } catch (_) {}
+  }
 showCurrentStorySlide();
 }
 window.viewStatusGroup = viewStatusGroup;
@@ -20107,26 +20144,38 @@ cleanupStorySlide();
 // WhatsApp-Style Background Music Track Playback & Floating Sticker
 if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
   try {
-    let musicAudio = window._nexStatusViewerAudioEl;
+    try { window.statusMusicPickerEngine?.stopPreviewPlayback(); } catch (_) {}
+    let musicAudio = window._nexStatusViewerAudioEl || document.getElementById('statusViewerMusicAudioEl');
     if (!musicAudio) {
-      musicAudio = document.getElementById('statusViewerMusicAudioEl') || new Audio();
+      musicAudio = new Audio();
       musicAudio.id = 'statusViewerMusicAudioEl';
-      musicAudio.setAttribute('playsinline', '');
-      musicAudio.preload = 'auto';
       window._nexStatusViewerAudioEl = musicAudio;
     }
+    if (document.body && musicAudio.parentNode !== document.body) {
+      document.body.appendChild(musicAudio);
+    }
+    musicAudio.preload = 'auto';
+    musicAudio.playsInline = true;
+    musicAudio.setAttribute('playsinline', '');
+    musicAudio.setAttribute('webkit-playsinline', '');
+    window._nexStatusViewerAudioEl = musicAudio;
+
+    const targetUrl = currentSlide.musicTrack.previewUrl;
+    const isSameSrc = musicAudio.src === targetUrl;
     musicAudio.pause();
-    musicAudio.src = currentSlide.musicTrack.previewUrl;
-    musicAudio.currentTime = 0;
+    if (!isSameSrc) {
+      musicAudio.src = targetUrl;
+    } else if (musicAudio.readyState >= 1) {
+      try { musicAudio.currentTime = 0; } catch (_) {}
+    }
     musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
-    musicAudio.muted = false;
+    musicAudio.muted = Boolean(currentSlide.isMuted);
     musicAudio.loop = true;
-    musicAudio.play().catch(err => console.warn('[STATUS MUSIC] Playback notice:', err.message));
     window._statusViewerMusicAudio = musicAudio;
 
     const stage = document.getElementById('statusViewerStage');
+    let sticker = document.getElementById('statusViewerMusicStickerBadge');
     if (stage) {
-      let sticker = document.getElementById('statusViewerMusicStickerBadge');
       if (!sticker) {
         sticker = document.createElement('div');
         sticker.id = 'statusViewerMusicStickerBadge';
@@ -20142,10 +20191,50 @@ if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
         </div>
       `;
       sticker.style.display = 'flex';
+      sticker.style.cursor = 'pointer';
+      sticker.title = 'Tap to play/pause music';
+      if (!sticker.dataset.tapToggleBound) {
+        sticker.dataset.tapToggleBound = 'true';
+        sticker.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const el = window._nexStatusViewerAudioEl;
+          if (!el || !el.src) return;
+          const discIcon = sticker.querySelector('.music-sticker-disc-icon i');
+          if (el.paused) {
+            el.muted = false;
+            el.play().then(() => {
+              if (discIcon) discIcon.classList.add('fa-spin');
+              const mb = document.getElementById('statusViewerMuteBtn');
+              if (mb) mb.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+            }).catch(() => {});
+          } else {
+            el.pause();
+            if (discIcon) discIcon.classList.remove('fa-spin');
+          }
+        });
+      }
+    }
+
+    const discIcon = sticker?.querySelector('.music-sticker-disc-icon i');
+    const playPromise = musicAudio.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      playPromise.then(() => {
+        if (discIcon) discIcon.classList.add('fa-spin');
+      }).catch(err => {
+        console.warn('[STATUS MUSIC] Playback notice:', err.message);
+        if (discIcon) discIcon.classList.remove('fa-spin');
+      });
     }
   } catch (mErr) {
     console.warn('[STATUS MUSIC] Setup error:', mErr.message);
   }
+} else {
+  if (window._nexStatusViewerAudioEl) {
+    try { window._nexStatusViewerAudioEl.pause(); } catch (_) {}
+  }
+  window._statusViewerMusicAudio = null;
+  const existingMusicBadge = document.getElementById('statusViewerMusicStickerBadge');
+  if (existingMusicBadge) existingMusicBadge.style.display = 'none';
 }
 // Preload next slide media
 const nextSlide = currentGrp.slides?.[currentStorySlideIndex + 1];
@@ -20216,7 +20305,14 @@ if (muteBtn) {
     if (audioStage) audioStage.style.display = 'none';
     if (codeStage) codeStage.style.display = 'none';
     if (video) { video.pause(); video.style.display = 'none'; }
-    if (muteBtn) muteBtn.style.display = 'none';
+    if (muteBtn) {
+      const hasMusic = Boolean(currentSlide.musicTrack && currentSlide.musicTrack.previewUrl);
+      muteBtn.style.display = hasMusic ? 'flex' : 'none';
+      if (hasMusic) {
+        const ma = window._nexStatusViewerAudioEl;
+        muteBtn.innerHTML = (ma && ma.muted) ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+      }
+    }
     if (textSlide) textSlide.style.display = 'none';
 if (img) {
       img.style.display = 'block';
@@ -20227,7 +20323,14 @@ if (img) {
     if (audioStage) audioStage.style.display = 'none';
     if (codeStage) codeStage.style.display = 'none';
     if (video) video.style.display = 'none';
-    if (muteBtn) muteBtn.style.display = 'none';
+    if (muteBtn) {
+      const hasMusic = Boolean(currentSlide.musicTrack && currentSlide.musicTrack.previewUrl);
+      muteBtn.style.display = hasMusic ? 'flex' : 'none';
+      if (hasMusic) {
+        const ma = window._nexStatusViewerAudioEl;
+        muteBtn.innerHTML = (ma && ma.muted) ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+      }
+    }
     if (img) img.style.display = 'none';
 if (textSlide) {
       textSlide.style.display = 'flex';
@@ -20433,6 +20536,20 @@ window.NexStatusAudioStudio.startViewerSpectrumAnimation();
       }
     }
   }
+// 3. Attached background music pause / resume
+if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl && window._nexStatusViewerAudioEl) {
+    const musicEl = window._nexStatusViewerAudioEl;
+    const sticker = document.getElementById('statusViewerMusicStickerBadge');
+    const discIcon = sticker?.querySelector('.music-sticker-disc-icon i');
+    if (isStoryPaused) {
+      try { musicEl.pause(); } catch (_) {}
+      if (discIcon) discIcon.classList.remove('fa-spin');
+    } else if (!musicEl.muted) {
+      musicEl.play().then(() => {
+        if (discIcon) discIcon.classList.add('fa-spin');
+      }).catch(() => {});
+    }
+  }
 }
 function setupViewerControls() {
   const modal = document.getElementById('statusViewerModal');
@@ -20448,13 +20565,15 @@ function setupViewerControls() {
   const stage = document.getElementById('statusViewerStage');
 const closeViewer = () => {
     cleanupStorySlide();
-    if (window._statusViewerMusicAudio) {
-      try {
-        window._statusViewerMusicAudio.pause();
-        window._statusViewerMusicAudio.currentTime = 0;
-        window._statusViewerMusicAudio = null;
-      } catch (_) {}
-    }
+    [window._statusViewerMusicAudio, window._nexStatusViewerAudioEl].forEach((aEl) => {
+      if (aEl) {
+        try {
+          aEl.pause();
+          if (aEl.readyState >= 1) aEl.currentTime = 0;
+        } catch (_) {}
+      }
+    });
+    window._statusViewerMusicAudio = null;
     const musicBadge = document.getElementById('statusViewerMusicStickerBadge');
     if (musicBadge) {
       musicBadge.remove();
@@ -20496,16 +20615,44 @@ pauseBtn.onclick = (e) => {
 setStoryPaused(!isStoryPaused);
     };
   }
-// Video Sound Toggle
+// Video & Background Music Sound Toggle
 if (muteBtn && !muteBtn.dataset.hasListener) {
     muteBtn.dataset.hasListener = 'true';
 muteBtn.onclick = (e) => {
       e.stopPropagation();
       const video = document.getElementById('statusViewerVideo');
-if (video) {
+      const musicEl = window._nexStatusViewerAudioEl;
+      const currentSlide = activeStoriesList[currentStoryGroupIndex]?.slides?.[currentStorySlideIndex];
+      const hasVideo = currentSlide?.mediaType === 'video' && video;
+      const hasMusic = Boolean(currentSlide?.musicTrack?.previewUrl && musicEl);
+
+      let isMutedNow = true;
+      if (hasVideo) {
         video.muted = !video.muted;
-muteBtn.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+        isMutedNow = video.muted;
+        if (hasMusic) {
+          musicEl.muted = video.muted;
+          if (!musicEl.muted && musicEl.paused && !isStoryPaused) {
+            musicEl.play().catch(() => {});
+          }
+        }
+      } else if (hasMusic) {
+        musicEl.muted = !musicEl.muted;
+        isMutedNow = musicEl.muted;
+        const discIcon = document.querySelector('#statusViewerMusicStickerBadge .music-sticker-disc-icon i');
+        if (!musicEl.muted) {
+          if (musicEl.paused && !isStoryPaused) {
+            musicEl.play().then(() => {
+              if (discIcon) discIcon.classList.add('fa-spin');
+            }).catch(() => {});
+          } else if (discIcon) {
+            discIcon.classList.add('fa-spin');
+          }
+        } else if (discIcon) {
+          discIcon.classList.remove('fa-spin');
+        }
       }
+      muteBtn.innerHTML = isMutedNow ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
     };
   }
 // Delete status update (Own status)
@@ -20961,8 +21108,12 @@ const audioCaption = document.getElementById('statusAudioCaptionInput');
   const dropZoneEl = document.getElementById('statusMediaDropZone');
   if (dropZoneEl) dropZoneEl.classList.remove('has-preview');
   if (window.statusMusicPickerEngine) {
-    window.statusMusicPickerEngine.stopPreviewPlayback();
-    window.statusMusicPickerEngine.currentTrack = null;
+    if (typeof window.statusMusicPickerEngine.reset === 'function') {
+      window.statusMusicPickerEngine.reset();
+    } else {
+      window.statusMusicPickerEngine.stopPreviewPlayback();
+      window.statusMusicPickerEngine.selectedTrack = null;
+    }
   }
   const musicSticker = document.getElementById('statusAttachedMusicSticker');
   if (musicSticker) {
@@ -21395,6 +21546,7 @@ if (myCircle) myCircle.classList.add('has-status');
 playLuxuryChimeSound();
 showNotif('Status update published! Disappears in 24 hours.', 'success', 3500);
 closeCreateStatusModal();
+window._lastStatusFeedSignature = null;
 loadStatusFeed();
     } catch (err) {
       console.error('[STATUS] Publish error:', err);

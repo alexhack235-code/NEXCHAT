@@ -10870,11 +10870,20 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
     <!-- Category Filter Pills -->
     <div class="music-picker-genre-pills">
       <button type="button" class="music-genre-pill active" data-genre="top hits">Top Hits</button>
+      <button type="button" class="music-genre-pill" data-genre="trending">Trending</button>
       <button type="button" class="music-genre-pill" data-genre="afrobeats">Afrobeats</button>
-      <button type="button" class="music-genre-pill" data-genre="pop">Pop</button>
+      <button type="button" class="music-genre-pill" data-genre="amapiano">Amapiano</button>
       <button type="button" class="music-genre-pill" data-genre="hip hop">Hip-Hop</button>
       <button type="button" class="music-genre-pill" data-genre="r&b">R&B</button>
+      <button type="button" class="music-genre-pill" data-genre="pop">Pop</button>
+      <button type="button" class="music-genre-pill" data-genre="dancehall">Dancehall</button>
+      <button type="button" class="music-genre-pill" data-genre="latin">Latin</button>
+      <button type="button" class="music-genre-pill" data-genre="gospel">Gospel</button>
+      <button type="button" class="music-genre-pill" data-genre="edm">EDM</button>
+      <button type="button" class="music-genre-pill" data-genre="rock">Rock</button>
+      <button type="button" class="music-genre-pill" data-genre="lofi">Lo-Fi</button>
       <button type="button" class="music-genre-pill" data-genre="chill">Chill</button>
+      <button type="button" class="music-genre-pill" data-genre="jazz">Jazz</button>
       <button type="button" class="music-genre-pill" data-genre="cinematic">Cinematic</button>
     </div>
 
@@ -10885,11 +10894,11 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
         <span>Loading trending music...</span>
       </div>
     </div>
-
-    <!-- Hidden Audio Preview Player -->
-    <audio id="statusMusicPreviewPlayer" preload="none"></audio>
   </div>
 </div>
+
+<!-- Persistent Audio Preview Player (kept outside display:none modal so iOS/WebKit never suspends playback) -->
+<audio id="statusMusicPreviewPlayer" preload="auto" playsinline webkit-playsinline></audio>
 
 <!-- FLOATING CYBER-FAB FOR MOBILE GLOBAL DROP -->
 <button id="globalDropMobileFab" class="global-drop-mobile-fab" title="Transmit Drop">

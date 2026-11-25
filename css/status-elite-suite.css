@@ -2831,6 +2831,7 @@
 }
 
 .music-picker-header {
+  flex-shrink: 0;
   padding: 16px 20px 12px 20px;
   display: flex;
   align-items: center;
@@ -2872,6 +2873,7 @@
 }
 
 .music-picker-search-bar {
+  flex-shrink: 0;
   position: relative;
   margin: 12px 18px 8px 18px;
   display: flex;
@@ -2914,10 +2916,14 @@
 }
 
 .music-picker-genre-pills {
+  flex-shrink: 0 !important;
+  min-height: 48px;
   display: flex;
+  align-items: center;
   gap: 8px;
-  padding: 6px 18px 10px 18px;
+  padding: 8px 18px 12px 18px;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -2927,9 +2933,14 @@
 }
 
 .music-genre-pill {
-  flex-shrink: 0;
+  flex-shrink: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  line-height: 1.25;
   white-space: nowrap;
-  padding: 5px 14px;
+  padding: 6px 14px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
