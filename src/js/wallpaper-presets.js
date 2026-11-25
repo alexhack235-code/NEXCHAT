@@ -34,6 +34,18 @@ const SVG_HEX_MESH = toSvgDataUri('<svg xmlns="http://www.w3.org/2000/svg" width
 // Classic Doodle & Solid Color Presets
 export const CLASSIC_PRESETS = [
   {
+    id: 'obsidian_futuristic_glass',
+    name: 'Obsidian Glass Architecture',
+    genre: 'abstract',
+    category: 'Abstract',
+    type: 'image',
+    url: './assets/images/chatlist-futuristic-bg.jpg',
+    thumbnailUrl: './assets/images/chatlist-futuristic-bg.jpg',
+    previewBg: '#060c14',
+    accentColor: '#00ff88',
+    description: 'Mature dark carbon & volumetric liquid-glass architectural backdrop.'
+  },
+  {
     id: 'classic_encrypted_doodle',
     name: 'Classic Encrypted Doodle',
     genre: 'doodles',
@@ -136,6 +148,53 @@ export const SAFE_WALLPAPER_PRESETS = WALLPAPER_PRESETS.filter(p => {
   return !str.includes("');") && !str.includes('--') && !str.includes('<script');
 });
 
+const _wallpaperDecodedCache = new Set();
+
+async function decodeWallpaperEager(url) {
+  if (!url || typeof url !== 'string') return false;
+  if (url.startsWith('data:image/svg') || url.startsWith('data:image/') || _wallpaperDecodedCache.has(url)) {
+    return true;
+  }
+  if (typeof Image === 'undefined') return true;
+  return new Promise((resolve) => {
+    const img = new Image();
+    try { img.fetchPriority = 'high'; } catch (_) {}
+    img.decoding = 'sync';
+    img.onload = async () => {
+      try { if (typeof img.decode === 'function') await img.decode(); } catch (_) {}
+      _wallpaperDecodedCache.add(url);
+      resolve(true);
+    };
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+}
+
+async function compressWallpaperFast(file, maxDim = 1600, quality = 0.84) {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = reject;
+      el.src = objectUrl;
+    });
+    const w = img.naturalWidth || img.width || 1080;
+    const h = img.naturalHeight || img.height || 1080;
+    const scale = Math.min(1, maxDim / Math.max(w, h));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(w * scale));
+    canvas.height = Math.max(1, Math.round(h * scale));
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+    _wallpaperDecodedCache.add(dataUrl);
+    return dataUrl;
+  } finally {
+    try { URL.revokeObjectURL(objectUrl); } catch (_) {}
+  }
+}
+
 /**
  * Applies a wallpaper to the active chat screen and messages container.
  */
@@ -147,21 +206,7 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
   const messagesArea = document.getElementById('messages-area');
   const chatDetail = document.getElementById('chatDetailView');
 
-  if (wallpaperUrl) {
-    let rawUrl = String(wallpaperUrl).replace(/[\n\r\t]/g, '').trim();
-    const wrappedMatch = rawUrl.match(/^url\((['"]?)(.*?)\1\)$/i);
-    if (wrappedMatch && wrappedMatch[2]) rawUrl = wrappedMatch[2].trim();
-    const isSvg = rawUrl.startsWith('data:image/svg');
-    const bgSize = isSvg ? 'auto' : 'cover';
-    const bgRepeat = isSvg ? 'repeat' : 'no-repeat';
-    const cleanUrl = rawUrl;
-
-    if (!isSvg && cleanUrl && typeof Image !== 'undefined') {
-      const pre = new Image();
-      pre.decoding = 'async';
-      pre.src = cleanUrl;
-    }
-
+  const commitWallpaperToDom = (cleanUrl, bgSize, bgRepeat, isSvg) => {
     document.documentElement.style.setProperty('--chat-wallpaper', `url("${cleanUrl}")`);
     document.documentElement.style.setProperty('--chat-wallpaper-size', bgSize);
     document.documentElement.style.setProperty('--chat-wallpaper-repeat', bgRepeat);
@@ -187,6 +232,30 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
     if (app) {
       app.setAttribute('data-custom-bg', 'true');
     }
+  };
+
+  if (wallpaperUrl) {
+    let rawUrl = String(wallpaperUrl).replace(/[\n\r\t]/g, '').trim();
+    const wrappedMatch = rawUrl.match(/^url\((['"]?)(.*?)\1\)$/i);
+    if (wrappedMatch && wrappedMatch[2]) rawUrl = wrappedMatch[2].trim();
+    const isSvg = rawUrl.startsWith('data:image/svg');
+    const bgSize = isSvg ? 'auto' : 'cover';
+    const bgRepeat = isSvg ? 'repeat' : 'no-repeat';
+    const cleanUrl = rawUrl;
+
+    // Instant paint for SVG, DataURLs, or already-decoded cached wallpapers (zero lazy flash)
+    if (isSvg || cleanUrl.startsWith('data:image/') || _wallpaperDecodedCache.has(cleanUrl)) {
+      commitWallpaperToDom(cleanUrl, bgSize, bgRepeat, isSvg);
+      return;
+    }
+
+    // Apply immediately so the user gets responsive state, while decoding at high priority
+    commitWallpaperToDom(cleanUrl, bgSize, bgRepeat, isSvg);
+    decodeWallpaperEager(cleanUrl).then((ok) => {
+      if (ok && (document.documentElement.style.getPropertyValue('--chat-wallpaper') || '').includes(cleanUrl)) {
+        commitWallpaperToDom(cleanUrl, bgSize, bgRepeat, isSvg);
+      }
+    });
   } else if (solidColor) {
     if (app) {
       app.style.backgroundImage = 'none';
@@ -228,6 +297,21 @@ export function applyActiveWallpaper(wallpaperUrl, solidColor = null) {
  * Saves and applies a wallpaper across Firestore and localStorage.
  */
 export async function setWallpaper(wallpaperUrl, scope = 'chat', chatId = null, chatType = 'direct', myUID = null, db = null) {
+  if (scope === 'chatlist') {
+    if (window.NexChatExperienceStudio && typeof window.NexChatExperienceStudio.applyChatListWallpaper === 'function') {
+      await window.NexChatExperienceStudio.applyChatListWallpaper(wallpaperUrl);
+      if (localStorage.getItem('nex_chatlist_theme') === 'none' || !localStorage.getItem('nex_chatlist_theme')) {
+        window.NexChatExperienceStudio.applyChatListTheme?.('telegram-glass');
+      }
+    } else {
+      try {
+        localStorage.setItem('nex_chatlist_bg', wallpaperUrl);
+        localStorage.removeItem('nex_chatlist_bg_cleared');
+      } catch (_) {}
+    }
+    return;
+  }
+
   applyActiveWallpaper(wallpaperUrl);
 
   // Always persist as global fallback so all chats & reload have it
@@ -274,6 +358,18 @@ export async function setWallpaper(wallpaperUrl, scope = 'chat', chatId = null, 
  * Removes custom wallpaper and restores system default.
  */
 export async function removeWallpaper(scope = 'chat', chatId = null, chatType = 'direct', myUID = null, db = null) {
+  if (scope === 'chatlist') {
+    if (window.NexChatExperienceStudio && typeof window.NexChatExperienceStudio.applyChatListWallpaper === 'function') {
+      await window.NexChatExperienceStudio.applyChatListWallpaper(null);
+    } else {
+      try {
+        localStorage.removeItem('nex_chatlist_bg');
+        localStorage.setItem('nex_chatlist_bg_cleared', 'true');
+      } catch (_) {}
+    }
+    return;
+  }
+
   if (scope === 'chat' && chatId) {
     localStorage.removeItem(`chat_bg_${chatId}`);
     if (db && myUID) {
@@ -318,6 +414,7 @@ export function openWallpaperModal(options = {}) {
     chatId = null,
     chatName = 'Active Chat',
     chatType = 'direct',
+    scope = null,
     myUID = null,
     db = null,
     onUploadCustom = null,
@@ -330,9 +427,10 @@ export function openWallpaperModal(options = {}) {
   }
 
   const currentChatBg = chatId ? localStorage.getItem(`chat_bg_${chatId}`) : null;
+  const currentChatListBg = localStorage.getItem('nex_chatlist_bg');
   const currentGlobalBg = localStorage.getItem('nexchat_background');
-  let selectedUrl = currentChatBg || currentGlobalBg || (SAFE_WALLPAPER_PRESETS[0] ? SAFE_WALLPAPER_PRESETS[0].url : '');
-  let selectedScope = chatId ? 'chat' : 'global';
+  let selectedScope = scope === 'chatlist' ? 'chatlist' : (scope || (chatId ? 'chat' : 'global'));
+  let selectedUrl = (selectedScope === 'chatlist' ? currentChatListBg : currentChatBg) || currentGlobalBg || (SAFE_WALLPAPER_PRESETS[0] ? SAFE_WALLPAPER_PRESETS[0].url : '');
   let activeGenre = 'all';
 
   const modal = document.createElement('div');
@@ -448,6 +546,7 @@ export function openWallpaperModal(options = {}) {
       
       .wp-scope-switch {
         display: flex;
+        flex-wrap: wrap;
         background: rgba(255,255,255,0.04);
         padding: 4px;
         border-radius: 10px;
@@ -455,8 +554,8 @@ export function openWallpaperModal(options = {}) {
         border: 1px solid rgba(255,255,255,0.06);
       }
       .wp-scope-btn {
-        flex: 1;
-        padding: 8px 12px;
+        flex: 1 1 110px;
+        padding: 8px 10px;
         background: transparent;
         border: none;
         color: #94a3b8;
@@ -646,15 +745,18 @@ export function openWallpaperModal(options = {}) {
           </div>
         </div>
 
-        <!-- Scope Selection (This Chat vs All Chats) -->
+        <!-- Scope Selection (This Chat vs All Chats vs Chat List) -->
         <div>
           <div style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Apply To Scope</div>
           <div class="wp-scope-switch">
             <button type="button" class="wp-scope-btn ${selectedScope === 'chat' ? 'active' : ''}" id="wpScopeChatBtn">
-              <i class="fa-solid fa-comment"></i> This Chat Only (${escapeHTML(chatName)})
+              <i class="fa-solid fa-comment"></i> This Chat (${escapeHTML(chatName)})
             </button>
             <button type="button" class="wp-scope-btn ${selectedScope === 'global' ? 'active' : ''}" id="wpScopeGlobalBtn">
-              <i class="fa-solid fa-globe"></i> All Chats (Default)
+              <i class="fa-solid fa-globe"></i> All Chats
+            </button>
+            <button type="button" class="wp-scope-btn ${selectedScope === 'chatlist' ? 'active' : ''}" id="wpScopeChatListBtn">
+              <i class="fa-solid fa-layer-group"></i> Chat List
             </button>
           </div>
         </div>
@@ -768,63 +870,68 @@ export function openWallpaperModal(options = {}) {
   // Scope switcher
   const scopeChatBtn = document.getElementById('wpScopeChatBtn');
   const scopeGlobalBtn = document.getElementById('wpScopeGlobalBtn');
-  scopeChatBtn?.addEventListener('click', () => {
-    selectedScope = 'chat';
-    scopeChatBtn.classList.add('active');
-    scopeGlobalBtn.classList.remove('active');
-  });
-  scopeGlobalBtn?.addEventListener('click', () => {
-    selectedScope = 'global';
-    scopeGlobalBtn.classList.add('active');
-    scopeChatBtn.classList.remove('active');
-  });
+  const scopeChatListBtn = document.getElementById('wpScopeChatListBtn');
+  const setScopeUi = (sc) => {
+    selectedScope = sc;
+    scopeChatBtn?.classList.toggle('active', sc === 'chat');
+    scopeGlobalBtn?.classList.toggle('active', sc === 'global');
+    scopeChatListBtn?.classList.toggle('active', sc === 'chatlist');
+  };
+  scopeChatBtn?.addEventListener('click', () => setScopeUi('chat'));
+  scopeGlobalBtn?.addEventListener('click', () => setScopeUi('global'));
+  scopeChatListBtn?.addEventListener('click', () => setScopeUi('chatlist'));
 
-  // Custom Upload Handler (Vercel Blob Primary)
+  // Custom Upload Handler (0ms instant local decode + background cloud persistence)
   const customInput = document.getElementById('wpCustomUploadInput');
   customInput?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    showNotif('Uploading wallpaper to Vercel Blob store...', 'info');
-
     try {
-      let uploadedUrl = null;
+      // 1. Instant 0ms local compressed preview & decode so switching chats never lazy-loads
+      let instantDataUrl = null;
+      try {
+        instantDataUrl = await compressWallpaperFast(file, 1440, 0.84);
+        selectedUrl = instantDataUrl;
+        refreshPreview();
+        if (selectedScope === 'chatlist') {
+          window.NexChatExperienceStudio?.applyChatListWallpaper?.(instantDataUrl);
+        } else {
+          applyActiveWallpaper(instantDataUrl);
+        }
+      } catch (_) {}
 
-      // 1. Primary: onUploadCustom (uses NEXCHAT Vercel Blob vaults)
+      let uploadedUrl = instantDataUrl;
+
+      // 2. Upload high-res in cloud in background so multi-device sync persists
       if (typeof onUploadCustom === 'function') {
         try {
-          uploadedUrl = await onUploadCustom(file);
+          const remote = await onUploadCustom(file);
+          if (remote) {
+            await decodeWallpaperEager(remote);
+            uploadedUrl = remote;
+          }
         } catch (bErr) {
-          console.warn('[WALLPAPER] Vercel Blob upload notice:', bErr?.message || bErr);
+          console.warn('[WALLPAPER] Remote upload notice:', bErr?.message || bErr);
         }
       }
 
-      // 2. Secondary fallback: Cloudinary
       if (!uploadedUrl) {
         try {
           const cRes = await uploadImageToCloudinary(file, { folder: 'nexchat-wallpapers' });
           if (cRes && (cRes.secure_url || cRes.url)) {
             uploadedUrl = cRes.secure_url || cRes.url;
+            await decodeWallpaperEager(uploadedUrl);
           }
         } catch (cErr) {
           console.warn('[WALLPAPER] Cloudinary fallback notice:', cErr?.message || cErr);
         }
       }
 
-      // 3. Last resort fallback: local FileReader
-      if (!uploadedUrl) {
-        uploadedUrl = await new Promise((res, rej) => {
-          const reader = new FileReader();
-          reader.onload = (re) => res(re.target.result);
-          reader.onerror = rej;
-          reader.readAsDataURL(file);
-        });
-      }
-
       if (uploadedUrl) {
         selectedUrl = uploadedUrl;
         refreshPreview();
-        showNotif('Wallpaper uploaded! Click "Set Wallpaper" to apply.', 'success');
+        showNotif('Wallpaper ready! Tap "Set Wallpaper" to lock it in.', 'success');
       }
     } catch (err) {
       console.error('Wallpaper upload failed:', err);
@@ -853,10 +960,32 @@ export function openWallpaperModal(options = {}) {
   });
 }
 
-// Auto-apply persisted wallpaper on startup
+// Auto-apply & warm-decode persisted wallpapers on startup (eliminates lazy loading when switching chats)
 document.addEventListener('DOMContentLoaded', () => {
   try {
     const saved = localStorage.getItem('nexchat_background');
     if (saved) applyActiveWallpaper(saved);
+
+    // Warm-decode per-chat custom wallpapers and top presets during idle time
+    const warmQueue = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('chat_bg_')) {
+        const val = localStorage.getItem(k);
+        if (val) warmQueue.push(val);
+      }
+    }
+    SAFE_WALLPAPER_PRESETS.slice(0, 8).forEach((p) => {
+      if (p.thumbnailUrl) warmQueue.push(p.thumbnailUrl);
+      if (p.url) warmQueue.push(p.url);
+    });
+    const runWarm = () => {
+      warmQueue.forEach((u) => { decodeWallpaperEager(u); });
+    };
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(runWarm, { timeout: 1500 });
+    } else {
+      setTimeout(runWarm, 250);
+    }
   } catch (_) {}
 });

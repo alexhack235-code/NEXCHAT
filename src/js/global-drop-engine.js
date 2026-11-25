@@ -435,14 +435,18 @@ class GlobalDropEngine {
       item.className = 'x-preview-item global-drop-media-preview-item';
 
       const fileUrl = URL.createObjectURL(file);
-      if (file.type.startsWith('video/')) {
+      if (this._isVideoFile(file)) {
         const vid = document.createElement('video');
         vid.src = fileUrl;
+        vid.controls = true;
         vid.muted = true;
         vid.playsInline = true;
-        vid.autoplay = true;
+        vid.setAttribute('playsinline', '');
+        vid.setAttribute('webkit-playsinline', '');
+        vid.preload = 'auto';
         vid.loop = true;
         item.appendChild(vid);
+        vid.play().catch(() => {});
       } else {
         const img = document.createElement('img');
         img.src = fileUrl;
@@ -779,35 +783,35 @@ class GlobalDropEngine {
       let detectedMediaType = 'none';
 
       for (const file of this.selectedMediaFiles) {
+        const isVideo = this._isVideoFile(file);
         try {
-          const isVideo = file.type && file.type.startsWith('video/');
-          const timeoutDuration = isVideo ? 60000 : 12000;
+          const timeoutDuration = isVideo ? 120000 : 18000;
           const uploadPromise = uploadAnyMedia(file, { folder: 'global_drops', uid, preferImageKit: true });
           const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Media upload timed out')), timeoutDuration));
           const res = await Promise.race([uploadPromise, timeoutPromise]).catch(async (err) => {
             console.warn('[GLOBAL DROP] Media upload timed out or failed, using client fallback:', err);
-            if (file.type && file.type.startsWith('image/')) {
+            if (!isVideo && file.type && file.type.startsWith('image/')) {
               const fallbackUrl = await compressImageToDataUrl(file);
-              return { url: fallbackUrl, downloadUrl: fallbackUrl };
-            } else if (isVideo) {
-              const fallbackUrl = URL.createObjectURL(file);
               return { url: fallbackUrl, downloadUrl: fallbackUrl };
             }
             throw err;
           });
           const url = res?.url || res?.downloadUrl;
-          if (url) {
-            mediaUrls.push({
-              url: url,
-              type: file.type.startsWith('video/') ? 'video' : 'image',
-              name: file.name
-            });
-            if (file.type.startsWith('video/')) detectedMediaType = 'video';
-            else if (detectedMediaType !== 'video') detectedMediaType = 'image';
+          if (!url || url.startsWith('blob:') || (isVideo && url.startsWith('data:') && url.length > 750000)) {
+            throw new Error(isVideo
+              ? 'Video upload failed across cloud vaults or exceeded inline fallback size. Please check connection and retry.'
+              : 'Media upload returned an invalid temporary URL.');
           }
+          mediaUrls.push({
+            url: url,
+            type: isVideo ? 'video' : 'image',
+            name: file.name || (isVideo ? 'drop_video.mp4' : 'drop_image.jpg')
+          });
+          if (isVideo) detectedMediaType = 'video';
+          else if (detectedMediaType !== 'video') detectedMediaType = 'image';
         } catch (mErr) {
           console.error('[GLOBAL DROP] Media vault error:', mErr);
-          if (file.type && file.type.startsWith('image/')) {
+          if (!isVideo && file.type && file.type.startsWith('image/')) {
             try {
               const fallbackUrl = await compressImageToDataUrl(file);
               if (fallbackUrl) {
@@ -819,14 +823,8 @@ class GlobalDropEngine {
                 if (detectedMediaType !== 'video') detectedMediaType = 'image';
               }
             } catch (_) {}
-          } else if (file.type && file.type.startsWith('video/')) {
-            const fallbackUrl = URL.createObjectURL(file);
-            mediaUrls.push({
-              url: fallbackUrl,
-              type: 'video',
-              name: file.name
-            });
-            detectedMediaType = 'video';
+          } else {
+            throw new Error(mErr?.message || 'Could not upload video to media vault. Please retry.');
           }
         }
       }
@@ -864,6 +862,8 @@ class GlobalDropEngine {
       const tenureInfo = this.calculateUserRankAndTenure(userJoinedAt);
       const authorLoc = this.activeDropLocation?.city || this.activeDropLocation?.label || this.userLocation?.city || null;
 
+      const firstRemoteVideo = mediaUrls.find(m => m.type === 'video' && /^https?:\/\//i.test(m.url) && m.url.length <= 2048)?.url || null;
+
       // 5. Build Drop Document Payload
       const dropDoc = {
         authorId: uid,
@@ -878,6 +878,7 @@ class GlobalDropEngine {
         authorJoinedAtMs: userJoinedAt,
         content: content,
         location: this.activeDropLocation || null,
+        videoUrl: firstRemoteVideo,
         mediaUrls: mediaUrls.map(m => m.url),
         mediaItems: mediaUrls,
         mediaType: detectedMediaType,
@@ -1366,29 +1367,120 @@ class GlobalDropEngine {
 
       // Event Listeners for actions
       this.bindCardActions(card, drop);
+      this.hydrateDropVideos(card);
       container.appendChild(card);
     });
   }
 
-  buildMediaGridHtml(drop) {
-    const urls = Array.isArray(drop.mediaUrls) ? drop.mediaUrls : [];
-    if (!urls.length) return '';
+  _isVideoFile(file) {
+    if (!file) return false;
+    return Boolean(
+      (file.type && file.type.startsWith('video/')) ||
+      /\.(mp4|webm|mov|m4v|mkv|3gp|ogv|ogg)$/i.test(file.name || '')
+    );
+  }
 
-    const count = Math.min(urls.length, 4);
+  _isVideoMediaUrl(url, item, drop) {
+    if (!url || typeof url !== 'string') return false;
+    if (item && item.type === 'video') return true;
+    if (/\.(mp4|webm|mov|m4v|mkv|3gp|ogv|ogg)([?#].*)?$/i.test(url)) return true;
+    if (/\/video\/upload\/|\/video\/|^data:video\//i.test(url)) return true;
+    if (drop?.videoUrl && drop.videoUrl === url) return true;
+    if (drop?.mediaType === 'video' && !/\.(jpe?g|png|gif|webp|avif|svg)([?#].*)?$/i.test(url) && !/^data:image\//i.test(url)) {
+      return true;
+    }
+    return false;
+  }
+
+  _withVideoPosterHint(url) {
+    if (!url || typeof url !== 'string') return url;
+    if (/^https?:\/\//i.test(url) && !url.includes('#')) {
+      return `${url}#t=0.001`;
+    }
+    return url;
+  }
+
+  hydrateDropVideos(rootEl) {
+    if (!rootEl) return;
+    rootEl.querySelectorAll('.x-media-cell.is-video-cell').forEach((cell) => {
+      const video = cell.querySelector('video');
+      const playOverlay = cell.querySelector('.x-video-play-overlay-btn');
+      if (!video || video.dataset.nexDropVideoBound === 'true') return;
+      video.dataset.nexDropVideoBound = 'true';
+
+      const syncOverlay = () => {
+        if (!playOverlay) return;
+        playOverlay.classList.toggle('is-hidden', !video.paused && !video.ended);
+      };
+
+      const togglePlay = (e) => {
+        e.stopPropagation();
+        if (video.paused || video.ended) {
+          video.muted = false;
+          video.play().then(syncOverlay).catch(() => {
+            video.muted = true;
+            video.play().then(syncOverlay).catch(() => {});
+          });
+        } else {
+          video.pause();
+          syncOverlay();
+        }
+      };
+
+      playOverlay?.addEventListener('click', togglePlay);
+      cell.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        e.stopPropagation();
+        if (e.target !== video) {
+          togglePlay(e);
+        }
+      });
+
+      video.addEventListener('play', syncOverlay);
+      video.addEventListener('playing', syncOverlay);
+      video.addEventListener('pause', syncOverlay);
+      video.addEventListener('ended', syncOverlay);
+      video.addEventListener('error', () => {
+        if (playOverlay) playOverlay.style.display = 'none';
+        if (!cell.querySelector('.x-video-error-fallback')) {
+          const errBox = document.createElement('div');
+          errBox.className = 'x-video-error-fallback';
+          errBox.innerHTML = '<i class="fa-solid fa-video-slash"></i><span>Video clip unavailable or still processing</span>';
+          cell.appendChild(errBox);
+        }
+      });
+    });
+  }
+
+  buildMediaGridHtml(drop) {
+    const rawUrls = Array.isArray(drop.mediaUrls) && drop.mediaUrls.length
+      ? drop.mediaUrls
+      : (drop.videoUrl ? [drop.videoUrl] : []);
+    if (!rawUrls.length) return '';
+
+    const mediaItems = Array.isArray(drop.mediaItems) ? drop.mediaItems : [];
+    const count = Math.min(rawUrls.length, 4);
     const gridClass = `grid-${count}`;
 
-    const cellsHtml = urls.slice(0, 4).map(url => {
-      const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') || drop.mediaType === 'video';
+    const cellsHtml = rawUrls.slice(0, 4).map((url, idx) => {
+      const item = mediaItems[idx] || mediaItems.find(m => m && m.url === url);
+      const isVideo = this._isVideoMediaUrl(url, item, drop);
       if (isVideo) {
+        const safeUrl = this.escapeHtml(url);
+        const videoSrc = this.escapeHtml(this._withVideoPosterHint(url));
         return `
-          <div class="x-media-cell global-drop-media-cell" data-media-url="${url}">
-            <video src="${url}" controls preload="metadata" playsinline></video>
+          <div class="x-media-cell global-drop-media-cell is-video-cell" data-media-url="${safeUrl}">
+            <video src="${videoSrc}" controls preload="auto" playsinline webkit-playsinline controlsList="nodownload"></video>
+            <button type="button" class="x-video-play-overlay-btn" aria-label="Play video" title="Play video">
+              <i class="fa-solid fa-play"></i>
+            </button>
           </div>
         `;
       }
+      const safeImgUrl = this.escapeHtml(url);
       return `
-        <div class="x-media-cell global-drop-media-cell" data-media-url="${url}">
-          <img src="${url}" alt="Drop Attachment" loading="lazy" />
+        <div class="x-media-cell global-drop-media-cell" data-media-url="${safeImgUrl}">
+          <img src="${safeImgUrl}" alt="Drop Attachment" loading="lazy" />
         </div>
       `;
     }).join('');
@@ -1908,6 +2000,7 @@ class GlobalDropEngine {
         this.playVoiceAudio(pVoiceBtn, pVoiceBtn.getAttribute('data-url'));
       });
     }
+    this.hydrateDropVideos(parentContainer);
 
     // Subscribe to replies stream
     if (this.unsubscribeReplies) {
@@ -2886,6 +2979,7 @@ class GlobalDropEngine {
         this.openRepliesDrawer(drop);
       });
 
+      this.hydrateDropVideos(card);
       stream.appendChild(card);
     });
   }
@@ -2893,6 +2987,9 @@ class GlobalDropEngine {
 
 // Global Singleton
 const globalDropEngine = new GlobalDropEngine();
+if (typeof window !== 'undefined') {
+  window.globalDropEngine = globalDropEngine;
+}
 window.openGlobalDropUserProfile = (uid, data) => globalDropEngine.openUserProfile(uid, data);
 
 export function initGlobalDropEngine() {

@@ -17,14 +17,14 @@ export function createTypingIndicator(container) {
   element.style.display = 'none';
 
   element.innerHTML = `
-    <div class="nex-typing-dot-container">
-      <span class="nex-typing-dot"></span>
-      <span class="nex-typing-dot"></span>
-      <span class="nex-typing-dot"></span>
+    <div class="nex-typing-avatars-stack" aria-hidden="true"></div>
+    <div class="nex-typing-wave-bars" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
     </div>
-    <span class="nex-typing-text"></span>
+    <span class="nex-typing-text nex-typing-name-shimmer"></span>
   `;
 
+  const stackEl = element.querySelector('.nex-typing-avatars-stack');
   const textEl = element.querySelector('.nex-typing-text');
   let hideTimeout = null;
 
@@ -47,17 +47,25 @@ export function createTypingIndicator(container) {
 
       clearTimeout(hideTimeout);
 
+      if (stackEl) {
+        stackEl.innerHTML = usernames.slice(0, 3).map((u) => {
+          const ch = String(u || 'M').trim().charAt(0).toUpperCase() || 'M';
+          return `<span class="nex-typing-mini-avatar">${ch}</span>`;
+        }).join('');
+      }
+
       let text;
       if (usernames.length === 1) {
-        text = `${usernames[0]} is typing`;
+        text = `${usernames[0]} typing...`;
       } else if (usernames.length === 2) {
-        text = `${usernames[0]} and ${usernames[1]} are typing`;
+        text = `${usernames[0]} & ${usernames[1]} typing...`;
       } else {
-        text = `${usernames[0]} and ${usernames.length - 1} others are typing`;
+        text = `${usernames[0]} + ${usernames.length - 1} others typing...`;
       }
 
       textEl.textContent = text;
-      element.style.display = 'flex';
+      element.style.display = 'inline-flex';
+      element.style.visibility = 'visible';
       element.classList.add('visible');
     },
 

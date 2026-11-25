@@ -129,6 +129,7 @@ export function renderMessageBubble(message, container, options = {}) {
       message.isSticker ||
       (message.attachment && (
         message.attachment.isSticker ||
+        message.attachment.isVideoSticker ||
         message.attachment.fileType === 'sticker' ||
         (message.attachment.fileName && String(message.attachment.fileName).toLowerCase().includes('sticker')) ||
         (message.attachment.fileType === 'image/webp' && !hasText)
@@ -227,7 +228,7 @@ export function renderMessageBubble(message, container, options = {}) {
       if (hasCustomPic) {
         const avatarImg = document.createElement('img');
         avatarImg.className = 'nex-msg-avatar';
-        avatarImg.loading = 'lazy';
+        avatarImg.loading = 'eager';
         avatarImg.decoding = 'async';
         avatarImg.src = options.senderAvatar;
         avatarImg.alt = options.senderName || 'User';
@@ -276,6 +277,9 @@ export function renderMessageBubble(message, container, options = {}) {
     }
     if (isSticker) {
       bubble.classList.add('is-sticker-bubble');
+    }
+    if (typeof options.onReply === 'function') {
+      bubble._nexSwipeData = { wrapper, msg: message, isOwn: !!options.isOwn, onReply: options.onReply };
     }
 
     // 2. WhatsApp Group Identity: 1 single row, Left = DisplayName (~ ALEXANDER), Right = Phone/Username in small grey
@@ -395,7 +399,7 @@ export function renderMessageBubble(message, container, options = {}) {
         const stickerSrc = att.downloadURL || att.url || att.fileUrl || message.imageUrl || message.stickerUrl || '';
         const altText = att.fileName || 'Sticker';
         if (typeof window.createCyberStickerElement === 'function') {
-          attDiv.appendChild(window.createCyberStickerElement(stickerSrc, altText, options.isOwn));
+          attDiv.appendChild(window.createCyberStickerElement(stickerSrc, altText, options.isOwn, att));
         } else {
           const stkWrap = document.createElement('div');
           stkWrap.className = 'message-sticker-wrap';
@@ -631,7 +635,12 @@ export function renderMessageBubble(message, container, options = {}) {
     }
 
     wrapper.appendChild(contentArea);
+    wrapper.classList.add('nex-msg-enter');
+    wrapper.dataset.dateLabel = 'Today';
     container.appendChild(wrapper);
+    if (typeof window !== 'undefined' && typeof window.initNexDelegatedSwipeReply === 'function') {
+      window.initNexDelegatedSwipeReply(container);
+    }
 
     // ChronEX Universal Translator hook
     if (typeof window !== 'undefined' && window.ChronexBriefEngine && window.ChronexBriefEngine.isActive) {

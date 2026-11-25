@@ -3,7 +3,8 @@
  * Manages uploading ephemeral status media (photos & videos) to NEX-STATUS VAULT 1 through 5.
  * All Status Vaults are configured as private blob partitions with proxy streaming.
  */
-import { uploadVideoToCloudinary } from './cloudinary.js';
+import { uploadVideoToCloudinary, uploadImageToCloudinary } from './cloudinary.js';
+import { uploadToImageKit } from './imagekit-vault.js';
 import { getFirebaseAuthorizationHeaders } from './firebase-auth-header.js';
 
 export const STATUS_VAULTS = [
@@ -146,33 +147,71 @@ export async function uploadStatusMedia(file, options = {}) {
   console.warn('[NEX-STATUS] All 5 Status Vaults exhausted or unavailable. Cascading to Cloudinary backup pipeline...');
   try {
     const isMedia = file.type && (file.type.startsWith('video/') || file.type.startsWith('audio/'));
-    if (isMedia) {
-      const cldRes = await uploadVideoToCloudinary(file, {
-        folder: 'nexchat-statuses',
-        onProgress: (percent, msg) => {
-          if (options.onProgress) {
-            options.onProgress(percent, msg, 'Cloudinary Backup Vault');
-          }
-        },
-      });
+    const cldRes = isMedia
+      ? await uploadVideoToCloudinary(file, {
+          folder: 'nexchat-statuses',
+          onProgress: (percent, msg) => {
+            if (options.onProgress) {
+              options.onProgress(percent, msg, 'Cloudinary Backup Vault');
+            }
+          },
+        })
+      : await uploadImageToCloudinary(file, {
+          folder: 'nexchat-statuses',
+          onProgress: (percent, msg) => {
+            if (options.onProgress) {
+              options.onProgress(percent, msg, 'Cloudinary Backup Vault');
+            }
+          },
+        });
+    if (cldRes && (cldRes.secure_url || cldRes.downloadURL || cldRes.url)) {
+      const resolvedUrl = cldRes.secure_url || cldRes.downloadURL || cldRes.url;
       return {
-        url: cldRes.secure_url || cldRes.downloadURL,
-        rawBlobUrl: cldRes.secure_url || cldRes.downloadURL,
-        pathname: cldRes.public_id,
-        vault: 'Cloudinary Global Vault',
+        url: resolvedUrl,
+        rawBlobUrl: resolvedUrl,
+        pathname: cldRes.public_id || cleanName,
+        vault: cldRes.vault || 'Cloudinary Global Vault',
         vaultIndex: -1,
         access: 'public',
         fileName: file.name,
         fileSize: file.size,
-        fileType: 'video/mp4',
-        mediaType: 'video/mp4',
+        fileType: file.type || (isMedia ? 'video/mp4' : 'image/jpeg'),
+        mediaType: isMedia ? 'video' : 'image',
       };
     }
   } catch (cldErr) {
     console.warn('[NEX-STATUS] Cloudinary fallback failed:', cldErr);
   }
 
-  // Fallback 2: Compressed Base64 / Local Object URL (strictly capped to stay safely under Firestore 1MB limit)
+  // Fallback 1.5: ImageKit Multi-Vault Pool (supports large images, audio & video)
+  try {
+    const ikRes = await uploadToImageKit(file, { folder: 'nexchat-statuses', uid: options.uid });
+    if (ikRes && ikRes.url) {
+      const isVideoFile = Boolean(file.type?.startsWith('video/') || /\.(mp4|webm|mov|m4v|ogg)$/i.test(file.name || ''));
+      const isAudioFile = Boolean(file.type?.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac)$/i.test(file.name || ''));
+      return {
+        url: ikRes.url,
+        rawBlobUrl: ikRes.downloadUrl || ikRes.url,
+        pathname: ikRes.fileId || file.name,
+        vault: ikRes.vault || 'ImageKit Status Vault',
+        vaultIndex: -1,
+        access: 'public',
+        fileName: ikRes.name || file.name,
+        fileSize: ikRes.size || file.size,
+        fileType: ikRes.fileType || file.type || (isVideoFile ? 'video/mp4' : 'image/jpeg'),
+        mediaType: isVideoFile ? 'video' : (isAudioFile ? 'audio' : 'image'),
+      };
+    }
+  } catch (ikErr) {
+    console.warn('[NEX-STATUS] ImageKit fallback failed:', ikErr);
+  }
+
+  // Reject oversized non-image media instead of sending >1MB base64 to Firestore (which triggers permission/size errors)
+  if (!file?.type?.startsWith('image/') && file?.size > 700000) {
+    throw new Error('Status video/audio upload vaults are unavailable and the clip exceeds the 700KB inline fallback limit. Please trim the clip shorter or retry.');
+  }
+
+  // Fallback 2: Compressed Base64 (strictly capped to stay safely under Firestore 1MB limit)
   console.warn('[NEX-STATUS] Using client-side compressed Base64 / Object URL fallback.');
   return new Promise((resolve) => {
     if (file && file.type && file.type.startsWith('image/')) {

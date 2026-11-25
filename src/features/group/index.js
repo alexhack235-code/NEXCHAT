@@ -271,7 +271,7 @@ async function open(groupId, messagesContainer, options = {}) {
           } else if (fallback) {
             img = document.createElement('img');
             img.className = 'nex-msg-avatar';
-            img.loading = 'lazy';
+            img.loading = 'eager';
             img.decoding = 'async';
             img.alt = name || 'User';
             img.src = profile.avatar;
@@ -536,10 +536,23 @@ function _renderItem(item, element, currentUid, options = {}) {
   if (!hasContent) return;
   const members = groupStore.getState().members;
   const group = groupStore.getState().currentGroup;
-  const senderId = item.senderId || item.from;
-  const isOwn = !!(currentUid && (senderId === currentUid || item.from === currentUid));
-  const senderProfile = (senderId ? members?.get(senderId) : null) || (item.from ? members?.get(item.from) : null) || { username: 'Unknown', avatar: 'favicon.png' };
-  const senderName = item.senderName || senderProfile.displayName || senderProfile.username || 'Member';
+  const rawSenderId = item.senderId || item.from;
+  let senderId = rawSenderId;
+  if (senderId && members && !members.has(senderId)) {
+    for (const [mUid] of members.entries()) {
+      if (mUid && typeof window !== 'undefined' && window.isSameSupabaseUid && window.isSameSupabaseUid(senderId, mUid)) {
+        senderId = mUid;
+        break;
+      }
+    }
+  }
+  const isOwn = !!(currentUid && (
+    senderId === currentUid ||
+    item.from === currentUid ||
+    (typeof window !== 'undefined' && window.isSameSupabaseUid && (window.isSameSupabaseUid(senderId, currentUid) || window.isSameSupabaseUid(item.from, currentUid)))
+  ));
+  const senderProfile = (senderId ? members?.get(senderId) : null) || (item.from ? members?.get(item.from) : null) || { username: item.senderName || item.senderUsername || 'Member', avatar: item.senderAvatar || 'favicon.png' };
+  const senderName = isOwn ? ((typeof window !== 'undefined' && window.myUsername) || item.senderName || senderProfile.displayName || senderProfile.username || 'You') : (item.senderName || senderProfile.displayName || senderProfile.username || 'Member');
   const senderUsername = item.senderUsername || senderProfile.username || senderName;
   const senderAvatar = item.senderAvatar || senderProfile.avatar || 'favicon.png';
   const senderRole = group ? getUserRole(group, senderId) : 'member';

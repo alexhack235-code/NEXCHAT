@@ -18,50 +18,139 @@ return el;
     };
   }
 })();
-// CYBER LAB: Sticker Element Factory with Contrast Die-Cut & Spoiler Blur
-function createCyberStickerElement(url, altText, isOwn) {
+// CYBER LAB: Sticker Element Factory with Contrast Die-Cut, Animated Video Stickers & Audio Controls
+function createCyberStickerElement(url, altText, isOwn, attachment = null) {
   const stkWrap = document.createElement("div");
-stkWrap.className = "message-sticker-wrap";
-stkWrap.style.cssText = "position: relative; display: inline-block; cursor: pointer; width: 160px; height: 160px; user-select: none;";
-const stkImg = document.createElement("img");
-stkImg.src = url;
-stkImg.alt = altText || "Sticker";
-stkImg.className = "w-[160px] h-[160px] object-contain bg-transparent rounded-lg message-sticker-img";
-stkImg.style.cssText = "width: 160px; height: 160px; object-fit: contain; background: transparent; border-radius: 8px; display: block;";
-stkImg.draggable = false;
-stkImg.loading = "lazy";
-const blurEnabled = localStorage.getItem('nex_blur_stickers') === 'true';
-if (blurEnabled) {
+  stkWrap.className = "message-sticker-wrap";
+  stkWrap.style.cssText = "position: relative; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; width: 160px; height: 160px; user-select: none;";
+
+  const fType = String(attachment?.fileType || attachment?.mimeType || '').toLowerCase();
+  const isVideo = Boolean(
+    attachment?.isVideoSticker ||
+    fType.startsWith('video/') ||
+    /\.(mp4|webm|mov|m4v)([?#].*)?$/i.test(url || '') ||
+    /^data:video\//i.test(url || '')
+  );
+  const hasAudio = Boolean(
+    attachment?.hasAudio ||
+    attachment?.audioUrl ||
+    (attachment?.soundPreset && attachment.soundPreset !== 'none') ||
+    isVideo
+  );
+
+  let mediaNode;
+  if (isVideo) {
+    const vid = document.createElement("video");
+    const vidSrc = (/^https?:\/\//i.test(url || '') && !String(url).includes('#')) ? `${url}#t=0.001` : url;
+    vid.src = vidSrc;
+    vid.autoplay = true;
+    vid.loop = true;
+    vid.muted = true;
+    vid.playsInline = true;
+    vid.setAttribute('playsinline', '');
+    vid.setAttribute('webkit-playsinline', '');
+    vid.preload = 'auto';
+    vid.className = "message-sticker-video message-sticker-img";
+    vid.play().catch(() => {});
+    mediaNode = vid;
+
+    const vPill = document.createElement('span');
+    vPill.className = 'sticker-video-pill';
+    vPill.textContent = 'VIDEO';
+    stkWrap.appendChild(vPill);
+  } else {
+    const stkImg = document.createElement("img");
+    stkImg.src = url;
+    stkImg.alt = altText || "Sticker";
+    stkImg.className = "w-[160px] h-[160px] object-contain bg-transparent rounded-lg message-sticker-img";
+    stkImg.style.cssText = "width: 160px; height: 160px; object-fit: contain; background: transparent; border-radius: 8px; display: block;";
+    stkImg.draggable = false;
+    stkImg.loading = "eager";
+    mediaNode = stkImg;
+  }
+
+  let audioToggleBtn = null;
+  if (hasAudio) {
+    audioToggleBtn = document.createElement('button');
+    audioToggleBtn.type = 'button';
+    audioToggleBtn.className = 'sticker-audio-toggle-btn';
+    audioToggleBtn.title = 'Play / Unmute Sticker Audio';
+    audioToggleBtn.setAttribute('aria-label', 'Play sticker audio');
+    audioToggleBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+    const triggerAudio = (ev) => {
+      ev.stopPropagation();
+      if (isVideo && mediaNode && mediaNode.tagName === 'VIDEO') {
+        const willUnmute = mediaNode.muted;
+        mediaNode.muted = !willUnmute;
+        if (!mediaNode.muted) {
+          mediaNode.play().catch(() => {});
+          audioToggleBtn.classList.add('is-playing');
+          audioToggleBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        } else {
+          audioToggleBtn.classList.remove('is-playing');
+          audioToggleBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+        }
+      }
+      if ((attachment?.audioUrl || attachment?.soundPreset) && typeof window.playNexStickerAudio === 'function') {
+        window.playNexStickerAudio({ audioUrl: attachment.audioUrl, soundPreset: attachment.soundPreset });
+        audioToggleBtn.classList.add('is-playing');
+        audioToggleBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        setTimeout(() => {
+          if (!isVideo || mediaNode?.muted) {
+            audioToggleBtn.classList.remove('is-playing');
+            audioToggleBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+          }
+        }, 1200);
+      }
+    };
+    audioToggleBtn.addEventListener('click', triggerAudio);
+    stkWrap.appendChild(audioToggleBtn);
+  }
+
+  const blurEnabled = localStorage.getItem('nex_blur_stickers') === 'true';
+  if (blurEnabled) {
     stkWrap.classList.add('is-spoiler-blurred');
     const badge = document.createElement('div');
-badge.className = 'sticker-spoiler-badge';
-badge.innerHTML = '<i class="fa-solid fa-eye-slash" style="font-size:10px;"></i> Sticker (Tap to reveal)';
-stkWrap.appendChild(badge);
-const revealHandler = (e) => {
+    badge.className = 'sticker-spoiler-badge';
+    badge.innerHTML = '<i class="fa-solid fa-eye-slash" style="font-size:10px;"></i> Sticker (Tap to reveal)';
+    stkWrap.appendChild(badge);
+    const revealHandler = (e) => {
       e.stopPropagation();
-stkWrap.classList.remove('is-spoiler-blurred');
-stkWrap.classList.add('is-spoiler-revealed');
-badge.remove();
-if (navigator.vibrate) navigator.vibrate(20);
+      stkWrap.classList.remove('is-spoiler-blurred');
+      stkWrap.classList.add('is-spoiler-revealed');
+      badge.remove();
+      if (navigator.vibrate) navigator.vibrate(20);
     };
-stkWrap.addEventListener('click', revealHandler);
+    stkWrap.addEventListener('click', revealHandler);
   } else {
     stkWrap.addEventListener('click', () => {
+      if (hasAudio && audioToggleBtn && (!isVideo || (attachment?.audioUrl || attachment?.soundPreset))) {
+        audioToggleBtn.click();
+        return;
+      }
       if (window.nexStickerStore && typeof window.nexStickerStore.saveCustomSticker === 'function') {
         window.nexStickerStore.saveCustomSticker({
           id: 'stk_' + Date.now(),
-name: altText ? String(altText).replace('.webp', '') : 'Saved Sticker',
-pack: 'my_stickers',
-dataUrl: url,
-createdAt: Date.now()
+          name: altText ? String(altText).replace('.webp', '') : 'Saved Sticker',
+          pack: 'my_stickers',
+          dataUrl: url,
+          isVideoSticker: isVideo,
+          mimeType: attachment?.mimeType || fType || undefined,
+          hasAudio: hasAudio,
+          audioUrl: attachment?.audioUrl || null,
+          soundPreset: attachment?.soundPreset || null,
+          createdAt: Date.now()
         }).then(() => {
           if (typeof showNotif === 'function') showNotif('Sticker saved to collection!', 'success', 2000);
         }).catch(() => {});
       }
     });
   }
-stkWrap.appendChild(stkImg);
-return stkWrap;
+  stkWrap.appendChild(mediaNode);
+  return stkWrap;
+}
+if (typeof window !== 'undefined') {
+  window.createCyberStickerElement = createCyberStickerElement;
 }
 import {
   initNexbotStudio,
@@ -133,13 +222,17 @@ import {
   registerCurrentLoggedDevice, getCachedRememberedDevices, getOrCreateDeviceSessionId, listenForCurrentDeviceRevocation
 } from "./src/js/link-device.js";
 import { openWallpaperModal, applyActiveWallpaper, WALLPAPER_PRESETS } from "./src/js/wallpaper-presets.js";
+import { initChatExperienceStudio } from "./src/js/chat-experience-studio.js";
 import {
   sendSupabaseMessage,
 subscribeToSupabaseRoom,
 subscribeToUserInbox,
 fetchSupabaseRoomMessages,
 markSupabaseMessagesRead,
-buildRoomId
+buildRoomId,
+isSameSupabaseUid,
+isSelfSupabaseUid,
+resolveOriginalUid
 } from "./src/js/supabase-chat.js";
 import {
   getActiveSupabaseSettings,
@@ -158,6 +251,9 @@ if (typeof window !== 'undefined') {
 window.sendSupabaseMessage = sendSupabaseMessage;
 window.subscribeToSupabaseRoom = subscribeToSupabaseRoom;
 window.subscribeToUserInbox = subscribeToUserInbox;
+window.isSameSupabaseUid = isSameSupabaseUid;
+window.isSelfSupabaseUid = isSelfSupabaseUid;
+window.resolveOriginalUid = resolveOriginalUid;
 window.getActiveSupabaseSettings = getActiveSupabaseSettings;
 window.nexchatSharding = {
     getShardForGroup,
@@ -1224,10 +1320,8 @@ let cleanText = label || 'typing...';
     cleanText = cleanText.replace(' is typing...', ' typing...');
   }
 let iconOrHashes = `
-    <div class="typing-hashes">
-      <span class="hash-dot">#</span>
-      <span class="hash-dot">#</span>
-      <span class="hash-dot">#</span>
+    <div class="nex-typing-wave-bars" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
     </div>
   `;
 if (action === 'recording_audio') {
@@ -1242,7 +1336,7 @@ if (action === 'recording_audio') {
 indicator.innerHTML = `
     <img class="typing-avatar" src="${resolvedAvatar}" alt="User" onerror="this.src='logo.jpg'">
     ${iconOrHashes}
-    <span class="typing-text" style="color: #00ff66; font-weight: 500;">${escapeHtml(cleanText)}</span>
+    <span class="typing-text nex-typing-name-shimmer">${escapeHtml(cleanText)}</span>
   `;
 indicator.style.visibility = 'visible';
   indicator.style.display = 'inline-flex';
@@ -1850,8 +1944,17 @@ function isEligibleIncomingNotification(msg, currentUserId) {
   if (!msg) return false;
 const currentUid = currentUserId || (typeof myUID !== 'undefined' ? myUID : (auth?.currentUser?.uid || null));
   const sender = msg.senderId || msg.from;
-// 1. Sender must NOT be current user or 'me'
-if (!sender || sender === currentUid || sender === 'me' || msg.from === 'me' || msg.senderId === 'me') {
+// 1. Sender must NOT be current user, 'me', or current user's hashed Supabase UUID
+if (
+  !sender ||
+  sender === currentUid ||
+  sender === 'me' ||
+  msg.from === 'me' ||
+  msg.senderId === 'me' ||
+  isSelfSupabaseUid(sender, currentUid) ||
+  isSelfSupabaseUid(msg.from, currentUid) ||
+  isSelfSupabaseUid(msg.senderId, currentUid)
+) {
     return false;
   }
 // 2. Message type must ONLY be real conversational types
@@ -6400,23 +6503,36 @@ activeClientMsgId = null;
   }
 }
 // Global Dispatcher for WhatsApp-Style Stickers
-window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
+window.dispatchStickerMessage = async function(stickerUrl, stickerName, stickerMeta = {}) {
   if (!currentChatUser) {
     if (typeof showNotif === 'function') showNotif("Please select a conversation first", "error");
-return;
+    return;
   }
-if (!myUID) {
+  if (!myUID) {
     if (typeof showNotif === 'function') showNotif("Please log in first", "error");
-return;
+    return;
   }
-const stickerAttachment = {
+  const isVideo = Boolean(stickerMeta?.isVideoSticker || /\.(mp4|webm|mov)(\?|$)|^data:video\//i.test(stickerUrl || ''));
+  const ext = isVideo ? 'mp4' : 'webp';
+  const stickerAttachment = {
     downloadURL: stickerUrl,
-imageUrl: stickerUrl,
-url: stickerUrl,
-fileName: (stickerName || 'sticker') + '.webp',
-fileType: 'sticker',
-isSticker: true
+    imageUrl: stickerUrl,
+    url: stickerUrl,
+    fileName: (stickerName || 'sticker') + '.' + ext,
+    fileType: isVideo ? (stickerMeta?.mimeType || 'video/mp4') : 'sticker',
+    mimeType: stickerMeta?.mimeType || (isVideo ? 'video/mp4' : 'image/webp'),
+    isSticker: true,
+    isVideoSticker: isVideo,
+    hasAudio: Boolean(stickerMeta?.hasAudio || stickerMeta?.audioUrl || (stickerMeta?.soundPreset && stickerMeta.soundPreset !== 'none') || isVideo),
+    audioUrl: stickerMeta?.audioUrl || null,
+    soundPreset: stickerMeta?.soundPreset || null
   };
+  if (currentChatType === 'group' && typeof sendGroupMessage === 'function') {
+    await sendGroupMessage(currentChatUser, '', stickerAttachment);
+    if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+    if (typeof showNotif === 'function') showNotif(isVideo ? "Video Sticker sent!" : "Sticker sent!", "success", 1200);
+    return;
+  }
 const clientMsgId = `stk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 // 1. Instant 0ms Local UI Append
 if (typeof appendLocalSentMessage === 'function') {
@@ -6435,6 +6551,7 @@ type: 'sticker',
 imageUrl: stickerUrl,
 attachment: stickerAttachment,
 isSticker: true,
+clientMsgId: clientMsgId,
 chatType: currentChatType || 'direct'
     }).then(() => {
       if (typeof updateLocalSentMessageStatus === 'function') {
@@ -7654,9 +7771,9 @@ const fileType = (attachment.fileType || '').toLowerCase();
   const fileName = (attachment.fileName || '').toLowerCase();
   const url = attachment.downloadURL;
 // WhatsApp-Style Clean Transparent Sticker with Contrast Outline & Blur/Spoiler
-const isSticker = attachment.isSticker || fileType === 'sticker' || (fileName && fileName.includes('sticker'));
+const isSticker = attachment.isSticker || attachment.isVideoSticker || fileType === 'sticker' || (fileName && fileName.includes('sticker'));
 if (isSticker) {
-    const stickerWrap = createCyberStickerElement(url, attachment.fileName || "Sticker", isOwn);
+    const stickerWrap = createCyberStickerElement(url, attachment.fileName || "Sticker", isOwn, attachment);
 // Transparent Timestamp Badge Overlay
 const msgDate = parentMsg?.time?.toDate?.() || (parentMsg?.time ? new Date(parentMsg.time) : new Date());
     const formattedTime = formatTime(msgDate);
@@ -7721,7 +7838,8 @@ imgWrap.style.cssText = "position: relative; border-radius: 10px; overflow: hidd
 const img = document.createElement("img");
 img.src = url;
 img.alt = attachment.fileName || "Photo attachment";
-img.loading = "lazy";
+img.loading = "eager";
+img.decoding = "async";
 img.style.cssText = "max-width: 290px; max-height: 320px; width: 100%; object-fit: cover; border-radius: 10px; cursor: pointer; display: block; box-shadow: 0 4px 16px rgba(0,0,0,0.35); transition: transform 0.25s ease;";
 img.addEventListener("mouseenter", () => { img.style.transform = "scale(1.02)"; });
 img.addEventListener("mouseleave", () => { img.style.transform = "scale(1)"; });
@@ -8243,7 +8361,7 @@ wrapper.id = `msg-wrapper-${id}`;
 wrapper.dataset.messageId = id;
 wrapper.dataset.clientMsgId = id;
 wrapper.style.cssText = "display:flex; justify-content:flex-end; margin:8px 0; padding:0; flex-direction: column; align-items: flex-end; overflow:visible;";
-const isStk = (extraMeta && extraMeta.type === 'sticker') || (attachment && (attachment.isSticker || attachment.fileType === 'sticker'));
+const isStk = (extraMeta && extraMeta.type === 'sticker') || (attachment && (attachment.isSticker || attachment.isVideoSticker || attachment.fileType === 'sticker'));
   const isCirc = attachment && (attachment.isCircularVideo || attachment.fileType === 'video_note');
   const isDrop = attachment && (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData || attachment.isPredictionPoll || attachment.fileType === 'prediction_poll' || attachment.pollData || attachment.isScratchCard || attachment.fileType === 'scratch_card' || attachment.scratchData || attachment.isBountyContract || attachment.fileType === 'escrow_bounty' || attachment.bountyData || attachment.isSteganoCloak);
   const bubble = document.createElement("div");
@@ -8251,7 +8369,7 @@ bubble.className = isStk ? "message-bubble sent is-sticker-message" : (isCirc ? 
 bubble.style.cssText = isStk ? "background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; width: 160px !important;" : ((isCirc || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #005c4b 0%, #059669 100%); border: none; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); color: #ffffff; display:flex; flex-direction:column; padding:7px 11px 6px 11px; border-radius:16px; max-width:calc(75% - 8px); margin-left:auto; margin-right:8px; min-width:88px; overflow:visible; word-break:break-word; overflow-wrap:anywhere; position:relative; box-sizing:border-box;");
 const stickerUrl = extraMeta?.imageUrl || attachment?.imageUrl || attachment?.downloadURL || attachment?.url || (isStk ? text : null);
 if (isStk && stickerUrl) {
-    const stkWrap = createCyberStickerElement(stickerUrl, "Sticker", true);
+    const stkWrap = createCyberStickerElement(stickerUrl, attachment?.fileName || "Sticker", true, attachment);
 bubble.appendChild(stkWrap);
   } else if (attachment && isRenderableAttachment(attachment)) {
     const attachNode = renderMessageAttachment(attachment, { time: new Date(), status: 'pending' }, true);
@@ -9425,9 +9543,14 @@ dbMessages.forEach((msg) => {
       const canonicalId = (clientMsgId && clientToDocMap.has(clientMsgId)) ? clientToDocMap.get(clientMsgId) : (docId || clientMsgId || String(msg.id || msg._id || '').trim());
 if (!canonicalId || hiddenSet.has(canonicalId)) return;
 if (msg.deletedFor && Array.isArray(msg.deletedFor) && myUID && msg.deletedFor.includes(myUID)) return;
+const effectiveFrom = resolveOriginalUid(msg.senderId || msg.from || '', [myUID, currentChatUser]);
+if (effectiveFrom) {
+  if (effectiveFrom !== msg.from) msg.from = effectiveFrom;
+  if (effectiveFrom !== msg.senderId) msg.senderId = effectiveFrom;
+}
 const mTime = resolveMsgTime(msg);
       const timeBucket = Math.floor(mTime / 3000);
-      const signature = `${msg.senderId || msg.from || ''}:${(msg.text || '').trim()}:${timeBucket}`;
+      const signature = `${effectiveFrom || ''}:${(msg.text || '').trim()}:${timeBucket}`;
 if (uniqueMessagesMap.has(canonicalId)) {
         return; // Skip duplicate ID
       }
@@ -9632,7 +9755,14 @@ desiredMessageNodes.push(synthDiv);
 return;
       }
 const msgSenderId = m.senderId || m.from;
-      let isOwn = msgSenderId === myUID;
+      let isOwn = Boolean(
+        myUID && (
+          msgSenderId === myUID ||
+          m.from === myUID ||
+          isSelfSupabaseUid(msgSenderId, myUID) ||
+          isSelfSupabaseUid(m.from, myUID)
+        )
+      );
       const isAI = m.from === 'chronex-ai' || m.isAiResponse || msgSenderId === 'chronex-ai';
       const isDeletedTombstone = !!(m.isDeleted || m.deletedForEveryone);
 if (isAI) isOwn = false;
@@ -9705,7 +9835,7 @@ overflow: visible;
 `;
 const msgDate = m.time?.toDate?.() || new Date();
       const time = formatTime(msgDate);
-const isStk = m.type === 'sticker' || m.isSticker || (m.attachment && (m.attachment.isSticker || m.attachment.fileType === 'sticker'));
+const isStk = m.type === 'sticker' || m.isSticker || (m.attachment && (m.attachment.isSticker || m.attachment.isVideoSticker || m.attachment.fileType === 'sticker'));
       const isImg = m.type === 'image' || (m.attachment && m.attachment.fileType && m.attachment.fileType.startsWith('image/'));
       const isCirc = m.attachment && (m.attachment.isCircularVideo || m.attachment.fileType === 'video_note');
       const stickerOrImgUrl = m.imageUrl || m.stickerUrl || m.attachment?.imageUrl || m.attachment?.downloadURL || m.attachment?.url || (isStk ? m.text : null);
@@ -9800,8 +9930,8 @@ replyQuote.style.cursor = 'pointer';
 bubble.appendChild(replyQuote);
       }
 if ((m.type === 'sticker' || isStk) && stickerOrImgUrl) {
-        // WhatsApp exact: 160x160 image, transparent background, no bubble background, no text, no Translate button
-const stkWrap = createCyberStickerElement(stickerOrImgUrl, m.attachment?.fileName || "Sticker", isOwn);
+        // WhatsApp exact: 160x160 image/video sticker, transparent background, no bubble background
+const stkWrap = createCyberStickerElement(stickerOrImgUrl, m.attachment?.fileName || "Sticker", isOwn, m.attachment);
 bubble.appendChild(stkWrap);
       } else if (m.attachment && isRenderableAttachment(m.attachment)) {
         const attachNode = renderMessageAttachment(m.attachment, m, isOwn);
@@ -10227,8 +10357,9 @@ if (currentChatType === 'direct' && myUID && currentChatUser) {
     const roomId = buildRoomId(myUID, currentChatUser);
     const activeDirectAtSub = currentChatUser;
 subscribeToSupabaseRoom(roomId, {
+      knownUids: [myUID, activeDirectAtSub],
       onNewMessage: (incoming) => {
-        if (!incoming || incoming.from === myUID) return;
+        if (!incoming || isSelfSupabaseUid(incoming.from, myUID)) return;
         if (currentChatUser !== activeDirectAtSub || currentChatType !== 'direct') return;
         const msgCorrelationId = incoming.clientMsgId || incoming.client_msg_id || incoming.docId || incoming.id;
 if (msgCorrelationId && window._nexProcessedRealtimeIds && window._nexProcessedRealtimeIds.has(msgCorrelationId)) {
@@ -10288,10 +10419,15 @@ if (incoming.attachment.isP2PChunk) {
 return;
           }
         }
-const exists = messages2.some(m => m.docId === incoming.docId || (m.text === incoming.text && Math.abs((m.time?.toMillis?.() || 0) - (incoming.time?.toMillis?.() || 0)) < 4000));
+const incomingTs = incoming.time?.toMillis?.() || Date.now();
+        const exists = [...messages1, ...messages2].some(m =>
+          (incoming.docId && (m.docId === incoming.docId || m.id === incoming.docId)) ||
+          (incoming.clientMsgId && m.clientMsgId === incoming.clientMsgId) ||
+          (isSameSupabaseUid(m.from, incoming.from) && m.text === incoming.text && Math.abs((m.time?.toMillis?.() || m.timestamp?.toMillis?.() || 0) - incomingTs) < 8000)
+        );
 if (!exists) {
           messages2.push(incoming);
-if (incoming.from !== myUID) {
+if (!isSelfSupabaseUid(incoming.from, myUID)) {
             window.dispatchEvent(new CustomEvent("nexchat:incoming_message", { detail: incoming }));
           }
 debouncedUpdateMessages();
@@ -16665,11 +16801,12 @@ messagesArea.style.backgroundColor = "";
   }
 updateBackgroundPreview(null);
 }
-window.openChatWallpaperPicker = (chatId = null, chatName = null, isGroup = false) => {
+window.openChatWallpaperPicker = (chatId = null, chatName = null, isGroup = false, scope = null) => {
   openWallpaperModal({
     chatId: chatId,
 chatName: chatName || (chatId ? (currentChatName || 'Chat') : 'All Chats'),
 chatType: isGroup ? 'group' : (currentChatType || 'direct'),
+scope: scope,
 myUID: myUID,
 db: db,
 onUploadCustom: async (file) => {
@@ -19279,38 +19416,50 @@ if (window.ChronexBriefEngine && window.ChronexBriefEngine.isActive) {
 if (groupId) {
       const groupRoomId = `group_${groupId}`;
       const activeGroupAtSub = groupId;
+    const groupMemberIds = Array.isArray(window._currentGroupData?.members) ? window._currentGroupData.members : [];
+    const knownGroupUids = [myUID, ...groupMemberIds];
 subscribeToSupabaseRoom(groupRoomId, {
+        knownUids: knownGroupUids,
         onNewMessage: (incoming) => {
-          if (!incoming || incoming.from === myUID) return;
+          if (!incoming || isSelfSupabaseUid(incoming.from, myUID)) return;
           if (currentChatUser !== activeGroupAtSub || currentChatType !== 'group') return;
 // Optimistically insert into groupStore.getState().messages if not already present (sub-15ms group message render)
 const store = typeof groupStore !== 'undefined' ? groupStore : (typeof GroupChat !== 'undefined' && GroupChat.getStore ? GroupChat.getStore() : null);
 if (store) {
-            const currentMessages = store.getState().messages || [];
+            const stateSnapshot = store.getState();
+            const currentMessages = stateSnapshot.messages || [];
+            const membersMap = stateSnapshot.members;
+            const resolvedFrom = resolveOriginalUid(incoming.from, membersMap ? Array.from(membersMap.keys()) : knownGroupUids);
+            if (isSelfSupabaseUid(resolvedFrom, myUID)) return;
+            const memberProf = membersMap && resolvedFrom ? membersMap.get(resolvedFrom) : null;
             const incomingId = incoming.id || incoming.docId || incoming.clientMsgId || incoming.client_msg_id;
             const exists = currentMessages.some(m => {
-              if (incomingId && (m.id === incomingId || m.docId === incomingId)) return true;
-if (m.from === incoming.from && m.text === incoming.text) {
+              if (incomingId && (m.id === incomingId || m.docId === incomingId || (m.clientMsgId && m.clientMsgId === incomingId))) return true;
+if (isSameSupabaseUid(m.from, resolvedFrom) && m.text === incoming.text) {
                 const tA = m.timestamp?.toMillis ? m.timestamp.toMillis() : (m.timestamp?.toDate ? m.timestamp.toDate().getTime() : (m.timestamp instanceof Date ? m.timestamp.getTime() : Number(m.timestamp) || 0));
                 const tB = incoming.timestamp?.toMillis ? incoming.timestamp.toMillis() : (incoming.timestamp?.toDate ? incoming.timestamp.toDate().getTime() : (incoming.timestamp instanceof Date ? incoming.timestamp.getTime() : Number(incoming.timestamp || incoming.time) || 0));
-if (tA && tB && Math.abs(tA - tB) < 5000) return true;
+if (tA && tB && Math.abs(tA - tB) < 8000) return true;
               }
 return false;
             });
 if (!exists) {
               const incomingMsg = {
+                ...incoming,
                 id: incomingId || `supa_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-groupId: incoming.groupId || groupId,
-from: incoming.from,
-text: incoming.text || '',
-timestamp: incoming.timestamp || incoming.time || new Date(),
-attachment: incoming.attachment || null,
-replyTo: incoming.replyTo || null,
-reactions: incoming.reactions || [],
-readBy: incoming.readBy || [incoming.from],
-readAt: incoming.readAt || {},
-edited: false,
-...incoming
+                groupId: incoming.groupId || groupId,
+                from: resolvedFrom,
+                senderId: resolvedFrom,
+                senderName: incoming.senderName || memberProf?.displayName || memberProf?.username || 'Member',
+                senderUsername: incoming.senderUsername || memberProf?.username || memberProf?.displayName || 'Member',
+                senderAvatar: incoming.senderAvatar || memberProf?.avatar || 'favicon.png',
+                text: incoming.text || '',
+                timestamp: incoming.timestamp || incoming.time || new Date(),
+                attachment: incoming.attachment || null,
+                replyTo: incoming.replyTo || null,
+                reactions: incoming.reactions || [],
+                readBy: incoming.readBy || [resolvedFrom],
+                readAt: incoming.readAt || {},
+                edited: false
               };
 store.setState({
                 messages: [...currentMessages, incomingMsg]
@@ -19409,20 +19558,32 @@ return;
       }
     }
   }
-try {
-    await GroupChat.send({ text, attachment });
-// Trigger zero-lag slow mode countdown HUD
-if (window._activeGroupSlowMode && window._activeGroupSlowMode.groupId === groupId) {
+  try {
+    const clientMsgId = await GroupChat.send({ text, attachment });
+    // Trigger zero-lag slow mode countdown HUD
+    if (window._activeGroupSlowMode && window._activeGroupSlowMode.groupId === groupId) {
       startSlowModeCountdown(window._activeGroupSlowMode.seconds, groupId);
     }
-// Supabase Realtime High-Speed broadcast for Group Members
-if (typeof sendSupabaseMessage === 'function') {
+    // Supabase Realtime High-Speed broadcast for Group Members
+    if (typeof sendSupabaseMessage === 'function') {
+      const senderDisplayName =
+        (typeof myUsername !== 'undefined' && myUsername) ||
+        auth?.currentUser?.displayName ||
+        'Member';
+      const senderAvatarUrl =
+        (typeof myProfilePic !== 'undefined' && myProfilePic) ||
+        auth?.currentUser?.photoURL ||
+        'logo.jpg';
       sendSupabaseMessage({
         from: myUID,
-to: groupId,
-text: text || '',
-attachment: attachment,
-chatType: 'group',
+        to: groupId,
+        text: text || '',
+        attachment: attachment,
+        chatType: 'group',
+        clientMsgId: clientMsgId || undefined,
+        senderName: senderDisplayName,
+        senderUsername: senderDisplayName,
+        senderAvatar: senderAvatarUrl,
       }).catch(err => console.warn('[SUPABASE GROUP] Broadcast notice:', err?.message));
     }
 tokens--;
@@ -19953,12 +20114,22 @@ if (textContent && window.fortressGuard) {
 if (!inspection.safe) return;
   }
 try {
+    if (auth && !auth.currentUser && typeof auth.authStateReady === 'function') {
+      await auth.authStateReady().catch(() => {});
+    }
+    const activeUser = auth?.currentUser || (typeof getAuth === 'function' ? getAuth()?.currentUser : null);
+    if (!activeUser?.uid) {
+      showNotif('Please sign in again before posting a status.', 'error');
+      return;
+    }
+    const rawAvatar = activeUser.photoURL || (typeof myProfilePic !== 'undefined' ? myProfilePic : '') || 'logo.jpg';
+    const safeAvatar = (typeof rawAvatar === 'string' && rawAvatar.length <= 2048) ? rawAvatar : 'logo.jpg';
     const now = Date.now();
     const expiresAtMs = now + 24 * 60 * 60 * 1000; // Strictly 24 hours from creation
 const statusData = {
-      userId: myUID,
-username: myUsername || 'User',
-profilePic: myProfilePic || '',
+      userId: activeUser.uid,
+username: activeUser.displayName || myUsername || 'User',
+profilePic: safeAvatar,
 content: textContent || '',
 type: mediaType ? (mediaType.startsWith('image/') ? 'image' : (mediaType.startsWith('video/') ? 'video' : 'text')) : (imageUrl ? 'image' : 'text'),
 mediaType: mediaType || (imageUrl ? 'image/jpeg' : null),
@@ -19969,7 +20140,17 @@ createdAt: serverTimestamp(),
 createdAtMs: now,
 timestamp: serverTimestamp()
     };
-const statusRef = await addDoc(collection(db, 'statuses'), statusData);
+let statusRef;
+    try {
+      statusRef = await addDoc(collection(db, 'statuses'), statusData);
+    } catch (permErr) {
+      if (permErr?.code === 'permission-denied' || (permErr?.message || '').toLowerCase().includes('permission')) {
+        await activeUser.getIdToken(true).catch(() => {});
+        statusRef = await addDoc(collection(db, 'statuses'), statusData);
+      } else {
+        throw permErr;
+      }
+    }
 console.log(' Status published to Firestore:', statusRef.id, 'Expires in 24h at:', new Date(expiresAtMs).toLocaleTimeString());
 showNotif(' Status posted! Disappears in 24 hours.', 'success', 3500);
 const textInput = document.getElementById('statusInput');
@@ -20286,12 +20467,12 @@ cardDiv.innerHTML = `
 <div class="status-story-card-backdrop">
 ${isVideo
 ? `<video src="${previewBg}" class="status-card-bg-img" preload="metadata" muted playsinline></video>`
-: `<img src="${previewBg}" alt="${escape(grp.userName)}" class="status-card-bg-img" loading="lazy" decoding="async" onerror="this.src='logo.jpg'" />`
+: `<img src="${previewBg}" alt="${escape(grp.userName)}" class="status-card-bg-img" loading="eager" decoding="async" onerror="this.src='logo.jpg'" />`
             }
 <div class="status-card-gradient-overlay"></div>
 </div>
 <div class="status-card-avatar-wrap ${grp.isViewed ? 'viewed' : 'unread'}">
-<img src="${safeAvatar}" alt="${escape(grp.userName)}" class="status-card-avatar-img" loading="lazy" decoding="async" onerror="this.src='logo.jpg'" />
+<img src="${safeAvatar}" alt="${escape(grp.userName)}" class="status-card-avatar-img" loading="eager" decoding="async" onerror="this.src='logo.jpg'" />
 </div>
 <div class="status-card-copy">
 <span class="status-card-name">${escape(grp.userName)}</span>
@@ -20329,7 +20510,7 @@ row.className = 'status-row-item';
 const safeRowAvatar = getValidImageSrc(grp.avatarUrl, 'logo.jpg');
 row.innerHTML = `
 <div class="status-row-avatar ${grp.isViewed ? 'viewed' : 'unread'}">
-<img src="${safeRowAvatar}" alt="${escape(grp.userName)}" loading="lazy" decoding="async" onerror="this.src='logo.jpg'" />
+<img src="${safeRowAvatar}" alt="${escape(grp.userName)}" loading="eager" decoding="async" onerror="this.src='logo.jpg'" />
 </div>
 <div class="status-row-info">
 <h4 class="status-row-name">
@@ -20493,15 +20674,54 @@ if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
     window._nexStatusViewerAudioEl = musicAudio;
 
     const targetUrl = currentSlide.musicTrack.previewUrl;
-    const isSameSrc = musicAudio.src === targetUrl;
-    musicAudio.pause();
-    if (!isSameSrc) {
-      musicAudio.src = targetUrl;
-    } else if (musicAudio.readyState >= 1) {
-      try { musicAudio.currentTime = 0; } catch (_) {}
+    const clipStart = Math.max(0, Number(currentSlide.musicTrack.startSec || 0));
+    const clipEnd = Math.max(clipStart + 1, Number(currentSlide.musicTrack.endSec || 30));
+
+    if (musicAudio._nexViewerClipHandler) {
+      try { musicAudio.removeEventListener('timeupdate', musicAudio._nexViewerClipHandler); } catch (_) {}
     }
-    musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
-    musicAudio.muted = Boolean(currentSlide.isMuted);
+    musicAudio._nexViewerClipHandler = () => {
+      if (musicAudio.currentTime >= clipEnd - 0.06) {
+        try { musicAudio.currentTime = clipStart; } catch (_) {}
+      }
+    };
+    musicAudio.addEventListener('timeupdate', musicAudio._nexViewerClipHandler);
+
+    musicAudio.onerror = async () => {
+      const mTrack = currentSlide.musicTrack;
+      if (mTrack && !mTrack._nexViewerRecovered && window.statusMusicPickerEngine?.resolveFreshPreviewUrl) {
+        mTrack._nexViewerRecovered = true;
+        const freshUrl = await window.statusMusicPickerEngine.resolveFreshPreviewUrl(mTrack);
+        if (freshUrl && musicAudio._nexTargetSlideId === (currentSlide.id || currentStorySlideIndex)) {
+          musicAudio.src = freshUrl;
+          musicAudio.play().catch(() => {});
+        }
+      }
+    };
+
+    const isSameSrc = musicAudio.src === targetUrl || musicAudio._nexRawTargetUrl === targetUrl;
+    musicAudio._nexTargetSlideId = currentSlide.id || currentStorySlideIndex;
+    musicAudio._nexRawTargetUrl = targetUrl;
+    if (!isSameSrc) {
+      musicAudio.pause();
+      musicAudio.src = targetUrl;
+    }
+    if (clipStart > 0 && musicAudio.readyState >= 1) {
+      try { musicAudio.currentTime = clipStart; } catch (_) {}
+    } else if (musicAudio.readyState >= 1 && !isSameSrc) {
+      try { musicAudio.currentTime = clipStart; } catch (_) {}
+    }
+    if (clipStart > 0) {
+      const applyStartOnce = () => {
+        try { musicAudio.currentTime = clipStart; } catch (_) {}
+        musicAudio.removeEventListener('loadedmetadata', applyStartOnce);
+      };
+      musicAudio.addEventListener('loadedmetadata', applyStartOnce);
+    }
+
+    musicAudio.volume = currentSlide.mediaType === 'video' ? 0.55 : 0.85;
+    // Never mute attached background music just because original video mic audio was muted
+    musicAudio.muted = false;
     musicAudio.loop = true;
     window._statusViewerMusicAudio = musicAudio;
 
@@ -20547,11 +20767,16 @@ if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
       }
     }
 
-    const targetVol = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
+    const targetVol = currentSlide.mediaType === 'video' ? 0.55 : 0.85;
     const discIcon = sticker?.querySelector('.music-sticker-disc-icon i');
+    musicAudio._nexPendingPlay = true;
     const playPromise = musicAudio.play();
     if (playPromise && typeof playPromise.then === 'function') {
       playPromise.then(() => {
+        musicAudio._nexPendingPlay = false;
+        if (clipStart > 0 && Math.abs(musicAudio.currentTime - clipStart) > 0.35 && musicAudio.currentTime < clipStart) {
+          try { musicAudio.currentTime = clipStart; } catch (_) {}
+        }
         if (discIcon) discIcon.classList.add('fa-spin');
         if (!musicAudio.muted && !document.body.classList.contains('nex-low-end')) {
           if (musicAudio._nexFadeRaf) cancelAnimationFrame(musicAudio._nexFadeRaf);
@@ -20567,9 +20792,14 @@ if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
           musicAudio._nexFadeRaf = requestAnimationFrame(ramp);
         }
       }).catch(err => {
-        console.warn('[STATUS MUSIC] Playback notice:', err.message);
-        if (discIcon) discIcon.classList.remove('fa-spin');
+        musicAudio._nexPendingPlay = false;
+        if (err?.name !== 'AbortError') {
+          console.warn('[STATUS MUSIC] Playback notice:', err.message);
+          if (discIcon) discIcon.classList.remove('fa-spin');
+        }
       });
+    } else {
+      musicAudio._nexPendingPlay = false;
     }
   } catch (mErr) {
     console.warn('[STATUS MUSIC] Setup error:', mErr.message);
@@ -20643,9 +20873,12 @@ if (video.readyState >= 1) {
         }
       }
     }
-if (muteBtn) {
+    if (muteBtn) {
+      const hasMusic = Boolean(currentSlide.musicTrack && currentSlide.musicTrack.previewUrl);
       muteBtn.style.display = 'flex';
-      muteBtn.innerHTML = (video && !video.muted) ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
+      const musicAud = window._nexStatusViewerAudioEl;
+      const audible = (video && !video.muted) || (hasMusic && musicAud && !musicAud.muted);
+      muteBtn.innerHTML = audible ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
     }
   } else if (currentSlide.mediaUrl && isValidImageUrl(currentSlide.mediaUrl)) {
     if (audioStage) audioStage.style.display = 'none';
@@ -21190,29 +21423,11 @@ function startStoryProgress() {
   const currentSlide = currentGrp.slides[currentStorySlideIndex];
   if (!currentSlide) return;
 
-  // Background Music Playback (if present and not already playing)
+  // Keep background music uninterrupted if already primed & pending from showCurrentStorySlide
   if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
-    try {
-      let musicAudio = window._nexStatusViewerAudioEl;
-      if (!musicAudio) {
-        musicAudio = document.getElementById('statusViewerMusicAudioEl') || new Audio();
-        musicAudio.id = 'statusViewerMusicAudioEl';
-        musicAudio.setAttribute('playsinline', '');
-        musicAudio.preload = 'auto';
-        window._nexStatusViewerAudioEl = musicAudio;
-      }
-      if (musicAudio.src !== currentSlide.musicTrack.previewUrl || musicAudio.paused) {
-        musicAudio.pause();
-        musicAudio.src = currentSlide.musicTrack.previewUrl;
-        musicAudio.currentTime = 0;
-        musicAudio.volume = currentSlide.mediaType === 'video' ? 0.45 : 0.85;
-        musicAudio.muted = false;
-        musicAudio.loop = true;
-        musicAudio.play().catch(err => console.warn('[STATUS MUSIC] Playback notice:', err.message));
-      }
-      window._statusViewerMusicAudio = musicAudio;
-    } catch (mErr) {
-      console.warn('[STATUS MUSIC] Setup error:', mErr.message);
+    const musicAudio = window._nexStatusViewerAudioEl;
+    if (musicAudio && musicAudio.paused && !musicAudio.muted && !musicAudio._nexPendingPlay) {
+      musicAudio.play().catch(() => {});
     }
   }
 
@@ -21783,8 +21998,8 @@ if (progressBar) progressBar.style.width = '100%';
 const now = Date.now();
       const expiresAtMs = now + 86400000;
 // Safeguard against Firestore 1MB property limit:
-// If uploadedUrl is a data URL (Base64) longer than 500KB, resize and compress it down
-if (uploadedUrl && typeof uploadedUrl === 'string' && (uploadedUrl.startsWith('data:image/') || uploadedUrl.length > 500000)) {
+// If uploadedUrl is a large image data URL (>500KB), resize and compress it down
+if (uploadedUrl && typeof uploadedUrl === 'string' && uploadedUrl.startsWith('data:image/') && uploadedUrl.length > 500000) {
         try {
           uploadedUrl = await new Promise((resComp) => {
             const compImg = new Image();
@@ -21812,16 +22027,28 @@ compImg.src = uploadedUrl;
           });
         } catch (_) {}
       }
-const effectiveUid = auth?.currentUser?.uid || (typeof getAuth === 'function' ? getAuth()?.currentUser?.uid : null) || myUID;
+      if (uploadedUrl && typeof uploadedUrl === 'string' && uploadedUrl.startsWith('data:') && uploadedUrl.length > 900000) {
+        throw new Error('Status media exceeds cloud inline size limit. Please trim shorter or retry.');
+      }
+if (auth && !auth.currentUser && typeof auth.authStateReady === 'function') {
+        await auth.authStateReady().catch(() => {});
+      }
+const activeUser = auth?.currentUser || (typeof getAuth === 'function' ? getAuth()?.currentUser : null);
+if (!activeUser?.uid) {
+        throw new Error('Authentication required. Please sign in again before publishing a status.');
+      }
+const effectiveUid = activeUser.uid;
+const rawProfilePic = activeUser.photoURL || (typeof myProfilePic !== 'undefined' ? myProfilePic : '') || 'logo.jpg';
+const safeProfilePic = (typeof rawProfilePic === 'string' && rawProfilePic.length <= 2048) ? rawProfilePic : 'logo.jpg';
       const attachedMusic = window.statusMusicPickerEngine ? window.statusMusicPickerEngine.getSelectedMusic() : null;
-      const selectedDuration = parseInt(document.getElementById('statusSlideDurationSelect')?.value || localStorage.getItem('nex_status_default_duration') || '7', 10);
+      const selectedDuration = parseInt(document.getElementById('statusSlideDurationSelect')?.value || localStorage.getItem('nex_status_default_duration') || '7', 10) || 7;
       const selectedPrivacy = document.getElementById('statusPrivacySelect')?.value || localStorage.getItem('nex_status_default_privacy') || 'contacts';
       const statusDoc = {
         duration: selectedDuration,
         privacyMode: selectedPrivacy,
-        userId: effectiveUid || 'user',
-username: auth?.currentUser?.displayName || myUsername || 'User',
-profilePic: auth?.currentUser?.photoURL || myProfilePic || 'logo.jpg',
+        userId: effectiveUid,
+username: activeUser.displayName || myUsername || 'User',
+profilePic: safeProfilePic,
 content: contentText || '',
 imageUrl: uploadedUrl || null,
 mediaUrl: uploadedUrl || null,
@@ -21840,6 +22067,17 @@ expiresAt: new Date(expiresAtMs),
 expiresAtMs: Math.round(expiresAtMs)
       };
 if (db) {
+        const writeStatusDoc = async (payload) => {
+          try {
+            return await addDoc(collection(db, 'statuses'), payload);
+          } catch (err) {
+            if (err?.code === 'permission-denied' || (err?.message || '').toLowerCase().includes('permission')) {
+              await activeUser.getIdToken(true).catch(() => {});
+              return await addDoc(collection(db, 'statuses'), payload);
+            }
+            throw err;
+          }
+        };
         const trimmerPayload = window.NexTransmitterTrimmer?.getTrimmingPayload();
         if (trimmerPayload?.isMuted) {
           statusDoc.isMuted = true;
@@ -21866,7 +22104,7 @@ duration: Math.round(pt.duration),
 isMuted: !!trimmerPayload.isMuted,
 createdAtMs: now + (i * 50)
             };
-await addDoc(collection(db, 'statuses'), partDoc);
+await writeStatusDoc(partDoc);
           }
         } else if (trimmerPayload && (trimmerPayload.mode === 'TRIM' || trimmerPayload.isTrimmed)) {
           const trimDoc = {
@@ -21882,9 +22120,9 @@ duration: trimmerPayload.duration
 duration: trimmerPayload.duration,
 isMuted: !!trimmerPayload.isMuted
           };
-await addDoc(collection(db, 'statuses'), trimDoc);
+await writeStatusDoc(trimDoc);
         } else {
-          await addDoc(collection(db, 'statuses'), statusDoc);
+          await writeStatusDoc(statusDoc);
         }
       }
 const myCircle = document.getElementById('myStatusCircleItem');
@@ -23382,6 +23620,8 @@ window.GroupChat = GroupChat;
 window.loadMessages = loadMessages;
 window.renderCachedDirectChatHistory = renderCachedDirectChatHistory;
 window.applyActiveWallpaper = applyActiveWallpaper;
+window.uploadMediaBlob = uploadMediaBlob;
+window.uploadAnyMedia = uploadAnyMedia;
 console.log("? Functions exposed to global window");
 async function loadGroups() {
   const groupsList = document.getElementById("groupsList");
@@ -23545,10 +23785,21 @@ function handleGlobalIncomingMessage(msg, isGroup = false) {
   if (!msg) return;
   const myUid = myUID || (typeof auth !== 'undefined' ? auth?.currentUser?.uid : null);
 if (!myUid) return;
-const senderId = msg.from || msg.senderId;
+const rawSenderId = msg.from || msg.senderId;
+const senderId = (typeof resolveOriginalUid === 'function' && rawSenderId)
+  ? resolveOriginalUid(rawSenderId, [myUid, currentChatUser, msg.to].filter(Boolean))
+  : rawSenderId;
   const targetId = isGroup ? (msg.groupId || msg.to) : senderId;
-// 1. Ignore outgoing messages sent by current user
-if (!senderId || senderId === myUid || senderId === 'me' || msg.from === 'me' || msg.senderId === 'me') {
+// 1. Ignore outgoing messages sent by current user (including deterministic UUID self-hashes)
+if (
+  !senderId ||
+  senderId === 'me' ||
+  msg.from === 'me' ||
+  msg.senderId === 'me' ||
+  (typeof isSelfSupabaseUid === 'function'
+    ? (isSelfSupabaseUid(rawSenderId, myUid) || isSelfSupabaseUid(senderId, myUid))
+    : senderId === myUid)
+) {
     return;
   }
 // 2. Suppress system and AI job noise
@@ -24106,13 +24357,13 @@ const isPicValid = pic && typeof pic === 'string' &&
 (pic.startsWith('http://') || pic.startsWith('https://') || pic.startsWith('data:image/') || pic.startsWith('/') || pic.startsWith('./') || pic.endsWith('.jpg') || pic.endsWith('.png') || pic.endsWith('.webp') || pic.endsWith('.svg'));
 const safePic = escapeHtml(pic || '');
       let avatar = isPicValid
-? `<img src="${safePic}" class="chat-avatar" loading="lazy" decoding="async" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}">` + `<div class="chat-avatar avatar-placeholder hidden" style="display:none !important; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
+? `<img src="${safePic}" class="chat-avatar" loading="eager" decoding="async" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}">` + `<div class="chat-avatar avatar-placeholder hidden" style="display:none !important; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
 : `<div class="chat-avatar avatar-placeholder" style="background:#202c33; color:#e9edef; display:flex !important; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`;
 let lastMessageSnippet = "No messages yet";
       let lastMessageTime = "";
       let deliveryTickHtml = "";
 if (latestMsg) {
-        const isFromMe = latestMsg.from === myUID;
+        const isFromMe = Boolean(myUID && (latestMsg.from === myUID || latestMsg.senderId === myUID || isSelfSupabaseUid(latestMsg.from || latestMsg.senderId, myUID)));
 if (isFromMe) {
           if (latestMsg.read) {
             deliveryTickHtml = `<span class="delivery-tick read" title="Read"><i class="fa-solid fa-check-double"></i></span> `;
@@ -25697,10 +25948,10 @@ function initNexDelegatedSwipeReply(containerEl) {
   const VERTICAL_CANCEL_THRESHOLD = 28;
 
   const ensureIndicator = (wrapper) => {
-    let ind = wrapper.querySelector('.swipe-reply-indicator');
+    let ind = wrapper.querySelector('.swipe-reply-indicator, .nex-reply-swipe-indicator');
     if (!ind) {
       ind = document.createElement('div');
-      ind.className = 'swipe-reply-indicator';
+      ind.className = 'swipe-reply-indicator nex-reply-swipe-indicator';
       ind.innerHTML = '<i class="fa-solid fa-reply"></i>';
       ind.style.setProperty('left', '12px', 'important');
       ind.style.setProperty('right', 'auto', 'important');
@@ -25759,7 +26010,7 @@ function initNexDelegatedSwipeReply(containerEl) {
 
   container.addEventListener('touchstart', (e) => {
     if (!e.touches || e.touches.length !== 1) return;
-    const targetBubble = e.target.closest('.message-bubble');
+    const targetBubble = e.target.closest('.message-bubble, .nex-msg-bubble');
     if (!targetBubble || !targetBubble._nexSwipeData) return;
     if (cleanupTimer) { clearTimeout(cleanupTimer); cleanupTimer = null; }
 
@@ -25788,6 +26039,7 @@ function initNexDelegatedSwipeReply(containerEl) {
         isLockedHorizontal = true;
         activeBubble.style.transition = 'none';
         activeBubble.style.willChange = 'transform';
+        activeBubble.classList.add('is-swiping');
         activeIndicator = ensureIndicator(activeWrapper);
         activeIndicator.style.transition = 'none';
       } else {
@@ -25807,13 +26059,17 @@ function initNexDelegatedSwipeReply(containerEl) {
         if (navigator.vibrate) try { navigator.vibrate(15); } catch (_) {}
         if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
         const swipeMeta = activeBubble._nexSwipeData;
-        if (swipeMeta) openReplyForMessage(swipeMeta.msg, swipeMeta.isOwn);
+        if (swipeMeta) {
+          if (typeof swipeMeta.onReply === 'function') swipeMeta.onReply(swipeMeta.msg);
+          else openReplyForMessage(swipeMeta.msg, swipeMeta.isOwn);
+        }
       }
     }
   }, { passive: true });
 
   const onEndOrCancel = (e) => {
     if (!isSwiping && !isLockedHorizontal) return;
+    if (activeBubble) activeBubble.classList.remove('is-swiping');
     if (activeBubble && !hasTriggered && e && e.changedTouches && e.changedTouches[0]) {
       const dx = e.changedTouches[0].clientX - startX;
       if (dx >= HORIZONTAL_THRESHOLD && isLockedHorizontal) {
@@ -25822,7 +26078,10 @@ function initNexDelegatedSwipeReply(containerEl) {
         if (navigator.vibrate) try { navigator.vibrate(15); } catch (_) {}
         if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
         const swipeMeta = activeBubble._nexSwipeData;
-        if (swipeMeta) openReplyForMessage(swipeMeta.msg, swipeMeta.isOwn);
+        if (swipeMeta) {
+          if (typeof swipeMeta.onReply === 'function') swipeMeta.onReply(swipeMeta.msg);
+          else openReplyForMessage(swipeMeta.msg, swipeMeta.isOwn);
+        }
       }
     }
     snapBack();
@@ -25830,6 +26089,9 @@ function initNexDelegatedSwipeReply(containerEl) {
 
   container.addEventListener('touchend', onEndOrCancel, { passive: true });
   container.addEventListener('touchcancel', onEndOrCancel, { passive: true });
+}
+if (typeof window !== 'undefined') {
+  window.initNexDelegatedSwipeReply = initNexDelegatedSwipeReply;
 }
 
 function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
@@ -26637,6 +26899,7 @@ if (typeof document !== 'undefined') {
       }
       if (document.readyState !== 'loading') {
         setupCyberLabDisplayPanel();
+        if (typeof initChatExperienceStudio === 'function') initChatExperienceStudio();
       }
     } catch (_) {}
   };
@@ -26644,7 +26907,10 @@ if (typeof document !== 'undefined') {
   else document.addEventListener('DOMContentLoaded', applyBootTier);
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      try { setupCyberLabDisplayPanel(); } catch (_) {}
+      try {
+        setupCyberLabDisplayPanel();
+        if (typeof initChatExperienceStudio === 'function') initChatExperienceStudio();
+      } catch (_) {}
     }, { once: true });
   }
 }

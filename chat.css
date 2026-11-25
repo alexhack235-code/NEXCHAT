@@ -445,20 +445,25 @@ html, body {
 }
 
 .toggle-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   z-index: 1;
   pointer-events: none;
-  font-family: 'Orbitron', monospace;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .dark-label {
-  color: var(--accent-primary);
+  color: #7dd3fc;
   opacity: 0;
 }
 
 .light-label {
-  color: #fff;
+  color: #fbbf24;
   opacity: 1;
 }
 
@@ -20996,4 +21001,53 @@ body.nex-low-end .nex-tab-enter-left,
 body.nex-low-end #chatDetailView.nex-conv-slide-in,
 body.nex-low-end .music-track-item.nex-track-reveal {
   animation: none !important;
+}
+
+/* Crisp Sun & Moon visibility inside #darkModeToggle */
+#darkModeToggle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 7px !important;
+}
+
+#darkModeToggle .toggle-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  z-index: 2 !important;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#darkModeToggle .toggle-label i {
+  display: inline-block !important;
+  visibility: visible !important;
+}
+
+#darkModeToggle .dark-label {
+  color: #7dd3fc !important;
+  opacity: 0.48 !important;
+}
+
+#darkModeToggle .light-label {
+  color: #fbbf24 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.55));
+}
+
+#darkModeToggle.active .dark-label {
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 5px rgba(125, 211, 252, 0.75));
+}
+
+#darkModeToggle.active .light-label {
+  opacity: 0.48 !important;
+  filter: none;
+}
+
+#darkModeToggle .toggle-slider {
+  z-index: 1 !important;
 }

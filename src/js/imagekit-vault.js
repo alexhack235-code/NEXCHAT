@@ -60,6 +60,9 @@ async function uploadToSingleVault(file, authData, options = {}) {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const res = JSON.parse(xhr.responseText);
+          const inferredType = (file.type && file.type.includes('/'))
+            ? file.type
+            : (/\.(mp4|webm|mov|m4v|mkv|3gp|ogv|ogg)$/i.test(cleanName) ? 'video/mp4' : res.fileType);
           resolve({
             url: res.url,
             downloadUrl: res.url,
@@ -68,7 +71,7 @@ async function uploadToSingleVault(file, authData, options = {}) {
             size: res.size,
             filePath: res.filePath,
             thumbnailUrl: res.thumbnailUrl || res.url,
-            fileType: res.fileType,
+            fileType: inferredType,
             vault: authData.vaultName || `ImageKit Vault ${authData.vaultIndex}`,
             vaultIndex: authData.vaultIndex
           });

@@ -29,7 +29,7 @@
   <meta name="x-apple-disable-message-reformatting" content="yes">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
     // NEXCHAT STABLE BUILD GUARD (NO RELOAD LOOPS)
@@ -87,6 +87,7 @@
   <link rel="stylesheet" href="css/layout-declutter.css?v=12.0">
   <link rel="stylesheet" href="css/status-elite-suite.css?v=12.0">
   <link rel="stylesheet" href="css/global-drop.css?v=13.0">
+  <link rel="stylesheet" href="css/chat-experience-studio.css?v=12.0">
   <style id="globalDropMobileStyles">
     @media (max-width: 899px) {
       .x-composer {
@@ -342,8 +343,8 @@
           <div class="toggle-switch-container" title="Dark/Light Mode">
             <div class="toggle-switch" id="darkModeToggle">
               <div class="toggle-slider"></div>
-              <span class="toggle-label dark-label">D</span>
-              <span class="toggle-label light-label">L</span>
+              <span class="toggle-label dark-label" aria-label="Dark Mode"><i class="fa-solid fa-moon"></i></span>
+              <span class="toggle-label light-label" aria-label="Light Mode"><i class="fa-solid fa-sun"></i></span>
             </div>
           </div>
 
@@ -1280,6 +1281,7 @@
           <button class="filter-tab" data-filter="market" title="Market Hub Messages">Market</button>
           <button class="filter-tab" data-filter="unread" title="Unread messages">Unread</button>
           <button class="filter-tab add-chat-tab" id="newChatFromTab" title="Start New Direct Chat"><i class="fa-solid fa-plus"></i></button>
+          <button type="button" class="filter-tab chatlist-style-tab" id="chatListCustomizeBtn" title="Customize Chat List Glassmorphism &amp; Picture"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>Glass</span></button>
         </div>
 
         <!-- WhatsApp-Style System Action Rows: Locked chats & Archived -->
@@ -3394,6 +3396,124 @@
                       <input type="range" id="bubbleGlassOpacityRange" min="25" max="90" value="65" step="5" class="settings-input" style="width:100%;">
                     </div>
                   </div>
+                </div>
+
+                <!-- Chat List Glassmorphism & Picture Backdrop Studio -->
+                <div class="settings-card" id="chatListGlassSettingsCard">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+                    <label for="chatListStyleSelect" style="margin:0;"><strong>Chat List Glassmorphism &amp; Picture Backdrop</strong></label>
+                    <span class="auto-trans-badge" style="background:rgba(0,212,255,0.14);border:1px solid rgba(0,212,255,0.35);color:#67e8f9;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700;">CHAT LIST FX</span>
+                  </div>
+                  <div id="chatListLivePreview" class="nex-chatlist-preview-stage" style="background-image:url('./assets/images/chatlist-futuristic-bg.jpg');">
+                    <div class="nex-chatlist-preview-row">
+                      <img src="chronex-ai.jpg" class="nex-chatlist-preview-avatar" onerror="this.style.display='none'" alt="" />
+                      <div style="flex:1;min-width:0;">
+                        <div style="font-size:13px;font-weight:700;color:#fff;">Chronex AI</div>
+                        <div style="font-size:11px;color:#cbd5e1;opacity:0.85;">Frosted liquid glass row card preview</div>
+                      </div>
+                      <span style="background:#00ff88;color:#041019;font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;">3</span>
+                    </div>
+                    <div class="nex-chatlist-preview-row">
+                      <span class="nex-chatlist-preview-avatar" style="display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#00ff88,#00d4ff);color:#041019;font-weight:800;font-size:12px;">T</span>
+                      <div style="flex:1;min-width:0;">
+                        <div style="font-size:13px;font-weight:700;color:#fff;">Team Syndicate</div>
+                        <div style="font-size:11px;color:#00ff88;">Swipe &amp; glassmorphic cards active</div>
+                      </div>
+                      <span style="font-size:10px;color:#94a3b8;">Now</span>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                    <label class="btn-primary" style="flex:1;min-width:120px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;">
+                      <i class="fa-solid fa-image"></i> Upload Photo
+                      <input type="file" id="chatListWallpaperFileInput" accept="image/*" style="display:none;" />
+                    </label>
+                    <button type="button" id="chatListBrowseAllWallpapersBtn" class="btn-secondary" style="flex:1;min-width:130px;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:700;background:linear-gradient(135deg,rgba(0,255,136,0.16),rgba(0,212,255,0.16));border-color:rgba(0,255,136,0.45);color:#00ff88;">
+                      <i class="fa-solid fa-palette"></i> 84+ Wallpapers
+                    </button>
+                    <button type="button" id="chatListUseProfilePicBtn" class="btn-secondary" style="flex:1;min-width:120px;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:700;">
+                      <i class="fa-solid fa-user-astronaut"></i> Use Profile Pic
+                    </button>
+                    <button type="button" id="chatListResetBgBtn" class="btn-secondary" style="padding:8px 12px;border-radius:10px;font-size:12px;" title="Clear Picture">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
+
+                  <select id="chatListStyleSelect" class="settings-select" style="margin-top:4px;">
+                    <option value="none">Default Clean List (Classic)</option>
+                    <option value="telegram-glass">1. Telegram High Glassmorphism</option>
+                    <option value="liquid-crystal">2. Liquid Crystal Glass</option>
+                    <option value="midnight-obsidian">3. Midnight Obsidian Glass</option>
+                    <option value="glass-frost">4. Pure Glass Frost</option>
+                    <option value="crimson-velvet-glass">5. Crimson Velvet Glass</option>
+                    <option value="arctic-ice-glass">6. Arctic Ice Glass</option>
+                    <option value="cyber-violet-glass">7. Cyber Violet Glass</option>
+                    <option value="solar-amber-glass">8. Solar Amber Glass</option>
+                    <option value="rose-quartz-glass">9. Rose Quartz Glass</option>
+                    <option value="neon-cyan-glass">10. Neon Cyan Glass</option>
+                    <option value="emerald-matrix-glass">11. Emerald Matrix Glass</option>
+                    <option value="graphite-smoke-glass">12. Graphite Smoke Glass</option>
+                    <option value="cobalt-deep-glass">13. Cobalt Deep Glass</option>
+                    <option value="royal-amethyst-glass">14. Royal Amethyst Glass</option>
+                    <option value="sunset-coral-glass">15. Sunset Coral Glass</option>
+                    <option value="mint-breeze-glass">16. Mint Breeze Glass</option>
+                    <option value="champagne-gold-glass">17. Champagne Gold Glass</option>
+                    <option value="indigo-nebula-glass">18. Indigo Nebula Glass</option>
+                    <option value="chrome-mirror-glass">19. Chrome Mirror Glass</option>
+                    <option value="pearl-ivory-glass">20. Pearl Ivory Glass</option>
+                  </select>
+
+                  <div id="glassChatListSwatches" class="nex-chatlist-swatch-grid"></div>
+
+                  <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">
+                    <div>
+                      <label for="chatListCardStyleSelect"><strong>Row Card Style</strong></label>
+                      <select id="chatListCardStyleSelect" class="settings-select" style="margin-top:4px;">
+                        <option value="frosted-cards">Frosted Cards (Balanced Depth)</option>
+                        <option value="prism-trim">Prism Neon Trim</option>
+                        <option value="ultra-clear">Ultra Clear Glass Film</option>
+                        <option value="aurora-pills">Aurora Pill Rows</option>
+                      </select>
+                    </div>
+                    <div class="luxury-toggle-row">
+                      <div>
+                        <strong>Chat List Specular Edge Highlights</strong>
+                        <p style="font-size:11.5px;color:#94a3b8;margin:2px 0 0 0;">Crisp top rim reflections across chat list row cards.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="chkChatListSpecularRim" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                    <div>
+                      <label for="chatListBlurRange"><strong>Chat List Blur: <span id="chatListBlurValue">16px</span></strong></label>
+                      <input type="range" id="chatListBlurRange" min="4" max="28" value="16" step="2" class="settings-input" style="width:100%;">
+                    </div>
+                    <div>
+                      <label for="chatListOpacityRange"><strong>Row Glass Opacity: <span id="chatListOpacityValue">56%</span></strong></label>
+                      <input type="range" id="chatListOpacityRange" min="18" max="90" value="56" step="4" class="settings-input" style="width:100%;">
+                    </div>
+                    <div>
+                      <label for="chatListBgDimRange"><strong>Picture Backdrop Dim: <span id="chatListBgDimValue">42%</span></strong></label>
+                      <input type="range" id="chatListBgDimRange" min="0" max="85" value="42" step="5" class="settings-input" style="width:100%;">
+                    </div>
+                    <div>
+                      <label for="chatListBgBlurRange"><strong>Picture Backdrop Blur: <span id="chatListBgBlurValue">0px</span></strong></label>
+                      <input type="range" id="chatListBgBlurRange" min="0" max="20" value="0" step="2" class="settings-input" style="width:100%;">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Direct & Group Animations, Swiping & Typing Effects -->
+                <div class="settings-card">
+                  <label for="typingFxStyleSelect"><strong>Swiping, Scrolling &amp; Typing Effects (1-to-1 &amp; Groups)</strong></label>
+                  <p style="font-size:11.5px;color:#94a3b8;margin:4px 0 8px 0;">120Hz spring scroll momentum, swipe-to-reply in both Direct &amp; Group chats, filter tab swiping, and live typing keystroke effects.</p>
+                  <select id="typingFxStyleSelect" class="settings-select">
+                    <option value="kinetic">Kinetic Wave &amp; Spark (Default)</option>
+                    <option value="ripple">Liquid Cyan Ripple</option>
+                    <option value="matrix">Neon Emerald Pulse</option>
+                    <option value="stealth">Stealth Crisp (Minimal)</option>
+                  </select>
                 </div>
 
                 <div class="settings-card">
@@ -6378,14 +6498,18 @@
                       </button>
                     </div>
 
-                    <!-- Floating Music Sticker Chip on Media Preview -->
+                    <!-- Floating Music Sticker Chip on Media Preview (Click to open Music Status & Time-Frame Studio) -->
                     <div id="statusAttachedMusicSticker" class="status-attached-music-sticker" style="display: none;">
-                      <div class="music-sticker-disc-icon"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
+                      <div class="music-sticker-disc-icon" id="statusAttachedMusicQuickPlay" title="Play or pause preview"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
                       <img id="statusAttachedMusicArt" src="logo.jpg" class="music-sticker-art" alt="Track Art">
                       <div class="music-sticker-info">
                         <span id="statusAttachedMusicTitle" class="music-sticker-title">Track Name</span>
-                        <span id="statusAttachedMusicArtist" class="music-sticker-artist">Artist</span>
+                        <div class="music-sticker-title-row">
+                          <span id="statusAttachedMusicArtist" class="music-sticker-artist">Artist</span>
+                          <span id="statusAttachedMusicStatePill" class="music-sticker-state-pill">READY</span>
+                        </div>
                       </div>
+                      <span class="music-sticker-tune-hint" title="Adjust playback & video time frame"><i class="fa-solid fa-sliders"></i></span>
                       <button type="button" id="statusRemoveMusicBtn" class="music-sticker-remove-btn" title="Remove Music Track"><i class="fa-solid fa-xmark"></i></button>
                     </div>
 
@@ -6400,6 +6524,71 @@
                         <button type="button" class="status-filter-chip" data-filter="contrast(1.1) sepia(0.25) saturate(0.95)">Cinema</button>
                         <button type="button" class="status-filter-chip" data-filter="sepia(0.35) saturate(1.25)">Warm</button>
                         <button type="button" class="status-filter-chip" data-filter="hue-rotate(85deg) saturate(1.35)">Emerald</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Interactive Music Playback Status & Video Time-Frame Studio Panel -->
+                  <div id="statusMusicControlPanel" class="status-music-control-panel" style="display: none;">
+                    <div class="music-ctrl-header">
+                      <div class="music-ctrl-status-group">
+                        <span id="statusMusicCtrlStateDot" class="music-ctrl-status-dot stopped"></span>
+                        <span id="statusMusicCtrlStateText" class="music-ctrl-state-text">Stopped</span>
+                        <span id="statusMusicCtrlTimeReadout" class="music-ctrl-time-readout">0:00 / 0:30</span>
+                      </div>
+                      <button type="button" id="statusMusicCtrlCollapseBtn" class="music-ctrl-collapse-btn" title="Hide music panel">
+                        <i class="fa-solid fa-chevron-up"></i>
+                      </button>
+                    </div>
+
+                    <div class="music-ctrl-transport-row">
+                      <button type="button" id="statusMusicCtrlPlayBtn" class="music-ctrl-btn primary">
+                        <i class="fa-solid fa-play"></i> <span>Play</span>
+                      </button>
+                      <button type="button" id="statusMusicCtrlStopBtn" class="music-ctrl-btn danger">
+                        <i class="fa-solid fa-stop"></i> <span>Stop</span>
+                      </button>
+                      <button type="button" id="statusMusicCtrlRestartBtn" class="music-ctrl-btn" title="Restart from clip start frame">
+                        <i class="fa-solid fa-backward-step"></i> <span>Start</span>
+                      </button>
+                      <button type="button" id="statusMusicCtrlChangeBtn" class="music-ctrl-btn" title="Choose a different track">
+                        <i class="fa-solid fa-music"></i> <span>Track</span>
+                      </button>
+                    </div>
+
+                    <div class="music-ctrl-progress-row">
+                      <input type="range" id="statusMusicProgressRange" class="music-ctrl-range progress" min="0" max="30" step="0.1" value="0" aria-label="Music playback position">
+                    </div>
+
+                    <div class="music-ctrl-timeframe-box">
+                      <div class="music-ctrl-timeframe-head">
+                        <span class="music-ctrl-tf-label"><i class="fa-solid fa-timeline"></i> TIME FRAME</span>
+                        <span id="statusMusicWindowSummary" class="music-ctrl-tf-summary">0:00 - 0:30 (30.0s)</span>
+                      </div>
+                      <div class="music-ctrl-sliders-grid">
+                        <label class="music-ctrl-slider-field">
+                          <span class="music-ctrl-slider-label">Start: <strong id="statusMusicStartLabel">0:00</strong></span>
+                          <input type="range" id="statusMusicStartRange" class="music-ctrl-range" min="0" max="29" step="0.5" value="0">
+                        </label>
+                        <label class="music-ctrl-slider-field">
+                          <span class="music-ctrl-slider-label">End: <strong id="statusMusicEndLabel">0:30</strong></span>
+                          <input type="range" id="statusMusicEndRange" class="music-ctrl-range" min="1" max="30" step="0.5" value="30">
+                        </label>
+                      </div>
+                      <div class="music-ctrl-video-sync-row" id="statusMusicVideoSyncRow">
+                        <div class="music-ctrl-video-meta">
+                          <i class="fa-solid fa-film"></i>
+                          <span id="statusMusicVideoInfoLabel">No video selected &mdash; 30s music clip</span>
+                        </div>
+                        <div class="music-ctrl-video-actions">
+                          <button type="button" id="statusMusicFitVideoBtn" class="music-ctrl-mini-btn" title="Match music clip length to video frame">
+                            <i class="fa-solid fa-arrows-left-right-to-line"></i> <span>Fit Video</span>
+                          </button>
+                          <label class="music-ctrl-sync-toggle" title="Start and stop music in lockstep with video preview">
+                            <input type="checkbox" id="statusMusicSyncVideoToggle" checked>
+                            <span>Sync</span>
+                          </label>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -33,31 +33,35 @@ service cloud.firestore {
     // Collection: statuses & status & status_updates
     // Document ID: {statusId} (Auto-generated)
     // Fields:
-    //   - userId: string (required, creator UID, immutable)
-    //   - authorId: string (optional, creator UID, immutable)
-    //   - username: string (optional, max 100 chars)
-    //   - profilePic: string (optional URL or path, max 2048 chars)
+    //   - userId / authorId: string (required, creator UID, immutable)
+    //   - username / userName / author / authorName: string (optional, max 100 chars)
+    //   - profilePic / avatar / authorPhoto / userAvatar: string (optional URL, path, or DataURL, max 150KB)
+    //   - privacyMode: string (optional, e.g. 'contacts' | 'public' | 'contacts_except' | 'only_share', max 50 chars)
     //   - content / caption / text: string (optional, max 10000 chars)
-    //   - imageUrl / mediaUrl / videoUrl: string (optional URL or base64 data URL, max 1.5MB)
+    //   - imageUrl / mediaUrl / videoUrl / audioUrl / voiceUrl: string (optional URL or base64 data URL, max 1.5MB)
     //   - musicTrack: map or null (optional, attached track metadata)
-    //   - mediaType / type: string (optional, 'image' | 'video' | 'text' | 'audio' | 'code')
+    //   - mediaType / type: string (optional, max 100 / 50 chars)
     //   - filter: string (optional, CSS filter name, max 100 chars)
     //   - fontFamily: string (optional, typography name, max 100 chars)
     //   - textAlign: string (optional, text alignment, max 50 chars)
     //   - gradient: string (optional, CSS gradient background, max 500 chars)
     //   - codeContent: string (optional, code block payload, max 20000 chars)
     //   - codeLanguage: string (optional, syntax highlight language, max 50 chars)
+    //   - amaPrompt: string (optional, AMA sticker prompt, max 500 chars)
     //   - mode: string (optional, 'CHAIN' | 'TRIM', max 50 chars)
     //   - threadId: string (optional, chain thread grouping ID, max 128 chars)
     //   - chainIndex / chainTotal: number (optional, video sequence markers)
     //   - timeWindow: map or null (optional, start, end, duration numbers)
     //   - trimStart / trimEnd / duration: number (optional, video clip timestamps)
     //   - isMuted: bool (optional, audio mute flag)
+    //   - pollData / poll: map or null (optional, interactive poll payload)
     //   - timestamp / createdAt: timestamp or number (optional, creation time)
     //   - createdAtMs: number (optional, epoch timestamp in ms)
     //   - expiresAt: timestamp, string or number (optional, 24h expiration)
     //   - expiresAtMs: number (optional, 24h epoch expiration timestamp in ms)
-    //   - views / likedBy / likes: list (optional, viewer tracking)
+    //   - views / likedBy / likes / viewers / viewersList: list or number (optional, engagement tracking)
+    //   - viewCount / viewsCount / likesCount: number (optional, engagement counters)
+    //   - reactions: list or map (optional, inline reactions)
     // Subcollections:
     //   - views/{viewId}: View receipts with viewer UID and timestamp
     //   - reactions/{reactionId}: Story emoji reactions
@@ -238,6 +242,11 @@ service cloud.firestore {
       return val == null || (val is string && val.size() <= 1500000);
     }
 
+    // Safe avatar validator for Status Stories (supports '', 'logo.jpg', null, remote URLs, and compressed DataURLs up to 150KB)
+    function isValidStatusAvatar(val) {
+      return val == null || (val is string && val.size() <= 150000);
+    }
+
     function isValidList(val, maxSize) {
       return val is list && val.size() <= maxSize;
     }
@@ -289,7 +298,7 @@ service cloud.firestore {
     }
 
     function isValidTimestampOrNumber(val) {
-      return val == null || val is timestamp || val is string || val is int || val is float || val is number;
+      return val == null || val is timestamp || (val is string && val.size() <= 100) || val is int || val is float || val is number;
     }
 
     function resourceExists() {
@@ -548,43 +557,236 @@ service cloud.firestore {
       isValidOptionalList('deletedFor', 500);
     }
 
-    // 12. Status Story Create Validator
+    // 12. Status Story Validators (Create, Update, Engagement, Views & Reactions)
+    function isOptionalMapStr(m, k, maxLen) {
+      return !(k in m) || m[k] == null || (m[k] is string && m[k].size() <= maxLen);
+    }
+
+    function isOptionalMapNum(m, k, maxV) {
+      return !(k in m) || m[k] == null || (m[k] is number && m[k] >= 0 && m[k] <= maxV);
+    }
+
+    function isValidStatusMusicTrack(m) {
+      return m == null || (
+        m is map && m.size() <= 16 &&
+        m.keys().hasOnly([
+          'id', 'trackName', 'artistName', 'collectionName', 'previewUrl', 'artworkUrl',
+          'durationSec', 'startSec', 'endSec', 'clipDuration', 'syncWithVideo', 'volume'
+        ]) &&
+        (!('id' in m) || m.id == null || m.id is number || (m.id is string && m.id.size() <= 128)) &&
+        isOptionalMapStr(m, 'trackName', 200) && isOptionalMapStr(m, 'artistName', 200) &&
+        isOptionalMapStr(m, 'collectionName', 200) && isOptionalMapStr(m, 'previewUrl', 4096) &&
+        isOptionalMapStr(m, 'artworkUrl', 4096) && isOptionalMapNum(m, 'durationSec', 86400) &&
+        isOptionalMapNum(m, 'startSec', 86400) && isOptionalMapNum(m, 'endSec', 86400) &&
+        isOptionalMapNum(m, 'clipDuration', 86400) && isOptionalMapNum(m, 'volume', 2) &&
+        (!('syncWithVideo' in m) || m.syncWithVideo == null || m.syncWithVideo is bool)
+      );
+    }
+
+    function isValidStatusPoll(p) {
+      return p == null || (
+        p is map && p.size() <= 15 &&
+        p.keys().hasOnly(['question', 'options', 'votes', 'voters', 'totalVotes', 'pollId', 'status', 'title', 'counts']) &&
+        isOptionalMapStr(p, 'question', 500) && isOptionalMapStr(p, 'title', 500) &&
+        isOptionalMapStr(p, 'pollId', 128) && isOptionalMapStr(p, 'status', 50) &&
+        (!('options' in p) || p.options == null || isValidList(p.options, 20)) &&
+        (!('votes' in p) || p.votes == null || isValidList(p.votes, 20) || (p.votes is map && p.votes.size() <= 20)) &&
+        (!('counts' in p) || p.counts == null || isValidList(p.counts, 20) || (p.counts is map && p.counts.size() <= 20)) &&
+        (!('voters' in p) || p.voters == null || isValidList(p.voters, 10000) || (p.voters is map && p.voters.size() <= 10000)) &&
+        isOptionalMapNum(p, 'totalVotes', 100000000)
+      );
+    }
+
     function isValidStatusStoryCreate(data) {
-      return (
-        ('userId' in data && (data.userId == request.auth.uid || isSuperAdmin())) ||
-        ('authorId' in data && (data.authorId == request.auth.uid || isSuperAdmin()))
+      return data.keys().hasOnly([
+        'userId', 'authorId', 'username', 'userName', 'author', 'authorName',
+        'profilePic', 'avatar', 'authorPhoto', 'userAvatar',
+        'privacyMode', 'allowedUsers', 'excludedUsers',
+        'content', 'caption', 'text',
+        'imageUrl', 'mediaUrl', 'videoUrl', 'audioUrl', 'voiceUrl', 'musicTrack',
+        'mediaType', 'type', 'filter', 'fontFamily', 'textAlign', 'gradient',
+        'codeContent', 'codeLanguage', 'amaPrompt',
+        'mode', 'threadId', 'chainIndex', 'chainTotal', 'timeWindow', 'trimStart', 'trimEnd', 'duration', 'isMuted',
+        'pollData', 'poll',
+        'timestamp', 'createdAt', 'createdAtMs', 'expiresAt', 'expiresAtMs', 'updatedAt',
+        'views', 'viewCount', 'viewsCount', 'viewers', 'viewersList', 'likedBy', 'likes', 'likesCount', 'reactions'
+      ]) &&
+      (
+        ('userId' in data && data.userId is string && data.userId.size() > 0 && data.userId.size() <= 128) ||
+        ('authorId' in data && data.authorId is string && data.authorId.size() > 0 && data.authorId.size() <= 128)
       ) &&
-      isValidOptionalString('content', 0, 10000) &&
-      isValidOptionalString('caption', 0, 10000) &&
-      isValidOptionalString('text', 0, 10000) &&
-      isValidOptionalString('username', 0, 100) &&
-      isValidOptionalString('profilePic', 0, 2048) &&
-      isValidOptionalString('mediaType', 0, 50) &&
-      isValidOptionalString('type', 0, 50) &&
-      isValidOptionalString('filter', 0, 100) &&
-      isValidOptionalString('fontFamily', 0, 100) &&
-      isValidOptionalString('textAlign', 0, 50) &&
-      isValidOptionalString('gradient', 0, 500) &&
-      isValidOptionalString('codeContent', 0, 20000) &&
-      isValidOptionalString('codeLanguage', 0, 50) &&
-      isValidOptionalString('mode', 0, 50) &&
-      isValidOptionalString('threadId', 0, 128) &&
+      (!('userId' in data) || data.userId == null || data.userId == request.auth.uid || isSuperAdmin()) &&
+      (!('authorId' in data) || data.authorId == null || data.authorId == request.auth.uid || isSuperAdmin()) &&
+      isValidOptionalString('username', 0, 100) && isValidOptionalString('userName', 0, 100) &&
+      isValidOptionalString('author', 0, 100) && isValidOptionalString('authorName', 0, 100) &&
+      (!('profilePic' in data) || isValidStatusAvatar(data.profilePic)) &&
+      (!('avatar' in data) || isValidStatusAvatar(data.avatar)) &&
+      (!('authorPhoto' in data) || isValidStatusAvatar(data.authorPhoto)) &&
+      (!('userAvatar' in data) || isValidStatusAvatar(data.userAvatar)) &&
+      isValidOptionalString('privacyMode', 0, 50) &&
+      isValidOptionalList('allowedUsers', 1000) && isValidOptionalList('excludedUsers', 1000) &&
+      isValidOptionalString('content', 0, 10000) && isValidOptionalString('caption', 0, 10000) && isValidOptionalString('text', 0, 10000) &&
       (!('imageUrl' in data) || isValidStatusMedia(data.imageUrl)) &&
       (!('mediaUrl' in data) || isValidStatusMedia(data.mediaUrl)) &&
       (!('videoUrl' in data) || isValidStatusMedia(data.videoUrl)) &&
-      (!('musicTrack' in data) || data.musicTrack == null || data.musicTrack is map) &&
-      (!('timeWindow' in data) || data.timeWindow == null || data.timeWindow is map) &&
+      (!('audioUrl' in data) || isValidStatusMedia(data.audioUrl)) &&
+      (!('voiceUrl' in data) || isValidStatusMedia(data.voiceUrl)) &&
+      (!('musicTrack' in data) || isValidStatusMusicTrack(data.musicTrack)) &&
+      isValidOptionalString('mediaType', 0, 100) && isValidOptionalString('type', 0, 50) &&
+      isValidOptionalString('filter', 0, 100) && isValidOptionalString('fontFamily', 0, 100) &&
+      isValidOptionalString('textAlign', 0, 50) && isValidOptionalString('gradient', 0, 500) &&
+      isValidOptionalString('codeContent', 0, 20000) && isValidOptionalString('codeLanguage', 0, 50) &&
+      isValidOptionalString('amaPrompt', 0, 500) && isValidOptionalString('mode', 0, 50) && isValidOptionalString('threadId', 0, 128) &&
+      isOptionalMapNum(data, 'chainIndex', 100) && isOptionalMapNum(data, 'chainTotal', 100) &&
+      (!('timeWindow' in data) || data.timeWindow == null || (
+        data.timeWindow is map && data.timeWindow.keys().hasOnly(['start', 'end', 'duration']) &&
+        isOptionalMapNum(data.timeWindow, 'start', 86400) && isOptionalMapNum(data.timeWindow, 'end', 86400) && isOptionalMapNum(data.timeWindow, 'duration', 86400)
+      )) &&
+      isOptionalMapNum(data, 'trimStart', 86400) && isOptionalMapNum(data, 'trimEnd', 86400) && isOptionalMapNum(data, 'duration', 86400) &&
       (!('isMuted' in data) || data.isMuted == null || data.isMuted is bool) &&
-      (!('chainIndex' in data) || data.chainIndex is number) &&
-      (!('chainTotal' in data) || data.chainTotal is number) &&
-      (!('trimStart' in data) || data.trimStart is number) &&
-      (!('trimEnd' in data) || data.trimEnd is number) &&
-      (!('duration' in data) || data.duration is number) &&
-      (!('createdAtMs' in data) || data.createdAtMs is number) &&
-      (!('expiresAtMs' in data) || data.expiresAtMs is number) &&
-      (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
-      (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
-      (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt));
+      (!('pollData' in data) || isValidStatusPoll(data.pollData)) && (!('poll' in data) || isValidStatusPoll(data.poll)) &&
+      (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) && (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+      (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) && (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt)) &&
+      (!('createdAtMs' in data) || data.createdAtMs == null || (data.createdAtMs is number && data.createdAtMs >= 0)) &&
+      (!('expiresAtMs' in data) || data.expiresAtMs == null || (data.expiresAtMs is number && data.expiresAtMs >= 0)) &&
+      (!('views' in data) || data.views == null || (data.views is number && data.views >= 0) || isValidList(data.views, 10000)) &&
+      (!('viewCount' in data) || data.viewCount == null || (data.viewCount is number && data.viewCount >= 0)) &&
+      (!('viewsCount' in data) || data.viewsCount == null || (data.viewsCount is number && data.viewsCount >= 0)) &&
+      isValidOptionalList('viewers', 10000) && isValidOptionalList('viewersList', 10000) && isValidOptionalList('likedBy', 10000) &&
+      (!('likes' in data) || data.likes == null || (data.likes is number && data.likes >= 0) || isValidList(data.likes, 10000)) &&
+      (!('likesCount' in data) || data.likesCount == null || (data.likesCount is number && data.likesCount >= 0)) &&
+      isValidOptionalReactions('reactions');
+    }
+
+    function isStatusDocOwner() {
+      return isAuthenticated() && resource != null && (
+        ('userId' in resource.data && resource.data.userId == request.auth.uid) ||
+        ('authorId' in resource.data && resource.data.authorId == request.auth.uid)
+      );
+    }
+
+    function isStatusCounterPlusOne(field, affected) {
+      return !affected.hasAny([field]) || (
+        request.resource.data[field] is number &&
+        (
+          ((!(field in resource.data) || resource.data[field] == null) && request.resource.data[field] == 1) ||
+          (field in resource.data && resource.data[field] is number && request.resource.data[field] == resource.data[field] + 1)
+        )
+      );
+    }
+
+    function isValidStatusPollVoteUpdate(field, affected) {
+      return !affected.hasAny([field]) || (
+        isValidStatusPoll(request.resource.data[field]) &&
+        field in resource.data && resource.data[field] is map &&
+        (!('question' in resource.data[field]) || ('question' in request.resource.data[field] && request.resource.data[field].question == resource.data[field].question)) &&
+        (!('options' in resource.data[field]) || ('options' in request.resource.data[field] && request.resource.data[field].options == resource.data[field].options))
+      );
+    }
+
+    function isValidStatusNonOwnerUpdate() {
+      let affected = request.resource.data.diff(resource.data).affectedKeys();
+      return affected.hasOnly([
+        'views', 'viewCount', 'viewsCount', 'pollData', 'poll',
+        'likedBy', 'likes', 'likesCount', 'reactions'
+      ]) &&
+      isStatusCounterPlusOne('viewCount', affected) &&
+      isStatusCounterPlusOne('viewsCount', affected) &&
+      isValidStatusPollVoteUpdate('pollData', affected) &&
+      isValidStatusPollVoteUpdate('poll', affected) &&
+      (!affected.hasAny(['views']) || request.resource.data.views == null || (request.resource.data.views is number && request.resource.data.views >= 0) || isValidList(request.resource.data.views, 10000)) &&
+      (!affected.hasAny(['likedBy']) || isValidOptionalList('likedBy', 10000)) &&
+      (!affected.hasAny(['likes']) || request.resource.data.likes == null || (request.resource.data.likes is number && request.resource.data.likes >= 0) || isValidList(request.resource.data.likes, 10000)) &&
+      (!affected.hasAny(['likesCount']) || (
+        request.resource.data.likesCount is number && request.resource.data.likesCount >= 0 &&
+        (
+          ((!('likesCount' in resource.data) || resource.data.likesCount == null) && request.resource.data.likesCount <= 1) ||
+          ('likesCount' in resource.data && resource.data.likesCount is number &&
+           request.resource.data.likesCount <= resource.data.likesCount + 1 &&
+           resource.data.likesCount <= request.resource.data.likesCount + 1)
+        )
+      )) &&
+      (!affected.hasAny(['reactions']) || isValidOptionalReactions('reactions'));
+    }
+
+    function isValidStatusUpdate() {
+      return isAuthenticated() && resource != null && (
+        (
+          (isStatusDocOwner() || isSuperAdmin()) &&
+          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'createdAtMs']) &&
+          isValidStatusStoryCreate(request.resource.data)
+        ) ||
+        isValidStatusNonOwnerUpdate() ||
+        isSuperAdmin()
+      );
+    }
+
+    function canDeleteStatusDoc() {
+      return isAuthenticated() && resource != null && (
+        isStatusDocOwner() ||
+        isSuperAdmin() ||
+        ('expiresAtMs' in resource.data && resource.data.expiresAtMs is number && resource.data.expiresAtMs <= request.time.toMillis())
+      );
+    }
+
+    function isStatusViewOwner(viewId) {
+      return resource != null && (
+        viewId == request.auth.uid ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
+        ('viewerId' in resource.data && resource.data.viewerId == request.auth.uid) ||
+        ('userId' in resource.data && resource.data.userId == request.auth.uid)
+      );
+    }
+
+    function isValidStatusViewWrite(viewId) {
+      let d = request.resource.data;
+      return isAuthenticated() &&
+             d.keys().hasOnly([
+               'uid', 'viewerId', 'userId', 'username', 'userName',
+               'avatarUrl', 'profilePic', 'avatar', 'viewedAt', 'reaction',
+               'timestamp', 'createdAt', 'updatedAt'
+             ]) &&
+             (!('uid' in d) || d.uid == null || d.uid == request.auth.uid) &&
+             (!('viewerId' in d) || d.viewerId == null || d.viewerId == request.auth.uid) &&
+             (!('userId' in d) || d.userId == null || d.userId == request.auth.uid) &&
+             (viewId == request.auth.uid || ('uid' in d && d.uid == request.auth.uid) || ('viewerId' in d && d.viewerId == request.auth.uid) || ('userId' in d && d.userId == request.auth.uid)) &&
+             isValidOptionalString('username', 0, 100) && isValidOptionalString('userName', 0, 100) &&
+             (!('avatarUrl' in d) || isValidStatusAvatar(d.avatarUrl)) &&
+             (!('profilePic' in d) || isValidStatusAvatar(d.profilePic)) &&
+             (!('avatar' in d) || isValidStatusAvatar(d.avatar)) &&
+             isValidOptionalString('reaction', 0, 50) &&
+             (!('viewedAt' in d) || isValidTimestampOrNumber(d.viewedAt)) &&
+             (!('timestamp' in d) || isValidTimestampOrNumber(d.timestamp)) &&
+             (!('createdAt' in d) || isValidTimestampOrNumber(d.createdAt)) &&
+             (!('updatedAt' in d) || isValidTimestampOrNumber(d.updatedAt));
+    }
+
+    function isStatusReactionOwner(reactionId) {
+      return resource != null && (
+        reactionId == request.auth.uid ||
+        ('userId' in resource.data && resource.data.userId == request.auth.uid) ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid)
+      );
+    }
+
+    function isValidStatusReactionWrite(reactionId) {
+      let d = request.resource.data;
+      return isAuthenticated() &&
+             d.keys().hasOnly([
+               'userId', 'uid', 'reaction', 'emoji', 'type',
+               'username', 'userName', 'avatarUrl', 'profilePic',
+               'createdAt', 'timestamp', 'updatedAt'
+             ]) &&
+             (!('userId' in d) || d.userId == null || d.userId == request.auth.uid) &&
+             (!('uid' in d) || d.uid == null || d.uid == request.auth.uid) &&
+             (reactionId == request.auth.uid || ('userId' in d && d.userId == request.auth.uid) || ('uid' in d && d.uid == request.auth.uid)) &&
+             isValidOptionalString('reaction', 0, 50) && isValidOptionalString('emoji', 0, 32) && isValidOptionalString('type', 0, 50) &&
+             isValidOptionalString('username', 0, 100) && isValidOptionalString('userName', 0, 100) &&
+             (!('avatarUrl' in d) || isValidStatusAvatar(d.avatarUrl)) &&
+             (!('profilePic' in d) || isValidStatusAvatar(d.profilePic)) &&
+             (!('createdAt' in d) || isValidTimestampOrNumber(d.createdAt)) &&
+             (!('timestamp' in d) || isValidTimestampOrNumber(d.timestamp)) &&
+             (!('updatedAt' in d) || isValidTimestampOrNumber(d.updatedAt));
     }
 
     // 13. Reel Short Video Validator
@@ -1240,55 +1442,22 @@ service cloud.firestore {
     // ===============================================================
     match /statuses/{statusId} {
       allow read: if isAuthenticated();
-
       allow create: if isAuthenticated() && isValidStatusStoryCreate(request.resource.data);
-
-      allow update: if isAuthenticated() && (
-        (
-          (('userId' in resource.data && isOwner(resource.data.userId)) ||
-           ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-           isSuperAdmin()) &&
-          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'createdAtMs']) &&
-          isValidStatusStoryCreate(request.resource.data)
-        ) ||
-        (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
-          ]) &&
-          isValidOptionalList('views', 10000) &&
-          isValidOptionalList('likedBy', 10000) &&
-          isValidOptionalList('likes', 10000)
-        ) ||
-        isSuperAdmin()
-      );
-
-      allow delete: if isAuthenticated() && (
-        ('userId' in resource.data && isOwner(resource.data.userId)) ||
-        ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-        isSuperAdmin() ||
-        (resource.data.expiresAtMs is number && resource.data.expiresAtMs <= request.time.toMillis())
-      );
+      allow update: if isValidStatusUpdate();
+      allow delete: if canDeleteStatusDoc();
 
       match /views/{viewId} {
         allow read: if isAuthenticated();
-        allow create, update: if isAuthenticated() && (
-          request.resource.data.uid == request.auth.uid ||
-          request.resource.data.viewerId == request.auth.uid ||
-          request.resource.data.userId == request.auth.uid ||
-          viewId == request.auth.uid
-        );
-        allow delete: if isAuthenticated() && (
-          resource.data.uid == request.auth.uid ||
-          resource.data.viewerId == request.auth.uid ||
-          viewId == request.auth.uid ||
-          isSuperAdmin()
-        );
+        allow create: if isValidStatusViewWrite(viewId);
+        allow update: if isAuthenticated() && isStatusViewOwner(viewId) && isValidStatusViewWrite(viewId);
+        allow delete: if isAuthenticated() && (isStatusViewOwner(viewId) || isSuperAdmin());
       }
 
       match /reactions/{reactionId} {
         allow read: if isAuthenticated();
-        allow create, update: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || reactionId == request.auth.uid);
-        allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || reactionId == request.auth.uid || isSuperAdmin());
+        allow create: if isValidStatusReactionWrite(reactionId);
+        allow update: if isAuthenticated() && isStatusReactionOwner(reactionId) && isValidStatusReactionWrite(reactionId);
+        allow delete: if isAuthenticated() && (isStatusReactionOwner(reactionId) || isSuperAdmin());
       }
     }
 
@@ -1296,82 +1465,42 @@ service cloud.firestore {
     match /status/{statusId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidStatusStoryCreate(request.resource.data);
-      allow update: if isAuthenticated() && (
-        (
-          (('userId' in resource.data && isOwner(resource.data.userId)) ||
-           ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-           isSuperAdmin()) &&
-          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'createdAtMs']) &&
-          isValidStatusStoryCreate(request.resource.data)
-        ) ||
-        (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
-          ]) &&
-          isValidOptionalList('views', 10000) &&
-          isValidOptionalList('likedBy', 10000) &&
-          isValidOptionalList('likes', 10000)
-        ) ||
-        isSuperAdmin()
-      );
-      allow delete: if isAuthenticated() && (
-        ('userId' in resource.data && isOwner(resource.data.userId)) ||
-        ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-        isSuperAdmin() ||
-        (resource.data.expiresAtMs is number && resource.data.expiresAtMs <= request.time.toMillis())
-      );
+      allow update: if isValidStatusUpdate();
+      allow delete: if canDeleteStatusDoc();
 
       match /views/{viewId} {
         allow read: if isAuthenticated();
-        allow create, update: if isAuthenticated() && (request.resource.data.uid == request.auth.uid || viewId == request.auth.uid);
-        allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || viewId == request.auth.uid || isSuperAdmin());
+        allow create: if isValidStatusViewWrite(viewId);
+        allow update: if isAuthenticated() && isStatusViewOwner(viewId) && isValidStatusViewWrite(viewId);
+        allow delete: if isAuthenticated() && (isStatusViewOwner(viewId) || isSuperAdmin());
       }
 
       match /reactions/{reactionId} {
         allow read: if isAuthenticated();
-        allow create, update: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || reactionId == request.auth.uid);
-        allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || reactionId == request.auth.uid || isSuperAdmin());
+        allow create: if isValidStatusReactionWrite(reactionId);
+        allow update: if isAuthenticated() && isStatusReactionOwner(reactionId) && isValidStatusReactionWrite(reactionId);
+        allow delete: if isAuthenticated() && (isStatusReactionOwner(reactionId) || isSuperAdmin());
       }
     }
 
     match /status_updates/{statusId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isValidStatusStoryCreate(request.resource.data);
-      allow update: if isAuthenticated() && (
-        (
-          (('userId' in resource.data && isOwner(resource.data.userId)) ||
-           ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-           isSuperAdmin()) &&
-          areImmutableFieldsUnchanged(['userId', 'authorId', 'createdAt', 'createdAtMs']) &&
-          isValidStatusStoryCreate(request.resource.data)
-        ) ||
-        (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'views', 'viewCount', 'viewsCount', 'pollData', 'poll', 'likedBy', 'likes', 'likesCount'
-          ]) &&
-          isValidOptionalList('views', 10000) &&
-          isValidOptionalList('likedBy', 10000) &&
-          isValidOptionalList('likes', 10000)
-        ) ||
-        isSuperAdmin()
-      );
-      allow delete: if isAuthenticated() && (
-        ('userId' in resource.data && isOwner(resource.data.userId)) ||
-        ('authorId' in resource.data && isOwner(resource.data.authorId)) ||
-        isSuperAdmin() ||
-        (resource.data.expiresAtMs is number && resource.data.expiresAtMs <= request.time.toMillis())
-      );
+      allow update: if isValidStatusUpdate();
+      allow delete: if canDeleteStatusDoc();
 
       match /views/{viewId} {
         allow read: if isAuthenticated();
-        allow create, update: if isAuthenticated() && (request.resource.data.uid == request.auth.uid || viewId == request.auth.uid);
-        allow delete: if isAuthenticated() && (resource.data.uid == request.auth.uid || viewId == request.auth.uid || isSuperAdmin());
+        allow create: if isValidStatusViewWrite(viewId);
+        allow update: if isAuthenticated() && isStatusViewOwner(viewId) && isValidStatusViewWrite(viewId);
+        allow delete: if isAuthenticated() && (isStatusViewOwner(viewId) || isSuperAdmin());
       }
 
       match /reactions/{reactionId} {
         allow read: if isAuthenticated();
-        allow create, update: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || reactionId == request.auth.uid);
-        allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || reactionId == request.auth.uid || isSuperAdmin());
+        allow create: if isValidStatusReactionWrite(reactionId);
+        allow update: if isAuthenticated() && isStatusReactionOwner(reactionId) && isValidStatusReactionWrite(reactionId);
+        allow delete: if isAuthenticated() && (isStatusReactionOwner(reactionId) || isSuperAdmin());
       }
     }
 

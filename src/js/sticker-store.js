@@ -191,8 +191,169 @@
           </svg>`
         }
       ]
+    },
+    {
+      id: 'video_sound',
+      name: 'Video & Audio',
+      icon: 'fa-film',
+      stickers: [
+        {
+          id: 'kinetic_pulse',
+          name: 'Sonic Pulse',
+          soundPreset: 'bass_drop',
+          isAnimated: true,
+          svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="76" fill="#07131e" stroke="#00ff88" stroke-width="6">
+              <animate attributeName="r" values="70;78;70" dur="1.1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="100" cy="100" r="54" fill="none" stroke="#00d4ff" stroke-width="4" stroke-dasharray="18 10">
+              <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="4s" repeatCount="indefinite"/>
+            </circle>
+            <g fill="#00ff88">
+              <rect x="64" y="80" width="10" height="40" rx="5"><animate attributeName="height" values="24;68;24" dur="0.7s" repeatCount="indefinite"/><animate attributeName="y" values="88;66;88" dur="0.7s" repeatCount="indefinite"/></rect>
+              <rect x="82" y="65" width="10" height="70" rx="5" fill="#00d4ff"><animate attributeName="height" values="70;28;70" dur="0.65s" repeatCount="indefinite"/><animate attributeName="y" values="65;86;65" dur="0.65s" repeatCount="indefinite"/></rect>
+              <rect x="100" y="55" width="10" height="90" rx="5"><animate attributeName="height" values="36;86;36" dur="0.58s" repeatCount="indefinite"/><animate attributeName="y" values="82;57;82" dur="0.58s" repeatCount="indefinite"/></rect>
+              <rect x="118" y="68" width="10" height="64" rx="5" fill="#00d4ff"><animate attributeName="height" values="66;26;66" dur="0.72s" repeatCount="indefinite"/><animate attributeName="y" values="67;87;67" dur="0.72s" repeatCount="indefinite"/></rect>
+              <rect x="136" y="80" width="10" height="40" rx="5"><animate attributeName="height" values="24;58;24" dur="0.62s" repeatCount="indefinite"/><animate attributeName="y" values="88;71;88" dur="0.62s" repeatCount="indefinite"/></rect>
+            </g>
+            <text x="100" y="176" font-family="'Impact', sans-serif" font-size="18" fill="#ffffff" stroke="#000" stroke-width="3" text-anchor="middle" paint-order="stroke fill">BASS DROP</text>
+          </svg>`
+        },
+        {
+          id: 'neon_heartbeat',
+          name: 'Neon Heart',
+          soundPreset: 'sci_fi_chime',
+          isAnimated: true,
+          svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <g>
+              <animateTransform attributeName="transform" type="scale" values="1;1.1;0.96;1.08;1" dur="1.15s" repeatCount="indefinite" additive="sum" />
+              <path d="M100 160 C55 128 28 96 28 65 C28 42 46 26 68 26 C82 26 94 34 100 45 C106 34 118 26 132 26 C154 26 172 42 172 65 C172 96 145 128 100 160 Z" fill="#e11d48" stroke="#ffffff" stroke-width="7"/>
+            </g>
+            <path d="M55 95 L78 95 L88 74 L100 116 L112 82 L122 95 L145 95" fill="none" stroke="#67e8f9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="140">
+              <animate attributeName="stroke-dashoffset" from="140" to="0" dur="1.15s" repeatCount="indefinite"/>
+            </path>
+            <text x="100" y="185" font-family="'Impact', sans-serif" font-size="19" fill="#ffffff" stroke="#000" stroke-width="3" text-anchor="middle" paint-order="stroke fill">HEARTBEAT</text>
+          </svg>`
+        },
+        {
+          id: 'laser_zap_motion',
+          name: 'Laser Bolt',
+          soundPreset: 'laser_zap',
+          isAnimated: true,
+          svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="76" fill="#0f172a" stroke="#38bdf8" stroke-width="6"/>
+            <polygon points="112,32 62,108 102,108 86,168 142,88 102,88" fill="#ffd700" stroke="#ffffff" stroke-width="5">
+              <animate attributeName="opacity" values="1;0.65;1;0.9;1" dur="0.45s" repeatCount="indefinite"/>
+              <animateTransform attributeName="transform" type="translate" values="0,0;0,-4;0,0" dur="0.6s" repeatCount="indefinite"/>
+            </polygon>
+            <text x="100" y="184" font-family="'Impact', sans-serif" font-size="18" fill="#67e8f9" stroke="#000" stroke-width="3" text-anchor="middle" paint-order="stroke fill">HYPER ZAP</text>
+          </svg>`
+        },
+        {
+          id: 'applause_orbit',
+          name: 'Gold Star FX',
+          soundPreset: 'applause_burst',
+          isAnimated: true,
+          svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="100,26 121,72 172,78 134,113 144,164 100,139 56,164 66,113 28,78 79,72" fill="#f59e0b" stroke="#ffffff" stroke-width="7">
+              <animateTransform attributeName="transform" type="rotate" values="-6 100 100;6 100 100;-6 100 100" dur="1.4s" repeatCount="indefinite"/>
+            </polygon>
+            <text x="100" y="185" font-family="'Impact', sans-serif" font-size="19" fill="#ffffff" stroke="#000" stroke-width="3" text-anchor="middle" paint-order="stroke fill">LEGENDARY</text>
+          </svg>`
+        },
+        {
+          id: 'cyber_laugh_motion',
+          name: 'HAHA Motion',
+          soundPreset: 'pop_laugh',
+          isAnimated: true,
+          svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect x="24" y="42" width="152" height="112" rx="26" fill="#7c3aed" stroke="#ffffff" stroke-width="7">
+              <animateTransform attributeName="transform" type="rotate" values="-4 100 100;4 100 100;-4 100 100" dur="0.55s" repeatCount="indefinite"/>
+            </rect>
+            <text x="100" y="106" font-family="'Impact', sans-serif" font-size="38" fill="#00ff88" stroke="#000" stroke-width="4" text-anchor="middle" paint-order="stroke fill">HAHAHA!</text>
+            <text x="100" y="136" font-family="'Impact', sans-serif" font-size="16" fill="#ffffff" text-anchor="middle">SOUND ON</text>
+          </svg>`
+        },
+        {
+          id: 'hype_radar_siren',
+          name: 'Alert Siren',
+          soundPreset: 'hype_siren',
+          isAnimated: true,
+          svg: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="78" fill="none" stroke="#ff2a5f" stroke-width="5" opacity="0.7">
+              <animate attributeName="r" values="42;84" dur="1s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.9;0" dur="1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="100" cy="100" r="56" fill="#0b0f19" stroke="#ff2a5f" stroke-width="6"/>
+            <text x="100" y="108" font-family="'Impact', sans-serif" font-size="28" fill="#ff5f7e" stroke="#000" stroke-width="3" text-anchor="middle" paint-order="stroke fill">HYPE!</text>
+          </svg>`
+        }
+      ]
     }
   ];
+
+  let _activeAudioNode = null;
+  function playNexStickerAudio(meta = {}) {
+    try {
+      if (_activeAudioNode) {
+        try { _activeAudioNode.pause(); } catch (_) {}
+        _activeAudioNode = null;
+      }
+      if (meta && meta.audioUrl) {
+        const audio = new Audio(meta.audioUrl);
+        audio.volume = 0.88;
+        _activeAudioNode = audio;
+        audio.play().catch(() => {});
+        return true;
+      }
+      const preset = meta?.soundPreset || 'sci_fi_chime';
+      if (preset === 'none') return false;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return false;
+      const ctx = window.__nexStickerAudioCtx || (window.__nexStickerAudioCtx = new AudioCtx());
+      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+      const now = ctx.currentTime;
+
+      const tone = (freqStart, freqEnd, dur, type = 'sine', startOffset = 0, vol = 0.16) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freqStart, now + startOffset);
+        osc.frequency.exponentialRampToValueAtTime(Math.max(24, freqEnd), now + startOffset + dur);
+        gain.gain.setValueAtTime(0.001, now + startOffset);
+        gain.gain.linearRampToValueAtTime(vol, now + startOffset + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + startOffset + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + startOffset);
+        osc.stop(now + startOffset + dur + 0.03);
+      };
+
+      if (preset === 'bass_drop') {
+        tone(170, 42, 0.55, 'sawtooth', 0, 0.2);
+        tone(95, 36, 0.65, 'sine', 0.04, 0.25);
+      } else if (preset === 'laser_zap') {
+        tone(1200, 180, 0.24, 'sawtooth', 0, 0.16);
+        tone(980, 140, 0.22, 'triangle', 0.12, 0.14);
+      } else if (preset === 'applause_burst') {
+        [523.25, 659.25, 783.99, 1046.5].forEach((f, idx) => tone(f, f * 1.02, 0.32, 'triangle', idx * 0.06, 0.14));
+      } else if (preset === 'pop_laugh') {
+        [420, 560, 480, 640, 580].forEach((f, idx) => tone(f, f * 1.25, 0.1, 'sine', idx * 0.085, 0.16));
+      } else if (preset === 'hype_siren') {
+        tone(540, 880, 0.22, 'sawtooth', 0, 0.13);
+        tone(880, 540, 0.22, 'sawtooth', 0.22, 0.13);
+      } else {
+        tone(587.33, 880, 0.24, 'sine', 0, 0.15);
+        tone(880, 1174.66, 0.34, 'triangle', 0.09, 0.14);
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+  if (typeof window !== 'undefined') {
+    window.playNexStickerAudio = playNexStickerAudio;
+  }
 
   class NexStickerStore {
     constructor() {
@@ -333,6 +494,9 @@
               <button type="button" class="sticker-tab-pill" data-pack="reactions">
                 <i class="fa-solid fa-thumbs-up text-[#38bdf8]"></i> <span>Reactions</span>
               </button>
+              <button type="button" class="sticker-tab-pill" data-pack="video_sound">
+                <i class="fa-solid fa-film text-[#00ff88]"></i> <span>Video &amp; Audio</span>
+              </button>
             </div>
 
             <!-- Sticker Grid Stream -->
@@ -364,21 +528,22 @@
             </div>
 
             <div class="sticker-studio-body">
-              <!-- Left: Canvas Preview Box -->
+              <!-- Left: Canvas / Video Preview Box -->
               <div class="sticker-canvas-wrapper">
                 <div class="sticker-checkered-stage">
                   <canvas id="stickerStudioCanvas" width="360" height="360"></canvas>
+                  <video id="stickerStudioVideoPreview" autoplay loop muted playsinline style="display:none;width:100%;height:100%;max-width:300px;max-height:300px;object-fit:contain;border-radius:16px;"></video>
                 </div>
-                <span class="text-[11px] text-gray-400 mt-2 text-center block">Real-time Die-Cut Sticker Preview</span>
+                <span class="text-[11px] text-gray-400 mt-2 text-center block">Real-time Image &amp; Video Sticker Preview</span>
               </div>
 
               <!-- Right: Controls & Customization -->
               <div class="sticker-controls-column">
                 <div class="sticker-upload-dropzone" id="stickerDropzone">
-                  <input type="file" id="stickerImageInput" accept="image/*" style="display: none;">
+                  <input type="file" id="stickerImageInput" accept="image/*,video/mp4,video/webm,video/quicktime" style="display: none;">
                   <i class="fa-solid fa-cloud-arrow-up text-2xl text-[#00f2fe] mb-1"></i>
-                  <strong class="text-white text-xs block">Choose or Drop Image</strong>
-                  <span class="text-[10px] text-gray-400">PNG, JPG, WebP, GIF supported</span>
+                  <strong class="text-white text-xs block">Choose Photo, GIF or Video Sticker</strong>
+                  <span class="text-[10px] text-gray-400">PNG, WebP, GIF, MP4, WebM supported</span>
                 </div>
 
                 <div class="sticker-control-group mt-3">
@@ -399,6 +564,26 @@
                 <div class="sticker-control-group mt-2">
                   <label class="sticker-control-label">Meme Caption / Text (Optional)</label>
                   <input type="text" id="stickerCaptionInput" class="sticker-text-input" placeholder="e.g. GG, NO WAY, APPROVED" maxlength="24">
+                </div>
+
+                <div class="sticker-control-group mt-2">
+                  <label class="sticker-control-label">Sticker Audio / Sound Effect</label>
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    <select id="stickerSoundPresetSelect" class="sticker-text-input" style="flex:1;">
+                      <option value="none">No Audio</option>
+                      <option value="bass_drop">Bass Drop</option>
+                      <option value="sci_fi_chime">Sci-Fi Chime</option>
+                      <option value="laser_zap">Laser Zap</option>
+                      <option value="applause_burst">Applause Burst</option>
+                      <option value="pop_laugh">Pop Laugh</option>
+                      <option value="hype_siren">Hype Siren</option>
+                    </select>
+                    <label class="sticker-style-pill" style="cursor:pointer;white-space:nowrap;" title="Attach custom audio file">
+                      <i class="fa-solid fa-music"></i> MP3/WAV
+                      <input type="file" id="stickerAudioInput" accept="audio/*" style="display:none;" />
+                    </label>
+                    <button type="button" id="stickerTestSoundBtn" class="sticker-style-pill" title="Preview Sound"><i class="fa-solid fa-volume-high"></i></button>
+                  </div>
                 </div>
 
                 <div class="sticker-studio-actions mt-4 flex gap-2">
@@ -528,12 +713,35 @@
         customStickers.forEach(s => {
           const tile = document.createElement('div');
           tile.className = 'sticker-tile-item';
+          tile.style.position = 'relative';
           tile.title = `${s.name || 'Custom Sticker'} (Click to send)`;
 
-          const img = document.createElement('img');
-          img.src = s.dataUrl;
-          img.className = 'sticker-tile-img';
-          tile.appendChild(img);
+          if (s.isVideoSticker) {
+            const vid = document.createElement('video');
+            vid.src = s.dataUrl;
+            vid.autoplay = true;
+            vid.loop = true;
+            vid.muted = true;
+            vid.playsInline = true;
+            vid.className = 'sticker-tile-video';
+            tile.appendChild(vid);
+            const vBadge = document.createElement('span');
+            vBadge.className = 'sticker-tile-video-badge';
+            vBadge.textContent = 'VIDEO';
+            tile.appendChild(vBadge);
+          } else {
+            const img = document.createElement('img');
+            img.src = s.dataUrl;
+            img.className = 'sticker-tile-img';
+            tile.appendChild(img);
+          }
+
+          if (s.hasAudio || s.audioUrl || (s.soundPreset && s.soundPreset !== 'none') || s.isVideoSticker) {
+            const aBadge = document.createElement('span');
+            aBadge.className = 'sticker-tile-audio-badge';
+            aBadge.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+            tile.appendChild(aBadge);
+          }
 
           // Delete sticker icon
           const delBtn = document.createElement('button');
@@ -551,13 +759,33 @@
           tile.appendChild(delBtn);
 
           tile.addEventListener('click', () => {
-            this.sendStickerToChat(s.dataUrl, s.name || 'Sticker');
+            this.sendStickerToChat(s.dataUrl, s.name || 'Sticker', {
+              isVideoSticker: Boolean(s.isVideoSticker),
+              mimeType: s.mimeType,
+              hasAudio: Boolean(s.hasAudio || s.audioUrl || (s.soundPreset && s.soundPreset !== 'none') || s.isVideoSticker),
+              audioUrl: s.audioUrl || null,
+              soundPreset: s.soundPreset || null
+            });
             this.closeStoreModal();
           });
 
           grid.appendChild(tile);
         });
         return;
+      }
+
+      if (packId === 'video_sound') {
+        const uploadCard = document.createElement('div');
+        uploadCard.className = 'sticker-tile-add-card';
+        uploadCard.innerHTML = `
+          <i class="fa-solid fa-film text-2xl text-[#00d4ff] mb-1"></i>
+          <span>Add Video/Audio</span>
+        `;
+        uploadCard.addEventListener('click', () => {
+          this.closeStoreModal();
+          this.openStudioModal();
+        });
+        grid.appendChild(uploadCard);
       }
 
       // Preset Pack rendering
@@ -567,6 +795,7 @@
       pack.stickers.forEach(s => {
         const tile = document.createElement('div');
         tile.className = 'sticker-tile-item';
+        tile.style.position = 'relative';
         tile.title = `${s.name} (Click to send)`;
 
         const dataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(s.svg)}`;
@@ -575,8 +804,28 @@
         img.className = 'sticker-tile-img';
         tile.appendChild(img);
 
+        if (s.soundPreset || s.audioUrl) {
+          const aBadge = document.createElement('span');
+          aBadge.className = 'sticker-tile-audio-badge';
+          aBadge.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+          tile.appendChild(aBadge);
+        }
+        if (s.isAnimated) {
+          const mBadge = document.createElement('span');
+          mBadge.className = 'sticker-tile-video-badge';
+          mBadge.textContent = 'LIVE';
+          tile.appendChild(mBadge);
+        }
+
         tile.addEventListener('click', () => {
-          this.sendStickerToChat(dataUrl, s.name);
+          const meta = {
+            isVideoSticker: false,
+            hasAudio: Boolean(s.soundPreset || s.audioUrl),
+            soundPreset: s.soundPreset || null,
+            audioUrl: s.audioUrl || null
+          };
+          if (meta.hasAudio) playNexStickerAudio(meta);
+          this.sendStickerToChat(dataUrl, s.name, meta);
           this.closeStoreModal();
         });
 
@@ -596,9 +845,36 @@
       const sendBtn = document.getElementById('sendStickerDirectBtn');
 
       this.studioImage = null;
+      this.studioVideoFile = null;
+      this.studioVideoPreviewUrl = null;
+      this.studioAudioFile = null;
+      this.studioAudioUrl = null;
+      this.studioSoundPreset = 'none';
       this.studioStyle = 'diecut';
       this.studioBorderWidth = 6;
       this.studioCaption = '';
+
+      const soundSelect = document.getElementById('stickerSoundPresetSelect');
+      const audioInput = document.getElementById('stickerAudioInput');
+      const testSoundBtn = document.getElementById('stickerTestSoundBtn');
+
+      soundSelect?.addEventListener('change', () => {
+        this.studioSoundPreset = soundSelect.value || 'none';
+      });
+      audioInput?.addEventListener('change', async (e) => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        this.studioAudioFile = f;
+        this.studioAudioUrl = URL.createObjectURL(f);
+        if (soundSelect) soundSelect.value = 'sci_fi_chime';
+        if (window.showNotif) window.showNotif(`Audio "${f.name}" attached to sticker!`, 'success', 1800);
+      });
+      testSoundBtn?.addEventListener('click', () => {
+        playNexStickerAudio({
+          audioUrl: this.studioAudioUrl,
+          soundPreset: this.studioSoundPreset !== 'none' ? this.studioSoundPreset : 'sci_fi_chime'
+        });
+      });
 
       if (dropzone && fileInput) {
         dropzone.addEventListener('click', () => fileInput.click());
@@ -642,16 +918,77 @@
         });
       });
 
+      const buildStudioStickerPayload = async () => {
+        let finalAudioUrl = null;
+        if (this.studioAudioFile) {
+          try {
+            if (typeof window.uploadAnyMedia === 'function') {
+              const res = await window.uploadAnyMedia(this.studioAudioFile, { folder: 'sticker-audio', uid: window.myUID });
+              finalAudioUrl = res?.url || res?.downloadUrl || null;
+            }
+          } catch (_) {}
+          if (!finalAudioUrl && this.studioAudioFile.size <= 350 * 1024) {
+            finalAudioUrl = await new Promise((resolve) => {
+              const r = new FileReader();
+              r.onload = (ev) => resolve(ev.target.result);
+              r.readAsDataURL(this.studioAudioFile);
+            });
+          }
+        }
+
+        if (this.studioVideoFile) {
+          let videoUrl = null;
+          try {
+            if (typeof window.uploadAnyMedia === 'function') {
+              const res = await window.uploadAnyMedia(this.studioVideoFile, { folder: 'video-stickers', uid: window.myUID });
+              videoUrl = res?.url || res?.downloadUrl || null;
+            }
+          } catch (_) {}
+          if (!videoUrl && this.studioVideoFile.size <= 700 * 1024) {
+            videoUrl = await new Promise((resolve) => {
+              const r = new FileReader();
+              r.onload = (ev) => resolve(ev.target.result);
+              r.readAsDataURL(this.studioVideoFile);
+            });
+          } else if (!videoUrl) {
+            videoUrl = this.studioVideoPreviewUrl;
+          }
+          return {
+            dataUrl: videoUrl,
+            isVideoSticker: true,
+            mimeType: this.studioVideoFile.type || 'video/mp4',
+            hasAudio: Boolean(finalAudioUrl || this.studioSoundPreset !== 'none' || true),
+            audioUrl: finalAudioUrl,
+            soundPreset: this.studioSoundPreset !== 'none' ? this.studioSoundPreset : null
+          };
+        }
+
+        const canvas = document.getElementById('stickerStudioCanvas');
+        const dataUrl = canvas ? canvas.toDataURL('image/webp', 0.95) : '';
+        return {
+          dataUrl,
+          isVideoSticker: false,
+          mimeType: 'image/webp',
+          hasAudio: Boolean(finalAudioUrl || this.studioSoundPreset !== 'none'),
+          audioUrl: finalAudioUrl,
+          soundPreset: this.studioSoundPreset !== 'none' ? this.studioSoundPreset : null
+        };
+      };
+
       if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
-          const canvas = document.getElementById('stickerStudioCanvas');
-          if (!canvas) return;
-          const dataUrl = canvas.toDataURL('image/webp', 0.95);
+          const payload = await buildStudioStickerPayload();
+          if (!payload.dataUrl) return;
           const newSticker = {
             id: 'stk_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-            name: this.studioCaption || 'Custom Sticker',
+            name: this.studioCaption || (payload.isVideoSticker ? 'Video Sticker' : 'Custom Sticker'),
             pack: 'my_stickers',
-            dataUrl: dataUrl,
+            dataUrl: payload.dataUrl,
+            isVideoSticker: payload.isVideoSticker,
+            mimeType: payload.mimeType,
+            hasAudio: payload.hasAudio,
+            audioUrl: payload.audioUrl,
+            soundPreset: payload.soundPreset,
             createdAt: Date.now()
           };
           await this.saveCustomSticker(newSticker);
@@ -662,17 +999,45 @@
       }
 
       if (sendBtn) {
-        sendBtn.addEventListener('click', () => {
-          const canvas = document.getElementById('stickerStudioCanvas');
-          if (!canvas) return;
-          const dataUrl = canvas.toDataURL('image/webp', 0.95);
-          this.sendStickerToChat(dataUrl, this.studioCaption || 'Custom Sticker');
+        sendBtn.addEventListener('click', async () => {
+          const payload = await buildStudioStickerPayload();
+          if (!payload.dataUrl) return;
+          this.sendStickerToChat(payload.dataUrl, this.studioCaption || (payload.isVideoSticker ? 'Video Sticker' : 'Custom Sticker'), payload);
           this.closeStudioModal();
         });
       }
     }
 
     loadStudioImage(file) {
+      if (!file) return;
+      const canvas = document.getElementById('stickerStudioCanvas');
+      const vidPrev = document.getElementById('stickerStudioVideoPreview');
+      const isVideo = (file.type && file.type.startsWith('video/')) || /\.(mp4|webm|mov)$/i.test(file.name || '');
+
+      if (isVideo) {
+        this.studioVideoFile = file;
+        this.studioImage = null;
+        if (this.studioVideoPreviewUrl) {
+          try { URL.revokeObjectURL(this.studioVideoPreviewUrl); } catch (_) {}
+        }
+        this.studioVideoPreviewUrl = URL.createObjectURL(file);
+        if (canvas) canvas.style.display = 'none';
+        if (vidPrev) {
+          vidPrev.src = this.studioVideoPreviewUrl;
+          vidPrev.muted = false;
+          vidPrev.style.display = 'block';
+          vidPrev.play().catch(() => { vidPrev.muted = true; vidPrev.play().catch(() => {}); });
+        }
+        return;
+      }
+
+      this.studioVideoFile = null;
+      if (vidPrev) {
+        vidPrev.pause();
+        vidPrev.style.display = 'none';
+      }
+      if (canvas) canvas.style.display = 'block';
+
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -806,9 +1171,9 @@
     }
 
     // ─── 4. Send Sticker into Chat ───
-    sendStickerToChat(stickerUrl, stickerName) {
+    sendStickerToChat(stickerUrl, stickerName, stickerMeta = {}) {
       if (typeof window.dispatchStickerMessage === 'function') {
-        window.dispatchStickerMessage(stickerUrl, stickerName);
+        window.dispatchStickerMessage(stickerUrl, stickerName, stickerMeta);
       } else if (typeof window.sendMessage === 'function') {
         // Fallback: Set attachment as sticker
         window.selectedFile = null;
@@ -817,7 +1182,7 @@
         
         // Dispatch synthetic event or direct call
         const event = new CustomEvent('nex_send_sticker', {
-          detail: { url: stickerUrl, name: stickerName }
+          detail: { url: stickerUrl, name: stickerName, meta: stickerMeta }
         });
         window.dispatchEvent(event);
       }

@@ -69,23 +69,23 @@
       genres: ['top hits', 'trending', 'afrobeats', 'amapiano', 'r&b']
     },
     {
-      trackId: 1500000001,
+      trackId: 1614063459,
       trackName: 'Calm Down',
       artistName: 'Rema',
       collectionName: 'Rave & Roses',
-      previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/bf/20/7e/bf207e47-e25f-2ec4-eaec-cb242d59cf7a/mzaf_14022800318534015697.plus.aac.p.m4a',
-      artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/bf/20/7e/bf207e47-e25f-2ec4-eaec-cb242d59cf7a/22UMGIM10373.rgb.jpg/600x600bb.jpg',
-      trackTimeMillis: 30000,
+      previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/3c/7e/3b/3c7e3b1d-c005-91cb-51d1-2d86effd9990/mzaf_6788794088599474630.plus.aac.p.m4a',
+      artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b2/b4/7c/b2b47cf9-d8e2-53f6-5c62-c974d665c95b/22UMGIM08994.rgb.jpg/100x100bb.jpg',
+      trackTimeMillis: 219669,
       genres: ['top hits', 'afrobeats', 'trending']
     },
     {
-      trackId: 1500000002,
+      trackId: 1623677811,
       trackName: 'Last Last',
       artistName: 'Burna Boy',
       collectionName: 'Love, Damini',
-      previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview122/v4/09/b3/ef/09b3efbc-ebf3-4ca2-c288-cf941a50a1df/mzaf_5521255536486183358.plus.aac.p.m4a',
-      artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/09/b3/ef/09b3efbc-ebf3-4ca2-c288-cf941a50a1df/075679753441.jpg/600x600bb.jpg',
-      trackTimeMillis: 30000,
+      previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/42/c0/0f/42c00f8b-fff6-2529-70c3-861c21143c0a/mzaf_2842108628707526245.plus.aac.p.m4a',
+      artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/ca/eb/31/caeb3173-eaf0-0cd5-65ea-585adfe312ba/075679745156.jpg/100x100bb.jpg',
+      trackTimeMillis: 172342,
       genres: ['top hits', 'afrobeats']
     },
     {
@@ -129,23 +129,23 @@
       genres: ['r&b', 'top hits', 'pop']
     },
     {
-      trackId: 1440843468,
+      trackId: 1499378607,
       trackName: 'Blinding Lights',
       artistName: 'The Weeknd',
       collectionName: 'After Hours',
-      previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/4a/5b/4b/4a5b4be4-20b8-c3e0-652a-cf0fba0d588a/mzaf_10034237194161726059.plus.aac.p.m4a',
-      artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/4a/5b/4b/4a5b4be4-20b8-c3e0-652a-cf0fba0d588a/20UMGIM03138.rgb.jpg/600x600bb.jpg',
-      trackTimeMillis: 30000,
+      previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/19/d6/60/19d660ff-e3a9-8377-15a3-ce4b28e89cac/mzaf_18422426156481158187.plus.aac.p.m4a',
+      artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/25/a1/d6/25a1d6f7-e7df-5b57-53e2-2aa20377c887/20UMGIM11048.rgb.jpg/600x600bb.jpg',
+      trackTimeMillis: 200040,
       genres: ['top hits', 'pop', 'r&b']
     },
     {
-      trackId: 1544494222,
+      trackId: 1505683980,
       trackName: 'Save Your Tears',
       artistName: 'The Weeknd',
-      collectionName: 'After Hours',
-      previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview125/v4/5e/5c/42/5e5c4266-98dc-a9fc-c744-996ff2064971/mzaf_7811195679549326402.plus.aac.p.m4a',
-      artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/5e/5c/42/5e5c4266-98dc-a9fc-c744-996ff2064971/20UMGIM03138.rgb.jpg/600x600bb.jpg',
-      trackTimeMillis: 30000,
+      collectionName: 'After Hours (Deluxe)',
+      previewUrl: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/8b/38/17/8b3817e4-c0e9-7e02-2654-3e2ecee93603/mzaf_18415642125637540903.plus.aac.p.m4a',
+      artworkUrl100: 'https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/83/3a/f7/833af71b-2e0c-3303-24f5-8f5c546c073b/20UMGIM21167.rgb.jpg/100x100bb.jpg',
+      trackTimeMillis: 215627,
       genres: ['pop', 'r&b', 'chill']
     },
     {
@@ -280,9 +280,18 @@
       this.selectedTrack = null;
       this.currentPreviewAudio = null;
       this.currentlyPlayingId = null;
+      this.activePreviewTrack = null;
       this.activeGenre = 'top hits';
       this.searchDebounceTimer = null;
       this.cachedTracks = new Map();
+      this.clipStartSec = 0;
+      this.clipEndSec = 30;
+      this.trackDurationSec = 30;
+      this.syncWithVideo = true;
+      this.panelOpen = false;
+      this.playbackStatus = 'stopped';
+      this._playSeq = 0;
+      this._suppressVideoSync = false;
 
       this.init();
     }
@@ -360,6 +369,8 @@
         e.stopPropagation();
         this.removeTrack();
       });
+
+      this._bindAttachedStickerAndPanel();
 
       // Prepare singleton Preview Audio element cleanly
       this._ensureAudioPlayer();
@@ -653,10 +664,10 @@
           liveTracks = liveTracks.filter(t => !/(power music workout|mixxc|karaoke|rockabye baby)/i.test(`${t.artistName} ${t.trackName} ${t.collectionName}`));
         }
 
-        // Merge curated + live tracks cleanly without duplicates
+        // Merge fresh live iTunes tracks FIRST so curated fallbacks only fill missing slots
         const seenIds = new Set();
         const mergedTracks = [];
-        for (const t of [...curatedInstant, ...liveTracks]) {
+        for (const t of [...liveTracks, ...curatedInstant]) {
           if (t && t.previewUrl && !seenIds.has(t.id)) {
             seenIds.add(t.id);
             mergedTracks.push(t);
@@ -742,6 +753,379 @@
       });
     }
 
+    _formatSec(sec) {
+      const s = Math.max(0, Math.round(Number(sec) || 0));
+      const m = Math.floor(s / 60);
+      const rem = s % 60;
+      return `${m}:${rem < 10 ? '0' : ''}${rem}`;
+    }
+
+    _getVideoFrameMeta() {
+      const trimmer = window.NexTransmitterTrimmer;
+      const videoEl = document.getElementById('statusModalVideoPreview');
+      const hasVideo = Boolean(
+        videoEl &&
+        videoEl.style.display !== 'none' &&
+        (videoEl.currentSrc || videoEl.src || trimmer?.activeFile)
+      );
+      if (hasVideo && trimmer && trimmer.videoDuration > 0) {
+        const start = Number(trimmer.currentStart || 0);
+        const end = Number(trimmer.currentEnd || trimmer.videoDuration || 30);
+        return {
+          hasVideo: true,
+          start,
+          end,
+          duration: Math.max(1, end - start),
+          totalDuration: Number(trimmer.videoDuration || end),
+          videoEl
+        };
+      }
+      if (hasVideo && videoEl && videoEl.duration > 0 && isFinite(videoEl.duration)) {
+        return {
+          hasVideo: true,
+          start: 0,
+          end: videoEl.duration,
+          duration: Math.max(1, videoEl.duration),
+          totalDuration: videoEl.duration,
+          videoEl
+        };
+      }
+      const fallbackSlideSec = parseFloat(
+        document.getElementById('statusSlideDurationSelect')?.value ||
+        localStorage.getItem('nex_status_default_duration') ||
+        '15'
+      ) || 15;
+      return {
+        hasVideo: false,
+        start: 0,
+        end: fallbackSlideSec,
+        duration: fallbackSlideSec,
+        totalDuration: fallbackSlideSec,
+        videoEl: null
+      };
+    }
+
+    _bindAttachedStickerAndPanel() {
+      const sticker = document.getElementById('statusAttachedMusicSticker');
+      if (sticker && !sticker.dataset.interactiveBound) {
+        sticker.dataset.interactiveBound = 'true';
+        sticker.style.cursor = 'pointer';
+        sticker.title = 'Click to open Music Controls & Time Frame';
+        sticker.addEventListener('click', (e) => {
+          if (e.target.closest('#statusRemoveMusicBtn')) return;
+          e.stopPropagation();
+          if (e.target.closest('#statusAttachedMusicQuickPlay')) {
+            this.toggleAttachedPlayback();
+            return;
+          }
+          this.toggleControlPanel();
+        });
+      }
+
+      const panel = document.getElementById('statusMusicControlPanel');
+      if (!panel || panel.dataset.panelBound === 'true') return;
+      panel.dataset.panelBound = 'true';
+
+      document.getElementById('statusMusicCtrlCollapseBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.setControlPanelOpen(false);
+      });
+
+      document.getElementById('statusMusicCtrlPlayBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleAttachedPlayback();
+      });
+
+      document.getElementById('statusMusicCtrlStopBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.stopClip();
+      });
+
+      document.getElementById('statusMusicCtrlRestartBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playClip(true);
+      });
+
+      document.getElementById('statusMusicCtrlChangeBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openPicker();
+      });
+
+      const progressRange = document.getElementById('statusMusicProgressRange');
+      progressRange?.addEventListener('input', (e) => {
+        e.stopPropagation();
+        const audio = this._ensureAudioPlayer();
+        const target = Math.max(this.clipStartSec, Math.min(this.clipEndSec, Number(e.target.value) || 0));
+        if (audio && audio.readyState >= 1) {
+          try { audio.currentTime = target; } catch (_) {}
+        }
+        this._syncControlPanelUI();
+      });
+
+      const startRange = document.getElementById('statusMusicStartRange');
+      const endRange = document.getElementById('statusMusicEndRange');
+
+      startRange?.addEventListener('input', (e) => {
+        e.stopPropagation();
+        let nextStart = Math.max(0, Math.min(this.trackDurationSec - 1, Number(e.target.value) || 0));
+        if (this.clipEndSec - nextStart < 1) {
+          nextStart = Math.max(0, this.clipEndSec - 1);
+          e.target.value = String(nextStart);
+        }
+        this.clipStartSec = Number(nextStart.toFixed(1));
+        const audio = this._ensureAudioPlayer();
+        if (audio && audio.readyState >= 1 && (audio.currentTime < this.clipStartSec || audio.currentTime > this.clipEndSec)) {
+          try { audio.currentTime = this.clipStartSec; } catch (_) {}
+        }
+        this._syncControlPanelUI();
+      });
+
+      endRange?.addEventListener('input', (e) => {
+        e.stopPropagation();
+        let nextEnd = Math.min(this.trackDurationSec, Math.max(1, Number(e.target.value) || 30));
+        if (nextEnd - this.clipStartSec < 1) {
+          nextEnd = Math.min(this.trackDurationSec, this.clipStartSec + 1);
+          e.target.value = String(nextEnd);
+        }
+        this.clipEndSec = Number(nextEnd.toFixed(1));
+        const audio = this._ensureAudioPlayer();
+        if (audio && audio.readyState >= 1 && audio.currentTime >= this.clipEndSec) {
+          try { audio.currentTime = this.clipStartSec; } catch (_) {}
+        }
+        this._syncControlPanelUI();
+      });
+
+      document.getElementById('statusMusicFitVideoBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.fitToVideoDuration();
+      });
+
+      const syncToggle = document.getElementById('statusMusicSyncVideoToggle');
+      syncToggle?.addEventListener('change', (e) => {
+        e.stopPropagation();
+        this.syncWithVideo = Boolean(e.target.checked);
+      });
+    }
+
+    setControlPanelOpen(open) {
+      this.panelOpen = Boolean(open && this.selectedTrack);
+      const panel = document.getElementById('statusMusicControlPanel');
+      if (panel) {
+        panel.style.display = this.panelOpen ? 'flex' : 'none';
+      }
+      if (this.panelOpen) {
+        this._syncControlPanelUI();
+        try {
+          panel?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } catch (_) {}
+      }
+    }
+
+    toggleControlPanel() {
+      if (!this.selectedTrack) {
+        this.openPicker();
+        return;
+      }
+      this.setControlPanelOpen(!this.panelOpen);
+    }
+
+    onVideoFrameUpdated() {
+      this._syncControlPanelUI();
+    }
+
+    fitToVideoDuration() {
+      const meta = this._getVideoFrameMeta();
+      const targetLen = Math.min(this.trackDurationSec, Math.max(1, meta.duration || 15));
+      if (this.clipStartSec + targetLen > this.trackDurationSec) {
+        this.clipStartSec = Math.max(0, Number((this.trackDurationSec - targetLen).toFixed(1)));
+      }
+      this.clipEndSec = Math.min(this.trackDurationSec, Number((this.clipStartSec + targetLen).toFixed(1)));
+      const audio = this._ensureAudioPlayer();
+      if (audio && audio.readyState >= 1) {
+        try { audio.currentTime = this.clipStartSec; } catch (_) {}
+      }
+      this._syncControlPanelUI();
+      if (window.showNotif) {
+        const label = meta.hasVideo ? `Matched to video (${targetLen.toFixed(1)}s)` : `Clip set to ${targetLen.toFixed(1)}s`;
+        window.showNotif(label, 'info', 2000);
+      }
+    }
+
+    async resolveFreshPreviewUrl(track) {
+      if (!track) return '';
+      const q = `${track.trackName || ''} ${track.artistName || ''}`.trim();
+      if (!q) return '';
+      const encoded = encodeURIComponent(q);
+      let results = [];
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 3500);
+        const res = await fetch(`https://itunes.apple.com/search?term=${encoded}&entity=song&limit=5`, {
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (res.ok) {
+          const data = await res.json();
+          results = Array.isArray(data?.results) ? data.results : [];
+        }
+      } catch (_) {}
+
+      if (results.length === 0) {
+        try {
+          const jsonp = await new Promise((resolve, reject) => {
+            const cbName = 'itunes_fix_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+            const script = document.createElement('script');
+            const to = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 3500);
+            function cleanup() {
+              clearTimeout(to);
+              try { delete window[cbName]; } catch (_) {}
+              if (script.parentNode) script.remove();
+            }
+            window[cbName] = (d) => { cleanup(); resolve(d); };
+            script.onerror = () => { cleanup(); reject(new Error('error')); };
+            script.src = `https://itunes.apple.com/search?term=${encoded}&entity=song&limit=5&callback=${cbName}`;
+            document.head.appendChild(script);
+          });
+          results = Array.isArray(jsonp?.results) ? jsonp.results : [];
+        } catch (_) {}
+      }
+
+      const fresh = results.find(item => item?.previewUrl);
+      if (fresh?.previewUrl) {
+        track.previewUrl = fresh.previewUrl;
+        if (this.selectedTrack && this.selectedTrack.id === track.id) {
+          this.selectedTrack.previewUrl = fresh.previewUrl;
+        }
+        return fresh.previewUrl;
+      }
+      return '';
+    }
+
+    _syncControlPanelUI() {
+      const audio = this.currentPreviewAudio;
+      const isSelectedPlaying = Boolean(
+        this.selectedTrack &&
+        audio &&
+        !audio.paused &&
+        this.currentlyPlayingId === this.selectedTrack.id
+      );
+
+      let effectiveStatus = this.playbackStatus;
+      if (isSelectedPlaying) {
+        effectiveStatus = 'playing';
+      } else if (effectiveStatus === 'playing') {
+        effectiveStatus = 'paused';
+      }
+
+      const statePill = document.getElementById('statusAttachedMusicStatePill');
+      if (statePill) {
+        statePill.className = `music-sticker-state-pill ${effectiveStatus}`;
+        if (effectiveStatus === 'playing') {
+          statePill.textContent = `PLAYING ${this._formatSec(audio?.currentTime || this.clipStartSec)}`;
+        } else if (effectiveStatus === 'loading') {
+          statePill.textContent = 'LOADING';
+        } else if (effectiveStatus === 'blocked') {
+          statePill.textContent = 'TAP PLAY';
+        } else if (effectiveStatus === 'error') {
+          statePill.textContent = 'RETRY';
+        } else if (effectiveStatus === 'paused') {
+          statePill.textContent = 'PAUSED';
+        } else {
+          statePill.textContent = 'STOPPED';
+        }
+      }
+
+      const dot = document.getElementById('statusMusicCtrlStateDot');
+      const stateText = document.getElementById('statusMusicCtrlStateText');
+      if (dot) dot.className = `music-ctrl-status-dot ${effectiveStatus}`;
+      if (stateText) {
+        const labels = {
+          playing: 'Playing',
+          paused: 'Paused',
+          stopped: 'Stopped',
+          loading: 'Loading...',
+          blocked: 'Tap Play to hear audio',
+          error: 'Audio unavailable'
+        };
+        stateText.textContent = labels[effectiveStatus] || 'Ready';
+      }
+
+      const playBtn = document.getElementById('statusMusicCtrlPlayBtn');
+      if (playBtn) {
+        playBtn.innerHTML = isSelectedPlaying
+          ? '<i class="fa-solid fa-pause"></i> <span>Pause</span>'
+          : '<i class="fa-solid fa-play"></i> <span>Play</span>';
+      }
+
+      const cur = (audio && isFinite(audio.currentTime))
+        ? Math.max(this.clipStartSec, Math.min(this.clipEndSec, audio.currentTime))
+        : this.clipStartSec;
+
+      const timeReadout = document.getElementById('statusMusicCtrlTimeReadout');
+      if (timeReadout) {
+        timeReadout.textContent = `${this._formatSec(cur)} / ${this._formatSec(this.clipEndSec)}`;
+      }
+
+      const progressRange = document.getElementById('statusMusicProgressRange');
+      if (progressRange) {
+        progressRange.min = String(this.clipStartSec);
+        progressRange.max = String(this.clipEndSec);
+        progressRange.value = String(cur);
+      }
+
+      const startRange = document.getElementById('statusMusicStartRange');
+      const endRange = document.getElementById('statusMusicEndRange');
+      if (startRange) {
+        startRange.max = String(Math.max(1, this.trackDurationSec - 1));
+        startRange.value = String(this.clipStartSec);
+      }
+      if (endRange) {
+        endRange.max = String(this.trackDurationSec);
+        endRange.value = String(this.clipEndSec);
+      }
+
+      const startLabel = document.getElementById('statusMusicStartLabel');
+      const endLabel = document.getElementById('statusMusicEndLabel');
+      if (startLabel) startLabel.textContent = this._formatSec(this.clipStartSec);
+      if (endLabel) endLabel.textContent = this._formatSec(this.clipEndSec);
+
+      const summary = document.getElementById('statusMusicWindowSummary');
+      if (summary) {
+        const span = Math.max(1, this.clipEndSec - this.clipStartSec);
+        summary.textContent = `${this._formatSec(this.clipStartSec)} - ${this._formatSec(this.clipEndSec)} (${span.toFixed(1)}s)`;
+      }
+
+      const videoMeta = this._getVideoFrameMeta();
+      const videoInfoEl = document.getElementById('statusMusicVideoInfoLabel');
+      const fitBtn = document.getElementById('statusMusicFitVideoBtn');
+      const syncWrap = document.querySelector('.music-ctrl-sync-toggle');
+      const syncToggle = document.getElementById('statusMusicSyncVideoToggle');
+
+      if (videoInfoEl) {
+        if (videoMeta.hasVideo) {
+          videoInfoEl.textContent = `Video Frame: ${this._formatSec(videoMeta.start)} - ${this._formatSec(videoMeta.end)} (${videoMeta.duration.toFixed(1)}s)`;
+        } else {
+          videoInfoEl.textContent = `Story Slide: ${Math.round(videoMeta.duration)}s clip`;
+        }
+      }
+      if (fitBtn) {
+        fitBtn.innerHTML = videoMeta.hasVideo
+          ? '<i class="fa-solid fa-arrows-left-right-to-line"></i> <span>Fit Video</span>'
+          : '<i class="fa-solid fa-arrows-left-right-to-line"></i> <span>Fit Slide</span>';
+      }
+      if (syncWrap) {
+        syncWrap.style.display = videoMeta.hasVideo ? 'inline-flex' : 'none';
+      }
+      if (syncToggle) {
+        syncToggle.checked = Boolean(this.syncWithVideo);
+      }
+
+      const disc = document.querySelector('#statusAttachedMusicSticker .music-sticker-disc-icon i');
+      if (disc) {
+        disc.classList.toggle('fa-spin', isSelectedPlaying);
+      }
+    }
+
     _ensureAudioPlayer() {
       let el = this.currentPreviewAudio || document.getElementById('statusMusicPreviewPlayer');
       if (!el) {
@@ -753,25 +1137,85 @@
         document.body.appendChild(el);
       }
       el.preload = 'auto';
+      el.muted = false;
       el.playsInline = true;
       el.setAttribute('playsinline', '');
       el.setAttribute('webkit-playsinline', '');
 
       if (!el.dataset.nexMusicBound) {
         el.dataset.nexMusicBound = 'true';
+        el.addEventListener('loadedmetadata', () => {
+          const previewDur = (el.duration && isFinite(el.duration) && el.duration > 0) ? Math.min(60, Math.round(el.duration)) : 30;
+          if (this.selectedTrack && this.currentlyPlayingId === this.selectedTrack.id) {
+            this.trackDurationSec = Math.max(5, previewDur);
+            if (this.clipEndSec > this.trackDurationSec || this.clipEndSec <= this.clipStartSec) {
+              this.clipEndSec = this.trackDurationSec;
+            }
+            if (this.clipStartSec > 0 && el.currentTime < this.clipStartSec) {
+              try { el.currentTime = this.clipStartSec; } catch (_) {}
+            }
+          }
+          this._syncControlPanelUI();
+        });
+        el.addEventListener('timeupdate', () => {
+          if (this.selectedTrack && this.currentlyPlayingId === this.selectedTrack.id) {
+            if (el.currentTime >= (this.clipEndSec - 0.06)) {
+              if (el.loop) {
+                try { el.currentTime = this.clipStartSec; } catch (_) {}
+                const vMeta = this._getVideoFrameMeta();
+                if (this.syncWithVideo && vMeta.hasVideo && vMeta.videoEl) {
+                  try { vMeta.videoEl.currentTime = vMeta.start; } catch (_) {}
+                }
+              } else {
+                this.stopClip();
+                return;
+              }
+            }
+            this._syncControlPanelUI();
+          }
+        });
         el.addEventListener('ended', () => {
-          if (!el.loop) this.stopPreviewPlayback();
+          if (!el.loop) {
+            this.playbackStatus = 'stopped';
+            this.stopPreviewPlayback();
+          }
         });
         el.addEventListener('play', () => {
           const sticker = document.getElementById('statusAttachedMusicSticker');
+          this.playbackStatus = 'playing';
           if (sticker && this.selectedTrack) sticker.classList.add('playing');
+          this._syncControlPanelUI();
+          this.updatePlayStateUI();
         });
         el.addEventListener('pause', () => {
           const sticker = document.getElementById('statusAttachedMusicSticker');
+          if (this.playbackStatus === 'playing') this.playbackStatus = 'paused';
           if (sticker) sticker.classList.remove('playing');
+          this._syncControlPanelUI();
+          this.updatePlayStateUI();
         });
-        el.addEventListener('error', () => {
-          this.stopPreviewPlayback();
+        el.addEventListener('error', async () => {
+          const track = this.activePreviewTrack || this.selectedTrack;
+          if (track && !track._nexRecoveredUrl) {
+            track._nexRecoveredUrl = true;
+            this.playbackStatus = 'loading';
+            this._syncControlPanelUI();
+            const freshUrl = await this.resolveFreshPreviewUrl(track);
+            if (freshUrl) {
+              el.src = freshUrl;
+              el.play().catch(() => {
+                this.playbackStatus = 'blocked';
+                this._syncControlPanelUI();
+              });
+              return;
+            }
+          }
+          this.playbackStatus = 'error';
+          this.stopPreviewPlayback(true);
+          this._syncControlPanelUI();
+          if (typeof window.showNotif === 'function') {
+            window.showNotif('Preview stream could not load. Please try another track.', 'warning', 2600);
+          }
         });
       }
 
@@ -779,7 +1223,7 @@
       return this.currentPreviewAudio;
     }
 
-    togglePreviewPlayback(track) {
+    async togglePreviewPlayback(track) {
       const audio = this._ensureAudioPlayer();
       if (!audio || !track?.previewUrl) return;
 
@@ -788,6 +1232,8 @@
         return;
       }
 
+      const seq = ++this._playSeq;
+      this.activePreviewTrack = track;
       try {
         audio.pause();
         const isSameSrc = audio.src === track.previewUrl;
@@ -799,39 +1245,190 @@
         } else if (audio.readyState >= 1) {
           try { audio.currentTime = 0; } catch (_) {}
         }
-        const playPromise = audio.play();
         this.currentlyPlayingId = track.id;
+        this.playbackStatus = 'loading';
         this.updatePlayStateUI();
+        this._syncControlPanelUI();
+
+        const playPromise = audio.play();
         if (playPromise && typeof playPromise.then === 'function') {
-          playPromise.then(() => {
-            if (this.currentlyPlayingId === track.id && !audio.paused) {
-              this._fadeAudioTo(audio, 0.85, 180);
-            }
-          }).catch(err => {
-            console.warn('[MUSIC PICKER] Audio play blocked:', err.message);
-            this.stopPreviewPlayback();
-            if (typeof window.showNotif === 'function') {
-              window.showNotif('Tap Play again to preview track', 'info', 2000);
-            }
-          });
+          await playPromise;
         }
+        if (seq !== this._playSeq) return;
+        this.playbackStatus = 'playing';
+        if (this.currentlyPlayingId === track.id && !audio.paused) {
+          this._fadeAudioTo(audio, 0.85, 180);
+        }
+        this._syncControlPanelUI();
       } catch (err) {
-        console.warn('[MUSIC PICKER] Preview playback error:', err.message);
-        this.stopPreviewPlayback();
+        if (seq !== this._playSeq || err?.name === 'AbortError') return;
+        console.warn('[MUSIC PICKER] Audio play blocked:', err.message);
+        this.playbackStatus = err?.name === 'NotAllowedError' ? 'blocked' : 'error';
+        this.currentlyPlayingId = null;
+        this.updatePlayStateUI();
+        this._syncControlPanelUI();
+        if (typeof window.showNotif === 'function') {
+          window.showNotif('Tap Play again to preview track', 'info', 2000);
+        }
       }
     }
 
-    stopPreviewPlayback() {
+    stopPreviewPlayback(preserveErrorStatus = false) {
       if (this.currentPreviewAudio) {
         try {
           this.currentPreviewAudio.pause();
           if (this.currentPreviewAudio.readyState >= 1) {
-            this.currentPreviewAudio.currentTime = 0;
+            this.currentPreviewAudio.currentTime = this.selectedTrack ? this.clipStartSec : 0;
           }
         } catch (_) {}
       }
       this.currentlyPlayingId = null;
+      if (!preserveErrorStatus && this.playbackStatus !== 'error') {
+        this.playbackStatus = 'stopped';
+      }
       this.updatePlayStateUI();
+      this._syncControlPanelUI();
+    }
+
+    async playClip(fromStart = false) {
+      if (!this.selectedTrack?.previewUrl) return;
+      const audio = this._ensureAudioPlayer();
+      if (!audio) return;
+      const seq = ++this._playSeq;
+      this.activePreviewTrack = this.selectedTrack;
+
+      try {
+        const isSameSrc = audio.src === this.selectedTrack.previewUrl;
+        audio.loop = true;
+        audio.muted = false;
+        audio.volume = 0.85;
+        if (!isSameSrc) {
+          audio.src = this.selectedTrack.previewUrl;
+        }
+        if (fromStart || !isSameSrc || audio.currentTime < this.clipStartSec || audio.currentTime >= this.clipEndSec - 0.1) {
+          if (audio.readyState >= 1) {
+            try { audio.currentTime = this.clipStartSec; } catch (_) {}
+          }
+        }
+
+        this.currentlyPlayingId = this.selectedTrack.id;
+        this.playbackStatus = 'loading';
+        this._syncControlPanelUI();
+
+        const p = audio.play();
+        if (p && typeof p.then === 'function') await p;
+        if (seq !== this._playSeq) return;
+
+        if (fromStart && audio.readyState >= 1 && Math.abs(audio.currentTime - this.clipStartSec) > 0.25) {
+          try { audio.currentTime = this.clipStartSec; } catch (_) {}
+        }
+
+        this.playbackStatus = 'playing';
+        const vMeta = this._getVideoFrameMeta();
+        if (this.syncWithVideo && vMeta.hasVideo && vMeta.videoEl) {
+          const trimmer = window.NexTransmitterTrimmer;
+          if (trimmer) trimmer._suppressMusicSync = true;
+          try {
+            if (fromStart || vMeta.videoEl.currentTime < vMeta.start || vMeta.videoEl.currentTime >= vMeta.end - 0.1) {
+              vMeta.videoEl.currentTime = vMeta.start;
+            }
+            vMeta.videoEl.play().catch(() => {});
+          } finally {
+            setTimeout(() => { if (trimmer) trimmer._suppressMusicSync = false; }, 120);
+          }
+        }
+        this._syncControlPanelUI();
+      } catch (err) {
+        if (seq !== this._playSeq || err?.name === 'AbortError') return;
+        console.warn('[STATUS MUSIC] Clip play failed:', err.message);
+        this.playbackStatus = err?.name === 'NotAllowedError' ? 'blocked' : 'error';
+        this._syncControlPanelUI();
+      }
+    }
+
+    pauseClip() {
+      const audio = this.currentPreviewAudio;
+      this.playbackStatus = 'paused';
+      if (audio && !audio.paused) {
+        try { audio.pause(); } catch (_) {}
+      }
+      const vMeta = this._getVideoFrameMeta();
+      if (this.syncWithVideo && vMeta.hasVideo && vMeta.videoEl && !vMeta.videoEl.paused) {
+        const trimmer = window.NexTransmitterTrimmer;
+        if (trimmer) trimmer._suppressMusicSync = true;
+        try { vMeta.videoEl.pause(); } catch (_) {}
+        setTimeout(() => { if (trimmer) trimmer._suppressMusicSync = false; }, 120);
+      }
+      this._syncControlPanelUI();
+    }
+
+    stopClip() {
+      this._playSeq++;
+      const audio = this.currentPreviewAudio;
+      this.playbackStatus = 'stopped';
+      if (audio) {
+        try {
+          audio.pause();
+          if (audio.readyState >= 1) audio.currentTime = this.clipStartSec;
+        } catch (_) {}
+      }
+      this.currentlyPlayingId = null;
+      const vMeta = this._getVideoFrameMeta();
+      if (this.syncWithVideo && vMeta.hasVideo && vMeta.videoEl) {
+        const trimmer = window.NexTransmitterTrimmer;
+        if (trimmer) trimmer._suppressMusicSync = true;
+        try {
+          vMeta.videoEl.pause();
+          vMeta.videoEl.currentTime = vMeta.start;
+        } catch (_) {}
+        setTimeout(() => { if (trimmer) trimmer._suppressMusicSync = false; }, 120);
+      }
+      this.updatePlayStateUI();
+      this._syncControlPanelUI();
+    }
+
+    toggleAttachedPlayback() {
+      if (!this.selectedTrack) return;
+      const audio = this._ensureAudioPlayer();
+      const isPlaying = Boolean(audio && !audio.paused && this.currentlyPlayingId === this.selectedTrack.id);
+      if (isPlaying) {
+        this.pauseClip();
+      } else {
+        this.playClip(this.playbackStatus === 'stopped');
+      }
+    }
+
+    syncFromVideoPlay(offsetSec = 0) {
+      if (!this.selectedTrack?.previewUrl || !this.syncWithVideo) return;
+      const audio = this._ensureAudioPlayer();
+      if (!audio) return;
+      const target = Math.min(this.clipEndSec - 0.1, this.clipStartSec + Math.max(0, Number(offsetSec) || 0));
+      if (audio.src !== this.selectedTrack.previewUrl) {
+        audio.src = this.selectedTrack.previewUrl;
+      }
+      audio.loop = true;
+      audio.muted = false;
+      audio.volume = 0.85;
+      if (audio.readyState >= 1) {
+        try { audio.currentTime = target; } catch (_) {}
+      }
+      this.currentlyPlayingId = this.selectedTrack.id;
+      this.activePreviewTrack = this.selectedTrack;
+      if (audio.paused) {
+        audio.play().then(() => {
+          this.playbackStatus = 'playing';
+          this._syncControlPanelUI();
+        }).catch(() => {});
+      }
+    }
+
+    syncFromVideoPause() {
+      const audio = this.currentPreviewAudio;
+      if (audio && !audio.paused && this.selectedTrack && this.currentlyPlayingId === this.selectedTrack.id) {
+        this.playbackStatus = 'paused';
+        try { audio.pause(); } catch (_) {}
+        this._syncControlPanelUI();
+      }
     }
 
     updatePlayStateUI() {
@@ -850,7 +1447,18 @@
     }
 
     selectTrack(track) {
-      this.selectedTrack = track;
+      this.selectedTrack = { ...track };
+      this.activePreviewTrack = this.selectedTrack;
+      this.trackDurationSec = 30;
+      this.clipStartSec = 0;
+
+      // Auto-fit music clip length initially to uploaded video/slide duration if shorter than 30s
+      const vMeta = this._getVideoFrameMeta();
+      if (vMeta.hasVideo && vMeta.duration > 0) {
+        this.clipEndSec = Math.min(this.trackDurationSec, Math.max(1, Number(vMeta.duration.toFixed(1))));
+      } else {
+        this.clipEndSec = 30;
+      }
 
       // Update Floating Music Sticker on preview card BEFORE starting playback
       const sticker = document.getElementById('statusAttachedMusicSticker');
@@ -864,79 +1472,32 @@
         artist.textContent = track.artistName;
         sticker.style.display = 'flex';
         sticker.classList.remove('playing');
-
-        if (!sticker.dataset.interactiveBound) {
-          sticker.dataset.interactiveBound = 'true';
-          sticker.style.cursor = 'pointer';
-          sticker.title = 'Click to toggle background music playback';
-          sticker.addEventListener('click', (e) => {
-            if (e.target.closest('#statusRemoveMusicBtn')) return;
-            const player = this._ensureAudioPlayer();
-            if (!player || !this.selectedTrack?.previewUrl) return;
-            if (player.paused) {
-              if (player.src !== this.selectedTrack.previewUrl) {
-                player.src = this.selectedTrack.previewUrl;
-              }
-              player.loop = true;
-              player.muted = false;
-              player.volume = 0.85;
-              player.play().then(() => {
-                sticker.classList.add('playing');
-                this.currentlyPlayingId = this.selectedTrack.id;
-              }).catch(() => {});
-            } else {
-              player.pause();
-              sticker.classList.remove('playing');
-            }
-          });
-        }
+        this._bindAttachedStickerAndPanel();
       }
 
       // Start playback synchronously inside tap gesture BEFORE hiding modal (critical for iOS WebKit)
-      const audio = this._ensureAudioPlayer();
-      if (audio && track.previewUrl) {
-        try {
-          const alreadyPlayingSame = audio.src === track.previewUrl && !audio.paused;
-          audio.loop = true;
-          audio.volume = 0.85;
-          audio.muted = false;
-          if (!alreadyPlayingSame) {
-            audio.pause();
-            if (audio.src !== track.previewUrl) {
-              audio.src = track.previewUrl;
-            } else if (audio.readyState >= 1) {
-              try { audio.currentTime = 0; } catch (_) {}
-            }
-          }
-          const playPromise = alreadyPlayingSame ? Promise.resolve() : audio.play();
-          this.currentlyPlayingId = track.id;
-          if (playPromise && typeof playPromise.then === 'function') {
-            playPromise.then(() => {
-              this.currentlyPlayingId = track.id;
-              if (sticker) sticker.classList.add('playing');
-              this._fadeAudioTo(audio, 0.85, 180);
-            }).catch(err => {
-              console.warn('[STATUS MUSIC] Autoplay preview notice:', err.message);
-              if (sticker) sticker.classList.remove('playing');
-            });
-          }
-        } catch (e) {
-          console.warn('[STATUS MUSIC] Audio play setup error:', e);
-        }
-      }
+      this.playClip(true);
+      this.setControlPanelOpen(false);
+      this._syncControlPanelUI();
 
       // Close modal sheet after triggering audio playback on body-level player
       const modal = document.getElementById('statusMusicPickerModal');
       if (modal) modal.style.display = 'none';
 
       if (window.showNotif) {
-        window.showNotif(`Added music: ${track.trackName} - ${track.artistName}`, 'success', 2500);
+        window.showNotif(`Added: ${track.trackName}. Tap sticker to play/stop & adjust time frame.`, 'success', 2800);
       }
     }
 
     removeTrack() {
       this.selectedTrack = null;
+      this.activePreviewTrack = null;
+      this.clipStartSec = 0;
+      this.clipEndSec = 30;
+      this.trackDurationSec = 30;
+      this.playbackStatus = 'stopped';
       this.stopPreviewPlayback();
+      this.setControlPanelOpen(false);
 
       const sticker = document.getElementById('statusAttachedMusicSticker');
       if (sticker) {
@@ -957,7 +1518,11 @@
         collectionName: this.selectedTrack.collectionName,
         previewUrl: this.selectedTrack.previewUrl,
         artworkUrl: this.selectedTrack.artworkUrl,
-        durationSec: this.selectedTrack.durationSec
+        durationSec: this.selectedTrack.durationSec,
+        startSec: Number((this.clipStartSec || 0).toFixed(1)),
+        endSec: Number((this.clipEndSec || 30).toFixed(1)),
+        clipDuration: Number(Math.max(1, (this.clipEndSec || 30) - (this.clipStartSec || 0)).toFixed(1)),
+        syncWithVideo: Boolean(this.syncWithVideo)
       } : null;
     }
 

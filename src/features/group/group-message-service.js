@@ -662,9 +662,15 @@ function _attachRealtimeListener(groupId, newestMessage) {
 
       if (change.type === 'added') {
         // Check for duplicates and optimistic messages
-        const existingIdx = messages.findIndex(m => m.id === msgId);
+        const isSameUid = (a, b) => !!(a && b && (a === b || (typeof window !== 'undefined' && window.isSameSupabaseUid && window.isSameSupabaseUid(a, b))));
+        const existingIdx = messages.findIndex(m => m.id === msgId || (data.clientMsgId && (m.clientMsgId === data.clientMsgId || m.id === data.clientMsgId)));
         const optimisticIdx = messages.findIndex(m =>
-          m._optimistic && (m.from === data.from || m.senderId === (data.senderId || data.from)) && m.text === data.text
+          m._optimistic && (isSameUid(m.from, data.from) || isSameUid(m.senderId, data.senderId || data.from)) && m.text === data.text
+        );
+        // Also collapse any early Supabase echo row that matches this confirmed Firestore message
+        const duplicateIdx = messages.findIndex(m =>
+          !m._optimistic && (isSameUid(m.from, data.from) || isSameUid(m.senderId, data.senderId || data.from)) && m.text === data.text &&
+          Math.abs(((m.timestamp?.toMillis ? m.timestamp.toMillis() : (m.timestamp instanceof Date ? m.timestamp.getTime() : 0)) || 0) - ((data.timestamp?.toMillis ? data.timestamp.toMillis() : 0) || Date.now())) < 10000
         );
 
         if (existingIdx >= 0) {
@@ -683,6 +689,10 @@ function _attachRealtimeListener(groupId, newestMessage) {
         } else if (optimisticIdx >= 0) {
           // Replace optimistic with confirmed
           messages[optimisticIdx] = { id: msgId, ...data };
+          changed = true;
+        } else if (duplicateIdx >= 0) {
+          // Replace any early Supabase broadcast/CDC echo with authoritative Firestore document
+          messages[duplicateIdx] = { id: msgId, ...data };
           changed = true;
         } else {
           // Truly a new message

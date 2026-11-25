@@ -288,9 +288,23 @@
         if (this.videoEl) {
           this.videoEl.currentTime = this.currentStart;
         }
+        if (window.statusMusicPickerEngine?.selectedTrack && window.statusMusicPickerEngine.syncWithVideo) {
+          window.statusMusicPickerEngine.syncFromVideoPause?.();
+        }
       });
-      video.addEventListener('play', () => { this.isPlaying = true; });
-      video.addEventListener('pause', () => { this.isPlaying = false; });
+      video.addEventListener('play', () => {
+        this.isPlaying = true;
+        if (!this._suppressMusicSync && window.statusMusicPickerEngine?.selectedTrack && window.statusMusicPickerEngine.syncWithVideo) {
+          const offset = this.videoEl ? Math.max(0, this.videoEl.currentTime - this.currentStart) : 0;
+          window.statusMusicPickerEngine.syncFromVideoPlay?.(offset);
+        }
+      });
+      video.addEventListener('pause', () => {
+        this.isPlaying = false;
+        if (!this._suppressMusicSync && window.statusMusicPickerEngine?.selectedTrack && window.statusMusicPickerEngine.syncWithVideo) {
+          window.statusMusicPickerEngine.syncFromVideoPause?.();
+        }
+      });
     }
 
     setupDuration(duration) {
@@ -373,6 +387,9 @@
       this.isMuted = false;
       this.updateMuteButtonUI();
       this.updateSubmitButtonUI();
+      if (window.statusMusicPickerEngine?.onVideoFrameUpdated) {
+        window.statusMusicPickerEngine.onVideoFrameUpdated(null, null);
+      }
     }
 
     // =========================================================================
@@ -518,6 +535,9 @@
       if (durBadge) {
         durBadge.textContent = `${selectedSec}s`;
       }
+      if (window.statusMusicPickerEngine?.onVideoFrameUpdated) {
+        window.statusMusicPickerEngine.onVideoFrameUpdated(this.getTrimmingPayload(), this.videoEl);
+      }
     }
 
     updateTimeIndicators(currentTime) {
@@ -563,6 +583,9 @@
       if (this.mode === 'TRIM') {
         if (cur >= this.currentEnd) {
           this.videoEl.currentTime = this.currentStart;
+          if (!this._suppressMusicSync && window.statusMusicPickerEngine?.selectedTrack && window.statusMusicPickerEngine.syncWithVideo) {
+            window.statusMusicPickerEngine.syncFromVideoPlay?.(0);
+          }
           return;
         }
         if (cur < this.currentStart - 0.2) {

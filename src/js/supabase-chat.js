@@ -20,8 +20,10 @@ import {
 let supabaseClient = null;
 const activeSubscriptions = new Map();
 const pendingSubscriptions = new Map();
+const uuidToUidMap = new Map();
+const localSelfUidSet = new Set();
 
-function deterministicUuid(str) {
+export function deterministicUuid(str) {
   if (!str) return '00000000-0000-0000-0000-000000000000';
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)) {
     return str;
@@ -36,6 +38,46 @@ function deterministicUuid(str) {
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
   const hex = ((h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0')).slice(0, 32);
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
+
+export function rememberKnownUid(uid) {
+  if (!uid || typeof uid !== 'string') return;
+  const trimmed = uid.trim();
+  if (!trimmed) return;
+  const hashed = deterministicUuid(trimmed);
+  if (hashed !== trimmed) uuidToUidMap.set(hashed, trimmed);
+}
+
+export function isSameSupabaseUid(uidA, uidB) {
+  if (!uidA || !uidB) return false;
+  if (uidA === uidB) return true;
+  return deterministicUuid(uidA) === uidB || uidA === deterministicUuid(uidB);
+}
+
+export function isSelfSupabaseUid(rawUid, explicitMyUid = null) {
+  if (!rawUid) return false;
+  if (rawUid === 'me') return true;
+  if (localSelfUidSet.has(rawUid)) return true;
+  const my = explicitMyUid || (typeof window !== 'undefined' && window.myUID) || null;
+  if (my && isSameSupabaseUid(rawUid, my)) return true;
+  return false;
+}
+
+export function resolveOriginalUid(rawUid, extraCandidates = []) {
+  if (!rawUid || typeof rawUid !== 'string') return rawUid;
+  if (Array.isArray(extraCandidates)) {
+    for (let i = 0; i < extraCandidates.length; i++) {
+      rememberKnownUid(extraCandidates[i]);
+    }
+  }
+  if (typeof window !== 'undefined') {
+    rememberKnownUid(window.myUID);
+    rememberKnownUid(window.currentChatUser);
+    if (Array.isArray(window._currentGroupData?.members)) {
+      window._currentGroupData.members.forEach(rememberKnownUid);
+    }
+  }
+  return uuidToUidMap.get(rawUid) || rawUid;
 }
 
 /**
@@ -114,6 +156,8 @@ export async function getSupabaseClient() {
  */
 export function buildRoomId(uidA, uidB) {
   if (!uidA || !uidB) return '';
+  rememberKnownUid(uidA);
+  rememberKnownUid(uidB);
   return `direct_${[uidA, uidB].sort().join('_')}`;
 }
 
@@ -162,8 +206,17 @@ export async function sendSupabaseMessage({
   attachment = null,
   replyTo = null,
   chatType = 'direct',
+  senderName = null,
+  senderUsername = null,
+  senderAvatar = null,
   onOptimisticDispatch = null,
 }) {
+  rememberKnownUid(from);
+  rememberKnownUid(to);
+  if (from) {
+    localSelfUidSet.add(from);
+    localSelfUidSet.add(deterministicUuid(from));
+  }
   const roomId = chatType === 'group' ? `group_${to}` : buildRoomId(from, to);
   const clientMsgId = inputClientMsgId || `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const nowIso = new Date().toISOString();
@@ -173,6 +226,10 @@ export async function sendSupabaseMessage({
     clientMsgId,
     roomId,
     from,
+    senderId: from,
+    senderName: senderName || undefined,
+    senderUsername: senderUsername || undefined,
+    senderAvatar: senderAvatar || undefined,
     to,
     text,
     attachment,
@@ -338,8 +395,9 @@ export async function sendSupabaseMessage({
  * @param {function(object):void} [callbacks.onReaction]
  * @returns {Promise<function():void>} Unsubscribe function
  */
-export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageUpdated, onReaction }) {
+export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageUpdated, onReaction, knownUids = [] }) {
   if (!roomId) return () => {};
+  if (Array.isArray(knownUids)) knownUids.forEach(rememberKnownUid);
 
   // Clean existing subscription for this room if any
   if (activeSubscriptions.has(roomId)) {
@@ -378,17 +436,35 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
 
   console.log(`[SUPABASE CHAT] Subscribing to room ${roomId} on shard: ${shardName}`);
   const channel = client.channel(channelName);
+  const recentRoomEvents = new Map();
+  const shouldDeliverRoomMsg = (norm) => {
+    if (!norm) return false;
+    // Never deliver echoed self-messages (even if hashed to deterministicUuid by Postgres)
+    if (isSelfSupabaseUid(norm.from)) return false;
+    const now = Date.now();
+    const sig = `${norm.from || ''}|${(norm.text || '').trim()}`;
+    if (norm.clientMsgId && recentRoomEvents.has(`cid:${norm.clientMsgId}`)) return false;
+    if (norm.text && recentRoomEvents.has(sig) && (now - recentRoomEvents.get(sig)) < 10000) return false;
+    if (norm.clientMsgId) recentRoomEvents.set(`cid:${norm.clientMsgId}`, now);
+    if (norm.text) recentRoomEvents.set(sig, now);
+    if (recentRoomEvents.size > 150) {
+      const firstKey = recentRoomEvents.keys().next().value;
+      recentRoomEvents.delete(firstKey);
+    }
+    return true;
+  };
 
   // 1. Listen for Broadcast Events (Sub-15ms peer stream)
   channel
     .on('broadcast', { event: 'new_message' }, ({ payload }) => {
       if (payload && onNewMessage) {
-        onNewMessage(normalizeSupabaseMessage(payload));
+        const norm = normalizeSupabaseMessage(payload, knownUids);
+        if (shouldDeliverRoomMsg(norm)) onNewMessage(norm);
       }
     })
     .on('broadcast', { event: 'message_updated' }, ({ payload }) => {
       if (payload && onMessageUpdated) {
-        onMessageUpdated(payload);
+        onMessageUpdated(normalizeSupabaseMessage(payload, knownUids) || payload);
       }
     })
     .on('broadcast', { event: 'reaction' }, ({ payload }) => {
@@ -408,7 +484,8 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
     },
     (payload) => {
       if (payload.new && onNewMessage) {
-        onNewMessage(normalizeSupabaseMessage(payload.new));
+        const norm = normalizeSupabaseMessage(payload.new, knownUids);
+        if (shouldDeliverRoomMsg(norm)) onNewMessage(norm);
       }
     }
   );
@@ -423,7 +500,7 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
     },
     (payload) => {
       if (payload.new && onMessageUpdated) {
-        onMessageUpdated(normalizeSupabaseMessage(payload.new));
+        onMessageUpdated(normalizeSupabaseMessage(payload.new, knownUids));
       }
     }
   );
@@ -454,6 +531,9 @@ export async function subscribeToSupabaseRoom(roomId, { onNewMessage, onMessageU
  */
 export async function subscribeToUserInbox(userUid, { onIncomingMessage }) {
   if (!userUid) return () => {};
+  rememberKnownUid(userUid);
+  localSelfUidSet.add(userUid);
+  localSelfUidSet.add(deterministicUuid(userUid));
 
   const client = await getSupabaseClient();
   const config = getSupabaseConfig();
@@ -470,7 +550,10 @@ export async function subscribeToUserInbox(userUid, { onIncomingMessage }) {
   // Direct WebSocket Broadcast push
   channel.on('broadcast', { event: 'incoming_dm' }, ({ payload }) => {
     if (payload && onIncomingMessage) {
-      onIncomingMessage(normalizeSupabaseMessage(payload));
+      const norm = normalizeSupabaseMessage(payload, [userUid]);
+      if (norm && !isSelfSupabaseUid(norm.from, userUid)) {
+        onIncomingMessage(norm);
+      }
     }
   });
 
@@ -495,8 +578,9 @@ export async function subscribeToUserInbox(userUid, { onIncomingMessage }) {
  * @param {number} [limit=50] 
  * @returns {Promise<Array<object>>}
  */
-export async function fetchSupabaseRoomMessages(roomId, limit = 50, beforeTimestamp = null) {
+export async function fetchSupabaseRoomMessages(roomId, limit = 50, beforeTimestamp = null, knownUids = []) {
   if (!roomId) return [];
+  if (Array.isArray(knownUids)) knownUids.forEach(rememberKnownUid);
 
   const { client, shardName } = await resolveRoomClient(roomId);
   const config = getSupabaseConfig();
@@ -521,7 +605,7 @@ export async function fetchSupabaseRoomMessages(roomId, limit = 50, beforeTimest
       return [];
     }
 
-    return (data || []).reverse().map(normalizeSupabaseMessage);
+    return (data || []).reverse().map(row => normalizeSupabaseMessage(row, knownUids));
   } catch (err) {
     console.warn(`[SUPABASE CHAT] History error from ${shardName}:`, err.message);
     return [];
@@ -570,7 +654,7 @@ export async function markSupabaseMessagesRead(roomId, readerId) {
  * Normalizes Supabase message schema to match NEXCHAT internal message object.
  * @private
  */
-function normalizeSupabaseMessage(raw) {
+function normalizeSupabaseMessage(raw, knownUids = []) {
   if (!raw) return null;
   const createdAtStr = raw.created_at || raw.createdAt || new Date().toISOString();
   const msgDate = new Date(createdAtStr);
@@ -590,6 +674,10 @@ function normalizeSupabaseMessage(raw) {
     try { reactions = JSON.parse(reactions); } catch {}
   }
 
+  const rawFrom = raw.sender_id || raw.senderId || raw.from;
+  const rawTo = raw.recipient_id || raw.group_id || raw.to;
+  const resolvedFrom = resolveOriginalUid(rawFrom, knownUids);
+  const resolvedTo = resolveOriginalUid(rawTo, knownUids);
   const clientCorrelationId = raw.client_msg_id || raw.clientMsgId || null;
   const canonicalDocId = clientCorrelationId || String(raw.id || 'supa_' + Date.now());
   return {
@@ -598,8 +686,12 @@ function normalizeSupabaseMessage(raw) {
     clientMsgId: clientCorrelationId,
     dbId: raw.id ? String(raw.id) : null,
     shard: raw.shard || null,
-    from: raw.sender_id || raw.from,
-    to: raw.recipient_id || raw.group_id || raw.to,
+    from: resolvedFrom,
+    senderId: resolvedFrom,
+    senderName: raw.senderName || raw.sender_name || undefined,
+    senderUsername: raw.senderUsername || raw.sender_username || undefined,
+    senderAvatar: raw.senderAvatar || raw.sender_avatar || undefined,
+    to: resolvedTo,
     text: raw.text || '',
     type: raw.type || (attachment ? (attachment.fileType || attachment.type || 'image') : 'text'),
     attachment: attachment || null,
