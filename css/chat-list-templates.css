@@ -1,0 +1,1657 @@
+/* ============================================================================
+   NEXCHAT CHAT LIST TEMPLATE ENGINE (15 BESPOKE TEMPLATES)
+   ----------------------------------------------------------------------------
+   2 References:
+     1. glass-studio          (Pic 1: Frosted Glass Cards + High-Contrast Fix)
+     2. classic               (Pic 2: Classic Flat + Neon Rings + Hairlines)
+   5 NEXCHAT Studio:
+     3. swift-compact         (Fast Scanning 54-60px, 38px squircles, 3px rail)
+     4. aurora-bento          (20px dual-surface bento, 52px portrait, capsule)
+     5. terminal-grid         (1px architectural cells, 42px bevel, [3] badge)
+     6. minimal-air           (Zero-clutter whitespace, 50px circle, hairline)
+     7. neon-dock             (14px asymmetric card, 4px gradient bar, 46px halo)
+   4 Apple Liquid Glass:
+     8. apple-liquid-refraction (iOS 26 specular refraction glass pill cards)
+     9. apple-spatial-vision    (visionOS depth slab + glass-ring avatar)
+    10. apple-ios-inset         (Grouped iOS translucent rows + inset hairlines)
+    11. apple-dynamic-dock      (26px capsule Dynamic Island glass chrome)
+   4 Samsung Galaxy / One UI:
+    12. samsung-oneui-curves    (26px One UI continuous curved cards + squircles)
+    13. samsung-galaxy-ultra    (Matte titanium sharp edge strip + geometric wt)
+    14. samsung-fold-split      (Z-Fold balanced vertical split metadata rail)
+    15. samsung-knox-minimal    (High-legibility recessed hairline cards)
+
+   100% Theme-Aware via --nex-theme-* (Light Mode, Dark Mode, 20 App Themes,
+   and 20 Glass Styles). Zero reload, >=4.5:1 WCAG AA contrast, >=44px targets.
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   0. SHARED TEMPLATE LAYOUT, TAP TARGET & 394PX RESPONSIVE GUARDS
+   -------------------------------------------------------------------------- */
+/* Guard against generic [data-chatlist-template] button rules hitting html/body */
+html[data-chatlist-template],
+body[data-chatlist-template] {
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background-color: var(--nex-theme-bg-app, #0b0d14) !important;
+  color: var(--nex-theme-text, #f1f5f9) !important;
+}
+
+html body[data-chatlist-template] #contactList,
+html body[data-chatlist-template] .chat-list {
+  padding-bottom: 112px !important;
+  box-sizing: border-box !important;
+}
+
+html body[data-chatlist-template] #contactList .chat-item,
+html body[data-chatlist-template] #contactList .chat-list-item,
+html body[data-chatlist-template] #groupsList .chat-list-item,
+html body[data-chatlist-template] #archivedList .chat-item {
+  position: relative !important;
+  min-height: 54px !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+html body[data-chatlist-template] #contactList .chat-item-content,
+html body[data-chatlist-template] #contactList .chat-item-header {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+/* Prevent "NEURAL CORE" pill or sender names clipping at 360px-394px */
+html body[data-chatlist-template] #contactList .chat-time-container {
+  width: auto !important;
+  min-width: 44px !important;
+  max-width: 96px !important;
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+html body[data-chatlist-template] #contactList .chronex-ai-item .chat-item-header {
+  flex-wrap: wrap !important;
+  gap: 4px 6px !important;
+  align-items: center !important;
+}
+
+html body[data-chatlist-template] #contactList .chronex-ai-item .chat-name {
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+html body[data-chatlist-template] #contactList .chronex-vip-pill {
+  margin-left: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+html body[data-chatlist-template] #contactList .unread-badge,
+html body[data-chatlist-template] #contactList .chat-item-time {
+  font-size: max(12px, 0.75rem) !important;
+}
+
+/* Universal Dark Mode Text Contrast Guarantee (>=4.5:1 across all templates) */
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chat-item .chat-name,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chat-list-item .chat-name,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #groupsList .chat-list-item .chat-name,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #archivedList .chat-item .chat-name {
+  color: var(--nex-theme-text, #f8fafc) !important;
+}
+
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chat-item:not(.chronex-ai-item) .chat-preview,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chat-item:not(.chronex-ai-item) .chat-preview .preview-text,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chat-item:not(.chronex-ai-item) .chat-item-time:not(.unread),
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #groupsList .chat-list-item .chat-preview,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #groupsList .chat-list-item .chat-item-time:not(.unread) {
+  color: #cbd5e1 !important;
+}
+
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chronex-ai-item .chat-preview,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chronex-ai-item .chat-preview .preview-text,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chronex-ai-item .chat-item-time,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chat-item-time.unread {
+  color: #4ade80 !important;
+}
+
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .unread-badge {
+  background: var(--nex-theme-accent, #10b981) !important;
+  color: var(--nex-theme-accent-fg, #042419) !important;
+}
+
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template] #contactList .chronex-vip-pill {
+  background: #00ff66 !important;
+  color: #03130a !important;
+}
+
+/* Universal Light Mode Text Contrast Guarantee (overrides inline #25d366 & dark locks) */
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chat-item .chat-name,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chat-list-item .chat-name,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #groupsList .chat-list-item .chat-name,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #archivedList .chat-item .chat-name {
+  color: var(--nex-theme-text, #0f172a) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chat-item:not(.chronex-ai-item) .chat-preview,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chat-item:not(.chronex-ai-item) .chat-preview .preview-text,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chat-item:not(.chronex-ai-item) .chat-item-time:not(.unread),
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #groupsList .chat-list-item .chat-preview,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #groupsList .chat-list-item .chat-item-time:not(.unread) {
+  color: var(--nex-theme-text-muted, #3f485e) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chronex-ai-item .chat-preview,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chronex-ai-item .chat-preview .preview-text,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chronex-ai-item .chat-preview i,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chronex-ai-item .chat-item-time,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chat-item-time.unread {
+  color: var(--nex-theme-accent, #0b6e5b) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .unread-badge,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template] #contactList .chronex-vip-pill {
+  background: var(--nex-theme-accent, #0b6e5b) !important;
+  color: var(--nex-theme-accent-fg, #ffffff) !important;
+}
+
+/* --------------------------------------------------------------------------
+   SHARED NON-GLASS BACKDROP SUPPRESSION (Solid/Architectural Templates)
+   Preserves saved nex_chatlist_bg & nex_chatlist_saved_theme in localStorage!
+   -------------------------------------------------------------------------- */
+html body:is(
+  [data-chatlist-template="classic"],
+  [data-chatlist-template="swift-compact"],
+  [data-chatlist-template="terminal-grid"],
+  [data-chatlist-template="minimal-air"],
+  [data-chatlist-template="apple-ios-inset"],
+  [data-chatlist-template="samsung-oneui-curves"],
+  [data-chatlist-template="samsung-galaxy-ultra"],
+  [data-chatlist-template="samsung-fold-split"],
+  [data-chatlist-template="samsung-knox-minimal"]
+) #chatListView.has-chatlist-wallpaper {
+  background-color: var(--nex-theme-bg-app, #0b0d14) !important;
+}
+
+html body:is(
+  [data-chatlist-template="classic"],
+  [data-chatlist-template="swift-compact"],
+  [data-chatlist-template="terminal-grid"],
+  [data-chatlist-template="minimal-air"],
+  [data-chatlist-template="apple-ios-inset"],
+  [data-chatlist-template="samsung-oneui-curves"],
+  [data-chatlist-template="samsung-galaxy-ultra"],
+  [data-chatlist-template="samsung-fold-split"],
+  [data-chatlist-template="samsung-knox-minimal"]
+) #chatListView.has-chatlist-wallpaper::before,
+html body:is(
+  [data-chatlist-template="classic"],
+  [data-chatlist-template="swift-compact"],
+  [data-chatlist-template="terminal-grid"],
+  [data-chatlist-template="minimal-air"],
+  [data-chatlist-template="apple-ios-inset"],
+  [data-chatlist-template="samsung-oneui-curves"],
+  [data-chatlist-template="samsung-galaxy-ultra"],
+  [data-chatlist-template="samsung-fold-split"],
+  [data-chatlist-template="samsung-knox-minimal"]
+) #chatListView.has-chatlist-wallpaper::after {
+  display: none !important;
+  opacity: 0 !important;
+  background-image: none !important;
+}
+
+html body:is(
+  [data-chatlist-template="classic"],
+  [data-chatlist-template="swift-compact"],
+  [data-chatlist-template="terminal-grid"],
+  [data-chatlist-template="minimal-air"],
+  [data-chatlist-template="apple-ios-inset"],
+  [data-chatlist-template="samsung-oneui-curves"],
+  [data-chatlist-template="samsung-galaxy-ultra"],
+  [data-chatlist-template="samsung-fold-split"],
+  [data-chatlist-template="samsung-knox-minimal"]
+) #chatListView .chats-section {
+  background: var(--nex-theme-bg-app, #0b0d14) !important;
+}
+
+/* ==========================================================================
+   1. PIC 1 REFERENCE: glass-studio ("Glass Cards")
+   Floating rounded frosted glassmorphism cards, emerald active glow,
+   circular avatars, crisp white #f8fafc dark-mode .chat-name fix.
+   ========================================================================== */
+html body[data-chatlist-template="glass-studio"] #contactList .chat-item,
+html body[data-chatlist-template="glass-studio"] #contactList .chat-list-item,
+html body[data-chatlist-template="glass-studio"] #groupsList .chat-list-item,
+html body[data-chatlist-template="glass-studio"] #archivedList .chat-item {
+  width: auto !important;
+  margin: 6px 10px !important;
+  padding: 10px 14px !important;
+  border-radius: 16px !important;
+  background: var(--cl-bg, rgba(20, 34, 54, 0.64)) !important;
+  border: 1px solid var(--cl-border, rgba(125, 211, 252, 0.24)) !important;
+  backdrop-filter: blur(var(--nex-chatlist-blur, 16px)) saturate(175%) !important;
+  -webkit-backdrop-filter: blur(var(--nex-chatlist-blur, 16px)) saturate(175%) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, var(--nex-chatlist-rim, 0.22)), 0 0 14px var(--cl-glow, transparent) !important;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease !important;
+}
+
+html body[data-chatlist-template="glass-studio"].nex-low-end #contactList .chat-item,
+html body[data-chatlist-template="glass-studio"].nex-low-end #contactList .chat-list-item {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(15, 25, 42, 0.88) !important;
+}
+
+html body[data-chatlist-template="glass-studio"] #contactList .chat-avatar-container {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+}
+
+html body[data-chatlist-template="glass-studio"] #contactList .chat-avatar,
+html body[data-chatlist-template="glass-studio"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="glass-studio"] #contactList .avatar-placeholder {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  border-radius: 50% !important;
+}
+
+html body[data-chatlist-template="glass-studio"] #contactList .chat-item.active,
+html body[data-chatlist-template="glass-studio"] #contactList .chat-item.selected,
+html body[data-chatlist-template="glass-studio"] #contactList .chat-list-item.active {
+  background: var(--cl-active, rgba(0, 168, 132, 0.34)) !important;
+  border-color: rgba(0, 255, 136, 0.56) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.34), 0 0 18px rgba(0, 255, 136, 0.28) !important;
+}
+
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template="glass-studio"] #contactList .chat-item .chat-name,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template="glass-studio"] #contactList .chat-list-item .chat-name {
+  color: #f8fafc !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template="glass-studio"] #contactList .chat-item:not(.chronex-ai-item) .chat-preview,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template="glass-studio"] #contactList .chat-item:not(.chronex-ai-item) .chat-preview .preview-text,
+html body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[data-chatlist-template="glass-studio"] #contactList .chat-item:not(.chronex-ai-item) .chat-item-time:not(.unread) {
+  color: #e2e8f0 !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="glass-studio"] #contactList .chat-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="glass-studio"] #contactList .chat-list-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="glass-studio"] #groupsList .chat-list-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="glass-studio"] #archivedList .chat-item {
+  background: var(--cl-light-bg, rgba(255, 255, 255, 0.86)) !important;
+  border-color: var(--cl-light-border, var(--nex-theme-border, rgba(15, 23, 42, 0.14))) !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="glass-studio"] #contactList .chat-item.active,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="glass-studio"] #contactList .chat-item.selected {
+  background: var(--cl-light-active, var(--nex-theme-active, rgba(11, 110, 91, 0.14))) !important;
+  border-color: var(--nex-theme-accent, #0b6e5b) !important;
+}
+
+/* ==========================================================================
+   2. PIC 2 REFERENCE: classic ("Classic Flat")
+   Full-width borderless rows on solid theme surface, glowing neon-ring
+   circular avatars, 1px hairline divider, highlighted Chronex AI badge row.
+   ========================================================================== */
+html body[data-chatlist-template="classic"] #contactList .chat-item,
+html body[data-chatlist-template="classic"] #contactList .chat-list-item,
+html body[data-chatlist-template="classic"] #groupsList .chat-list-item,
+html body[data-chatlist-template="classic"] #archivedList .chat-item {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 10px 16px !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--nex-theme-surface, #111b21) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.16)) !important;
+  box-shadow: none !important;
+}
+
+html body[data-chatlist-template="classic"] #contactList .chat-item.chronex-ai-item {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.14) 0%, rgba(56, 189, 248, 0.05) 100%) !important;
+  border-left: 3px solid var(--nex-theme-accent, #10b981) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="classic"] #contactList .chat-item.chronex-ai-item {
+  background: var(--nex-theme-active, rgba(11, 110, 91, 0.11)) !important;
+  border-left: 3px solid var(--nex-theme-accent, #0b6e5b) !important;
+}
+
+html body[data-chatlist-template="classic"] #contactList .chat-avatar-container {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+}
+
+html body[data-chatlist-template="classic"] #contactList .chat-avatar,
+html body[data-chatlist-template="classic"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="classic"] #contactList .avatar-placeholder {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--nex-theme-accent, #10b981) !important;
+  box-shadow: 0 0 11px var(--nex-theme-active, rgba(16, 185, 129, 0.32)) !important;
+}
+
+html body[data-chatlist-template="classic"] #contactList .chat-item:hover {
+  background: var(--nex-theme-hover, rgba(255, 255, 255, 0.05)) !important;
+  transform: none !important;
+}
+
+html body[data-chatlist-template="classic"] #contactList .chat-item.active,
+html body[data-chatlist-template="classic"] #contactList .chat-item.selected {
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.16)) !important;
+  transform: none !important;
+}
+
+/* ==========================================================================
+   3. NEW #1: swift-compact ("Swift Compact" — Fast Scanning)
+   54-60px compact rows, 38px squircle (10px), 13.5px bold name + 1-line
+   preview, tabular ui-monospace timestamp, 3px left accent unread rail.
+   ========================================================================== */
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item,
+html body[data-chatlist-template="swift-compact"] #contactList .chat-list-item,
+html body[data-chatlist-template="swift-compact"] #groupsList .chat-list-item,
+html body[data-chatlist-template="swift-compact"] #archivedList .chat-item {
+  width: 100% !important;
+  min-height: 54px !important;
+  max-height: 60px !important;
+  margin: 0 !important;
+  padding: 6px 12px 6px 14px !important;
+  gap: 10px !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--nex-theme-surface, #121724) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.14)) !important;
+  box-shadow: none !important;
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item:has(.unread-badge)::before,
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item:has(.chat-item-content.unread)::before,
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item.active::before,
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--nex-theme-accent, #10b981);
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .chat-avatar-container {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .chat-avatar,
+html body[data-chatlist-template="swift-compact"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="swift-compact"] #contactList .avatar-placeholder {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  min-height: 38px !important;
+  max-width: 38px !important;
+  max-height: 38px !important;
+  border-radius: 10px !important;
+  font-size: 15px !important;
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item-content {
+  gap: 1px !important;
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .chat-name {
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .chat-preview {
+  font-size: 12.5px !important;
+  line-height: 1.25 !important;
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item-time {
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace !important;
+  font-variant-numeric: tabular-nums !important;
+  font-size: 12px !important;
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .unread-badge {
+  min-width: 20px !important;
+  height: 20px !important;
+  padding: 0 6px !important;
+  border-radius: 6px !important;
+  font-family: ui-monospace, 'JetBrains Mono', monospace !important;
+  font-weight: 800 !important;
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item:hover {
+  background: var(--nex-theme-hover, rgba(255, 255, 255, 0.05)) !important;
+}
+
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item.active,
+html body[data-chatlist-template="swift-compact"] #contactList .chat-item.selected {
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.14)) !important;
+}
+
+/* ==========================================================================
+   4. NEW #2: aurora-bento ("Aurora Bento" — Editorial Beauty)
+   20px-radius dual-surface frosted gradient bento cards (8px gap), 52px
+   rounded-portrait (16px) avatars, elevated editorial typography, luminous
+   floating corner unread capsule.
+   ========================================================================== */
+html body[data-chatlist-template="aurora-bento"] #contactList .chat-item,
+html body[data-chatlist-template="aurora-bento"] #contactList .chat-list-item,
+html body[data-chatlist-template="aurora-bento"] #groupsList .chat-list-item,
+html body[data-chatlist-template="aurora-bento"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 76px !important;
+  margin: 0 10px 8px 10px !important;
+  padding: 12px 15px !important;
+  gap: 14px !important;
+  border-radius: 20px !important;
+  background-color: var(--cl-bg, rgba(18, 28, 48, 0.78)) !important;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 48%, rgba(16, 185, 129, 0.09) 100%) !important;
+  border: 1px solid var(--cl-border, rgba(167, 139, 250, 0.28)) !important;
+  backdrop-filter: blur(20px) saturate(185%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(185%) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.24s ease !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="aurora-bento"] #contactList .chat-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="aurora-bento"] #contactList .chat-list-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="aurora-bento"] #groupsList .chat-list-item {
+  background-color: var(--cl-light-bg, rgba(244, 248, 255, 0.92)) !important;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(244, 248, 255, 0.25) 55%, rgba(236, 246, 255, 0.45) 100%) !important;
+  border: 1px solid var(--cl-light-border, var(--nex-theme-border, rgba(15, 23, 42, 0.14))) !important;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+html body[data-chatlist-template="aurora-bento"] #contactList .chat-avatar-container {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+}
+
+html body[data-chatlist-template="aurora-bento"] #contactList .chat-avatar,
+html body[data-chatlist-template="aurora-bento"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="aurora-bento"] #contactList .avatar-placeholder {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  min-height: 52px !important;
+  max-width: 52px !important;
+  max-height: 52px !important;
+  border-radius: 16px !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.28) !important;
+}
+
+html body[data-chatlist-template="aurora-bento"] #contactList .chat-name {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.015em !important;
+}
+
+html body[data-chatlist-template="aurora-bento"] #contactList .chat-time-container {
+  align-self: stretch !important;
+  flex-direction: column-reverse !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+}
+
+html body[data-chatlist-template="aurora-bento"] #contactList .unread-badge {
+  border-radius: 999px !important;
+  padding: 3px 9px !important;
+  min-width: 24px !important;
+  height: 22px !important;
+  box-shadow: 0 0 14px var(--nex-theme-active, rgba(16, 185, 129, 0.5)), 0 4px 10px rgba(0, 0, 0, 0.22) !important;
+}
+
+html body[data-chatlist-template="aurora-bento"] #contactList .chat-item.active,
+html body[data-chatlist-template="aurora-bento"] #contactList .chat-item.selected {
+  border-color: var(--nex-theme-accent, #10b981) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3), 0 0 18px var(--nex-theme-active, rgba(16, 185, 129, 0.28)) !important;
+}
+
+/* ==========================================================================
+   5. NEW #3: terminal-grid ("Terminal Grid" — Precision / Power Users)
+   1px crisp bordered 8px cells (zero blur noise), 42px sharp beveled-square
+   (6px) avatars, monospace tabular metadata, glowing [3] bracketed pill.
+   ========================================================================== */
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-item,
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-list-item,
+html body[data-chatlist-template="terminal-grid"] #groupsList .chat-list-item,
+html body[data-chatlist-template="terminal-grid"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 62px !important;
+  margin: 0 10px 6px 10px !important;
+  padding: 9px 12px !important;
+  gap: 12px !important;
+  border-radius: 8px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--nex-theme-surface, #121724) !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.24)) !important;
+  box-shadow: none !important;
+}
+
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-avatar-container {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+}
+
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-avatar,
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="terminal-grid"] #contactList .avatar-placeholder {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  min-height: 42px !important;
+  max-width: 42px !important;
+  max-height: 42px !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.35)) !important;
+}
+
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-name {
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em !important;
+}
+
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-item-time,
+html body[data-chatlist-template="terminal-grid"] #contactList .chronex-vip-pill {
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: 0.03em !important;
+}
+
+html body[data-chatlist-template="terminal-grid"] #contactList .unread-badge {
+  font-family: ui-monospace, 'JetBrains Mono', 'Fira Code', monospace !important;
+  font-variant-numeric: tabular-nums !important;
+  border-radius: 4px !important;
+  padding: 2px 7px !important;
+  min-width: 28px !important;
+  height: 22px !important;
+  box-shadow: 0 0 10px var(--nex-theme-active, rgba(16, 185, 129, 0.35)) !important;
+}
+
+html body[data-chatlist-template="terminal-grid"] #contactList .unread-badge::before {
+  content: '[';
+  opacity: 0.88;
+  margin-right: 1px;
+}
+
+html body[data-chatlist-template="terminal-grid"] #contactList .unread-badge::after {
+  content: ']';
+  opacity: 0.88;
+  margin-left: 1px;
+}
+
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-item:hover,
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-item.active,
+html body[data-chatlist-template="terminal-grid"] #contactList .chat-item.selected {
+  border-color: var(--nex-theme-accent, #10b981) !important;
+  background: var(--nex-theme-surface-2, #1b2233) !important;
+}
+
+/* ==========================================================================
+   6. NEW #4: minimal-air ("Air Minimal" — Calm Minimalism)
+   Apple/Linear zero-clutter whitespace, zero heavy boxes, 13px 16px pad,
+   50px circular portrait avatars, light hairline bottom inset, soft badge.
+   ========================================================================== */
+html body[data-chatlist-template="minimal-air"] #contactList .chat-item,
+html body[data-chatlist-template="minimal-air"] #contactList .chat-list-item,
+html body[data-chatlist-template="minimal-air"] #groupsList .chat-list-item,
+html body[data-chatlist-template="minimal-air"] #archivedList .chat-item {
+  width: 100% !important;
+  min-height: 76px !important;
+  margin: 0 !important;
+  padding: 13px 16px !important;
+  gap: 14px !important;
+  border-radius: 12px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html body[data-chatlist-template="minimal-air"] #contactList .chat-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 80px;
+  right: 16px;
+  height: 1px;
+  background: var(--nex-theme-border, rgba(148, 163, 184, 0.14));
+  pointer-events: none;
+}
+
+html body[data-chatlist-template="minimal-air"] #contactList .chat-item:last-child::after {
+  display: none;
+}
+
+html body[data-chatlist-template="minimal-air"] #contactList .chat-avatar-container {
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+}
+
+html body[data-chatlist-template="minimal-air"] #contactList .chat-avatar,
+html body[data-chatlist-template="minimal-air"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="minimal-air"] #contactList .avatar-placeholder {
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  min-height: 50px !important;
+  max-width: 50px !important;
+  max-height: 50px !important;
+  border-radius: 50% !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.2)) !important;
+  box-shadow: none !important;
+}
+
+html body[data-chatlist-template="minimal-air"] #contactList .chat-name {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+html body[data-chatlist-template="minimal-air"] #contactList .unread-badge {
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.16)) !important;
+  color: var(--nex-theme-text, #f8fafc) !important;
+  border: 1px solid var(--nex-theme-accent, #10b981) !important;
+  border-radius: 999px !important;
+  padding: 2px 8px !important;
+  gap: 5px !important;
+  box-shadow: 0 0 10px var(--nex-theme-active, rgba(16, 185, 129, 0.22)) !important;
+}
+
+html body[data-chatlist-template="minimal-air"] #contactList .unread-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--nex-theme-accent, #10b981);
+  display: inline-block;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="minimal-air"] #contactList .unread-badge {
+  background: var(--nex-theme-active, rgba(11, 110, 91, 0.12)) !important;
+  color: var(--nex-theme-accent, #0b6e5b) !important;
+  border-color: var(--nex-theme-accent, #0b6e5b) !important;
+}
+
+html body[data-chatlist-template="minimal-air"] #contactList .chat-item:hover {
+  background: var(--nex-theme-hover, rgba(148, 163, 184, 0.08)) !important;
+}
+
+html body[data-chatlist-template="minimal-air"] #contactList .chat-item.active,
+html body[data-chatlist-template="minimal-air"] #contactList .chat-item.selected {
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.12)) !important;
+}
+
+/* ==========================================================================
+   7. NEW #5: neon-dock ("Neon Dock" — Modern Split Dock)
+   14px vibrant asymmetric card, 4px gradient left unread bar, 46px squircle-halo
+   (14px) avatars, bold 15px sender weight, bottom-right time + gradient pill.
+   ========================================================================== */
+html body[data-chatlist-template="neon-dock"] #contactList .chat-item,
+html body[data-chatlist-template="neon-dock"] #contactList .chat-list-item,
+html body[data-chatlist-template="neon-dock"] #groupsList .chat-list-item,
+html body[data-chatlist-template="neon-dock"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 70px !important;
+  margin: 0 10px 8px 10px !important;
+  padding: 11px 14px 11px 18px !important;
+  gap: 13px !important;
+  border-radius: 14px !important;
+  background-color: var(--cl-bg, rgba(18, 26, 44, 0.8)) !important;
+  background-image: linear-gradient(100deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0) 36%) !important;
+  border: 1px solid var(--cl-border, rgba(56, 189, 248, 0.28)) !important;
+  backdrop-filter: blur(16px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(170%) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.26) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="neon-dock"] #contactList .chat-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="neon-dock"] #contactList .chat-list-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="neon-dock"] #groupsList .chat-list-item {
+  background-color: var(--cl-light-bg, rgba(255, 255, 255, 0.9)) !important;
+  background-image: linear-gradient(100deg, var(--nex-theme-active, rgba(11, 110, 91, 0.08)) 0%, rgba(255, 255, 255, 0) 42%) !important;
+  border-color: var(--cl-light-border, var(--nex-theme-border, rgba(15, 23, 42, 0.14))) !important;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+}
+
+html body[data-chatlist-template="neon-dock"] #contactList .chat-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background: var(--nex-theme-border, rgba(148, 163, 184, 0.24));
+}
+
+html body[data-chatlist-template="neon-dock"] #contactList .chat-item:has(.unread-badge)::before,
+html body[data-chatlist-template="neon-dock"] #contactList .chat-item:has(.chat-item-content.unread)::before,
+html body[data-chatlist-template="neon-dock"] #contactList .chat-item.active::before,
+html body[data-chatlist-template="neon-dock"] #contactList .chat-item.selected::before,
+html body[data-chatlist-template="neon-dock"] #contactList .chat-item.chronex-ai-item::before {
+  background: linear-gradient(180deg, #00ff88 0%, #38bdf8 55%, #8b5cf6 100%) !important;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.45);
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="neon-dock"] #contactList .chat-item:has(.unread-badge)::before,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="neon-dock"] #contactList .chat-item.active::before {
+  background: linear-gradient(180deg, var(--nex-theme-accent, #0b6e5b) 0%, #2563eb 100%) !important;
+}
+
+html body[data-chatlist-template="neon-dock"] #contactList .chat-avatar-container {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+}
+
+html body[data-chatlist-template="neon-dock"] #contactList .chat-avatar,
+html body[data-chatlist-template="neon-dock"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="neon-dock"] #contactList .avatar-placeholder {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  max-width: 46px !important;
+  max-height: 46px !important;
+  border-radius: 14px !important;
+  border: 2px solid var(--nex-theme-accent, #10b981) !important;
+  box-shadow: 0 0 0 2px var(--nex-theme-active, rgba(16, 185, 129, 0.24)), 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+
+html body[data-chatlist-template="neon-dock"] #contactList .chat-name {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em !important;
+}
+
+html body[data-chatlist-template="neon-dock"] #contactList .chat-time-container {
+  align-self: stretch !important;
+  flex-direction: column-reverse !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+}
+
+html body[data-chatlist-template="neon-dock"] #contactList .unread-badge {
+  background: linear-gradient(135deg, #00ff88 0%, #06b6d4 100%) !important;
+  color: #031512 !important;
+  border-radius: 999px !important;
+  padding: 2px 8px !important;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.45) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="neon-dock"] #contactList .unread-badge {
+  background: var(--nex-theme-accent, #0b6e5b) !important;
+  color: var(--nex-theme-accent-fg, #ffffff) !important;
+  box-shadow: 0 4px 12px var(--nex-theme-active, rgba(11, 110, 91, 0.28)) !important;
+}
+
+/* ==========================================================================
+   8. APPLE LIQUID GLASS #1: apple-liquid-refraction ("iOS 26 Liquid")
+   Translucent iOS 26 specular glass pill cards, crisp 22px curve, circular
+   avatars with specular highlight edge.
+   ========================================================================== */
+html body[data-chatlist-template="apple-liquid-refraction"] #contactList .chat-item,
+html body[data-chatlist-template="apple-liquid-refraction"] #contactList .chat-list-item,
+html body[data-chatlist-template="apple-liquid-refraction"] #groupsList .chat-list-item,
+html body[data-chatlist-template="apple-liquid-refraction"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 70px !important;
+  margin: 0 10px 8px 10px !important;
+  padding: 11px 15px !important;
+  gap: 13px !important;
+  border-radius: 22px !important;
+  background: var(--cl-bg, rgba(22, 34, 54, 0.56)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(24px) saturate(195%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(195%) !important;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.44),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    0 10px 26px rgba(0, 0, 0, 0.22) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-liquid-refraction"] #contactList .chat-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-liquid-refraction"] #contactList .chat-list-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-liquid-refraction"] #groupsList .chat-list-item {
+  background: var(--cl-light-bg, rgba(255, 255, 255, 0.78)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.92) !important;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.06),
+    0 8px 22px rgba(15, 23, 42, 0.09) !important;
+}
+
+html body[data-chatlist-template="apple-liquid-refraction"] #contactList .chat-avatar-container {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+}
+
+html body[data-chatlist-template="apple-liquid-refraction"] #contactList .chat-avatar,
+html body[data-chatlist-template="apple-liquid-refraction"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="apple-liquid-refraction"] #contactList .avatar-placeholder {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  border-radius: 50% !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.42) !important;
+}
+
+html body[data-chatlist-template="apple-liquid-refraction"] #contactList .chat-item.active,
+html body[data-chatlist-template="apple-liquid-refraction"] #contactList .chat-item.selected {
+  border-color: var(--nex-theme-accent, #38bdf8) !important;
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.56),
+    0 12px 28px rgba(0, 0, 0, 0.28),
+    0 0 16px var(--nex-theme-active, rgba(56, 189, 248, 0.28)) !important;
+}
+
+/* ==========================================================================
+   9. APPLE LIQUID GLASS #2: apple-spatial-vision ("visionOS Spatial")
+   visionOS depth slab (24px radius), glass-ring avatar, floating lift.
+   ========================================================================== */
+html body[data-chatlist-template="apple-spatial-vision"] #contactList .chat-item,
+html body[data-chatlist-template="apple-spatial-vision"] #contactList .chat-list-item,
+html body[data-chatlist-template="apple-spatial-vision"] #groupsList .chat-list-item,
+html body[data-chatlist-template="apple-spatial-vision"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 74px !important;
+  margin: 0 10px 10px 10px !important;
+  padding: 12px 16px !important;
+  gap: 14px !important;
+  border-radius: 24px !important;
+  background: var(--cl-bg, rgba(34, 42, 60, 0.62)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  backdrop-filter: blur(26px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(26px) saturate(180%) !important;
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36) !important;
+  transition: transform 0.22s ease, box-shadow 0.22s ease !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-spatial-vision"] #contactList .chat-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-spatial-vision"] #contactList .chat-list-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-spatial-vision"] #groupsList .chat-list-item {
+  background: var(--cl-light-bg, rgba(255, 255, 255, 0.84)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.96) !important;
+  box-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.1),
+    inset 0 1px 0 #ffffff !important;
+}
+
+html body[data-chatlist-template="apple-spatial-vision"] #contactList .chat-avatar-container {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+}
+
+html body[data-chatlist-template="apple-spatial-vision"] #contactList .chat-avatar,
+html body[data-chatlist-template="apple-spatial-vision"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="apple-spatial-vision"] #contactList .avatar-placeholder {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 0 2.5px rgba(255, 255, 255, 0.36), 0 6px 14px rgba(0, 0, 0, 0.24) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-spatial-vision"] #contactList .chat-avatar {
+  box-shadow: 0 0 0 2.5px rgba(15, 23, 42, 0.12), 0 6px 14px rgba(15, 23, 42, 0.12) !important;
+}
+
+html body[data-chatlist-template="apple-spatial-vision"] #contactList .chat-item:hover {
+  transform: translateY(-1.5px) !important;
+}
+
+/* ==========================================================================
+   10. APPLE LIQUID GLASS #3: apple-ios-inset ("iOS Grouped")
+   Grouped iOS inset rows inside rounded card stack + crisp inset hairlines.
+   ========================================================================== */
+html body[data-chatlist-template="apple-ios-inset"] #contactList {
+  padding-top: 8px !important;
+}
+
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-item,
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-list-item,
+html body[data-chatlist-template="apple-ios-inset"] #groupsList .chat-list-item,
+html body[data-chatlist-template="apple-ios-inset"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 66px !important;
+  margin: 0 12px !important;
+  padding: 11px 14px !important;
+  gap: 12px !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--nex-theme-surface, #151b2a) !important;
+  border: none !important;
+  border-left: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.16)) !important;
+  border-right: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.16)) !important;
+  box-shadow: none !important;
+}
+
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-item:first-child {
+  border-top: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.16)) !important;
+  border-top-left-radius: 16px !important;
+  border-top-right-radius: 16px !important;
+}
+
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-item:last-child {
+  border-bottom: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.16)) !important;
+  border-bottom-left-radius: 16px !important;
+  border-bottom-right-radius: 16px !important;
+}
+
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 72px;
+  right: 0;
+  height: 1px;
+  background: var(--nex-theme-border, rgba(148, 163, 184, 0.16));
+  pointer-events: none;
+}
+
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-item:last-child::after {
+  display: none;
+}
+
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-avatar-container {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+}
+
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-avatar,
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="apple-ios-inset"] #contactList .avatar-placeholder {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  max-width: 46px !important;
+  max-height: 46px !important;
+  border-radius: 50% !important;
+}
+
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-item:hover {
+  background: var(--nex-theme-hover, rgba(255, 255, 255, 0.05)) !important;
+}
+
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-item.active,
+html body[data-chatlist-template="apple-ios-inset"] #contactList .chat-item.selected {
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.14)) !important;
+}
+
+/* ==========================================================================
+   11. APPLE LIQUID GLASS #4: apple-dynamic-dock ("Dynamic Island")
+   26px capsule Dynamic Island glass chrome with sleek pill curvature.
+   ========================================================================== */
+html body[data-chatlist-template="apple-dynamic-dock"] #contactList .chat-item,
+html body[data-chatlist-template="apple-dynamic-dock"] #contactList .chat-list-item,
+html body[data-chatlist-template="apple-dynamic-dock"] #groupsList .chat-list-item,
+html body[data-chatlist-template="apple-dynamic-dock"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 66px !important;
+  margin: 0 10px 8px 10px !important;
+  padding: 9px 14px !important;
+  gap: 12px !important;
+  border-radius: 26px !important;
+  background: var(--cl-bg, rgba(10, 12, 18, 0.84)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(20px) saturate(165%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-dynamic-dock"] #contactList .chat-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-dynamic-dock"] #contactList .chat-list-item,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="apple-dynamic-dock"] #groupsList .chat-list-item {
+  background: var(--cl-light-bg, rgba(255, 255, 255, 0.9)) !important;
+  border: 1px solid var(--cl-light-border, var(--nex-theme-border, rgba(15, 23, 42, 0.14))) !important;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08), inset 0 1px 0 #ffffff !important;
+}
+
+html body[data-chatlist-template="apple-dynamic-dock"] #contactList .chat-avatar-container {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+}
+
+html body[data-chatlist-template="apple-dynamic-dock"] #contactList .chat-avatar,
+html body[data-chatlist-template="apple-dynamic-dock"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="apple-dynamic-dock"] #contactList .avatar-placeholder {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  border-radius: 50% !important;
+}
+
+html body[data-chatlist-template="apple-dynamic-dock"] #contactList .unread-badge {
+  border-radius: 999px !important;
+  padding: 2px 9px !important;
+}
+
+/* ==========================================================================
+   12. SAMSUNG ONE UI #1: samsung-oneui-curves ("One UI Curves")
+   One UI 26px continuous curved cards + 48px squircle avatars.
+   ========================================================================== */
+html body[data-chatlist-template="samsung-oneui-curves"] #contactList .chat-item,
+html body[data-chatlist-template="samsung-oneui-curves"] #contactList .chat-list-item,
+html body[data-chatlist-template="samsung-oneui-curves"] #groupsList .chat-list-item,
+html body[data-chatlist-template="samsung-oneui-curves"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 72px !important;
+  margin: 0 10px 8px 10px !important;
+  padding: 12px 16px !important;
+  gap: 14px !important;
+  border-radius: 26px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--nex-theme-surface, #151b29) !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.16)) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="samsung-oneui-curves"] #contactList .chat-item {
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05) !important;
+}
+
+html body[data-chatlist-template="samsung-oneui-curves"] #contactList .chat-avatar-container {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+}
+
+html body[data-chatlist-template="samsung-oneui-curves"] #contactList .chat-avatar,
+html body[data-chatlist-template="samsung-oneui-curves"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="samsung-oneui-curves"] #contactList .avatar-placeholder {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  border-radius: 18px !important;
+}
+
+html body[data-chatlist-template="samsung-oneui-curves"] #contactList .chat-item.active,
+html body[data-chatlist-template="samsung-oneui-curves"] #contactList .chat-item.selected {
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.16)) !important;
+  border-color: var(--nex-theme-accent, #10b981) !important;
+}
+
+/* ==========================================================================
+   13. SAMSUNG GALAXY #2: samsung-galaxy-ultra ("Galaxy Ultra")
+   Matte titanium sharp edge strip, 10px precision radius, 44px squircle,
+   bold geometric sender weight.
+   ========================================================================== */
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-item,
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-list-item,
+html body[data-chatlist-template="samsung-galaxy-ultra"] #groupsList .chat-list-item,
+html body[data-chatlist-template="samsung-galaxy-ultra"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 66px !important;
+  margin: 0 10px 7px 10px !important;
+  padding: 10px 14px 10px 15px !important;
+  gap: 12px !important;
+  border-radius: 10px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background-color: var(--nex-theme-surface, #121724) !important;
+  background-image: linear-gradient(145deg, var(--nex-theme-surface-2, #1c2436) 0%, var(--nex-theme-surface, #121724) 100%) !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.22)) !important;
+  border-left: 3px solid var(--nex-theme-border, rgba(148, 163, 184, 0.42)) !important;
+  box-shadow: none !important;
+}
+
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-item:has(.unread-badge),
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-item.active,
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-item.selected,
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-item.chronex-ai-item {
+  border-left-color: var(--nex-theme-accent, #10b981) !important;
+}
+
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-avatar-container {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+}
+
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-avatar,
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .avatar-placeholder {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  border-radius: 10px !important;
+}
+
+html body[data-chatlist-template="samsung-galaxy-ultra"] #contactList .chat-name {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* ==========================================================================
+   14. SAMSUNG GALAXY #3: samsung-fold-split ("Galaxy Z Fold")
+   Z-Fold balanced timestamp/unread split column with dedicated right divider.
+   ========================================================================== */
+html body[data-chatlist-template="samsung-fold-split"] #contactList .chat-item,
+html body[data-chatlist-template="samsung-fold-split"] #contactList .chat-list-item,
+html body[data-chatlist-template="samsung-fold-split"] #groupsList .chat-list-item,
+html body[data-chatlist-template="samsung-fold-split"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 68px !important;
+  margin: 0 10px 7px 10px !important;
+  padding: 10px 12px !important;
+  gap: 12px !important;
+  border-radius: 14px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--nex-theme-surface, #121724) !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.2)) !important;
+  box-shadow: none !important;
+}
+
+html body[data-chatlist-template="samsung-fold-split"] #contactList .chat-avatar-container {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+}
+
+html body[data-chatlist-template="samsung-fold-split"] #contactList .chat-avatar,
+html body[data-chatlist-template="samsung-fold-split"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="samsung-fold-split"] #contactList .avatar-placeholder {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  max-width: 46px !important;
+  max-height: 46px !important;
+  border-radius: 14px !important;
+}
+
+html body[data-chatlist-template="samsung-fold-split"] #contactList .chat-time-container {
+  min-width: 64px !important;
+  padding-left: 10px !important;
+  border-left: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.2)) !important;
+  align-self: stretch !important;
+  justify-content: center !important;
+}
+
+html body[data-chatlist-template="samsung-fold-split"] #contactList .chat-item.active,
+html body[data-chatlist-template="samsung-fold-split"] #contactList .chat-item.selected {
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.16)) !important;
+  border-color: var(--nex-theme-accent, #10b981) !important;
+}
+
+/* ==========================================================================
+   15. SAMSUNG GALAXY #4: samsung-knox-minimal ("Knox Minimal")
+   High-legibility recessed hairline graphite/ceramic cards, 44px circular.
+   ========================================================================== */
+html body[data-chatlist-template="samsung-knox-minimal"] #contactList .chat-item,
+html body[data-chatlist-template="samsung-knox-minimal"] #contactList .chat-list-item,
+html body[data-chatlist-template="samsung-knox-minimal"] #groupsList .chat-list-item,
+html body[data-chatlist-template="samsung-knox-minimal"] #archivedList .chat-item {
+  width: auto !important;
+  min-height: 64px !important;
+  margin: 0 10px 6px 10px !important;
+  padding: 10px 14px !important;
+  gap: 12px !important;
+  border-radius: 12px !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--nex-theme-card, #151b29) !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.24)) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.22) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"])[data-chatlist-template="samsung-knox-minimal"] #contactList .chat-item {
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+}
+
+html body[data-chatlist-template="samsung-knox-minimal"] #contactList .chat-avatar-container {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+}
+
+html body[data-chatlist-template="samsung-knox-minimal"] #contactList .chat-avatar,
+html body[data-chatlist-template="samsung-knox-minimal"] #contactList .chat-avatar-container img,
+html body[data-chatlist-template="samsung-knox-minimal"] #contactList .avatar-placeholder {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  border-radius: 50% !important;
+  border: 1.5px solid var(--nex-theme-border, rgba(148, 163, 184, 0.35)) !important;
+}
+
+html body[data-chatlist-template="samsung-knox-minimal"] #contactList .chat-item.active,
+html body[data-chatlist-template="samsung-knox-minimal"] #contactList .chat-item.selected {
+  border-color: var(--nex-theme-accent, #10b981) !important;
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.14)) !important;
+}
+
+/* ==========================================================================
+   TEMPLATE BAR (#chatListTemplateBar) & SETTINGS / STUDIO GALLERY CARDS
+   ========================================================================== */
+#chatListTemplateBar,
+.chatlist-template-bar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 6px 12px 8px !important;
+  box-sizing: border-box !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  flex-shrink: 0 !important;
+  border-bottom: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.12)) !important;
+  background: transparent !important;
+}
+
+#chatListTemplateBar::-webkit-scrollbar,
+.chatlist-template-bar::-webkit-scrollbar {
+  display: none !important;
+}
+
+.chatlist-template-group-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 28px !important;
+  padding: 0 8px !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+  color: var(--nex-theme-text-muted, #cbd5e1) !important;
+  background: var(--nex-theme-surface-2, rgba(255, 255, 255, 0.06)) !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.18)) !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  visibility: visible !important;
+}
+
+.chatlist-template-pill i,
+.chatlist-template-card i {
+  visibility: visible !important;
+}
+
+#chatListTemplateBar .chatlist-template-pill,
+#chatListTemplateBar [data-chatlist-template] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  min-height: 44px !important;
+  height: 44px !important;
+  padding: 0 13px !important;
+  border-radius: 999px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.24)) !important;
+  background: var(--nex-theme-surface-2, rgba(255, 255, 255, 0.08)) !important;
+  color: var(--nex-theme-text, #f1f5f9) !important;
+  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, color 0.16s ease !important;
+}
+
+#chatListTemplateBar .chatlist-template-pill:hover,
+#chatListTemplateBar [data-chatlist-template]:hover {
+  border-color: var(--nex-theme-accent, #10b981) !important;
+  background: var(--nex-theme-hover, rgba(255, 255, 255, 0.14)) !important;
+}
+
+#chatListTemplateBar .chatlist-template-pill:focus-visible,
+#chatListTemplateBar [data-chatlist-template]:focus-visible,
+.chatlist-template-card:focus-visible {
+  outline: 2px solid var(--nex-theme-accent, #10b981) !important;
+  outline-offset: 2px !important;
+}
+
+#chatListTemplateBar .chatlist-template-pill.is-active,
+#chatListTemplateBar .chatlist-template-pill.active,
+#chatListTemplateBar [data-chatlist-template].is-active,
+#chatListTemplateBar [data-chatlist-template].active,
+#chatListTemplateBar [data-chatlist-template][aria-pressed="true"] {
+  background: var(--nex-theme-accent, #10b981) !important;
+  color: var(--nex-theme-accent-fg, #042419) !important;
+  border-color: var(--nex-theme-accent, #10b981) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px var(--nex-theme-active, rgba(16, 185, 129, 0.28)) !important;
+}
+
+.chatlist-template-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+/* Settings & Studio Modal Grouped Template Cards Grid */
+.chatlist-template-settings-grid,
+.nex-template-gallery-groups {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  margin-bottom: 12px !important;
+  width: 100% !important;
+}
+
+.nex-template-group-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nex-template-group-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--nex-theme-text-muted, #9aa7ba);
+}
+
+.nex-template-group-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(146px, 1fr));
+  gap: 8px;
+}
+
+.chatlist-template-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  min-height: 72px !important;
+  padding: 10px 11px !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.24)) !important;
+  background: var(--nex-theme-surface-2, rgba(255, 255, 255, 0.05)) !important;
+  color: var(--nex-theme-text, #f1f5f9) !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+.chatlist-template-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--nex-theme-accent, #10b981) !important;
+}
+
+.chatlist-template-card.is-active,
+.chatlist-template-card.active,
+.chatlist-template-card[aria-pressed="true"] {
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.16)) !important;
+  border-color: var(--nex-theme-accent, #10b981) !important;
+  color: var(--nex-theme-text, #f8fafc) !important;
+  box-shadow: 0 0 0 2px var(--nex-theme-active, rgba(16, 185, 129, 0.24)) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .chatlist-template-card.is-active,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .chatlist-template-card.active,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .chatlist-template-card[aria-pressed="true"] {
+  background: var(--nex-theme-active, rgba(11, 110, 91, 0.12)) !important;
+  color: var(--nex-theme-text, #0f172a) !important;
+}
+
+.chatlist-template-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+}
+
+.chatlist-template-card-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 13px;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.chatlist-template-card-tag {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--nex-theme-surface, rgba(15, 23, 42, 0.45));
+  color: var(--nex-theme-text-muted, #cbd5e1);
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.2));
+  white-space: nowrap;
+}
+
+.chatlist-template-card-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--nex-theme-text, #f8fafc);
+}
+
+.chatlist-template-card-desc {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--nex-theme-text-muted, #cbd5e1);
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .chatlist-template-card-title {
+  color: var(--nex-theme-text, #0f172a) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .chatlist-template-card-desc,
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .chatlist-template-card-tag {
+  color: var(--nex-theme-text-muted, #3f485e) !important;
+}
+
+/* Override app-themes-studio generic [data-chatlist-template][aria-pressed] text-fg on full cards */
+.chatlist-template-card[data-chatlist-template][aria-pressed="true"] {
+  background: var(--nex-theme-active, rgba(16, 185, 129, 0.16)) !important;
+  color: var(--nex-theme-text, #f8fafc) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .chatlist-template-card[data-chatlist-template][aria-pressed="true"] {
+  color: var(--nex-theme-text, #0f172a) !important;
+}
+
+/* Low-end zero-blur surface fallbacks for glass templates */
+html body.nex-low-end:is(
+  [data-chatlist-template="aurora-bento"],
+  [data-chatlist-template="neon-dock"],
+  [data-chatlist-template="apple-liquid-refraction"],
+  [data-chatlist-template="apple-spatial-vision"],
+  [data-chatlist-template="apple-dynamic-dock"]
+) #contactList .chat-item,
+html body.nex-low-end:is(
+  [data-chatlist-template="aurora-bento"],
+  [data-chatlist-template="neon-dock"],
+  [data-chatlist-template="apple-liquid-refraction"],
+  [data-chatlist-template="apple-spatial-vision"],
+  [data-chatlist-template="apple-dynamic-dock"]
+) #contactList .chat-list-item {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: var(--nex-theme-card, #151b2a) !important;
+}
+
+html body.nex-low-end:is(.light-mode, .light-theme, [class*="light-theme-"]):is(
+  [data-chatlist-template="aurora-bento"],
+  [data-chatlist-template="neon-dock"],
+  [data-chatlist-template="apple-liquid-refraction"],
+  [data-chatlist-template="apple-spatial-vision"],
+  [data-chatlist-template="apple-dynamic-dock"]
+) #contactList .chat-item,
+html body.nex-low-end:is(.light-mode, .light-theme, [class*="light-theme-"]):is(
+  [data-chatlist-template="aurora-bento"],
+  [data-chatlist-template="neon-dock"],
+  [data-chatlist-template="apple-liquid-refraction"],
+  [data-chatlist-template="apple-spatial-vision"],
+  [data-chatlist-template="apple-dynamic-dock"]
+) #contactList .chat-list-item {
+  background: var(--nex-theme-surface, #ffffff) !important;
+}
+
+/* Live Preview Stage Template Mirroring */
+html body:is(
+  [data-chatlist-template="classic"],
+  [data-chatlist-template="swift-compact"],
+  [data-chatlist-template="terminal-grid"],
+  [data-chatlist-template="minimal-air"],
+  [data-chatlist-template="apple-ios-inset"],
+  [data-chatlist-template="samsung-oneui-curves"],
+  [data-chatlist-template="samsung-galaxy-ultra"],
+  [data-chatlist-template="samsung-fold-split"],
+  [data-chatlist-template="samsung-knox-minimal"]
+) .nex-chatlist-preview-stage {
+  background: var(--nex-theme-bg-app, #0b0d14) !important;
+  background-image: none !important;
+}
+
+html body:is(
+  [data-chatlist-template="classic"],
+  [data-chatlist-template="swift-compact"],
+  [data-chatlist-template="terminal-grid"],
+  [data-chatlist-template="minimal-air"],
+  [data-chatlist-template="apple-ios-inset"],
+  [data-chatlist-template="samsung-oneui-curves"],
+  [data-chatlist-template="samsung-galaxy-ultra"],
+  [data-chatlist-template="samsung-fold-split"],
+  [data-chatlist-template="samsung-knox-minimal"]
+) .nex-chatlist-preview-stage::after {
+  display: none !important;
+}
+
+html body[data-chatlist-template="swift-compact"] .nex-chatlist-preview-row {
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  border-left: 3px solid var(--nex-theme-accent, #10b981) !important;
+}
+html body[data-chatlist-template="swift-compact"] .nex-chatlist-preview-avatar,
+html body[data-chatlist-template="samsung-galaxy-ultra"] .nex-chatlist-preview-avatar {
+  border-radius: 10px !important;
+}
+html body[data-chatlist-template="aurora-bento"] .nex-chatlist-preview-row {
+  border-radius: 18px !important;
+}
+html body[data-chatlist-template="aurora-bento"] .nex-chatlist-preview-avatar {
+  border-radius: 12px !important;
+}
+html body[data-chatlist-template="terminal-grid"] .nex-chatlist-preview-row {
+  border-radius: 8px !important;
+  background: var(--nex-theme-surface, #121724) !important;
+  border: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.24)) !important;
+}
+html body[data-chatlist-template="terminal-grid"] .nex-chatlist-preview-avatar {
+  border-radius: 6px !important;
+}
+html body[data-chatlist-template="minimal-air"] .nex-chatlist-preview-row {
+  border-radius: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid var(--nex-theme-border, rgba(148, 163, 184, 0.14)) !important;
+  box-shadow: none !important;
+}
+html body[data-chatlist-template="neon-dock"] .nex-chatlist-preview-row {
+  border-radius: 14px !important;
+  border-left: 4px solid var(--nex-theme-accent, #00ff88) !important;
+}
+html body[data-chatlist-template="neon-dock"] .nex-chatlist-preview-avatar,
+html body[data-chatlist-template="samsung-fold-split"] .nex-chatlist-preview-avatar {
+  border-radius: 12px !important;
+}
+html body[data-chatlist-template="apple-liquid-refraction"] .nex-chatlist-preview-row {
+  border-radius: 20px !important;
+}
+html body[data-chatlist-template="apple-spatial-vision"] .nex-chatlist-preview-row {
+  border-radius: 22px !important;
+}
+html body[data-chatlist-template="apple-dynamic-dock"] .nex-chatlist-preview-row,
+html body[data-chatlist-template="samsung-oneui-curves"] .nex-chatlist-preview-row {
+  border-radius: 24px !important;
+}
+html body[data-chatlist-template="samsung-oneui-curves"] .nex-chatlist-preview-avatar {
+  border-radius: 14px !important;
+}
+

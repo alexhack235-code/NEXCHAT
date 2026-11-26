@@ -1,9 +1,223 @@
 /**
  * NEXCHAT Experience Studio:
+ * - 15 Bespoke Chat List Templates (Pic 1/2 Refs, 5 Studio, 4 Apple Liquid Glass, 4 Samsung One UI)
  * - 20 Frosted Glassmorphism Chat List Themes & Picture/Profile Backdrop
+ * - 10 Light + 10 Dark App Themes
  * - Zero-Lazy Instant Local DataURL Pre-Decode Cache
  * - 120Hz Swiping, Scroll Elasticity, & Typing Keystroke FX across Direct & Group Chats
  */
+
+function ensureChatListTemplatesStylesheet() {
+  if (typeof document === 'undefined' || !document.head) return;
+  try {
+    if (document.querySelector('link[href*="chat-list-templates.css"]')) return;
+    const link = document.createElement('link');
+    link.id = 'nexChatListTemplatesStylesheet';
+    link.rel = 'stylesheet';
+    link.href = 'css/chat-list-templates.css?v=1.0';
+    document.head.appendChild(link);
+  } catch (_) {}
+}
+
+ensureChatListTemplatesStylesheet();
+
+export const CHAT_LIST_TEMPLATES = [
+  // 2 Reference Presets
+  {
+    id: 'glass-studio',
+    name: 'Glass Cards',
+    label: 'Glass Cards',
+    group: 'reference',
+    groupLabel: 'Reference Presets',
+    tag: 'Pic 1 Ref',
+    usesGlassBackdrop: true,
+    icon: 'fa-solid fa-layer-group',
+    accentPreview: 'linear-gradient(135deg, #10b981 0%, #38bdf8 100%)',
+    description: 'Floating frosted glassmorphism cards over backdrop with glowing emerald active state'
+  },
+  {
+    id: 'classic',
+    name: 'Classic Flat',
+    label: 'Classic Flat',
+    group: 'reference',
+    groupLabel: 'Reference Presets',
+    tag: 'Pic 2 Ref',
+    usesGlassBackdrop: false,
+    icon: 'fa-solid fa-list',
+    accentPreview: 'linear-gradient(135deg, #111b21 0%, #00c896 100%)',
+    description: 'Full-width borderless list rows, neon-ring avatars & crisp 1px hairline dividers'
+  },
+  // 5 Brand-New NEXCHAT Studio Templates
+  {
+    id: 'swift-compact',
+    name: 'Swift Compact',
+    label: 'Swift Compact',
+    group: 'studio',
+    groupLabel: 'NEXCHAT Studio',
+    tag: 'Fast Scan',
+    usesGlassBackdrop: false,
+    icon: 'fa-solid fa-bolt',
+    accentPreview: 'linear-gradient(135deg, #0ea5e9 0%, #10b981 100%)',
+    description: 'Tight 54–60px rows, 38px squircles, tabular timestamps & 3px left unread rail'
+  },
+  {
+    id: 'aurora-bento',
+    name: 'Aurora Bento',
+    label: 'Aurora Bento',
+    group: 'studio',
+    groupLabel: 'NEXCHAT Studio',
+    tag: 'Editorial',
+    usesGlassBackdrop: true,
+    icon: 'fa-solid fa-wand-magic-sparkles',
+    accentPreview: 'linear-gradient(135deg, #6366f1 0%, #10b981 100%)',
+    description: '20px dual-surface gradient bento cards, 52px rounded portraits & floating capsule'
+  },
+  {
+    id: 'terminal-grid',
+    name: 'Terminal Grid',
+    label: 'Terminal Grid',
+    group: 'studio',
+    groupLabel: 'NEXCHAT Studio',
+    tag: 'Power User',
+    usesGlassBackdrop: false,
+    icon: 'fa-solid fa-terminal',
+    accentPreview: 'linear-gradient(135deg, #0f172a 0%, #22d3ee 100%)',
+    description: 'Architectural 1px bordered 8px cells, 42px beveled avatars & [3] monospace badge'
+  },
+  {
+    id: 'minimal-air',
+    name: 'Air Minimal',
+    label: 'Air Minimal',
+    group: 'studio',
+    groupLabel: 'NEXCHAT Studio',
+    tag: 'Calm UI',
+    usesGlassBackdrop: false,
+    icon: 'fa-solid fa-feather',
+    accentPreview: 'linear-gradient(135deg, #cbd5e1 0%, #475569 100%)',
+    description: 'Zero-clutter whitespace, 50px circular portraits, inset hairline & soft dot badge'
+  },
+  {
+    id: 'neon-dock',
+    name: 'Neon Dock',
+    label: 'Neon Dock',
+    group: 'studio',
+    groupLabel: 'NEXCHAT Studio',
+    tag: 'Split Dock',
+    usesGlassBackdrop: true,
+    icon: 'fa-solid fa-sliders',
+    accentPreview: 'linear-gradient(135deg, #00ff88 0%, #8b5cf6 100%)',
+    description: '14px asymmetric card, 4px gradient unread bar, 46px halo squircle & split meta'
+  },
+  // 4 Apple Liquid Glass Templates
+  {
+    id: 'apple-liquid-refraction',
+    name: 'iOS 26 Liquid',
+    label: 'iOS 26 Liquid',
+    group: 'apple',
+    groupLabel: 'Apple Liquid Glass',
+    tag: 'iOS 26',
+    usesGlassBackdrop: true,
+    icon: 'fa-solid fa-droplet',
+    accentPreview: 'linear-gradient(135deg, #60a5fa 0%, #e0f2fe 100%)',
+    description: 'Translucent iOS 26 specular refraction glass pill cards with crisp specular rims'
+  },
+  {
+    id: 'apple-spatial-vision',
+    name: 'visionOS Spatial',
+    label: 'visionOS Spatial',
+    group: 'apple',
+    groupLabel: 'Apple Liquid Glass',
+    tag: 'visionOS',
+    usesGlassBackdrop: true,
+    icon: 'fa-solid fa-cube',
+    accentPreview: 'linear-gradient(135deg, #334155 0%, #94a3b8 100%)',
+    description: '24px visionOS floating depth slabs with glass-ring circular avatars'
+  },
+  {
+    id: 'apple-ios-inset',
+    name: 'iOS Grouped',
+    label: 'iOS Grouped',
+    group: 'apple',
+    groupLabel: 'Apple Liquid Glass',
+    tag: 'Grouped',
+    usesGlassBackdrop: false,
+    icon: 'fa-solid fa-bars-staggered',
+    accentPreview: 'linear-gradient(135deg, #2563eb 0%, #60a5fa 100%)',
+    description: 'Grouped iOS inset list stack with crisp inset hairlines & clean circular avatars'
+  },
+  {
+    id: 'apple-dynamic-dock',
+    name: 'Dynamic Island',
+    label: 'Dynamic Island',
+    group: 'apple',
+    groupLabel: 'Apple Liquid Glass',
+    tag: 'Capsule',
+    usesGlassBackdrop: true,
+    icon: 'fa-solid fa-capsules',
+    accentPreview: 'linear-gradient(135deg, #09090b 0%, #38bdf8 100%)',
+    description: '26px pill-shaped Dynamic Island glass chrome with nested circular avatars'
+  },
+  // 4 Samsung Galaxy / One UI Templates
+  {
+    id: 'samsung-oneui-curves',
+    name: 'One UI Curves',
+    label: 'One UI Curves',
+    group: 'samsung',
+    groupLabel: 'Samsung One UI / Galaxy',
+    tag: 'One UI',
+    usesGlassBackdrop: false,
+    icon: 'fa-solid fa-shapes',
+    accentPreview: 'linear-gradient(135deg, #1d4ed8 0%, #10b981 100%)',
+    description: 'One UI 26px continuous curved cards with generous spacing & 48px squircle avatars'
+  },
+  {
+    id: 'samsung-galaxy-ultra',
+    name: 'Galaxy Ultra',
+    label: 'Galaxy Ultra',
+    group: 'samsung',
+    groupLabel: 'Samsung One UI / Galaxy',
+    tag: 'Titanium',
+    usesGlassBackdrop: false,
+    icon: 'fa-solid fa-shield-halved',
+    accentPreview: 'linear-gradient(135deg, #475569 0%, #f59e0b 100%)',
+    description: 'Matte titanium cards with sharp 3px edge strip & bold geometric sender weight'
+  },
+  {
+    id: 'samsung-fold-split',
+    name: 'Galaxy Z Fold',
+    label: 'Galaxy Z Fold',
+    group: 'samsung',
+    groupLabel: 'Samsung One UI / Galaxy',
+    tag: 'Z Fold',
+    usesGlassBackdrop: false,
+    icon: 'fa-solid fa-table-columns',
+    accentPreview: 'linear-gradient(135deg, #0f172a 0%, #3b82f6 100%)',
+    description: 'Balanced split-column cards isolating timestamp & unread badge in a right rail'
+  },
+  {
+    id: 'samsung-knox-minimal',
+    name: 'Knox Minimal',
+    label: 'Knox Minimal',
+    group: 'samsung',
+    groupLabel: 'Samsung One UI / Galaxy',
+    tag: 'Knox',
+    usesGlassBackdrop: false,
+    icon: 'fa-solid fa-lock',
+    accentPreview: 'linear-gradient(135deg, #1e293b 0%, #2dd4bf 100%)',
+    description: 'High-legibility recessed hairline graphite/ceramic cards with crisp ring avatars'
+  }
+];
+
+export const NEW_CHAT_LIST_TEMPLATES = CHAT_LIST_TEMPLATES.filter((t) => t.group === 'studio');
+export const APPLE_CHAT_LIST_TEMPLATES = CHAT_LIST_TEMPLATES.filter((t) => t.group === 'apple');
+export const SAMSUNG_CHAT_LIST_TEMPLATES = CHAT_LIST_TEMPLATES.filter((t) => t.group === 'samsung');
+
+const CHAT_LIST_TEMPLATE_GROUPS = [
+  { id: 'reference', label: 'Reference Presets', shortLabel: 'Ref' },
+  { id: 'studio', label: 'NEXCHAT Studio', shortLabel: 'Studio' },
+  { id: 'apple', label: 'Apple Liquid Glass', shortLabel: 'Apple' },
+  { id: 'samsung', label: 'Samsung One UI / Galaxy', shortLabel: 'Samsung' }
+];
 
 const CHATLIST_GLASS_THEMES = [
   { id: 'none', label: 'Default Clean List', swatch: 'linear-gradient(135deg, #111b21, #202c33)', glass: false },
@@ -359,40 +573,74 @@ export async function applyChatListWallpaper(wallpaperUrl) {
   }
 }
 
-function syncChatListTemplateUI(template) {
-  const active = template === 'classic' ? 'classic' : 'glass-studio';
-  document.querySelectorAll('[data-chatlist-template]').forEach((btn) => {
+function normalizeChatListTemplateId(templateName) {
+  if (typeof templateName !== 'string') return 'glass-studio';
+  const clean = templateName.trim().toLowerCase();
+  if (clean === 'glass') return 'glass-studio';
+  if (clean === 'air-minimal') return 'minimal-air';
+  const match = CHAT_LIST_TEMPLATES.find((t) => t.id === clean);
+  return match ? match.id : 'glass-studio';
+}
+
+function getChatListTemplateMeta(templateId) {
+  const id = normalizeChatListTemplateId(templateId);
+  return CHAT_LIST_TEMPLATES.find((t) => t.id === id) || CHAT_LIST_TEMPLATES[0];
+}
+
+function syncChatListTemplateUI(template, opts = {}) {
+  const meta = getChatListTemplateMeta(template);
+  const active = meta.id;
+  if (document.body) {
+    document.body.classList?.remove?.('is-active', 'active');
+    if (typeof document.body.removeAttribute === 'function') document.body.removeAttribute('aria-pressed');
+  }
+  if (document.documentElement) {
+    document.documentElement.classList?.remove?.('is-active', 'active');
+    if (typeof document.documentElement.removeAttribute === 'function') document.documentElement.removeAttribute('aria-pressed');
+  }
+  document.querySelectorAll('button[data-chatlist-template], [role="tab"][data-chatlist-template], .chatlist-template-pill[data-chatlist-template], .chatlist-template-card[data-chatlist-template]').forEach((btn) => {
+    if (btn === document.body || btn === document.documentElement) return;
     const isMatch = btn.dataset.chatlistTemplate === active;
     btn.classList.toggle('is-active', isMatch);
     btn.classList.toggle('active', isMatch);
     btn.setAttribute('aria-pressed', isMatch ? 'true' : 'false');
+    if (btn.getAttribute('role') === 'tab') {
+      btn.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+    }
+    if (isMatch && opts.userInitiated && btn.closest('#chatListTemplateBar') && typeof btn.scrollIntoView === 'function') {
+      try {
+        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      } catch (_) {}
+    }
   });
   const topBtn = document.getElementById('chatListTemplateBtn');
   if (topBtn) {
     topBtn.dataset.currentTemplate = active;
-    topBtn.setAttribute('aria-pressed', active === 'glass-studio' ? 'true' : 'false');
-    topBtn.title = active === 'classic'
-      ? 'Classic List active — click to switch to Glass Studio'
-      : 'Glass Studio active — click to switch to Classic List';
-    const labelSpan = topBtn.querySelector('.chatlist-template-label');
+    topBtn.setAttribute('aria-pressed', meta.usesGlassBackdrop ? 'true' : 'false');
+    topBtn.title = `${meta.name} active — click to cycle Chat List templates`;
+    const iconEl = topBtn.querySelector('i');
+    if (iconEl) iconEl.className = meta.icon;
+    const labelSpan = topBtn.querySelector('#chatListTemplateBtnLabel, .chatlist-template-label');
     if (labelSpan) {
-      labelSpan.textContent = active === 'classic' ? 'Classic' : 'Glass';
+      labelSpan.textContent = meta.name;
     } else if (!topBtn.dataset.preserveInnerHtml) {
-      topBtn.innerHTML = active === 'classic'
-        ? '<i class="fas fa-list"></i> Classic'
-        : '<i class="fas fa-layer-group"></i> Glass';
+      topBtn.innerHTML = `<i class="${meta.icon}"></i> <span id="chatListTemplateBtnLabel">${meta.name}</span>`;
     }
   }
 }
 
 export function setChatListTemplate(templateName, opts = {}) {
-  const template = templateName === 'classic' ? 'classic' : 'glass-studio';
+  const meta = getChatListTemplateMeta(templateName);
+  const template = meta.id;
   safeSetStorage('nex_chatlist_template', template);
   if (document.body) {
     document.body.dataset.chatlistTemplate = template;
   }
+  if (document.documentElement) {
+    document.documentElement.dataset.chatlistTemplate = template;
+  }
 
-  if (template === 'classic') {
+  if (!meta.usesGlassBackdrop) {
     const currentTheme = safeGetStorage('nex_chatlist_theme');
     if (currentTheme && currentTheme !== 'none') {
       safeSetStorage('nex_chatlist_saved_theme', currentTheme);
@@ -409,7 +657,7 @@ export function setChatListTemplate(templateName, opts = {}) {
     else if (!cleared) applyChatListWallpaper(DEFAULT_FUTURISTIC_CHATLIST_BG);
   }
 
-  syncChatListTemplateUI(template);
+  syncChatListTemplateUI(template, opts);
   return template;
 }
 
@@ -421,7 +669,8 @@ export function applyChatListTheme(themeId, opts = {}) {
   if (chosen && chosen !== 'none') {
     document.body.classList.add(`chatlist-theme-${chosen}`);
     safeSetStorage('nex_chatlist_saved_theme', chosen);
-    if (!opts.fromTemplateSwitch && !opts.preserveTemplate && document.body?.dataset?.chatlistTemplate === 'classic') {
+    const curTemplate = getChatListTemplateMeta(document.body?.dataset?.chatlistTemplate || safeGetStorage('nex_chatlist_template'));
+    if (!opts.fromTemplateSwitch && !opts.preserveTemplate && !curTemplate.usesGlassBackdrop) {
       setChatListTemplate('glass-studio', { skipRestore: true });
     }
   }
@@ -783,38 +1032,159 @@ function bindStudioSettingsControls() {
   renderAppThemeGalleries();
 }
 
-function ensureSettingsTemplateControls() {
-  const glassCard = document.getElementById('chatListGlassSettingsCard');
-  if (glassCard && !glassCard.querySelector('[data-chatlist-template]')) {
-    const bar = document.createElement('div');
-    bar.id = 'chatListTemplateSwitcher';
-    bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--nex-theme-border,rgba(148,163,184,0.18));';
-    bar.innerHTML = `
-      <div>
-        <div style="font-size:13px;font-weight:700;">Chat List Template</div>
-        <div style="font-size:11.5px;opacity:0.8;">Switch effortlessly without losing saved glass theme or backdrop</div>
-      </div>
-      <div class="chatlist-template-toggle-group" role="group" aria-label="Chat List Template">
-        <button type="button" data-chatlist-template="classic">Classic</button>
-        <button type="button" data-chatlist-template="glass-studio">Glass Studio</button>
-      </div>
-    `;
-    glassCard.prepend(bar);
+function renderTemplateBarInto(bar) {
+  if (!bar) return;
+  if (bar.dataset.renderedTemplatesCount === String(CHAT_LIST_TEMPLATES.length)) return;
+  bar.dataset.renderedTemplatesCount = String(CHAT_LIST_TEMPLATES.length);
+  bar.innerHTML = '';
+
+  CHAT_LIST_TEMPLATE_GROUPS.forEach((grp) => {
+    const items = CHAT_LIST_TEMPLATES.filter((t) => t.group === grp.id);
+    if (!items.length) return;
+    const tag = document.createElement('span');
+    tag.className = 'chatlist-template-group-tag';
+    tag.textContent = grp.shortLabel;
+    bar.appendChild(tag);
+
+    items.forEach((t) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chatlist-template-pill';
+      btn.setAttribute('role', 'tab');
+      btn.dataset.chatlistTemplate = t.id;
+      btn.title = `${t.name} — ${t.description}`;
+      btn.innerHTML = `<span class="chatlist-template-dot" style="background:${t.accentPreview};"></span><i class="${t.icon}"></i><span>${t.name}</span>`;
+      bar.appendChild(btn);
+    });
+  });
+
+  if (bar.dataset.keyNavBound !== 'true') {
+    bar.dataset.keyNavBound = 'true';
+    bar.addEventListener('keydown', (e) => {
+      if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
+      const pills = Array.from(bar.querySelectorAll('[data-chatlist-template]'));
+      if (!pills.length) return;
+      const curIdx = pills.indexOf(document.activeElement);
+      if (curIdx === -1 && e.key !== 'Home' && e.key !== 'End') return;
+      e.preventDefault();
+      let nextIdx = 0;
+      if (e.key === 'ArrowRight') nextIdx = (curIdx + 1) % pills.length;
+      else if (e.key === 'ArrowLeft') nextIdx = (curIdx - 1 + pills.length) % pills.length;
+      else if (e.key === 'End') nextIdx = pills.length - 1;
+      const target = pills[nextIdx];
+      if (target) {
+        target.focus();
+        setChatListTemplate(target.dataset.chatlistTemplate, { userInitiated: true });
+      }
+    });
   }
 }
 
+export function ensureChatListTemplateBar() {
+  if (typeof document === 'undefined') return null;
+  let bar = document.getElementById('chatListTemplateBar');
+  const contactList = document.getElementById('contactList');
+  if (!bar) {
+    if (!contactList || !contactList.parentElement) return null;
+    bar = document.createElement('div');
+    bar.id = 'chatListTemplateBar';
+    bar.className = 'chatlist-template-bar';
+    bar.setAttribute('role', 'tablist');
+    bar.setAttribute('aria-label', 'Chat List Templates');
+    contactList.parentElement.insertBefore(bar, contactList);
+  } else {
+    bar.classList.add('chatlist-template-bar');
+    if (!bar.getAttribute('role')) bar.setAttribute('role', 'tablist');
+    if (!bar.getAttribute('aria-label')) bar.setAttribute('aria-label', 'Chat List Templates');
+  }
+  renderTemplateBarInto(bar);
+  return bar;
+}
+
+function renderTemplateCardsGrid(host) {
+  if (!host) return;
+  if (host.dataset.renderedTemplatesCount === String(CHAT_LIST_TEMPLATES.length)) return;
+  host.dataset.renderedTemplatesCount = String(CHAT_LIST_TEMPLATES.length);
+  host.classList.add('nex-template-gallery-groups');
+  host.innerHTML = '';
+
+  CHAT_LIST_TEMPLATE_GROUPS.forEach((grp) => {
+    const items = CHAT_LIST_TEMPLATES.filter((t) => t.group === grp.id);
+    if (!items.length) return;
+
+    const section = document.createElement('div');
+    section.className = 'nex-template-group-section';
+    section.dataset.templateGroup = grp.id;
+
+    const heading = document.createElement('div');
+    heading.className = 'nex-template-group-heading';
+    heading.innerHTML = `<span>${grp.label}</span><span>${items.length}</span>`;
+    section.appendChild(heading);
+
+    const grid = document.createElement('div');
+    grid.className = 'nex-template-group-cards';
+
+    items.forEach((t) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'chatlist-template-card';
+      card.dataset.chatlistTemplate = t.id;
+      card.title = t.description;
+      card.innerHTML = `
+        <div class="chatlist-template-card-top">
+          <span class="chatlist-template-card-thumb" style="background:${t.accentPreview};"><i class="${t.icon}"></i></span>
+          <span class="chatlist-template-card-tag">${t.tag}</span>
+        </div>
+        <div class="chatlist-template-card-title">${t.name}</div>
+        <div class="chatlist-template-card-desc">${t.description}</div>
+      `;
+      grid.appendChild(card);
+    });
+
+    section.appendChild(grid);
+    host.appendChild(section);
+  });
+}
+
+function ensureSettingsTemplateControls() {
+  const glassCard = document.getElementById('chatListGlassSettingsCard');
+  if (!glassCard) return;
+
+  const legacyRow = glassCard.querySelector('.chatlist-template-switcher-row');
+  let grid = document.getElementById('chatListTemplateSettingsGrid');
+  if (!grid) {
+    grid = document.createElement('div');
+    grid.id = 'chatListTemplateSettingsGrid';
+    grid.className = 'chatlist-template-settings-grid';
+    const previewStage = glassCard.querySelector('#chatListLivePreview');
+    if (legacyRow && legacyRow.parentElement === glassCard) {
+      legacyRow.insertAdjacentElement('afterend', grid);
+    } else if (previewStage && previewStage.parentElement === glassCard) {
+      glassCard.insertBefore(grid, previewStage);
+    } else {
+      glassCard.prepend(grid);
+    }
+  }
+  if (legacyRow) {
+    legacyRow.style.display = 'none';
+  }
+  renderTemplateCardsGrid(grid);
+}
+
 function bindChatListTemplateControls() {
+  ensureChatListTemplateBar();
   ensureSettingsTemplateControls();
 
   if (typeof document !== 'undefined' && !document.documentElement.dataset.nexTemplateDelegated) {
     document.documentElement.dataset.nexTemplateDelegated = 'true';
     document.addEventListener('click', (e) => {
-      const tplBtn = e.target?.closest?.('[data-chatlist-template]');
-      if (tplBtn) {
+      const tplBtn = e.target?.closest?.('button[data-chatlist-template], [role="tab"][data-chatlist-template], .chatlist-template-pill[data-chatlist-template], .chatlist-template-card[data-chatlist-template]');
+      if (tplBtn && tplBtn !== document.body && tplBtn !== document.documentElement) {
         e.preventDefault();
-        const nextTpl = setChatListTemplate(tplBtn.dataset.chatlistTemplate);
+        const nextTpl = setChatListTemplate(tplBtn.dataset.chatlistTemplate, { userInitiated: true });
+        const meta = getChatListTemplateMeta(nextTpl);
         if (typeof window.showNotif === 'function') {
-          window.showNotif(nextTpl === 'classic' ? 'Switched to Classic chat list' : 'Restored Glass Studio chat list', 'success', 1400);
+          window.showNotif(`Chat list: ${meta.name}`, 'success', 1400);
         }
         return;
       }
@@ -822,10 +1192,12 @@ function bindChatListTemplateControls() {
       if (toggleBtn) {
         e.preventDefault();
         e.stopPropagation();
-        const cur = document.body?.dataset?.chatlistTemplate || safeGetStorage('nex_chatlist_template') || 'glass-studio';
-        const nextTpl = setChatListTemplate(cur === 'classic' ? 'glass-studio' : 'classic');
+        const cur = normalizeChatListTemplateId(document.body?.dataset?.chatlistTemplate || safeGetStorage('nex_chatlist_template') || 'glass-studio');
+        const curIdx = CHAT_LIST_TEMPLATES.findIndex((t) => t.id === cur);
+        const nextMeta = CHAT_LIST_TEMPLATES[(curIdx + 1) % CHAT_LIST_TEMPLATES.length] || CHAT_LIST_TEMPLATES[0];
+        setChatListTemplate(nextMeta.id, { userInitiated: true });
         if (typeof window.showNotif === 'function') {
-          window.showNotif(nextTpl === 'classic' ? 'Switched to Classic chat list' : 'Restored Glass Studio chat list', 'success', 1400);
+          window.showNotif(`Chat list: ${nextMeta.name}`, 'success', 1400);
         }
       }
     });
@@ -845,17 +1217,9 @@ export function openChatListStudioModal() {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
           <h3 style="margin:0;font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;">
             <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--nex-theme-accent,#00ff88);"></i>
-            Chat List Glassmorphism &amp; Themes
+            Chat List Templates &amp; Glass Studio
           </h3>
-          <button type="button" id="closeChatListStudioBtn" class="wp-close-btn" style="background:var(--nex-theme-surface-2,rgba(255,255,255,0.08));border:1px solid var(--nex-theme-border,transparent);color:var(--nex-theme-text,#cbd5e1);width:32px;height:32px;border-radius:50%;cursor:pointer;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding:8px 10px;border-radius:14px;background:var(--nex-theme-surface-2,rgba(255,255,255,0.05));border:1px solid var(--nex-theme-border,rgba(255,255,255,0.12));">
-          <span style="font-size:12px;font-weight:700;">Template Mode</span>
-          <div class="chatlist-template-toggle-group" role="group" aria-label="Chat List Template">
-            <button type="button" data-chatlist-template="classic">Classic</button>
-            <button type="button" data-chatlist-template="glass-studio">Glass Studio</button>
-          </div>
+          <button type="button" id="closeChatListStudioBtn" class="wp-close-btn" style="background:var(--nex-theme-surface-2,rgba(255,255,255,0.08));border:1px solid var(--nex-theme-border,transparent);color:var(--nex-theme-text,#cbd5e1);width:44px;height:44px;min-width:44px;min-height:44px;border-radius:50%;cursor:pointer;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div id="modalChatListLivePreview" class="nex-chatlist-preview-stage" style="background-image:url('./assets/images/chatlist-futuristic-bg.jpg');">
@@ -863,59 +1227,64 @@ export function openChatListStudioModal() {
             <img src="chronex-ai.jpg" class="nex-chatlist-preview-avatar" onerror="this.style.display='none'" alt="" />
             <div style="flex:1;min-width:0;">
               <div style="font-size:13px;font-weight:700;">Chronex AI</div>
-              <div style="font-size:11px;opacity:0.85;">Frosted liquid glass chat list row</div>
+              <div style="font-size:12px;opacity:0.85;">Live chat list template &amp; glass preview</div>
             </div>
-            <span style="background:var(--nex-theme-accent,#00ff88);color:var(--nex-theme-accent-fg,#041019);font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;">3</span>
+            <span class="nex-preview-badge" style="background:var(--nex-theme-accent,#00ff88);color:var(--nex-theme-accent-fg,#041019);font-size:12px;font-weight:800;padding:2px 8px;border-radius:999px;">3</span>
           </div>
           <div class="nex-chatlist-preview-row">
             <span class="nex-chatlist-preview-avatar" style="display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#00ff88,#00d4ff);color:#041019;font-weight:800;font-size:12px;">G</span>
             <div style="flex:1;min-width:0;">
               <div style="font-size:13px;font-weight:700;">Group Syndicate</div>
-              <div style="font-size:11px;color:var(--nex-theme-accent,#00ff88);">typing &amp; swipe FX ready</div>
+              <div style="font-size:12px;color:var(--nex-theme-accent,#00ff88);">15 layouts • Light &amp; Dark ready</div>
             </div>
-            <span style="font-size:10px;opacity:0.75;">Now</span>
+            <span style="font-size:12px;opacity:0.8;">Now</span>
           </div>
         </div>
 
+        <div style="margin-bottom:12px;">
+          <div style="font-size:12px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:6px;">15 Chat List Templates</div>
+          <div id="modalChatListTemplateGrid" class="chatlist-template-settings-grid"></div>
+        </div>
+
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-          <label class="btn-primary" style="flex:1;min-width:120px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:700;">
+          <label class="btn-primary" style="flex:1;min-width:120px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:700;">
             <i class="fa-solid fa-image"></i> Upload Photo
             <input type="file" id="modalChatListPicInput" accept="image/*" style="display:none;" />
           </label>
-          <button type="button" id="modalChatListBrowseWallpapersBtn" class="btn-secondary" style="flex:1;min-width:130px;padding:9px 12px;border-radius:12px;font-size:12px;font-weight:700;background:var(--nex-theme-active,rgba(0,255,136,0.16));border:1px solid var(--nex-theme-border,rgba(0,255,136,0.45));color:var(--nex-theme-accent,#00ff88);">
+          <button type="button" id="modalChatListBrowseWallpapersBtn" class="btn-secondary" style="flex:1;min-width:130px;min-height:44px;padding:9px 12px;border-radius:12px;font-size:12px;font-weight:700;background:var(--nex-theme-active,rgba(0,255,136,0.16));border:1px solid var(--nex-theme-border,rgba(0,255,136,0.45));color:var(--nex-theme-accent,#00ff88);">
             <i class="fa-solid fa-palette"></i> 84+ Wallpapers
           </button>
-          <button type="button" id="modalChatListUseAvatarBtn" class="btn-secondary" style="flex:1;min-width:120px;padding:9px 12px;border-radius:12px;font-size:12px;font-weight:700;">
+          <button type="button" id="modalChatListUseAvatarBtn" class="btn-secondary" style="flex:1;min-width:120px;min-height:44px;padding:9px 12px;border-radius:12px;font-size:12px;font-weight:700;">
             <i class="fa-solid fa-user-astronaut"></i> Profile Pic
           </button>
-          <button type="button" id="modalChatListClearPicBtn" class="btn-secondary" style="padding:9px 12px;border-radius:12px;font-size:12px;" title="Remove Backdrop">
+          <button type="button" id="modalChatListClearPicBtn" class="btn-secondary" style="min-width:44px;min-height:44px;padding:9px 12px;border-radius:12px;font-size:12px;" title="Remove Backdrop">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         </div>
 
         <div style="margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:6px;">Instant Built-In Backdrops</div>
+          <div style="font-size:12px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:6px;">Instant Built-In Backdrops</div>
           <div id="modalChatListPresetBackdrops" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;"></div>
         </div>
 
         <div style="margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:4px;">20 Frosted Glassmorphism Row Styles</div>
+          <div style="font-size:12px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:4px;">20 Frosted Glassmorphism Row Styles</div>
           <div id="modalGlassChatListSwatches" class="nex-chatlist-swatch-grid"></div>
         </div>
 
         <div style="margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:4px;">10 Light Mode App Themes</div>
+          <div style="font-size:12px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:4px;">10 Light Mode App Themes</div>
           <div id="modalAppLightThemeGallery" class="app-theme-gallery-grid"></div>
         </div>
 
         <div style="margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:4px;">10 Dark Mode App Themes</div>
+          <div style="font-size:12px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:4px;">10 Dark Mode App Themes</div>
           <div id="modalAppDarkThemeGallery" class="app-theme-gallery-grid"></div>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
           <div>
-            <label style="font-size:11.5px;font-weight:600;">Card Shape</label>
+            <label style="font-size:12px;font-weight:600;">Card Shape</label>
             <select id="modalChatListCardStyleSelect" class="settings-select" style="margin-top:4px;">
               <option value="frosted-cards">Frosted Cards</option>
               <option value="prism-trim">Prism Neon Trim</option>
@@ -924,15 +1293,15 @@ export function openChatListStudioModal() {
             </select>
           </div>
           <div>
-            <label style="font-size:11.5px;font-weight:600;">Frosted Blur: <span id="modalChatListBlurVal">16px</span></label>
+            <label style="font-size:12px;font-weight:600;">Frosted Blur: <span id="modalChatListBlurVal">16px</span></label>
             <input type="range" id="modalChatListBlurRange" min="6" max="28" step="2" value="16" class="settings-input" style="width:100%;" />
           </div>
           <div>
-            <label style="font-size:11.5px;font-weight:600;">Row Glass Opacity: <span id="modalChatListOpacityVal">56%</span></label>
+            <label style="font-size:12px;font-weight:600;">Row Glass Opacity: <span id="modalChatListOpacityVal">56%</span></label>
             <input type="range" id="modalChatListOpacityRange" min="20" max="88" step="4" value="56" class="settings-input" style="width:100%;" />
           </div>
           <div>
-            <label style="font-size:11.5px;font-weight:600;">Backdrop Dim: <span id="modalChatListBgDimVal">42%</span></label>
+            <label style="font-size:12px;font-weight:600;">Backdrop Dim: <span id="modalChatListBgDimVal">42%</span></label>
             <input type="range" id="modalChatListBgDimRange" min="0" max="85" step="5" value="42" class="settings-input" style="width:100%;" />
           </div>
         </div>
@@ -945,7 +1314,7 @@ export function openChatListStudioModal() {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'btn-secondary';
-      btn.style.cssText = 'min-width:94px;height:42px;border-radius:10px;font-size:10.5px;font-weight:700;background-size:cover;color:#fff;text-shadow:0 1px 4px #000;flex-shrink:0;';
+      btn.style.cssText = 'min-width:94px;min-height:44px;border-radius:10px;font-size:12px;font-weight:700;background-size:cover;color:#fff;text-shadow:0 1px 4px #000;flex-shrink:0;';
       btn.style.backgroundImage = `url("${b.url}")`;
       btn.textContent = b.label;
       btn.onclick = () => {
@@ -1002,6 +1371,7 @@ export function openChatListStudioModal() {
   const prev = modal.querySelector('#modalChatListLivePreview');
   if (prev) prev.style.backgroundImage = effectiveBg ? `url("${effectiveBg}")` : '';
   const activeChatListTheme = safeGetStorage('nex_chatlist_theme') || safeGetStorage('nex_chatlist_saved_theme') || 'telegram-glass';
+  renderTemplateCardsGrid(modal.querySelector('#modalChatListTemplateGrid'));
   renderChatListSwatches('modalGlassChatListSwatches', activeChatListTheme);
   renderAppThemeGalleries();
   syncChatListTemplateUI(safeGetStorage('nex_chatlist_template') || 'glass-studio');
@@ -1013,6 +1383,10 @@ function exposeStudioGlobals() {
   if (typeof window === 'undefined') return;
   window.APP_LIGHT_THEMES = APP_LIGHT_THEMES;
   window.APP_DARK_THEMES = APP_DARK_THEMES;
+  window.CHAT_LIST_TEMPLATES = CHAT_LIST_TEMPLATES;
+  window.NEW_CHAT_LIST_TEMPLATES = NEW_CHAT_LIST_TEMPLATES;
+  window.APPLE_CHAT_LIST_TEMPLATES = APPLE_CHAT_LIST_TEMPLATES;
+  window.SAMSUNG_CHAT_LIST_TEMPLATES = SAMSUNG_CHAT_LIST_TEMPLATES;
   window.applyAppThemeVariant = applyAppThemeVariant;
   window.setChatListTemplate = setChatListTemplate;
   window.NexChatExperienceStudio = {
@@ -1024,15 +1398,21 @@ function exposeStudioGlobals() {
     preloadImageEager,
     APP_LIGHT_THEMES,
     APP_DARK_THEMES,
+    CHAT_LIST_TEMPLATES,
+    NEW_CHAT_LIST_TEMPLATES,
+    APPLE_CHAT_LIST_TEMPLATES,
+    SAMSUNG_CHAT_LIST_TEMPLATES,
     applyAppThemeVariant,
     setChatListTemplate,
-    renderAppThemeGalleries
+    renderAppThemeGalleries,
+    ensureChatListTemplateBar
   };
 }
 
 exposeStudioGlobals();
 
 export function initChatExperienceStudio() {
+  ensureChatListTemplatesStylesheet();
   const savedTemplate = safeGetStorage('nex_chatlist_template') || 'glass-studio';
   applyChatListTheme(safeGetStorage('nex_chatlist_theme') || 'telegram-glass', { preserveTemplate: true });
   const savedBg = safeGetStorage('nex_chatlist_bg');

@@ -1,3 +1,5 @@
+@import url('./chat-list-templates.css');
+
 /* ============================================================================
    NEXCHAT Experience Studio:
    1. 20 Frosted Glassmorphism Chat List Themes & Picture Backdrop Engine
@@ -64,12 +66,42 @@ body.light-theme #chatListView.has-chatlist-wallpaper::after {
   );
 }
 
-/* Classic Chat List Template suppresses backdrop canvas layers cleanly */
-body[data-chatlist-template="classic"] #chatListView.has-chatlist-wallpaper {
-  background-color: var(--nex-theme-surface, #111b21) !important;
+/* Non-Glass Chat List Templates suppress backdrop canvas layers cleanly */
+body:is(
+  [data-chatlist-template="classic"],
+  [data-chatlist-template="swift-compact"],
+  [data-chatlist-template="terminal-grid"],
+  [data-chatlist-template="minimal-air"],
+  [data-chatlist-template="apple-ios-inset"],
+  [data-chatlist-template="samsung-oneui-curves"],
+  [data-chatlist-template="samsung-galaxy-ultra"],
+  [data-chatlist-template="samsung-fold-split"],
+  [data-chatlist-template="samsung-knox-minimal"]
+) #chatListView.has-chatlist-wallpaper {
+  background-color: var(--nex-theme-bg-app, var(--nex-theme-surface, #111b21)) !important;
 }
-body[data-chatlist-template="classic"] #chatListView.has-chatlist-wallpaper::before,
-body[data-chatlist-template="classic"] #chatListView.has-chatlist-wallpaper::after {
+body:is(
+  [data-chatlist-template="classic"],
+  [data-chatlist-template="swift-compact"],
+  [data-chatlist-template="terminal-grid"],
+  [data-chatlist-template="minimal-air"],
+  [data-chatlist-template="apple-ios-inset"],
+  [data-chatlist-template="samsung-oneui-curves"],
+  [data-chatlist-template="samsung-galaxy-ultra"],
+  [data-chatlist-template="samsung-fold-split"],
+  [data-chatlist-template="samsung-knox-minimal"]
+) #chatListView.has-chatlist-wallpaper::before,
+body:is(
+  [data-chatlist-template="classic"],
+  [data-chatlist-template="swift-compact"],
+  [data-chatlist-template="terminal-grid"],
+  [data-chatlist-template="minimal-air"],
+  [data-chatlist-template="apple-ios-inset"],
+  [data-chatlist-template="samsung-oneui-curves"],
+  [data-chatlist-template="samsung-galaxy-ultra"],
+  [data-chatlist-template="samsung-fold-split"],
+  [data-chatlist-template="samsung-knox-minimal"]
+) #chatListView.has-chatlist-wallpaper::after {
   display: none !important;
   opacity: 0 !important;
   background-image: none !important;
@@ -112,11 +144,11 @@ body.light-theme .chatlist-style-tab:hover {
   color: var(--nex-theme-text, #0f172a) !important;
 }
 
-/* ── Shared Frosted Chat List Card Optics (All 20 Glass Themes) ── */
-body[class*="chatlist-theme-"]:not(.nex-low-end) #contactList .chat-list-item,
-body[class*="chatlist-theme-"]:not(.nex-low-end) #contactList .chat-item,
-body[class*="chatlist-theme-"]:not(.nex-low-end) #groupsList .chat-list-item,
-body[class*="chatlist-theme-"]:not(.nex-low-end) #archivedList .chat-item,
+/* ── Shared Frosted Chat List Card Optics (Glass Studio & Default) ── */
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"]:not(.nex-low-end) #contactList .chat-list-item,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"]:not(.nex-low-end) #contactList .chat-item,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"]:not(.nex-low-end) #groupsList .chat-list-item,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"]:not(.nex-low-end) #archivedList .chat-item,
 body[class*="chatlist-theme-"]:not(.nex-low-end) .nex-chatlist-preview-row {
   backdrop-filter: blur(var(--nex-chatlist-blur, 16px)) saturate(175%) !important;
   -webkit-backdrop-filter: blur(var(--nex-chatlist-blur, 16px)) saturate(175%) !important;
@@ -138,34 +170,35 @@ body[class*="chatlist-theme-"]:not(.nex-low-end) #chatSearchContainer .chat-sear
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, var(--nex-chatlist-rim, 0.22)), 0 6px 20px rgba(0, 0, 0, 0.24) !important;
 }
 
-body.light-mode[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]):not(.nex-low-end) #chatSearchContainer .chat-search-pill-wrapper,
-body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]):not(.nex-low-end) #chatSearchContainer .chat-search-pill-wrapper {
-  background: rgba(255, 255, 255, 0.84) !important;
+body.light-mode[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"], [data-chatlist-template="aurora-bento"], [data-chatlist-template="neon-dock"], [data-chatlist-template="apple-liquid-refraction"], [data-chatlist-template="apple-spatial-vision"], [data-chatlist-template="apple-dynamic-dock"]):not(.nex-low-end) #chatSearchContainer .chat-search-pill-wrapper,
+body.light-theme[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"], [data-chatlist-template="aurora-bento"], [data-chatlist-template="neon-dock"], [data-chatlist-template="apple-liquid-refraction"], [data-chatlist-template="apple-spatial-vision"], [data-chatlist-template="apple-dynamic-dock"]):not(.nex-low-end) #chatSearchContainer .chat-search-pill-wrapper {
+  background: rgba(255, 255, 255, 0.86) !important;
   border: 1px solid var(--nex-theme-border, rgba(15, 23, 42, 0.14)) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 6px 18px rgba(15, 23, 42, 0.08) !important;
 }
 
-body[class*="chatlist-theme-"]:not(.nex-low-end) #chatFilterTabs .filter-tab:not(.active) {
+body[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"], [data-chatlist-template="aurora-bento"], [data-chatlist-template="neon-dock"], [data-chatlist-template="apple-liquid-refraction"], [data-chatlist-template="apple-spatial-vision"], [data-chatlist-template="apple-dynamic-dock"]):not(.nex-low-end) #chatFilterTabs .filter-tab:not(.active) {
   backdrop-filter: blur(12px) saturate(160%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-  background: rgba(15, 23, 42, 0.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  background: rgba(15, 23, 42, 0.62) !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
 }
 
-body.light-mode[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]):not(.nex-low-end) #chatFilterTabs .filter-tab:not(.active),
-body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]):not(.nex-low-end) #chatFilterTabs .filter-tab:not(.active) {
-  background: rgba(255, 255, 255, 0.82) !important;
+body.light-mode[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"], [data-chatlist-template="aurora-bento"], [data-chatlist-template="neon-dock"], [data-chatlist-template="apple-liquid-refraction"], [data-chatlist-template="apple-spatial-vision"], [data-chatlist-template="apple-dynamic-dock"]):not(.nex-low-end) #chatFilterTabs .filter-tab:not(.active),
+body.light-theme[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"], [data-chatlist-template="aurora-bento"], [data-chatlist-template="neon-dock"], [data-chatlist-template="apple-liquid-refraction"], [data-chatlist-template="apple-spatial-vision"], [data-chatlist-template="apple-dynamic-dock"]):not(.nex-low-end) #chatFilterTabs .filter-tab:not(.active) {
+  background: rgba(255, 255, 255, 0.86) !important;
   color: var(--nex-theme-text-muted, #3b4958) !important;
   border: 1px solid var(--nex-theme-border, rgba(15, 23, 42, 0.14)) !important;
 }
 
-body[class*="chatlist-theme-"] #contactList .chat-item:hover,
-body[class*="chatlist-theme-"] #contactList .chat-list-item:hover {
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #contactList .chat-item:hover,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #contactList .chat-list-item:hover {
   transform: translate3d(2px, -1px, 0) scale(1.006);
 }
 
-body[class*="chatlist-theme-"] #contactList .chat-item.selected,
-body[class*="chatlist-theme-"] #contactList .chat-item.active {
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #contactList .chat-item.selected,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #contactList .chat-item.active {
   transform: translate3d(2px, 0, 0);
 }
 
@@ -191,7 +224,7 @@ body[data-chatlist-card-style="aurora-pills"] .nex-chatlist-preview-row {
 body.chatlist-theme-telegram-glass { --cl-bg: rgba(25, 44, 68, var(--nex-chatlist-alpha, 0.56)); --cl-border: rgba(125, 211, 252, 0.24); --cl-glow: rgba(56, 189, 248, 0.18); --cl-active: rgba(0, 168, 132, 0.34); }
 body.chatlist-theme-liquid-crystal { --cl-bg: rgba(10, 42, 62, var(--nex-chatlist-alpha, 0.54)); --cl-border: rgba(0, 212, 255, 0.34); --cl-glow: rgba(0, 212, 255, 0.22); --cl-active: rgba(0, 212, 255, 0.32); }
 body.chatlist-theme-midnight-obsidian { --cl-bg: rgba(15, 23, 42, var(--nex-chatlist-alpha, 0.68)); --cl-border: rgba(148, 163, 184, 0.22); --cl-glow: rgba(15, 23, 42, 0.42); --cl-active: rgba(51, 65, 85, 0.72); }
-body.chatlist-theme-glass-frost { --cl-bg: rgba(226, 232, 240, 0.16); --cl-border: rgba(255, 255, 255, 0.34); --cl-glow: rgba(255, 255, 255, 0.14); --cl-active: rgba(255, 255, 255, 0.26); }
+body.chatlist-theme-glass-frost { --cl-bg: rgba(30, 41, 59, calc(var(--nex-chatlist-alpha, 0.56) * 0.9)); --cl-border: rgba(255, 255, 255, 0.36); --cl-glow: rgba(255, 255, 255, 0.16); --cl-active: rgba(51, 65, 85, 0.78); }
 body.chatlist-theme-crimson-velvet-glass { --cl-bg: rgba(105, 16, 48, var(--nex-chatlist-alpha, 0.56)); --cl-border: rgba(251, 113, 133, 0.34); --cl-glow: rgba(225, 29, 72, 0.24); --cl-active: rgba(225, 29, 72, 0.38); }
 body.chatlist-theme-arctic-ice-glass { --cl-bg: rgba(14, 74, 102, var(--nex-chatlist-alpha, 0.54)); --cl-border: rgba(125, 211, 252, 0.38); --cl-glow: rgba(56, 189, 248, 0.22); --cl-active: rgba(14, 165, 233, 0.34); }
 body.chatlist-theme-cyber-violet-glass { --cl-bg: rgba(59, 25, 112, var(--nex-chatlist-alpha, 0.58)); --cl-border: rgba(167, 139, 250, 0.36); --cl-glow: rgba(139, 92, 246, 0.24); --cl-active: rgba(139, 92, 246, 0.36); }
@@ -207,23 +240,44 @@ body.chatlist-theme-mint-breeze-glass { --cl-bg: rgba(12, 72, 60, var(--nex-chat
 body.chatlist-theme-champagne-gold-glass { --cl-bg: rgba(84, 62, 18, var(--nex-chatlist-alpha, 0.56)); --cl-border: rgba(250, 204, 21, 0.36); --cl-glow: rgba(234, 179, 8, 0.22); --cl-active: rgba(234, 179, 8, 0.32); }
 body.chatlist-theme-indigo-nebula-glass { --cl-bg: rgba(42, 36, 110, var(--nex-chatlist-alpha, 0.58)); --cl-border: rgba(129, 140, 248, 0.36); --cl-glow: rgba(99, 102, 241, 0.24); --cl-active: rgba(99, 102, 241, 0.36); }
 body.chatlist-theme-chrome-mirror-glass { --cl-bg: rgba(71, 85, 105, var(--nex-chatlist-alpha, 0.46)); --cl-border: rgba(241, 245, 249, 0.38); --cl-glow: rgba(203, 213, 225, 0.2); --cl-active: rgba(148, 163, 184, 0.38); }
-body.chatlist-theme-pearl-ivory-glass { --cl-bg: rgba(148, 163, 184, 0.24); --cl-border: rgba(255, 255, 255, 0.42); --cl-glow: rgba(248, 250, 252, 0.18); --cl-active: rgba(248, 250, 252, 0.32); }
+body.chatlist-theme-pearl-ivory-glass { --cl-bg: rgba(39, 46, 61, calc(var(--nex-chatlist-alpha, 0.56) * 0.92)); --cl-border: rgba(248, 250, 252, 0.38); --cl-glow: rgba(248, 250, 252, 0.18); --cl-active: rgba(71, 85, 105, 0.78); }
 
-body[class*="chatlist-theme-"] #contactList .chat-list-item,
-body[class*="chatlist-theme-"] #contactList .chat-item,
-body[class*="chatlist-theme-"] #groupsList .chat-list-item,
-body[class*="chatlist-theme-"] #archivedList .chat-item,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #contactList .chat-list-item,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #contactList .chat-item,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #groupsList .chat-list-item,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #archivedList .chat-item,
 body[class*="chatlist-theme-"] .nex-chatlist-preview-row {
-  background: var(--cl-bg, rgba(25, 44, 68, 0.56)) !important;
+  background: var(--cl-bg, rgba(25, 44, 68, 0.6)) !important;
   border: 1px solid var(--cl-border, rgba(255, 255, 255, 0.2)) !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, var(--nex-chatlist-rim, 0.22)), 0 0 14px var(--cl-glow, transparent) !important;
 }
 
-body[class*="chatlist-theme-"] #contactList .chat-item.selected,
-body[class*="chatlist-theme-"] #contactList .chat-item.active {
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #contactList .chat-item.selected,
+body:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"])[class*="chatlist-theme-"] #contactList .chat-item.active {
   background: var(--cl-active, rgba(0, 168, 132, 0.34)) !important;
   border-color: rgba(0, 255, 136, 0.52) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 0 18px var(--cl-glow, rgba(0, 255, 136, 0.25)) !important;
+}
+
+/* Dark Mode Frosted Glass High-Contrast Text Fix (>=4.5:1 across all 20 Glass Themes) */
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #contactList .chat-item .chat-name,
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #contactList .chat-list-item .chat-name,
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #groupsList .chat-list-item .chat-name,
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] .nex-chatlist-preview-row {
+  color: #f8fafc !important;
+}
+
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #contactList .chat-item:not(.chronex-ai-item) .chat-preview,
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #contactList .chat-list-item:not(.chronex-ai-item) .chat-preview,
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #contactList .chat-item:not(.chronex-ai-item) .chat-item-time:not(.unread),
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #contactList .chat-list-item:not(.chronex-ai-item) .chat-item-time:not(.unread) {
+  color: #e2e8f0 !important;
+}
+
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #contactList .chronex-ai-item .chat-preview,
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #contactList .chronex-ai-item .chat-item-time,
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"])[class*="chatlist-theme-"] #contactList .chat-item-time.unread {
+  color: #4ade80 !important;
 }
 
 /* ── Light Mode Frosted Glass Tints & High-Contrast Readable Text ── */
@@ -268,26 +322,26 @@ body.light-theme.chatlist-theme-chrome-mirror-glass { --cl-light-bg: rgba(244, 2
 body.light-mode.chatlist-theme-pearl-ivory-glass,
 body.light-theme.chatlist-theme-pearl-ivory-glass { --cl-light-bg: rgba(252, 250, 245, 0.88); --cl-light-border: rgba(148, 163, 184, 0.34); --cl-light-active: rgba(241, 237, 228, 0.94); }
 
-body.light-mode[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #contactList .chat-list-item,
-body.light-mode[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #contactList .chat-item,
-body.light-mode[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #groupsList .chat-list-item,
-body.light-mode[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #archivedList .chat-item,
-body.light-mode[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) .nex-chatlist-preview-row,
-body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #contactList .chat-list-item,
-body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #contactList .chat-item,
-body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #groupsList .chat-list-item,
-body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #archivedList .chat-item,
-body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) .nex-chatlist-preview-row {
+body.light-mode[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #contactList .chat-list-item,
+body.light-mode[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #contactList .chat-item,
+body.light-mode[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #groupsList .chat-list-item,
+body.light-mode[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #archivedList .chat-item,
+body.light-mode[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) .nex-chatlist-preview-row,
+body.light-theme[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #contactList .chat-list-item,
+body.light-theme[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #contactList .chat-item,
+body.light-theme[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #groupsList .chat-list-item,
+body.light-theme[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #archivedList .chat-item,
+body.light-theme[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) .nex-chatlist-preview-row {
   background: var(--cl-light-bg, rgba(255, 255, 255, 0.84)) !important;
   border: 1px solid var(--cl-light-border, rgba(15, 23, 42, 0.14)) !important;
   color: var(--nex-theme-text, #0f172a) !important;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
 }
 
-body.light-mode[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #contactList .chat-item.selected,
-body.light-mode[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #contactList .chat-item.active,
-body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #contactList .chat-item.selected,
-body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"]) #contactList .chat-item.active {
+body.light-mode[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #contactList .chat-item.selected,
+body.light-mode[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #contactList .chat-item.active,
+body.light-theme[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #contactList .chat-item.selected,
+body.light-theme[class*="chatlist-theme-"]:is(:not([data-chatlist-template]), [data-chatlist-template="glass-studio"]) #contactList .chat-item.active {
   background: var(--cl-light-active, var(--nex-theme-active, rgba(11, 110, 91, 0.14))) !important;
   border-color: var(--nex-theme-accent, #0b6e5b) !important;
 }
@@ -295,22 +349,22 @@ body.light-theme[class*="chatlist-theme-"]:not([data-chatlist-template="classic"
 body.light-mode[class*="chatlist-theme-"] #contactList .chat-item .chat-name,
 body.light-mode[class*="chatlist-theme-"] #contactList .chat-list-item .chat-name,
 body.light-mode[class*="chatlist-theme-"] .nex-chatlist-preview-row,
-body.light-mode[class*="chatlist-theme-"] .nex-chatlist-preview-row *,
+body.light-mode[class*="chatlist-theme-"] .nex-chatlist-preview-row > div *:not(.nex-preview-badge),
 body.light-theme[class*="chatlist-theme-"] #contactList .chat-item .chat-name,
 body.light-theme[class*="chatlist-theme-"] #contactList .chat-list-item .chat-name,
 body.light-theme[class*="chatlist-theme-"] .nex-chatlist-preview-row,
-body.light-theme[class*="chatlist-theme-"] .nex-chatlist-preview-row * {
+body.light-theme[class*="chatlist-theme-"] .nex-chatlist-preview-row > div *:not(.nex-preview-badge) {
   color: var(--nex-theme-text, #0f172a) !important;
 }
 
-body.light-mode[class*="chatlist-theme-"] #contactList .chat-item .chat-preview,
-body.light-mode[class*="chatlist-theme-"] #contactList .chat-list-item .chat-preview,
-body.light-mode[class*="chatlist-theme-"] #contactList .chat-item .chat-item-time,
-body.light-mode[class*="chatlist-theme-"] #contactList .chat-list-item .chat-item-time,
-body.light-theme[class*="chatlist-theme-"] #contactList .chat-item .chat-preview,
-body.light-theme[class*="chatlist-theme-"] #contactList .chat-list-item .chat-preview,
-body.light-theme[class*="chatlist-theme-"] #contactList .chat-item .chat-item-time,
-body.light-theme[class*="chatlist-theme-"] #contactList .chat-list-item .chat-item-time {
+body.light-mode[class*="chatlist-theme-"] #contactList .chat-item:not(.chronex-ai-item) .chat-preview,
+body.light-mode[class*="chatlist-theme-"] #contactList .chat-list-item:not(.chronex-ai-item) .chat-preview,
+body.light-mode[class*="chatlist-theme-"] #contactList .chat-item:not(.chronex-ai-item) .chat-item-time:not(.unread),
+body.light-mode[class*="chatlist-theme-"] #contactList .chat-list-item:not(.chronex-ai-item) .chat-item-time:not(.unread),
+body.light-theme[class*="chatlist-theme-"] #contactList .chat-item:not(.chronex-ai-item) .chat-preview,
+body.light-theme[class*="chatlist-theme-"] #contactList .chat-list-item:not(.chronex-ai-item) .chat-preview,
+body.light-theme[class*="chatlist-theme-"] #contactList .chat-item:not(.chronex-ai-item) .chat-item-time:not(.unread),
+body.light-theme[class*="chatlist-theme-"] #contactList .chat-list-item:not(.chronex-ai-item) .chat-item-time:not(.unread) {
   color: var(--nex-theme-text-muted, #3b4958) !important;
 }
 
