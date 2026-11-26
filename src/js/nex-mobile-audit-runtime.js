@@ -184,6 +184,7 @@ class NexMobileAuditRuntimeController {
       }
       .nex-dispatch-retry-btn {
         padding: 9px 18px;
+        min-height: 44px;
         border-radius: 999px;
         border: 1px solid rgba(0, 242, 255, 0.55);
         background: rgba(0, 242, 255, 0.16);
@@ -767,75 +768,261 @@ class NexMobileAuditRuntimeController {
   // 3. ALERTS / DISPATCHES 4s TIMEOUT & RETRY SYNC
   // ---------------------------------------------------------------------------
   installDispatchesWatchdog() {
+    const DISPATCH_CARD_SELECTOR = '.announcement-item, .dynamic-announcement, .announcement-card, .dispatch-card, [data-announcement-id]';
+
+    const isContainerVisible = (el) => {
+      if (!el || el.isConnected === false) return false;
+      let cur = el;
+      while (cur && cur.nodeType === 1) {
+        if (cur.hidden || cur.getAttribute?.('hidden') !== null || cur.classList?.contains('hidden')) return false;
+        const inlineDisplay = (cur.style?.display || '').toLowerCase().trim();
+        if (inlineDisplay === 'none') return false;
+        if (typeof window.getComputedStyle === 'function') {
+          try {
+            const cs = window.getComputedStyle(cur);
+            if (!cs || cs.display === 'none' || cs.visibility === 'hidden') return false;
+          } catch (_) {
+            return false;
+          }
+        }
+        cur = cur.parentElement;
+      }
+      return true;
+    };
+
+    const clearDispatchTimer = () => {
+      if (this.dispatchTimeoutId) {
+        clearTimeout(this.dispatchTimeoutId);
+        this.dispatchTimeoutId = null;
+      }
+    };
+
+    const restoreBeaconForLoadedCards = (container) => {
+      const beaconLabel = container?.querySelector('.announcements-live-beacon .beacon-label');
+      if (!beaconLabel) return;
+      const current = (beaconLabel.textContent || '').trim();
+      if (current !== 'LIVE SYNC' && current !== 'LOCAL SYNC') {
+        beaconLabel.textContent = 'LIVE SYNC';
+      }
+    };
+
+    const handleLoadedCards = (container, feed, emptyState) => {
+      clearDispatchTimer();
+      restoreBeaconForLoadedCards(container);
+      if (emptyState && emptyState.parentElement === feed) {
+        emptyState.remove();
+      }
+      container.querySelectorAll('.nex-dispatch-timeout-card').forEach((el) => el.remove());
+    };
+
+    const isWaitingOnNetwork = (feed, emptyState) => {
+      const statusText = ((emptyState ? emptyState.textContent : '') || (feed ? feed.textContent : '') || '').trim();
+      return /Connecting to NEX Protocol Network/i.test(statusText);
+    };
+
+    const renderConnectingState = (container, feed, emptyState) => {
+      const beaconLabel = container?.querySelector('.announcements-live-beacon .beacon-label');
+      if (beaconLabel && (beaconLabel.textContent || '').trim() !== 'SYNCING') {
+        beaconLabel.textContent = 'SYNCING';
+      }
+      const connectingMarkup = `
+        <div style="padding:24px 16px;text-align:center;color:#94a3b8;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:20px;color:#00f2ff;margin-bottom:8px;"></i>
+          <div>Connecting to NEX Protocol Network...</div>
+        </div>
+      `;
+      if (emptyState && emptyState.isConnected !== false) {
+        emptyState.innerHTML = connectingMarkup;
+      } else if (feed) {
+        feed.innerHTML = `<div class="announcements-empty-state" id="announcementsEmptyState">${connectingMarkup}</div>`;
+      }
+    };
+
+    const triggerFallbackIfEmpty = () => {
+      const liveFeed = document.getElementById('announcementsFeed');
+      if (!liveFeed || liveFeed.querySelector(DISPATCH_CARD_SELECTOR)) return;
+      if (typeof window.loadAnnouncementsFallback === 'function') {
+        try { window.loadAnnouncementsFallback(liveFeed); } catch (_) { }
+      }
+      if (!liveFeed.querySelector(DISPATCH_CARD_SELECTOR) && window.NexTranslator && typeof window.NexTranslator.renderSeedDispatches === 'function') {
+        try { window.NexTranslator.renderSeedDispatches(liveFeed); } catch (_) { }
+      }
+    };
+
+    let isCheckingDispatches = false;
+    let obs = null;
+
     const checkDispatchesState = () => {
+      if (isCheckingDispatches) return;
+      isCheckingDispatches = true;
+      try {
+        const container = document.getElementById('announcementsContainer');
+        if (!container) {
+          clearDispatchTimer();
+          return;
+        }
+        const feed = document.getElementById('announcementsFeed');
+        const emptyState = document.getElementById('announcementsEmptyState');
+        const cardCount = feed ? feed.querySelectorAll(DISPATCH_CARD_SELECTOR).length : 0;
+
+        if (cardCount > 0) {
+          handleLoadedCards(container, feed, emptyState);
+          return;
+        }
+
+        // Do not start or fire the 4s offline/retry countdown while Dispatches is hidden
+        if (!isContainerVisible(container)) {
+          clearDispatchTimer();
+          return;
+        }
+
+        if (!isWaitingOnNetwork(feed, emptyState)) {
+          clearDispatchTimer();
+          return;
+        }
+
+        const beaconLabel = container.querySelector('.announcements-live-beacon .beacon-label');
+        if (beaconLabel && (beaconLabel.textContent || '').trim() === 'OFFLINE') {
+          beaconLabel.textContent = 'LIVE SYNC';
+        }
+
+        if (this.dispatchTimeoutId) return;
+
+        this.dispatchTimeoutId = setTimeout(() => {
+          this.dispatchTimeoutId = null;
+          const liveContainer = document.getElementById('announcementsContainer');
+          const liveFeed = document.getElementById('announcementsFeed');
+          const liveEmpty = document.getElementById('announcementsEmptyState');
+          if (!liveContainer || !isContainerVisible(liveContainer)) return;
+
+          const liveCardCount = liveFeed ? liveFeed.querySelectorAll(DISPATCH_CARD_SELECTOR).length : 0;
+          if (liveCardCount > 0) {
+            handleLoadedCards(liveContainer, liveFeed, liveEmpty);
+            return;
+          }
+
+          if (!isWaitingOnNetwork(liveFeed, liveEmpty)) return;
+
+          const liveBeacon = liveContainer.querySelector('.announcements-live-beacon .beacon-label');
+          if (liveBeacon && (liveBeacon.textContent || '').trim() !== 'OFFLINE') {
+            liveBeacon.textContent = 'OFFLINE';
+          }
+
+          const timeoutMarkup = `
+            <div class="nex-dispatch-timeout-card" role="status" aria-live="polite">
+              <i class="fa-solid fa-satellite-dish" style="font-size:24px;color:#fbbf24;"></i>
+              <div style="font-size:15px;font-weight:800;color:#ffffff;">Protocol sync paused or offline</div>
+              <div style="font-size:12.5px;color:#94a3b8;max-width:300px;line-height:1.45;">
+                Dispatches could not connect within 4 seconds. Check your connection and try syncing again.
+              </div>
+              <button type="button" id="retryAnnouncementsSyncBtn" class="nex-dispatch-retry-btn">
+                <i class="fa-solid fa-rotate-right"></i> Retry Sync
+              </button>
+            </div>
+          `;
+
+          if (liveEmpty && liveEmpty.isConnected !== false) {
+            liveEmpty.innerHTML = timeoutMarkup;
+          } else if (liveFeed) {
+            liveFeed.innerHTML = `<div class="announcements-empty-state" id="announcementsEmptyState">${timeoutMarkup}</div>`;
+          }
+        }, 4000);
+      } finally {
+        if (obs) {
+          try { obs.takeRecords(); } catch (_) { }
+        }
+        isCheckingDispatches = false;
+      }
+    };
+
+    const triggerRetryLoad = () => {
       const container = document.getElementById('announcementsContainer');
       const feed = document.getElementById('announcementsFeed');
       const emptyState = document.getElementById('announcementsEmptyState');
-      if (!container || !emptyState) return;
+      if (!container) return;
 
-      const hasLoadedCards = !!(feed && feed.querySelector('.announcement-card, .dispatch-card, [data-announcement-id]'));
-      const text = (emptyState.textContent || '').trim();
-      const isConnecting = /Connecting to NEX Protocol Network/i.test(text);
+      clearDispatchTimer();
+      renderConnectingState(container, feed, emptyState);
 
-      if (hasLoadedCards || !isConnecting) {
-        if (this.dispatchTimeoutId) {
-          clearTimeout(this.dispatchTimeoutId);
-          this.dispatchTimeoutId = null;
+      if (typeof window.loadAnnouncements === 'function') {
+        try {
+          const maybePromise = window.loadAnnouncements(true);
+          if (maybePromise && typeof maybePromise.catch === 'function') {
+            maybePromise.catch(() => triggerFallbackIfEmpty());
+          }
+        } catch (_) {
+          triggerFallbackIfEmpty();
         }
-        return;
+      } else if (typeof window.loadAnnouncementsFallback === 'function') {
+        try { window.loadAnnouncementsFallback(feed); } catch (_) { triggerFallbackIfEmpty(); }
+      } else {
+        document.getElementById('refreshAnnouncementsBtn')?.click();
+        setTimeout(() => {
+          const liveFeed = document.getElementById('announcementsFeed');
+          if (liveFeed && !liveFeed.querySelector(DISPATCH_CARD_SELECTOR) && typeof window.loadAnnouncements !== 'function') {
+            triggerFallbackIfEmpty();
+          }
+        }, 50);
       }
 
-      if (this.dispatchTimeoutId) return;
-
-      this.dispatchTimeoutId = setTimeout(() => {
-        this.dispatchTimeoutId = null;
-        const stillEmpty = !(feed && feed.querySelector('.announcement-card, .dispatch-card, [data-announcement-id]'));
-        const stillConnecting = /Connecting to NEX Protocol Network/i.test(emptyState.textContent || '');
-        if (!stillEmpty || !stillConnecting) return;
-
-        const beaconLabel = container.querySelector('.announcements-live-beacon .beacon-label');
-        if (beaconLabel) beaconLabel.textContent = 'OFFLINE';
-
-        emptyState.innerHTML = `
-          <div class="nex-dispatch-timeout-card" role="status" aria-live="polite">
-            <i class="fa-solid fa-satellite-dish" style="font-size:24px;color:#fbbf24;"></i>
-            <div style="font-size:15px;font-weight:800;color:#ffffff;">Protocol sync paused or offline</div>
-            <div style="font-size:12.5px;color:#94a3b8;max-width:300px;line-height:1.45;">
-              Dispatches could not connect within 4 seconds. Check your connection and try syncing again.
-            </div>
-            <button type="button" id="retryAnnouncementsSyncBtn" class="nex-dispatch-retry-btn">
-              <i class="fa-solid fa-rotate-right"></i> Retry Sync
-            </button>
-          </div>
-        `;
-
-        document.getElementById('retryAnnouncementsSyncBtn')?.addEventListener('click', () => {
-          if (beaconLabel) beaconLabel.textContent = 'SYNCING';
-          emptyState.innerHTML = `
-            <div style="padding:24px 16px;text-align:center;color:#94a3b8;">
-              <i class="fa-solid fa-spinner fa-spin" style="font-size:20px;color:#00f2ff;margin-bottom:8px;"></i>
-              <div>Connecting to NEX Protocol Network...</div>
-            </div>
-          `;
-          if (typeof window.loadAnnouncements === 'function') {
-            try { window.loadAnnouncements(true); } catch (_) { }
-          } else {
-            document.getElementById('refreshAnnouncementsBtn')?.click();
-          }
-          checkDispatchesState();
-        });
-      }, 4000);
+      checkDispatchesState();
     };
 
+    this._checkDispatchesState = checkDispatchesState;
     checkDispatchesState();
 
-    const target = document.getElementById('announcementsContainer') || document.body;
-    const obs = new MutationObserver(() => checkDispatchesState());
-    obs.observe(target, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
+    const containerEl = document.getElementById('announcementsContainer');
+    obs = new MutationObserver(() => checkDispatchesState());
+    if (containerEl) {
+      obs.observe(containerEl, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class', 'hidden']
+      });
+      if (document.body) {
+        obs.observe(document.body, {
+          attributes: true,
+          attributeFilter: ['data-active-section', 'class', 'style']
+        });
+      }
+      const appShell = document.querySelector('.app');
+      if (appShell && appShell !== document.body && appShell !== containerEl) {
+        obs.observe(appShell, {
+          attributes: true,
+          attributeFilter: ['data-active-section', 'class', 'style']
+        });
+      }
+    } else if (document.body) {
+      obs.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class', 'hidden', 'data-active-section']
+      });
+    }
 
-    document.getElementById('refreshAnnouncementsBtn')?.addEventListener('click', () => {
-      setTimeout(checkDispatchesState, 50);
-    });
+    if (!this._dispatchesClickDelegated) {
+      this._dispatchesClickDelegated = true;
+      document.addEventListener('click', (e) => {
+        if (e.target?.closest?.('#retryAnnouncementsSyncBtn')) {
+          e.preventDefault();
+          triggerRetryLoad();
+          return;
+        }
+        if (e.target?.closest?.('#refreshAnnouncementsBtn')) {
+          const container = document.getElementById('announcementsContainer');
+          const feed = document.getElementById('announcementsFeed');
+          const emptyState = document.getElementById('announcementsEmptyState');
+          const cardCount = feed ? feed.querySelectorAll(DISPATCH_CARD_SELECTOR).length : 0;
+          if (container && cardCount === 0 && (container.querySelector('.nex-dispatch-timeout-card') || /Protocol sync paused/i.test(emptyState?.textContent || ''))) {
+            clearDispatchTimer();
+            renderConnectingState(container, feed, emptyState);
+          }
+          setTimeout(checkDispatchesState, 50);
+        }
+      });
+    }
   }
 
   // ---------------------------------------------------------------------------
