@@ -336,6 +336,7 @@
   function buildPlayerRigs(T, disposables) {
     var root = new T.Group();
     root.name = 'AstroPlayerRoot';
+    var RigApi = global.RealisticCharacterRig || null;
 
     function trackGeo(g) { disposables.geos.push(g); return g; }
     function trackMat(m) { disposables.mats.push(m); return m; }
@@ -346,92 +347,136 @@
     var matGlow = trackMat(new T.MeshBasicMaterial({ color: 0x00f2ff }));
     var matThruster = trackMat(new T.MeshBasicMaterial({ color: 0xff8800 }));
 
-    // 1. Exo-Operative
+    // 1. Exo-Operative (articulated realistic humanoid with safe fallback)
     var opGroup = new T.Group();
-    var opTorso = new T.Mesh(trackGeo(new T.BoxGeometry(0.68, 0.9, 0.42)), matArmor);
-    opTorso.position.y = 0.2;
-    opGroup.add(opTorso);
+    var opRig = null;
+    var opFlameL = null;
+    var opFlameR = null;
+    if (RigApi && typeof RigApi.createHumanoid === 'function') {
+      opRig = RigApi.createHumanoid({
+        variant: 'exo-operative',
+        accentColor: 0x00f2ff,
+        castShadow: true
+      });
+      opRig.root.rotation.y = Math.PI;
+      opRig.root.position.y = -1.1;
+      opGroup.add(opRig.root);
+      opFlameL = opRig.thrusterGlowL || null;
+      opFlameR = opRig.thrusterGlowR || null;
+      if (opFlameL) opFlameL.visible = false;
+      if (opFlameR) opFlameR.visible = false;
+    } else {
+      var opTorso = new T.Mesh(trackGeo(new T.BoxGeometry(0.68, 0.9, 0.42)), matArmor);
+      opTorso.position.y = 0.2;
+      opGroup.add(opTorso);
 
-    var opHead = new T.Mesh(trackGeo(new T.BoxGeometry(0.42, 0.42, 0.44)), matArmor);
-    opHead.position.y = 0.88;
-    opGroup.add(opHead);
+      var opHead = new T.Mesh(trackGeo(new T.BoxGeometry(0.42, 0.42, 0.44)), matArmor);
+      opHead.position.y = 0.88;
+      opGroup.add(opHead);
 
-    var opVisor = new T.Mesh(trackGeo(new T.BoxGeometry(0.36, 0.16, 0.08)), matGlow);
-    opVisor.position.set(0, 0.9, -0.21);
-    opGroup.add(opVisor);
+      var opVisor = new T.Mesh(trackGeo(new T.BoxGeometry(0.36, 0.16, 0.08)), matGlow);
+      opVisor.position.set(0, 0.9, -0.21);
+      opGroup.add(opVisor);
 
-    var opPack = new T.Mesh(trackGeo(new T.BoxGeometry(0.5, 0.62, 0.24)), matDark);
-    opPack.position.set(0, 0.25, 0.28);
-    opGroup.add(opPack);
+      var opPack = new T.Mesh(trackGeo(new T.BoxGeometry(0.5, 0.62, 0.24)), matDark);
+      opPack.position.set(0, 0.25, 0.28);
+      opGroup.add(opPack);
 
-    var opFlameL = new T.Mesh(trackGeo(new T.ConeGeometry(0.11, 0.45, 6)), matThruster);
-    opFlameL.rotation.x = Math.PI;
-    opFlameL.position.set(-0.14, -0.22, 0.28);
-    opFlameL.visible = false;
-    opGroup.add(opFlameL);
+      opFlameL = new T.Mesh(trackGeo(new T.ConeGeometry(0.11, 0.45, 6)), matThruster);
+      opFlameL.rotation.x = Math.PI;
+      opFlameL.position.set(-0.14, -0.22, 0.28);
+      opFlameL.visible = false;
+      opGroup.add(opFlameL);
 
-    var opFlameR = new T.Mesh(trackGeo(new T.ConeGeometry(0.11, 0.45, 6)), matThruster);
-    opFlameR.rotation.x = Math.PI;
-    opFlameR.position.set(0.14, -0.22, 0.28);
-    opFlameR.visible = false;
-    opGroup.add(opFlameR);
+      opFlameR = new T.Mesh(trackGeo(new T.ConeGeometry(0.11, 0.45, 6)), matThruster);
+      opFlameR.rotation.x = Math.PI;
+      opFlameR.position.set(0.14, -0.22, 0.28);
+      opFlameR.visible = false;
+      opGroup.add(opFlameR);
+    }
 
     root.add(opGroup);
 
-    // 2. Starfighter
+    // 2. Starfighter (sculpted multi-part starfighter with safe fallback)
     var jetGroup = new T.Group();
-    var jetBody = new T.Mesh(trackGeo(new T.ConeGeometry(0.75, 4.4, 6)), matArmor);
-    jetBody.rotation.x = -Math.PI / 2;
-    jetGroup.add(jetBody);
+    var jetRig = null;
+    var jetFlame = null;
+    var jetThrusters = null;
+    if (RigApi && typeof RigApi.createStarfighter === 'function') {
+      jetRig = RigApi.createStarfighter({
+        accentColor: 0x00f2ff,
+        castShadow: true
+      });
+      jetRig.root.rotation.y = Math.PI;
+      jetGroup.add(jetRig.root);
+      jetThrusters = jetRig.thrusters || null;
+    } else {
+      var jetBody = new T.Mesh(trackGeo(new T.ConeGeometry(0.75, 4.4, 6)), matArmor);
+      jetBody.rotation.x = -Math.PI / 2;
+      jetGroup.add(jetBody);
 
-    var jetWing = new T.Mesh(trackGeo(new T.BoxGeometry(4.6, 0.12, 1.5)), matArmor);
-    jetWing.position.set(0, -0.05, 0.45);
-    jetGroup.add(jetWing);
+      var jetWing = new T.Mesh(trackGeo(new T.BoxGeometry(4.6, 0.12, 1.5)), matArmor);
+      jetWing.position.set(0, -0.05, 0.45);
+      jetGroup.add(jetWing);
 
-    var jetWingTipL = new T.Mesh(trackGeo(new T.BoxGeometry(0.25, 0.35, 1.3)), matTrim);
-    jetWingTipL.position.set(-2.25, 0.08, 0.5);
-    jetGroup.add(jetWingTipL);
+      var jetWingTipL = new T.Mesh(trackGeo(new T.BoxGeometry(0.25, 0.35, 1.3)), matTrim);
+      jetWingTipL.position.set(-2.25, 0.08, 0.5);
+      jetGroup.add(jetWingTipL);
 
-    var jetWingTipR = new T.Mesh(trackGeo(new T.BoxGeometry(0.25, 0.35, 1.3)), matTrim);
-    jetWingTipR.position.set(2.25, 0.08, 0.5);
-    jetGroup.add(jetWingTipR);
+      var jetWingTipR = new T.Mesh(trackGeo(new T.BoxGeometry(0.25, 0.35, 1.3)), matTrim);
+      jetWingTipR.position.set(2.25, 0.08, 0.5);
+      jetGroup.add(jetWingTipR);
 
-    var jetCanopy = new T.Mesh(trackGeo(new T.BoxGeometry(0.55, 0.36, 1.35)), matGlow);
-    jetCanopy.position.set(0, 0.38, -0.35);
-    jetGroup.add(jetCanopy);
+      var jetCanopy = new T.Mesh(trackGeo(new T.BoxGeometry(0.55, 0.36, 1.35)), matGlow);
+      jetCanopy.position.set(0, 0.38, -0.35);
+      jetGroup.add(jetCanopy);
 
-    var jetFlame = new T.Mesh(trackGeo(new T.ConeGeometry(0.36, 1.4, 8)), matThruster);
-    jetFlame.rotation.x = Math.PI / 2;
-    jetFlame.position.set(0, 0, 2.55);
-    jetGroup.add(jetFlame);
+      jetFlame = new T.Mesh(trackGeo(new T.ConeGeometry(0.36, 1.4, 8)), matThruster);
+      jetFlame.rotation.x = Math.PI / 2;
+      jetFlame.position.set(0, 0, 2.55);
+      jetGroup.add(jetFlame);
+    }
 
     jetGroup.visible = false;
     root.add(jetGroup);
 
-    // 3. Tactical Rover
+    // 3. Tactical Rover (multi-part cruiser with spinning wheels + safe fallback)
     var roverGroup = new T.Group();
-    var roverChassis = new T.Mesh(trackGeo(new T.BoxGeometry(2.1, 0.72, 3.6)), matArmor);
-    roverChassis.position.y = 0.62;
-    roverGroup.add(roverChassis);
-
-    var roverCab = new T.Mesh(trackGeo(new T.BoxGeometry(1.55, 0.56, 1.7)), matTrim);
-    roverCab.position.set(0, 1.18, -0.15);
-    roverGroup.add(roverCab);
-
-    var wheelGeo = trackGeo(new T.CylinderGeometry(0.54, 0.54, 0.42, 12));
-    wheelGeo.rotateZ(Math.PI / 2);
-    var wheelPositions = [
-      [-1.18, 0.54, -1.25],
-      [1.18, 0.54, -1.25],
-      [-1.18, 0.54, 1.25],
-      [1.18, 0.54, 1.25]
-    ];
+    var roverRig = null;
     var wheels = [];
-    for (var w = 0; w < 4; w++) {
-      var wm = new T.Mesh(wheelGeo, matDark);
-      wm.position.set(wheelPositions[w][0], wheelPositions[w][1], wheelPositions[w][2]);
-      roverGroup.add(wm);
-      wheels.push(wm);
+    var roverWheelSpinSign = -1;
+    if (RigApi && typeof RigApi.createCruiser === 'function') {
+      roverRig = RigApi.createCruiser({
+        accentColor: 0x00f2ff,
+        castShadow: true
+      });
+      roverRig.root.rotation.y = Math.PI;
+      roverGroup.add(roverRig.root);
+      wheels = roverRig.wheels || [];
+      roverWheelSpinSign = 1;
+    } else {
+      var roverChassis = new T.Mesh(trackGeo(new T.BoxGeometry(2.1, 0.72, 3.6)), matArmor);
+      roverChassis.position.y = 0.62;
+      roverGroup.add(roverChassis);
+
+      var roverCab = new T.Mesh(trackGeo(new T.BoxGeometry(1.55, 0.56, 1.7)), matTrim);
+      roverCab.position.set(0, 1.18, -0.15);
+      roverGroup.add(roverCab);
+
+      var wheelGeo = trackGeo(new T.CylinderGeometry(0.54, 0.54, 0.42, 12));
+      wheelGeo.rotateZ(Math.PI / 2);
+      var wheelPositions = [
+        [-1.18, 0.54, -1.25],
+        [1.18, 0.54, -1.25],
+        [-1.18, 0.54, 1.25],
+        [1.18, 0.54, 1.25]
+      ];
+      for (var w = 0; w < 4; w++) {
+        var wm = new T.Mesh(wheelGeo, matDark);
+        wm.position.set(wheelPositions[w][0], wheelPositions[w][1], wheelPositions[w][2]);
+        roverGroup.add(wm);
+        wheels.push(wm);
+      }
     }
 
     roverGroup.visible = false;
@@ -440,12 +485,17 @@
     return {
       root: root,
       operative: opGroup,
+      opRig: opRig,
       opFlameL: opFlameL,
       opFlameR: opFlameR,
       starfighter: jetGroup,
+      jetRig: jetRig,
       jetFlame: jetFlame,
+      jetThrusters: jetThrusters,
       rover: roverGroup,
-      roverWheels: wheels
+      roverRig: roverRig,
+      roverWheels: wheels,
+      roverWheelSpinSign: roverWheelSpinSign
     };
   }
 
@@ -507,20 +557,43 @@
     particleMesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
     particleMesh.frustumCulled = false;
 
-    var enemyHullGeo = new T.OctahedronGeometry(1.45, 0);
-    var enemyHullMat = new T.MeshStandardMaterial({ color: 0xffffff, metalness: 0.55, roughness: 0.35 });
+    // Enemy Interceptor Pool (3-part sleek winged interceptor, shared cached geometry, zero runtime Mesh alloc)
+    var enemyHullGeo = new T.ConeGeometry(0.62, 3.1, 6);
+    enemyHullGeo.rotateX(-Math.PI / 2);
+    var enemyHullMat = new T.MeshStandardMaterial({ color: 0xffffff, metalness: 0.65, roughness: 0.3 });
     var enemyHullMesh = new T.InstancedMesh(enemyHullGeo, enemyHullMat, ENEMY_POOL_SIZE);
     enemyHullMesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
     enemyHullMesh.frustumCulled = false;
 
-    var enemyCoreGeo = new T.BoxGeometry(0.85, 0.85, 2.3);
+    // Swept delta wings (shared BufferGeometry)
+    var enemyWingGeo = new T.BufferGeometry();
+    var wingVerts = new Float32Array([
+      // Left swept wing (top & bottom faces via double-sided or thickness)
+      -0.35, 0.04, -0.65,  -2.35, -0.14, 0.78,  -0.35, 0.04, 0.85,
+      -0.35, -0.06, -0.65, -0.35, -0.06, 0.85,  -2.35, -0.14, 0.78,
+      // Right swept wing
+       0.35, 0.04, -0.65,   0.35, 0.04, 0.85,    2.35, -0.14, 0.78,
+       0.35, -0.06, -0.65,  2.35, -0.14, 0.78,   0.35, -0.06, 0.85,
+      // Twin vertical tail fins
+      -0.48, 0.02, 0.25,   -0.68, 0.62, 0.95,   -0.48, 0.02, 0.95,
+       0.48, 0.02, 0.25,    0.48, 0.02, 0.95,    0.68, 0.62, 0.95
+    ]);
+    enemyWingGeo.setAttribute('position', new T.BufferAttribute(wingVerts, 3));
+    enemyWingGeo.computeVertexNormals();
+    var enemyWingMat = new T.MeshStandardMaterial({ color: 0x3a1828, metalness: 0.7, roughness: 0.35, side: T.DoubleSide });
+    var enemyWingMesh = new T.InstancedMesh(enemyWingGeo, enemyWingMat, ENEMY_POOL_SIZE);
+    enemyWingMesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
+    enemyWingMesh.frustumCulled = false;
+
+    var enemyCoreGeo = new T.BoxGeometry(0.46, 0.34, 1.45);
+    enemyCoreGeo.translate(0, 0.22, 0.1);
     var enemyCoreMat = new T.MeshBasicMaterial({ color: 0xffaa00 });
     var enemyCoreMesh = new T.InstancedMesh(enemyCoreGeo, enemyCoreMat, ENEMY_POOL_SIZE);
     enemyCoreMesh.instanceMatrix.setUsage(T.DynamicDrawUsage);
     enemyCoreMesh.frustumCulled = false;
 
-    disposables.geos.push(boltGeo, missileGeo, particleGeo, enemyHullGeo, enemyCoreGeo);
-    disposables.mats.push(boltMat, missileMat, particleMat, enemyHullMat, enemyCoreMat);
+    disposables.geos.push(boltGeo, missileGeo, particleGeo, enemyHullGeo, enemyWingGeo, enemyCoreGeo);
+    disposables.mats.push(boltMat, missileMat, particleMat, enemyHullMat, enemyWingMat, enemyCoreMat);
 
     // Initialize instance colors & zero matrices
     _mat4.compose(_v1.set(0, -9999, 0), _quat.identity(), _zeroScale);
@@ -539,6 +612,7 @@
     for (idx = 0; idx < ENEMY_POOL_SIZE; idx++) {
       enemyHullMesh.setMatrixAt(idx, _mat4);
       enemyHullMesh.setColorAt(idx, _colorEnemyBase);
+      enemyWingMesh.setMatrixAt(idx, _mat4);
       enemyCoreMesh.setMatrixAt(idx, _mat4);
     }
 
@@ -547,6 +621,7 @@
       scene.add(missileMesh);
       scene.add(particleMesh);
       scene.add(enemyHullMesh);
+      scene.add(enemyWingMesh);
       scene.add(enemyCoreMesh);
     }
 
@@ -620,7 +695,17 @@
       gameOver: false,
       waveDelayTimer: 0,
       simTime: 0,
+      isFiring: false,
       disposed: false
+    };
+
+    // Pre-allocated humanoid animation state (zero runtime alloc)
+    var humAnimState = {
+      speed: 0,
+      isMoving: false,
+      isGrounded: true,
+      isFiring: false,
+      isSeated: false
     };
 
     // Pre-allocated HUD snapshot object (mutated in-place or shallow-copied)
@@ -971,15 +1056,17 @@
         if (jump && state.grounded) {
           state.vel.y = 11.5;
           state.grounded = false;
+          if (rigs.opFlameL) rigs.opFlameL.visible = false;
+          if (rigs.opFlameR) rigs.opFlameR.visible = false;
         } else if (jump && state.jetFuel > 0) {
           state.vel.y += 38 * dt;
           state.vel.y = Math.min(state.vel.y, 14);
           state.jetFuel = Math.max(0, state.jetFuel - 34 * dt);
-          rigs.opFlameL.visible = true;
-          rigs.opFlameR.visible = true;
+          if (rigs.opFlameL) rigs.opFlameL.visible = true;
+          if (rigs.opFlameR) rigs.opFlameR.visible = true;
         } else {
-          rigs.opFlameL.visible = false;
-          rigs.opFlameR.visible = false;
+          if (rigs.opFlameL) rigs.opFlameL.visible = false;
+          if (rigs.opFlameR) rigs.opFlameR.visible = false;
           state.vel.y -= 26 * dt;
         }
 
@@ -1022,7 +1109,14 @@
           state.pos.y = 420;
           if (state.vel.y > 0) state.vel.y = 0;
         }
-        rigs.jetFlame.scale.set(1, boost ? 1.85 : 1.0, 1);
+        var flameScaleY = boost ? 1.85 : 1.0;
+        if (rigs.jetThrusters && rigs.jetThrusters.length) {
+          for (var ti = 0; ti < rigs.jetThrusters.length; ti++) {
+            if (rigs.jetThrusters[ti]) rigs.jetThrusters[ti].scale.set(1, flameScaleY, 1);
+          }
+        } else if (rigs.jetFlame) {
+          rigs.jetFlame.scale.set(1, flameScaleY, 1);
+        }
 
       } else {
         // Tactical Rover: high-traction steering + terrain height alignment
@@ -1060,8 +1154,9 @@
         state.roverPitch += (targetRoverPitch - state.roverPitch) * alignF;
         state.roverRoll += (targetRoverRoll - state.roverRoll) * alignF;
 
-        for (var w = 0; w < 4; w++) {
-          rigs.roverWheels[w].rotation.x -= newFwdSpd * dt * 1.6;
+        var wheelSpin = newFwdSpd * dt * 1.6 * (rigs.roverWheelSpinSign || -1);
+        for (var w = 0; w < rigs.roverWheels.length; w++) {
+          if (rigs.roverWheels[w]) rigs.roverWheels[w].rotation.x += wheelSpin;
         }
       }
 
@@ -1093,7 +1188,8 @@
       state.speed = state.vel.length();
       state.altitude = Math.max(0, state.pos.y - terrainHere);
 
-      if (input && (input.fire || input.firePrimary)) firePrimary();
+      state.isFiring = !!(input && (input.fire || input.firePrimary));
+      if (state.isFiring) firePrimary();
       if (input && (input.missile || input.fireMissile)) fireMissile();
     }
 
@@ -1327,6 +1423,18 @@
       rigs.root.quaternion.setFromEuler(_euler);
       rigs.root.visible = !(firstPerson && state.vehicleMode === 'operative');
 
+      // Smoothly animate articulated Exo-Operative humanoid
+      if (state.vehicleMode === 'operative' && rigs.opRig &&
+          global.RealisticCharacterRig && typeof global.RealisticCharacterRig.animateHumanoid === 'function') {
+        var horizSpd = Math.hypot(state.vel.x, state.vel.z);
+        humAnimState.speed = horizSpd;
+        humAnimState.isMoving = horizSpd > 0.35;
+        humAnimState.isGrounded = !!state.grounded;
+        humAnimState.isFiring = !!(state.isFiring || state.primaryCd > 0.02);
+        humAnimState.isSeated = false;
+        global.RealisticCharacterRig.animateHumanoid(rigs.opRig, humAnimState, dt);
+      }
+
       // Smooth damped camera rig
       if (camera && camera.position) {
         computeAimDirection(_forward);
@@ -1409,6 +1517,7 @@
         if (!enActive[i]) {
           _mat4.compose(_v1.set(0, -9999, 0), _quat.identity(), _zeroScale);
           enemyHullMesh.setMatrixAt(i, _mat4);
+          enemyWingMesh.setMatrixAt(i, _mat4);
           enemyCoreMesh.setMatrixAt(i, _mat4);
         } else {
           i3 = i * 3;
@@ -1419,6 +1528,7 @@
           _quat.setFromEuler(_euler);
           _mat4.compose(_v1, _quat, _scale.set(1, 1, 1));
           enemyHullMesh.setMatrixAt(i, _mat4);
+          enemyWingMesh.setMatrixAt(i, _mat4);
           enemyCoreMesh.setMatrixAt(i, _mat4);
 
           if (enFlash[i] > 0) {
@@ -1431,6 +1541,7 @@
         }
       }
       enemyHullMesh.instanceMatrix.needsUpdate = true;
+      enemyWingMesh.instanceMatrix.needsUpdate = true;
       enemyCoreMesh.instanceMatrix.needsUpdate = true;
       if (colorDirty && enemyHullMesh.instanceColor) {
         enemyHullMesh.instanceColor.needsUpdate = true;
@@ -1513,6 +1624,7 @@
         scene.remove(missileMesh);
         scene.remove(particleMesh);
         scene.remove(enemyHullMesh);
+        scene.remove(enemyWingMesh);
         scene.remove(enemyCoreMesh);
       }
 
