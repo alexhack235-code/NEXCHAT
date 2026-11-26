@@ -243,7 +243,20 @@ const CHATLIST_GLASS_THEMES = [
   { id: 'pearl-ivory-glass', label: 'Pearl Ivory Glass', swatch: 'linear-gradient(135deg, rgba(248,250,252,0.48), rgba(148,163,184,0.6))', glass: true }
 ];
 
-const DEFAULT_FUTURISTIC_CHATLIST_BG = './assets/images/chatlist-futuristic-bg.jpg';
+const DEFAULT_FUTURISTIC_CHATLIST_BG = '/assets/images/chatlist-futuristic-bg.jpg';
+
+function resolveWallpaperCssUrl(rawUrl) {
+  const clean = String(rawUrl || '').replace(/[\n\r\t]/g, '').trim();
+  if (!clean) return '';
+  if (/^(?:data:|blob:|https?:\/\/)/i.test(clean)) return clean;
+  try {
+    if (typeof window !== 'undefined' && window.location && window.location.href) {
+      return new URL(clean, window.location.href).href;
+    }
+  } catch (_) {}
+  if (clean.startsWith('./')) return `/${clean.slice(2)}`;
+  return clean.startsWith('/') ? clean : `/${clean}`;
+}
 
 const CHATLIST_BUILT_IN_BACKDROPS = [
   { id: 'obsidian-futuristic', label: 'Obsidian Architecture', url: DEFAULT_FUTURISTIC_CHATLIST_BG },
@@ -547,7 +560,8 @@ export async function applyChatListWallpaper(wallpaperUrl) {
   const root = document.documentElement;
 
   if (wallpaperUrl) {
-    const cleanUrl = String(wallpaperUrl).replace(/[\n\r\t]/g, '').trim();
+    const rawClean = String(wallpaperUrl).replace(/[\n\r\t]/g, '').trim();
+    const cleanUrl = resolveWallpaperCssUrl(rawClean);
     const isSvg = cleanUrl.startsWith('data:image/svg');
     if (!isSvg) await preloadImageEager(cleanUrl);
 
@@ -558,7 +572,8 @@ export async function applyChatListWallpaper(wallpaperUrl) {
     if (previewStage) previewStage.style.backgroundImage = `url("${cleanUrl}")`;
     if (modalPreview) modalPreview.style.backgroundImage = `url("${cleanUrl}")`;
     try {
-      localStorage.setItem('nex_chatlist_bg', cleanUrl);
+      const storedUrl = rawClean.startsWith('./') ? `/${rawClean.slice(2)}` : rawClean;
+      localStorage.setItem('nex_chatlist_bg', storedUrl);
       localStorage.removeItem('nex_chatlist_bg_cleared');
     } catch (_) {}
   } else {
@@ -1222,7 +1237,7 @@ export function openChatListStudioModal() {
           <button type="button" id="closeChatListStudioBtn" class="wp-close-btn" style="background:var(--nex-theme-surface-2,rgba(255,255,255,0.08));border:1px solid var(--nex-theme-border,transparent);color:var(--nex-theme-text,#cbd5e1);width:44px;height:44px;min-width:44px;min-height:44px;border-radius:50%;cursor:pointer;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <div id="modalChatListLivePreview" class="nex-chatlist-preview-stage" style="background-image:url('./assets/images/chatlist-futuristic-bg.jpg');">
+        <div id="modalChatListLivePreview" class="nex-chatlist-preview-stage" style="background-image:url('/assets/images/chatlist-futuristic-bg.jpg');">
           <div class="nex-chatlist-preview-row">
             <img src="chronex-ai.jpg" class="nex-chatlist-preview-avatar" onerror="this.style.display='none'" alt="" />
             <div style="flex:1;min-width:0;">
@@ -1315,7 +1330,7 @@ export function openChatListStudioModal() {
       btn.type = 'button';
       btn.className = 'btn-secondary';
       btn.style.cssText = 'min-width:94px;min-height:44px;border-radius:10px;font-size:12px;font-weight:700;background-size:cover;color:#fff;text-shadow:0 1px 4px #000;flex-shrink:0;';
-      btn.style.backgroundImage = `url("${b.url}")`;
+      btn.style.backgroundImage = `url("${resolveWallpaperCssUrl(b.url)}")`;
       btn.textContent = b.label;
       btn.onclick = () => {
         applyChatListWallpaper(b.url);
@@ -1367,7 +1382,7 @@ export function openChatListStudioModal() {
 
   const savedBg = safeGetStorage('nex_chatlist_bg');
   const cleared = safeGetStorage('nex_chatlist_bg_cleared') === 'true';
-  const effectiveBg = savedBg || (!cleared ? DEFAULT_FUTURISTIC_CHATLIST_BG : '');
+  const effectiveBg = savedBg ? resolveWallpaperCssUrl(savedBg) : (!cleared ? resolveWallpaperCssUrl(DEFAULT_FUTURISTIC_CHATLIST_BG) : '');
   const prev = modal.querySelector('#modalChatListLivePreview');
   if (prev) prev.style.backgroundImage = effectiveBg ? `url("${effectiveBg}")` : '';
   const activeChatListTheme = safeGetStorage('nex_chatlist_theme') || safeGetStorage('nex_chatlist_saved_theme') || 'telegram-glass';
