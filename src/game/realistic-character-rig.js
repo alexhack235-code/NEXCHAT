@@ -5,6 +5,8 @@
  * Exposes `window.RealisticCharacterRig`:
  *   - createHumanoid(opts)
  *   - animateHumanoid(rig, state, dt)
+ *   - setWeapon(rig, weaponId)
+ *   - getMuzzleWorldPosition(rig, outVec3)
  *   - createCruiser(opts)
  *   - createStarfighter(opts)
  *   - disposeShared()
@@ -979,6 +981,100 @@
     const legL = buildLeg('L');
     const legR = buildLeg('R');
 
+    // --------------------------------------------------------------------------
+    // WEAPON MOUNT & CACHED-GEOMETRY 3D ARSENAL (attached to right hand)
+    // --------------------------------------------------------------------------
+    const gunMetalMat = getCachedMat('weapon_gunmetal', function (T) {
+      return createStdMat(T, { color: 0x1f2937, roughness: 0.32, metalness: 0.78 });
+    });
+    const gunBarrelMat = getCachedMat('weapon_barrel', function (T) {
+      return createStdMat(T, { color: 0x374151, roughness: 0.24, metalness: 0.88 });
+    });
+    const gunGripMat = getCachedMat('weapon_grip', function (T) {
+      return createStdMat(T, { color: 0x0f172a, roughness: 0.82, metalness: 0.12 });
+    });
+    const gunOpticMat = getCachedMat('weapon_optic', function (T) {
+      return createStdMat(T, {
+        color: 0x38bdf8,
+        roughness: 0.10,
+        metalness: 0.90,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.55
+      });
+    });
+
+    const weaponMount = new THREE.Group();
+    weaponMount.position.set(0, -0.055, 0.022);
+    weaponMount.rotation.x = Math.PI / 2;
+    armR.wrist.add(weaponMount);
+
+    function addWeaponPart(parent, geo, mat, x, y, z, rx, ry, rz) {
+      const m = configureShadow(new THREE.Mesh(geo, mat), castShadow);
+      m.position.set(x, y, z);
+      if (rx) m.rotation.x = rx;
+      if (ry) m.rotation.y = ry;
+      if (rz) m.rotation.z = rz;
+      parent.add(m);
+      return m;
+    }
+
+    // 1) Pistol: compact tactical sidearm (slide, grip, trigger guard, barrel)
+    const pistol = new THREE.Group();
+    pistol.visible = false;
+    addWeaponPart(pistol, makeBox('wpn_pistol_grip', 0.026, 0.088, 0.036), gunGripMat, 0, -0.024, -0.012, -0.22, 0, 0);
+    addWeaponPart(pistol, makeBox('wpn_pistol_frame', 0.026, 0.022, 0.145), gunGripMat, 0, 0.022, 0.038, 0, 0, 0);
+    addWeaponPart(pistol, makeBox('wpn_pistol_slide', 0.028, 0.026, 0.155), gunMetalMat, 0, 0.042, 0.042, 0, 0, 0);
+    addWeaponPart(pistol, makeBox('wpn_pistol_tguard', 0.014, 0.020, 0.038), gunMetalMat, 0, 0.002, 0.026, 0, 0, 0);
+    addWeaponPart(pistol, makeCyl('wpn_pistol_barrel', 0.008, 0.008, 0.055, 10), gunBarrelMat, 0, 0.038, 0.130, Math.PI / 2, 0, 0);
+    addWeaponPart(pistol, makeBox('wpn_pistol_sight', 0.010, 0.006, 0.012), accentMat, 0, 0.057, 0.108, 0, 0, 0);
+    const pistolMuzzle = new THREE.Object3D();
+    pistolMuzzle.position.set(0, 0.038, 0.160);
+    pistol.add(pistolMuzzle);
+    pistol.userData.muzzle = pistolMuzzle;
+    weaponMount.add(pistol);
+
+    // 2) Carbine: sleek assault carbine (receiver, barrel shroud, magazine, optic rail, stock)
+    const carbine = new THREE.Group();
+    carbine.visible = false;
+    addWeaponPart(carbine, makeBox('wpn_carbine_grip', 0.028, 0.095, 0.038), gunGripMat, 0, -0.030, -0.015, -0.24, 0, 0);
+    addWeaponPart(carbine, makeBox('wpn_carbine_receiver', 0.042, 0.068, 0.240), gunMetalMat, 0, 0.035, 0.065, 0, 0, 0);
+    addWeaponPart(carbine, makeBox('wpn_carbine_shroud', 0.036, 0.052, 0.230), gunGripMat, 0, 0.042, 0.290, 0, 0, 0);
+    addWeaponPart(carbine, makeCyl('wpn_carbine_barrel', 0.010, 0.010, 0.140, 10), gunBarrelMat, 0, 0.042, 0.440, Math.PI / 2, 0, 0);
+    addWeaponPart(carbine, makeBox('wpn_carbine_mag', 0.026, 0.135, 0.048), gunGripMat, 0, -0.045, 0.115, 0.18, 0, 0);
+    addWeaponPart(carbine, makeBox('wpn_carbine_rail', 0.024, 0.016, 0.200), gunBarrelMat, 0, 0.076, 0.080, 0, 0, 0);
+    addWeaponPart(carbine, makeBox('wpn_carbine_optic', 0.028, 0.030, 0.068), gunMetalMat, 0, 0.096, 0.070, 0, 0, 0);
+    addWeaponPart(carbine, makeCyl('wpn_carbine_lens', 0.011, 0.011, 0.072, 10), gunOpticMat, 0, 0.096, 0.070, Math.PI / 2, 0, 0);
+    addWeaponPart(carbine, makeBox('wpn_carbine_stock', 0.034, 0.082, 0.195), gunGripMat, 0, 0.024, -0.145, 0, 0, 0);
+    addWeaponPart(carbine, makeBox('wpn_carbine_accent', 0.044, 0.008, 0.140), accentMat, 0, 0.042, 0.285, 0, 0, 0);
+    const carbineMuzzle = new THREE.Object3D();
+    carbineMuzzle.position.set(0, 0.042, 0.515);
+    carbine.add(carbineMuzzle);
+    carbine.userData.muzzle = carbineMuzzle;
+    weaponMount.add(carbine);
+
+    // 3) Shotgun: heavy pump/pulse shotgun (double rail barrel, pump forend, stock, glowing accent strip)
+    const shotgun = new THREE.Group();
+    shotgun.visible = false;
+    addWeaponPart(shotgun, makeBox('wpn_shotgun_grip', 0.030, 0.092, 0.040), gunGripMat, 0, -0.026, -0.018, -0.32, 0, 0);
+    addWeaponPart(shotgun, makeBox('wpn_shotgun_receiver', 0.048, 0.074, 0.220), gunMetalMat, 0, 0.034, 0.060, 0, 0, 0);
+    addWeaponPart(shotgun, makeCyl('wpn_shotgun_barrel_top', 0.014, 0.014, 0.360, 10), gunBarrelMat, 0, 0.056, 0.340, Math.PI / 2, 0, 0);
+    addWeaponPart(shotgun, makeCyl('wpn_shotgun_tube_bot', 0.013, 0.013, 0.320, 10), gunMetalMat, 0, 0.022, 0.320, Math.PI / 2, 0, 0);
+    addWeaponPart(shotgun, makeBox('wpn_shotgun_rail', 0.038, 0.014, 0.300), gunBarrelMat, 0, 0.072, 0.280, 0, 0, 0);
+    addWeaponPart(shotgun, makeBox('wpn_shotgun_pump', 0.046, 0.048, 0.155), gunGripMat, 0, 0.018, 0.275, 0, 0, 0);
+    addWeaponPart(shotgun, makeBox('wpn_shotgun_stock', 0.038, 0.092, 0.210), gunGripMat, 0, 0.018, -0.140, 0.08, 0, 0);
+    addWeaponPart(shotgun, makeBox('wpn_shotgun_glow', 0.050, 0.012, 0.180), accentMat, 0, 0.040, 0.280, 0, 0, 0);
+    const shotgunMuzzle = new THREE.Object3D();
+    shotgunMuzzle.position.set(0, 0.056, 0.525);
+    shotgun.add(shotgunMuzzle);
+    shotgun.userData.muzzle = shotgunMuzzle;
+    weaponMount.add(shotgun);
+
+    const weapons = {
+      pistol: pistol,
+      carbine: carbine,
+      shotgun: shotgun
+    };
+
     return {
       root: root,
       pelvis: pelvis,
@@ -999,8 +1095,17 @@
       elbowR: armR.elbow,
       wristL: armL.wrist,
       wristR: armR.wrist,
+      handL: armL.wrist,
+      handR: armR.wrist,
       thrusterGlowL: thrusterGlowL,
       thrusterGlowR: thrusterGlowR,
+      parts: {
+        weaponMount: weaponMount,
+        weapons: weapons,
+        activeWeapon: 'unarmed',
+        handL: armL.wrist,
+        handR: armR.wrist
+      },
       variant: variant,
       _anim: {
         walkPhase: 0,
@@ -1015,6 +1120,49 @@
         // Shared geometries/materials are disposed via disposeShared()
       }
     };
+  }
+
+  // ============================================================================
+  // WEAPON EQUIP & MUZZLE HELPERS
+  // ============================================================================
+  function setWeapon(rig, weaponId) {
+    if (!rig || !rig.parts || !rig.parts.weapons) return rig;
+    const id = (weaponId === 'pistol' || weaponId === 'carbine' || weaponId === 'shotgun')
+      ? weaponId
+      : 'unarmed';
+    const w = rig.parts.weapons;
+    if (w.pistol) w.pistol.visible = (id === 'pistol');
+    if (w.carbine) w.carbine.visible = (id === 'carbine');
+    if (w.shotgun) w.shotgun.visible = (id === 'shotgun');
+    rig.parts.activeWeapon = id;
+    return rig;
+  }
+
+  function getMuzzleWorldPosition(rig, outVec3) {
+    const THREE = getTHREE();
+    const out = outVec3 || new THREE.Vector3();
+    if (!rig) return out.set(0, 0, 0);
+
+    const parts = rig.parts;
+    const activeId = parts && parts.activeWeapon ? parts.activeWeapon : 'unarmed';
+    const weaponObj = parts && parts.weapons ? parts.weapons[activeId] : null;
+    if (weaponObj && weaponObj.visible && weaponObj.userData && weaponObj.userData.muzzle) {
+      weaponObj.userData.muzzle.getWorldPosition(out);
+      return out;
+    }
+    if (parts && parts.weaponMount) {
+      parts.weaponMount.getWorldPosition(out);
+      return out;
+    }
+    if (rig.handR || rig.wristR) {
+      (rig.handR || rig.wristR).getWorldPosition(out);
+      return out;
+    }
+    if (rig.root) {
+      rig.root.getWorldPosition(out);
+      return out;
+    }
+    return out.set(0, 0, 0);
   }
 
   // ============================================================================
@@ -1042,6 +1190,18 @@
     const isGrounded = s.isGrounded !== undefined ? !!s.isGrounded : true;
     const isFiring = !!s.isFiring;
     const isSeated = !!s.isSeated;
+    const isAiming = !!s.aiming;
+    const recoil = typeof s.recoil === 'number' ? clamp(s.recoil, 0, 1) : 0;
+
+    let weapon = 'unarmed';
+    if (s.weapon !== undefined) {
+      weapon = (s.weapon === 'pistol' || s.weapon === 'carbine' || s.weapon === 'shotgun') ? s.weapon : 'unarmed';
+      if (rig.parts && rig.parts.weapons && rig.parts.activeWeapon !== weapon) {
+        setWeapon(rig, weapon);
+      }
+    } else if (rig.parts && rig.parts.activeWeapon) {
+      weapon = rig.parts.activeWeapon;
+    }
 
     anim.idlePhase += clampedDt * 1.9;
 
@@ -1266,15 +1426,76 @@
       tShoulderRRz -= landFactor * 0.18;
     }
 
-    // Right-arm aiming pose overrides right arm (and adds slight torso aim twist)
-    if (isFiring && !isSeated) {
-      tShoulderRRx = -1.48;
-      tShoulderRRz = -0.05;
-      tElbowRRx = -0.18;
-      tWristRRx = 0;
-      tTorsoRy += -0.14;
-      tChestRy += -0.12;
-      tHeadRy += 0.16;
+    // Weapon stance, aiming & recoil overrides (zero allocations)
+    if (!isSeated) {
+      if (weapon === 'unarmed') {
+        if (isFiring) {
+          tShoulderRRx = -1.48;
+          tShoulderRRz = -0.05;
+          tElbowRRx = -0.18;
+          tWristRRx = 0;
+          tTorsoRy += -0.14;
+          tChestRy += -0.12;
+          tHeadRy += 0.16;
+        }
+      } else if (isAiming || isFiring || recoil > 0.01) {
+        if (weapon === 'pistol') {
+          // Tactical sidearm aim + crisp muzzle climb
+          tShoulderRRx = -1.46 - recoil * 0.22;
+          tShoulderRRz = -0.06;
+          tElbowRRx = -0.18 - recoil * 0.08;
+          tWristRRx = 0.04 - recoil * 0.28;
+          tShoulderLRx = -0.55;
+          tShoulderLRz = 0.22;
+          tElbowLRx = -0.95;
+          tWristLRx = 0.05;
+          tTorsoRy += -0.16;
+          tChestRy += -0.14 - recoil * 0.03;
+          tChestRx -= recoil * 0.04;
+          tHeadRy += 0.24;
+          tHeadRx -= 0.04;
+        } else {
+          // Two-handed carbine / shotgun combat stance + support hand
+          const isHeavy = weapon === 'shotgun';
+          tShoulderRRx = -1.22 - recoil * (isHeavy ? 0.28 : 0.14);
+          tShoulderRRz = -0.10;
+          tElbowRRx = -0.62 - recoil * (isHeavy ? 0.18 : 0.10);
+          tWristRRx = 0.12 - recoil * (isHeavy ? 0.14 : 0.08);
+          tShoulderLRx = -1.28 - recoil * (isHeavy ? 0.20 : 0.10);
+          tShoulderLRz = 0.38;
+          tElbowLRx = -0.45 - recoil * (isHeavy ? 0.12 : 0.06);
+          tWristLRx = 0.15;
+          tTorsoRy += -0.22;
+          tChestRy += -0.18;
+          tChestRx -= recoil * (isHeavy ? 0.10 : 0.05);
+          tHeadRy += 0.30;
+          tHeadRx -= 0.05;
+        }
+      } else {
+        // Low-ready Rockstar carry stance when armed but not aiming
+        if (weapon === 'pistol') {
+          tShoulderRRx = -0.26;
+          tShoulderRRz = -0.10;
+          tElbowRRx = -0.46;
+          tWristRRx = 0.04;
+        } else {
+          tShoulderRRx = -0.48;
+          tShoulderRRz = -0.12;
+          tElbowRRx = -0.82;
+          tWristRRx = 0.08;
+          tShoulderLRx = -0.58;
+          tShoulderLRz = 0.36;
+          tElbowLRx = -0.78;
+          tWristLRx = 0.08;
+        }
+      }
+    }
+
+    if (rig.parts && rig.parts.weaponMount) {
+      const kickDist = weapon === 'shotgun' ? 0.032 : (weapon === 'carbine' ? 0.020 : 0.016);
+      const climbAngle = weapon === 'shotgun' ? 0.18 : (weapon === 'pistol' ? 0.16 : 0.10);
+      rig.parts.weaponMount.position.set(0, -0.055 + recoil * kickDist, 0.022);
+      rig.parts.weaponMount.rotation.x = Math.PI / 2 - recoil * climbAngle;
     }
 
     const lambda = 14;
@@ -1678,6 +1899,8 @@
   global.RealisticCharacterRig = {
     createHumanoid: createHumanoid,
     animateHumanoid: animateHumanoid,
+    setWeapon: setWeapon,
+    getMuzzleWorldPosition: getMuzzleWorldPosition,
     createCruiser: createCruiser,
     createStarfighter: createStarfighter,
     disposeShared: disposeShared

@@ -725,7 +725,10 @@
       const tmp = new THREE.Color();
       for (let i = 0; i < rCount; i += 1) {
         const side = rng() > 0.5 ? 1 : -1;
-        dummy.position.set(side * (16 + rng() * 130), 0.25, -90 + rng() * 200);
+        const rx = side * (16 + rng() * 130);
+        const rz = -90 + rng() * 200;
+        if (Math.abs(rx) < 18 && rz > -6 && rz < 36) continue;
+        dummy.position.set(rx, 0.25, rz);
         dummy.rotation.set(rng() * 2, rng() * 2, rng() * 2);
         dummy.scale.set(0.6 + rng() * 1.4, 0.35 + rng() * 0.5, 0.6 + rng() * 1.3);
         dummy.updateMatrix();
@@ -751,6 +754,7 @@
         const side = rng() > 0.5 ? 1 : -1;
         const x = side * (12 + rng() * 140);
         const z = -120 + rng() * 240;
+        if (Math.abs(x) < 17 && z > -6 && z < 36) continue;
         dummy.position.set(x, 0, z);
         dummy.rotation.set((rng() - 0.5) * 0.14, rng() * Math.PI * 2, (rng() - 0.5) * 0.14);
         const s = 0.75 + rng() * 0.6;
@@ -820,6 +824,7 @@
       const x = side * (14 + rng() * 135);
       const z = -95 + rng() * 220;
       if (Math.abs(x) < 18 && Math.abs(z + 52) < 22) continue;
+      if (Math.abs(x) < 17 && z > -6 && z < 36) continue;
 
       const s = 0.72 + rng() * 0.85;
       const sy = s * (0.88 + rng() * 0.28);
@@ -1296,6 +1301,212 @@
     }
   }
 
+  const FUNCTIONAL_HUB_SPECS = [
+    {
+      id: 'hub-gunshop',
+      type: 'gunshop',
+      name: 'Ammu-North Armory',
+      subtitle: 'Weapons, Ammo & Tactical Gear',
+      shortTitle: 'AMMU-NORTH',
+      tag: 'ARMORY',
+      color: '#f59e0b',
+      side: 1,
+      z: 28
+    },
+    {
+      id: 'hub-safehouse',
+      type: 'safehouse',
+      name: 'Explorer Safe House',
+      subtitle: 'Rest, Heal & Stash Supplies',
+      shortTitle: 'SAFE HOUSE',
+      tag: 'EXPLORER LODGE',
+      color: '#10b981',
+      side: -1,
+      z: 24
+    },
+    {
+      id: 'hub-contract',
+      type: 'contract',
+      name: 'Syndicate Ops Terminal',
+      subtitle: 'Province Contracts & Bounties',
+      shortTitle: 'SYNDICATE OPS',
+      tag: 'CONTRACTS',
+      color: '#a855f7',
+      side: 1,
+      z: 6
+    },
+    {
+      id: 'hub-garage',
+      type: 'garage',
+      name: 'Trans-Canada Customs',
+      subtitle: 'Vehicle Repair & Paint Bay',
+      shortTitle: 'TRANS-CANADA',
+      tag: 'CUSTOMS BAY',
+      color: '#38bdf8',
+      side: -1,
+      z: 2
+    }
+  ];
+
+  function getHubSignTexture(THREE, spec) {
+    return getCachedTexture(THREE, 'hub_sign_' + spec.type, 256, function (ctx, s) {
+      ctx.fillStyle = '#0b1220';
+      ctx.fillRect(0, 0, s, s);
+      ctx.strokeStyle = spec.color;
+      ctx.lineWidth = 10;
+      ctx.strokeRect(8, 12, s - 16, s - 24);
+      ctx.fillStyle = spec.color;
+      ctx.fillRect(16, 22, s - 32, 8);
+      ctx.fillRect(16, s - 30, s - 32, 8);
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 34px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(spec.shortTitle, s * 0.5, s * 0.44);
+      ctx.fillStyle = spec.color;
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText(spec.tag, s * 0.5, s * 0.68);
+    }, { srgb: true });
+  }
+
+  function buildFunctionalBuildings(THREE, scene, state) {
+    const concreteTex = getConcreteTexture(THREE);
+    const bTex = getBuildingTextures(THREE);
+
+    // Shared geometries across all 4 hubs (zero duplicate allocations)
+    const bodyGeo = new THREE.BoxGeometry(5.0, 5.2, 7.6);
+    const podiumGeo = new THREE.BoxGeometry(5.6, 0.24, 8.2);
+    const roofTrimGeo = new THREE.BoxGeometry(5.3, 0.42, 7.9);
+    const doorRecessGeo = new THREE.BoxGeometry(0.24, 2.75, 2.2);
+    const doorJambGeo = new THREE.BoxGeometry(0.34, 2.9, 0.28);
+    const doorHeaderGeo = new THREE.BoxGeometry(0.38, 0.3, 2.76);
+    const doorStripGeo = new THREE.BoxGeometry(0.16, 0.12, 2.2);
+    const awningGeo = new THREE.BoxGeometry(1.25, 0.22, 3.8);
+    const signBackGeo = new THREE.BoxGeometry(0.18, 1.05, 4.2);
+    const signFaceGeo = new THREE.PlaneGeometry(4.0, 0.92);
+    const padGeo = new THREE.CylinderGeometry(1.65, 1.8, 0.08, 24);
+    const ringGeo = new THREE.RingGeometry(1.85, 2.25, 32);
+
+    // Shared structural materials
+    const bodyMat = mat(THREE, 0x334155, {
+      map: bTex.map,
+      emissiveMap: bTex.emissiveMap,
+      emissive: 0xffd580,
+      emissiveIntensity: 0.08,
+      roughness: 0.48,
+      metalness: 0.35
+    });
+    const trimMat = mat(THREE, 0x1e293b, { map: concreteTex, roughness: 0.72, metalness: 0.25 });
+    const recessMat = mat(THREE, 0x050811, { roughness: 0.9, metalness: 0.1 });
+    const padMat = mat(THREE, 0x475569, { map: concreteTex, roughness: 0.85, metalness: 0.1 });
+
+    for (let i = 0; i < FUNCTIONAL_HUB_SPECS.length; i += 1) {
+      const spec = FUNCTIONAL_HUB_SPECS[i];
+      const side = spec.side; // +1 right of road, -1 left of road
+      const bx = side * 11.6;
+      const bz = spec.z;
+      const faceDir = -side; // points toward road centre (x = 0)
+      const frontX = bx + faceDir * 2.5;
+      const padX = side * 8.2;
+
+      const accentMat = new THREE.MeshStandardMaterial({
+        color: spec.color,
+        emissive: spec.color,
+        emissiveIntensity: 0.72,
+        roughness: 0.28,
+        metalness: 0.2
+      });
+      const signTex = getHubSignTexture(THREE, spec);
+      const signFaceMat = new THREE.MeshStandardMaterial({
+        map: signTex,
+        emissiveMap: signTex,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.55,
+        roughness: 0.35
+      });
+
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      body.position.set(bx, 2.6, bz);
+      body.castShadow = true;
+      body.receiveShadow = true;
+      scene.add(body);
+
+      const podium = new THREE.Mesh(podiumGeo, trimMat);
+      podium.position.set(bx, 0.12, bz);
+      podium.receiveShadow = true;
+      scene.add(podium);
+
+      const roofTrim = new THREE.Mesh(roofTrimGeo, trimMat);
+      roofTrim.position.set(bx, 5.4, bz);
+      scene.add(roofTrim);
+
+      // Street-level doorway recess & illuminated frame
+      const recess = new THREE.Mesh(doorRecessGeo, recessMat);
+      recess.position.set(frontX + faceDir * 0.04, 1.38, bz);
+      scene.add(recess);
+
+      const jambL = new THREE.Mesh(doorJambGeo, accentMat);
+      jambL.position.set(frontX + faceDir * 0.12, 1.45, bz - 1.24);
+      scene.add(jambL);
+
+      const jambR = new THREE.Mesh(doorJambGeo, accentMat);
+      jambR.position.set(frontX + faceDir * 0.12, 1.45, bz + 1.24);
+      scene.add(jambR);
+
+      const header = new THREE.Mesh(doorHeaderGeo, accentMat);
+      header.position.set(frontX + faceDir * 0.12, 2.95, bz);
+      scene.add(header);
+
+      const strip = new THREE.Mesh(doorStripGeo, accentMat);
+      strip.position.set(frontX + faceDir * 0.26, 2.75, bz);
+      scene.add(strip);
+
+      // Illuminated awning & signboard
+      const awning = new THREE.Mesh(awningGeo, accentMat);
+      awning.position.set(frontX + faceDir * 0.62, 3.25, bz);
+      awning.rotation.z = faceDir * -0.18;
+      scene.add(awning);
+
+      const signBack = new THREE.Mesh(signBackGeo, trimMat);
+      signBack.position.set(frontX + faceDir * 0.12, 4.25, bz);
+      scene.add(signBack);
+
+      const signFace = new THREE.Mesh(signFaceGeo, signFaceMat);
+      signFace.position.set(frontX + faceDir * 0.22, 4.25, bz);
+      signFace.rotation.y = faceDir > 0 ? Math.PI / 2 : -Math.PI / 2;
+      scene.add(signFace);
+
+      // Street-level interaction pad & pulsing beacon ring
+      const pad = new THREE.Mesh(padGeo, padMat);
+      pad.position.set(padX, 0.04, bz);
+      pad.receiveShadow = true;
+      scene.add(pad);
+
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: spec.color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.78
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = -Math.PI / 2;
+      ringMesh.position.set(padX, 0.14, bz);
+      scene.add(ringMesh);
+
+      state.functionalBuildings.push({
+        id: spec.id,
+        type: spec.type,
+        name: spec.name,
+        subtitle: spec.subtitle,
+        x: padX,
+        z: bz,
+        radius: 5.5,
+        color: spec.color,
+        ringMesh: ringMesh
+      });
+    }
+  }
+
   function buildProvinceWorld(scene, province, qualityTier) {
     const THREE = global.THREE;
     if (!THREE) throw new Error('THREE is required to build province world');
@@ -1308,6 +1519,7 @@
       auroraMeshes: [],
       beaconMeshes: [],
       landmarkMarkers: [],
+      functionalBuildings: [],
       lights: null,
       waterMesh: null,
       waterBump: null,
@@ -1324,6 +1536,7 @@
     buildInstancedForest(THREE, scene, province, scale, rng);
     buildProvinceLandmarks(THREE, scene, province, scale, rng, state);
     buildLandmarkMarkers(THREE, scene, province, state);
+    buildFunctionalBuildings(THREE, scene, state);
 
     return {
       scene: scene,
@@ -1333,11 +1546,13 @@
       auroraMeshes: state.auroraMeshes,
       beaconMeshes: state.beaconMeshes,
       landmarkMarkers: state.landmarkMarkers,
+      functionalBuildings: state.functionalBuildings,
       emissiveTargets: {
         streetlightMat: state.streetlightMat,
         buildingMat: state.buildingMat
       },
-      update: function (elapsed) {
+      update: function (dtOrElapsed, maybeElapsed) {
+        const elapsed = maybeElapsed !== undefined ? maybeElapsed : dtOrElapsed;
         if (state.lights && state.lights.skyMat && state.lights.skyMat.uniforms && state.lights.skyMat.uniforms.uTime) {
           state.lights.skyMat.uniforms.uTime.value = elapsed;
         }
@@ -1355,6 +1570,13 @@
         }
         for (let i = 0; i < state.beaconMeshes.length; i += 1) {
           state.beaconMeshes[i].material.emissiveIntensity = 1.0 + Math.sin(elapsed * 3.2) * 0.65;
+        }
+        for (let i = 0; i < state.functionalBuildings.length; i += 1) {
+          const fb = state.functionalBuildings[i];
+          const pulse = Math.sin(elapsed * 2.6 + i * 1.4);
+          const s = 1.0 + pulse * 0.08;
+          fb.ringMesh.scale.set(s, s, 1);
+          fb.ringMesh.material.opacity = 0.62 + pulse * 0.24;
         }
       }
     };
