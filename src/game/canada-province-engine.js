@@ -137,30 +137,114 @@
     return group;
   }
 
-  function applyLightingFeel(THREE, world, province, mode) {
+  function applyLightingFeel(THREE, world, province, mode, renderer) {
     if (!world || !world.lights) return;
     const c = province.climate;
-    const { hemi, sun, skyMat } = world.lights;
+    const { hemi, sun, fill, skyMat } = world.lights;
     const isPolar = province.id === 'northwest-territories' || province.id === 'nunavut' || province.id === 'manitoba';
+    const u = skyMat && skyMat.uniforms ? skyMat.uniforms : null;
 
     if (mode === 'golden') {
-      skyMat.uniforms.topColor.value.set('#1e1b4b');
-      skyMat.uniforms.bottomColor.value.set('#f59e0b');
+      if (u) {
+        u.topColor.value.set('#1e1b4b');
+        u.bottomColor.value.set('#e06d53');
+        if (u.horizonColor) u.horizonColor.value.set('#fbbf24');
+        if (u.sunDir) u.sunDir.value.set(0.55, 0.24, -0.80).normalize();
+        if (u.sunColor) u.sunColor.value.set('#ffd180');
+        if (u.sunGlow) u.sunGlow.value = 1.0;
+        if (u.cloudOpacity) u.cloudOpacity.value = 0.42;
+      }
       sun.color.set('#ffcf87');
-      sun.intensity = 1.25;
-      hemi.intensity = 0.65;
+      sun.intensity = 1.32;
+      sun.position.set(68, 32, -98);
+      hemi.color.set('#fda4af');
+      hemi.groundColor.set('#3b2820');
+      hemi.intensity = 0.62;
+      if (fill) {
+        fill.color.set('#818cf8');
+        fill.intensity = 0.28;
+      }
+      if (world.scene) {
+        if (world.scene.fog) {
+          world.scene.fog.color.set('#b46b57');
+          world.scene.fog.density = world.fogDensityBase ? world.fogDensityBase * 1.1 : 0.0034;
+        }
+        if (world.scene.background && world.scene.background.set) {
+          world.scene.background.set('#e06d53');
+        }
+      }
+      if (renderer) renderer.toneMappingExposure = 1.08;
     } else if (mode === 'aurora') {
-      skyMat.uniforms.topColor.value.set('#020617');
-      skyMat.uniforms.bottomColor.value.set('#0f3443');
-      sun.color.set('#7dd3fc');
-      sun.intensity = 0.65;
-      hemi.intensity = 0.5;
+      if (u) {
+        u.topColor.value.set('#020617');
+        u.bottomColor.value.set('#0b293b');
+        if (u.horizonColor) u.horizonColor.value.set('#113b4e');
+        if (u.sunDir) u.sunDir.value.set(-0.35, 0.48, -0.80).normalize();
+        if (u.sunColor) u.sunColor.value.set('#bae6fd');
+        if (u.sunGlow) u.sunGlow.value = 0.45;
+        if (u.cloudOpacity) u.cloudOpacity.value = 0.16;
+      }
+      sun.color.set('#93c5fd');
+      sun.intensity = 0.68;
+      sun.position.set(-45, 72, -92);
+      hemi.color.set('#38bdf8');
+      hemi.groundColor.set('#0f172a');
+      hemi.intensity = 0.48;
+      if (fill) {
+        fill.color.set('#34d399');
+        fill.intensity = 0.22;
+      }
+      if (world.scene) {
+        if (world.scene.fog) {
+          world.scene.fog.color.set('#081e2c');
+          world.scene.fog.density = world.fogDensityBase ? world.fogDensityBase * 1.15 : 0.0036;
+        }
+        if (world.scene.background && world.scene.background.set) {
+          world.scene.background.set('#081e2c');
+        }
+      }
+      if (renderer) renderer.toneMappingExposure = 1.02;
     } else {
-      skyMat.uniforms.topColor.value.set(c.skyTop);
-      skyMat.uniforms.bottomColor.value.set(c.skyHorizon);
+      if (u) {
+        u.topColor.value.set(c.skyTop);
+        u.bottomColor.value.set(c.skyHorizon);
+        if (u.horizonColor) u.horizonColor.value.set(c.fogColor || c.skyHorizon);
+        if (u.sunDir) u.sunDir.value.set(0.50, 0.74, 0.37).normalize();
+        if (u.sunColor) u.sunColor.value.set(c.sunColor);
+        if (u.sunGlow) u.sunGlow.value = 0.85;
+        if (u.cloudOpacity) u.cloudOpacity.value = 0.36;
+      }
       sun.color.set(c.sunColor);
-      sun.intensity = 1.15;
-      hemi.intensity = 0.72;
+      sun.intensity = 1.22;
+      sun.position.set(75, 110, 55);
+      hemi.color.set(c.skyTop);
+      hemi.groundColor.set(c.groundColor);
+      hemi.intensity = 0.74;
+      if (fill) {
+        fill.color.set(c.accent);
+        fill.intensity = 0.25;
+      }
+      if (world.scene) {
+        if (world.scene.fog) {
+          world.scene.fog.color.set(c.fogColor);
+          world.scene.fog.density = world.fogDensityBase || 0.0030;
+        }
+        if (world.scene.background && world.scene.background.set) {
+          world.scene.background.set(c.skyHorizon);
+        }
+      }
+      if (renderer) renderer.toneMappingExposure = 1.05;
+    }
+
+    if (world.emissiveTargets) {
+      const lampIntensity = mode === 'aurora' ? 1.65 : (mode === 'golden' ? 1.15 : 0.05);
+      const winIntensity = mode === 'aurora' ? 0.95 : (mode === 'golden' ? 0.62 : 0.06);
+      if (world.emissiveTargets.streetlightMat) {
+        world.emissiveTargets.streetlightMat.emissiveIntensity = lampIntensity;
+      }
+      if (world.emissiveTargets.buildingMat) {
+        world.emissiveTargets.buildingMat.emissiveIntensity = winIntensity;
+      }
     }
 
     for (let i = 0; i < world.auroraMeshes.length; i += 1) {
@@ -508,7 +592,7 @@
       lightingIdx = (lightingIdx + 1) % LIGHTING_MODES.length;
       const mode = LIGHTING_MODES[lightingIdx];
       if (THREE && world) {
-        applyLightingFeel(THREE, world, province, mode);
+        applyLightingFeel(THREE, world, province, mode, renderer);
       }
       const btn = document.getElementById('btn-toggle-sky');
       if (btn) btn.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
@@ -543,6 +627,9 @@
       renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
       renderer.setPixelRatio(Math.min(global.devicePixelRatio || 1, QUALITY_PRESETS[qualityKey].dprCap));
       renderer.setSize(container.clientWidth || global.innerWidth, container.clientHeight || global.innerHeight);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      renderer.outputEncoding = THREE.sRGBEncoding;
       renderer.shadowMap.enabled = QUALITY_PRESETS[qualityKey].shadows;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.innerHTML = '';
@@ -552,7 +639,7 @@
       camera = new THREE.PerspectiveCamera(62, (container.clientWidth || global.innerWidth) / (container.clientHeight || global.innerHeight), 0.5, 650);
 
       world = global.CanadaLandmarks.buildProvinceWorld(scene, province, qualityKey);
-      applyLightingFeel(THREE, world, province, LIGHTING_MODES[lightingIdx]);
+      applyLightingFeel(THREE, world, province, LIGHTING_MODES[lightingIdx], renderer);
 
       const accentHex = toHexNumber(province.climate && province.climate.accent, 0x00f2ff);
       const rigLib = global.RealisticCharacterRig;
