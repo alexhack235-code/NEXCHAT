@@ -31,11 +31,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
+  <script>
     // NEXCHAT STABLE BUILD GUARD (NO RELOAD LOOPS)
     (function() {
       const BUILD_ID = 'v12_20261114_FRESH_RELEASE';
-      localStorage.setItem('nex_build_version', BUILD_ID);
+      try { localStorage.setItem('nex_build_version', BUILD_ID); } catch (_) {}
 
       // Purge any stale chat selection from storage to prevent ever reloading to an empty user chat
       try {
@@ -55,23 +55,27 @@
       const p = new URLSearchParams(window.location.search);
       if (p.get('test_auth') === 'true' || p.get('preview') === 'true') {
         window.authRedirectDisabled = true;
-        sessionStorage.setItem('disable_auth_redirect', 'true');
+        try { sessionStorage.setItem('disable_auth_redirect', 'true'); } catch (_) {}
         const testUid = p.get('uid') || 'hLbqt1sBP3aS5DZnwJaW1Hrpiko2';
         const testName = p.get('name') || 'Александр';
         window.myUID = testUid;
-        localStorage.setItem('auth_uid', testUid);
-        localStorage.setItem('auth_name', testName);
-        localStorage.setItem('auth_email', 'demonalexander526@gmail.com');
+        try {
+          localStorage.setItem('auth_uid', testUid);
+          localStorage.setItem('auth_name', testName);
+          localStorage.setItem('auth_email', 'demonalexander526@gmail.com');
+        } catch (_) {}
         if (p.get('chat')) {
           const cParam = p.get('chat');
           if (cParam && cParam !== 'User' && cParam !== 'u_active' && cParam !== testUid) {
-            localStorage.setItem('selected_chat_id', cParam);
-            if (p.get('chatName')) localStorage.setItem('selected_chat_name', p.get('chatName'));
-            if (p.get('chatType')) localStorage.setItem('selected_chat_type', p.get('chatType'));
+            try {
+              localStorage.setItem('selected_chat_id', cParam);
+              if (p.get('chatName')) localStorage.setItem('selected_chat_name', p.get('chatName'));
+              if (p.get('chatType')) localStorage.setItem('selected_chat_type', p.get('chatType'));
+            } catch (_) {}
           }
         }
         if (p.get('wallpaper')) {
-          localStorage.setItem('nexchat_background', p.get('wallpaper'));
+          try { localStorage.setItem('nexchat_background', p.get('wallpaper')); } catch (_) {}
         }
       }
     })();
@@ -88,8 +92,6 @@
   <link rel="stylesheet" href="css/status-elite-suite.css?v=12.0">
   <link rel="stylesheet" href="css/global-drop.css?v=13.0">
   <link rel="stylesheet" href="css/chat-experience-studio.css?v=12.0">
-  <link rel="stylesheet" href="css/app-themes-studio.css?v=1.0">
-  <link rel="stylesheet" href="css/mobile-ux-audit-fixes.css?v=1.0">
   <style id="globalDropMobileStyles">
     @media (max-width: 899px) {
       .x-composer {
@@ -293,6 +295,9 @@
       100% { background-position: -200% 0; }
     }
   </style>
+  <link rel="stylesheet" href="css/app-themes-studio.css?v=1.0">
+  <link rel="stylesheet" href="css/chat-list-templates.css?v=1.0">
+  <link rel="stylesheet" href="css/mobile-ux-audit-fixes.css?v=1.0">
 </head>
 
 <body>
@@ -1299,6 +1304,25 @@
           <button class="filter-tab add-chat-tab" id="newChatFromTab" title="Start New Direct Chat"><i class="fa-solid fa-plus"></i></button>
           <button type="button" class="filter-tab chatlist-template-tab" id="chatListTemplateBtn" title="Switch Chat List Template: Former Classic vs New Glass Cards"><i class="fa-solid fa-layer-group"></i> <span id="chatListTemplateBtnLabel">Glass Cards</span></button>
           <button type="button" class="filter-tab chatlist-style-tab" id="chatListCustomizeBtn" title="Customize Chat List Glassmorphism &amp; Picture"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>Glass</span></button>
+        </div>
+
+        <!-- Chat List Layout Template Switcher Bar -->
+        <div id="chatListTemplateBar" class="chatlist-template-bar" role="tablist" aria-label="Chat List Templates">
+          <button type="button" class="chatlist-template-pill is-active active" role="tab" aria-selected="true" aria-pressed="true" data-chatlist-template="glass-studio">Glass Cards</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="classic">Classic Flat</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="swift-compact">Swift Compact</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="aurora-bento">Aurora Bento</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="terminal-grid">Terminal Grid</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="minimal-air">Air Minimal</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="neon-dock">Neon Dock</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-liquid-refraction">Liquid Refraction</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-spatial-vision">Spatial Vision</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-ios-inset">iOS Inset</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-dynamic-dock">Dynamic Dock</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-oneui-curves">One UI Curves</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-galaxy-ultra">Galaxy Ultra</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-fold-split">Fold Split</button>
+          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-knox-minimal">Knox Minimal</button>
         </div>
 
         <!-- WhatsApp-Style System Action Rows: Locked chats & Archived -->
@@ -3427,13 +3451,79 @@
                     <label for="chatListStyleSelect" style="margin:0;"><strong>Chat List Template &amp; Glassmorphism Studio</strong></label>
                     <span class="auto-trans-badge" style="background:rgba(0,212,255,0.14);border:1px solid rgba(0,212,255,0.35);color:#67e8f9;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;">CHAT LIST FX</span>
                   </div>
-                  <div class="chatlist-template-switcher-row" role="group" aria-label="Chat List Template" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-                    <button type="button" class="btn-secondary chatlist-template-btn" data-chatlist-template="classic" id="btnChatListTemplateClassic" style="flex:1;min-width:140px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;font-size:12.5px;font-weight:700;">
-                      <i class="fa-solid fa-list"></i> <span>Former Classic</span>
-                    </button>
-                    <button type="button" class="btn-secondary chatlist-template-btn" data-chatlist-template="glass-studio" id="btnChatListTemplateGlass" style="flex:1;min-width:140px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;font-size:12.5px;font-weight:700;">
-                      <i class="fa-solid fa-wand-magic-sparkles"></i> <span>New Glass Cards</span>
-                    </button>
+                  <div class="chatlist-template-settings-section" aria-label="Chat List Layout Templates">
+                    <div class="chatlist-template-settings-header">
+                      <div>
+                        <strong class="chatlist-template-settings-title">Chat List Layout Templates</strong>
+                        <p class="chatlist-template-settings-subtitle">Switch layout presets instantly across Light &amp; Dark modes without losing your saved glass theme.</p>
+                      </div>
+                      <span class="chatlist-template-settings-badge">15 STYLES</span>
+                    </div>
+                    <div id="chatListTemplateSettingsGrid" class="chatlist-template-settings-grid" role="group" aria-label="Chat List Layout Templates">
+                      <div class="chatlist-template-group-label">Core &amp; NEXCHAT Studio</div>
+                      <button type="button" class="chatlist-template-card is-active active" data-chatlist-template="glass-studio" id="btnChatListTemplateGlass" aria-pressed="true">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Glass Cards</span>
+                        <span class="chatlist-template-card-desc">Floating frosted glassmorphic cards</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="classic" id="btnChatListTemplateClassic" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-list"></i> Classic Flat</span>
+                        <span class="chatlist-template-card-desc">Full-width borderless rows &amp; hairlines</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="swift-compact" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-bolt"></i> Swift Compact</span>
+                        <span class="chatlist-template-card-desc">Dense scanning with accent unread rail</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="aurora-bento" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-layer-group"></i> Aurora Bento</span>
+                        <span class="chatlist-template-card-desc">Editorial gradient dual-surface cards</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="terminal-grid" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-terminal"></i> Terminal Grid</span>
+                        <span class="chatlist-template-card-desc">Crisp 1px bordered cells &amp; mono time</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="minimal-air" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-feather"></i> Air Minimal</span>
+                        <span class="chatlist-template-card-desc">Calm whitespace &amp; subtle hairlines</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="neon-dock" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-wave-square"></i> Neon Dock</span>
+                        <span class="chatlist-template-card-desc">Asymmetric left accent dock &amp; squircle</span>
+                      </button>
+                      <div class="chatlist-template-group-label">Apple Liquid Glass</div>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="apple-liquid-refraction" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-droplet"></i> Liquid Refraction</span>
+                        <span class="chatlist-template-card-desc">iOS specular translucent pill cards</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="apple-spatial-vision" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-vr-cardboard"></i> Spatial Vision</span>
+                        <span class="chatlist-template-card-desc">visionOS depth slab &amp; glass ring</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="apple-ios-inset" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-mobile-screen"></i> iOS Inset</span>
+                        <span class="chatlist-template-card-desc">Grouped inset translucent rows</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="apple-dynamic-dock" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-capsules"></i> Dynamic Dock</span>
+                        <span class="chatlist-template-card-desc">26px capsule island glass chrome</span>
+                      </button>
+                      <div class="chatlist-template-group-label">Samsung One UI / Galaxy</div>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="samsung-oneui-curves" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-square"></i> One UI Curves</span>
+                        <span class="chatlist-template-card-desc">26px continuous curved squircle cards</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="samsung-galaxy-ultra" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-gem"></i> Galaxy Ultra</span>
+                        <span class="chatlist-template-card-desc">Matte titanium edge strip &amp; sharp type</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="samsung-fold-split" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-table-columns"></i> Fold Split</span>
+                        <span class="chatlist-template-card-desc">Z-Fold balanced time &amp; unread column</span>
+                      </button>
+                      <button type="button" class="chatlist-template-card" data-chatlist-template="samsung-knox-minimal" aria-pressed="false">
+                        <span class="chatlist-template-card-title"><i class="fa-solid fa-shield-halved"></i> Knox Minimal</span>
+                        <span class="chatlist-template-card-desc">High-legibility recessed hairline cards</span>
+                      </button>
+                    </div>
                   </div>
                   <div id="chatListLivePreview" class="nex-chatlist-preview-stage" style="background-image:url('./assets/images/chatlist-futuristic-bg.jpg');">
                     <div class="nex-chatlist-preview-row">
@@ -8684,7 +8774,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <div class="sandbox-editor-header">
             <span><i class="fa-solid fa-desktop"></i> Live Rendered Viewport</span>
           </div>
-          <iframe id="sandboxPreviewFrame" class="sandbox-preview-frame" sandbox="allow-scripts allow-modals"></iframe>
+          <iframe id="sandboxPreviewFrame" class="sandbox-preview-frame" title="NEX-SANDBOX Live Preview" sandbox="allow-scripts allow-modals" srcdoc="<!DOCTYPE html><html><head><meta charset=&quot;utf-8&quot;><script>try{void window.localStorage;}catch(_){}</script></head><body></body></html>"></iframe>
           <div class="sandbox-console-log" id="sandboxConsoleLog"></div>
         </div>
       </div>
