@@ -1052,13 +1052,26 @@ a {
 
   .hud-right {
     justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 100%;
     gap: 6px;
+    padding-bottom: 2px;
+  }
+
+  .hud-right::-webkit-scrollbar {
+    display: none;
   }
 
   .hud-pill {
     min-height: 44px;
     padding: 0 9px;
     font-size: 0.64rem;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .btn-hud,
@@ -1068,17 +1081,19 @@ a {
     min-height: 44px;
     padding: 0 10px;
     font-size: 0.62rem;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   #mission-tracker,
   .mission-tracker {
-    top: calc(var(--hud-safe-top) + 124px);
+    top: var(--hud-stack-top, calc(var(--hud-safe-top) + 114px));
     width: min(210px, calc(100vw - 126px));
     padding: 9px 10px;
   }
 
   #radar-container {
-    top: calc(var(--hud-safe-top) + 124px);
+    top: var(--hud-stack-top, calc(var(--hud-safe-top) + 114px));
     width: 100px;
     padding: 6px;
   }

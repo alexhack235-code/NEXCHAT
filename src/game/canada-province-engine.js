@@ -48,6 +48,15 @@
     safeStorageSet('canada_discovered_' + provinceId, JSON.stringify(map));
   }
 
+  function toHexNumber(val, fallback) {
+    if (typeof val === 'number' && !isNaN(val)) return val;
+    if (typeof val === 'string') {
+      const parsed = parseInt(val.replace('#', ''), 16);
+      if (!isNaN(parsed)) return parsed;
+    }
+    return fallback;
+  }
+
   function resolveProvinceHref(href) {
     const path = (global.location && global.location.pathname) || '';
     if (path.indexOf('/Canada/') !== -1) {
@@ -466,12 +475,14 @@
     }
 
     let operativeMesh = null;
+    let operativeRig = null;
     let cruiserMesh = null;
+    let cruiserRig = null;
 
     function toggleCruiser() {
       inCruiser = !inCruiser;
       player.speed = 0;
-      if (operativeMesh) operativeMesh.visible = !inCruiser;
+      if (operativeMesh) operativeMesh.visible = operativeRig ? true : !inCruiser;
       if (cruiserMesh) cruiserMesh.visible = inCruiser;
       const chud = document.getElementById('cruiser-hud');
       if (chud) chud.style.display = inCruiser ? 'block' : 'none';
@@ -543,8 +554,26 @@
       world = global.CanadaLandmarks.buildProvinceWorld(scene, province, qualityKey);
       applyLightingFeel(THREE, world, province, LIGHTING_MODES[lightingIdx]);
 
-      operativeMesh = createOperativeMesh(THREE, province.climate.accent);
-      cruiserMesh = createCruiserMesh(THREE, province.climate.accent);
+      const accentHex = toHexNumber(province.climate && province.climate.accent, 0x00f2ff);
+      const rigLib = global.RealisticCharacterRig;
+      if (rigLib && typeof rigLib.createHumanoid === 'function') {
+        operativeRig = rigLib.createHumanoid({
+          variant: 'canadian-explorer',
+          accentColor: accentHex
+        });
+        operativeMesh = operativeRig.root;
+      } else {
+        operativeMesh = createOperativeMesh(THREE, province.climate.accent);
+      }
+      if (rigLib && typeof rigLib.createCruiser === 'function') {
+        cruiserRig = rigLib.createCruiser({
+          accentColor: accentHex
+        });
+        cruiserMesh = cruiserRig.root;
+        cruiserMesh.visible = false;
+      } else {
+        cruiserMesh = createCruiserMesh(THREE, province.climate.accent);
+      }
       scene.add(operativeMesh);
       scene.add(cruiserMesh);
     } catch (err) {
@@ -570,7 +599,26 @@
     function onKeyUp(e) {
       keys[e.code] = false;
     }
+    function syncMobileHudStack() {
+      const rootEl = document.documentElement;
+      if (!rootEl) return;
+      if ((global.innerWidth || 1024) <= 720) {
+        const hudEl = document.getElementById('province-hud');
+        if (hudEl) {
+          const rect = hudEl.getBoundingClientRect();
+          if (rect.bottom > 0) {
+            rootEl.style.setProperty('--hud-stack-top', Math.ceil(rect.bottom + 8) + 'px');
+          }
+        }
+      } else {
+        rootEl.style.removeProperty('--hud-stack-top');
+      }
+    }
+    syncMobileHudStack();
+    global.requestAnimationFrame(syncMobileHudStack);
+
     function onResize() {
+      syncMobileHudStack();
       if (!renderer || !camera) return;
       const w = container.clientWidth || global.innerWidth;
       const h = container.clientHeight || global.innerHeight;
@@ -677,13 +725,32 @@
       player.x = Math.max(-220, Math.min(220, player.x));
       player.z = Math.max(-180, Math.min(220, player.z));
 
+      const isMoving = Math.abs(player.speed) > 0.2;
+      const isGrounded = player.y <= 0.01;
+      const rigLib = global.RealisticCharacterRig;
+
       if (operativeMesh) {
-        operativeMesh.position.set(player.x, player.y, player.z);
-        operativeMesh.rotation.y = player.yaw;
+        operativeMesh.position.set(player.x, inCruiser ? -0.05 : player.y, player.z);
+        operativeMesh.rotation.y = operativeRig ? (player.yaw + Math.PI) : player.yaw;
+      }
+      if (operativeRig && rigLib && typeof rigLib.animateHumanoid === 'function') {
+        rigLib.animateHumanoid(operativeRig, {
+          speed: Math.abs(player.speed),
+          isMoving: isMoving,
+          isGrounded: isGrounded,
+          isFiring: false,
+          isSeated: inCruiser
+        }, dt);
       }
       if (cruiserMesh) {
         cruiserMesh.position.set(player.x, 0, player.z);
-        cruiserMesh.rotation.y = player.yaw;
+        cruiserMesh.rotation.y = cruiserRig ? (player.yaw + Math.PI) : player.yaw;
+        if (inCruiser && cruiserRig && cruiserRig.wheels && cruiserRig.wheels.length) {
+          const wheelSpin = (player.speed * dt) / 0.38;
+          for (let w = 0; w < cruiserRig.wheels.length; w += 1) {
+            cruiserRig.wheels[w].rotation.x += wheelSpin;
+          }
+        }
       }
 
       // Third-person smooth camera
