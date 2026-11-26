@@ -1,0 +1,1549 @@
+/* ============================================================================
+   NEXCHAT APP THEMES STUDIO — 100% Full-App Light Mode, 10 Light + 10 Dark
+   Themes, & Responsive Classic/Glass Surface Token Engine
+   ----------------------------------------------------------------------------
+   Loaded after css/chat-experience-studio.css in chat.html.
+   Uses CSS custom properties (--nex-theme-*) across every root shell, view,
+   navigation chrome, chat list, chat detail, updates, groups, calls,
+   announcements, settings modal, studio modal, and dropdown/modal surface.
+   ============================================================================ */
+
+/* ── Base Dark Fallback Tokens ────────────────────────────────────────────── */
+:root {
+  --nex-theme-bg-app: #0b0d14;
+  --nex-theme-surface: #121724;
+  --nex-theme-surface-2: #1b2233;
+  --nex-theme-card: #151b29;
+  --nex-theme-header: #0f1420;
+  --nex-theme-nav: #0f1420;
+  --nex-theme-input: #1d2536;
+  --nex-theme-border: rgba(148, 163, 184, 0.22);
+  --nex-theme-text: #f1f5f9;
+  --nex-theme-text-muted: #9aa7ba;
+  --nex-theme-accent: #10b981;
+  --nex-theme-accent-fg: #052e22;
+  --nex-theme-bubble-recv: #1c2434;
+  --nex-theme-bubble-sent: #065f46;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(148, 163, 184, 0.12);
+  --nex-theme-active: rgba(16, 185, 129, 0.16);
+  --nex-theme-shadow: 0 12px 32px rgba(0, 0, 0, 0.36);
+}
+
+/* ============================================================================
+   10 LIGHT MODE THEME PALETTES (WCAG AA >= 4.5:1 Verified)
+   ============================================================================ */
+
+body.light-mode:not([class*="light-theme-"]),
+body.light-theme:not([class*="light-theme-"]),
+body.light-theme-alabaster {
+  color-scheme: light;
+  --nex-theme-bg-app: #f4f6f9;
+  --nex-theme-surface: #ffffff;
+  --nex-theme-surface-2: #e7ecf3;
+  --nex-theme-card: #ffffff;
+  --nex-theme-header: #ffffff;
+  --nex-theme-nav: #ffffff;
+  --nex-theme-input: #eef2f7;
+  --nex-theme-border: rgba(15, 23, 42, 0.12);
+  --nex-theme-text: #0f172a;
+  --nex-theme-text-muted: #435164;
+  --nex-theme-accent: #0b6e5b;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #ffffff;
+  --nex-theme-bubble-sent: #0b6e5b;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(15, 23, 42, 0.05);
+  --nex-theme-active: rgba(11, 110, 91, 0.12);
+  --nex-theme-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+body.light-theme-cream {
+  color-scheme: light;
+  --nex-theme-bg-app: #faf6ee;
+  --nex-theme-surface: #fffdf8;
+  --nex-theme-surface-2: #f1e9d8;
+  --nex-theme-card: #fffdf8;
+  --nex-theme-header: #fffcf5;
+  --nex-theme-nav: #fffcf5;
+  --nex-theme-input: #f4ede0;
+  --nex-theme-border: rgba(92, 68, 36, 0.14);
+  --nex-theme-text: #1f1912;
+  --nex-theme-text-muted: #524536;
+  --nex-theme-accent: #8a4b14;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #fffdf8;
+  --nex-theme-bubble-sent: #8a4b14;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(92, 68, 36, 0.06);
+  --nex-theme-active: rgba(138, 75, 20, 0.12);
+  --nex-theme-shadow: 0 10px 28px rgba(68, 48, 22, 0.08);
+}
+
+body.light-theme-ivory-linen {
+  color-scheme: light;
+  --nex-theme-bg-app: #f7f4ec;
+  --nex-theme-surface: #fdfbf6;
+  --nex-theme-surface-2: #ece6d7;
+  --nex-theme-card: #fdfbf6;
+  --nex-theme-header: #fbf8f0;
+  --nex-theme-nav: #fbf8f0;
+  --nex-theme-input: #f0eadc;
+  --nex-theme-border: rgba(54, 48, 36, 0.14);
+  --nex-theme-text: #1c1a15;
+  --nex-theme-text-muted: #4b473b;
+  --nex-theme-accent: #3d4e8a;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #fdfbf6;
+  --nex-theme-bubble-sent: #3d4e8a;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(61, 78, 138, 0.06);
+  --nex-theme-active: rgba(61, 78, 138, 0.12);
+  --nex-theme-shadow: 0 10px 28px rgba(45, 42, 32, 0.08);
+}
+
+body.light-theme-mint-breeze {
+  color-scheme: light;
+  --nex-theme-bg-app: #effaf5;
+  --nex-theme-surface: #ffffff;
+  --nex-theme-surface-2: #dcf2e7;
+  --nex-theme-card: #ffffff;
+  --nex-theme-header: #f8fefb;
+  --nex-theme-nav: #f8fefb;
+  --nex-theme-input: #e5f6ed;
+  --nex-theme-border: rgba(11, 95, 73, 0.14);
+  --nex-theme-text: #0d211b;
+  --nex-theme-text-muted: #2f5146;
+  --nex-theme-accent: #0b6d54;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #ffffff;
+  --nex-theme-bubble-sent: #0b6d54;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(11, 109, 84, 0.06);
+  --nex-theme-active: rgba(11, 109, 84, 0.13);
+  --nex-theme-shadow: 0 10px 28px rgba(10, 62, 48, 0.08);
+}
+
+body.light-theme-glacier-sky {
+  color-scheme: light;
+  --nex-theme-bg-app: #eff6fc;
+  --nex-theme-surface: #ffffff;
+  --nex-theme-surface-2: #dfecf8;
+  --nex-theme-card: #ffffff;
+  --nex-theme-header: #f8fbff;
+  --nex-theme-nav: #f8fbff;
+  --nex-theme-input: #e6f0fa;
+  --nex-theme-border: rgba(19, 88, 158, 0.14);
+  --nex-theme-text: #0f1c2e;
+  --nex-theme-text-muted: #344a66;
+  --nex-theme-accent: #13589e;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #ffffff;
+  --nex-theme-bubble-sent: #13589e;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(19, 88, 158, 0.06);
+  --nex-theme-active: rgba(19, 88, 158, 0.13);
+  --nex-theme-shadow: 0 10px 28px rgba(15, 45, 85, 0.08);
+}
+
+body.light-theme-rose-pearl {
+  color-scheme: light;
+  --nex-theme-bg-app: #fdf2f6;
+  --nex-theme-surface: #ffffff;
+  --nex-theme-surface-2: #f7e1ea;
+  --nex-theme-card: #ffffff;
+  --nex-theme-header: #fff9fb;
+  --nex-theme-nav: #fff9fb;
+  --nex-theme-input: #fae9f0;
+  --nex-theme-border: rgba(145, 32, 82, 0.14);
+  --nex-theme-text: #27121c;
+  --nex-theme-text-muted: #5a3446;
+  --nex-theme-accent: #9f1f54;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #ffffff;
+  --nex-theme-bubble-sent: #9f1f54;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(159, 31, 84, 0.06);
+  --nex-theme-active: rgba(159, 31, 84, 0.13);
+  --nex-theme-shadow: 0 10px 28px rgba(102, 22, 54, 0.08);
+}
+
+body.light-theme-lavender-mist {
+  color-scheme: light;
+  --nex-theme-bg-app: #f5f2fc;
+  --nex-theme-surface: #ffffff;
+  --nex-theme-surface-2: #e8e1f7;
+  --nex-theme-card: #ffffff;
+  --nex-theme-header: #fbf9ff;
+  --nex-theme-nav: #fbf9ff;
+  --nex-theme-input: #efe9fa;
+  --nex-theme-border: rgba(91, 52, 176, 0.14);
+  --nex-theme-text: #1b142e;
+  --nex-theme-text-muted: #483b66;
+  --nex-theme-accent: #5b34b0;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #ffffff;
+  --nex-theme-bubble-sent: #5b34b0;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(91, 52, 176, 0.06);
+  --nex-theme-active: rgba(91, 52, 176, 0.13);
+  --nex-theme-shadow: 0 10px 28px rgba(64, 34, 128, 0.08);
+}
+
+body.light-theme-champagne-sand {
+  color-scheme: light;
+  --nex-theme-bg-app: #f9f3ea;
+  --nex-theme-surface: #fffdf9;
+  --nex-theme-surface-2: #eee1cf;
+  --nex-theme-card: #fffdf9;
+  --nex-theme-header: #fdfaf4;
+  --nex-theme-nav: #fdfaf4;
+  --nex-theme-input: #f2e8da;
+  --nex-theme-border: rgba(120, 68, 30, 0.14);
+  --nex-theme-text: #241910;
+  --nex-theme-text-muted: #564232;
+  --nex-theme-accent: #8c471c;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #fffdf9;
+  --nex-theme-bubble-sent: #8c471c;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(140, 71, 28, 0.06);
+  --nex-theme-active: rgba(140, 71, 28, 0.13);
+  --nex-theme-shadow: 0 10px 28px rgba(84, 48, 22, 0.08);
+}
+
+body.light-theme-sage-paper {
+  color-scheme: light;
+  --nex-theme-bg-app: #f2f6f2;
+  --nex-theme-surface: #fcfefc;
+  --nex-theme-surface-2: #e1ebe2;
+  --nex-theme-card: #fcfefc;
+  --nex-theme-header: #f8fbf8;
+  --nex-theme-nav: #f8fbf8;
+  --nex-theme-input: #e9f1ea;
+  --nex-theme-border: rgba(43, 100, 65, 0.14);
+  --nex-theme-text: #131f16;
+  --nex-theme-text-muted: #394e3e;
+  --nex-theme-accent: #2b6441;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #fcfefc;
+  --nex-theme-bubble-sent: #2b6441;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(43, 100, 65, 0.06);
+  --nex-theme-active: rgba(43, 100, 65, 0.13);
+  --nex-theme-shadow: 0 10px 28px rgba(26, 62, 38, 0.08);
+}
+
+body.light-theme-porcelain {
+  color-scheme: light;
+  --nex-theme-bg-app: #f3f5fa;
+  --nex-theme-surface: #ffffff;
+  --nex-theme-surface-2: #e4e9f5;
+  --nex-theme-card: #ffffff;
+  --nex-theme-header: #fafbfe;
+  --nex-theme-nav: #fafbfe;
+  --nex-theme-input: #eaeef7;
+  --nex-theme-border: rgba(29, 78, 216, 0.13);
+  --nex-theme-text: #111827;
+  --nex-theme-text-muted: #3f485e;
+  --nex-theme-accent: #1d4ed8;
+  --nex-theme-accent-fg: #ffffff;
+  --nex-theme-bubble-recv: #ffffff;
+  --nex-theme-bubble-sent: #1d4ed8;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(29, 78, 216, 0.06);
+  --nex-theme-active: rgba(29, 78, 216, 0.13);
+  --nex-theme-shadow: 0 10px 28px rgba(17, 24, 39, 0.08);
+}
+
+/* Sync global design tokens inside ALL light modes */
+body.light-mode,
+body.light-theme,
+body[class*="light-theme-"] {
+  --bg-app: var(--nex-theme-bg-app);
+  --bg-surface: var(--nex-theme-surface);
+  --bg-sidebar: var(--nex-theme-surface);
+  --bg-header: var(--nex-theme-header);
+  --bg-card: var(--nex-theme-card);
+  --bg-input: var(--nex-theme-input);
+  --bg-hover: var(--nex-theme-hover);
+  --bg-navy: var(--nex-theme-bg-app);
+  --text-primary: var(--nex-theme-text);
+  --text-secondary: var(--nex-theme-text-muted);
+  --text-muted: var(--nex-theme-text-muted);
+  --border-color: var(--nex-theme-border);
+  --border-subtle: var(--nex-theme-border);
+  --accent: var(--nex-theme-accent);
+  --accent-primary: var(--nex-theme-accent);
+  --primary: var(--nex-theme-accent);
+  --tg-bg: var(--nex-theme-bg-app);
+  --tg-surface: var(--nex-theme-surface);
+  --tg-surface-hover: var(--nex-theme-surface-2);
+  --tg-text: var(--nex-theme-text);
+  --tg-text-muted: var(--nex-theme-text-muted);
+  --tg-border: var(--nex-theme-border);
+  --tg-accent: var(--nex-theme-accent);
+  --glass-surface: rgba(255, 255, 255, 0.92);
+}
+
+/* ============================================================================
+   10 DARK MODE THEME PALETTES (WCAG AA >= 4.5:1 Verified)
+   ============================================================================ */
+
+body.dark-theme-obsidian {
+  color-scheme: dark;
+  --nex-theme-bg-app: #0b0d14;
+  --nex-theme-surface: #121724;
+  --nex-theme-surface-2: #1c2436;
+  --nex-theme-card: #151b2a;
+  --nex-theme-header: #0f1420;
+  --nex-theme-nav: #0f1420;
+  --nex-theme-input: #1e273a;
+  --nex-theme-border: rgba(148, 163, 184, 0.18);
+  --nex-theme-text: #f1f5f9;
+  --nex-theme-text-muted: #a1afc4;
+  --nex-theme-accent: #10b981;
+  --nex-theme-accent-fg: #042419;
+  --nex-theme-bubble-recv: #1c2434;
+  --nex-theme-bubble-sent: #065f46;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(255, 255, 255, 0.06);
+  --nex-theme-active: rgba(16, 185, 129, 0.18);
+  --nex-theme-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+}
+
+body.dark-theme-midnight-navy {
+  color-scheme: dark;
+  --nex-theme-bg-app: #081022;
+  --nex-theme-surface: #0f1a33;
+  --nex-theme-surface-2: #182647;
+  --nex-theme-card: #121f3b;
+  --nex-theme-header: #0c152b;
+  --nex-theme-nav: #0c152b;
+  --nex-theme-input: #1a2a4f;
+  --nex-theme-border: rgba(96, 165, 250, 0.22);
+  --nex-theme-text: #eef4ff;
+  --nex-theme-text-muted: #9eb4d6;
+  --nex-theme-accent: #38bdf8;
+  --nex-theme-accent-fg: #051c2e;
+  --nex-theme-bubble-recv: #172544;
+  --nex-theme-bubble-sent: #1d4ed8;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(56, 189, 248, 0.08);
+  --nex-theme-active: rgba(56, 189, 248, 0.18);
+  --nex-theme-shadow: 0 14px 36px rgba(2, 8, 23, 0.52);
+}
+
+body.dark-theme-oled-black {
+  color-scheme: dark;
+  --nex-theme-bg-app: #000000;
+  --nex-theme-surface: #09090c;
+  --nex-theme-surface-2: #14141b;
+  --nex-theme-card: #0c0c10;
+  --nex-theme-header: #040406;
+  --nex-theme-nav: #040406;
+  --nex-theme-input: #17171f;
+  --nex-theme-border: rgba(255, 255, 255, 0.14);
+  --nex-theme-text: #f8fafc;
+  --nex-theme-text-muted: #a1a1aa;
+  --nex-theme-accent: #22c55e;
+  --nex-theme-accent-fg: #04220f;
+  --nex-theme-bubble-recv: #15151c;
+  --nex-theme-bubble-sent: #046c4e;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(255, 255, 255, 0.07);
+  --nex-theme-active: rgba(34, 197, 94, 0.18);
+  --nex-theme-shadow: 0 14px 34px rgba(0, 0, 0, 0.7);
+}
+
+body.dark-theme-emerald-nocturne {
+  color-scheme: dark;
+  --nex-theme-bg-app: #061310;
+  --nex-theme-surface: #0b1e19;
+  --nex-theme-surface-2: #132e27;
+  --nex-theme-card: #0e241e;
+  --nex-theme-header: #081814;
+  --nex-theme-nav: #081814;
+  --nex-theme-input: #16342c;
+  --nex-theme-border: rgba(52, 211, 153, 0.2);
+  --nex-theme-text: #ecfdf5;
+  --nex-theme-text-muted: #93c0af;
+  --nex-theme-accent: #34d399;
+  --nex-theme-accent-fg: #04261a;
+  --nex-theme-bubble-recv: #122b24;
+  --nex-theme-bubble-sent: #047857;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(52, 211, 153, 0.08);
+  --nex-theme-active: rgba(52, 211, 153, 0.18);
+  --nex-theme-shadow: 0 14px 36px rgba(2, 16, 12, 0.52);
+}
+
+body.dark-theme-graphite-slate {
+  color-scheme: dark;
+  --nex-theme-bg-app: #12161f;
+  --nex-theme-surface: #191f2c;
+  --nex-theme-surface-2: #242d3f;
+  --nex-theme-card: #1d2433;
+  --nex-theme-header: #151b26;
+  --nex-theme-nav: #151b26;
+  --nex-theme-input: #273144;
+  --nex-theme-border: rgba(148, 163, 184, 0.22);
+  --nex-theme-text: #f3f6fb;
+  --nex-theme-text-muted: #a6b2c6;
+  --nex-theme-accent: #60a5fa;
+  --nex-theme-accent-fg: #061b36;
+  --nex-theme-bubble-recv: #232c3d;
+  --nex-theme-bubble-sent: #1e40af;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(96, 165, 250, 0.08);
+  --nex-theme-active: rgba(96, 165, 250, 0.18);
+  --nex-theme-shadow: 0 14px 34px rgba(0, 0, 0, 0.42);
+}
+
+body.dark-theme-deep-amethyst {
+  color-scheme: dark;
+  --nex-theme-bg-app: #0f091b;
+  --nex-theme-surface: #171029;
+  --nex-theme-surface-2: #23183d;
+  --nex-theme-card: #1b1230;
+  --nex-theme-header: #130c22;
+  --nex-theme-nav: #130c22;
+  --nex-theme-input: #271b45;
+  --nex-theme-border: rgba(167, 139, 250, 0.22);
+  --nex-theme-text: #f5f3ff;
+  --nex-theme-text-muted: #b5a7d8;
+  --nex-theme-accent: #a78bfa;
+  --nex-theme-accent-fg: #1b0b38;
+  --nex-theme-bubble-recv: #22173c;
+  --nex-theme-bubble-sent: #5b21b6;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(167, 139, 250, 0.08);
+  --nex-theme-active: rgba(167, 139, 250, 0.18);
+  --nex-theme-shadow: 0 14px 36px rgba(8, 3, 20, 0.55);
+}
+
+body.dark-theme-crimson-carbon {
+  color-scheme: dark;
+  --nex-theme-bg-app: #13090d;
+  --nex-theme-surface: #1d0f15;
+  --nex-theme-surface-2: #2c1720;
+  --nex-theme-card: #221219;
+  --nex-theme-header: #170b10;
+  --nex-theme-nav: #170b10;
+  --nex-theme-input: #311a24;
+  --nex-theme-border: rgba(251, 113, 133, 0.22);
+  --nex-theme-text: #fff1f3;
+  --nex-theme-text-muted: #cfa2ab;
+  --nex-theme-accent: #fb7185;
+  --nex-theme-accent-fg: #330710;
+  --nex-theme-bubble-recv: #29161e;
+  --nex-theme-bubble-sent: #9f1239;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(251, 113, 133, 0.08);
+  --nex-theme-active: rgba(251, 113, 133, 0.18);
+  --nex-theme-shadow: 0 14px 36px rgba(15, 4, 8, 0.55);
+}
+
+body.dark-theme-nordic-forest {
+  color-scheme: dark;
+  --nex-theme-bg-app: #091410;
+  --nex-theme-surface: #10201a;
+  --nex-theme-surface-2: #193027;
+  --nex-theme-card: #13251e;
+  --nex-theme-header: #0c1a15;
+  --nex-theme-nav: #0c1a15;
+  --nex-theme-input: #1c362c;
+  --nex-theme-border: rgba(45, 212, 191, 0.2);
+  --nex-theme-text: #eefaf6;
+  --nex-theme-text-muted: #98bfb2;
+  --nex-theme-accent: #2dd4bf;
+  --nex-theme-accent-fg: #042521;
+  --nex-theme-bubble-recv: #172c24;
+  --nex-theme-bubble-sent: #0f766e;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(45, 212, 191, 0.08);
+  --nex-theme-active: rgba(45, 212, 191, 0.18);
+  --nex-theme-shadow: 0 14px 34px rgba(3, 14, 10, 0.5);
+}
+
+body.dark-theme-cyber-teal {
+  color-scheme: dark;
+  --nex-theme-bg-app: #041316;
+  --nex-theme-surface: #091e23;
+  --nex-theme-surface-2: #102e35;
+  --nex-theme-card: #0c242a;
+  --nex-theme-header: #06181c;
+  --nex-theme-nav: #06181c;
+  --nex-theme-input: #13353d;
+  --nex-theme-border: rgba(34, 211, 238, 0.22);
+  --nex-theme-text: #ecfeff;
+  --nex-theme-text-muted: #92c2cb;
+  --nex-theme-accent: #22d3ee;
+  --nex-theme-accent-fg: #032227;
+  --nex-theme-bubble-recv: #0f2b32;
+  --nex-theme-bubble-sent: #0e7490;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(34, 211, 238, 0.08);
+  --nex-theme-active: rgba(34, 211, 238, 0.18);
+  --nex-theme-shadow: 0 14px 36px rgba(1, 14, 18, 0.56);
+}
+
+body.dark-theme-solar-bronze {
+  color-scheme: dark;
+  --nex-theme-bg-app: #140e08;
+  --nex-theme-surface: #1f160d;
+  --nex-theme-surface-2: #2e2114;
+  --nex-theme-card: #24190f;
+  --nex-theme-header: #19110a;
+  --nex-theme-nav: #19110a;
+  --nex-theme-input: #342617;
+  --nex-theme-border: rgba(245, 158, 11, 0.22);
+  --nex-theme-text: #fffbeb;
+  --nex-theme-text-muted: #c9b292;
+  --nex-theme-accent: #f59e0b;
+  --nex-theme-accent-fg: #2b1702;
+  --nex-theme-bubble-recv: #2a1e13;
+  --nex-theme-bubble-sent: #92400e;
+  --nex-theme-bubble-sent-text: #ffffff;
+  --nex-theme-hover: rgba(245, 158, 11, 0.08);
+  --nex-theme-active: rgba(245, 158, 11, 0.18);
+  --nex-theme-shadow: 0 14px 36px rgba(14, 8, 2, 0.56);
+}
+
+body[class*="dark-theme-"] {
+  --bg-app: var(--nex-theme-bg-app);
+  --bg-surface: var(--nex-theme-surface);
+  --bg-sidebar: var(--nex-theme-surface);
+  --bg-header: var(--nex-theme-header);
+  --bg-card: var(--nex-theme-card);
+  --bg-input: var(--nex-theme-input);
+  --bg-hover: var(--nex-theme-hover);
+  --bg-navy: var(--nex-theme-bg-app);
+  --text-primary: var(--nex-theme-text);
+  --text-secondary: var(--nex-theme-text-muted);
+  --text-muted: var(--nex-theme-text-muted);
+  --border-color: var(--nex-theme-border);
+  --border-subtle: var(--nex-theme-border);
+  --accent: var(--nex-theme-accent);
+  --accent-primary: var(--nex-theme-accent);
+  --primary: var(--nex-theme-accent);
+  --tg-bg: var(--nex-theme-bg-app);
+  --tg-surface: var(--nex-theme-surface);
+  --tg-surface-hover: var(--nex-theme-surface-2);
+  --tg-text: var(--nex-theme-text);
+  --tg-text-muted: var(--nex-theme-text-muted);
+  --tg-border: var(--nex-theme-border);
+  --tg-accent: var(--nex-theme-accent);
+}
+
+/* ============================================================================
+   SHARED THEME TOKEN APPLICATION ACROSS ALL ROOT SHELLS & VIEWS
+   Applies cleanly to BOTH 10 Light themes AND 10 Dark themes!
+   Note: Never alters display/visibility so route switching & modals stay intact.
+   ============================================================================ */
+
+html body.light-mode,
+html body.light-theme,
+html body[class*="light-theme-"],
+html body[class*="dark-theme-"] {
+  background-color: var(--nex-theme-bg-app) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .app,
+html body.light-theme .app,
+html body[class*="light-theme-"] .app,
+html body[class*="dark-theme-"] .app,
+html body.light-mode #root,
+html body.light-theme #root,
+html body[class*="light-theme-"] #root,
+html body[class*="dark-theme-"] #root,
+html body.light-mode .chat-main,
+html body.light-theme .chat-main,
+html body[class*="light-theme-"] .chat-main,
+html body[class*="dark-theme-"] .chat-main,
+html body.light-mode .main-content,
+html body.light-theme .main-content,
+html body[class*="light-theme-"] .main-content,
+html body[class*="dark-theme-"] .main-content,
+html body.light-mode .chats-section,
+html body.light-theme .chats-section,
+html body[class*="light-theme-"] .chats-section,
+html body[class*="dark-theme-"] .chats-section {
+  background-color: var(--nex-theme-bg-app) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+/* ── Top Header ── */
+html body.light-mode .top-header,
+html body.light-theme .top-header,
+html body[class*="light-theme-"] .top-header,
+html body[class*="dark-theme-"] .top-header {
+  background: var(--nex-theme-header) !important;
+  background-color: var(--nex-theme-header) !important;
+  color: var(--nex-theme-text) !important;
+  border-bottom: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode .top-header .nex-brand-title,
+html body.light-theme .top-header .nex-brand-title,
+html body.light-mode .top-header .nex-text,
+html body.light-theme .top-header .nex-text,
+html body.light-mode .top-header h1,
+html body.light-theme .top-header h1,
+html body[class*="dark-theme-"] .top-header .nex-brand-title,
+html body[class*="dark-theme-"] .top-header .nex-text {
+  color: var(--nex-theme-text) !important;
+  -webkit-text-fill-color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .top-header .brand-subtitle,
+html body.light-theme .top-header .brand-subtitle,
+html body[class*="dark-theme-"] .top-header .brand-subtitle {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode .top-header .header-icon-btn,
+html body.light-theme .top-header .header-icon-btn,
+html body.light-mode .top-header .mobile-action-btn,
+html body.light-theme .top-header .mobile-action-btn,
+html body[class*="dark-theme-"] .top-header .header-icon-btn,
+html body[class*="dark-theme-"] .top-header .mobile-action-btn {
+  background: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text) !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode .top-header .token-display,
+html body.light-theme .top-header .token-display,
+html body.light-mode .top-header .user-badge,
+html body.light-theme .top-header .user-badge {
+  background: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+/* ── Bottom Navigation & Desktop Sidebar Nav ── */
+html body.light-mode .bottom-nav,
+html body.light-theme .bottom-nav,
+html body[class*="light-theme-"] .bottom-nav,
+html body[class*="dark-theme-"] .bottom-nav,
+html body.light-mode .desktop-nav,
+html body.light-theme .desktop-nav,
+html body[class*="light-theme-"] .desktop-nav,
+html body[class*="dark-theme-"] .desktop-nav,
+html body.light-mode .desktop-only-nav,
+html body.light-theme .desktop-only-nav,
+html body[class*="dark-theme-"] .desktop-only-nav {
+  background: var(--nex-theme-nav) !important;
+  background-color: var(--nex-theme-nav) !important;
+  color: var(--nex-theme-text) !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode .bottom-nav .nav-item,
+html body.light-theme .bottom-nav .nav-item,
+html body.light-mode .desktop-nav .nav-item,
+html body.light-theme .desktop-nav .nav-item,
+html body[class*="dark-theme-"] .bottom-nav .nav-item,
+html body[class*="dark-theme-"] .desktop-nav .nav-item {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode .bottom-nav .nav-item svg,
+html body.light-theme .bottom-nav .nav-item svg,
+html body.light-mode .desktop-nav .nav-item svg,
+html body.light-theme .desktop-nav .nav-item svg {
+  color: inherit !important;
+  stroke: currentColor;
+}
+
+html body.light-mode .bottom-nav .nav-item.active,
+html body.light-theme .bottom-nav .nav-item.active,
+html body.light-mode .desktop-nav .nav-item.active,
+html body.light-theme .desktop-nav .nav-item.active,
+html body[class*="dark-theme-"] .bottom-nav .nav-item.active,
+html body[class*="dark-theme-"] .desktop-nav .nav-item.active {
+  color: var(--nex-theme-accent) !important;
+  background: var(--nex-theme-active) !important;
+}
+
+html body.light-mode .bottom-nav .nav-item.active .nav-icon,
+html body.light-theme .bottom-nav .nav-item.active .nav-icon,
+html body[class*="dark-theme-"] .bottom-nav .nav-item.active .nav-icon {
+  background: var(--nex-theme-active) !important;
+  color: var(--nex-theme-accent) !important;
+}
+
+/* ── Chat List View, Search Pill, Filter Tabs, Chat Items ── */
+html body.light-mode #chatListView,
+html body.light-theme #chatListView,
+html body[class*="light-theme-"] #chatListView,
+html body[class*="dark-theme-"] #chatListView,
+html body.light-mode .chat-list-view,
+html body.light-theme .chat-list-view,
+html body[class*="dark-theme-"] .chat-list-view {
+  background-color: var(--nex-theme-surface) !important;
+  color: var(--nex-theme-text) !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode #chatSearchContainer,
+html body.light-theme #chatSearchContainer,
+html body[class*="dark-theme-"] #chatSearchContainer,
+html body.light-mode .chat-search-container,
+html body.light-theme .chat-search-container,
+html body[class*="dark-theme-"] .chat-search-container,
+html body.light-mode #chatFilterTabs,
+html body.light-theme #chatFilterTabs,
+html body[class*="dark-theme-"] #chatFilterTabs,
+html body.light-mode .chat-filter-tabs,
+html body.light-theme .chat-filter-tabs,
+html body[class*="dark-theme-"] .chat-filter-tabs {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+/* When Chat List does NOT have glass wallpaper (or in Classic mode), keep header search strip crisp solid surface */
+html body.light-mode[data-chatlist-template="classic"] #chatSearchContainer,
+html body.light-mode[data-chatlist-template="classic"] #chatFilterTabs,
+html body.light-mode #chatListView:not(.has-chatlist-wallpaper) #chatSearchContainer,
+html body.light-mode #chatListView:not(.has-chatlist-wallpaper) #chatFilterTabs {
+  background: var(--nex-theme-surface) !important;
+  background-color: var(--nex-theme-surface) !important;
+}
+
+html body.light-mode .chat-search-pill-wrapper,
+html body.light-theme .chat-search-pill-wrapper,
+html body[class*="dark-theme-"] .chat-search-pill-wrapper {
+  background: var(--nex-theme-input) !important;
+  background-color: var(--nex-theme-input) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode .chat-search-pill-wrapper svg,
+html body.light-theme .chat-search-pill-wrapper svg,
+html body.light-mode #searchInput::placeholder,
+html body.light-theme #searchInput::placeholder {
+  color: var(--nex-theme-text-muted) !important;
+  opacity: 1 !important;
+}
+
+html body.light-mode #searchInput,
+html body.light-theme #searchInput,
+html body[class*="dark-theme-"] #searchInput {
+  color: var(--nex-theme-text) !important;
+  background: transparent !important;
+}
+
+html body.light-mode #chatSearchAlertsBtn,
+html body.light-theme #chatSearchAlertsBtn,
+html body.light-mode #chatListCustomizeBtn,
+html body.light-theme #chatListCustomizeBtn,
+html body.light-mode #chatListTemplateBtn,
+html body.light-theme #chatListTemplateBtn {
+  background: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode #chatFilterTabs .filter-tab,
+html body.light-theme #chatFilterTabs .filter-tab,
+html body[class*="dark-theme-"] #chatFilterTabs .filter-tab {
+  background: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text-muted) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode #chatFilterTabs .filter-tab.active,
+html body.light-theme #chatFilterTabs .filter-tab.active,
+html body[class*="dark-theme-"] #chatFilterTabs .filter-tab.active {
+  background: var(--nex-theme-accent) !important;
+  color: var(--nex-theme-accent-fg) !important;
+  border-color: var(--nex-theme-accent) !important;
+  font-weight: 700 !important;
+}
+
+html body.light-mode #contactList,
+html body.light-theme #contactList,
+html body[class*="dark-theme-"] #contactList,
+html body.light-mode #contactList .chat-list-items,
+html body.light-theme #contactList .chat-list-items {
+  background: transparent !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #contactList .chat-item,
+html body.light-theme #contactList .chat-item,
+html body.light-mode #contactList .chat-list-item,
+html body.light-theme #contactList .chat-list-item,
+html body[class*="dark-theme-"] #contactList .chat-item,
+html body[class*="dark-theme-"] #contactList .chat-list-item {
+  background-color: var(--nex-theme-surface) !important;
+  color: var(--nex-theme-text) !important;
+  border-bottom-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode #contactList .chat-item:hover,
+html body.light-theme #contactList .chat-item:hover,
+html body.light-mode #contactList .chat-list-item:hover,
+html body.light-theme #contactList .chat-list-item:hover,
+html body[class*="dark-theme-"] #contactList .chat-item:hover,
+html body[class*="dark-theme-"] #contactList .chat-list-item:hover {
+  background-color: var(--nex-theme-hover) !important;
+}
+
+html body.light-mode #contactList .chat-item.active,
+html body.light-theme #contactList .chat-item.active,
+html body.light-mode #contactList .chat-list-item.active,
+html body.light-theme #contactList .chat-list-item.active,
+html body[class*="dark-theme-"] #contactList .chat-item.active,
+html body[class*="dark-theme-"] #contactList .chat-list-item.active {
+  background-color: var(--nex-theme-active) !important;
+}
+
+html body.light-mode #contactList .chat-item .chat-name,
+html body.light-theme #contactList .chat-item .chat-name,
+html body.light-mode #contactList .chat-list-item .chat-name,
+html body.light-theme #contactList .chat-list-item .chat-name,
+html body[class*="dark-theme-"] #contactList .chat-item .chat-name,
+html body[class*="dark-theme-"] #contactList .chat-list-item .chat-name {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #contactList .chat-item .chat-preview,
+html body.light-theme #contactList .chat-item .chat-preview,
+html body.light-mode #contactList .chat-list-item .chat-preview,
+html body.light-theme #contactList .chat-list-item .chat-preview,
+html body.light-mode #contactList .chat-item .chat-item-time,
+html body.light-theme #contactList .chat-item .chat-item-time,
+html body.light-mode #contactList .chat-list-item .chat-item-time,
+html body.light-theme #contactList .chat-list-item .chat-item-time,
+html body.light-mode #contactList .chat-item .chat-time,
+html body.light-theme #contactList .chat-item .chat-time,
+html body[class*="dark-theme-"] #contactList .chat-item .chat-preview,
+html body[class*="dark-theme-"] #contactList .chat-list-item .chat-preview,
+html body[class*="dark-theme-"] #contactList .chat-item .chat-item-time,
+html body[class*="dark-theme-"] #contactList .chat-list-item .chat-item-time {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode .unread-badge,
+html body.light-theme .unread-badge,
+html body[class*="dark-theme-"] .unread-badge {
+  background: var(--nex-theme-accent) !important;
+  background-color: var(--nex-theme-accent) !important;
+  color: var(--nex-theme-accent-fg) !important;
+  border-color: var(--nex-theme-surface) !important;
+}
+
+/* ── Desktop Welcome Panel ── */
+html body.light-mode #chatWelcomePanel,
+html body.light-theme #chatWelcomePanel,
+html body[class*="light-theme-"] #chatWelcomePanel,
+html body[class*="dark-theme-"] #chatWelcomePanel {
+  background: var(--nex-theme-bg-app) !important;
+  background-color: var(--nex-theme-bg-app) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #chatWelcomePanel h1,
+html body.light-mode #chatWelcomePanel h2,
+html body.light-mode #chatWelcomePanel h3,
+html body.light-theme #chatWelcomePanel h1,
+html body.light-theme #chatWelcomePanel h2,
+html body.light-theme #chatWelcomePanel h3 {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #chatWelcomePanel p,
+html body.light-theme #chatWelcomePanel p,
+html body.light-mode #chatWelcomePanel span,
+html body.light-theme #chatWelcomePanel span {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode #chatWelcomePanel .welcome-feature-card,
+html body.light-theme #chatWelcomePanel .welcome-feature-card,
+html body.light-mode #chatWelcomePanel .welcome-badge,
+html body.light-theme #chatWelcomePanel .welcome-badge,
+html body[class*="dark-theme-"] #chatWelcomePanel .welcome-feature-card {
+  background: var(--nex-theme-card) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+/* ── Chat Detail View, Header, Messages Area, Bubbles & Composer ── */
+html body.light-mode #chatDetailView:not(.has-custom-wallpaper),
+html body.light-theme #chatDetailView:not(.has-custom-wallpaper),
+html body[class*="light-theme-"] #chatDetailView:not(.has-custom-wallpaper),
+html body[class*="dark-theme-"] #chatDetailView:not(.has-custom-wallpaper),
+html body.light-mode .chat-detail-view:not(.has-custom-wallpaper),
+html body.light-theme .chat-detail-view:not(.has-custom-wallpaper),
+html body[class*="dark-theme-"] .chat-detail-view:not(.has-custom-wallpaper),
+html body.light-mode #messages-area:not(.has-custom-wallpaper),
+html body.light-theme #messages-area:not(.has-custom-wallpaper),
+html body[class*="light-theme-"] #messages-area:not(.has-custom-wallpaper),
+html body[class*="dark-theme-"] #messages-area:not(.has-custom-wallpaper),
+html body.light-mode .messages-area:not(.has-custom-wallpaper),
+html body.light-theme .messages-area:not(.has-custom-wallpaper),
+html body[class*="dark-theme-"] .messages-area:not(.has-custom-wallpaper) {
+  background: var(--nex-theme-bg-app) !important;
+  background-color: var(--nex-theme-bg-app) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+/* Keep custom chat wallpaper clearly visible under a light translucent scrim */
+html body.light-mode #messages-area.has-custom-wallpaper,
+html body.light-theme #messages-area.has-custom-wallpaper {
+  background-color: rgba(248, 250, 252, 0.25) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .chat-detail-header,
+html body.light-theme .chat-detail-header,
+html body[class*="dark-theme-"] .chat-detail-header,
+html body.light-mode #chatDetailView .chat-header,
+html body.light-theme #chatDetailView .chat-header,
+html body[class*="dark-theme-"] #chatDetailView .chat-header {
+  background: var(--nex-theme-header) !important;
+  background-color: var(--nex-theme-header) !important;
+  color: var(--nex-theme-text) !important;
+  border-bottom: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode .chat-detail-header *,
+html body.light-theme .chat-detail-header *,
+html body.light-mode #chatDetailView .chat-header .chat-user-name,
+html body.light-theme #chatDetailView .chat-header .chat-user-name {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #chatDetailView .chat-header .chat-user-status,
+html body.light-theme #chatDetailView .chat-header .chat-user-status,
+html body.light-mode .chat-detail-header .chat-status-text,
+html body.light-theme .chat-detail-header .chat-status-text {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode .message-bubble.received,
+html body.light-theme .message-bubble.received,
+html body[class*="dark-theme-"] .message-bubble.received,
+html body.light-mode .nex-msg-bubble.received,
+html body.light-theme .nex-msg-bubble.received,
+html body[class*="dark-theme-"] .nex-msg-bubble.received {
+  background: var(--nex-theme-bubble-recv) !important;
+  background-color: var(--nex-theme-bubble-recv) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
+}
+
+html body.light-mode .message-bubble.received .message-text,
+html body.light-theme .message-bubble.received .message-text,
+html body.light-mode .nex-msg-bubble.received .nex-msg-text,
+html body.light-theme .nex-msg-bubble.received .nex-msg-text,
+html body.light-mode .nex-msg-bubble.received .nex-msg-author,
+html body.light-theme .nex-msg-bubble.received .nex-msg-author,
+html body[class*="dark-theme-"] .message-bubble.received .message-text,
+html body[class*="dark-theme-"] .nex-msg-bubble.received .nex-msg-text {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .message-bubble.received .message-time,
+html body.light-theme .message-bubble.received .message-time,
+html body.light-mode .nex-msg-bubble.received .nex-msg-time,
+html body.light-theme .nex-msg-bubble.received .nex-msg-time,
+html body[class*="dark-theme-"] .message-bubble.received .message-time,
+html body[class*="dark-theme-"] .nex-msg-bubble.received .nex-msg-time {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode .message-bubble.sent,
+html body.light-theme .message-bubble.sent,
+html body[class*="dark-theme-"] .message-bubble.sent,
+html body.light-mode .nex-msg-bubble.sent,
+html body.light-theme .nex-msg-bubble.sent,
+html body[class*="dark-theme-"] .nex-msg-bubble.sent {
+  background: var(--nex-theme-bubble-sent) !important;
+  background-color: var(--nex-theme-bubble-sent) !important;
+  color: var(--nex-theme-bubble-sent-text) !important;
+}
+
+html body.light-mode .message-bubble.sent .message-text,
+html body.light-theme .message-bubble.sent .message-text,
+html body.light-mode .nex-msg-bubble.sent .nex-msg-text,
+html body.light-theme .nex-msg-bubble.sent .nex-msg-text,
+html body.light-mode .message-bubble.sent .message-time,
+html body.light-theme .message-bubble.sent .message-time,
+html body.light-mode .nex-msg-bubble.sent .nex-msg-time,
+html body.light-theme .nex-msg-bubble.sent .nex-msg-time {
+  color: var(--nex-theme-bubble-sent-text) !important;
+}
+
+html body.light-mode .message-date-pill,
+html body.light-theme .message-date-pill,
+html body.light-mode .nex-date-separator-pill,
+html body.light-theme .nex-date-separator-pill,
+html body.light-mode .nex-system-pill,
+html body.light-theme .nex-system-pill,
+html body[class*="dark-theme-"] .nex-date-separator-pill {
+  background: var(--nex-theme-surface-2) !important;
+  background-color: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text-muted) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode .reply-preview,
+html body.light-theme .reply-preview,
+html body.light-mode .reply-quote,
+html body.light-theme .reply-quote {
+  background: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text) !important;
+  border-left-color: var(--nex-theme-accent) !important;
+}
+
+/* ── Composer / Message Input Area ── */
+html body.light-mode #messageInputArea,
+html body.light-theme #messageInputArea,
+html body[class*="light-theme-"] #messageInputArea,
+html body[class*="dark-theme-"] #messageInputArea,
+html body.light-mode .message-input-area,
+html body.light-theme .message-input-area,
+html body[class*="dark-theme-"] .message-input-area,
+html body.light-mode #message-form,
+html body.light-theme #message-form,
+html body[class*="dark-theme-"] #message-form {
+  background: var(--nex-theme-header) !important;
+  background-color: var(--nex-theme-header) !important;
+  color: var(--nex-theme-text) !important;
+  border-top: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode .message-input-wrapper,
+html body.light-theme .message-input-wrapper,
+html body[class*="dark-theme-"] .message-input-wrapper,
+html body.light-mode .chat-input-wrapper,
+html body.light-theme .chat-input-wrapper,
+html body[class*="dark-theme-"] .chat-input-wrapper,
+html body.light-mode #message-input,
+html body.light-theme #message-input,
+html body[class*="dark-theme-"] #message-input {
+  background: var(--nex-theme-input) !important;
+  background-color: var(--nex-theme-input) !important;
+  color: var(--nex-theme-text) !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode #message-input::placeholder,
+html body.light-theme #message-input::placeholder,
+html body[class*="dark-theme-"] #message-input::placeholder {
+  color: var(--nex-theme-text-muted) !important;
+  opacity: 1 !important;
+}
+
+html body.light-mode #messageInputArea button:not(#sendBtn):not(.send-btn),
+html body.light-theme #messageInputArea button:not(#sendBtn):not(.send-btn),
+html body.light-mode #message-form button:not(#sendBtn):not(.send-btn) {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode #sendBtn,
+html body.light-theme #sendBtn,
+html body[class*="dark-theme-"] #sendBtn,
+html body.light-mode .send-btn,
+html body.light-theme .send-btn {
+  background: var(--nex-theme-accent) !important;
+  color: var(--nex-theme-accent-fg) !important;
+}
+
+/* ── Tailwind Hardcoded Dark Utility Overrides in Light Mode ── */
+html body.light-mode .bg-\[\#202c33\],
+html body.light-theme .bg-\[\#202c33\],
+html body.light-mode .bg-\[\#111b21\],
+html body.light-theme .bg-\[\#111b21\],
+html body.light-mode .bg-\[\#0b141a\],
+html body.light-theme .bg-\[\#0b141a\] {
+  background-color: var(--nex-theme-surface) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .bg-\[\#2a3942\],
+html body.light-theme .bg-\[\#2a3942\] {
+  background-color: var(--nex-theme-input) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .text-white:not(.message-bubble.sent):not(.message-bubble.sent *):not(.nex-msg-bubble.sent):not(.nex-msg-bubble.sent *):not(.unread-badge):not(.btn-primary):not(.btn-primary *):not(.tg-squircle-icon):not(.tg-squircle-icon *):not(#sendBtn):not(#sendBtn *):not([data-preserve-white-text]):not([data-preserve-white-text] *):not(.status-viewer-overlay *),
+html body.light-theme .text-white:not(.message-bubble.sent):not(.message-bubble.sent *):not(.nex-msg-bubble.sent):not(.nex-msg-bubble.sent *):not(.unread-badge):not(.btn-primary):not(.btn-primary *):not(.tg-squircle-icon):not(.tg-squircle-icon *):not(#sendBtn):not(#sendBtn *):not([data-preserve-white-text]):not([data-preserve-white-text] *):not(.status-viewer-overlay *) {
+  color: var(--nex-theme-text) !important;
+}
+
+/* ── Updates / Status, Groups, Calls, & Announcements Views ── */
+html body.light-mode #statusContainer,
+html body.light-theme #statusContainer,
+html body[class*="dark-theme-"] #statusContainer,
+html body.light-mode .nex-status-container,
+html body.light-theme .nex-status-container,
+html body.light-mode #groupsContainer,
+html body.light-theme #groupsContainer,
+html body[class*="dark-theme-"] #groupsContainer,
+html body.light-mode .groups-container,
+html body.light-theme .groups-container,
+html body.light-mode #callHistoryContainer,
+html body.light-theme #callHistoryContainer,
+html body[class*="dark-theme-"] #callHistoryContainer,
+html body.light-mode .call-history-container,
+html body.light-theme .call-history-container,
+html body.light-mode #announcementsContainer,
+html body.light-theme #announcementsContainer,
+html body[class*="dark-theme-"] #announcementsContainer,
+html body.light-mode .announcements-container,
+html body.light-theme .announcements-container {
+  background: var(--nex-theme-bg-app) !important;
+  background-color: var(--nex-theme-bg-app) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .updates-top-appbar,
+html body.light-theme .updates-top-appbar,
+html body[class*="dark-theme-"] .updates-top-appbar,
+html body.light-mode .calls-top-bar,
+html body.light-theme .calls-top-bar,
+html body[class*="dark-theme-"] .calls-top-bar,
+html body.light-mode .announcements-top-bar,
+html body.light-theme .announcements-top-bar,
+html body[class*="dark-theme-"] .announcements-top-bar,
+html body.light-mode #groupsContainer .groups-header,
+html body.light-theme #groupsContainer .groups-header {
+  background: var(--nex-theme-header) !important;
+  background-color: var(--nex-theme-header) !important;
+  color: var(--nex-theme-text) !important;
+  border-bottom: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode .updates-top-appbar *,
+html body.light-theme .updates-top-appbar *,
+html body.light-mode .calls-top-bar *,
+html body.light-theme .calls-top-bar *,
+html body.light-mode .announcements-top-bar *,
+html body.light-theme .announcements-top-bar *,
+html body.light-mode #groupsContainer h2,
+html body.light-mode #groupsContainer h3,
+html body.light-mode #statusContainer h2,
+html body.light-mode #statusContainer h3,
+html body.light-mode #callHistoryContainer h2,
+html body.light-mode #callHistoryContainer h3,
+html body.light-mode #announcementsContainer h2,
+html body.light-mode #announcementsContainer h3 {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #statusContainer .story-card,
+html body.light-mode #statusContainer .channel-card,
+html body.light-mode #statusContainer .status-item,
+html body.light-mode #statusContainer .status-update-card,
+html body.light-mode #groupsContainer .group-card,
+html body.light-mode #groupsContainer .chat-list-item,
+html body.light-mode #callHistoryContainer .call-item,
+html body.light-mode #callHistoryContainer .call-history-item,
+html body.light-mode #callHistoryContainer .calls-section-card,
+html body.light-mode #announcementsContainer .announcement-item,
+html body.light-mode #announcementsContainer .announcement-card,
+html body.light-theme #statusContainer .story-card,
+html body.light-theme #statusContainer .channel-card,
+html body.light-theme #groupsContainer .group-card,
+html body.light-theme #callHistoryContainer .call-item,
+html body.light-theme #callHistoryContainer .call-history-item,
+html body.light-theme #announcementsContainer .announcement-item,
+html body.light-theme #announcementsContainer .announcement-card,
+html body[class*="dark-theme-"] #statusContainer .channel-card,
+html body[class*="dark-theme-"] #groupsContainer .group-card,
+html body[class*="dark-theme-"] #callHistoryContainer .call-item,
+html body[class*="dark-theme-"] #announcementsContainer .announcement-item {
+  background: var(--nex-theme-card) !important;
+  background-color: var(--nex-theme-card) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
+}
+
+html body.light-mode #statusContainer p,
+html body.light-mode #statusContainer .channel-followers,
+html body.light-mode #statusContainer .updates-section-subtitle,
+html body.light-mode #callHistoryContainer .call-meta,
+html body.light-mode #callHistoryContainer .call-time,
+html body.light-mode #announcementsContainer .announcement-meta,
+html body.light-mode #announcementsContainer p,
+html body.light-mode #groupsContainer .group-meta {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+/* ── Settings Modal, Sidebar, Tabs, Cards, Selects, Inputs ── */
+html body.light-mode #settingsModal,
+html body.light-theme #settingsModal,
+html body[class*="dark-theme-"] #settingsModal {
+  background: rgba(15, 23, 42, 0.42) !important;
+}
+
+html body[class*="dark-theme-"] #settingsModal {
+  background: rgba(0, 0, 0, 0.72) !important;
+}
+
+html body.light-mode #settingsModal .modal-content,
+html body.light-theme #settingsModal .modal-content,
+html body[class*="dark-theme-"] #settingsModal .modal-content,
+html body.light-mode #settingsModal .settings-content,
+html body.light-theme #settingsModal .settings-content,
+html body[class*="dark-theme-"] #settingsModal .settings-content,
+html body.light-mode #settingsModal .settings-modal-content,
+html body.light-theme #settingsModal .settings-modal-content,
+html body[class*="dark-theme-"] #settingsModal .settings-modal-content,
+html body.light-mode .settings-content,
+html body.light-theme .settings-content,
+html body.light-mode .settings-modal-content,
+html body.light-theme .settings-modal-content {
+  background: var(--nex-theme-bg-app) !important;
+  background-color: var(--nex-theme-bg-app) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode #settingsModal .settings-header,
+html body.light-theme #settingsModal .settings-header,
+html body[class*="dark-theme-"] #settingsModal .settings-header,
+html body.light-mode #settingsModal .settings-footer,
+html body.light-theme #settingsModal .settings-footer,
+html body[class*="dark-theme-"] #settingsModal .settings-footer {
+  background: var(--nex-theme-header) !important;
+  background-color: var(--nex-theme-header) !important;
+  color: var(--nex-theme-text) !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode #settingsModal .settings-sidebar,
+html body.light-theme #settingsModal .settings-sidebar,
+html body[class*="dark-theme-"] #settingsModal .settings-sidebar,
+html body.light-mode .settings-sidebar,
+html body.light-theme .settings-sidebar {
+  background: var(--nex-theme-surface) !important;
+  background-color: var(--nex-theme-surface) !important;
+  color: var(--nex-theme-text) !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode #settingsModal .settings-body,
+html body.light-theme #settingsModal .settings-body,
+html body[class*="dark-theme-"] #settingsModal .settings-body,
+html body.light-mode #settingsModal .settings-content-area,
+html body.light-theme #settingsModal .settings-content-area,
+html body[class*="dark-theme-"] #settingsModal .settings-content-area,
+html body.light-mode #settingsModal .settings-main,
+html body.light-theme #settingsModal .settings-main {
+  background: var(--nex-theme-bg-app) !important;
+  background-color: var(--nex-theme-bg-app) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+@media (max-width: 768px) {
+  html body.light-mode #settingsModal .settings-sidebar,
+  html body.light-theme #settingsModal .settings-sidebar,
+  html body[class*="dark-theme-"] #settingsModal .settings-sidebar {
+    background: var(--nex-theme-surface) !important;
+    background-color: var(--nex-theme-surface) !important;
+    border-bottom: 1px solid var(--nex-theme-border) !important;
+  }
+}
+
+html body.light-mode #settingsModal .settings-nav-tab,
+html body.light-theme #settingsModal .settings-nav-tab,
+html body[class*="dark-theme-"] #settingsModal .settings-nav-tab,
+html body.light-mode .settings-nav-tab,
+html body.light-theme .settings-nav-tab {
+  background: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text-muted) !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode #settingsModal .settings-nav-tab:hover,
+html body.light-theme #settingsModal .settings-nav-tab:hover,
+html body[class*="dark-theme-"] #settingsModal .settings-nav-tab:hover {
+  background: var(--nex-theme-hover) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #settingsModal .settings-nav-tab.active,
+html body.light-theme #settingsModal .settings-nav-tab.active,
+html body[class*="dark-theme-"] #settingsModal .settings-nav-tab.active,
+html body.light-mode .settings-nav-tab.active,
+html body.light-theme .settings-nav-tab.active {
+  background: var(--nex-theme-accent) !important;
+  color: var(--nex-theme-accent-fg) !important;
+  border-color: var(--nex-theme-accent) !important;
+}
+
+html body.light-mode #settingsModal .settings-card,
+html body.light-theme #settingsModal .settings-card,
+html body[class*="dark-theme-"] #settingsModal .settings-card,
+html body.light-mode .settings-card,
+html body.light-theme .settings-card {
+  background: var(--nex-theme-card) !important;
+  background-color: var(--nex-theme-card) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
+}
+
+html body.light-mode #settingsModal .settings-card h2,
+html body.light-mode #settingsModal .settings-card h3,
+html body.light-mode #settingsModal .settings-card h4,
+html body.light-mode #settingsModal .settings-card label,
+html body.light-mode #settingsModal .settings-card strong,
+html body.light-mode #settingsModal .settings-card .settings-label,
+html body.light-mode #settingsModal #settingsThemeControlCard label,
+html body.light-mode #settingsModal #settingsThemeControlCard span,
+html body.light-mode #settingsModal #tab-cyber-features-matrix,
+html body.light-mode #settingsModal #tab-cyber-features-matrix h3,
+html body.light-mode #settingsModal #tab-cyber-features-matrix h4,
+html body.light-mode #settingsModal #tab-cyber-features-matrix label,
+html body.light-theme #settingsModal .settings-card h2,
+html body.light-theme #settingsModal .settings-card h3,
+html body.light-theme #settingsModal .settings-card h4,
+html body.light-theme #settingsModal .settings-card label,
+html body.light-theme #settingsModal .settings-card strong {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #settingsModal .settings-card p,
+html body.light-mode #settingsModal .settings-card small,
+html body.light-mode #settingsModal .settings-card .settings-desc,
+html body.light-theme #settingsModal .settings-card p,
+html body.light-theme #settingsModal .settings-card small,
+html body.light-theme #settingsModal .settings-card .settings-desc {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode #settingsModal #tab-storage [style*="rgba(0,0,0"],
+html body.light-mode #settingsModal #tab-privacy [style*="rgba(0,0,0"],
+html body.light-mode #settingsModal #tab-devices [style*="rgba(0,0,0"],
+html body.light-mode #settingsModal #tab-cyber-lab [style*="rgba(0,0,0"],
+html body.light-mode #settingsModal #tab-support [style*="rgba(0,0,0"],
+html body.light-theme #settingsModal #tab-storage [style*="rgba(0,0,0"],
+html body.light-theme #settingsModal #tab-privacy [style*="rgba(0,0,0"] {
+  background: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text) !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode .settings-select,
+html body.light-theme .settings-select,
+html body[class*="dark-theme-"] .settings-select,
+html body.light-mode .settings-input,
+html body.light-theme .settings-input,
+html body[class*="dark-theme-"] .settings-input,
+html body.light-mode #settingsSearchInput,
+html body.light-theme #settingsSearchInput,
+html body[class*="dark-theme-"] #settingsSearchInput,
+html body.light-mode #settingsModal select,
+html body.light-mode #settingsModal input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html body.light-theme #settingsModal select,
+html body.light-theme #settingsModal input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+  background: var(--nex-theme-input) !important;
+  background-color: var(--nex-theme-input) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+/* ── Studio Modal, Chat Options Menu, General Modals & Popups ── */
+html body.light-mode #chatListStudioModal .nex-chatlist-studio-sheet,
+html body.light-theme #chatListStudioModal .nex-chatlist-studio-sheet,
+html body[class*="dark-theme-"] #chatListStudioModal .nex-chatlist-studio-sheet {
+  background: var(--nex-theme-surface) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
+}
+
+html body.light-mode #chatListStudioModal h3,
+html body.light-mode #chatListStudioModal label,
+html body.light-mode #chatListStudioModal span,
+html body.light-theme #chatListStudioModal h3,
+html body.light-theme #chatListStudioModal label {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #chatOptionsMenu,
+html body.light-theme #chatOptionsMenu,
+html body[class*="dark-theme-"] #chatOptionsMenu,
+html body.light-mode .chat-options-dropdown,
+html body.light-theme .chat-options-dropdown,
+html body.light-mode #mobileDropdownMenu,
+html body.light-theme #mobileDropdownMenu,
+html body[class*="dark-theme-"] #mobileDropdownMenu,
+html body.light-mode #mobileMoreSheet .more-sheet-content,
+html body.light-theme #mobileMoreSheet .more-sheet-content,
+html body.light-mode #attachmentPopupHub,
+html body.light-theme #attachmentPopupHub,
+html body.light-mode .attach-menu,
+html body.light-theme .attach-menu,
+html body.light-mode .nex-delete-modal-card,
+html body.light-theme .nex-delete-modal-card {
+  background: var(--nex-theme-surface) !important;
+  background-color: var(--nex-theme-surface) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
+}
+
+html body.light-mode #chatOptionsMenu button,
+html body.light-mode #chatOptionsMenu .dropdown-item,
+html body.light-mode #mobileDropdownMenu button,
+html body.light-mode #mobileMoreSheet button,
+html body.light-theme #chatOptionsMenu button,
+html body.light-theme #mobileDropdownMenu button {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #chatOptionsMenu button:hover,
+html body.light-mode #mobileDropdownMenu button:hover {
+  background: var(--nex-theme-hover) !important;
+}
+
+html body.light-mode .modal:not(#statusViewerModal):not(.small-popup) > .modal-content,
+html body.light-theme .modal:not(#statusViewerModal):not(.small-popup) > .modal-content,
+html body[class*="dark-theme-"] .modal:not(#statusViewerModal):not(.small-popup) > .modal-content,
+html body.light-mode .modal-content:not(#statusViewerModal *),
+html body.light-theme .modal-content:not(#statusViewerModal *) {
+  background: var(--nex-theme-surface) !important;
+  background-color: var(--nex-theme-surface) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
+}
+
+html body.light-mode .modal-header,
+html body.light-theme .modal-header,
+html body.light-mode .modal-footer,
+html body.light-theme .modal-footer {
+  background: var(--nex-theme-header) !important;
+  color: var(--nex-theme-text) !important;
+  border-color: var(--nex-theme-border) !important;
+}
+
+html body.light-mode .modal-body,
+html body.light-theme .modal-body {
+  background: transparent !important;
+  color: var(--nex-theme-text) !important;
+}
+
+/* ============================================================================
+   INTERACTIVE THEME GALLERY & TEMPLATE SWITCHER UI CONTROLS
+   ============================================================================ */
+
+.app-theme-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.app-theme-swatch-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--nex-theme-border);
+  background: var(--nex-theme-surface-2);
+  color: var(--nex-theme-text);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.app-theme-swatch-btn:hover {
+  transform: translateY(-1px);
+  border-color: var(--nex-theme-accent);
+}
+
+.app-theme-swatch-btn.is-active {
+  border-color: var(--nex-theme-accent) !important;
+  box-shadow: 0 0 0 2px var(--nex-theme-active) !important;
+  background: var(--nex-theme-active) !important;
+}
+
+.app-theme-swatch-preview {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.app-theme-swatch-dot {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.app-theme-swatch-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.chatlist-template-toggle-group {
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--nex-theme-surface-2);
+  border: 1px solid var(--nex-theme-border);
+  flex-wrap: wrap;
+}
+
+[data-chatlist-template] {
+  padding: 6px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--nex-theme-text-muted);
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+[data-chatlist-template].is-active,
+[data-chatlist-template].active,
+[data-chatlist-template][aria-pressed="true"] {
+  background: var(--nex-theme-accent) !important;
+  color: var(--nex-theme-accent-fg) !important;
+  border-color: var(--nex-theme-accent) !important;
+}
+
+#chatListTemplateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}

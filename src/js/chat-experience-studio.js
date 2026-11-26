@@ -39,6 +39,191 @@ const CHATLIST_BUILT_IN_BACKDROPS = [
   { id: 'crimson-silk', label: 'Crimson Silk', url: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200"><defs><radialGradient id="c1" cx="30%" cy="25%" r="80%"><stop offset="0%" stop-color="#e11d48" stop-opacity="0.44"/><stop offset="100%" stop-color="#0b050d"/></radialGradient></defs><rect width="800" height="1200" fill="#0b050d"/><rect width="800" height="1200" fill="url(#c1)"/></svg>') }
 ];
 
+export const APP_LIGHT_THEMES = [
+  { id: 'light-theme-alabaster', mode: 'light', label: 'Alabaster Crisp', bg: '#f4f6f9', surface: '#ffffff', accent: '#0b6e5b', swatch: 'linear-gradient(135deg, #ffffff 0%, #e7ecf3 100%)' },
+  { id: 'light-theme-cream', mode: 'light', label: 'Warm Cream', bg: '#faf6ee', surface: '#fffdf8', accent: '#8a4b14', swatch: 'linear-gradient(135deg, #fffdf8 0%, #f1e9d8 100%)' },
+  { id: 'light-theme-ivory-linen', mode: 'light', label: 'Ivory Linen', bg: '#f7f4ec', surface: '#fdfbf6', accent: '#3d4e8a', swatch: 'linear-gradient(135deg, #fdfbf6 0%, #ece6d7 100%)' },
+  { id: 'light-theme-mint-breeze', mode: 'light', label: 'Mint Breeze', bg: '#effaf5', surface: '#ffffff', accent: '#0b6d54', swatch: 'linear-gradient(135deg, #effaf5 0%, #dcf2e7 100%)' },
+  { id: 'light-theme-glacier-sky', mode: 'light', label: 'Glacier Sky', bg: '#eff6fc', surface: '#ffffff', accent: '#13589e', swatch: 'linear-gradient(135deg, #eff6fc 0%, #dfecf8 100%)' },
+  { id: 'light-theme-rose-pearl', mode: 'light', label: 'Rose Pearl', bg: '#fdf2f6', surface: '#ffffff', accent: '#9f1f54', swatch: 'linear-gradient(135deg, #fdf2f6 0%, #f7e1ea 100%)' },
+  { id: 'light-theme-lavender-mist', mode: 'light', label: 'Lavender Mist', bg: '#f5f2fc', surface: '#ffffff', accent: '#5b34b0', swatch: 'linear-gradient(135deg, #f5f2fc 0%, #e8e1f7 100%)' },
+  { id: 'light-theme-champagne-sand', mode: 'light', label: 'Champagne Sand', bg: '#f9f3ea', surface: '#fffdf9', accent: '#8c471c', swatch: 'linear-gradient(135deg, #f9f3ea 0%, #eee1cf 100%)' },
+  { id: 'light-theme-sage-paper', mode: 'light', label: 'Sage Paper', bg: '#f2f6f2', surface: '#fcfefc', accent: '#2b6441', swatch: 'linear-gradient(135deg, #f2f6f2 0%, #e1ebe2 100%)' },
+  { id: 'light-theme-porcelain', mode: 'light', label: 'Cool Porcelain', bg: '#f3f5fa', surface: '#ffffff', accent: '#1d4ed8', swatch: 'linear-gradient(135deg, #f3f5fa 0%, #e4e9f5 100%)' }
+];
+
+export const APP_DARK_THEMES = [
+  { id: 'dark-theme-obsidian', mode: 'dark', label: 'Obsidian Emerald', bg: '#0b0d14', surface: '#121724', accent: '#10b981', swatch: 'linear-gradient(135deg, #0b0d14 0%, #1c2436 100%)' },
+  { id: 'dark-theme-midnight-navy', mode: 'dark', label: 'Midnight Navy', bg: '#081022', surface: '#0f1a33', accent: '#38bdf8', swatch: 'linear-gradient(135deg, #081022 0%, #182647 100%)' },
+  { id: 'dark-theme-oled-black', mode: 'dark', label: 'True OLED Black', bg: '#000000', surface: '#09090c', accent: '#22c55e', swatch: 'linear-gradient(135deg, #000000 0%, #14141b 100%)' },
+  { id: 'dark-theme-emerald-nocturne', mode: 'dark', label: 'Emerald Nocturne', bg: '#061310', surface: '#0b1e19', accent: '#34d399', swatch: 'linear-gradient(135deg, #061310 0%, #132e27 100%)' },
+  { id: 'dark-theme-graphite-slate', mode: 'dark', label: 'Graphite Slate', bg: '#12161f', surface: '#191f2c', accent: '#60a5fa', swatch: 'linear-gradient(135deg, #12161f 0%, #242d3f 100%)' },
+  { id: 'dark-theme-deep-amethyst', mode: 'dark', label: 'Deep Amethyst', bg: '#0f091b', surface: '#171029', accent: '#a78bfa', swatch: 'linear-gradient(135deg, #0f091b 0%, #23183d 100%)' },
+  { id: 'dark-theme-crimson-carbon', mode: 'dark', label: 'Crimson Carbon', bg: '#13090d', surface: '#1d0f15', accent: '#fb7185', swatch: 'linear-gradient(135deg, #13090d 0%, #2c1720 100%)' },
+  { id: 'dark-theme-nordic-forest', mode: 'dark', label: 'Nordic Forest', bg: '#091410', surface: '#10201a', accent: '#2dd4bf', swatch: 'linear-gradient(135deg, #091410 0%, #193027 100%)' },
+  { id: 'dark-theme-cyber-teal', mode: 'dark', label: 'Teal Matrix', bg: '#041316', surface: '#091e23', accent: '#22d3ee', swatch: 'linear-gradient(135deg, #041316 0%, #102e35 100%)' },
+  { id: 'dark-theme-solar-bronze', mode: 'dark', label: 'Solar Bronze', bg: '#140e08', surface: '#1f160d', accent: '#f59e0b', swatch: 'linear-gradient(135deg, #140e08 0%, #2e2114 100%)' }
+];
+
+const ALL_APP_THEMES = [...APP_LIGHT_THEMES, ...APP_DARK_THEMES];
+const DEFAULT_LIGHT_VARIANT = 'light-theme-alabaster';
+const DEFAULT_DARK_VARIANT = 'dark-theme-obsidian';
+let _isApplyingThemeVariant = false;
+
+function safeGetStorage(key) {
+  try { return localStorage.getItem(key); } catch (_) { return null; }
+}
+
+function safeSetStorage(key, value) {
+  try { localStorage.setItem(key, value); } catch (_) {}
+}
+
+function resolveAppThemeObject(variantId) {
+  if (variantId === 'light') {
+    const saved = safeGetStorage('nex_light_variant') || DEFAULT_LIGHT_VARIANT;
+    return ALL_APP_THEMES.find((t) => t.id === saved) || APP_LIGHT_THEMES[0];
+  }
+  if (variantId === 'dark') {
+    const saved = safeGetStorage('nex_dark_variant') || DEFAULT_DARK_VARIANT;
+    return ALL_APP_THEMES.find((t) => t.id === saved) || APP_DARK_THEMES[0];
+  }
+  if (typeof variantId === 'string') {
+    const exact = ALL_APP_THEMES.find((t) => t.id === variantId);
+    if (exact) return exact;
+    if (variantId.startsWith('light-')) return APP_LIGHT_THEMES[0];
+    if (variantId.startsWith('dark-')) return APP_DARK_THEMES[0];
+  }
+  let storedSettingsTheme = null;
+  try {
+    const raw = safeGetStorage('nexchat_settings');
+    if (raw) storedSettingsTheme = JSON.parse(raw)?.theme || null;
+  } catch (_) {}
+  const darkPref = safeGetStorage('darkMode');
+  const preferLight = storedSettingsTheme === 'light' || darkPref === 'false' ||
+    (document.body && (document.body.classList.contains('light-mode') || document.body.classList.contains('light-theme')));
+  if (preferLight) {
+    const lightId = safeGetStorage('nex_light_variant') || DEFAULT_LIGHT_VARIANT;
+    return APP_LIGHT_THEMES.find((t) => t.id === lightId) || APP_LIGHT_THEMES[0];
+  }
+  const darkId = safeGetStorage('nex_dark_variant') || safeGetStorage('nex_app_theme_variant') || DEFAULT_DARK_VARIANT;
+  return ALL_APP_THEMES.find((t) => t.id === darkId) || APP_DARK_THEMES[0];
+}
+
+function syncThemeModeControls(mode, themeObj) {
+  const isLight = mode === 'light';
+  const darkCard = document.getElementById('themeCardDark');
+  const lightCard = document.getElementById('themeCardLight');
+  if (darkCard) darkCard.classList.toggle('active', !isLight);
+  if (lightCard) lightCard.classList.toggle('active', isLight);
+
+  const toggleBtn = document.getElementById('darkModeToggle');
+  if (toggleBtn) {
+    const icon = toggleBtn.querySelector('i');
+    if (icon) icon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+  }
+  const quickIcon = document.getElementById('settingsQuickThemeIcon');
+  if (quickIcon) {
+    quickIcon.className = isLight ? 'fas fa-sun' : 'fas fa-moon';
+    quickIcon.style.color = themeObj?.accent || (isLight ? '#f59e0b' : '#38bdf8');
+  }
+  const settingsSwitch = document.getElementById('settingsThemeToggleSwitch');
+  if (settingsSwitch) settingsSwitch.checked = !isLight;
+  const themeLabel = document.getElementById('themeToggleTextLabel');
+  if (themeLabel) themeLabel.textContent = isLight ? `Light: ${themeObj?.label || 'Light'}` : `Dark: ${themeObj?.label || 'Dark'}`;
+  document.querySelectorAll('input[name="theme"]').forEach((radio) => {
+    radio.checked = radio.value === (isLight ? 'light' : 'dark');
+  });
+}
+
+function renderGalleryInto(containerId, list, activeId) {
+  const host = document.getElementById(containerId);
+  if (!host) return;
+  if (!host.dataset.rendered || host.children.length !== list.length) {
+    host.dataset.rendered = 'true';
+    host.innerHTML = '';
+    list.forEach((t) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'app-theme-swatch-btn';
+      btn.dataset.appThemeVariant = t.id;
+      btn.title = t.label;
+      btn.innerHTML = `<span class="app-theme-swatch-preview" style="background:${t.swatch};"><span class="app-theme-swatch-dot" style="background:${t.accent};"></span></span><span class="app-theme-swatch-label">${t.label}</span>`;
+      btn.addEventListener('click', () => {
+        applyAppThemeVariant(t.id);
+        if (typeof window.showNotif === 'function') {
+          window.showNotif(`Theme: ${t.label}`, 'success', 1500);
+        }
+      });
+      host.appendChild(btn);
+    });
+  }
+  host.querySelectorAll('.app-theme-swatch-btn').forEach((btn) => {
+    const isActive = btn.dataset.appThemeVariant === activeId;
+    btn.classList.toggle('is-active', isActive);
+    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+  });
+}
+
+export function renderAppThemeGalleries(activeId) {
+  const active = activeId || document.body?.dataset?.appTheme || safeGetStorage('nex_app_theme_variant') || DEFAULT_DARK_VARIANT;
+  renderGalleryInto('appLightThemeGallery', APP_LIGHT_THEMES, active);
+  renderGalleryInto('appDarkThemeGallery', APP_DARK_THEMES, active);
+  renderGalleryInto('modalAppLightThemeGallery', APP_LIGHT_THEMES, active);
+  renderGalleryInto('modalAppDarkThemeGallery', APP_DARK_THEMES, active);
+}
+
+export function applyAppThemeVariant(variantId, opts = {}) {
+  const chosen = resolveAppThemeObject(variantId);
+  if (_isApplyingThemeVariant) return chosen.id;
+  _isApplyingThemeVariant = true;
+
+  try {
+    const body = document.body;
+    if (body) {
+      ALL_APP_THEMES.forEach((t) => body.classList.remove(t.id));
+      const isLight = chosen.mode === 'light';
+      body.classList.toggle('light-mode', isLight);
+      body.classList.toggle('light-theme', isLight);
+      body.classList.toggle('dark-mode', !isLight);
+      body.classList.toggle('dark-theme', !isLight);
+      body.classList.toggle('oled-mode', chosen.id === 'dark-theme-oled-black');
+      body.classList.add(chosen.id);
+      body.dataset.appTheme = chosen.id;
+      body.dataset.themeMode = chosen.mode;
+    }
+    if (document.documentElement) {
+      document.documentElement.style.colorScheme = chosen.mode;
+      document.documentElement.dataset.appTheme = chosen.id;
+    }
+
+    safeSetStorage(chosen.mode === 'light' ? 'nex_light_variant' : 'nex_dark_variant', chosen.id);
+    safeSetStorage('nex_app_theme_variant', chosen.id);
+    safeSetStorage('darkMode', chosen.mode === 'light' ? 'false' : 'true');
+    try {
+      const parsed = JSON.parse(safeGetStorage('nexchat_settings') || '{}');
+      parsed.theme = chosen.mode;
+      safeSetStorage('nexchat_settings', JSON.stringify(parsed));
+    } catch (_) {}
+
+    if (!opts.fromApplyThemeMode && !opts.skipModeSync && typeof window.applyThemeMode === 'function') {
+      try {
+        window.applyThemeMode(chosen.mode, { fromAppThemeStudio: true });
+      } catch (_) {}
+      // Re-assert classes in case applyThemeMode touched body classes
+      if (body && !body.classList.contains(chosen.id)) {
+        body.classList.add(chosen.id);
+      }
+    }
+
+    syncThemeModeControls(chosen.mode, chosen);
+    renderAppThemeGalleries(chosen.id);
+  } finally {
+    _isApplyingThemeVariant = false;
+  }
+
+  return chosen.id;
+}
+
 const _fastDecodedImages = new Map();
 
 export function preloadImageEager(url) {
@@ -174,20 +359,78 @@ export async function applyChatListWallpaper(wallpaperUrl) {
   }
 }
 
-export function applyChatListTheme(themeId) {
-  const chosen = themeId || localStorage.getItem('nex_chatlist_theme') || 'telegram-glass';
+function syncChatListTemplateUI(template) {
+  const active = template === 'classic' ? 'classic' : 'glass-studio';
+  document.querySelectorAll('[data-chatlist-template]').forEach((btn) => {
+    const isMatch = btn.dataset.chatlistTemplate === active;
+    btn.classList.toggle('is-active', isMatch);
+    btn.classList.toggle('active', isMatch);
+    btn.setAttribute('aria-pressed', isMatch ? 'true' : 'false');
+  });
+  const topBtn = document.getElementById('chatListTemplateBtn');
+  if (topBtn) {
+    topBtn.dataset.currentTemplate = active;
+    topBtn.setAttribute('aria-pressed', active === 'glass-studio' ? 'true' : 'false');
+    topBtn.title = active === 'classic'
+      ? 'Classic List active — click to switch to Glass Studio'
+      : 'Glass Studio active — click to switch to Classic List';
+    const labelSpan = topBtn.querySelector('.chatlist-template-label');
+    if (labelSpan) {
+      labelSpan.textContent = active === 'classic' ? 'Classic' : 'Glass';
+    } else if (!topBtn.dataset.preserveInnerHtml) {
+      topBtn.innerHTML = active === 'classic'
+        ? '<i class="fas fa-list"></i> Classic'
+        : '<i class="fas fa-layer-group"></i> Glass';
+    }
+  }
+}
+
+export function setChatListTemplate(templateName, opts = {}) {
+  const template = templateName === 'classic' ? 'classic' : 'glass-studio';
+  safeSetStorage('nex_chatlist_template', template);
+  if (document.body) {
+    document.body.dataset.chatlistTemplate = template;
+  }
+
+  if (template === 'classic') {
+    const currentTheme = safeGetStorage('nex_chatlist_theme');
+    if (currentTheme && currentTheme !== 'none') {
+      safeSetStorage('nex_chatlist_saved_theme', currentTheme);
+    } else if (!safeGetStorage('nex_chatlist_saved_theme')) {
+      safeSetStorage('nex_chatlist_saved_theme', 'telegram-glass');
+    }
+  } else if (!opts.skipRestore) {
+    const savedTheme = safeGetStorage('nex_chatlist_saved_theme') || safeGetStorage('nex_chatlist_theme');
+    const restoreTheme = (savedTheme && savedTheme !== 'none') ? savedTheme : 'telegram-glass';
+    applyChatListTheme(restoreTheme, { fromTemplateSwitch: true });
+    const savedBg = safeGetStorage('nex_chatlist_bg');
+    const cleared = safeGetStorage('nex_chatlist_bg_cleared') === 'true';
+    if (savedBg) applyChatListWallpaper(savedBg);
+    else if (!cleared) applyChatListWallpaper(DEFAULT_FUTURISTIC_CHATLIST_BG);
+  }
+
+  syncChatListTemplateUI(template);
+  return template;
+}
+
+export function applyChatListTheme(themeId, opts = {}) {
+  const chosen = themeId || safeGetStorage('nex_chatlist_theme') || 'telegram-glass';
   CHATLIST_GLASS_THEMES.forEach((t) => {
     if (t.id !== 'none') document.body.classList.remove(`chatlist-theme-${t.id}`);
   });
   if (chosen && chosen !== 'none') {
     document.body.classList.add(`chatlist-theme-${chosen}`);
+    safeSetStorage('nex_chatlist_saved_theme', chosen);
+    if (!opts.fromTemplateSwitch && !opts.preserveTemplate && document.body?.dataset?.chatlistTemplate === 'classic') {
+      setChatListTemplate('glass-studio', { skipRestore: true });
+    }
   }
   const sel = document.getElementById('chatListStyleSelect');
   if (sel && sel.value !== chosen) sel.value = chosen;
   renderChatListSwatches('glassChatListSwatches', chosen);
   renderChatListSwatches('modalGlassChatListSwatches', chosen);
   applyChatListGlassVars();
-  try { localStorage.setItem('nex_chatlist_theme', chosen); } catch (_) {}
+  safeSetStorage('nex_chatlist_theme', chosen);
 }
 
 function renderChatListSwatches(containerId, activeTheme) {
@@ -535,6 +778,60 @@ function bindStudioSettingsControls() {
       openChatListStudioModal();
     });
   }
+
+  bindChatListTemplateControls();
+  renderAppThemeGalleries();
+}
+
+function ensureSettingsTemplateControls() {
+  const glassCard = document.getElementById('chatListGlassSettingsCard');
+  if (glassCard && !glassCard.querySelector('[data-chatlist-template]')) {
+    const bar = document.createElement('div');
+    bar.id = 'chatListTemplateSwitcher';
+    bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--nex-theme-border,rgba(148,163,184,0.18));';
+    bar.innerHTML = `
+      <div>
+        <div style="font-size:13px;font-weight:700;">Chat List Template</div>
+        <div style="font-size:11.5px;opacity:0.8;">Switch effortlessly without losing saved glass theme or backdrop</div>
+      </div>
+      <div class="chatlist-template-toggle-group" role="group" aria-label="Chat List Template">
+        <button type="button" data-chatlist-template="classic">Classic</button>
+        <button type="button" data-chatlist-template="glass-studio">Glass Studio</button>
+      </div>
+    `;
+    glassCard.prepend(bar);
+  }
+}
+
+function bindChatListTemplateControls() {
+  ensureSettingsTemplateControls();
+
+  if (typeof document !== 'undefined' && !document.documentElement.dataset.nexTemplateDelegated) {
+    document.documentElement.dataset.nexTemplateDelegated = 'true';
+    document.addEventListener('click', (e) => {
+      const tplBtn = e.target?.closest?.('[data-chatlist-template]');
+      if (tplBtn) {
+        e.preventDefault();
+        const nextTpl = setChatListTemplate(tplBtn.dataset.chatlistTemplate);
+        if (typeof window.showNotif === 'function') {
+          window.showNotif(nextTpl === 'classic' ? 'Switched to Classic chat list' : 'Restored Glass Studio chat list', 'success', 1400);
+        }
+        return;
+      }
+      const toggleBtn = e.target?.closest?.('#chatListTemplateBtn');
+      if (toggleBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const cur = document.body?.dataset?.chatlistTemplate || safeGetStorage('nex_chatlist_template') || 'glass-studio';
+        const nextTpl = setChatListTemplate(cur === 'classic' ? 'glass-studio' : 'classic');
+        if (typeof window.showNotif === 'function') {
+          window.showNotif(nextTpl === 'classic' ? 'Switched to Classic chat list' : 'Restored Glass Studio chat list', 'success', 1400);
+        }
+      }
+    });
+  }
+
+  syncChatListTemplateUI(safeGetStorage('nex_chatlist_template') || 'glass-studio');
 }
 
 export function openChatListStudioModal() {
@@ -547,28 +844,36 @@ export function openChatListStudioModal() {
       <div class="nex-chatlist-studio-sheet">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
           <h3 style="margin:0;font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;">
-            <i class="fa-solid fa-wand-magic-sparkles" style="color:#00ff88;"></i>
-            Chat List Glassmorphism &amp; Picture
+            <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--nex-theme-accent,#00ff88);"></i>
+            Chat List Glassmorphism &amp; Themes
           </h3>
-          <button type="button" id="closeChatListStudioBtn" class="wp-close-btn" style="background:rgba(255,255,255,0.08);border:none;color:#cbd5e1;width:32px;height:32px;border-radius:50%;cursor:pointer;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+          <button type="button" id="closeChatListStudioBtn" class="wp-close-btn" style="background:var(--nex-theme-surface-2,rgba(255,255,255,0.08));border:1px solid var(--nex-theme-border,transparent);color:var(--nex-theme-text,#cbd5e1);width:32px;height:32px;border-radius:50%;cursor:pointer;" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding:8px 10px;border-radius:14px;background:var(--nex-theme-surface-2,rgba(255,255,255,0.05));border:1px solid var(--nex-theme-border,rgba(255,255,255,0.12));">
+          <span style="font-size:12px;font-weight:700;">Template Mode</span>
+          <div class="chatlist-template-toggle-group" role="group" aria-label="Chat List Template">
+            <button type="button" data-chatlist-template="classic">Classic</button>
+            <button type="button" data-chatlist-template="glass-studio">Glass Studio</button>
+          </div>
         </div>
 
         <div id="modalChatListLivePreview" class="nex-chatlist-preview-stage" style="background-image:url('./assets/images/chatlist-futuristic-bg.jpg');">
           <div class="nex-chatlist-preview-row">
             <img src="chronex-ai.jpg" class="nex-chatlist-preview-avatar" onerror="this.style.display='none'" alt="" />
             <div style="flex:1;min-width:0;">
-              <div style="font-size:13px;font-weight:700;color:#fff;">Chronex AI</div>
-              <div style="font-size:11px;color:#cbd5e1;opacity:0.85;">Frosted liquid glass chat list row</div>
+              <div style="font-size:13px;font-weight:700;">Chronex AI</div>
+              <div style="font-size:11px;opacity:0.85;">Frosted liquid glass chat list row</div>
             </div>
-            <span style="background:#00ff88;color:#041019;font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;">3</span>
+            <span style="background:var(--nex-theme-accent,#00ff88);color:var(--nex-theme-accent-fg,#041019);font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;">3</span>
           </div>
           <div class="nex-chatlist-preview-row">
             <span class="nex-chatlist-preview-avatar" style="display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#00ff88,#00d4ff);color:#041019;font-weight:800;font-size:12px;">G</span>
             <div style="flex:1;min-width:0;">
-              <div style="font-size:13px;font-weight:700;color:#fff;">Group Syndicate</div>
-              <div style="font-size:11px;color:#00ff88;">typing &amp; swipe FX ready</div>
+              <div style="font-size:13px;font-weight:700;">Group Syndicate</div>
+              <div style="font-size:11px;color:var(--nex-theme-accent,#00ff88);">typing &amp; swipe FX ready</div>
             </div>
-            <span style="font-size:10px;color:#94a3b8;">Now</span>
+            <span style="font-size:10px;opacity:0.75;">Now</span>
           </div>
         </div>
 
@@ -577,7 +882,7 @@ export function openChatListStudioModal() {
             <i class="fa-solid fa-image"></i> Upload Photo
             <input type="file" id="modalChatListPicInput" accept="image/*" style="display:none;" />
           </label>
-          <button type="button" id="modalChatListBrowseWallpapersBtn" class="btn-secondary" style="flex:1;min-width:130px;padding:9px 12px;border-radius:12px;font-size:12px;font-weight:700;background:linear-gradient(135deg,rgba(0,255,136,0.16),rgba(0,212,255,0.16));border-color:rgba(0,255,136,0.45);color:#00ff88;">
+          <button type="button" id="modalChatListBrowseWallpapersBtn" class="btn-secondary" style="flex:1;min-width:130px;padding:9px 12px;border-radius:12px;font-size:12px;font-weight:700;background:var(--nex-theme-active,rgba(0,255,136,0.16));border:1px solid var(--nex-theme-border,rgba(0,255,136,0.45));color:var(--nex-theme-accent,#00ff88);">
             <i class="fa-solid fa-palette"></i> 84+ Wallpapers
           </button>
           <button type="button" id="modalChatListUseAvatarBtn" class="btn-secondary" style="flex:1;min-width:120px;padding:9px 12px;border-radius:12px;font-size:12px;font-weight:700;">
@@ -589,13 +894,23 @@ export function openChatListStudioModal() {
         </div>
 
         <div style="margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:6px;">Instant Built-In Backdrops</div>
+          <div style="font-size:11px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:6px;">Instant Built-In Backdrops</div>
           <div id="modalChatListPresetBackdrops" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;"></div>
         </div>
 
         <div style="margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:4px;">20 Frosted Glassmorphism Row Styles</div>
+          <div style="font-size:11px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:4px;">20 Frosted Glassmorphism Row Styles</div>
           <div id="modalGlassChatListSwatches" class="nex-chatlist-swatch-grid"></div>
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:4px;">10 Light Mode App Themes</div>
+          <div id="modalAppLightThemeGallery" class="app-theme-gallery-grid"></div>
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:var(--nex-theme-text-muted,#94a3b8);text-transform:uppercase;margin-bottom:4px;">10 Dark Mode App Themes</div>
+          <div id="modalAppDarkThemeGallery" class="app-theme-gallery-grid"></div>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
@@ -681,36 +996,55 @@ export function openChatListStudioModal() {
     });
   }
 
-  const savedBg = localStorage.getItem('nex_chatlist_bg');
-  const cleared = localStorage.getItem('nex_chatlist_bg_cleared') === 'true';
+  const savedBg = safeGetStorage('nex_chatlist_bg');
+  const cleared = safeGetStorage('nex_chatlist_bg_cleared') === 'true';
   const effectiveBg = savedBg || (!cleared ? DEFAULT_FUTURISTIC_CHATLIST_BG : '');
   const prev = modal.querySelector('#modalChatListLivePreview');
   if (prev) prev.style.backgroundImage = effectiveBg ? `url("${effectiveBg}")` : '';
-  renderChatListSwatches('modalGlassChatListSwatches', localStorage.getItem('nex_chatlist_theme') || 'telegram-glass');
+  const activeChatListTheme = safeGetStorage('nex_chatlist_theme') || safeGetStorage('nex_chatlist_saved_theme') || 'telegram-glass';
+  renderChatListSwatches('modalGlassChatListSwatches', activeChatListTheme);
+  renderAppThemeGalleries();
+  syncChatListTemplateUI(safeGetStorage('nex_chatlist_template') || 'glass-studio');
   applyChatListGlassVars();
   modal.classList.add('open');
 }
 
+function exposeStudioGlobals() {
+  if (typeof window === 'undefined') return;
+  window.APP_LIGHT_THEMES = APP_LIGHT_THEMES;
+  window.APP_DARK_THEMES = APP_DARK_THEMES;
+  window.applyAppThemeVariant = applyAppThemeVariant;
+  window.setChatListTemplate = setChatListTemplate;
+  window.NexChatExperienceStudio = {
+    openChatListStudioModal,
+    applyChatListTheme,
+    applyChatListWallpaper,
+    setTypingFxStyle,
+    triggerMessageSendLaunchFx,
+    preloadImageEager,
+    APP_LIGHT_THEMES,
+    APP_DARK_THEMES,
+    applyAppThemeVariant,
+    setChatListTemplate,
+    renderAppThemeGalleries
+  };
+}
+
+exposeStudioGlobals();
+
 export function initChatExperienceStudio() {
-  applyChatListTheme(localStorage.getItem('nex_chatlist_theme') || 'telegram-glass');
-  const savedBg = localStorage.getItem('nex_chatlist_bg');
-  const cleared = localStorage.getItem('nex_chatlist_bg_cleared') === 'true';
+  const savedTemplate = safeGetStorage('nex_chatlist_template') || 'glass-studio';
+  applyChatListTheme(safeGetStorage('nex_chatlist_theme') || 'telegram-glass', { preserveTemplate: true });
+  const savedBg = safeGetStorage('nex_chatlist_bg');
+  const cleared = safeGetStorage('nex_chatlist_bg_cleared') === 'true';
   if (savedBg) applyChatListWallpaper(savedBg);
   else if (!cleared) applyChatListWallpaper(DEFAULT_FUTURISTIC_CHATLIST_BG);
-  setTypingFxStyle(localStorage.getItem('nex_typing_fx_style') || 'kinetic');
+  setChatListTemplate(savedTemplate, { skipRestore: true });
+  setTypingFxStyle(safeGetStorage('nex_typing_fx_style') || 'kinetic');
+  applyAppThemeVariant(null, { skipModeSync: true });
   bindFilterTabSwipeGestures();
   bindEdgeSwipeBackAndScrollPhysics();
   bindComposerKeystrokeEffects();
   bindStudioSettingsControls();
-
-  if (typeof window !== 'undefined') {
-    window.NexChatExperienceStudio = {
-      openChatListStudioModal,
-      applyChatListTheme,
-      applyChatListWallpaper,
-      setTypingFxStyle,
-      triggerMessageSendLaunchFx,
-      preloadImageEager
-    };
-  }
+  exposeStudioGlobals();
 }
