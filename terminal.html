@@ -42,100 +42,612 @@
   </script>
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   
-  <!-- Fonts -->
+  <!-- Fonts (non-render-blocking so monospace terminal paints immediately offline/throttled) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            'nex-green': '#00FF88',
-            'nex-black': '#06090E',
-            'nex-cyan': '#00F2FF',
-            'nex-gold': '#FFD700',
-            'nex-red': '#FF3366',
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-            display: ['Orbitron', 'monospace'],
-          }
-        }
-      }
-    }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
+
+  <!-- FontAwesome (non-render-blocking; inline SVGs back critical controls) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
   <style>
+    :root {
+      --nex-green: #00FF88;
+      --nex-black: #05080E;
+      --nex-surface: rgba(8, 13, 21, 0.96);
+      --nex-cyan: #00F2FF;
+      --nex-info: #00D4FF;
+      --nex-gold: #FFD700;
+      --nex-red: #FF3366;
+      --nex-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+      --nex-display: 'Orbitron', 'JetBrains Mono', ui-monospace, monospace;
+      color-scheme: dark;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100%;
+      height: 100dvh;
+      min-height: 100dvh;
+      overflow: hidden;
+      background-color: var(--nex-black);
+      color: var(--nex-green);
+      font-family: var(--nex-mono);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      user-select: text;
+    }
+
     /* Custom Scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: rgba(3, 7, 18, 0.6); }
-    ::-webkit-scrollbar-thumb { background: rgba(0, 255, 136, 0.25); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #00FF88; }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 255, 136, 0.28); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--nex-green); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* CRT Scanline Overlay */
+    /* Background Canvas & CRT Scanlines (fixed so zero document flow gap) */
+    #matrixCanvas,
     .scanline-overlay {
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-      background-size: 100% 3px, 6px 100%;
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
     }
-
-    /* Terminal Blinking Cursor */
-    @keyframes blinkCursor {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+    #matrixCanvas { z-index: 0; opacity: 0.2; }
+    .scanline-overlay {
+      z-index: 30;
+      opacity: 0.65;
+      background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 6px 100%;
     }
+
+    /* Animations & Glows */
+    @keyframes blinkCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    @keyframes nexPing { 75%, 100% { transform: scale(1.9); opacity: 0; } }
+    @keyframes nexPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
     .term-cursor-blink { animation: blinkCursor 0.9s step-end infinite; }
+    .animate-ping { animation: nexPing 1.4s cubic-bezier(0, 0, 0.2, 1) infinite; }
+    .animate-pulse { animation: nexPulse 1.6s ease-in-out infinite; }
+    .neon-text-glow { text-shadow: 0 0 10px rgba(0, 255, 136, 0.65), 0 0 24px rgba(0, 255, 136, 0.35); }
+    .neon-cyan-glow { text-shadow: 0 0 10px rgba(0, 242, 255, 0.65), 0 0 24px rgba(0, 242, 255, 0.35); }
 
-    /* Glitch Glow */
-    .neon-text-glow {
-      text-shadow: 0 0 10px rgba(0, 255, 136, 0.65), 0 0 25px rgba(0, 255, 136, 0.35);
+    /* Header HUD */
+    .term-hud-header {
+      position: relative;
+      z-index: 20;
+      flex-shrink: 0;
+      width: 100%;
+      max-width: 100%;
+      min-height: 56px;
+      padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px;
+      background: var(--nex-surface);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0, 255, 136, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
     }
-    .neon-cyan-glow {
-      text-shadow: 0 0 10px rgba(0, 242, 255, 0.65), 0 0 25px rgba(0, 242, 255, 0.35);
+
+    .term-brand-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .term-traffic-lights {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .term-dot {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border-radius: 9999px;
+    }
+    .term-dot-red { background: rgba(239, 68, 68, 0.88); box-shadow: 0 0 8px rgba(239, 68, 68, 0.75); }
+    .term-dot-yellow { background: rgba(234, 179, 8, 0.88); box-shadow: 0 0 8px rgba(234, 179, 8, 0.75); }
+    .term-dot-green { background: var(--nex-green); box-shadow: 0 0 8px rgba(0, 255, 136, 0.75); }
+
+    .term-brand-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .term-brand-title {
+      font-family: var(--nex-display);
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.1em;
+      color: var(--nex-green);
+      white-space: nowrap;
+    }
+    .term-root-chip {
+      display: none;
+      font-family: var(--nex-display);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--nex-green);
+      background: rgba(0, 255, 136, 0.14);
+      border: 1px solid rgba(0, 255, 136, 0.32);
+      padding: 2px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .term-telemetry-strip {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .term-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .term-nav-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 40px;
+      min-width: 40px;
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-family: var(--nex-mono);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+      white-space: nowrap;
+    }
+    .term-nav-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .term-nav-btn-admin {
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--nex-green);
+      border: 1px solid rgba(0, 255, 136, 0.42);
+    }
+    .term-nav-btn-admin:hover { background: rgba(0, 255, 136, 0.26); }
+    .term-nav-btn-chat {
+      background: rgba(255, 255, 255, 0.1);
+      color: #F8FAFC;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    .term-nav-btn-chat:hover { background: rgba(255, 255, 255, 0.2); }
+    .term-nav-btn-reels {
+      display: none;
+      background: rgba(234, 179, 8, 0.12);
+      color: var(--nex-gold);
+      border: 1px solid rgba(234, 179, 8, 0.32);
+    }
+    .term-nav-btn-reels:hover { background: rgba(234, 179, 8, 0.22); }
+    .term-nav-btn-icon {
+      background: rgba(0, 0, 0, 0.45);
+      color: rgba(248, 250, 252, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 6px;
+    }
+    .term-nav-btn-icon:hover {
+      background: rgba(0, 0, 0, 0.78);
+      color: var(--nex-green);
+      border-color: rgba(0, 255, 136, 0.4);
+    }
+    .term-btn-label-sm { display: none; }
+
+    /* Main Shell Container */
+    .term-main {
+      position: relative;
+      z-index: 10;
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    /* Client-Side Access & SuperAdmin Server Token Gate Banner */
+    .term-gate-banner {
+      flex-shrink: 0;
+      width: 100%;
+      max-width: 100%;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255, 215, 0, 0.35);
+      background: linear-gradient(135deg, rgba(16, 20, 30, 0.96), rgba(9, 13, 22, 0.98));
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 15;
+    }
+    .term-gate-banner.is-verified {
+      border-bottom-color: rgba(0, 255, 136, 0.36);
+      background: linear-gradient(135deg, rgba(6, 24, 18, 0.94), rgba(8, 13, 21, 0.97));
+    }
+    .term-gate-banner.is-shake {
+      border-bottom-color: var(--nex-red);
+      box-shadow: inset 0 0 0 1px rgba(255, 51, 102, 0.45);
+    }
+    .term-gate-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .term-gate-title-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .term-gate-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: rgba(255, 215, 0, 0.14);
+      color: var(--nex-gold);
+      border: 1px solid rgba(255, 215, 0, 0.42);
+      white-space: nowrap;
+    }
+    .term-gate-banner.is-verified .term-gate-badge {
+      background: rgba(0, 255, 136, 0.14);
+      color: var(--nex-green);
+      border-color: rgba(0, 255, 136, 0.45);
+    }
+    .term-gate-copy {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.45;
+      color: rgba(226, 232, 240, 0.88);
+    }
+    .term-gate-copy strong { color: #FFFFFF; font-weight: 700; }
+    .term-gate-form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+    .term-gate-input {
+      flex: 1 1 220px;
+      min-width: 0;
+      min-height: 44px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 255, 136, 0.34);
+      background: rgba(3, 7, 14, 0.9);
+      color: #F8FAFC;
+      font-family: var(--nex-mono);
+      font-size: 13px;
+      outline: none;
+    }
+    .term-gate-input:focus {
+      border-color: var(--nex-green);
+      box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.18);
+    }
+    .term-gate-input::placeholder { color: rgba(248, 250, 252, 0.45); }
+    .term-gate-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 44px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-family: var(--nex-mono);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+    .term-gate-btn-primary {
+      background: var(--nex-green);
+      color: #04120B;
+      border-color: var(--nex-green);
+    }
+    .term-gate-btn-primary:hover { filter: brightness(1.06); }
+    .term-gate-btn-secondary {
+      background: rgba(255, 51, 102, 0.14);
+      color: #FDA4AF;
+      border-color: rgba(255, 51, 102, 0.36);
+    }
+    .term-gate-feedback {
+      font-size: 12px;
+      line-height: 1.4;
+      color: rgba(248, 250, 252, 0.78);
+    }
+    .term-gate-feedback.is-error { color: #FB7185; font-weight: 600; }
+    .term-gate-feedback.is-success { color: var(--nex-green); font-weight: 600; }
+
+    /* Terminal Output & Prompt */
+    #terminalScreen {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      max-width: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 16px;
+      cursor: text;
+      font-size: 13px;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .term-ascii-banner {
+      margin: 0 0 6px;
+      padding-bottom: 6px;
+      max-width: 100%;
+      overflow-x: auto;
+      color: var(--nex-green);
+      font-family: var(--nex-mono);
+      font-weight: 700;
+      font-size: clamp(7px, 2.05vw, 11.5px);
+      line-height: 1.18;
+      opacity: 0.92;
+      user-select: none;
+      white-space: pre;
+    }
+    .term-intro-line { font-size: 12.5px; line-height: 1.5; word-break: break-word; }
+    .term-help-trigger {
+      color: #FFFFFF;
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      padding: 0;
+      font: inherit;
+    }
+    .term-help-trigger:hover { color: var(--nex-green); }
+
+    #termLogsContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 4px;
+      min-width: 0;
+    }
+
+    #termForm {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding-top: 10px;
+      width: 100%;
+      max-width: 100%;
+    }
+    #termPromptPrefix {
+      color: var(--nex-green);
+      font-weight: 800;
+      font-size: 13px;
+      flex-shrink: 0;
+      text-shadow: 0 0 8px rgba(0, 255, 136, 0.55);
+    }
+    #termInputField {
+      flex: 1 1 200px;
+      min-width: 0;
+      min-height: 44px;
+      background: transparent;
+      color: var(--nex-green);
+      font-family: var(--nex-mono);
+      font-size: 14px;
+      border: none;
+      outline: none;
+      caret-color: var(--nex-green);
+      padding: 6px 0;
+    }
+    #termInputField::placeholder { color: rgba(248, 250, 252, 0.34); }
+    #termInputField.is-locked { color: rgba(248, 250, 252, 0.72); caret-color: var(--nex-gold); }
+
+    /* Quick Command Footer */
+    .term-quick-footer {
+      position: relative;
+      z-index: 20;
+      flex-shrink: 0;
+      width: 100%;
+      max-width: 100%;
+      padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px));
+      background: rgba(7, 11, 15, 0.96);
+      border-top: 1px solid rgba(0, 255, 136, 0.22);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      font-size: 12px;
+    }
+    .term-quick-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: rgba(248, 250, 252, 0.58);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .term-quick-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 40px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: var(--nex-mono);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.06);
+      color: #E2E8F0;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .term-pill-green { background: rgba(0, 255, 136, 0.12); border-color: rgba(0, 255, 136, 0.34); color: var(--nex-green); }
+    .term-pill-green:hover { background: rgba(0, 255, 136, 0.24); }
+    .term-pill-cyan { background: rgba(0, 242, 255, 0.11); border-color: rgba(0, 242, 255, 0.34); color: var(--nex-cyan); }
+    .term-pill-cyan:hover { background: rgba(0, 242, 255, 0.22); }
+    .term-pill-red { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.35); color: #F87171; }
+    .term-pill-red:hover { background: rgba(239, 68, 68, 0.22); }
+    .term-pill-purple { background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.35); color: #D8B4FE; }
+    .term-pill-purple:hover { background: rgba(168, 85, 247, 0.22); }
+    .term-pill-gold { background: rgba(255, 215, 0, 0.12); border-color: rgba(255, 215, 0, 0.35); color: var(--nex-gold); }
+    .term-pill-gold:hover { background: rgba(255, 215, 0, 0.22); }
+    .term-pill-blue { background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.35); color: #93C5FD; }
+    .term-pill-blue:hover { background: rgba(59, 130, 246, 0.22); }
+    .term-pill-emerald { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.35); color: #34D399; }
+    .term-pill-emerald:hover { background: rgba(16, 185, 129, 0.22); }
+    .term-pill-neutral { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.22); color: #F8FAFC; }
+    .term-pill-neutral:hover { background: rgba(255, 255, 255, 0.18); }
+
+    /* Shared Utility Classes used by JS terminal logger & telemetry badges */
+    .hidden { display: none; }
+    .flex { display: flex; }
+    .inline-block { display: inline-block; }
+    .items-center { align-items: center; }
+    .gap-1\.5 { gap: 6px; }
+    .w-2 { width: 8px; }
+    .h-2 { height: 8px; }
+    .rounded { border-radius: 4px; }
+    .rounded-full { border-radius: 9999px; }
+    .px-2\.5 { padding-left: 10px; padding-right: 10px; }
+    .py-1 { padding-top: 4px; padding-bottom: 4px; }
+    .border { border-width: 1px; border-style: solid; }
+    .font-mono { font-family: var(--nex-mono); }
+    .font-bold { font-weight: 700; }
+    .text-xs { font-size: 12px; }
+    .text-sm { font-size: 13.5px; }
+    .leading-relaxed { line-height: 1.55; }
+    .whitespace-pre-wrap { white-space: pre-wrap; }
+    .break-all { overflow-wrap: anywhere; word-break: break-word; }
+    .bg-black\/50 { background-color: rgba(0, 0, 0, 0.5); }
+    .bg-\[\#00FF88\] { background-color: #00FF88; }
+    .bg-\[\#00FF88\]\/15 { background-color: rgba(0, 255, 136, 0.15); }
+    .bg-\[\#FFD700\] { background-color: #FFD700; }
+    .bg-\[\#FFD700\]\/15 { background-color: rgba(255, 215, 0, 0.15); }
+    .bg-white\/40 { background-color: rgba(255, 255, 255, 0.4); }
+    .border-white\/20 { border-color: rgba(255, 255, 255, 0.2); }
+    .border-\[\#00FF88\]\/30 { border-color: rgba(0, 255, 136, 0.3); }
+    .border-\[\#00FF88\]\/50 { border-color: rgba(0, 255, 136, 0.5); }
+    .border-\[\#00F2FF\]\/30 { border-color: rgba(0, 242, 255, 0.3); }
+    .border-\[\#FFD700\]\/30 { border-color: rgba(255, 215, 0, 0.3); }
+    .border-\[\#FFD700\]\/50 { border-color: rgba(255, 215, 0, 0.5); }
+    .text-white { color: #FFFFFF; }
+    .text-white\/30 { color: rgba(255, 255, 255, 0.42); }
+    .text-white\/60 { color: rgba(255, 255, 255, 0.72); }
+    .text-red-400 { color: #F87171; }
+    .text-\[\#00FF88\] { color: var(--nex-green); }
+    .text-\[\#00F2FF\] { color: var(--nex-cyan); }
+    .text-\[\#00D4FF\] { color: var(--nex-info); }
+    .text-\[\#FFD700\] { color: var(--nex-gold); }
+
+    @media (min-width: 640px) {
+      .term-root-chip { display: inline-block; }
+      .term-btn-label-sm { display: inline; }
+      .term-brand-title { font-size: 16px; }
+      #terminalScreen { padding: 20px 24px; font-size: 14px; }
+      .sm\:text-sm { font-size: 14px; }
+    }
+    @media (min-width: 768px) {
+      .term-nav-btn-reels { display: inline-flex; }
+    }
+    @media (min-width: 1280px) {
+      .term-telemetry-strip { display: flex; }
+    }
+    @media (max-width: 440px) {
+      .term-hud-header { padding: calc(6px + env(safe-area-inset-top, 0px)) 10px 6px; gap: 6px; }
+      .term-traffic-lights { gap: 4px; }
+      .term-dot { width: 9px; height: 9px; }
+      .term-brand-title { font-size: 14px; letter-spacing: 0.06em; }
+      .term-nav-btn { min-width: 44px; min-height: 44px; padding: 6px 8px; }
+      .term-gate-banner { padding: 10px 12px; }
+      .term-gate-btn { width: 100%; }
+      #terminalScreen { padding: 12px; }
+      .term-quick-footer { padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px)); }
+      .term-quick-pill { min-height: 44px; }
     }
   </style>
   <link rel="manifest" href="/manifest.json">
 </head>
-<body class="bg-[#05080E] text-[#00FF88] w-screen h-screen overflow-hidden select-text font-mono flex flex-col relative">
+<body>
 
   <!-- Ambient CRT Scanline Effect -->
-  <div class="scanline-overlay absolute inset-0 z-30 opacity-70"></div>
+  <div class="scanline-overlay" aria-hidden="true"></div>
 
   <!-- Background Matrix Rain Canvas -->
-  <canvas id="matrixCanvas" class="absolute inset-0 pointer-events-none opacity-20 z-0"></canvas>
+  <canvas id="matrixCanvas" aria-hidden="true"></canvas>
 
   <!-- ══════════════════════════════════════════════════════════════════
        TOP CYBER HUD BAR (SUPERADMIN COMMAND CONSOLE HEADER)
        ══════════════════════════════════════════════════════════════════ -->
-  <header class="h-14 px-4 bg-[#080D15]/95 backdrop-blur-md border-b border-[#00FF88]/20 flex items-center justify-between flex-shrink-0 z-20 shadow-lg">
+  <header class="term-hud-header">
     <!-- Brand & Traffic Lights -->
-    <div class="flex items-center gap-3">
-      <div class="flex items-center gap-1.5">
-        <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
-        <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block shadow-[0_0_8px_rgba(234,179,8,0.8)]"></span>
-        <span class="w-3 h-3 rounded-full bg-[#00FF88] inline-block shadow-[0_0_8px_rgba(0,255,136,0.8)]"></span>
+    <div class="term-brand-group">
+      <div class="term-traffic-lights" aria-hidden="true">
+        <span class="term-dot term-dot-red"></span>
+        <span class="term-dot term-dot-yellow"></span>
+        <span class="term-dot term-dot-green"></span>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="font-display font-extrabold text-sm sm:text-base tracking-widest text-[#00FF88] neon-text-glow">
+      <div class="term-brand-title-wrap">
+        <span class="term-brand-title neon-text-glow">
           NEXCHAT<span class="term-cursor-blink text-white">_</span>CLI
         </span>
-        <span class="text-[9px] bg-[#00FF88]/15 text-[#00FF88] border border-[#00FF88]/30 px-2 py-0.5 rounded font-display font-bold uppercase tracking-wider hidden sm:inline-block">
+        <span class="term-root-chip">
           SUPERADMIN ROOT v9.2
         </span>
       </div>
     </div>
 
     <!-- Center Live Telemetry Chips -->
-    <div class="hidden xl:flex items-center gap-2.5 text-[11px]">
+    <div class="term-telemetry-strip">
       <span id="termCloudBadge" class="px-2.5 py-1 rounded bg-black/50 border border-white/20 text-white/60 flex items-center gap-1.5" title="Linode Cloud Bridge Connection Status">
         <span id="termCloudDot" class="w-2 h-2 rounded-full bg-white/40"></span>
         <span id="termCloudText">CLOUD: STANDBY</span>
@@ -145,34 +657,32 @@
         PORT 8080 ACTIVE
       </span>
       <span class="px-2.5 py-1 rounded bg-black/50 border border-[#00F2FF]/30 text-[#00F2FF] flex items-center gap-1.5">
-        <i class="fa-solid fa-shield-halved"></i>
         FIRESTORE 4-IP REGISTRY ENFORCED
       </span>
       <span class="px-2.5 py-1 rounded bg-black/50 border border-[#FFD700]/30 text-[#FFD700] flex items-center gap-1.5">
-        <i class="fa-solid fa-lock"></i>
         E2EE AES-256-GCM
       </span>
     </div>
 
     <!-- Right Action Buttons -->
-    <div class="flex items-center gap-2 text-xs">
-      <a href="admin-dashboard.html" id="terminalAdminConsoleLink" style="display: none;" class="px-3 py-1.5 rounded-lg bg-[#00FF88]/15 hover:bg-[#00FF88]/25 text-[#00FF88] border border-[#00FF88]/40 transition-all font-semibold items-center gap-1.5 shadow" title="Open Security Command Console">
-        <i class="fa-solid fa-shield-virus"></i>
-        <span class="hidden sm:inline">Security Console</span>
+    <div class="term-header-actions">
+      <a href="admin-dashboard.html" id="terminalAdminConsoleLink" style="display: none;" class="term-nav-btn term-nav-btn-admin" title="Open Security Command Console">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span class="term-btn-label-sm">Security Console</span>
       </a>
-      <a href="chat.html" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all font-semibold flex items-center gap-1.5" title="Return to Public Chat">
-        <i class="fa-solid fa-arrow-left"></i>
-        <span class="hidden sm:inline">Chat</span>
+      <a href="chat.html" class="term-nav-btn term-nav-btn-chat" title="Return to Public Chat" aria-label="Return to Chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span class="term-btn-label-sm">Chat</span>
       </a>
-      <a href="reels.html" class="px-3 py-1.5 rounded-lg bg-yellow-500/10 hover:bg-yellow-500/20 text-[#FFD700] border border-yellow-500/30 transition-all font-semibold hidden md:flex items-center gap-1.5" title="Open CamShot Video Stream">
-        <i class="fa-solid fa-clapperboard"></i>
+      <a href="reels.html" class="term-nav-btn term-nav-btn-reels" title="Open CamShot Video Stream">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         <span>CamShot</span>
       </a>
-      <button type="button" id="toggleMatrixBtn" onclick="toggleMatrixRain()" class="p-1.5 px-2.5 rounded-lg bg-black/40 hover:bg-black/70 text-white/70 hover:text-[#00FF88] border border-white/10 transition-colors text-xs" title="Toggle Digital Rain">
-        <i class="fa-solid fa-code"></i>
+      <button type="button" id="toggleMatrixBtn" onclick="toggleMatrixRain()" class="term-nav-btn term-nav-btn-icon" title="Toggle Digital Rain" aria-label="Toggle Digital Rain">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       </button>
-      <button type="button" onclick="clearTerminal()" class="p-1.5 px-2.5 rounded-lg bg-black/40 hover:bg-black/70 text-white/70 hover:text-white border border-white/10 transition-colors text-xs" title="Clear Screen Buffer">
-        <i class="fa-solid fa-trash-can"></i>
+      <button type="button" onclick="clearTerminal()" class="term-nav-btn term-nav-btn-icon" title="Clear Screen Buffer" aria-label="Clear Screen Buffer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
       </button>
     </div>
   </header>
@@ -180,72 +690,104 @@
   <!-- ══════════════════════════════════════════════════════════════════
        MAIN FULLSCREEN TERMINAL VIEWPORT (100% WIDTH & HEIGHT)
        ══════════════════════════════════════════════════════════════════ -->
-  <main class="flex-1 flex flex-col w-full h-full overflow-hidden relative z-10 bg-transparent min-h-0">
-    
+  <main class="term-main">
+
+    <!-- Explicit Client-Side Access & SuperAdmin Server Token Verification Gate -->
+    <section id="superAdminGateBanner" class="term-gate-banner is-locked" role="region" aria-label="SuperAdmin Access and Server Token Verification Gate">
+      <div class="term-gate-top">
+        <div class="term-gate-title-row">
+          <span id="superAdminGateBadge" class="term-gate-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span id="superAdminGateBadgeText">ACCESS GATE LOCKED</span>
+          </span>
+          <p class="term-gate-copy">
+            <strong>Client-Side Access Gate:</strong> Complete verification below before any command executes. Privileged remote bridge execution enforces <strong>SuperAdmin server token verification</strong> (<code>TERMINAL_SECRET</code> &ge; 32 chars) on the server.
+          </p>
+        </div>
+      </div>
+
+      <form id="superAdminGateForm" class="term-gate-form" autocomplete="off">
+        <input
+          id="superAdminGateTokenInput"
+          class="term-gate-input"
+          type="password"
+          spellcheck="false"
+          autocomplete="off"
+          placeholder="SuperAdmin server token (32+ chars) or verified passkey..."
+          aria-label="SuperAdmin server token or verification passkey"
+        />
+        <button type="submit" id="superAdminGateVerifyBtn" class="term-gate-btn term-gate-btn-primary">
+          Verify &amp; Unlock Shell
+        </button>
+        <button type="button" id="superAdminGateLockBtn" class="term-gate-btn term-gate-btn-secondary hidden">
+          Lock Gate
+        </button>
+      </form>
+      <div id="superAdminGateFeedback" class="term-gate-feedback" aria-live="polite">
+        Command execution is gated until client-side verification &amp; SuperAdmin server token binding succeed.
+      </div>
+    </section>
+
     <!-- Terminal Screen Scrollable Area -->
-    <div id="terminalScreen" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-2 leading-relaxed cursor-text text-xs sm:text-sm select-text" onclick="focusTermInput()">
-      
+    <div id="terminalScreen" onclick="focusTermInput()">
+
       <!-- ASCII Art Banner -->
-      <pre class="text-[#00FF88] font-bold text-[10px] sm:text-[11.5px] leading-tight select-none opacity-90 overflow-x-auto pb-2">
-  _   _ _______  __ ____ _   _    _  _____ 
+      <pre class="term-ascii-banner">  _   _ _______  __ ____ _   _    _  _____ 
  | \ | | ____\ \/ // ___| | | |  / \|_   _|
  |  \| |  _|  \  /| |   | |_| | / _ \ | |  
  | |\  | |___ /  \| |___|  _  |/ ___ \| |  
  |_| \_|_____/_/\_\\____|_| |_/_/   \_\_|  
  =========================================================================
- ZERO-TRUST SUPERADMIN COMMAND SHELL // ENCLAVE ROOT ACTIVE
+ ZERO-TRUST SUPERADMIN COMMAND SHELL // ENCLAVE ROOT GATE
  CLOUD FIRESTORE 4-IP REGISTRY STRICTLY BOUND (request.resource.size &lt;= 4)
  =========================================================================</pre>
 
-      <div class="text-[#00D4FF] text-xs">
-        [KERNEL] SuperAdmin Core v9.2 PRO • Hardware WebGL Sentinel Bound • E2EE AES-256-GCM
+      <div class="term-intro-line text-[#00D4FF]">
+        [KERNEL] SuperAdmin Core v9.2 PRO &bull; Hardware WebGL Sentinel Bound &bull; E2EE AES-256-GCM
       </div>
-      <div class="text-white/60 text-xs">
-        System initialized. Authenticated SuperAdmin terminal session active.
+      <div id="termSessionInitLine" class="term-intro-line text-white/60">
+        System initialized. Client-side access gate active &mdash; verify SuperAdmin server token above before running any command.
       </div>
-      <div class="text-[#FFD700] text-xs">
-        Type <span class="text-white font-bold underline cursor-pointer hover:text-[#00FF88]" onclick="runCommand('help')">help</span> to view all commands or click any quick pill below.
+      <div class="term-intro-line text-[#FFD700]">
+        Once verified, type <button type="button" class="term-help-trigger" onclick="runCommand('help')">help</button> to view all commands or tap any quick command pill below.
       </div>
-      
+
       <!-- Command Logs Container -->
-      <div id="termLogsContainer" class="space-y-1.5 pt-2"></div>
+      <div id="termLogsContainer"></div>
 
       <!-- Active Command Input Line -->
-      <form id="termForm" onsubmit="handleTermSubmit(event)" class="flex items-center gap-2 pt-3">
-        <span id="termPromptPrefix" class="text-[#00FF88] font-extrabold flex-shrink-0 drop-shadow-[0_0_8px_rgba(0,255,136,0.6)]">
-          root@nexchat-mainframe:~$
+      <form id="termForm" onsubmit="handleTermSubmit(event)">
+        <span id="termPromptPrefix">
+          locked@nexchat-gate:~$
         </span>
         <input
           id="termInputField"
+          class="is-locked"
           type="text"
           spellcheck="false"
           autocomplete="off"
-          autofocus
-          class="flex-1 bg-transparent text-[#00FF88] font-mono text-xs sm:text-sm border-none outline-none caret-[#00FF88] placeholder-white/20"
-          placeholder="Enter command (e.g. help, iplist, scan, pentest, crypto)..."
+          placeholder="Locked — verify SuperAdmin server token above before executing commands..."
         />
       </form>
     </div>
 
     <!-- Quick Command Bar Footer -->
-    <footer class="px-4 py-2.5 bg-[#070b0f]/95 border-t border-[#00FF88]/20 flex items-center gap-2 overflow-x-auto text-[11px] no-scrollbar flex-shrink-0 z-20">
-      <span class="text-white/40 uppercase tracking-widest text-[10px] mr-1 flex items-center gap-1 font-bold">
-        <i class="fa-solid fa-bolt text-[#00FF88]"></i> Quick:
-      </span>
-      <button type="button" onclick="runCommand('help')" class="px-2.5 py-1 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/30 rounded text-[#00FF88] font-semibold transition-all">help</button>
-      <button type="button" onclick="runCommand('cloud status')" class="px-2.5 py-1 bg-[#00FF88]/15 hover:bg-[#00FF88]/30 border border-[#00FF88]/40 rounded text-[#00FF88] font-bold transition-all"><i class="fa-solid fa-server mr-1"></i>cloud</button>
-      <button type="button" onclick="runCommand('iplist')" class="px-2.5 py-1 bg-[#00F2FF]/10 hover:bg-[#00F2FF]/20 border border-[#00F2FF]/30 rounded text-[#00F2FF] font-semibold transition-all">iplist</button>
-      <button type="button" onclick="runCommand('ipdetect')" class="px-2.5 py-1 bg-[#00F2FF]/10 hover:bg-[#00F2FF]/20 border border-[#00F2FF]/30 rounded text-[#00F2FF] font-semibold transition-all">ipdetect</button>
-      <button type="button" onclick="runCommand('ipsync')" class="px-2.5 py-1 bg-[#00F2FF]/10 hover:bg-[#00F2FF]/20 border border-[#00F2FF]/30 rounded text-[#00F2FF] font-semibold transition-all">ipsync</button>
-      <button type="button" onclick="runCommand('scan')" class="px-2.5 py-1 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/30 rounded text-[#00FF88] font-semibold transition-all">scan</button>
-      <button type="button" onclick="runCommand('pentest')" class="px-2.5 py-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded text-red-400 font-semibold transition-all">pentest</button>
-      <button type="button" onclick="runCommand('crypto')" class="px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded text-purple-300 font-semibold transition-all">crypto</button>
-      <button type="button" onclick="runCommand('firewall')" class="px-2.5 py-1 bg-[#FFD700]/10 hover:bg-[#FFD700]/20 border border-[#FFD700]/30 rounded text-[#FFD700] font-semibold transition-all">firewall</button>
-      <button type="button" onclick="runCommand('rules')" class="px-2.5 py-1 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded text-blue-300 font-semibold transition-all">rules</button>
-      <button type="button" onclick="runCommand('sentinel')" class="px-2.5 py-1 bg-[#00F2FF]/10 hover:bg-[#00F2FF]/20 border border-[#00F2FF]/30 rounded text-[#00F2FF] font-semibold transition-all">sentinel</button>
-      <button type="button" onclick="runCommand('sysinfo')" class="px-2.5 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-white font-semibold transition-all">sysinfo</button>
-      <button type="button" onclick="runCommand('matrix')" class="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded text-emerald-400 font-semibold transition-all">matrix</button>
-      <button type="button" onclick="runCommand('clear')" class="px-2.5 py-1 bg-white/5 hover:bg-white/15 border border-white/15 rounded text-white/70 font-semibold transition-all">clear</button>
+    <footer class="term-quick-footer no-scrollbar">
+      <span class="term-quick-label">Quick:</span>
+      <button type="button" onclick="runCommand('help')" class="term-quick-pill term-pill-green">help</button>
+      <button type="button" onclick="runCommand('cloud status')" class="term-quick-pill term-pill-green">cloud</button>
+      <button type="button" onclick="runCommand('iplist')" class="term-quick-pill term-pill-cyan">iplist</button>
+      <button type="button" onclick="runCommand('ipdetect')" class="term-quick-pill term-pill-cyan">ipdetect</button>
+      <button type="button" onclick="runCommand('ipsync')" class="term-quick-pill term-pill-cyan">ipsync</button>
+      <button type="button" onclick="runCommand('scan')" class="term-quick-pill term-pill-green">scan</button>
+      <button type="button" onclick="runCommand('pentest')" class="term-quick-pill term-pill-red">pentest</button>
+      <button type="button" onclick="runCommand('crypto')" class="term-quick-pill term-pill-purple">crypto</button>
+      <button type="button" onclick="runCommand('firewall')" class="term-quick-pill term-pill-gold">firewall</button>
+      <button type="button" onclick="runCommand('rules')" class="term-quick-pill term-pill-blue">rules</button>
+      <button type="button" onclick="runCommand('sentinel')" class="term-quick-pill term-pill-cyan">sentinel</button>
+      <button type="button" onclick="runCommand('sysinfo')" class="term-quick-pill term-pill-neutral">sysinfo</button>
+      <button type="button" onclick="runCommand('matrix')" class="term-quick-pill term-pill-emerald">matrix</button>
+      <button type="button" onclick="runCommand('clear')" class="term-quick-pill term-pill-neutral">clear</button>
     </footer>
   </main>
 
@@ -351,8 +893,136 @@
       };
 
       window.focusTermInput = function() {
+        if (!isClientGateVerified) {
+          document.getElementById('superAdminGateTokenInput')?.focus();
+          return;
+        }
         document.getElementById('termInputField')?.focus();
       };
+
+      // ─── EXPLICIT CLIENT-SIDE ACCESS & SERVER TOKEN VERIFICATION GATE ───
+      const VALID_ADMIN_HASHES = [
+        "4ef9674e23418643453fbf0c4ea870992d64ff504e64019d064562b69eb85859",
+        "f0e6d50c8713b0b10d639409e513b927961820f0b5ac227d9b6329bce5dc7b98",
+        "0675731e4ad4a1f3a2bcbd9e330774bcd3a0f5728ceeb5dd2983c3be24efe8d2",
+        "04578d1c1822fe9c2fff33c2937a1af5d871ce28281426dca3cd1734bd9b38e5"
+      ];
+      let isClientGateVerified = false;
+      let stagedServerToken = '';
+
+      async function sha256Hex(str) {
+        if (window.crypto && window.crypto.subtle) {
+          const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str || ''));
+          return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        return '';
+      }
+
+      function applyGateUiState(mode = 'locked', message = '') {
+        const banner = document.getElementById('superAdminGateBanner');
+        const badgeText = document.getElementById('superAdminGateBadgeText');
+        const feedback = document.getElementById('superAdminGateFeedback');
+        const lockBtn = document.getElementById('superAdminGateLockBtn');
+        const initLine = document.getElementById('termSessionInitLine');
+        const termInput = document.getElementById('termInputField');
+        const prefix = document.getElementById('termPromptPrefix');
+        if (banner) {
+          banner.classList.toggle('is-verified', isClientGateVerified);
+          banner.classList.toggle('is-locked', !isClientGateVerified);
+          banner.classList.remove('is-shake');
+        }
+        if (badgeText) {
+          badgeText.textContent = isClientGateVerified
+            ? (stagedServerToken ? 'VERIFIED • SERVER TOKEN BOUND' : 'VERIFIED • SUPERADMIN PASSKEY')
+            : 'ACCESS GATE LOCKED';
+        }
+        if (lockBtn) lockBtn.classList.toggle('hidden', !isClientGateVerified);
+        if (termInput) {
+          termInput.classList.toggle('is-locked', !isClientGateVerified);
+          termInput.placeholder = isClientGateVerified
+            ? 'Enter command (e.g. help, iplist, scan, pentest, crypto)...'
+            : 'Locked — verify SuperAdmin server token above before executing commands...';
+        }
+        if (prefix && !isCloudConnected) {
+          prefix.textContent = isClientGateVerified ? 'root@nexchat-mainframe:~$' : 'locked@nexchat-gate:~$';
+        }
+        if (initLine) {
+          initLine.textContent = isClientGateVerified
+            ? 'Client-side verification gate unlocked. Remote cloud shell remains protected by SuperAdmin server token verification.'
+            : 'System initialized. Client-side access gate active — verify SuperAdmin server token above before running any command.';
+        }
+        if (feedback && message) {
+          feedback.textContent = message;
+          feedback.className = 'term-gate-feedback' + (mode === 'error' ? ' is-error' : (mode === 'success' ? ' is-success' : ''));
+        }
+      }
+
+      function requireGateBeforeCommand(cmdLabel) {
+        if (isClientGateVerified) return true;
+        const banner = document.getElementById('superAdminGateBanner');
+        if (banner) {
+          banner.classList.add('is-shake');
+          banner.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+        const msg = `Execution blocked for "${cmdLabel}": complete client-side verification with a SuperAdmin server token (>= 32 chars) or admin passkey above before any command executes.`;
+        applyGateUiState('error', msg);
+        logTerminal(`[ACCESS GATE] ${msg}`, 'error');
+        document.getElementById('superAdminGateTokenInput')?.focus();
+        return false;
+      }
+
+      window.verifyTerminalGate = async function(secretInput) {
+        const trimmed = String(secretInput || '').trim();
+        if (!trimmed) {
+          applyGateUiState('error', 'Enter a SuperAdmin server token (>= 32 chars for TERMINAL_SECRET bridge auth) or verified passkey.');
+          return false;
+        }
+        const hash = await sha256Hex(trimmed);
+        const matchesPasskey = VALID_ADMIN_HASHES.includes(hash);
+        const meetsServerTokenLen = trimmed.length >= 32;
+        if (!matchesPasskey && !meetsServerTokenLen) {
+          applyGateUiState('error', 'Verification failed: enter a valid admin passkey or a SuperAdmin server token of at least 32 characters.');
+          logTerminal('[ACCESS GATE] Verification rejected (invalid passkey / server token < 32 chars).', 'error');
+          return false;
+        }
+        isClientGateVerified = true;
+        stagedServerToken = meetsServerTokenLen ? trimmed : '';
+        if (matchesPasskey) {
+          const nowStr = Date.now().toString();
+          try { sessionStorage.setItem('nex_admin_authorized', 'true'); } catch (_) {}
+          try { sessionStorage.setItem('nex_admin_auth_timestamp', nowStr); } catch (_) {}
+          const adminLink = document.getElementById('terminalAdminConsoleLink');
+          if (adminLink) adminLink.style.display = 'inline-flex';
+        }
+        const statusMsg = meetsServerTokenLen
+          ? 'Client-side gate unlocked. SuperAdmin server token staged in memory for server-side TERMINAL_SECRET WebSocket verification.'
+          : 'Client-side gate unlocked via verified SuperAdmin passkey. Remote cloud bridge still requires TERMINAL_SECRET server token.';
+        applyGateUiState('success', statusMsg);
+        logTerminal(`[ACCESS GATE] ${statusMsg}`, 'success');
+        document.getElementById('termInputField')?.focus();
+        return true;
+      };
+
+      window.lockTerminalGate = function() {
+        isClientGateVerified = false;
+        stagedServerToken = '';
+        if (isCloudConnected) disconnectCloudTerminal();
+        const input = document.getElementById('superAdminGateTokenInput');
+        if (input) input.value = '';
+        applyGateUiState('locked', 'Gate locked. Verify SuperAdmin server token or passkey before any command executes.');
+        logTerminal('[ACCESS GATE] Terminal access gate locked.', 'warn');
+      };
+
+      document.getElementById('superAdminGateForm')?.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const tokenEl = document.getElementById('superAdminGateTokenInput');
+        const ok = await window.verifyTerminalGate(tokenEl ? tokenEl.value : '');
+        if (ok && tokenEl) tokenEl.value = '';
+      });
+      document.getElementById('superAdminGateLockBtn')?.addEventListener('click', () => {
+        window.lockTerminalGate();
+      });
+      applyGateUiState('locked');
 
 
       // ─── CLOUD TERMINAL BRIDGE (LINODE VPS / REAL SHELL) ───
@@ -380,7 +1050,7 @@
           badge.className = 'px-2.5 py-1 rounded bg-black/50 border border-white/20 text-white/60 flex items-center gap-1.5';
           dot.className = 'w-2 h-2 rounded-full bg-white/40';
           txt.textContent = 'CLOUD: STANDBY';
-          if (prefix) prefix.textContent = 'root@nexchat-mainframe:~$ ';
+          if (prefix) prefix.textContent = isClientGateVerified ? 'root@nexchat-mainframe:~$' : 'locked@nexchat-gate:~$';
         }
       }
 
@@ -390,12 +1060,15 @@
           cloudSocket = null;
         }
 
-        const wsUrl = url || cloudTargetUrl;
+        let wsUrl = url || cloudTargetUrl;
         cloudTargetUrl = wsUrl;
         localStorage.setItem('nex_cloud_terminal_url', wsUrl);
+        if (stagedServerToken && wsUrl && !/[?&]token=/.test(wsUrl)) {
+          wsUrl += (wsUrl.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(stagedServerToken);
+        }
 
         updateCloudBadge('connecting');
-        logTerminal(`[CLOUD BRIDGE] Initiating secure WebSocket bridge to: ${wsUrl}...`, 'info');
+        logTerminal(`[CLOUD BRIDGE] Initiating secure WebSocket bridge to: ${cloudTargetUrl}...`, 'info');
 
         try {
           cloudSocket = new WebSocket(wsUrl);
@@ -460,6 +1133,7 @@
         const raw = input.value.trim();
         input.value = '';
         if (!raw) return;
+        if (!requireGateBeforeCommand(raw)) return;
 
         commandHistory.push(raw);
         historyIdx = commandHistory.length;
@@ -523,7 +1197,8 @@
         }
       });
 
-      window.runCommand = function(cmd) {
+      window.runCommand = async function(cmd) {
+        if (!requireGateBeforeCommand(cmd)) return;
         const parts = cmd.trim().split(/\s+/);
         const main = parts[0].toLowerCase();
         const target = parts.slice(1).join(' ');
@@ -952,20 +1627,8 @@ Active Network Mesh Connections:
           toggleMatrixRain();
         }
         else if (main === 'admin') {
-          const inputHash = await (async (str) => {
-            if (window.crypto && window.crypto.subtle) {
-              const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str || ''));
-              return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-            }
-            return '';
-          })(parts[1]);
-          const VALID_HASHES = [
-            "4ef9674e23418643453fbf0c4ea870992d64ff504e64019d064562b69eb85859",
-            "f0e6d50c8713b0b10d639409e513b927961820f0b5ac227d9b6329bce5dc7b98",
-            "0675731e4ad4a1f3a2bcbd9e330774bcd3a0f5728ceeb5dd2983c3be24efe8d2",
-            "04578d1c1822fe9c2fff33c2937a1af5d871ce28281426dca3cd1734bd9b38e5"
-          ];
-          if (VALID_HASHES.includes(inputHash)) {
+          const inputHash = await sha256Hex(parts[1]);
+          if (VALID_ADMIN_HASHES.includes(inputHash)) {
             const nowStr = Date.now().toString();
             try { sessionStorage.setItem('nex_admin_authorized', 'true'); } catch (_) {}
             try { sessionStorage.setItem('nex_admin_auth_timestamp', nowStr); } catch (_) {}
@@ -1047,9 +1710,7 @@ Active Network Mesh Connections:
         };
       }
 
-      // Initial focus
-      focusTermInput();
-      logTerminal('[SYSTEM] SuperAdmin Command Shell online. Type "help" for command matrix.', 'success');
+      logTerminal('[ACCESS GATE] Shell ready in locked standby. Verify SuperAdmin server token in the banner above before any command executes.', 'warn');
     })();
   </script>
 </body>

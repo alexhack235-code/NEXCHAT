@@ -44,8 +44,77 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  </noscript>
+  <!-- Critical Immediate Paint Styles for Locked Screen & Chip Readability -->
+  <style>
+    html, body.reels-body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100%;
+      min-height: 100dvh;
+      background: #040711;
+      color: #f8fafc;
+      overflow-x: hidden !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    }
+    #reelsLockedScreenOverlay {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    .reels-lock-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+      box-sizing: border-box;
+    }
+    .reels-lock-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      max-width: 100%;
+      padding: 12px 20px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 14px;
+      line-height: 1.3;
+      text-align: center;
+      white-space: normal;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      box-sizing: border-box;
+      flex: 1 1 210px;
+    }
+    @media (max-width: 440px) {
+      .reels-lock-btn {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+    }
+    .t-stop-marker,
+    .hud-metric-item,
+    .hud-badge-res,
+    .hud-live-rec,
+    .hud-brand-title {
+      font-size: 12px !important;
+      color: #fef08a !important;
+      opacity: 1 !important;
+    }
+  </style>
   <!-- Tailwind removed: pure CSS design system -->
   <link rel="stylesheet" href="reels.css">
   <link rel="stylesheet" href="extension-hub.css">
@@ -53,31 +122,33 @@
   <link rel="stylesheet" href="css/layout-declutter.css">
 </head>
 <body class="reels-body">
-  <!-- PERMANENT UNDER-DEVELOPMENT LOCK SCREEN (Full-Screen Blocking Overlay) -->
-  <div id="reelsLockedScreenOverlay" style="position: fixed; inset: 0; z-index: 2147483647; background: radial-gradient(circle at center, #0c1527 0%, #040711 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; pointer-events: all; user-select: none;">
-    <div style="position: relative; width: 88px; height: 88px; border-radius: 50%; background: rgba(0, 255, 136, 0.08); border: 2px solid rgba(0, 255, 136, 0.45); display: flex; align-items: center; justify-content: center; font-size: 34px; color: #00ff88; margin-bottom: 24px; box-shadow: 0 0 50px rgba(0, 255, 136, 0.3);">
-      <i class="fa-solid fa-lock"></i>
-      <div style="position: absolute; inset: -8px; border-radius: 50%; border: 1px dashed rgba(0, 212, 255, 0.4); animation: spin 12s linear infinite;"></div>
+  <!-- PERMANENT UNDER-DEVELOPMENT LOCK SCREEN (Immediate First-Paint Blocking Overlay) -->
+  <main id="reelsLockedScreenOverlay" role="main" aria-label="CamShot Reels Coming Soon" style="position: fixed; inset: 0; z-index: 2147483647; background: radial-gradient(circle at center, #0c1527 0%, #040711 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; pointer-events: all; user-select: none;">
+    <div style="position: relative; width: 88px; height: 88px; border-radius: 50%; background: rgba(0, 255, 136, 0.08); border: 2px solid rgba(0, 255, 136, 0.45); display: flex; align-items: center; justify-content: center; font-size: 34px; color: #00ff88; margin-bottom: 24px; box-shadow: 0 0 50px rgba(0, 255, 136, 0.3);" aria-hidden="true">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <div style="position: absolute; inset: -8px; border-radius: 50%; border: 1px dashed rgba(0, 212, 255, 0.4);"></div>
     </div>
-    <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: 3px; color: #00ff88; text-transform: uppercase; margin-bottom: 14px; background: rgba(0, 255, 136, 0.1); padding: 6px 16px; border-radius: 9999px; border: 1px solid rgba(0, 255, 136, 0.3);">
+    <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: 2px; color: #34ffa3; text-transform: uppercase; margin-bottom: 14px; background: rgba(0, 255, 136, 0.14); padding: 6px 16px; border-radius: 9999px; border: 1px solid rgba(0, 255, 136, 0.4);">
       <span style="width: 7px; height: 7px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 10px #00ff88;"></span>
       PLATFORM NOTICE
     </div>
-    <h1 style="font-size: clamp(26px, 5.5vw, 40px); font-weight: 800; color: #ffffff; margin: 0 0 14px 0; letter-spacing: -0.5px;">
+    <h1 style="font-size: clamp(24px, 5.5vw, 40px); font-weight: 800; color: #ffffff; margin: 0 0 14px 0; letter-spacing: -0.5px; line-height: 1.2;">
       Coming Soon Under Development
     </h1>
-    <p style="font-size: 15px; color: #94a3b8; max-width: 460px; line-height: 1.6; margin: 0 0 32px 0;">
+    <p style="font-size: 15px; color: #cbd5e1; max-width: 460px; line-height: 1.6; margin: 0 0 28px 0;">
       CamShot Video Reels is currently locked for scheduled infrastructure enhancements and core system development. All reel feeds and uploads are temporarily quarantined.
     </p>
-    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px;">
-      <a href="chat.html" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #00ff88, #00d4ff); color: #050811; font-weight: 800; font-size: 14px; padding: 13px 28px; border-radius: 14px; text-decoration: none; box-shadow: 0 4px 24px rgba(0, 255, 136, 0.35); transition: transform 0.2s;">
-        <i class="fa-solid fa-arrow-left"></i> Return to NEXCHAT
+    <div class="reels-lock-actions">
+      <a href="chat.html" id="reelsReturnBtn" class="reels-lock-btn" style="background: linear-gradient(135deg, #00ff88, #00d4ff); color: #050811; text-decoration: none; box-shadow: 0 4px 24px rgba(0, 255, 136, 0.35);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>Return to NEXCHAT</span>
       </a>
-      <button type="button" id="reelsNotifyMeBtn" onclick="subscribeReelsLaunchNotification()" style="display: inline-flex; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(0, 255, 136, 0.45); color: #00ff88; font-weight: 800; font-size: 14px; padding: 13px 26px; border-radius: 14px; cursor: pointer; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0, 255, 136, 0.15); transition: all 0.2s;">
-        <i class="fa-solid fa-bell"></i> <span id="reelsNotifyBtnText">Notify Me When Reels Launch</span>
+      <button type="button" id="reelsNotifyMeBtn" class="reels-lock-btn" onclick="subscribeReelsLaunchNotification()" style="background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(0, 255, 136, 0.55); color: #34ffa3; cursor: pointer; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0, 255, 136, 0.15);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span id="reelsNotifyBtnText">Notify Me When Reels Launch</span>
       </button>
     </div>
-  </div>
+  </main>
   <script>
     function subscribeReelsLaunchNotification() {
       const btn = document.getElementById('reelsNotifyMeBtn');
@@ -114,6 +185,9 @@
       }
     });
   </script>
+
+  <!-- Quarantined Hidden Background Reels UI (inert + hidden while lock screen is active) -->
+  <div id="reelsBackgroundUi" inert hidden aria-hidden="true" style="display: none !important;">
 
   <!-- Ambient Luxury Background Grid -->
   <div class="hud-grid-overlay" aria-hidden="true"></div>
@@ -1602,30 +1676,31 @@
   <!-- Notification Toast -->
   <div id="reelPredictionOverlayContainer" style="position:fixed; bottom:80px; left:20px; z-index:90; max-width:360px; width:calc(100% - 40px);"></div>
   <div id="reelsNotif" class="reels-toast" style="display: none;"></div>
+  </div><!-- /#reelsBackgroundUi -->
 
   <script type="module" src="./src/js/nexchat-auto-heal-client.js"></script>
-  <script src="./src/js/synthetic-media-validator.js"></script>
-  <script src="./src/js/reels-watermark-engine.js"></script>
+  <script defer src="./src/js/synthetic-media-validator.js"></script>
+  <script defer src="./src/js/reels-watermark-engine.js"></script>
   <script type="module" src="./src/js/security-shield.js"></script>
   <script type="module" src="./src/js/ai-security-scanner-api.js"></script>
-  <script src="./src/js/report-activity-monitor.js"></script>
+  <script defer src="./src/js/report-activity-monitor.js"></script>
   <script type="module" src="reels.js"></script>
-  <script src="./src/js/extension-consent-hub.js"></script>
-  <script src="./src/js/reels-advanced-suite.js"></script>
-  <script src="./src/js/nextgen-eight-suite.js"></script>
-  <script src="./src/js/verification-badges-catalog.js"></script>
-  <script src="./src/js/strategic-marketing-suite.js"></script>
-  <script src="./src/js/reels-quantum-suite.js"></script>
-  <script src="./src/js/reels-viral-engagement-suite.js"></script>
-  <script src="./src/js/reels-audio-dsp-eq.js"></script>
-  <script src="./src/js/reels-streamer-tipping.js"></script>
-  <script src="./src/js/reels-prediction-engine.js"></script>
-  <script src="./src/js/reels-greenscreen.js"></script>
+  <script defer src="./src/js/extension-consent-hub.js"></script>
+  <script defer src="./src/js/reels-advanced-suite.js"></script>
+  <script defer src="./src/js/nextgen-eight-suite.js"></script>
+  <script defer src="./src/js/verification-badges-catalog.js"></script>
+  <script defer src="./src/js/strategic-marketing-suite.js"></script>
+  <script defer src="./src/js/reels-quantum-suite.js"></script>
+  <script defer src="./src/js/reels-viral-engagement-suite.js"></script>
+  <script defer src="./src/js/reels-audio-dsp-eq.js"></script>
+  <script defer src="./src/js/reels-streamer-tipping.js"></script>
+  <script defer src="./src/js/reels-prediction-engine.js"></script>
+  <script defer src="./src/js/reels-greenscreen.js"></script>
 
   <!-- =========================================================================
-       CAMSHOT ACCESS CONSENT MODAL & PROMINENT TOP BANNER
+       CAMSHOT ACCESS CONSENT MODAL & PROMINENT TOP BANNER (quarantined while locked)
        ========================================================================= -->
-  <div id="camshotAccessConsentModal" class="camshot-consent-modal-backdrop" style="display: none;">
+  <div id="camshotAccessConsentModal" class="camshot-consent-modal-backdrop" style="display: none;" hidden inert aria-hidden="true">
     <div class="camshot-consent-modal-window">
       <div class="camshot-consent-modal-header">
         <div class="camshot-consent-brand">
@@ -1694,6 +1769,7 @@
   <script>
     (function initCamshotAccessEngine() {
       function checkAndInit() {
+        if (document.getElementById('reelsLockedScreenOverlay')) return;
         const isGranted = localStorage.getItem('camshot_nexchat_access_granted') === 'true';
         const modal = document.getElementById('camshotAccessConsentModal');
         const banner = document.getElementById('camshotImmediateAccessBanner');
@@ -1775,8 +1851,8 @@
 
 
   <!-- REEL DETAILS & REWARDS SLIDE-UP PANEL (TIKTOK STYLE) -->
-  <div id="reelDetailsBackdrop" class="reel-details-backdrop" style="display: none;"></div>
-  <div id="reelDetailsSlideUpPanel" class="reel-details-slideup-panel" style="display: none;">
+  <div id="reelDetailsBackdrop" class="reel-details-backdrop" style="display: none;" hidden inert aria-hidden="true"></div>
+  <div id="reelDetailsSlideUpPanel" class="reel-details-slideup-panel" style="display: none;" hidden inert aria-hidden="true">
     <div class="reel-slideup-header-bar">
       <div class="reel-slideup-drag-pill"></div>
       <div class="reel-slideup-top-row">

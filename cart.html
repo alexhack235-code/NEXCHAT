@@ -146,6 +146,25 @@
       text-shadow: 0 0 20px rgba(0, 255, 102, 0.35);
     }
 
+    .balance-skeleton {
+      display: inline-block;
+      min-width: 88px;
+      height: 1em;
+      line-height: 1;
+      vertical-align: middle;
+      border-radius: 8px;
+      color: transparent !important;
+      text-shadow: none !important;
+      background: linear-gradient(90deg, rgba(0, 255, 102, 0.12) 25%, rgba(0, 255, 102, 0.28) 50%, rgba(0, 255, 102, 0.12) 75%);
+      background-size: 200% 100%;
+      animation: cartBalanceShimmer 1.15s ease-in-out infinite;
+    }
+
+    @keyframes cartBalanceShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
     .user-info .user-meta {
       text-align: right;
       color: rgba(0, 255, 102, 0.75);
@@ -662,7 +681,7 @@
     <div class="user-info">
       <div>
         <div class="user-balance">Your Balance</div>
-        <div class="balance-value"><span id="currentBalance">0</span> </div>
+        <div class="balance-value"><span id="currentBalance" class="balance-skeleton" aria-busy="true">—</span> </div>
       </div>
       <div class="user-meta">
         <p id="userUID">Loading...</p>
@@ -794,25 +813,25 @@
       <div class="section-title-wrap" style="text-align: center; margin-bottom: 28px;">
         <h2 class="section-title"><i class="fa-solid fa-certificate" style="color: #00f2ff;"></i> Creator Verification Badges</h2>
         <p class="section-desc" style="color: #94a3b8; font-size: 13px; max-width: 650px; margin: 6px auto 0;">
-          Multi-tier verified identity ecosystem modeled after X (Twitter). Stand out with distinctive Beginner, Pro Blue, Gold Organization, Grey Official, and VIP Sovereign badges across CamShot Reels and chat. Instant order dispatch via WhatsApp.
+          Multi-tier NEXCHAT verified identity ecosystem built for trusted creators and communities. Stand out with distinctive Beginner, Pro Blue, Gold Studio, Official Slate, and VIP Sovereign badges across CamShot Reels and chat. Instant order dispatch via WhatsApp.
         </p>
       </div>
 
       <!-- Category Filter Pills -->
       <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;">
-        <span class="badge" style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; color: #10b981; font-size: 11px; padding: 5px 12px;">
+        <span class="badge" style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; color: #10b981; font-size: 12px; padding: 5px 12px;">
           <i class="fa-solid fa-seedling"></i> Beginner Creators
         </span>
-        <span class="badge" style="background: rgba(29, 155, 240, 0.12); border: 1px solid #1d9bf0; color: #1d9bf0; font-size: 11px; padding: 5px 12px;">
-          <i class="fa-solid fa-circle-check"></i> Pro &amp; Premium+ (X Blue)
+        <span class="badge" style="background: rgba(29, 155, 240, 0.12); border: 1px solid #1d9bf0; color: #1d9bf0; font-size: 12px; padding: 5px 12px;">
+          <i class="fa-solid fa-circle-check"></i> Pro &amp; Premium+ (NEX Blue)
         </span>
-        <span class="badge" style="background: rgba(255, 215, 0, 0.12); border: 1px solid #ffd700; color: #ffd700; font-size: 11px; padding: 5px 12px;">
-          <i class="fa-solid fa-building-circle-check"></i> Business &amp; Studios (X Gold)
+        <span class="badge" style="background: rgba(255, 215, 0, 0.12); border: 1px solid #ffd700; color: #ffd700; font-size: 12px; padding: 5px 12px;">
+          <i class="fa-solid fa-building-circle-check"></i> Business &amp; Studios (NEX Gold)
         </span>
-        <span class="badge" style="background: rgba(148, 163, 184, 0.12); border: 1px solid #94a3b8; color: #94a3b8; font-size: 11px; padding: 5px 12px;">
-          <i class="fa-solid fa-landmark"></i> Government &amp; Officials (X Grey)
+        <span class="badge" style="background: rgba(148, 163, 184, 0.12); border: 1px solid #94a3b8; color: #94a3b8; font-size: 12px; padding: 5px 12px;">
+          <i class="fa-solid fa-landmark"></i> Government &amp; Officials (NEX Slate)
         </span>
-        <span class="badge" style="background: rgba(192, 132, 252, 0.12); border: 1px solid #c084fc; color: #c084fc; font-size: 11px; padding: 5px 12px;">
+        <span class="badge" style="background: rgba(192, 132, 252, 0.12); border: 1px solid #c084fc; color: #c084fc; font-size: 12px; padding: 5px 12px;">
           <i class="fa-solid fa-crown"></i> VIP Sovereign &amp; Patrons
         </span>
       </div>
@@ -825,7 +844,7 @@
           <div class="package-icon" style="color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
           <div class="package-tokens" style="color: #10b981; font-size: 20px;">BEGINNER</div>
           <div class="package-label" style="font-weight: 700; color: #fff;">Beginner Verified</div>
-          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+          <div style="font-size: 12px; color: #cbd5e1; margin: 6px 0 10px; min-height: 44px;">
             Rising talent verified check. Confirms human identity, baseline CamShot algorithm reach, and green verified badge.
           </div>
           <div class="package-price" style="color: #10b981;">$5</div>
@@ -835,13 +854,13 @@
           </button>
         </div>
 
-        <!-- Tier 2: Pro Creator (X Blue Standard) -->
-        <div class="package-card" onclick="selectBadgePackage('TIER_PRO', 12, 18000, 'Pro Creator (X Blue)', 'fa-circle-check')" style="border-color: rgba(29, 155, 240, 0.5); position: relative;">
-          <div class="special-badge" style="background: #1d9bf0; color: #fff; font-weight: 800;">X BLUE STANDARD</div>
+        <!-- Tier 2: Pro Creator (NEX Blue Standard) -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_PRO', 12, 18000, 'Pro Creator (NEX Blue)', 'fa-circle-check')" style="border-color: rgba(29, 155, 240, 0.5); position: relative;">
+          <div class="special-badge" style="background: #1d9bf0; color: #fff; font-weight: 800;">NEX BLUE STANDARD</div>
           <div class="package-icon" style="color: #1d9bf0;"><i class="fa-solid fa-circle-check"></i></div>
-          <div class="package-tokens" style="color: #1d9bf0; font-size: 20px;">PRO (X BLUE)</div>
-          <div class="package-label" style="font-weight: 700; color: #fff;">Pro Creator (X Blue)</div>
-          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+          <div class="package-tokens" style="color: #1d9bf0; font-size: 20px;">PRO (NEX BLUE)</div>
+          <div class="package-label" style="font-weight: 700; color: #fff;">Pro Creator (NEX Blue)</div>
+          <div style="font-size: 12px; color: #cbd5e1; margin: 6px 0 10px; min-height: 44px;">
             The iconic electric blue checkmark. Unlocks full monetization, 5x CamShot velocity priority, and trusted creator status.
           </div>
           <div class="package-price" style="color: #1d9bf0;">$12</div>
@@ -857,7 +876,7 @@
           <div class="package-icon" style="color: #00f2ff;"><i class="fa-solid fa-certificate"></i></div>
           <div class="package-tokens" style="color: #00f2ff; font-size: 20px;">PRO MASTER</div>
           <div class="package-label" style="font-weight: 700; color: #fff;">Pro Master (Premium+)</div>
-          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+          <div style="font-size: 12px; color: #cbd5e1; margin: 6px 0 10px; min-height: 44px;">
             Illuminated cyan rosette badge. 10x viral feed boost, synthetic detector bypass whitelist, and 0% tipping commission.
           </div>
           <div class="package-price" style="color: #00f2ff;">$25</div>
@@ -867,14 +886,14 @@
           </button>
         </div>
 
-        <!-- Tier 4: Verified Business & Studio (X Gold Organization) -->
-        <div class="package-card" onclick="selectBadgePackage('TIER_BUSINESS_GOLD', 50, 75000, 'Verified Business & Studio (X Gold)', 'fa-certificate')" style="border-color: rgba(255, 215, 0, 0.5); position: relative;">
-          <div class="special-badge" style="background: #ffd700; color: #000; font-weight: 800;">X GOLD BUSINESS</div>
+        <!-- Tier 4: Verified Business & Studio (NEX Gold Organization) -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_BUSINESS_GOLD', 50, 75000, 'Verified Business & Studio (NEX Gold)', 'fa-certificate')" style="border-color: rgba(255, 215, 0, 0.5); position: relative;">
+          <div class="special-badge" style="background: #ffd700; color: #000; font-weight: 800;">NEX GOLD BUSINESS</div>
           <div class="package-icon" style="color: #ffd700;"><i class="fa-solid fa-certificate"></i></div>
-          <div class="package-tokens" style="color: #ffd700; font-size: 20px;">X GOLD</div>
+          <div class="package-tokens" style="color: #ffd700; font-size: 20px;">NEX GOLD</div>
           <div class="package-label" style="font-weight: 700; color: #fff;">Verified Business &amp; Studio</div>
-          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
-            Official gold organization rosette like X Gold. Enables studio profile branding, multi-creator staff badges, and verified business banner.
+          <div style="font-size: 12px; color: #cbd5e1; margin: 6px 0 10px; min-height: 44px;">
+            Official gold organization rosette for NEXCHAT studios. Enables studio profile branding, multi-creator staff badges, and verified business banner.
           </div>
           <div class="package-price" style="color: #ffd700;">$50</div>
           <div class="package-currency">₦75,000 NGN</div>
@@ -883,13 +902,13 @@
           </button>
         </div>
 
-        <!-- Tier 5: Government & Sovereign Authority (X Grey Official) -->
-        <div class="package-card" onclick="selectBadgePackage('TIER_GOVERNMENT_GREY', 40, 60000, 'Government & Sovereign Authority (X Grey)', 'fa-circle-check')" style="border-color: rgba(148, 163, 184, 0.5); position: relative;">
-          <div class="special-badge" style="background: #94a3b8; color: #000; font-weight: 800;">X GREY OFFICIAL</div>
+        <!-- Tier 5: Government & Sovereign Authority (NEX Slate Official) -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_GOVERNMENT_GREY', 40, 60000, 'Government & Sovereign Authority (NEX Slate)', 'fa-circle-check')" style="border-color: rgba(148, 163, 184, 0.5); position: relative;">
+          <div class="special-badge" style="background: #94a3b8; color: #000; font-weight: 800;">NEX SLATE OFFICIAL</div>
           <div class="package-icon" style="color: #cbd5e1;"><i class="fa-solid fa-circle-check"></i></div>
-          <div class="package-tokens" style="color: #cbd5e1; font-size: 20px;">X GREY</div>
+          <div class="package-tokens" style="color: #cbd5e1; font-size: 20px;">NEX SLATE</div>
           <div class="package-label" style="font-weight: 700; color: #fff;">Government &amp; Authority</div>
-          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+          <div style="font-size: 12px; color: #cbd5e1; margin: 6px 0 10px; min-height: 44px;">
             Official slate grey checkmark for public institutions, community governance, sovereign validator nodes, and consensus councils.
           </div>
           <div class="package-price" style="color: #cbd5e1;">$40</div>
@@ -1287,22 +1306,39 @@
     let selectedPackage = null;
     let selectedPayment = 'chat';
 
+    function setBalanceDisplay(val) {
+      const balEl = document.getElementById("currentBalance");
+      if (!balEl) return;
+      balEl.classList.remove("balance-skeleton");
+      balEl.setAttribute("aria-busy", "false");
+      balEl.textContent = formatBalanceDisplay(val);
+    }
+
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         currentUser = null;
         const uidEl = document.getElementById("userUID");
         const storedUid = localStorage.getItem('myUID') || 'Guest_' + Math.random().toString(36).substring(2, 8);
         if (uidEl) uidEl.textContent = storedUid;
+        const cachedTokens = parseInt(String(localStorage.getItem('user_tokens') || localStorage.getItem('nexchat_user_tokens') || '0').replace(/,/g, ''), 10);
+        setBalanceDisplay(isNaN(cachedTokens) ? 0 : cachedTokens);
         return;
       }
 
       currentUser = user;
       document.getElementById("userUID").textContent = user.uid;
 
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const tokens = userDoc.data().tokens || 0;
-        document.getElementById("currentBalance").textContent = formatBalanceDisplay(tokens);
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const tokens = userDoc.data().tokens || 0;
+          setBalanceDisplay(tokens);
+        } else {
+          setBalanceDisplay(0);
+        }
+      } catch (_) {
+        const cachedTokens = parseInt(String(localStorage.getItem('user_tokens') || localStorage.getItem('nexchat_user_tokens') || '0').replace(/,/g, ''), 10);
+        setBalanceDisplay(isNaN(cachedTokens) ? 0 : cachedTokens);
       }
     });
 

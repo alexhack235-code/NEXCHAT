@@ -88,6 +88,8 @@
   <link rel="stylesheet" href="css/status-elite-suite.css?v=12.0">
   <link rel="stylesheet" href="css/global-drop.css?v=13.0">
   <link rel="stylesheet" href="css/chat-experience-studio.css?v=12.0">
+  <link rel="stylesheet" href="css/app-themes-studio.css?v=1.0">
+  <link rel="stylesheet" href="css/mobile-ux-audit-fixes.css?v=1.0">
   <style id="globalDropMobileStyles">
     @media (max-width: 899px) {
       .x-composer {
@@ -272,6 +274,24 @@
     .more-sheet-backdrop {
       z-index: 1 !important;
     }
+    /* Token Balance Loading Shimmer (prevents 0 -> real balance flash) */
+    .token-balance-skeleton {
+      display: inline-block;
+      min-width: 42px;
+      height: 1em;
+      line-height: 1;
+      vertical-align: middle;
+      border-radius: 6px;
+      color: transparent !important;
+      background: linear-gradient(90deg, rgba(148, 163, 184, 0.16) 25%, rgba(148, 163, 184, 0.34) 50%, rgba(148, 163, 184, 0.16) 75%);
+      background-size: 200% 100%;
+      animation: nexTokenShimmer 1.2s ease-in-out infinite;
+      user-select: none;
+    }
+    @keyframes nexTokenShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
   </style>
 </head>
 
@@ -285,8 +305,8 @@
         <div id="headerLogoContainer">
           <div class="nex-logo" id="headerLogoImg">
             <img src="logo.jpg" alt="NEXCHAT" class="nex-header-logo-badge" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(0, 255, 102, 0.4); box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);">
-            <div class="nex-header-brand-wrap" style="display: flex; align-items: center; gap: 8px;">
-              <span class="nex-text nex-brand-title" style="font-size: 21px; font-weight: 700; letter-spacing: 0.4px; color: #e9edef;">NEXCHAT</span>
+            <div class="nex-header-brand-wrap" style="display: flex; align-items: center; gap: 6px;">
+              <span class="nex-text nex-brand-title app-logo-text">NEXCHAT</span>
               
             </div>
             <span class="nex-online-pulse"></span>
@@ -322,7 +342,7 @@
 
         <div id="tokenDisplay" class="token-display" title="Your tokens">
           <span class="token-label">Tokens</span>
-          <span id="tokenCount">0</span>
+          <span id="tokenCount" class="token-balance-skeleton" data-balance-state="loading" aria-busy="true">—</span>
           <span id="giftBadge" class="gift-badge" aria-live="polite"></span>
         </div>
         <button type="button" id="cyberStreakBtn" class="cyber-streak-btn" title="Daily Cyber Streak: Tap to Claim Rewards">
@@ -402,7 +422,7 @@
         </div>
 
         <!-- Mobile Header Actions (visible on mobile < 900px: Camera, Search, 3-dots Menu) -->
-        <div class="header-right mobile-header-actions" style="display:flex; align-items:center; gap:8px;">
+        <div class="header-right mobile-header-actions">
           <button type="button" id="stealthGhostBtnMobile" class="header-icon-btn mobile-action-btn stealth-ghost-toggle-btn" title="Stealth Ghost Mode" aria-label="Toggle Stealth Ghost Mode" data-stealth-active="false">
             <i class="fa-solid fa-ghost"></i>
           </button>
@@ -410,9 +430,9 @@
           <button type="button" id="aegisPrivacyBtnMobile" class="header-icon-btn mobile-action-btn aegis-privacy-toggle-btn" title="Aegis Privacy Shield (Anti-Shoulder Surfing)" aria-label="Toggle Aegis Privacy Shield" data-aegis-active="false">
             <i class="fa-solid fa-user-secret" style="color: #00f3ff;"></i>
           </button>
-          <button id="mobileAlertsBtn" class="header-icon-btn mobile-action-btn" title="Alerts & Announcements" onclick="if(window.handleNavigation) window.handleNavigation('announcements');" style="font-size: 12px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; position: relative; color: #94a3b8;" aria-label="Alerts">
+          <button id="mobileAlertsBtn" class="header-icon-btn mobile-action-btn" title="Alerts &amp; Announcements" onclick="if(window.handleNavigation) window.handleNavigation('announcements');" style="position: relative;" aria-label="Alerts">
             <i class="fa-solid fa-bell"></i>
-            <span class="nav-status-beacon" id="mobileAlertsBeacon" style="display: none; background: #00ff88; width: 6px; height: 6px; position: absolute; top: 4px; right: 4px; border-radius: 50%;"></span>
+            <span class="nav-status-beacon" id="mobileAlertsBeacon" style="display: none; background: #00ff88; width: 6px; height: 6px; position: absolute; top: 6px; right: 6px; border-radius: 50%;"></span>
           </button>
           <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats" onclick="if(window.openSearch) window.openSearch();">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -1266,10 +1286,6 @@
           <div class="chat-search-pill-wrapper">
             <i class="fa-solid fa-magnifying-glass chat-search-pill-icon" style="cursor: pointer;" title="Search" onclick="if(window.openSearch) window.openSearch(); else { const inp=document.getElementById('searchInput'); if(inp) inp.focus(); }"></i>
             <input type="text" id="searchInput" class="search-bar chat-search-pill-input" placeholder="Search chats or ask ChronEX AI..." autocomplete="off" />
-            <button type="button" id="chatSearchAlertsBtn" class="chat-search-pill-alert-btn" title="System Alerts & Announcements" onclick="if(window.handleNavigation) window.handleNavigation('announcements');" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; padding: 4px 8px; display: inline-flex; align-items: center; justify-content: center; position: relative;" aria-label="Alerts">
-              <i class="fa-solid fa-bell"></i>
-              <span class="nav-status-beacon" id="searchAlertsBeacon" style="display: none; background: #00ff88; width: 5px; height: 5px; position: absolute; top: 3px; right: 4px; border-radius: 50%;"></span>
-            </button>
           </div>
         </div>
 
@@ -1281,6 +1297,7 @@
           <button class="filter-tab" data-filter="market" title="Market Hub Messages">Market</button>
           <button class="filter-tab" data-filter="unread" title="Unread messages">Unread</button>
           <button class="filter-tab add-chat-tab" id="newChatFromTab" title="Start New Direct Chat"><i class="fa-solid fa-plus"></i></button>
+          <button type="button" class="filter-tab chatlist-template-tab" id="chatListTemplateBtn" title="Switch Chat List Template: Former Classic vs New Glass Cards"><i class="fa-solid fa-layer-group"></i> <span id="chatListTemplateBtnLabel">Glass Cards</span></button>
           <button type="button" class="filter-tab chatlist-style-tab" id="chatListCustomizeBtn" title="Customize Chat List Glassmorphism &amp; Picture"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>Glass</span></button>
         </div>
 
@@ -1323,7 +1340,7 @@
         <div class="chats-section">
           <ul id="contactList" class="chat-list">
             <!-- 1. ChronEX AI Pre-seeded Instant Chat -->
-            <li class="chat-list-item chat-item chronex-ai-item" data-chat-id="chronex-ai" data-chat-type="ai" data-name="Chronex AI" onclick="if(typeof openChat==='function'){openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+            <li class="chat-list-item chat-item chronex-ai-item" data-chat-id="chronex-ai" data-chat-type="ai" data-name="Chronex AI">
               <div class="chat-avatar-container" style="position: relative;">
                 <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
                 <span class="chat-online-beacon" style="display: block;"></span>
@@ -1347,7 +1364,7 @@
             </li>
 
             <!-- 2. DUTY -->
-            <li class="chat-list-item chat-item" data-chat-id="duty" data-chat-type="direct" data-name="DUTY" onclick="if(typeof openChat==='function'){openChat('duty', 'DUTY', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+            <li class="chat-list-item chat-item" data-chat-id="duty" data-chat-type="direct" data-name="DUTY">
               <div class="chat-avatar-container" style="position: relative;">
                 <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">D</div>
                 <span class="chat-online-beacon" style="display: none;"></span>
@@ -1365,7 +1382,7 @@
             </li>
 
             <!-- 3. Home Alone -->
-            <li class="chat-list-item chat-item" data-chat-id="home-alone" data-chat-type="direct" data-name="Home Alone" onclick="if(typeof openChat==='function'){openChat('home-alone', 'Home Alone', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+            <li class="chat-list-item chat-item" data-chat-id="home-alone" data-chat-type="direct" data-name="Home Alone">
               <div class="chat-avatar-container" style="position: relative;">
                 <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">H</div>
                 <span class="chat-online-beacon" style="display: none;"></span>
@@ -1383,7 +1400,7 @@
             </li>
 
             <!-- 4. king Alex001 -->
-            <li class="chat-list-item chat-item" data-chat-id="king-alex001" data-chat-type="direct" data-name="king Alex001" onclick="if(typeof openChat==='function'){openChat('king-alex001', 'king Alex001', 'logo.jpg', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+            <li class="chat-list-item chat-item" data-chat-id="king-alex001" data-chat-type="direct" data-name="king Alex001">
               <div class="chat-avatar-container" style="position: relative;">
                 <img src="logo.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">
                 <span class="chat-online-beacon" style="display: none;"></span>
@@ -1401,7 +1418,7 @@
             </li>
 
             <!-- 5. @Daven ★ -->
-            <li class="chat-list-item chat-item" data-chat-id="daven" data-chat-type="direct" data-name="@Daven ★" onclick="if(typeof openChat==='function'){openChat('daven', '@Daven ★', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+            <li class="chat-list-item chat-item" data-chat-id="daven" data-chat-type="direct" data-name="@Daven ★">
               <div class="chat-avatar-container" style="position: relative;">
                 <svg width="52" height="52" viewBox="0 0 52 52" class="chat-avatar" style="width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);"><circle cx="26" cy="26" r="26" fill="#050a0e"/><circle cx="26" cy="26" r="24" fill="#0e1720"/><path d="M16 19L22 25M22 19L16 25" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M30 19L36 25M36 19L30 25" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M17 33C20 38 32 38 35 33" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
                 <span class="chat-online-beacon" style="display: none;"></span>
@@ -1419,7 +1436,7 @@
             </li>
 
             <!-- 6. demon alexander -->
-            <li class="chat-list-item chat-item" data-chat-id="demon-alexander" data-chat-type="direct" data-name="demon alexander" onclick="if(typeof openChat==='function'){openChat('demon-alexander', 'demon alexander', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+            <li class="chat-list-item chat-item" data-chat-id="demon-alexander" data-chat-type="direct" data-name="demon alexander">
               <div class="chat-avatar-container" style="position: relative;">
                 <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">D</div>
                 <span class="chat-online-beacon" style="display: none;"></span>
@@ -1437,7 +1454,7 @@
             </li>
 
             <!-- 7. Werxcsz -->
-            <li class="chat-list-item chat-item" data-chat-id="werxcsz" data-chat-type="direct" data-name="Werxcsz" onclick="if(typeof openChat==='function'){openChat('werxcsz', 'Werxcsz', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+            <li class="chat-list-item chat-item" data-chat-id="werxcsz" data-chat-type="direct" data-name="Werxcsz">
               <div class="chat-avatar-container" style="position: relative;">
                 <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">W</div>
                 <span class="chat-online-beacon" style="display: none;"></span>
@@ -1456,33 +1473,39 @@
           </ul>
         </div>
 
-        <!-- WhatsApp Single 56px Neon Green FAB (New Chat / Channel / Reel Action Sheet) -->
-        <div class="chat-fab-cluster" id="chatFabCluster">
-          <button type="button" id="chronexAiFabBtn" class="chronex-ai-fab" title="Ask ChronEX AI" aria-label="Ask ChronEX AI" onclick="if(typeof openChat==='function'){openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai'); if(typeof showChatDetailView==='function')showChatDetailView();}">
-            <div class="ai-conic-ring">
-              <i class="fa-solid fa-circle-nodes"></i>
-            </div>
-          </button>
-          <button type="button" id="mobileFabNewChat" class="mobile-fab whatsapp-chat-fab nex-unified-fab" title="New Chat" aria-label="New Chat">
-            <span class="nex-fab-n" style="font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:24px; color:#0A0F1E; line-height:1; display:flex; align-items:center; justify-content:center;">N</span>
+        <!-- Unified Compact Speed-Dial FAB (New Chat, ChronEX AI, Channel, Reel) -->
+        <div class="chat-fab-cluster chatlist-fab-dock" id="chatFabCluster">
+          <button type="button" id="mobileFabNewChat" class="mobile-fab whatsapp-chat-fab nex-unified-fab" title="Create Chat or Ask ChronEX AI" aria-label="New Chat and AI Menu" aria-haspopup="dialog" aria-expanded="false">
+            <span class="nex-fab-n" style="font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:22px; color:#0A0F1E; line-height:1; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-plus"></i></span>
           </button>
         </div>
 
         <!-- FAB Bottom Action Sheet Modal (200ms ease slide-up) -->
-        <div id="fabActionSheet" class="fab-action-sheet-overlay" style="display: none;" aria-hidden="true">
+        <div id="fabActionSheet" class="fab-action-sheet-overlay" style="display: none;" hidden inert aria-hidden="true">
           <div class="fab-action-sheet-backdrop" id="fabActionSheetBackdrop"></div>
           <div class="fab-action-sheet-panel" id="fabActionSheetPanel">
             <div class="fab-action-sheet-handle" id="fabActionSheetHandle"></div>
             <div class="fab-action-sheet-header">
-              <h3 class="fab-action-sheet-title">Create</h3>
+              <h3 class="fab-action-sheet-title">Quick Create &amp; AI</h3>
               <button type="button" class="fab-action-sheet-close" id="closeFabActionSheetBtn" aria-label="Close">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e9edef" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
             </div>
             <div class="fab-action-sheet-list">
+              <!-- 0. Ask ChronEX AI (Consolidated from overlapping dual FAB) -->
+              <button type="button" class="fab-action-sheet-item" id="fabSheetAskAi">
+                <div class="fab-sheet-item-icon ai-icon" style="background: linear-gradient(135deg, #00f2fe, #00ff88); color: #041019;">
+                  <i class="fa-solid fa-circle-nodes" style="font-size: 20px;"></i>
+                </div>
+                <div class="fab-sheet-item-meta">
+                  <span class="fab-sheet-item-title">Ask ChronEX AI</span>
+                  <span class="fab-sheet-item-sub">Neural assistant &amp; instant answers</span>
+                </div>
+              </button>
+
               <!-- 1. Start New Chat (MessageCircle icon, 48px circle, #00FF9D) -->
               <button type="button" class="fab-action-sheet-item" id="fabSheetNewChat">
                 <div class="fab-sheet-item-icon chat-icon">
@@ -1627,7 +1650,7 @@
             <button id="btnTacticalScreenShare" class="header-icon-btn" title="Tactical Screen Share (60 FPS)" onclick="window.NexTacticalScreenShare?.startScreenShare();"><i class="fa-solid fa-display" style="color: #c084fc;"></i></button>
             <button id="btnP2PFileSwarm" class="header-icon-btn" title="P2P Heavy File Swarm (Up to 2GB)" onclick="document.getElementById('inputP2PSwarmFile')?.click();"><i class="fa-solid fa-network-wired" style="color: #10b981;"></i></button>
             <button id="headerReportBtn" class="header-icon-btn report-header-btn" title="Report User or Conversation" style="color: #ef4444;" aria-label="Report User"><i class="fa-solid fa-flag"></i></button>
-            <button id="quickWallpaperBtn" class="header-icon-btn" title="Chat Wallpaper" style="background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s;"><i class="fa-solid fa-palette"></i></button>
+            <button id="quickWallpaperBtn" class="header-icon-btn" title="Chat Wallpaper" style="background: none; border: none; font-size: 16px; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s;"><i class="fa-solid fa-palette"></i></button>
             <!-- Ghost Protocol Ephemeral Button & Dropdown -->
             <div id="ghostProtocolControl" class="ghost-protocol-control" style="position: relative; display: inline-flex;">
               <button type="button" id="ghostProtocolBtn" class="header-icon-btn ghost-toggle-btn" title="Ghost Protocol (Ephemeral Self-Destruct Messages)">
@@ -2312,13 +2335,13 @@
             <span id="typingIndicatorText" class="typing-text">typing...</span>
           </div>
 
-          <form id="message-form" class="message-form flex items-center gap-2 w-full px-2 py-2 bg-[#202c33]">
+          <form id="message-form" class="message-form nex-message-form flex items-center gap-2 w-full px-2 py-2">
             <div class="message-input-wrapper">
               <button type="button" id="emoji-btn" class="input-inline-btn emoji-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
               <button type="button" id="sticker-btn" class="input-inline-btn sticker-toggle-btn" title="Stickers" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
-              <input type="text" id="message-input" class="message-input nex-input flex-1 min-w-0 w-full h-[48px] min-h-[48px] px-4 py-3 text-[15px] leading-[48px] whitespace-nowrap overflow-hidden truncate rounded-full bg-[#2a3942] text-white placeholder:text-[#8696a0] outline-none" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" />
+              <input type="text" id="message-input" class="message-input nex-input nex-message-input flex-1 min-w-0 w-full h-[48px] min-h-[48px] px-4 py-3 text-[15px] leading-[48px] whitespace-nowrap overflow-hidden truncate rounded-full outline-none" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" />
               <button type="button" id="voiceDictateBtn" class="input-inline-btn voice-dictate-btn" style="display: none !important;" title="Voice to Text &amp; Translate"><i class="fa-solid fa-microphone-lines"></i></button>
-              <button type="button" id="btnToggleAttachmentHub" class="input-inline-btn" title="Attachment Hub" style="color: #cbd5e1;" onclick="if(typeof window.toggleAttachmentHub==='function'){window.toggleAttachmentHub(event);}else{const h=document.getElementById('attachmentPopupHub');if(h){const isO=h.style.display==='grid'||h.classList.contains('active');h.style.display=isO?'none':'grid';h.classList.toggle('active',!isO);}}"><i class="fa-solid fa-paperclip"></i></button>
+              <button type="button" id="btnToggleAttachmentHub" class="input-inline-btn" title="Attachment Hub" onclick="if(typeof window.toggleAttachmentHub==='function'){window.toggleAttachmentHub(event);}else{const h=document.getElementById('attachmentPopupHub');if(h){const isO=h.style.display==='grid'||h.classList.contains('active');h.style.display=isO?'none':'grid';h.classList.toggle('active',!isO);}}"><i class="fa-solid fa-paperclip"></i></button>
               <button type="button" id="camera-btn" class="input-inline-btn chat-camera-inline-btn" title="Take photo or video" onclick="document.getElementById('file-input')?.click();"><i class="fa-solid fa-camera"></i></button>
               <button type="button" id="aiPolishInputBtn" class="input-inline-btn ai-polish-inline-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
             </div>
@@ -3400,9 +3423,17 @@
 
                 <!-- Chat List Glassmorphism & Picture Backdrop Studio -->
                 <div class="settings-card" id="chatListGlassSettingsCard">
-                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
-                    <label for="chatListStyleSelect" style="margin:0;"><strong>Chat List Glassmorphism &amp; Picture Backdrop</strong></label>
-                    <span class="auto-trans-badge" style="background:rgba(0,212,255,0.14);border:1px solid rgba(0,212,255,0.35);color:#67e8f9;padding:2px 8px;border-radius:999px;font-size:10.5px;font-weight:700;">CHAT LIST FX</span>
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                    <label for="chatListStyleSelect" style="margin:0;"><strong>Chat List Template &amp; Glassmorphism Studio</strong></label>
+                    <span class="auto-trans-badge" style="background:rgba(0,212,255,0.14);border:1px solid rgba(0,212,255,0.35);color:#67e8f9;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;">CHAT LIST FX</span>
+                  </div>
+                  <div class="chatlist-template-switcher-row" role="group" aria-label="Chat List Template" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                    <button type="button" class="btn-secondary chatlist-template-btn" data-chatlist-template="classic" id="btnChatListTemplateClassic" style="flex:1;min-width:140px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;font-size:12.5px;font-weight:700;">
+                      <i class="fa-solid fa-list"></i> <span>Former Classic</span>
+                    </button>
+                    <button type="button" class="btn-secondary chatlist-template-btn" data-chatlist-template="glass-studio" id="btnChatListTemplateGlass" style="flex:1;min-width:140px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:10px;font-size:12.5px;font-weight:700;">
+                      <i class="fa-solid fa-wand-magic-sparkles"></i> <span>New Glass Cards</span>
+                    </button>
                   </div>
                   <div id="chatListLivePreview" class="nex-chatlist-preview-stage" style="background-image:url('./assets/images/chatlist-futuristic-bg.jpg');">
                     <div class="nex-chatlist-preview-row">
@@ -3752,11 +3783,11 @@
                 <div class="settings-card" id="settingsThemeControlCard">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <div>
-                      <label style="margin: 0; font-size: 14px; font-weight: 700; color: #fff;">
+                      <label style="margin: 0; font-size: 14px; font-weight: 700;">
                         <i class="fa-solid fa-circle-half-stroke" style="color: #00ff66; margin-right: 6px;"></i>
                         Display Mode &amp; Atmosphere
                       </label>
-                      <p style="font-size: 11.5px; color: #94a3b8; margin: 2px 0 0;">Switch between deep stealth Onyx dark mode and crisp daylight theme.</p>
+                      <p style="font-size: 12px; color: var(--nex-theme-text-muted, #94a3b8); margin: 2px 0 0;">Switch between deep stealth dark themes and crisp daylight themes.</p>
                     </div>
                     <!-- Master Sliding Toggle Switch -->
                     <div style="display: flex; align-items: center; gap: 8px;">
@@ -3776,9 +3807,9 @@
                         <i class="fa-solid fa-moon"></i>
                       </div>
                       <div style="font-size: 13px; font-weight: 700; color: #fff;">Dark Mode</div>
-                      <div style="font-size: 10.5px; color: #8696a0; margin-top: 2px;">Cyber Onyx &amp; Obsidian</div>
+                      <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">10 Dark Themes</div>
                       <div style="margin-top: 8px;">
-                        <label class="radio-pill" style="margin: 0; font-size: 11px; padding: 3px 8px; background: rgba(0,255,102,0.1); border: 1px solid #00ff66; color: #00ff66; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                        <label class="radio-pill" style="margin: 0; font-size: 12px; padding: 4px 10px; background: rgba(0,255,102,0.1); border: 1px solid #00ff66; color: #00ff66; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
                           <input type="radio" name="theme" value="dark" id="themeDark" checked style="margin: 0;"> Active
                         </label>
                       </div>
@@ -3790,13 +3821,41 @@
                         <i class="fa-solid fa-sun"></i>
                       </div>
                       <div style="font-size: 13px; font-weight: 700; color: #0f172a;">Light Mode</div>
-                      <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">Daylight Crisp &amp; Clean</div>
+                      <div style="font-size: 12px; color: #475569; margin-top: 2px;">10 Light Themes</div>
                       <div style="margin-top: 8px;">
-                        <label class="radio-pill" style="margin: 0; font-size: 11px; padding: 3px 8px; background: rgba(0,0,0,0.05); border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                        <label class="radio-pill" style="margin: 0; font-size: 12px; padding: 4px 10px; background: rgba(0,0,0,0.05); border: 1px solid #cbd5e1; color: #334155; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
                           <input type="radio" name="theme" value="light" id="themeLight" style="margin: 0;"> Select
                         </label>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                <!-- 20 CUSTOM APP THEMES (10 LIGHT + 10 DARK) -->
+                <div class="settings-card" id="appThemeGalleriesCard">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                    <div>
+                      <label style="margin:0;font-size:14px;font-weight:700;">
+                        <i class="fa-solid fa-swatchbook" style="color:#00ff66;margin-right:6px;"></i>
+                        App Theme Studio (20 Custom Themes)
+                      </label>
+                      <p style="font-size:12px;color:var(--nex-theme-text-muted, #94a3b8);margin:2px 0 0;">10 Light Mode themes and 10 Dark Mode themes — your selected variant persists when switching Light/Dark.</p>
+                    </div>
+                    <span class="auto-trans-badge" style="background:rgba(0,255,102,0.14);border:1px solid rgba(0,255,102,0.35);color:#00ff66;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;">10 LIGHT + 10 DARK</span>
+                  </div>
+
+                  <div style="margin-top:10px;">
+                    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">
+                      <i class="fa-solid fa-sun" style="color:#f59e0b;margin-right:6px;"></i>10 Light Mode Themes
+                    </div>
+                    <div id="appLightThemeGallery" class="app-theme-gallery-grid"></div>
+                  </div>
+
+                  <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--nex-theme-border, rgba(255,255,255,0.08));">
+                    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:8px;">
+                      <i class="fa-solid fa-moon" style="color:#38bdf8;margin-right:6px;"></i>10 Dark Mode Themes
+                    </div>
+                    <div id="appDarkThemeGallery" class="app-theme-gallery-grid"></div>
                   </div>
                 </div>
 
@@ -3954,7 +4013,7 @@
                   <!-- 1. POP-UP NOTIFICATIONS TOGGLE -->
                   <div class="luxury-toggle-row" style="margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06);">
                     <div style="padding-right: 12px;">
-                      <strong style="font-size: 13.5px; color: #fff;"><i class="fa-solid fa-comment-dots" style="color: #00f2fe; margin-right: 6px;"></i>Pop-up Notifications</strong>
+                      <strong style="font-size: 13.5px;"><i class="fa-solid fa-comment-dots" style="color: #00f2fe; margin-right: 6px;"></i>Pop-up Notifications</strong>
                       <p style="font-size: 11.5px; color: #94a3b8; margin-top: 3px; line-height: 1.4;">Show floating toast popups on screen for new messages, reactions, and updates. <em>Turn OFF to suppress all in-app pop-up notifications.</em></p>
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px;">
@@ -5940,9 +5999,9 @@
                 </div>
 
                 <div class="settings-card" style="text-align: center; padding: 20px;">
-                  <span style="font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">Available Balance</span>
+                  <span style="font-size: 12px; color: var(--nex-theme-text-muted, #8b949e); text-transform: uppercase; letter-spacing: 1px;">Available Balance</span>
                   <div style="font-size: 36px; font-weight: 800; color: #00ff66; font-family: 'Orbitron', monospace; margin: 4px 0;">
-                    <span id="currentTokenBalance">0</span> <span style="font-size: 16px; opacity: 0.8;">Tokens</span>
+                    <span id="currentTokenBalance" class="token-balance-skeleton" data-balance-state="loading" aria-busy="true">—</span> <span style="font-size: 16px; opacity: 0.8;">Tokens</span>
                   </div>
                   <button type="button" id="claimTokensGrantBtn" class="btn-primary" style="margin-top: 10px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-weight: 700;">
                     <i class="fa-solid fa-gift"></i> Claim Starter Grant (+100 Tokens)
@@ -5952,7 +6011,7 @@
                 <!-- VERIFIED INVITATION SYSTEM & FREE TOKEN REWARDS -->
                 <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.35); background: linear-gradient(145deg, rgba(0, 255, 102, 0.05), rgba(0, 242, 254, 0.05));">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                    <label style="margin: 0; font-size: 14px; font-weight: 700; color: #fff;">
+                    <label style="margin: 0; font-size: 14px; font-weight: 700;">
                       <i class="fa-solid fa-user-plus" style="color: #00ff66; margin-right: 6px;"></i>
                       Invite Friends &amp; Earn Free Tokens
                     </label>
@@ -6184,7 +6243,7 @@
                       <strong>Android Display Glass Style Preset</strong>
                       <p>Switch glass shader material and rim-light tinting on flagship Android phones.</p>
                     </div>
-                    <select id="selLiquidGlassPreset" style="background:#0f172a;color:#00ff66;border:1px solid rgba(0,255,102,0.35);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer;max-width:168px;">
+                    <select id="selLiquidGlassPreset" class="settings-select" style="border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;cursor:pointer;max-width:168px;">
                       <option value="material">Material Frosted</option>
                       <option value="crystal">Liquid Crystal</option>
                       <option value="emerald">Cyber Emerald Prism</option>
@@ -6230,7 +6289,7 @@
                 <div class="settings-pane-header">
                   <div class="flex items-center justify-between">
                     <div>
-                      <h3 class="font-bold text-white text-base">
+                      <h3 class="font-bold text-base">
                         <i class="fa-solid fa-sliders text-[#00f3ff]"></i> 100 CYBER MATRIX & FEATURE TOGGLES
                       </h3>
                       <p class="text-xs text-gray-400 mt-0.5">Toggle and calibrate any of the 100 enterprise cybersecurity modules in real time.</p>
@@ -6765,7 +6824,7 @@
       </button>
       <button type="button" class="mobile-menu-item" onclick="window.location.href='cart.html'">
         <i class="fa-solid fa-coins"></i> <span>Tokens & Gifts</span>
-        <span class="mobile-menu-badge" id="mobileTokenBadge">0</span>
+        <span class="mobile-menu-badge token-balance-skeleton" id="mobileTokenBadge" data-balance-state="loading">—</span>
       </button>
       <button type="button" class="mobile-menu-item" onclick="window.NexDailyStreakEngine?.openStreakModal()">
         <i class="fa-solid fa-gift" style="color: #ffd700;"></i> <span>Daily Streak Drops</span>
@@ -11162,6 +11221,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
 <script type="module" src="chat.js"></script>
 <script type="module" src="chat2.js"></script>
+<script type="module" src="src/js/nex-mobile-audit-runtime.js?v=1.0"></script>
 <script>
   if (new URLSearchParams(window.location.search).has('settings')) {
     window.addEventListener('load', () => {

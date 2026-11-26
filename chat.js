@@ -386,6 +386,27 @@ function vibrate(duration = 10) {
 // ============================================================================
 // UNIFIED TOKEN SYNCHRONIZATION ENGINE (NEX ECOSYSTEM)
 // ============================================================================
+function updateTokenBalanceUI(amount, opts = {}) {
+  const pending = Boolean(opts.pending);
+  const fmt = pending ? '—' : (typeof formatBalanceDisplay === 'function' ? formatBalanceDisplay(amount) : Number(amount || 0).toLocaleString());
+  ['tokenCount', 'currentTokenBalance', 'mobileTokenBadge'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (pending) {
+      el.classList.add('token-balance-skeleton');
+      el.setAttribute('data-balance-state', 'loading');
+      el.setAttribute('aria-busy', 'true');
+      el.textContent = '—';
+    } else {
+      el.classList.remove('token-balance-skeleton');
+      el.setAttribute('data-balance-state', 'ready');
+      el.setAttribute('aria-busy', 'false');
+      el.textContent = fmt;
+    }
+  });
+}
+window.updateTokenBalanceUI = updateTokenBalanceUI;
+
 window.nexTokenManager = {
   getBalance() {
     const val = localStorage.getItem('nexchat_user_tokens') ||
@@ -400,10 +421,7 @@ setBalance(amount, reason = 'Sync') {
       try { localStorage.setItem(k, String(next)); } catch (_) {}
     });
 if (typeof tokens !== 'undefined') tokens = next;
-    const tokenDisplay = document.getElementById('currentTokenBalance');
-if (tokenDisplay) {
-      tokenDisplay.textContent = typeof formatBalanceDisplay === 'function' ? formatBalanceDisplay(next) : next.toLocaleString();
-    }
+    updateTokenBalanceUI(next);
 window.dispatchEvent(new CustomEvent('nexchat:tokens_changed', { detail: { balance: next, reason } }));
 return next;
   },
@@ -422,10 +440,7 @@ return next;
 window.addEventListener('storage', (e) => {
   if (e.key === 'nexchat_user_tokens' || e.key === 'nex_user_tokens' || e.key === 'tokens') {
     const newBal = window.nexTokenManager.getBalance();
-    const tokenDisplay = document.getElementById('currentTokenBalance');
-if (tokenDisplay) {
-      tokenDisplay.textContent = typeof formatBalanceDisplay === 'function' ? formatBalanceDisplay(newBal) : newBal.toLocaleString();
-    }
+    updateTokenBalanceUI(newBal);
   }
 });
 // ============================================================================
@@ -4549,6 +4564,9 @@ if (section === "announcements") {
 if (callHistoryContainer) {
     callHistoryContainer.style.removeProperty("display");
 if (section === "calls") {
+      callHistoryContainer.hidden = false;
+      callHistoryContainer.inert = false;
+      callHistoryContainer.removeAttribute("aria-hidden");
       callHistoryContainer.classList.remove("hidden");
       callHistoryContainer.style.setProperty("display", "block", "important");
     } else {
@@ -4699,7 +4717,7 @@ function initWhatsAppTabSwipeNavigation() {
         document.body.classList.contains('settings-open') ||
         (document.getElementById('settingsModal') && (document.getElementById('settingsModal').style.display === 'flex' || document.getElementById('settingsModal').classList.contains('open')))) return;
     const target = e.target;
-    if (target.closest('.modal, .settings-modal, .luxury-settings-suite, #settingsModal, .bottom-drawer, .media-lightbox-modal, .status-viewer-modal, #messages-area, input, textarea, select, .settings-sidebar, .settings-nav-tab, .settings-pane-container, .settings-card, .channels-cards-scroll, .status-horizontal-list, .status-horizontal-items, .x-topics-scroll, .groups-container, #groupsContainer, .x-drawer, .x-thread-modal-overlay, .x-profile-modal-overlay, .music-picker-genre-pills')) return;
+    if (target.closest('.bottom-nav, .nav-item, .top-header, .chat-fab-cluster, .chatlist-fab-dock, .chat-menu-btn, button, .modal, .settings-modal, .luxury-settings-suite, #settingsModal, .bottom-drawer, .media-lightbox-modal, .status-viewer-modal, #messages-area, input, textarea, select, .settings-sidebar, .settings-nav-tab, .settings-pane-container, .settings-card, .channels-cards-scroll, .status-horizontal-list, .status-horizontal-items, .x-topics-scroll, .groups-container, #groupsContainer, .x-drawer, .x-thread-modal-overlay, .x-profile-modal-overlay, .music-picker-genre-pills')) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     touchStartTime = Date.now();
@@ -5273,7 +5291,7 @@ if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
 return themeKey;
 }
 window.applyCyberAccentTheme = applyCyberAccentTheme;
-function applyThemeMode(themeMode = "dark") {
+function applyThemeMode(themeMode = "dark", opts = {}) {
   const resolvedTheme = themeMode === "light" ? "light" : "dark";
   const body = document.body;
 body.classList.toggle("dark-mode", resolvedTheme === "dark");
@@ -5330,6 +5348,20 @@ try {
     settings.theme = resolvedTheme;
     localStorage.setItem("nexchat_settings", JSON.stringify(settings));
   } catch (_) {}
+
+  // Preserve & apply user's chosen Light or Dark variant cleanly without re-entrancy
+  if (!opts?.fromVariantEngine && !window._nexApplyingThemeMode && typeof window.applyAppThemeVariant === "function") {
+    window._nexApplyingThemeMode = true;
+    try {
+      const variantKey = resolvedTheme === "light" ? "nex_light_variant" : "nex_dark_variant";
+      const fallbackVariant = resolvedTheme === "light" ? "light-theme-alabaster" : "dark-theme-obsidian";
+      const targetVariant = localStorage.getItem(variantKey) || fallbackVariant;
+      window.applyAppThemeVariant(targetVariant, { fromThemeMode: true, silent: true, mode: resolvedTheme });
+    } catch (_) {
+    } finally {
+      window._nexApplyingThemeMode = false;
+    }
+  }
 return resolvedTheme;
 }
 window.addEventListener("load", () => {
@@ -6164,8 +6196,7 @@ if (tokens < 1) {
 try {
         updateDoc(userRef, { tokens: 100 }).catch(console.warn);
       } catch (tokErr) {}
-const tokenDisplay = document.getElementById("currentTokenBalance");
-if (tokenDisplay) tokenDisplay.textContent = formatBalanceDisplay(tokens);
+updateTokenBalanceUI(tokens);
 showNotif("Welcome starter grant: +100 tokens added!", "success");
     }
 let attachment = null;
@@ -6265,8 +6296,7 @@ aiImagePayload = { url: imgUrl, mimeType: attachment.type || 'image/jpeg', name:
 if (messageText) messageText.value = "";
 if (typeof removeAttachment === 'function') removeAttachment();
 tokens--;
-        const tokenDisplay = document.getElementById("currentTokenBalance");
-if (tokenDisplay) tokenDisplay.textContent = formatBalanceDisplay(tokens);
+        updateTokenBalanceUI(tokens);
 if (myUID && userRef) {
           updateDoc(userRef, {
             tokens: increment(-1),
@@ -10633,15 +10663,17 @@ if (!beacon) return;
 }
 window.updateNavUpdatesBeacon = updateNavUpdatesBeacon;
 function updateNavAlertsBeacon(hasUnread) {
-  const beacon = document.getElementById('navAlertsBeacon');
-if (!beacon) return;
-if (hasUnread) {
-    beacon.classList.add('has-unread');
-beacon.style.setProperty('display', 'block', 'important');
-  } else {
-    beacon.classList.remove('has-unread');
-beacon.style.setProperty('display', 'none', 'important');
-  }
+  ['navAlertsBeacon', 'mobileAlertsBeacon'].forEach((id) => {
+    const beacon = document.getElementById(id);
+    if (!beacon) return;
+    if (hasUnread) {
+      beacon.classList.add('has-unread');
+      beacon.style.setProperty('display', 'block', 'important');
+    } else {
+      beacon.classList.remove('has-unread');
+      beacon.style.setProperty('display', 'none', 'important');
+    }
+  });
 }
 window.updateNavAlertsBeacon = updateNavAlertsBeacon;
 function updateNavAiBeacon(hasUnread) {
@@ -12749,36 +12781,50 @@ setTimeout(() => {
   }
 };
 document.getElementById("logout-btn")?.addEventListener("click", logoutUser);
-document.getElementById("nav-messages")?.addEventListener("click", () => {
-  handleNavigation("chats");
-});
-document.getElementById("nav-status")?.addEventListener("click", () => {
-  handleNavigation("updates");
-  if (typeof updateNavUpdatesBeacon === 'function') updateNavUpdatesBeacon(false);
-});
-document.getElementById("nav-announcements")?.addEventListener("click", () => {
-  handleNavigation("announcements");
-  if (typeof updateNavAlertsBeacon === 'function') updateNavAlertsBeacon(false);
-});
-// Bottom Nav & Feature Button Handlers
-document.getElementById("nav-calls")?.addEventListener("click", () => {
-  handleNavigation("calls");
-});
-document.getElementById("nav-more")?.addEventListener("click", () => {
-  handleNavigation("more");
-});
-document.getElementById("nav-ai")?.addEventListener("click", () => {
-  if (typeof openChat === 'function') openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai');
-});
-document.getElementById("nav-marketplace")?.addEventListener("click", () => {
-  handleNavigation("marketplace");
-});
-document.getElementById("nav-reels")?.addEventListener("click", () => {
-  handleNavigation("reels");
-});
-document.getElementById("nav-games")?.addEventListener("click", () => {
-  handleNavigation("games");
-});
+// Bottom Nav & Feature Button Handlers (delegated + idempotent via bindBottomNavItems)
+function bindBottomNavItems() {
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach((item) => {
+    if (item.dataset.navBound === 'true') return;
+    item.dataset.navBound = 'true';
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const navSection = item.dataset.nav;
+      if (!navSection) return;
+      if (navSection === 'more') {
+        const moreSheet = document.getElementById('mobileMoreSheet');
+        if (moreSheet) {
+          moreSheet.hidden = false;
+          moreSheet.inert = false;
+          moreSheet.classList.add('open');
+          moreSheet.setAttribute('aria-hidden', 'false');
+        }
+        return;
+      }
+      if (navSection === 'ai') {
+        if (typeof openChat === 'function') openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai');
+        return;
+      }
+      if (navSection === 'terminal') {
+        window.open('terminal.html', '_blank', 'width=1000,height=700,scrollbars=yes,resizable=yes');
+        if (typeof showNotif === 'function') showNotif('Terminal Opened', 'info', 800);
+        return;
+      }
+      if (navSection === 'updates' || navSection === 'status') {
+        if (typeof updateNavUpdatesBeacon === 'function') updateNavUpdatesBeacon(false);
+      } else if (navSection === 'announcements') {
+        if (typeof updateNavAlertsBeacon === 'function') updateNavAlertsBeacon(false);
+      }
+      document.querySelectorAll('.nav-item').forEach((nav) => nav.classList.remove('active'));
+      item.classList.add('active');
+      const navFn = typeof window.handleNavigation === 'function' ? window.handleNavigation : handleNavigation;
+      navFn(navSection);
+    });
+  });
+}
+window.bindBottomNavItems = bindBottomNavItems;
+bindBottomNavItems();
 document.getElementById("cancelReplyBtn")?.addEventListener("click", () => {
   const preview = document.getElementById("replyPreview");
 if (preview) preview.style.display = "none";
@@ -12810,10 +12856,7 @@ showNotif(`Edge Node Latency: ${ping}ms`, "success");
 document.getElementById("fileComplaintBtn")?.addEventListener("click", () => {
   showNotif("Support ticket dispatched to NEX-CORE operations.", "success");
 });
-document.getElementById("nav-terminal")?.addEventListener("click", () => {
-  window.open('terminal.html', '_blank', 'width=1000,height=700,scrollbars=yes,resizable=yes');
-showNotif("Terminal Opened", "info", 800);
-});
+// #nav-terminal handled via bindBottomNavItems()
 let selectedFile = null;
 document.getElementById("attach-btn")?.addEventListener("click", (e) => {
   e.preventDefault();
@@ -13701,10 +13744,7 @@ lastGrantClaimedAt: new Date().toISOString()
       }
     }
 const fmtVal = typeof formatBalanceDisplay === 'function' ? formatBalanceDisplay(newBal) : newBal.toLocaleString();
-if (tokenDisplay) tokenDisplay.textContent = fmtVal;
-if (headerDisplay) headerDisplay.textContent = fmtVal;
-    const currentTokenBalanceEl = document.getElementById('currentTokenBalance');
-if (currentTokenBalanceEl) currentTokenBalanceEl.textContent = fmtVal;
+updateTokenBalanceUI(newBal);
 playLuxuryChimeSound();
 if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
 showNotif(`Success! +100 Neural Tokens added. Restored Balance: ${fmtVal} Tokens`, "success", 4000);
@@ -16581,10 +16621,7 @@ await updateDoc(docSnapshot.ref, {
 tokensAwardedAt: new Date(),
 tokenRewardAmount: rewardTokens
             });
-const tokenDisplay = document.getElementById("tokenCount");
-if (tokenDisplay) {
-              tokenDisplay.textContent = formatBalanceDisplay(newTokens);
-            }
+updateTokenBalanceUI(newTokens);
 showNotif(`Milestone! Your video hit 1k likes! +1.5k tokens (${newTokens} total)`, "success", 3000);
 console.log(`? Rewarded ${rewardTokens} tokens for video with 1k likes`);
           }
@@ -17173,14 +17210,7 @@ if (statusImg) statusImg.src = newPic;
           localStorage.setItem('nex_prev_user_tokens', tokenCount.toString());
 console.log("?? Token count from Firebase:", tokenCount);
 console.log("?? User data:", userData);
-const tokenDisplay = document.getElementById("tokenCount");
-console.log("?? Token display element:", tokenDisplay);
-if (tokenDisplay) {
-            tokenDisplay.textContent = formatBalanceDisplay(tokenCount);
-console.log("? Token display updated to:", formatBalanceDisplay(tokenCount));
-          } else {
-            console.error("? Token display element not found!");
-          }
+updateTokenBalanceUI(tokenCount);
 console.log("? User data loaded. Username:", myUsername, "Tokens:", tokenCount);
 setupIncomingCallListener();
 setupGiftListener();
@@ -17196,8 +17226,7 @@ online: true,
 lastSeen: serverTimestamp(),
 createdAt: serverTimestamp()
             });
-            const tokenDisplay = document.getElementById("tokenCount");
-if (tokenDisplay) tokenDisplay.textContent = formatBalanceDisplay(2000);
+            updateTokenBalanceUI(2000);
 setupIncomingCallListener();
 setupGiftListener();
           } catch (createErr) {
@@ -17248,14 +17277,7 @@ if (typeof currentTokens === 'number' && currentTokens >= 0) {
               window.tokens = safeTokens;
               localStorage.setItem('user_tokens', safeTokens.toString());
               localStorage.setItem('nex_prev_user_tokens', safeTokens.toString());
-const tokenDisplay = document.getElementById("tokenCount");
-if (tokenDisplay) {
-                const oldValue = tokenDisplay.textContent;
-tokenDisplay.textContent = formatBalanceDisplay(currentTokens);
-if (Math.abs(parseInt(oldValue) - currentTokens) > 0) {
-                  console.log(`?? Token update: ${oldValue} ? ${currentTokens}`);
-                }
-              }
+updateTokenBalanceUI(safeTokens);
             } else if (currentTokens === undefined || currentTokens === null) {
               console.warn("?? Tokens field is missing in snapshot, but not updating to prevent data loss");
             }
@@ -17380,6 +17402,8 @@ return;
 console.warn("User not authenticated. Will verify before redirecting...");
 if (window.authRedirectDisabled || sessionStorage.getItem('disable_auth_redirect') === 'true') {
         console.log(" Auth redirect disabled by flag — keeping UI active for testing");
+        const fallbackTok = parseInt(String(localStorage.getItem('user_tokens') || localStorage.getItem('nexchat_user_tokens') || '2000').replace(/,/g, ''), 10);
+        updateTokenBalanceUI(isNaN(fallbackTok) ? 2000 : fallbackTok);
 return;
       }
 // Only redirect if not already in progress
@@ -19515,8 +19539,7 @@ if (tokens < 1) {
 try {
       if (myUID) updateDoc(doc(db, "users", myUID), { tokens: 100 }).catch(console.warn);
     } catch (tokErr) {}
-const tokenDisplay = document.getElementById('currentTokenBalance');
-if (tokenDisplay) tokenDisplay.textContent = formatBalanceDisplay(tokens);
+updateTokenBalanceUI(tokens);
   }
 // Local pre-checks for permissions & slow mode
 if (window._currentGroupData && window._currentGroupId === groupId) {
@@ -19587,8 +19610,7 @@ return;
       }).catch(err => console.warn('[SUPABASE GROUP] Broadcast notice:', err?.message));
     }
 tokens--;
-    const tokenDisplay = document.getElementById('currentTokenBalance');
-if (tokenDisplay) tokenDisplay.textContent = formatBalanceDisplay(tokens);
+    updateTokenBalanceUI(tokens);
   } catch (error) {
     console.error(' Group message error:', error);
 showNotif(` Failed to send: ${error.message}`, 'error');
@@ -22281,15 +22303,8 @@ getDoc(userRef).then((docSnap) => {
     if (docSnap.exists()) {
       const userData = docSnap.data();
 tokens = userData.tokens || 0;
-// Update both header balance and modal balance
-const headerTokenDisplay = document.getElementById('tokenCount');
-      const modalTokenDisplay = document.getElementById('currentTokenBalance');
-if (headerTokenDisplay) {
-        headerTokenDisplay.textContent = formatBalanceDisplay(tokens);
-      }
-if (modalTokenDisplay) {
-        modalTokenDisplay.textContent = formatBalanceDisplay(tokens);
-      }
+// Update both header balance, modal balance, and mobile badge cleanly
+updateTokenBalanceUI(tokens);
 console.log('Token balance loaded:', tokens);
     } else {
       console.log('User document not found for token balance');
@@ -23026,13 +23041,15 @@ const bindChatListDelegation = (listEl) => {
     if (!listEl || listEl._hasMasterChatDelegation) return;
 listEl._hasMasterChatDelegation = true;
 listEl.addEventListener('click', (e) => {
+      if (e._nexChatHandled) return;
       if (e.target.closest('.chat-menu-btn, button, input, textarea, a')) return;
       const item = e.target.closest('.chat-item, .chat-list-item');
 if (!item) return;
       const uid = item.getAttribute('data-chat-id');
 if (!uid) return;
+      e._nexChatHandled = true;
       const type = item.getAttribute('data-chat-type') || (uid === 'chronex-ai' ? 'ai' : (item.classList.contains('group-item') ? 'group' : 'direct'));
-      const name = item.querySelector('.chat-name')?.textContent?.trim() || item.querySelector('h4')?.textContent?.trim() || 'User';
+      const name = item.getAttribute('data-name') || item.querySelector('.chat-name')?.textContent?.trim() || item.querySelector('h4')?.textContent?.trim() || 'User';
       const pic = item.querySelector('img.chat-avatar')?.src || 'logo.jpg';
 openChat(uid, name, pic, type);
     });
@@ -23040,36 +23057,21 @@ openChat(uid, name, pic, type);
 bindChatListDelegation(document.getElementById('contactList'));
 bindChatListDelegation(document.getElementById('groupsList'));
 bindChatListDelegation(document.getElementById('archivedList'));
-const navItems = document.querySelectorAll(".nav-item");
-navItems.forEach(item => {
-    item.addEventListener("click", (e) => {
-      e.preventDefault();
-      const navSection = item.dataset.nav;
-if (navSection === 'more') {
-        const moreSheet = document.getElementById('mobileMoreSheet');
-if (moreSheet) {
-          moreSheet.classList.add('open');
-moreSheet.setAttribute('aria-hidden', 'false');
-        }
-return;
-      }
-navItems.forEach(nav => nav.classList.remove("active"));
-item.classList.add("active");
-handleNavigation(navSection);
-    });
-  });
+if (typeof bindBottomNavItems === 'function') {
+  bindBottomNavItems();
+}
 const darkModeToggle = document.getElementById("darkModeToggle");
   let isSliding = false;
   let startX = 0;
   let currentX = 0;
-const savedDarkMode = localStorage.getItem("darkMode") === "true";
-if (savedDarkMode) {
-    darkModeToggle?.classList.add("active");
-document.body.classList.add("dark-mode");
-  } else {
-    darkModeToggle?.classList.remove("active");
-document.body.classList.add("light-mode");
-  }
+try {
+  const initSettings = JSON.parse(localStorage.getItem("nexchat_settings") || "{}");
+  const initDarkFlag = localStorage.getItem("darkMode");
+  const initResolvedTheme = initSettings.theme || (initDarkFlag === "false" ? "light" : "dark");
+  applyThemeMode(initResolvedTheme);
+} catch (_) {
+  applyThemeMode("dark");
+}
 darkModeToggle?.addEventListener("mousedown", (e) => {
     isSliding = true;
 startX = e.clientX;
@@ -23178,32 +23180,44 @@ const desktopSearchBtnEl = document.getElementById('search-btn-header');
 if (desktopSearchBtnEl) {
     desktopSearchBtnEl.addEventListener('click', triggerGlobalSearch);
   }
-// Mobile Unified FAB: Opens Action Sheet (New Chat, New Channel, Post Reel)
+// Mobile Unified FAB: Opens Action Sheet (Ask ChronEX AI, New Chat, New Channel, Post Reel)
 let isClosingFabSheet = false;
   const openFabActionSheet = () => {
     const sheet = document.getElementById('fabActionSheet');
 if (!sheet) return;
     const panel = document.getElementById('fabActionSheetPanel');
     const backdrop = document.getElementById('fabActionSheetBackdrop');
+    const triggerBtn = document.getElementById('mobileFabNewChat');
 if (panel) {
       panel.classList.remove('closing');
 panel.style.transform = '';
     }
 if (backdrop) backdrop.classList.remove('closing');
+sheet.hidden = false;
+sheet.inert = false;
 sheet.classList.add('is-active', 'active', 'open');
 sheet.style.setProperty('display', 'flex', 'important');
 sheet.setAttribute('aria-hidden', 'false');
+if (triggerBtn) triggerBtn.setAttribute('aria-expanded', 'true');
   };
 const closeFabActionSheet = () => {
     const sheet = document.getElementById('fabActionSheet');
 if (!sheet) return;
     const panel = document.getElementById('fabActionSheetPanel');
     const backdrop = document.getElementById('fabActionSheetBackdrop');
+    const triggerBtn = document.getElementById('mobileFabNewChat');
+    if (document.activeElement && sheet.contains(document.activeElement)) {
+      if (triggerBtn && typeof triggerBtn.focus === 'function') triggerBtn.focus();
+      else if (typeof document.activeElement.blur === 'function') document.activeElement.blur();
+    }
 if (panel) panel.classList.add('closing');
 if (backdrop) backdrop.classList.add('closing');
 sheet.classList.remove('is-active', 'active', 'open');
 sheet.style.setProperty('display', 'none', 'important');
 sheet.setAttribute('aria-hidden', 'true');
+sheet.inert = true;
+sheet.hidden = true;
+if (triggerBtn) triggerBtn.setAttribute('aria-expanded', 'false');
 if (panel) {
       panel.classList.remove('closing');
 panel.style.transform = '';
@@ -23214,7 +23228,12 @@ window.openFabActionSheet = openFabActionSheet;
 window.closeFabActionSheet = closeFabActionSheet;
 document.getElementById('mobileFabNewChat')?.addEventListener('click', (e) => {
     e.preventDefault();
-openFabActionSheet();
+    const sheet = document.getElementById('fabActionSheet');
+    if (sheet && sheet.classList.contains('open') && sheet.getAttribute('aria-hidden') === 'false') {
+      closeFabActionSheet();
+    } else {
+      openFabActionSheet();
+    }
   });
 document.getElementById('closeFabActionSheetBtn')?.addEventListener('click', closeFabActionSheet);
 document.getElementById('fabActionSheetBackdrop')?.addEventListener('click', closeFabActionSheet);
@@ -23270,6 +23289,13 @@ document.getElementById('fabActionSheetBackdrop')?.addEventListener(evt, (e) => 
       e.preventDefault();
 closeFabActionSheet();
     });
+  });
+document.getElementById('fabSheetAskAi')?.addEventListener('click', (e) => {
+    e.preventDefault();
+closeFabActionSheet();
+if (typeof openChat === 'function') {
+      openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai');
+    }
   });
 document.getElementById('fabSheetNewChat')?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -23380,10 +23406,19 @@ const tokenCountEl = document.getElementById('tokenCount');
   const mobileTokenBadge = document.getElementById('mobileTokenBadge');
 if (tokenCountEl && mobileTokenBadge) {
     const updateBadge = () => {
-      mobileTokenBadge.textContent = tokenCountEl.textContent || '0';
+      const isLoading = tokenCountEl.classList.contains('token-balance-skeleton') || tokenCountEl.getAttribute('data-balance-state') === 'loading';
+      if (isLoading) {
+        mobileTokenBadge.classList.add('token-balance-skeleton');
+        mobileTokenBadge.setAttribute('data-balance-state', 'loading');
+        mobileTokenBadge.textContent = '—';
+      } else {
+        mobileTokenBadge.classList.remove('token-balance-skeleton');
+        mobileTokenBadge.setAttribute('data-balance-state', 'ready');
+        mobileTokenBadge.textContent = tokenCountEl.textContent || '0';
+      }
     };
     const observer = new MutationObserver(updateBadge);
-observer.observe(tokenCountEl, { childList: true, characterData: true, subtree: true });
+observer.observe(tokenCountEl, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class', 'data-balance-state'] });
 updateBadge();
   }
 }
@@ -23436,7 +23471,8 @@ if (chatDetailView) {
       const curWp = localStorage.getItem(`chat_bg_${currentChatUser}`) || localStorage.getItem('nexchat_background');
       if (curWp && typeof applyActiveWallpaper === 'function') applyActiveWallpaper(curWp);
     } else {
-      chatDetailView.style.setProperty('background', '#0f0a1e', 'important');
+      chatDetailView.style.removeProperty('background');
+      chatDetailView.style.removeProperty('background-color');
     }
 chatDetailView.classList.remove('hidden', 'entering', 'nex-interactive-drag', 'nex-conv-spring-back');
 chatDetailView.style.removeProperty('transform');
@@ -23710,7 +23746,8 @@ ${unreadBadgeHTML}
 let groupLongPressTimer = null;
       let groupTouchMoved = false;
       let groupLongPressFired = false;
-li.addEventListener("click", () => {
+      li.addEventListener("click", (e) => {
+        e.stopPropagation();
         if (groupLongPressFired) {
           groupLongPressFired = false;
 return;

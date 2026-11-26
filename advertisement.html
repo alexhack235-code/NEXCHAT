@@ -107,6 +107,87 @@
       color: #000000 !important;
       box-shadow: 0 0 10px rgba(0, 240, 118, 0.8) !important;
     }
+    /* Fix currency prefix overlapping price placeholder ("CA$" vs "0.00") */
+    .input-with-icon {
+      display: flex !important;
+      align-items: stretch !important;
+      background: var(--bg-surface) !important;
+      border: 1px solid var(--border-subtle) !important;
+      border-radius: var(--radius-sm) !important;
+      overflow: hidden !important;
+      min-height: 46px !important;
+    }
+    .input-with-icon:focus-within {
+      border-color: var(--accent-primary) !important;
+      box-shadow: 0 0 0 3px var(--accent-dim) !important;
+    }
+    .input-with-icon .input-prefix {
+      position: static !important;
+      left: auto !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 0 12px 0 14px !important;
+      background: rgba(0, 240, 118, 0.08) !important;
+      border-right: 1px solid var(--border-subtle) !important;
+      font-size: 14px !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+    }
+    .input-with-icon .form-input.with-prefix {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      border: none !important;
+      background: transparent !important;
+      padding: 10px 14px !important;
+      padding-left: 12px !important;
+      box-shadow: none !important;
+    }
+    /* Duration radio buttons: >=20px visible indicator inside >=44px tap targets */
+    .duration-card {
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      min-height: 52px !important;
+      padding: 12px 14px !important;
+      background: var(--bg-surface-elevated) !important;
+      border: 1.5px solid var(--border-subtle) !important;
+      border-radius: var(--radius-sm) !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+    }
+    .duration-card:hover {
+      border-color: var(--border-glass) !important;
+    }
+    .duration-card:has(input[type="radio"]:checked) {
+      border-color: var(--accent-primary) !important;
+      background: var(--accent-dim) !important;
+      box-shadow: 0 0 14px rgba(0, 240, 118, 0.15) !important;
+    }
+    .duration-card input[type="radio"] {
+      position: static !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      width: 22px !important;
+      height: 22px !important;
+      min-width: 22px !important;
+      min-height: 22px !important;
+      margin: 0 !important;
+      flex-shrink: 0 !important;
+      accent-color: #00f076 !important;
+      cursor: pointer !important;
+    }
+    .duration-card .duration-card-content {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+    }
+    .back-button, .view-btn, .chip, .btn-primary, .btn-secondary {
+      min-height: 44px;
+    }
   </style>
 </head>
 

@@ -18,6 +18,91 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="gaminghub.css" />
   <link rel="manifest" href="/manifest.json">
+  <style>
+    html, body {
+      max-width: 100%;
+      overflow-x: hidden !important;
+    }
+    .hub-balance-skeleton {
+      display: inline-block;
+      min-width: 44px;
+      height: 1em;
+      line-height: 1;
+      vertical-align: middle;
+      border-radius: 6px;
+      color: transparent !important;
+      background: linear-gradient(90deg, rgba(0, 255, 136, 0.14) 25%, rgba(0, 242, 255, 0.3) 50%, rgba(0, 255, 136, 0.14) 75%);
+      background-size: 200% 100%;
+      animation: hubShimmer 1.1s ease-in-out infinite;
+    }
+    .hub-loading-skeleton-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .hub-loading-skeleton-bar.is-ready {
+      display: none !important;
+    }
+    .hub-skel-card {
+      height: 54px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 242, 255, 0.18);
+      background: linear-gradient(90deg, rgba(10, 18, 30, 0.85) 25%, rgba(0, 242, 255, 0.14) 50%, rgba(10, 18, 30, 0.85) 75%);
+      background-size: 200% 100%;
+      animation: hubShimmer 1.1s ease-in-out infinite;
+    }
+    @keyframes hubShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .back-btn, .hub-icon-btn, .ea-submit-btn, .btn-launch-astro, .btn-specs {
+      min-height: 44px;
+    }
+    .astro-head-tag-chip {
+      font-size: 12px;
+    }
+    @media (max-width: 640px) {
+      .gaming-hub-container {
+        padding: 12px 12px 48px;
+      }
+      .gaming-header-top {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px;
+      }
+      .gaming-title {
+        font-size: 16px;
+        letter-spacing: 0.8px;
+      }
+      .astro-head-tag-banner {
+        margin-bottom: 16px;
+      }
+      .astro-head-tag-inner {
+        border-radius: 14px !important;
+        padding: 10px 14px !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        text-align: center !important;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .astro-head-tag-text {
+        font-size: 12px !important;
+        letter-spacing: 0.6px !important;
+        line-height: 1.35 !important;
+        white-space: normal !important;
+        word-break: break-word;
+      }
+      .astro-hero-banner {
+        padding: 20px 14px;
+      }
+      .astro-players-online {
+        font-size: 12px;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -34,7 +119,7 @@
         </h1>
         <div class="hub-header-actions">
           <div class="token-balance-chip" id="hubTokenBalanceChip" title="Your NEX Tokens">
-            <i class="fa-solid fa-coins"></i> <span id="hubTokenBalance">1,250</span> TOKENS
+            <i class="fa-solid fa-coins"></i> <span id="hubTokenBalance" class="hub-balance-skeleton" aria-busy="true">—</span> TOKENS
           </div>
           <button type="button" id="hubAudioToggle" class="hub-icon-btn" title="Toggle Sound FX">
             <i class="fa-solid fa-volume-high"></i>
@@ -55,6 +140,11 @@
 
     <!-- EXCLUSIVE FEATURED 3D GAME: ASTRO: SHIFT BEYOND EARTH -->
     <main>
+      <div id="gamingHubSkeleton" class="hub-loading-skeleton-bar" role="status" aria-label="Loading Gaming Hub telemetry">
+        <div class="hub-skel-card"></div>
+        <div class="hub-skel-card"></div>
+        <div class="hub-skel-card"></div>
+      </div>
       <section class="astro-hero-banner">
         <div class="astro-hero-badge-row">
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -62,7 +152,7 @@
             <span class="astro-badge green"><i class="fa-solid fa-bolt"></i> HIGH-FIDELITY PHYSICS</span>
           </div>
           <div class="astro-players-online">
-            <i class="fa-solid fa-users"></i> 8.9M OPERATIVES ONLINE
+            <i class="fa-solid fa-satellite-dish"></i> CLOSED BETA • WHITELIST QUEUE ACTIVE
           </div>
         </div>
 
@@ -273,6 +363,29 @@
     </div>
   </div>
 
+  <script>
+    (function() {
+      const balEl = document.getElementById('hubTokenBalance');
+      if (balEl) {
+        const obs = new MutationObserver(() => {
+          if (balEl.textContent && balEl.textContent.trim() !== '—') {
+            balEl.classList.remove('hub-balance-skeleton');
+            balEl.setAttribute('aria-busy', 'false');
+          }
+        });
+        obs.observe(balEl, { childList: true, characterData: true, subtree: true });
+      }
+      const markReady = () => {
+        const skel = document.getElementById('gamingHubSkeleton');
+        if (skel) skel.classList.add('is-ready');
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(markReady), { once: true });
+      } else {
+        requestAnimationFrame(markReady);
+      }
+    })();
+  </script>
   <script type="module" src="gaminghub.js"></script>
 </body>
 
