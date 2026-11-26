@@ -1362,11 +1362,51 @@ body:is(.light-mode, .light-theme, [class*="light-theme-"]) .bottom-nav .nav-ite
   color: var(--nex-theme-accent, #047857) !important;
 }
 
-body:is(.light-mode, .light-theme, [class*="light-theme-"]) .mobile-header-actions .mobile-action-btn {
-  color: var(--nex-theme-text, #1e293b) !important;
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .top-header :is(
+  #stealthGhostBtnMobile,
+  #stealthGhostToggleBtn,
+  #mobileAlertsBtn,
+  #mobileSearchBtn,
+  #mobileMenuBtn,
+  .stealth-ghost-toggle-btn,
+  .mobile-header-actions .mobile-action-btn
+):not(.active):not(.ghost-active):not([data-stealth-active="true"]):not([data-aegis-active="true"]) {
+  background: var(--nex-theme-surface-2, #e7ecf3) !important;
+  border-color: var(--nex-theme-border, rgba(15, 23, 42, 0.14)) !important;
+  color: var(--nex-theme-text, #0f172a) !important;
 }
 
-body:is(.light-mode, .light-theme, [class*="light-theme-"]) #aegisPrivacyBtnMobile i {
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .top-header :is(
+  #stealthGhostBtnMobile,
+  #stealthGhostToggleBtn,
+  #mobileAlertsBtn,
+  #mobileSearchBtn,
+  #mobileMenuBtn,
+  .stealth-ghost-toggle-btn,
+  .mobile-header-actions .mobile-action-btn
+):not(.active):not(.ghost-active):not([data-stealth-active="true"]):not([data-aegis-active="true"]) :is(i, svg, .fa-ghost, .stealth-ghost-icon) {
+  color: var(--nex-theme-text, #0f172a) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .top-header :is(
+  #stealthGhostBtnMobile,
+  #stealthGhostToggleBtn,
+  .stealth-ghost-toggle-btn
+):is(.active, .ghost-active, [data-stealth-active="true"]) {
+  background: var(--nex-theme-active, rgba(11, 110, 91, 0.16)) !important;
+  border-color: var(--nex-theme-accent, #0b6e5b) !important;
+  color: var(--nex-theme-accent, #0b6e5b) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .top-header :is(
+  #stealthGhostBtnMobile,
+  #stealthGhostToggleBtn,
+  .stealth-ghost-toggle-btn
+):is(.active, .ghost-active, [data-stealth-active="true"]) :is(i, svg, .fa-ghost, .stealth-ghost-icon) {
+  color: var(--nex-theme-accent, #0b6e5b) !important;
+}
+
+html body:is(.light-mode, .light-theme, [class*="light-theme-"]) .top-header #aegisPrivacyBtnMobile :is(i, svg) {
   color: var(--nex-theme-accent, #0b6e5b) !important;
 }
 
