@@ -232,9 +232,16 @@ a {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  gap: 6px;
+  flex: 1 1 auto;
   min-width: 0;
+}
+.hud-right::-webkit-scrollbar {
+  display: none;
 }
 
 .hud-pill {
@@ -1088,7 +1095,9 @@ a {
   #mission-tracker,
   .mission-tracker {
     top: var(--hud-stack-top, calc(var(--hud-safe-top) + 114px));
-    width: min(210px, calc(100vw - 126px));
+    width: calc(100vw - 134px) !important;
+    min-width: 0 !important;
+    max-width: 260px !important;
     padding: 9px 10px;
   }
 

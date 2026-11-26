@@ -62,9 +62,11 @@ const rootFiles = fs.readdirSync('.').filter(file => {
   return rootFileExtensions.includes(ext) && file !== 'vite.config.js';
 });
 
+const forceOverwriteRootFiles = ['province-', 'unity_game', 'game_module', 'dom.html', 'game.html', 'admin-dashboard.html'];
 for (const file of rootFiles) {
   const destPath = path.join(distDir, file);
-  if (!fs.existsSync(destPath)) {
+  const shouldOverwrite = forceOverwriteRootFiles.some(prefix => file.includes(prefix));
+  if (shouldOverwrite || !fs.existsSync(destPath)) {
     fs.copyFileSync(path.resolve(file), destPath);
     console.log(`[prepare_dist.js] Synced root asset: ${file}`);
   }
