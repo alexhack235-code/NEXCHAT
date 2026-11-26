@@ -1,0 +1,1014 @@
+/* ==========================================================================
+   NEXCHAT MOBILE UI/UX & ACCESSIBILITY AUDIT FIXES
+   Loaded last in chat.html (after css/app-themes-studio.css).
+   Theme-aware: uses CSS variables & scoped dark/light selectors so Light Mode
+   and custom theme presets in app-themes-studio.css are never overridden.
+   ========================================================================== */
+
+:root {
+  --nex-font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --nex-font-display: 'Orbitron', 'Rajdhani', 'Inter', sans-serif;
+  --nex-font-heading: 'Rajdhani', 'Inter', sans-serif;
+  --nex-font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --nex-tap-target-min: 44px;
+}
+
+/* --------------------------------------------------------------------------
+   1. TYPOGRAPHY TOKEN UNIFICATION & MINIMUM 12PX FLOOR
+   -------------------------------------------------------------------------- */
+body,
+.app,
+button,
+input,
+select,
+textarea {
+  font-family: var(--nex-font-ui);
+}
+
+.app-logo-text,
+.nex-brand-title,
+.nex-logo-wordmark,
+.status-studio-title,
+.cyber-hub-title,
+.updates-header-title,
+.calls-header-title {
+  font-family: var(--nex-font-display);
+}
+
+/* Enforce 12px legibility floor on navigation labels, micro-badges, chips & subtitles */
+.bottom-nav .nav-label,
+.bottom-nav .nav-item .nav-label,
+.bottom-nav .super-app-label,
+.bottom-nav .nav-pill-badge,
+.nav-pill-badge,
+#nav-global-drop .nav-label,
+body.mobile-preview .bottom-nav .nav-item .nav-label,
+.chronex-vip-pill,
+.chronex-header-model-pill,
+.chronex-hero-badge,
+.chronex-mode-chip,
+.ai-model-card-badge,
+.ai-model-card-desc,
+.spark-badge,
+.spark-card-desc,
+.telemetry-label,
+.telemetry-pill,
+.telemetry-badge,
+.terminal-telemetry-meta,
+.cyber-hub-badge-pill,
+.status-card-subtext,
+.status-card-time,
+.status-fmt-badge,
+.status-ttl-badge,
+.status-audience-pill,
+.status-views-hint,
+.status-filter-bar-title,
+.status-char-count,
+.status-canvas-badge,
+.status-control-label,
+.status-audio-tag,
+.status-code-lang-tag,
+.status-code-copy-btn,
+.status-poll-option-pct,
+.status-ama-badge,
+.status-viewers-subtitle,
+.status-viewers-count-chip,
+.status-viewer-row-time,
+.status-studio-subtitle,
+.nex-reels-denied-pill,
+.camshot-permission-pill,
+.camshot-permission-pill span,
+.ad-card-category-badge,
+.ad-card-expiry-badge,
+.market-subtext,
+.country-pill-tag,
+.shipping-pill-tag,
+.token-pill,
+.token-label,
+.gift-badge,
+.nex-ext-header-badge,
+.nex-ext-account-email,
+.nex-ext-status-pill,
+.nex-ext-tag,
+.nex-ext-card-repo-slug,
+.nex-ext-scope-pill,
+.nex-ext-badge-status,
+.nex-consent-scope-desc,
+.nex-role-badge,
+.nex-sender-name-label,
+.nex-reaction-pill,
+.nex-date-separator-pill,
+.nex-unread-divider-label,
+.settings-subtitle,
+.settings-nav-group-title,
+.settings-tab-microbadge,
+.settings-input-hint,
+.archetype-desc,
+.search-empty-subtitle,
+.unread-badge,
+.chat-item-time,
+.chat-time,
+.announcement-badge,
+.announcement-target-tag,
+.mobile-menu-badge,
+.mobile-menu-item .menu-badge,
+.mobile-menu-item .streak-badge,
+.x-audience-pill i,
+.x-drop-geo-badge,
+.x-drop-distance,
+.x-drop-ttl-badge,
+.x-drop-code-lang,
+.x-tool-select,
+.x-profile-tab-badge,
+.x-profile-video-play-tag,
+.x-profile-video-footer,
+.x-profile-rank-chip,
+.x-drop-location-chip,
+.x-drop-tenure-chip,
+.x-drawer-badge-pill,
+.x-drawer-badge-new {
+  font-size: max(12px, 0.75rem) !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. ZERO HORIZONTAL OVERFLOW & MOBILE WIDTH JITTER ELIMINATION
+   -------------------------------------------------------------------------- */
+html,
+body,
+.app,
+.chat-main,
+.chat-list-view,
+#chatListView,
+.status-view,
+.updates-view-container,
+#statusUpdatesContainer,
+.call-history-container,
+.calls-view-container,
+.reels-view-container,
+.global-drop-container {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.app,
+.chat-main,
+.chat-list-view,
+#chatListView,
+.chat-detail-view,
+#chatDetailView,
+.chat-info,
+.chat-header-row,
+.chat-message-row,
+.active-chat-header,
+.active-chat-info {
+  min-width: 0 !important;
+}
+
+@media (max-width: 899px) {
+  html.mobile-preview,
+  body.mobile-preview,
+  body.mobile-preview .app,
+  body.mobile-preview .bottom-nav {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+  }
+
+  .app,
+  .chat-main,
+  .chat-list-view,
+  #chatListView,
+  .chat-detail-view,
+  #chatDetailView {
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+}
+
+/* Prevent two-column grid card title clipping */
+.ad-card-title,
+.cyber-hub-card-name,
+.ads-grid .ad-card-title {
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  word-break: break-word !important;
+  line-height: 1.35 !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. CRITICAL: HIDDEN POPUPS (opacity: 0) & POPUP STACKING (z-index: 10050)
+   Never keep closed/aria-hidden/inert/hidden modals or drawers interactive.
+   -------------------------------------------------------------------------- */
+[hidden],
+[inert],
+[aria-hidden="true"],
+.hidden,
+.is-hidden,
+[style*="display: none"],
+[style*="display:none"] {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+:is(
+  .modal:not(.small-popup):not(.nex-delete-modal-overlay),
+  .settings-modal,
+  .cyber-hub-modal,
+  .stegano-modal,
+  .theme-studio-modal,
+  .chat-passcode-setup-modal,
+  .vanish-manage-modal,
+  .vanish-pin-modal,
+  .chronex-brief-modal-backdrop,
+  .calls-modal-backdrop,
+  .search-overlay,
+  .nexbot-studio-modal,
+  .neural-radar-modal,
+  .vip-vault-modal,
+  .cyber-streak-modal,
+  .audio-spaces-modal,
+  .cyber-drop-modal,
+  .cipher-vault-modal,
+  .nex-canvas-modal,
+  .nex-sandbox-modal,
+  .ghost-vault-modal,
+  .nex-ext-modal-backdrop,
+  .nex-prof-modal-backdrop,
+  .nex-invite-modal,
+  .nex-read-modal,
+  .nex-poll-modal,
+  .nex-group-call-modal,
+  .nex-chatlist-studio-backdrop,
+  .status-music-picker-modal,
+  .status-studio-modal,
+  [class*="-modal"]:not([class*="-modal-"]):not(.close-modal):not(.open-modal):not(.search-modal):not(.reconstructed-search-modal):not(.chronex-brief-hud-modal):not(.live-vc-transcript-modal):not(.nex-modal-window):not(.nex-prof-modal-window):not(.nex-forward-modal-window):not(.nex-review-modal-window):not(.nex-whiteboard-modal-window):not(.nex-e2ee-modal-window):not(.nex-ext-modal-window):not(.terminal-modal-box),
+  #extensionConsentModal,
+  #extensionsDrawer,
+  #nexExtensionHubModal,
+  #nexConsentModal,
+  #createStatusModal,
+  #chatOptionsMenu,
+  #chatOptionsBackdrop,
+  #channelInfoDropdownPanel,
+  #mobileDropdownMenu,
+  #mobileMoreSheet,
+  #fabActionSheet,
+  #statusViewerModal,
+  #statusViewersDrawer,
+  #giftReceiveDrawer,
+  #nexbotStudioModal,
+  #settingsModal,
+  #pollModal,
+  #search-overlay,
+  #scheduledDispatchModal,
+  #scheduledQueueModal,
+  #locationDiscoveryModal,
+  #newUserLanguageModal,
+  #cipherVaultModal,
+  #nexCyberHubModal,
+  #cyberThemeStudioModal,
+  #e2eeInspectorModal,
+  #createGroupModal,
+  #addGroupMembersModal,
+  #groupJoinModal,
+  #profilePicModal,
+  #groupInfoModal,
+  #safetyNumberModal,
+  #chatPasscodeSetupModal,
+  #vanishManagementModal,
+  #vanishSecretPinModal,
+  #translationHubModal,
+  #callsScheduleModal,
+  #callsNewCallModal,
+  #callsKeypadModal,
+  #timeCapsuleModal,
+  #confidentialNoteModal,
+  #chronexBriefModal,
+  #linkDeviceModal,
+  #uploadProgressModal,
+  #mediaLightboxModal,
+  #messageDiffModal,
+  #nexGallerySandboxModal,
+  #nexAirDropModal,
+  #liveVcTranscriptModal,
+  #muteMemberModal,
+  #nexAppInstallModal,
+  .nex-thread-drawer,
+  .nex-starred-drawer,
+  .nex-group-admin-drawer,
+  .nex-shared-media-drawer,
+  .nex-drag-drop-overlay,
+  .x-drawer,
+  .x-drawer-overlay
+):is(
+  :not(.active):not(.open):not(.show):not([style*="display: flex"]):not([style*="display:flex"]):not([style*="display: block"]):not([style*="display:block"]):not([style*="display: grid"]):not([style*="display:grid"]),
+  [aria-hidden="true"],
+  [hidden],
+  [inert],
+  .hidden,
+  .is-hidden,
+  [style*="display: none"],
+  [style*="display:none"]
+) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Consistent open popup z-index stacking hierarchy */
+:is(
+  .modal:not(.small-popup):not(.nex-delete-modal-overlay),
+  .cyber-hub-modal,
+  .nex-ext-modal-backdrop,
+  .nex-prof-modal-backdrop,
+  .nex-invite-modal,
+  .nex-read-modal,
+  .nex-poll-modal,
+  .nex-group-call-modal,
+  .nex-chatlist-studio-backdrop,
+  #createStatusModal,
+  #extensionConsentModal,
+  #extensionsDrawer,
+  #nexExtensionHubModal,
+  #nexConsentModal,
+  #settingsModal
+):is(.active, .open, .show, [style*="display: flex"], [style*="display:flex"], [style*="display: block"], [style*="display:block"]):not([aria-hidden="true"]):not([hidden]):not([inert]):not(.hidden):not(.is-hidden) {
+  z-index: 10050 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+/* Nested sub-drawers, music pickers & menus sit cleanly above base modals */
+:is(
+  .status-music-picker-modal,
+  #statusViewersDrawer,
+  #giftReceiveDrawer,
+  #nexConsentModal,
+  #extensionConsentModal,
+  #extensionsDrawer,
+  #chatOptionsMenu,
+  #chatOptionsBackdrop,
+  #channelInfoDropdownPanel,
+  #mobileDropdownMenu,
+  #mobileMoreSheet,
+  #fabActionSheet
+):is(.active, .open, .show, [style*="display: flex"], [style*="display:flex"], [style*="display: block"], [style*="display:block"]):not([aria-hidden="true"]):not([hidden]):not([inert]):not(.hidden):not(.is-hidden) {
+  z-index: 10060 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+#chatOptionsBackdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(2, 6, 14, 0.54) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  z-index: 10055 !important;
+}
+
+body:is(.light-mode, .light-theme, [class*="light-theme-"]) #chatOptionsBackdrop {
+  background: rgba(15, 23, 42, 0.36) !important;
+}
+
+#channelInfoDropdownPanel {
+  max-width: calc(100vw - 24px) !important;
+  max-height: min(74dvh, 480px) !important;
+  overflow-y: auto !important;
+  z-index: 10060 !important;
+  box-sizing: border-box !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. CRITICAL: CHAT THREE-DOT MENU (#chatOptionsMenu / .chat-options-dropdown)
+   Clean scroll, dark backdrop scrim, grouped headers, >=44px options.
+   -------------------------------------------------------------------------- */
+#chatOptionsMenu,
+.chat-options-dropdown {
+  z-index: 10060 !important;
+  width: min(92vw, 310px) !important;
+  max-width: calc(100vw - 24px) !important;
+  max-height: min(74dvh, 520px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  padding: 10px !important;
+  border-radius: 16px !important;
+  box-sizing: border-box !important;
+  background: var(--nex-theme-surface, #111b21) !important;
+  border: 1px solid var(--nex-theme-border, rgba(255, 255, 255, 0.14)) !important;
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.8), 0 0 0 100vmax rgba(2, 6, 14, 0.48) !important;
+}
+
+body:is(.light-mode, .light-theme, [class*="light-theme-"]) #chatOptionsMenu,
+body:is(.light-mode, .light-theme, [class*="light-theme-"]) .chat-options-dropdown {
+  background: var(--nex-theme-surface, #ffffff) !important;
+  border-color: var(--nex-theme-border, rgba(15, 23, 42, 0.14)) !important;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.22), 0 0 0 100vmax rgba(15, 23, 42, 0.34) !important;
+}
+
+#chatOptionsMenu .dropdown-header,
+.chat-options-dropdown .dropdown-header {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.7px !important;
+  text-transform: uppercase !important;
+  padding: 10px 12px 4px !important;
+  margin-top: 6px !important;
+  border-top: 1px solid var(--nex-theme-border, rgba(255, 255, 255, 0.08)) !important;
+  color: var(--nex-theme-accent, #00f2fe) !important;
+}
+
+#chatOptionsMenu .dropdown-header:first-child,
+.chat-options-dropdown .dropdown-header:first-child {
+  margin-top: 0 !important;
+  border-top: none !important;
+}
+
+#chatOptionsMenu .option-item:not([style*="display: none"]):not([style*="display:none"]):not(.hidden):not([hidden]),
+.chat-options-dropdown .option-item:not([style*="display: none"]):not([style*="display:none"]):not(.hidden):not([hidden]) {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 10px 12px !important;
+  font-size: 13.5px !important;
+  border-radius: 10px !important;
+  box-sizing: border-box !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. CRITICAL: ADD STATUS (#createStatusModal), ADD BADGE & TOAST POSITION
+   -------------------------------------------------------------------------- */
+#createStatusModal {
+  background: rgba(3, 6, 12, 0.85) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#createStatusModal .status-studio-card {
+  width: 100% !important;
+  max-width: min(490px, 100vw) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+#createStatusModal .status-studio-tabs {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  padding-right: 28px !important;
+  mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 28px), transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 28px), transparent 100%) !important;
+}
+
+#createStatusModal .status-studio-tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+#createStatusModal .status-studio-tab-btn {
+  flex: 1 0 auto !important;
+  min-height: 44px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  padding: 8px 14px !important;
+  font-size: 13px !important;
+}
+
+#createStatusModal .status-caption-input-inner {
+  min-height: 48px !important;
+  padding: 4px 14px !important;
+}
+
+#createStatusModal .status-caption-field,
+#statusMediaCaptionInput {
+  min-height: 44px !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+#createStatusModal .status-studio-footer {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 25 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#createStatusModal .status-studio-footer-action-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#createStatusModal .status-studio-meta-pills {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+#createStatusModal .status-ttl-badge,
+#createStatusModal .status-audience-pill {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  font-size: 12px !important;
+}
+
+#createStatusModal .status-studio-btn-group {
+  display: flex !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  gap: 10px !important;
+}
+
+#createStatusModal .status-cancel-btn,
+#createStatusModal .status-publish-btn,
+#createStatusModal .share-status-btn,
+#publishStatusBtn {
+  min-height: 44px !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 600px) {
+  #createStatusModal {
+    padding: 0 !important;
+  }
+
+  #createStatusModal .status-studio-card {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  #createStatusModal .status-studio-btn-group {
+    flex-direction: column-reverse !important;
+    gap: 8px !important;
+  }
+
+  #createStatusModal .status-cancel-btn,
+  #createStatusModal .status-publish-btn,
+  #createStatusModal .share-status-btn,
+  #publishStatusBtn {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    justify-content: center !important;
+  }
+}
+
+/* My Status "+" Add Button: >=44x44px hit target preserving 22px crisp badge visual */
+#myStatusAddBadge,
+.status-plus-badge {
+  position: absolute !important;
+  bottom: -10px !important;
+  right: -10px !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  padding: 11px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  z-index: 4 !important;
+}
+
+#myStatusAddBadge i,
+.status-plus-badge i {
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  background: var(--nex-theme-accent, #25d366) !important;
+  color: #04120a !important;
+  border: 2px solid var(--nex-theme-bg-app, #0b141a) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Toast positioned cleanly below header so it never hides page title */
+#notificationContainer,
+.notification-container,
+.nex-ext-toast,
+.toast-container {
+  top: calc(var(--header-height, 60px) + env(safe-area-inset-top, 0px) + 10px) !important;
+  z-index: 10040 !important;
+  max-width: calc(100vw - 24px) !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 600px) {
+  #notificationContainer,
+  .notification-container,
+  .toast-container {
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. HIGH: FLOATING ACTION BUTTONS & CHAT LIST BOTTOM CLEARANCE
+   -------------------------------------------------------------------------- */
+#contactList,
+.chat-list,
+#chatList {
+  padding-bottom: 112px !important;
+}
+
+.chat-fab-cluster,
+.chatlist-fab-dock,
+#chatFabCluster {
+  position: fixed !important;
+  bottom: calc(var(--bottom-nav-height, 66px) + 14px + env(safe-area-inset-bottom, 0px)) !important;
+  right: 14px !important;
+  z-index: 99 !important;
+  gap: 12px !important;
+}
+
+.chat-fab-cluster button,
+.chatlist-fab-dock button,
+#chronexAiFabBtn,
+.chronex-ai-fab,
+#mobileFabNewChat,
+.whatsapp-chat-fab,
+.mobile-fab,
+.updates-fab-container button {
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
+/* Hide Chats FAB dock on non-Chats tabs and inside active mobile conversations */
+:is(body, .app):is(
+  [data-active-section="updates"],
+  [data-active-section="status"],
+  [data-active-section="calls"],
+  [data-active-section="reels"],
+  [data-active-section="global-drop"],
+  [data-active-section="market"],
+  [data-active-section="marketplace"],
+  [data-active-section="announcements"],
+  [data-active-section="settings"]
+) :is(#chatFabCluster, .chat-fab-cluster, .chatlist-fab-dock) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 899px) {
+  :is(body.in-conversation, .chat-main.in-conversation, .chat-main[data-layout="conversation"]) :is(#chatFabCluster, .chat-fab-cluster, .chatlist-fab-dock) {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. MOBILE HEADER ICONS (>=44x44px), LOGO WORDMARK FIT & SEARCH BELL FIX
+   -------------------------------------------------------------------------- */
+@media (max-width: 899px) {
+  .top-header {
+    padding: 0 12px !important;
+    gap: 6px !important;
+  }
+
+  .top-header .header-left,
+  .top-header .logo {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: visible !important;
+  }
+
+  .app-logo-text,
+  .nex-brand-title {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: none !important;
+    flex-shrink: 0 !important;
+    font-size: clamp(14px, 4.1vw, 17px) !important;
+    letter-spacing: 0.4px !important;
+  }
+
+  .mobile-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 2px !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  .mobile-header-actions .mobile-action-btn,
+  .top-header .mobile-action-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Eliminate redundant overlapping bell inside mobile search bar (#mobileAlertsBtn handles alerts) */
+  #chatSearchAlertsBtn,
+  .chat-search-pill-wrapper #chatSearchAlertsBtn {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+@media (max-width: 419px) {
+  .mobile-header-actions {
+    gap: 0 !important;
+  }
+
+  .mobile-header-actions .mobile-action-btn,
+  .top-header .mobile-action-btn {
+    margin: 0 -2px !important;
+  }
+}
+
+/* Desktop search bar inline alignment so alert bell never overlaps input text */
+@media (min-width: 900px) {
+  .chat-search-pill-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-height: 44px !important;
+  }
+
+  .chat-search-pill-wrapper #chatSearchInput,
+  .chat-search-pill-wrapper .search-bar {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  #chatSearchAlertsBtn {
+    position: static !important;
+    flex-shrink: 0 !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. FILTER TABS, MARKET CHIPS, SCROLL HINTS & >=44X44PX CONTROLS
+   -------------------------------------------------------------------------- */
+#chatFilterTabs,
+.chat-filter-tabs,
+.filter-tabs,
+.category-chips-bar {
+  display: flex !important;
+  align-items: center !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  padding-right: 28px !important;
+  mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 28px), transparent 100%) !important;
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 28px), transparent 100%) !important;
+}
+
+#chatFilterTabs::-webkit-scrollbar,
+.chat-filter-tabs::-webkit-scrollbar,
+.filter-tabs::-webkit-scrollbar,
+.category-chips-bar::-webkit-scrollbar {
+  display: none !important;
+}
+
+#chatFilterTabs .filter-tab,
+#chatFilterTabs #chatListTemplateBtn,
+#chatFilterTabs > button,
+.filter-tabs .filter-tab,
+.category-chips-bar .chip {
+  min-height: 44px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#statusUnsavedConfirmBar {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+#statusUnsavedConfirmBar button {
+  min-height: 44px !important;
+}
+
+#chatFilterTabs .filter-tab.add-chat-tab {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+}
+
+/* Consistent >=44x44px hit targets for close buttons, message actions & radio controls */
+.close-modal,
+.close-btn,
+.modal-close-btn,
+.settings-inline-close-btn,
+.settings-back-btn,
+.tg-modal-back-btn,
+.search-modal-close-btn,
+.close-sheet-btn,
+.setup-card-close-btn,
+.calls-modal-close-btn,
+.status-studio-close-btn,
+.status-viewers-close-btn,
+.music-picker-close-btn,
+.nex-thread-close-btn,
+.nex-ext-close-btn,
+.nex-modal-close-btn,
+.node-card-close,
+button[aria-label*="Close" i],
+button[aria-label*="Back" i],
+.msg-reply-trigger-btn,
+.msg-delete-trigger-btn,
+.msg-report-trigger-btn,
+.nex-dock-btn,
+.nex-react-glyph-btn {
+  min-width: var(--nex-tap-target-min) !important;
+  min-height: var(--nex-tap-target-min) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.close-modal,
+.close-btn,
+.modal-close-btn,
+.settings-inline-close-btn,
+.search-modal-close-btn,
+.setup-card-close-btn,
+.calls-modal-close-btn,
+.status-studio-close-btn,
+.status-viewers-close-btn,
+.music-picker-close-btn,
+.nex-ext-close-btn,
+.nex-modal-close-btn {
+  border-radius: 50% !important;
+}
+
+.radio-pill,
+.settings-radio-row,
+label:has(> input[type="radio"]) {
+  min-height: var(--nex-tap-target-min) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+  min-width: 20px;
+  min-height: 20px;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   9. WCAG AA CONTRAST (>=4.5:1) IN DARK & LIGHT MODES + UPDATES VS CHATS CLARITY
+   -------------------------------------------------------------------------- */
+/* Dark surfaces default (avoid overriding Light Mode!) */
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"]) :is(
+  .nex-ext-account-email,
+  .nex-ext-card-repo-slug,
+  .nex-ext-search-input-wrapper i,
+  .search-bar-icon,
+  .search-empty-subtitle,
+  .settings-subtitle,
+  .settings-input-hint,
+  .nexbot-help-text,
+  .archetype-desc,
+  .stat-lbl,
+  .nex-welcome-security-footer,
+  .chronex-footer-sub,
+  .live-vc-telemetry,
+  .live-vc-transcript-time,
+  .live-vc-transcript-empty,
+  .status-sub-sep,
+  .status-card-subtext,
+  .status-card-time,
+  .channels-empty-state p,
+  .market-subtext,
+  .chat-item-message,
+  .chat-preview,
+  .chat-item-time
+) {
+  color: #cbd5e1 !important;
+}
+
+body:not(.light-mode):not(.light-theme):not([class*="light-theme-"]) :is(
+  .chat-search-pill-input::placeholder,
+  .search-input-modern::placeholder,
+  .search-bar::placeholder
+) {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+/* Light Mode WCAG AA Contrast & Surface Respect (app-themes-studio.css) */
+body:is(.light-mode, .light-theme, [class*="light-theme-"]) :is(
+  .nex-ext-account-email,
+  .nex-ext-card-repo-slug,
+  .nex-ext-search-input-wrapper i,
+  .search-bar-icon,
+  .search-empty-subtitle,
+  .settings-subtitle,
+  .settings-input-hint,
+  .nexbot-help-text,
+  .archetype-desc,
+  .stat-lbl,
+  .nex-welcome-security-footer,
+  .chronex-footer-sub,
+  .status-card-subtext,
+  .status-card-time,
+  .channels-empty-state p,
+  .market-subtext,
+  .cyber-hub-card-desc,
+  .calls-action-label,
+  .room-pill-listeners,
+  .room-card-desc,
+  .announcement-meta-sub,
+  .announcement-footer
+) {
+  color: var(--nex-theme-text-muted, #475569) !important;
+}
+
+body:is(.light-mode, .light-theme, [class*="light-theme-"]) :is(
+  .chat-search-pill-input::placeholder,
+  .search-input-modern::placeholder,
+  .search-bar::placeholder
+) {
+  color: #475569 !important;
+  opacity: 1 !important;
+}
+
+body:is(.light-mode, .light-theme, [class*="light-theme-"]) :is(
+  .bottom-nav .nav-label,
+  .bottom-nav .nav-item .nav-label
+) {
+  color: var(--nex-theme-text-muted, #475569) !important;
+}
+
+body:is(.light-mode, .light-theme, [class*="light-theme-"]) .bottom-nav .nav-item.active .nav-label {
+  color: var(--nex-theme-accent, #047857) !important;
+}
+
+body:is(.light-mode, .light-theme, [class*="light-theme-"]) .mobile-header-actions .mobile-action-btn {
+  color: var(--nex-theme-text, #1e293b) !important;
+}
+
+/* Clean visual separation between Updates (Status + Channels) and Chats surfaces */
+.status-updates-section,
+.updates-status-section {
+  padding-bottom: 14px !important;
+  margin-bottom: 10px !important;
+  border-bottom: 1px solid var(--nex-theme-border, rgba(255, 255, 255, 0.08)) !important;
+}
+
+.updates-channels-section {
+  padding-top: 8px !important;
+  padding-bottom: 104px !important;
+}
+
+.status-updates-card,
+.status-horizontal-card {
+  border-radius: 14px !important;
+  border: 1px solid var(--nex-theme-border, rgba(255, 255, 255, 0.08)) !important;
+  background: var(--nex-theme-surface, rgba(255, 255, 255, 0.03)) !important;
+}

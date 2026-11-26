@@ -16,9 +16,9 @@
   border-radius: 9999px;
   padding: 3px 10px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: #cbd5e1;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   margin-left: 8px;
@@ -30,7 +30,7 @@
   align-items: center;
   gap: 4px;
   color: #00ff88;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
@@ -40,7 +40,7 @@
 }
 
 .nex-telemetry-badge.e2ee i {
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .nex-telemetry-divider {
@@ -52,7 +52,7 @@
 .nex-telemetry-ping {
   color: #00f2ff;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 @media (max-width: 640px) {
@@ -118,11 +118,11 @@
 
 .nex-hub-section-label {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: #64748b;
+  color: #94a3b8;
   padding: 6px 10px 2px;
 }
 
@@ -189,8 +189,8 @@
 }
 
 .nex-pinned-icon {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 7px;
   background: rgba(0, 242, 255, 0.12);
   border: 1px solid rgba(0, 242, 255, 0.3);
@@ -198,7 +198,7 @@
   align-items: center;
   justify-content: center;
   color: #00f2ff;
-  font-size: 11px;
+  font-size: 12px;
   flex-shrink: 0;
 }
 
@@ -211,7 +211,7 @@
 
 .nex-pinned-title {
   font-family: 'Inter', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #00f2ff;
   line-height: 1.2;
@@ -219,8 +219,8 @@
 
 .nex-pinned-preview {
   font-family: 'Inter', sans-serif;
-  font-size: 11.5px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -236,15 +236,17 @@
 .nex-pinned-btn {
   background: transparent;
   border: none;
-  color: #64748b;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
+  color: #94a3b8;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
@@ -303,14 +305,16 @@
 .nex-dock-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
-  width: 26px;
-  height: 26px;
+  color: #cbd5e1;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -345,14 +349,14 @@
 .nex-react-glyph-btn {
   background: transparent;
   border: none;
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   color: #cbd5e1;
 }
@@ -422,10 +426,12 @@
 .nex-thread-close-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #cbd5e1;
   font-size: 15px;
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -460,8 +466,8 @@
 }
 
 .nex-thread-parent-time {
-  font-size: 10.5px;
-  color: #64748b;
+  font-size: 12px;
+  color: #94a3b8;
 }
 
 .nex-thread-parent-content {
@@ -497,14 +503,14 @@
 }
 
 .nex-thread-reply-sender {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #38bdf8;
 }
 
 .nex-thread-reply-time {
-  font-size: 10px;
-  color: #64748b;
+  font-size: 12px;
+  color: #94a3b8;
 }
 
 .nex-thread-reply-text {
@@ -590,7 +596,7 @@
 }
 
 .nex-code-lang-badge {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   color: #00f2ff;
@@ -602,8 +608,8 @@
 }
 
 .nex-code-title {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
 }
 
 .nex-code-copy-btn {
@@ -611,8 +617,9 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 5px;
   color: #cbd5e1;
-  padding: 3px 8px;
-  font-size: 10.5px;
+  min-height: 44px;
+  padding: 6px 10px;
+  font-size: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -652,14 +659,16 @@
 .nex-format-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
-  width: 26px;
-  height: 26px;
+  color: #cbd5e1;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -688,7 +697,7 @@
   border-radius: 6px;
   padding: 4px 10px;
   margin: 6px 12px 0;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #fbbf24;
   font-family: 'Inter', sans-serif;
 }
@@ -784,7 +793,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .nex-starred-card-sender {
@@ -793,7 +802,7 @@
 }
 
 .nex-starred-card-time {
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .nex-starred-card-text {
@@ -812,11 +821,12 @@
 .nex-starred-card-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
-  font-size: 11px;
+  color: #cbd5e1;
+  font-size: 12px;
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: 6px;
 }
 
 .nex-starred-card-btn:hover {
@@ -835,18 +845,20 @@
   -webkit-backdrop-filter: blur(12px);
   z-index: 100000;
   display: none !important;
+  visibility: hidden !important;
   align-items: center;
   justify-content: center;
   padding: 16px;
   opacity: 0;
-  pointer-events: none;
+  pointer-events: none !important;
   transition: opacity 0.22s ease;
 }
 
 .nex-prof-modal-backdrop.active {
   display: flex !important;
+  visibility: visible !important;
   opacity: 1;
-  pointer-events: auto;
+  pointer-events: auto !important;
 }
 
 .nex-prof-modal-window {
@@ -895,9 +907,9 @@
 
 .nex-prof-field-label {
   font-family: 'Inter', sans-serif;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: #cbd5e1;
   margin-bottom: 4px;
 }
 
@@ -991,7 +1003,7 @@
 
 .nex-sender-name-label {
   font-family: 'Inter', sans-serif;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #38bdf8;
 }
@@ -1000,12 +1012,12 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
   font-family: 'Rajdhani', sans-serif;
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
 }
 
@@ -1150,9 +1162,10 @@
   border-radius: 9999px;
   color: #00f2ff;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  padding: 2px 7px;
+  min-height: 44px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   user-select: none;
@@ -1192,22 +1205,22 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 12px;
   color: #00f2ff;
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .nex-link-title {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   color: #ffffff;
   line-height: 1.35;
 }
 
 .nex-link-url {
-  font-size: 11px;
-  color: #64748b;
+  font-size: 12px;
+  color: #94a3b8;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1226,8 +1239,8 @@
   padding: 6px 14px;
   margin: 6px 16px;
   font-family: 'Inter', sans-serif;
-  font-size: 11.5px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -1312,11 +1325,12 @@
   flex: 1;
   background: transparent;
   border: none;
+  min-height: 44px;
   padding: 8px 10px;
   font-family: 'Inter', sans-serif;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
-  color: #94a3b8;
+  color: #cbd5e1;
   cursor: pointer;
   border-radius: 6px;
   transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
@@ -1423,8 +1437,8 @@
 }
 
 .nex-doc-date {
-  font-size: 10.5px;
-  color: #64748b;
+  font-size: 12px;
+  color: #94a3b8;
 }
 
 /* --------------------------------------------------------------------------
@@ -1601,8 +1615,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
   font-family: 'JetBrains Mono', monospace;
   padding: 0 2px;
 }
@@ -1611,9 +1625,10 @@
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
-  color: #94a3b8;
-  padding: 2px 7px;
-  font-size: 10px;
+  color: #cbd5e1;
+  padding: 6px 10px;
+  min-height: 44px;
+  font-size: 12px;
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   display: inline-flex;
@@ -1661,8 +1676,8 @@
 }
 
 .nex-poll-meta-badge {
-  font-size: 10.5px;
-  color: #64748b;
+  font-size: 12px;
+  color: #94a3b8;
   font-family: monospace;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -1724,8 +1739,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
-  color: #64748b;
+  font-size: 12px;
+  color: #94a3b8;
   padding-top: 4px;
 }
 
@@ -1739,7 +1754,8 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   z-index: 200;
-  display: flex;
+  display: none;
+  visibility: hidden;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -1752,6 +1768,8 @@
 }
 
 .nex-drag-drop-overlay.active {
+  display: flex;
+  visibility: visible;
   opacity: 1;
 }
 
@@ -1802,7 +1820,7 @@
   border-bottom: 1px solid rgba(192, 132, 252, 0.35);
   color: #c084fc;
   font-family: 'Rajdhani', sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -1821,8 +1839,9 @@
   border: 1px solid rgba(0, 255, 136, 0.35);
   border-radius: 5px;
   color: #00ff88;
-  padding: 3px 8px;
-  font-size: 10.5px;
+  min-height: 44px;
+  padding: 6px 12px;
+  font-size: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1843,7 +1862,7 @@
   background: rgba(5, 8, 15, 0.95);
   border-top: 1px solid rgba(0, 242, 255, 0.2);
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #00f2ff;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
@@ -1909,7 +1928,7 @@
 
 .nex-call-timer {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11.5px;
+  font-size: 12px;
   color: #00ff88;
 }
 
@@ -1920,8 +1939,10 @@
 }
 
 .nex-call-btn {
-  width: 30px;
-  height: 30px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1929,7 +1950,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
@@ -1989,8 +2010,8 @@
 }
 
 .nex-snippet-preview {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2062,8 +2083,8 @@
 }
 
 .nex-roster-status {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
 }
 
 .nex-roster-actions {
@@ -2076,9 +2097,10 @@
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #cbd5e1;
-  padding: 4px 10px;
+  min-height: 44px;
+  padding: 6px 12px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -2145,7 +2167,7 @@
 
 .nex-pinned-counter {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10.5px;
+  font-size: 12px;
   color: #00f2ff;
   font-weight: 700;
   padding: 0 4px;
@@ -2171,8 +2193,8 @@
   align-items: center;
   gap: 8px;
   padding: 4px 16px;
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
   font-family: 'Inter', sans-serif;
   animation: nexFadeIn 0.2s ease;
 }
@@ -2234,14 +2256,14 @@
 }
 
 .nex-search-author {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #00f2ff;
 }
 
 .nex-search-time {
-  font-size: 10.5px;
-  color: #64748b;
+  font-size: 12px;
+  color: #94a3b8;
   font-family: monospace;
 }
 
@@ -2420,7 +2442,7 @@
 
 .nex-prompt-category {
   font-family: monospace;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #c084fc;
   letter-spacing: 0.5px;
@@ -2433,8 +2455,8 @@
 }
 
 .nex-prompt-desc {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
   line-height: 1.4;
 }
 
@@ -2446,9 +2468,10 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
   color: #cbd5e1;
-  font-size: 10.5px;
+  font-size: 12px;
   font-family: monospace;
-  padding: 2px 7px;
+  min-height: 44px;
+  padding: 6px 10px;
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   display: inline-flex;
@@ -2620,7 +2643,7 @@ body.privacy-shield-active .chat-header {
 }
 
 .nex-wall-preset-btn span {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #ffffff;
   background: rgba(0, 0, 0, 0.75);
@@ -2725,7 +2748,7 @@ body.privacy-shield-active .chat-header {
   background: rgba(0, 242, 255, 0.18);
   border: 1px solid rgba(0, 242, 255, 0.35);
   color: #00f2ff;
-  font-size: 10px;
+  font-size: 12px;
   font-family: monospace;
   padding: 1px 6px;
   border-radius: 4px;
@@ -2777,7 +2800,7 @@ body.privacy-shield-active .chat-header {
   left: 8px;
   background: rgba(239, 68, 68, 0.88);
   color: #ffffff;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   font-family: monospace;
   padding: 2px 8px;
@@ -2797,7 +2820,7 @@ body.privacy-shield-active .chat-header {
   background: rgba(0, 0, 0, 0.85);
   color: #fbbf24;
   border: 1px solid rgba(251, 191, 36, 0.4);
-  font-size: 11px;
+  font-size: 12px;
   font-family: monospace;
   font-weight: 700;
   padding: 3px 8px;
@@ -2812,9 +2835,10 @@ body.privacy-shield-active .chat-header {
   background: rgba(0, 242, 255, 0.12);
   border: 1px solid rgba(0, 242, 255, 0.3);
   color: #00f2ff;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  padding: 3px 9px;
+  min-height: 44px;
+  padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
   transition: transform 0.15s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
@@ -2878,7 +2902,7 @@ body.privacy-shield-active .chat-header {
 .nex-diff-pane pre {
   margin: 0;
   font-family: 'Fira Code', monospace;
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1.5;
   color: #e2e8f0;
 }

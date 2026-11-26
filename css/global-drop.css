@@ -343,10 +343,10 @@ body.light-theme,
     padding-bottom: 84px;
     touch-action: pan-y;
   }
-  /* Ensure the 6-tab bottom nav label for Global Drop fits without ellipsis */
+  /* Ensure the 6-tab bottom nav label for Global Drop fits cleanly at >=12px */
   #nav-global-drop .nav-label {
-    font-size: 9.5px !important;
-    letter-spacing: -0.4px !important;
+    font-size: 12px !important;
+    letter-spacing: -0.35px !important;
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -592,7 +592,7 @@ body.light-theme,
 }
 
 .x-audience-pill i {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 /* Textarea */
@@ -639,9 +639,9 @@ body.light-theme,
   background: transparent;
   border: none;
   color: var(--x-green);
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
-  padding: 0 0 0 2px;
+  padding: 2px 4px;
   display: flex;
   align-items: center;
 }
@@ -655,12 +655,12 @@ body.light-theme,
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 1px 7px;
+  padding: 2px 8px;
   border-radius: 9999px;
   background: var(--x-green-subtle);
   border: 1px solid rgba(0, 255, 136, 0.25);
   color: var(--x-green);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
@@ -674,7 +674,7 @@ body.light-theme,
 }
 
 .x-drop-distance {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--x-text-secondary);
   font-family: var(--x-mono);
   margin-left: 4px;
@@ -881,8 +881,9 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   border: 1px solid var(--x-border);
   color: var(--x-green);
   font-family: var(--x-mono);
-  font-size: 11px;
-  padding: 3px 8px;
+  font-size: 12px;
+  min-height: 36px;
+  padding: 4px 8px;
   border-radius: 6px;
   outline: none;
 }
@@ -1000,8 +1001,9 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   background: transparent;
   border: 1px solid var(--x-border);
   color: var(--x-text-secondary);
-  font-size: 11.5px;
-  padding: 4px 6px;
+  font-size: 12px;
+  min-height: 44px;
+  padding: 6px 8px;
   border-radius: 6px;
   outline: none;
   cursor: pointer;
@@ -1177,9 +1179,9 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 }
 
 .x-drop-ttl-badge {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 1px 6px;
+  padding: 2px 8px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--x-text-secondary);
@@ -1187,8 +1189,10 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 }
 
 .x-drop-more-btn {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 50%;
   background: transparent;
   border: none;
@@ -1395,7 +1399,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 
 .x-drop-code-lang {
   font-family: var(--x-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--x-green);
   text-transform: uppercase;
 }
@@ -1406,8 +1410,9 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   color: var(--x-text-secondary);
   font-size: 12px;
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: 6px;
 }
 
 .x-drop-code-copy-btn:hover {
@@ -1877,8 +1882,9 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
     gap: 4px;
   }
   .x-tool-select {
-    font-size: 11px;
-    padding: 3px 6px;
+    font-size: 12px;
+    min-height: 44px;
+    padding: 6px 8px;
   }
   .x-composer-submit-group {
     margin-left: auto;
@@ -2708,9 +2714,9 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   background: rgba(0, 255, 136, 0.18);
   color: var(--x-green);
   border: 1px solid rgba(0, 255, 136, 0.4);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
-  padding: 1px 5px;
+  padding: 1px 6px;
   border-radius: 9999px;
   margin-left: 2px;
 }
@@ -2782,7 +2788,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(4px);
   color: var(--x-green);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 6px;
@@ -2797,7 +2803,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   align-items: flex-end;
   justify-content: space-between;
   color: #ffffff;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -2834,7 +2840,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   background: rgba(0, 255, 136, 0.12);
   border: 1px solid rgba(0, 255, 136, 0.35);
   color: var(--x-green);
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 9999px;
@@ -2843,7 +2849,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 }
 
 .x-profile-rank-chip i {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 /* Metadata Chips on Timeline and Thread Parent */
@@ -2852,12 +2858,12 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--x-text-secondary);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1px 6px;
+  padding: 2px 6px;
   border-radius: 4px;
   margin-left: 6px;
   vertical-align: middle;
@@ -2865,12 +2871,12 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 
 .x-drop-location-chip i {
   color: var(--x-green);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .x-drop-tenure-chip i {
   color: #00d2ff;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .x-thread-parent-submeta {
@@ -3178,7 +3184,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 .x-drawer-badge-pill {
   background: #1d9bf0;
   color: #ffffff;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 9999px;
@@ -3189,7 +3195,7 @@ body[data-active-section="global-drop"] .top-header.header-hidden {
 .x-drawer-badge-new {
   background: var(--x-green, #00ff88);
   color: #000000;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 4px;
@@ -3261,7 +3267,7 @@ body.light-mode .x-tab-btn,
 body.light-theme .x-tab-btn,
 .global-drop-container.light-mode .x-tab-btn,
 .global-drop-container.light-theme .x-tab-btn {
-  color: #64748b !important;
+  color: #475569 !important;
 }
 
 body.light-mode .x-tab-btn.active,
@@ -3305,7 +3311,7 @@ body.light-theme .x-drop-handle,
 body.light-theme .x-drop-time,
 .global-drop-container.light-mode .x-drop-handle,
 .global-drop-container.light-theme .x-drop-handle {
-  color: #64748b !important;
+  color: #475569 !important;
 }
 
 body.light-mode .x-composer-textarea,
@@ -3319,7 +3325,7 @@ body.light-mode .x-composer-textarea::placeholder,
 body.light-theme .x-composer-textarea::placeholder,
 .global-drop-container.light-mode .x-composer-textarea::placeholder,
 .global-drop-container.light-theme .x-composer-textarea::placeholder {
-  color: #94a3b8 !important;
+  color: #475569 !important;
 }
 
 body.light-mode .x-composer,
@@ -3398,7 +3404,7 @@ body.light-mode .x-drawer-stat,
 body.light-theme .x-drawer-stat,
 .x-drawer.light-theme .x-drawer-stat,
 .x-drawer.light-mode .x-drawer-stat {
-  color: #64748b !important;
+  color: #475569 !important;
 }
 
 body.light-mode .x-drawer-stat strong,

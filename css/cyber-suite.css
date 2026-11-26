@@ -76,7 +76,7 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: #e2e8f0;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
@@ -253,13 +253,14 @@
   background: transparent;
   border: none;
   color: #00f3ff;
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 5px;
+  min-height: 44px;
+  padding: 6px 10px;
   border-radius: 6px;
   transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
 }
@@ -270,12 +271,15 @@
 }
 
 .voice-speed-pill {
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 700;
-  color: #94a3b8;
+  color: #cbd5e1;
   background: rgba(255, 255, 255, 0.06);
-  padding: 1px 5px;
-  border-radius: 4px;
+  min-height: 44px;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
   cursor: pointer;
   user-select: none;
   transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
@@ -292,7 +296,7 @@
   background: rgba(10, 16, 28, 0.85);
   border-left: 2px solid #00f3ff;
   border-radius: 0 6px 6px 0;
-  font-size: 11px;
+  font-size: 12px;
   color: #cbd5e1;
   line-height: 1.4;
   animation: cyberFadeIn 0.2s ease;
@@ -478,11 +482,12 @@
   align-items: center;
   gap: 6px;
   margin-top: 4px;
-  padding: 4px 10px;
+  min-height: 44px;
+  padding: 6px 12px;
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(99, 102, 241, 0.2));
   border: 1px solid rgba(139, 92, 246, 0.4);
   border-radius: 20px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: #c4b5fd;
   cursor: pointer;
@@ -788,22 +793,24 @@
 
 .panic-decoy-toggle {
   margin-top: 14px;
+  min-height: 44px;
+  padding: 8px 12px;
   background: transparent;
   border: none;
-  color: #64748b;
-  font-size: 11.5px;
+  color: #94a3b8;
+  font-size: 12px;
   cursor: pointer;
   text-decoration: underline;
 }
 
 .panic-decoy-toggle:hover {
-  color: #94a3b8;
+  color: #cbd5e1;
 }
 
 /* Decoy view */
 .decoy-code-view {
   font-family: monospace;
-  font-size: 11px;
+  font-size: 12px;
   color: #22c55e;
   text-align: left;
   max-height: 220px;
@@ -884,8 +891,8 @@
   padding: 8px 16px;
   background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 11.5px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
   font-weight: 600;
 }
 
@@ -927,7 +934,7 @@
   padding: 8px 12px;
   overflow-y: auto;
   font-family: monospace;
-  font-size: 11px;
+  font-size: 12px;
   color: #38bdf8;
 }
 
@@ -936,7 +943,8 @@
   color: #000;
   border: none;
   border-radius: 8px;
-  padding: 6px 14px;
+  min-height: 44px;
+  padding: 8px 14px;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -956,12 +964,13 @@
   align-items: center;
   gap: 5px;
   margin-top: 6px;
-  padding: 4px 10px;
+  min-height: 44px;
+  padding: 6px 12px;
   background: rgba(0, 240, 118, 0.15);
   border: 1px solid rgba(0, 240, 118, 0.4);
   border-radius: 6px;
   color: #00ff66;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
@@ -985,13 +994,14 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.3);
   border-radius: 6px;
-  padding: 3px 8px;
+  min-height: 44px;
+  padding: 6px 12px;
   margin-top: 6px;
   cursor: pointer;
   transition: transform 0.2s, opacity 0.2s, background-color 0.2s, border-color 0.2s, color 0.2s;
@@ -1030,7 +1040,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   color: #00f3ff;
   text-transform: uppercase;
@@ -1040,8 +1050,8 @@
 
 .auto-trans-original {
   margin-top: 5px;
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
   font-style: italic;
   border-top: 1px dashed rgba(255, 255, 255, 0.08);
   padding-top: 3px;
@@ -1051,7 +1061,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 800;
   color: #00f3ff;
   background: rgba(0, 243, 255, 0.15);
@@ -1070,7 +1080,7 @@
   margin-top: 6px;
   padding-top: 4px;
   border-top: 1px dashed rgba(255, 255, 255, 0.08);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .translate-lang-tag {
@@ -1196,7 +1206,7 @@
 }
 
 .ghost-enclave-badge {
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 800;
   color: #c084fc;
   background: rgba(192, 132, 252, 0.15);
@@ -1369,7 +1379,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #e2e8f0;
   background: rgba(0, 0, 0, 0.35);
@@ -1385,7 +1395,9 @@
   border: 1px solid rgba(0, 243, 255, 0.3);
   color: #00f3ff;
   border-radius: 6px;
-  padding: 4px 9px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 6px 10px;
   cursor: pointer;
   font-size: 12px;
   transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
@@ -1408,15 +1420,17 @@
 .location-tab-pills {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .loc-tab-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
-  font-size: 11.5px;
+  color: #cbd5e1;
+  font-size: 12px;
   font-weight: 700;
-  padding: 6px 12px;
+  min-height: 44px;
+  padding: 8px 14px;
   border-radius: 20px;
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
@@ -1519,8 +1533,8 @@
 
 .operative-info p {
   margin: 2px 0 0;
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 12px;
+  color: #cbd5e1;
 }
 
 .operative-badges-row {
@@ -1532,7 +1546,7 @@
 }
 
 .operative-badge-loc {
-  font-size: 10.5px;
+  font-size: 12px;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.25);
@@ -1542,7 +1556,7 @@
 }
 
 .operative-badge-dist {
-  font-size: 10px;
+  font-size: 12px;
   color: #10b981;
   background: rgba(16, 185, 129, 0.1);
   border-radius: 4px;
@@ -1558,8 +1572,9 @@
 
 .op-btn {
   flex: 1;
-  padding: 6px 8px;
-  font-size: 11px;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 12px;
   font-weight: 700;
   border-radius: 6px;
   cursor: pointer;
@@ -1605,8 +1620,8 @@
 }
 
 .nex-canvas-footer-tip {
-  font-size: 11px !important;
-  color: #64748b !important;
+  font-size: 12px !important;
+  color: #cbd5e1 !important;
   display: flex !important;
   align-items: center !important;
   gap: 6px !important;
@@ -1623,7 +1638,8 @@
 .nex-canvas-footer button.canvas-tool-btn {
   width: auto !important;
   min-width: 74px !important;
-  height: 38px !important;
+  height: 44px !important;
+  min-height: 44px !important;
   padding: 0 14px !important;
   border-radius: 10px !important;
   background: rgba(255, 255, 255, 0.06) !important;
@@ -1654,7 +1670,8 @@
 }
 
 .nex-canvas-footer .canvas-send-btn {
-  height: 38px !important;
+  height: 44px !important;
+  min-height: 44px !important;
   padding: 0 18px !important;
   font-size: 13px !important;
   white-space: nowrap !important;
@@ -1670,7 +1687,7 @@
   .nex-canvas-footer-tip {
     justify-content: center !important;
     text-align: center !important;
-    font-size: 10.5px !important;
+    font-size: 12px !important;
   }
   .nex-canvas-footer-btns {
     width: 100% !important;
@@ -1681,8 +1698,9 @@
   .nex-canvas-footer-btns > button {
     flex: 1 1 0 !important;
     min-width: 0 !important;
-    padding: 0 6px !important;
-    font-size: 11px !important;
+    min-height: 44px !important;
+    padding: 0 8px !important;
+    font-size: 12px !important;
     gap: 4px !important;
   }
 }
@@ -1715,12 +1733,13 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 12px;
+  min-height: 44px;
+  padding: 8px 14px;
   border-radius: 20px;
   border: 1px solid rgba(0, 255, 102, 0.35);
   background: rgba(0, 255, 102, 0.08);
   color: #00ff66;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
