@@ -977,7 +977,97 @@
     verification: new CreatorVerificationBadgeSystem()
   };
 
+  function enforceReelsLockAccessibility() {
+    if (!document.getElementById('nexReelsLockFixStyles')) {
+      const style = document.createElement('style');
+      style.id = 'nexReelsLockFixStyles';
+      style.textContent = `
+        #reelsLockedScreenOverlay {
+          padding: 16px !important;
+          box-sizing: border-box !important;
+        }
+        #reelsNotifyMeBtn {
+          max-width: min(100%, 340px) !important;
+          width: auto !important;
+          height: auto !important;
+          min-height: 44px !important;
+          padding: 11px 18px !important;
+          white-space: normal !important;
+          overflow-wrap: anywhere !important;
+          word-break: break-word !important;
+          line-height: 1.3 !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-wrap: wrap !important;
+          gap: 8px !important;
+          text-align: center !important;
+          box-sizing: border-box !important;
+        }
+        #reelsNotifyBtnText {
+          white-space: normal !important;
+          overflow-wrap: anywhere !important;
+          text-align: center !important;
+          line-height: 1.3 !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const bgTargets = [
+      document.getElementById('reelsFeed'),
+      document.getElementById('reelsLoadingState'),
+      document.getElementById('trendingTagsRibbonWrapper'),
+      document.getElementById('desktopNavControls'),
+      document.querySelector('.reels-header')
+    ].filter(Boolean);
+
+    const syncLockState = () => {
+      const overlay = document.getElementById('reelsLockedScreenOverlay');
+      let isLocked = false;
+      if (overlay && overlay.isConnected) {
+        const hiddenByAttr = overlay.hidden || overlay.getAttribute('aria-hidden') === 'true';
+        const dismissed = overlay.classList.contains('unlocked') || overlay.classList.contains('dismissed');
+        let displayVal = overlay.style.display;
+        if (!displayVal && typeof window.getComputedStyle === 'function') {
+          try { displayVal = window.getComputedStyle(overlay).display; } catch (_) { }
+        }
+        isLocked = !hiddenByAttr && !dismissed && displayVal !== 'none';
+      }
+
+      bgTargets.forEach((el) => {
+        if (!el || !el.isConnected) return;
+        if (isLocked) {
+          if (document.activeElement && el.contains(document.activeElement)) {
+            try { document.activeElement.blur(); } catch (_) { }
+          }
+          el.inert = true;
+          el.setAttribute('inert', '');
+          el.setAttribute('aria-hidden', 'true');
+        } else {
+          el.inert = false;
+          el.removeAttribute('inert');
+          el.setAttribute('aria-hidden', 'false');
+        }
+      });
+    };
+
+    syncLockState();
+
+    const overlay = document.getElementById('reelsLockedScreenOverlay');
+    if (overlay && !overlay.dataset.nexLockObserved) {
+      overlay.dataset.nexLockObserved = '1';
+      const lockObserver = new MutationObserver(syncLockState);
+      lockObserver.observe(overlay, { attributes: true, attributeFilter: ['style', 'class', 'hidden', 'aria-hidden'] });
+      if (document.body) {
+        lockObserver.observe(document.body, { childList: true });
+      }
+    }
+  }
+
   function initQuantumSuite() {
+    enforceReelsLockAccessibility();
+
     // Hook new reel cards as they mount
     const observer = new MutationObserver(() => {
       document.querySelectorAll('.reel-card').forEach(card => {

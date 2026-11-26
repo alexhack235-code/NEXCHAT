@@ -140,12 +140,107 @@
       badge.title = `${count} Day Cyber Streak! Click for milestone rewards`;
     }
 
+    injectReadabilityStyles() {
+      if (document.getElementById('nexCyberStreakReadabilityCss')) return;
+      const style = document.createElement('style');
+      style.id = 'nexCyberStreakReadabilityCss';
+      style.textContent = `
+        #streakStatusModal .streak-card-window,
+        #cyberLootboxModal .lootbox-modal-window,
+        #cyberStreakModal .cyber-modal-window,
+        #nexDailyStreakModal .cyber-modal-window {
+          color: #f8fafc;
+        }
+        #streakStatusModal .streak-row {
+          font-size: 13.5px;
+          line-height: 1.45;
+          color: #cbd5e1;
+        }
+        #cyberStreakModal .streak-days-grid,
+        #nexDailyStreakModal .streak-days-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+          gap: 8px;
+        }
+        .streak-day-card {
+          background: rgba(15, 23, 42, 0.94) !important;
+          border: 1px solid rgba(148, 163, 184, 0.36) !important;
+          border-radius: 10px !important;
+          padding: 10px 8px !important;
+          min-height: 76px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          color: #f8fafc !important;
+          text-align: center;
+        }
+        .streak-day-card .day-num {
+          font-size: 13px !important;
+          font-weight: 800 !important;
+          color: #f8fafc !important;
+          letter-spacing: 0.2px;
+        }
+        .streak-day-card .day-tokens {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+          color: #38bdf8 !important;
+        }
+        .streak-day-card .day-status-pill {
+          font-size: 10.5px !important;
+          font-weight: 800 !important;
+          padding: 2px 7px !important;
+          border-radius: 999px;
+          background: rgba(148, 163, 184, 0.16);
+          color: #e2e8f0 !important;
+        }
+        .streak-day-card.claimed,
+        .streak-day-card.active-day {
+          border-color: rgba(0, 255, 136, 0.65) !important;
+          background: rgba(6, 78, 59, 0.42) !important;
+        }
+        .streak-day-card.claimed .day-status-pill,
+        .streak-day-card.active-day .day-status-pill {
+          background: rgba(0, 255, 136, 0.18);
+          color: #4ade80 !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    setCyberModalState(modal, open) {
+      if (!modal) return;
+      if (open) {
+        modal.hidden = false;
+        modal.removeAttribute('hidden');
+        modal.inert = false;
+        modal.removeAttribute('inert');
+        modal.setAttribute('aria-hidden', 'false');
+        modal.style.display = 'flex';
+      } else {
+        if (document.activeElement && modal.contains(document.activeElement)) {
+          try { document.activeElement.blur(); } catch (_) { }
+        }
+        modal.setAttribute('aria-hidden', 'true');
+        modal.hidden = true;
+        modal.setAttribute('hidden', '');
+        modal.inert = true;
+        modal.setAttribute('inert', '');
+        modal.style.display = 'none';
+      }
+    }
+
     injectModals() {
+      this.injectReadabilityStyles();
+
       // 1. Streak Info & Milestone Modal
       if (!document.getElementById('streakStatusModal')) {
         const modal = document.createElement('div');
         modal.id = 'streakStatusModal';
         modal.className = 'cyber-modal-backdrop';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
         modal.style.display = 'none';
 
         modal.innerHTML = `
@@ -189,14 +284,15 @@
           </div>
         `;
         document.body.appendChild(modal);
+        this.setCyberModalState(modal, false);
 
         document.getElementById('closeStreakModalBtn')?.addEventListener('click', () => {
-          modal.style.display = 'none';
+          this.setCyberModalState(modal, false);
         });
 
         document.getElementById('sendStreakNudgeBtn')?.addEventListener('click', () => {
           this.sendStreakNudge();
-          modal.style.display = 'none';
+          this.setCyberModalState(modal, false);
         });
       }
 
@@ -205,6 +301,8 @@
         const lootboxModal = document.createElement('div');
         lootboxModal.id = 'cyberLootboxModal';
         lootboxModal.className = 'cyber-modal-backdrop';
+        lootboxModal.setAttribute('role', 'dialog');
+        lootboxModal.setAttribute('aria-modal', 'true');
         lootboxModal.style.display = 'none';
 
         lootboxModal.innerHTML = `
@@ -247,9 +345,10 @@
           </div>
         `;
         document.body.appendChild(lootboxModal);
+        this.setCyberModalState(lootboxModal, false);
 
         document.getElementById('closeLootboxModalBtn')?.addEventListener('click', () => {
-          lootboxModal.style.display = 'none';
+          this.setCyberModalState(lootboxModal, false);
         });
 
         document.getElementById('claimLootboxBtn')?.addEventListener('click', () => {
@@ -257,9 +356,44 @@
         });
 
         document.getElementById('ackLootboxRewardBtn')?.addEventListener('click', () => {
-          lootboxModal.style.display = 'none';
+          this.setCyberModalState(lootboxModal, false);
         });
       }
+    }
+
+    bindFirstTapTrigger(btn, action) {
+      if (!btn || btn.dataset.nexFirstTapBound === '1') return;
+      btn.dataset.nexFirstTapBound = '1';
+
+      let startX = 0;
+      let startY = 0;
+      let lastHandledAt = 0;
+
+      const fireOnce = (e) => {
+        const now = Date.now();
+        if (now - lastHandledAt < 350) return;
+        lastHandledAt = now;
+        if (e) e.stopPropagation();
+        this.injectModals();
+        action();
+      };
+
+      btn.addEventListener('pointerdown', (e) => {
+        startX = e.clientX || 0;
+        startY = e.clientY || 0;
+      }, { capture: true, passive: true });
+
+      btn.addEventListener('pointerup', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        const dist = Math.hypot((e.clientX || 0) - startX, (e.clientY || 0) - startY);
+        if (dist < 8) {
+          fireOnce(e);
+        }
+      }, { capture: true });
+
+      btn.addEventListener('click', (e) => {
+        fireOnce(e);
+      });
     }
 
     bindHeaderTriggers() {
@@ -268,12 +402,12 @@
                             document.querySelector('.chat-detail-header-right') || 
                             document.querySelector('.chat-detail-header');
       if (headerActions && !document.getElementById('chatStreakBadge')) {
-        const badge = document.createElement('div');
+        const badge = document.createElement('button');
+        badge.type = 'button';
         badge.id = 'chatStreakBadge';
         badge.className = 'chat-streak-badge';
         badge.style.display = 'none';
         badge.innerHTML = `<i class="fa-solid fa-fire text-amber-400"></i> <span>0</span>`;
-        badge.addEventListener('click', () => this.openStreakModal());
         headerActions.insertBefore(badge, headerActions.firstChild);
       }
 
@@ -288,9 +422,35 @@
           <i class="fa-solid fa-cube text-[#00ff66]"></i>
           <span class="lootbox-ready-dot" id="lootboxReadyDot" style="display: none;"></span>
         `;
-        lootboxBtn.addEventListener('click', () => this.openLootboxModal());
         headerActions.appendChild(lootboxBtn);
       }
+
+      // Ensure first-tap reliability on Cyber Streak & Daily Streak buttons
+      this.bindFirstTapTrigger(document.getElementById('chatStreakBadge'), () => this.openStreakModal());
+      this.bindFirstTapTrigger(document.getElementById('dailyLootboxBtn'), () => this.openLootboxModal());
+
+      const dailyStreakAction = () => {
+        document.getElementById('mobileDropdownMenu')?.classList.remove('show');
+        if (typeof window.openDailyStreakModal === 'function') {
+          window.openDailyStreakModal();
+          return;
+        }
+        if (typeof window.openCyberStreakModal === 'function') {
+          window.openCyberStreakModal();
+          return;
+        }
+        const extModal = document.getElementById('nexDailyStreakModal') || document.getElementById('cyberStreakModal');
+        if (extModal) {
+          this.setCyberModalState(extModal, true);
+          return;
+        }
+        this.openStreakModal();
+      };
+
+      ['cyberStreakBtn', 'cyberStreakBtnHeader', 'mobileStreakBtn', 'dailyStreakDropBtnHeader'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) this.bindFirstTapTrigger(el, dailyStreakAction);
+      });
     }
 
     openStreakModal() {
@@ -322,7 +482,7 @@
         }
       }
 
-      if (modal) modal.style.display = 'flex';
+      this.setCyberModalState(modal, true);
       if (window.playLuxuryPopSound) window.playLuxuryPopSound();
     }
 
@@ -397,7 +557,7 @@
       if (stage) stage.style.display = 'block';
       if (rewardsWrap) rewardsWrap.style.display = 'none';
 
-      if (modal) modal.style.display = 'flex';
+      this.setCyberModalState(modal, true);
       if (window.playLuxuryPopSound) window.playLuxuryPopSound();
     }
 

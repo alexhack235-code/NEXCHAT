@@ -38,7 +38,7 @@
           authorName: 'CamShot',
           text: 'Welcome to the official CamShot broadcast channel on NEXCHAT! Follow here for creator bounties, algorithmic boost drops, and cinematic 4K camera gear releases.',
           image: 'assets/camshot_logo.svg',
-          timestamp: '10:27 a.m.',
+          timestamp: '10:27 AM',
           views: '149',
           likes: 24
         },
@@ -46,7 +46,7 @@
           id: 'post_camshot_2',
           authorName: 'CamShot',
           text: 'CamShot Pro Cine Anamorphic presets v2.4 live for all verified creators. Tap attach or reels to link your stream directly.',
-          timestamp: '11:42 a.m.',
+          timestamp: '11:42 AM',
           views: '312',
           likes: 58
         }
@@ -65,13 +65,13 @@
       unreadCount: 0,
       createdAt: Date.now() - 86400000 * 5,
       lastPostSnippet: 'Testing broadcast update delivery across localhost node cluster.',
-      lastPostTime: '09:41 AM',
+      lastPostTime: '9:41 AM',
       posts: [
         {
           id: 'post_lh_1',
           authorName: 'LOCALHOST',
           text: 'Broadcast message running on local node. Real-time updates synced across all instances.',
-          timestamp: '10:27 a.m.',
+          timestamp: '10:27 AM',
           views: '149',
           likes: 12
         }
@@ -96,7 +96,7 @@
           id: 'post_nex_1',
           authorName: 'NEXCHAT Protocol',
           text: 'Welcome to NEXCHAT Broadcast Channels! Follow this channel to receive instant real-time security alerts, feature drops, and system status advisories.',
-          timestamp: 'Yesterday, 04:20 PM',
+          timestamp: 'Yesterday, 4:20 PM',
           views: '4.2K',
           likes: 4120
         },
@@ -104,7 +104,7 @@
           id: 'post_nex_2',
           authorName: 'NEXCHAT Protocol',
           text: 'NEXCHAT v4.2 Security Protocol rollout complete. Quantum forward secrecy enabled for all active nodes. End-to-end multi-device sync is now operational with zero latency.',
-          timestamp: '10:15 a.m.',
+          timestamp: '10:15 AM',
           views: '6.8K',
           likes: 6890
         }
@@ -123,13 +123,13 @@
       unreadCount: 0,
       createdAt: Date.now() - 86400000 * 20,
       lastPostSnippet: 'Deep reasoning engine calibrated at 99.8% precision with multi-lingual audio transcription.',
-      lastPostTime: '08:30 AM',
+      lastPostTime: '8:30 AM',
       posts: [
         {
           id: 'post_chronex_1',
           authorName: 'ChronEX Neural Core',
           text: 'Deep reasoning engine calibrated at 99.8% precision with multi-lingual audio transcription. Real-time neural translation supports over 32 global languages directly in your conversations.',
-          timestamp: '08:30 a.m.',
+          timestamp: '8:30 AM',
           views: '3.1K',
           likes: 3150
         }
@@ -214,6 +214,15 @@
               }
             }
           });
+          // Normalize legacy timestamps across cached channels and posts
+          parsed.forEach(ch => {
+            if (ch.lastPostTime) ch.lastPostTime = this.formatChannelTimestamp(ch.lastPostTime);
+            if (Array.isArray(ch.posts)) {
+              ch.posts.forEach(p => {
+                if (p && p.timestamp) p.timestamp = this.formatChannelTimestamp(p.timestamp);
+              });
+            }
+          });
           this.channels = parsed;
           this.saveChannels();
 
@@ -289,21 +298,55 @@
 
     }
 
+    isChannelAdmin(channel) {
+      if (!channel) return false;
+      const user = this.getCurrentUser();
+      const uid = user?.uid || '';
+      if (!uid) return false;
+      if (channel.creatorId && channel.creatorId === uid) return true;
+      if (Array.isArray(channel.admins) && channel.admins.includes(uid)) return true;
+      if (Array.isArray(channel.adminIds) && channel.adminIds.includes(uid)) return true;
+      return false;
+    }
+
+    formatCompactCount(value) {
+      if (value === null || value === undefined || value === '') return '0';
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (/^\d+(\.\d+)?[KMB]$/i.test(trimmed)) {
+          return trimmed.toUpperCase().replace(/\.0([KMB])$/, '$1');
+        }
+      }
+      const num = Number(value);
+      if (isNaN(num) || num < 0) return '0';
+      if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+      return String(Math.round(num));
+    }
+
     formatFollowerCount(count) {
-      if (!count && count !== 0) return '149K followers';
-      if (count === 149 || count === '149') return '149K followers';
-      const num = typeof count === 'string' ? parseFloat(count) : Number(count);
-      if (isNaN(num)) return '149K followers';
-      if (num >= 1000000) {
-        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M followers';
+      if (count === null || count === undefined || count === '') return '0 followers';
+      const num = Number(count);
+      const formatted = this.formatCompactCount(count);
+      return `${formatted} ${num === 1 ? 'follower' : 'followers'}`;
+    }
+
+    formatChannelTimestamp(value) {
+      if (!value) {
+        return new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
       }
-      if (num >= 1000) {
-        return (num / 1000).toFixed(num >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'K followers';
+      if (value instanceof Date) {
+        return value.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
       }
-      if (num > 0 && num < 1000) {
-        return num + 'K followers';
+      let str = String(value).trim();
+      if (!str) {
+        return new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
       }
-      return '0 followers';
+      str = str.replace(/\b(\d{1,2}:\d{2})\s*(a\.?m\.?|p\.?m\.?)\b/gi, (_, hm, mer) => {
+        const normalizedMer = mer.toLowerCase().startsWith('p') ? 'PM' : 'AM';
+        return `${hm} ${normalizedMer}`;
+      });
+      return str;
     }
 
     injectStyles() {
@@ -2428,6 +2471,147 @@
           transform: scale(1.05) !important;
           box-shadow: 0 0 14px rgba(0, 255, 102, 0.5) !important;
         }
+
+        /* Channel Info Panel (Non-blocking In-App Sheet) */
+        .channel-info-panel-head {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 12px !important;
+          padding-bottom: 10px !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+        .channel-info-panel-identity {
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          min-width: 0 !important;
+        }
+        .channel-info-panel-avatar {
+          width: 44px !important;
+          height: 44px !important;
+          border-radius: 50% !important;
+          object-fit: cover !important;
+          border: 1.5px solid rgba(0, 255, 102, 0.45) !important;
+          flex-shrink: 0 !important;
+        }
+        .channel-info-panel-title-wrap {
+          min-width: 0 !important;
+        }
+        .channel-info-panel-name {
+          font-size: 15px !important;
+          font-weight: 700 !important;
+          color: #f8fafc !important;
+          margin: 0 !important;
+          word-break: break-word !important;
+        }
+        .channel-info-panel-sub {
+          font-size: 12px !important;
+          color: #94a3b8 !important;
+          margin-top: 2px !important;
+        }
+        .channel-info-panel-close {
+          min-width: 44px !important;
+          min-height: 44px !important;
+          border-radius: 50% !important;
+          border: 1px solid rgba(255, 255, 255, 0.14) !important;
+          background: rgba(255, 255, 255, 0.06) !important;
+          color: #cbd5e1 !important;
+          cursor: pointer !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0 !important;
+        }
+        .channel-info-panel-meta-grid {
+          display: grid !important;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+          gap: 8px !important;
+        }
+        .channel-info-meta-chip {
+          background: rgba(255, 255, 255, 0.04) !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
+          border-radius: 10px !important;
+          padding: 8px 10px !important;
+        }
+        .channel-info-meta-label {
+          display: block !important;
+          font-size: 11px !important;
+          color: #94a3b8 !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.4px !important;
+        }
+        .channel-info-meta-value {
+          display: block !important;
+          font-size: 13px !important;
+          font-weight: 700 !important;
+          color: #f1f5f9 !important;
+          margin-top: 2px !important;
+        }
+
+        /* Read-Only Follower Bar (replaces admin composer for non-creators) */
+        .channel-follower-readonly-bar {
+          position: sticky !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          background: #141e25 !important;
+          border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+          padding: 10px 14px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 10px !important;
+          flex-wrap: wrap !important;
+          z-index: 100 !important;
+          flex-shrink: 0 !important;
+        }
+        .channel-readonly-copy {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          font-size: 12.5px !important;
+          color: #cbd5e1 !important;
+          flex: 1 1 180px !important;
+        }
+        .channel-readonly-copy i {
+          color: #00ff66 !important;
+          flex-shrink: 0 !important;
+        }
+        .channel-readonly-actions {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          flex-shrink: 0 !important;
+        }
+        .channel-readonly-info-btn,
+        .channel-readonly-follow-btn {
+          min-height: 40px !important;
+          padding: 8px 14px !important;
+          border-radius: 9999px !important;
+          font-size: 12.5px !important;
+          font-weight: 700 !important;
+          cursor: pointer !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+        }
+        .channel-readonly-info-btn {
+          background: rgba(255, 255, 255, 0.08) !important;
+          border: 1px solid rgba(255, 255, 255, 0.16) !important;
+          color: #e2e8f0 !important;
+        }
+        .channel-readonly-follow-btn {
+          background: #00a884 !important;
+          border: none !important;
+          color: #0b141a !important;
+        }
+        .channel-readonly-follow-btn.following {
+          background: rgba(0, 255, 102, 0.14) !important;
+          border: 1px solid rgba(0, 255, 102, 0.45) !important;
+          color: #00ff66 !important;
+        }
       `;
 
         document.head.appendChild(style);
@@ -2445,6 +2629,9 @@
       exploreModal.id = 'channelsExploreModal';
 
       exploreModal.className = 'channels-modal-overlay';
+      exploreModal.hidden = true;
+      exploreModal.inert = true;
+      exploreModal.setAttribute('aria-hidden', 'true');
 
       exploreModal.innerHTML = `
 
@@ -2519,6 +2706,9 @@
       createModal.id = 'createChannelModal';
 
       createModal.className = 'channels-modal-overlay';
+      createModal.hidden = true;
+      createModal.inert = true;
+      createModal.setAttribute('aria-hidden', 'true');
 
       createModal.innerHTML = `
 
@@ -2601,6 +2791,9 @@
       const feedModal = document.createElement('div');
       feedModal.id = 'channelFeedModal';
       feedModal.className = 'whatsapp-channel-route';
+      feedModal.hidden = true;
+      feedModal.inert = true;
+      feedModal.setAttribute('aria-hidden', 'true');
       feedModal.style.display = 'none';
       feedModal.innerHTML = `
         <!-- 1. Header (Height 60px, WhatsApp Copy) -->
@@ -2653,9 +2846,31 @@
           </div>
         </header>
 
-        <!-- Dropdown Channel Info Panel (Slides Down 200ms) -->
-        <div id="channelInfoDropdownPanel" class="whatsapp-channel-info-dropdown" style="display: none;">
+        <!-- Dropdown Channel Info Panel (Non-Blocking In-App Drawer) -->
+        <div id="channelInfoDropdownPanel" class="whatsapp-channel-info-dropdown" style="display: none;" aria-hidden="true" hidden inert>
           <div class="channel-info-dropdown-content">
+            <div class="channel-info-panel-head">
+              <div class="channel-info-panel-identity">
+                <img id="channelInfoPanelAvatar" src="assets/camshot_logo.svg" alt="Channel Avatar" class="channel-info-panel-avatar">
+                <div class="channel-info-panel-title-wrap">
+                  <h4 id="channelInfoPanelName" class="channel-info-panel-name">Channel Info</h4>
+                  <div id="channelInfoPanelHandle" class="channel-info-panel-sub">@channel.nex</div>
+                </div>
+              </div>
+              <button type="button" class="channel-info-panel-close" id="channelInfoCloseBtn" aria-label="Close channel info" title="Close channel info">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div class="channel-info-panel-meta-grid">
+              <div class="channel-info-meta-chip">
+                <span class="channel-info-meta-label">Followers</span>
+                <span class="channel-info-meta-value" id="channelInfoPanelFollowers">0 followers</span>
+              </div>
+              <div class="channel-info-meta-chip">
+                <span class="channel-info-meta-label">Created By</span>
+                <span class="channel-info-meta-value" id="channelInfoPanelCreator">Official</span>
+              </div>
+            </div>
             <div class="channel-info-about-section">
               <span class="channel-info-about-label">About</span>
               <p class="channel-info-about-text" id="feedChannelAboutText"></p>
@@ -2678,8 +2893,8 @@
           <!-- Populated dynamically with full width update cards -->
         </main>
 
-        <!-- 3. WhatsApp Bottom Input Bar (Stuck to bottom) -->
-        <footer class="whatsapp-channel-input-bar" id="feedComposerBar">
+        <!-- 3. WhatsApp Bottom Input Bar (Admins / Creators Only) -->
+        <footer class="whatsapp-channel-input-bar" id="feedComposerBar" style="display: none;" aria-hidden="true" hidden inert>
           <button type="button" class="channel-input-tool-btn" id="feedEmojiBtn" title="Emoji">
             <i class="fa-regular fa-face-smile"></i>
           </button>
@@ -2705,6 +2920,24 @@
           <!-- Hidden File Inputs -->
           <input type="file" id="feedMediaInput" accept="image/*,video/*" style="display: none;" />
           <input type="file" id="feedCameraInput" accept="image/*" capture="environment" style="display: none;" />
+        </footer>
+
+        <!-- 3b. Read-Only Follower Bar (Non-Admin Viewers) -->
+        <footer class="channel-follower-readonly-bar" id="feedFollowerReadOnlyBar" style="display: none;" aria-hidden="true" hidden>
+          <div class="channel-readonly-copy">
+            <i class="fa-solid fa-tower-broadcast"></i>
+            <span>Broadcast channel — only admins can post updates</span>
+          </div>
+          <div class="channel-readonly-actions">
+            <button type="button" class="channel-readonly-info-btn" id="followerBarInfoBtn">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>Info</span>
+            </button>
+            <button type="button" class="channel-readonly-follow-btn" id="followerBarFollowBtn">
+              <i class="fa-solid fa-plus" id="followerBarFollowIcon"></i>
+              <span id="followerBarFollowText">Follow</span>
+            </button>
+          </div>
         </footer>
       `;
 
@@ -2835,16 +3068,44 @@
       });
 
       document.getElementById('menuChannelInfoBtn')?.addEventListener('click', () => {
-        document.getElementById('feedOptionsMenu').style.display = 'none';
-        this.showChannelInfoModal();
+        const optMenu = document.getElementById('feedOptionsMenu');
+        if (optMenu) optMenu.style.display = 'none';
+        this.toggleChannelInfoPanel(true);
       });
 
       document.getElementById('feedAvatarContainer')?.addEventListener('click', () => {
-        this.showChannelInfoModal();
+        this.toggleChannelInfoPanel();
       });
 
-      document.getElementById('feedMetaContainer')?.addEventListener('click', () => {
-        this.showChannelInfoModal();
+      document.getElementById('feedMetaContainer')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleChannelInfoPanel();
+      });
+
+      document.getElementById('channelHeaderExpandBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleChannelInfoPanel();
+      });
+
+      document.getElementById('channelInfoCloseBtn')?.addEventListener('click', () => {
+        this.toggleChannelInfoPanel(false);
+      });
+
+      document.getElementById('dropdownCopyLinkBtn')?.addEventListener('click', () => {
+        this.handleCopyChannelLink();
+      });
+
+      const handleFollowFromPanel = () => {
+        if (!this.activeFeedChannelId) return;
+        this.toggleFollow(this.activeFeedChannelId);
+        this.updateFeedHeader(this.activeFeedChannelId);
+        this.syncChannelInfoPanelContent(this.activeFeedChannelId);
+      };
+
+      document.getElementById('dropdownFollowBtn')?.addEventListener('click', handleFollowFromPanel);
+      document.getElementById('followerBarFollowBtn')?.addEventListener('click', handleFollowFromPanel);
+      document.getElementById('followerBarInfoBtn')?.addEventListener('click', () => {
+        this.toggleChannelInfoPanel(true);
       });
 
       document.getElementById('menuShareBtn')?.addEventListener('click', () => {
@@ -2862,6 +3123,7 @@
         if (this.activeFeedChannelId) {
           this.toggleFollow(this.activeFeedChannelId);
           this.updateFeedHeader(this.activeFeedChannelId);
+          this.syncChannelInfoPanelContent(this.activeFeedChannelId);
         }
       });
 
@@ -2942,6 +3204,33 @@
 
     }
 
+    /**
+     * Toggle accessible visibility and inertness for broadcast overlay modals.
+     * @param {HTMLElement|null} modal
+     * @param {boolean} isOpen
+     */
+    setChannelOverlayState(modal, isOpen) {
+      if (!modal) return;
+      if (isOpen) {
+        modal.hidden = false;
+        modal.removeAttribute('hidden');
+        modal.inert = false;
+        modal.removeAttribute('inert');
+        modal.setAttribute('aria-hidden', 'false');
+        modal.classList.add('open');
+      } else {
+        if (document.activeElement && modal.contains(document.activeElement)) {
+          try { document.activeElement.blur(); } catch (_) { }
+        }
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.hidden = true;
+        modal.setAttribute('hidden', '');
+        modal.inert = true;
+        modal.setAttribute('inert', '');
+      }
+    }
+
     openModal(tab = 'explore') {
 
       this.mountModals();
@@ -2966,7 +3255,7 @@
 
       this.renderModalList();
 
-      modal.classList.add('open');
+      this.setChannelOverlayState(modal, true);
 
     }
 
@@ -2974,7 +3263,7 @@
 
       const modal = document.getElementById('channelsExploreModal');
 
-      if (modal) modal.classList.remove('open');
+      this.setChannelOverlayState(modal, false);
 
     }
 
@@ -2988,7 +3277,7 @@
 
       document.getElementById('createChannelForm')?.reset();
 
-      modal.classList.add('open');
+      this.setChannelOverlayState(modal, true);
 
     }
 
@@ -2996,7 +3285,7 @@
 
       const modal = document.getElementById('createChannelModal');
 
-      if (modal) modal.classList.remove('open');
+      this.setChannelOverlayState(modal, false);
 
     }
 
@@ -3064,7 +3353,7 @@
 
         lastPostSnippet: 'Channel created by ' + (user.displayName || 'Creator') + '.',
 
-        lastPostTime: 'Just now',
+        lastPostTime: this.formatChannelTimestamp(new Date()),
 
         posts: [
 
@@ -3076,7 +3365,9 @@
 
             text: 'Welcome to ' + name + '! This broadcast wire is now online. Updates and dispatches will be broadcast directly here.',
 
-            timestamp: 'Just now',
+            timestamp: this.formatChannelTimestamp(new Date()),
+
+            views: '1',
 
             likes: 1
 
@@ -3134,11 +3425,7 @@
 
       if (window.showNotif) {
 
-        window.showNotif('Channel created successfully!', 'success');
-
-      } else {
-
-        alert('Channel "' + name + '" created successfully!');
+        window.showNotif('Channel "' + name + '" created successfully!', 'success');
 
       }
 
@@ -3266,7 +3553,7 @@
 
         const isFollowing = this.followedChannelIds.has(c.id);
 
-        const countFormatted = c.followerCount >= 1000 ? (c.followerCount / 1000).toFixed(1) + 'K' : c.followerCount;
+        const followersText = this.formatFollowerCount(c.followerCount);
 
         return `
 
@@ -3284,7 +3571,7 @@
 
               </div>
 
-              <div class="channel-card-followers">${countFormatted} followers • ${c.handle}</div>
+              <div class="channel-card-followers">${followersText} • ${c.handle}</div>
 
               <div class="channel-card-snippet">${c.description}</div>
 
@@ -3378,7 +3665,7 @@
 
                   </div>
 
-                  <span class="updates-channel-time ${unreadCount > 0 ? 'unread' : ''}">${c.lastPostTime || 'Today'}</span>
+                  <span class="updates-channel-time ${unreadCount > 0 ? 'unread' : ''}">${this.formatChannelTimestamp(c.lastPostTime || 'Today')}</span>
 
                 </div>
 
@@ -3537,6 +3824,9 @@
       const modal = document.getElementById('channelFeedModal');
       if (!modal) return;
 
+      // Ensure info panel starts closed when entering a channel
+      this.toggleChannelInfoPanel(false);
+
       // 1. FULL SCREEN ROUTE: Hide Updates list AND bottom nav completely
       document.body.classList.add('channel-route-active');
       const bottomNav = document.querySelector('.bottom-nav');
@@ -3550,24 +3840,72 @@
       this.updateFeedHeader(channelId);
       this.renderFeedPosts(channel);
 
-      // 3. Setup dynamic placeholder for input bar (Owner vs Follower)
-      const user = this.getCurrentUser();
-      const isCreator = channel.creatorId === user.uid || channel.creatorId === 'system_nexchat' || channel.creatorId === 'system_camshot';
+      // 3. Enforce admin/creator check on channel composer vs read-only follower bar
+      const isAdmin = this.isChannelAdmin(channel);
       const input = document.getElementById('feedComposerInput');
+      const attachBtn = document.getElementById('feedAttachBtn');
+      const cameraBtn = document.getElementById('feedCameraBtn');
+      const emojiBtn = document.getElementById('feedEmojiBtn');
+      const sendBtn = document.getElementById('feedComposerSendBtn');
+      const mediaInput = document.getElementById('feedMediaInput');
+      const cameraInput = document.getElementById('feedCameraInput');
+
       if (input) {
         input.value = '';
-        input.placeholder = isCreator ? 'Write an update' : 'Share questions and other updates.';
+        input.placeholder = 'Write an update';
       }
       this.pendingMediaAttachment = null;
       const actionIcon = document.getElementById('feedActionIcon');
       if (actionIcon) actionIcon.className = 'fa-solid fa-microphone';
 
       const composer = document.getElementById('feedComposerBar');
+      const followerBar = document.getElementById('feedFollowerReadOnlyBar');
+
+      [input, attachBtn, cameraBtn, emojiBtn, sendBtn, mediaInput, cameraInput].forEach(ctrl => {
+        if (ctrl) ctrl.disabled = !isAdmin;
+      });
+
       if (composer) {
-        composer.style.display = 'flex';
+        if (isAdmin) {
+          composer.hidden = false;
+          composer.removeAttribute('hidden');
+          composer.inert = false;
+          composer.removeAttribute('inert');
+          composer.setAttribute('aria-hidden', 'false');
+          composer.style.setProperty('display', 'flex', 'important');
+        } else {
+          composer.hidden = true;
+          composer.setAttribute('hidden', '');
+          composer.inert = true;
+          composer.setAttribute('inert', '');
+          composer.setAttribute('aria-hidden', 'true');
+          composer.style.setProperty('display', 'none', 'important');
+        }
+      }
+
+      if (followerBar) {
+        if (isAdmin) {
+          followerBar.hidden = true;
+          followerBar.setAttribute('hidden', '');
+          followerBar.inert = true;
+          followerBar.setAttribute('aria-hidden', 'true');
+          followerBar.style.setProperty('display', 'none', 'important');
+        } else {
+          followerBar.hidden = false;
+          followerBar.removeAttribute('hidden');
+          followerBar.inert = false;
+          followerBar.removeAttribute('inert');
+          followerBar.setAttribute('aria-hidden', 'false');
+          followerBar.style.setProperty('display', 'flex', 'important');
+        }
       }
 
       // 4. Open full page route
+      modal.hidden = false;
+      modal.removeAttribute('hidden');
+      modal.inert = false;
+      modal.removeAttribute('inert');
+      modal.setAttribute('aria-hidden', 'false');
       modal.classList.add('open');
       modal.style.setProperty('display', 'flex', 'important');
 
@@ -3600,10 +3938,9 @@
         verifiedEl.style.display = channel.isVerified ? 'inline-block' : 'none';
       }
 
-      const user = this.getCurrentUser();
-      const isCreator = channel.creatorId === user.uid || channel.creatorId === 'system_nexchat' || channel.creatorId === 'system_camshot';
+      const isAdmin = this.isChannelAdmin(channel);
       if (adminBadge) {
-        if (isCreator) {
+        if (isAdmin) {
           adminBadge.classList.add('active');
         } else {
           adminBadge.classList.remove('active');
@@ -3611,16 +3948,22 @@
       }
 
       if (subsEl) {
-        const count = channel.followerCount >= 1000 ? (channel.followerCount / 1000).toFixed(1) + 'K' : (channel.followerCount || 1);
-        const countStr = count === 1 ? '1 follower' : count + ' followers';
+        const countStr = this.formatFollowerCount(channel.followerCount);
         const handleStr = channel.handle ? ' • ' + channel.handle : '';
         subsEl.textContent = countStr + handleStr;
       }
 
+      const isFollowing = this.followedChannelIds.has(channelId);
       if (menuFollowText) {
-        const isFollowing = this.followedChannelIds.has(channelId);
         menuFollowText.textContent = isFollowing ? 'Unfollow' : 'Follow';
       }
+
+      const fBtn = document.getElementById('followerBarFollowBtn');
+      const fIcon = document.getElementById('followerBarFollowIcon');
+      const fText = document.getElementById('followerBarFollowText');
+      if (fBtn) fBtn.classList.toggle('following', isFollowing);
+      if (fIcon) fIcon.className = isFollowing ? 'fa-solid fa-check' : 'fa-solid fa-plus';
+      if (fText) fText.textContent = isFollowing ? 'Following' : 'Follow';
     }
 
     escapeAndFormat(text) {
@@ -3650,8 +3993,9 @@
       }
 
       timeline.innerHTML = posts.map(p => {
-        const timeDisplay = p.timestamp || '10:27 a.m.';
-        const viewsDisplay = p.views || (channel.followerCount ? String(channel.followerCount) : '149');
+        const timeDisplay = this.formatChannelTimestamp(p.timestamp || '10:27 AM');
+        const rawViews = p.views !== undefined && p.views !== null ? p.views : '1';
+        const viewsDisplay = this.formatCompactCount(rawViews);
         const isReacted = p.userReacted ? 'reacted' : '';
         const likeCount = p.likes > 0 ? p.likes : '';
 
@@ -3665,8 +4009,8 @@
               ` : ''}
               <div class="whatsapp-channel-card-text">${this.escapeAndFormat(p.text || '')}</div>
               <div class="whatsapp-channel-card-meta">
-                <span class="whatsapp-card-views-time">
-                  <i class="fa-regular fa-eye"></i> ${viewsDisplay} &nbsp; ${timeDisplay}
+                <span class="whatsapp-card-views-time" aria-label="${viewsDisplay} views, ${timeDisplay}">
+                  <i class="fa-regular fa-eye"></i> <span>${viewsDisplay} views</span> <span aria-hidden="true">·</span> <span>${timeDisplay}</span>
                 </span>
                 <button type="button" class="whatsapp-channel-dots-btn" data-toggle-actions="${p.id}" title="Message Actions">
                   <i class="fa-solid fa-ellipsis"></i>
@@ -3768,6 +4112,14 @@
 
     handleBroadcastPost() {
       if (!this.activeFeedChannelId) return;
+      const channel = this.channels.find(c => c.id === this.activeFeedChannelId);
+      if (!channel) return;
+
+      if (!this.isChannelAdmin(channel)) {
+        if (window.showNotif) window.showNotif('Only channel admins can broadcast updates', 'info');
+        return;
+      }
+
       const input = document.getElementById('feedComposerInput');
       const text = input?.value?.trim() || '';
       const media = this.pendingMediaAttachment || null;
@@ -3782,12 +4134,9 @@
         if (!inspection.safe) return;
       }
 
-      const channel = this.channels.find(c => c.id === this.activeFeedChannelId);
-      if (!channel) return;
-
       const user = this.getCurrentUser();
       const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).toLowerCase();
+      const timeStr = this.formatChannelTimestamp(now);
 
       const newPost = {
         id: 'post_' + Date.now().toString(36),
@@ -3858,17 +4207,77 @@
       }
     }
 
+    syncChannelInfoPanelContent(channelId) {
+      const channel = this.channels.find(c => c.id === (channelId || this.activeFeedChannelId));
+      if (!channel) return;
+
+      const nameEl = document.getElementById('channelInfoPanelName');
+      const handleEl = document.getElementById('channelInfoPanelHandle');
+      const avatarEl = document.getElementById('channelInfoPanelAvatar');
+      const followersEl = document.getElementById('channelInfoPanelFollowers');
+      const creatorEl = document.getElementById('channelInfoPanelCreator');
+      const aboutEl = document.getElementById('feedChannelAboutText');
+      const followBtn = document.getElementById('dropdownFollowBtn');
+      const followIcon = document.getElementById('dropdownFollowIcon');
+      const followText = document.getElementById('dropdownFollowText');
+
+      if (nameEl) nameEl.textContent = channel.name;
+      if (handleEl) handleEl.textContent = channel.handle || '@channel.nex';
+      if (avatarEl) avatarEl.src = channel.avatar || 'assets/camshot_logo.svg';
+      if (followersEl) followersEl.textContent = this.formatFollowerCount(channel.followerCount);
+      if (creatorEl) creatorEl.textContent = channel.creatorName || 'Official';
+      if (aboutEl) aboutEl.textContent = channel.description || 'Broadcast updates and announcements.';
+
+      const isFollowing = this.followedChannelIds.has(channel.id);
+      if (followBtn) followBtn.classList.toggle('following', isFollowing);
+      if (followIcon) followIcon.className = isFollowing ? 'fa-solid fa-check' : 'fa-solid fa-plus';
+      if (followText) followText.textContent = isFollowing ? 'Following' : 'Follow';
+    }
+
+    toggleChannelInfoPanel(forceState) {
+      const panel = document.getElementById('channelInfoDropdownPanel');
+      const expandIcon = document.getElementById('channelHeaderExpandIcon');
+      if (!panel) return;
+
+      const isCurrentlyOpen = panel.classList.contains('open') && panel.style.display !== 'none';
+      const shouldOpen = typeof forceState === 'boolean' ? forceState : !isCurrentlyOpen;
+
+      if (shouldOpen) {
+        if (!this.activeFeedChannelId) return;
+        this.syncChannelInfoPanelContent(this.activeFeedChannelId);
+        panel.hidden = false;
+        panel.removeAttribute('hidden');
+        panel.inert = false;
+        panel.removeAttribute('inert');
+        panel.setAttribute('aria-hidden', 'false');
+        panel.style.display = 'block';
+        requestAnimationFrame(() => panel.classList.add('open'));
+        if (expandIcon) expandIcon.style.transform = 'rotate(180deg)';
+      } else {
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
+        panel.hidden = true;
+        panel.inert = true;
+        panel.setAttribute('inert', '');
+        panel.style.display = 'none';
+        if (expandIcon) expandIcon.style.transform = '';
+      }
+    }
+
     showChannelInfoModal() {
       if (!this.activeFeedChannelId) return;
-      const channel = this.channels.find(c => c.id === this.activeFeedChannelId);
-      if (!channel) return;
-      alert(`[CHANNEL INFO: ${channel.name.toUpperCase()}]\n\nHandle: ${channel.handle}\nFollowers: ${channel.followerCount}\nDescription: ${channel.description}\nCreated By: ${channel.creatorName}`);
+      this.toggleChannelInfoPanel(true);
     }
 
     closeFeedModal() {
+      this.toggleChannelInfoPanel(false);
       const modal = document.getElementById('channelFeedModal');
       if (modal) {
         modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.hidden = true;
+        modal.inert = true;
+        modal.setAttribute('inert', '');
         modal.style.setProperty('display', 'none', 'important');
       }
 
@@ -3893,6 +4302,7 @@
   const engine = new BroadcastChannelsEngine();
 
   window.broadcastChannelsEngine = engine;
+  window.toggleChannelInfoPanel = (force) => engine.toggleChannelInfoPanel(force);
 
     const params = new URLSearchParams(window.location.search);
 

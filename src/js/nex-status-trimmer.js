@@ -91,6 +91,363 @@
 
       // Seamlessly wire to statusMediaModalFileInput if not already bound
       this.wireFileInput();
+
+      // Enhance Code, Voice, and Typography tabs inside Status Studio
+      this.enhanceStatusStudioTabs();
+    }
+
+    enhanceStatusStudioTabs() {
+      this.injectStudioEnhancementStyles();
+      this.setupCodeStudioControls();
+      this.setupVoiceMicPrompt();
+      this.setupTypographyLivePreview();
+
+      if (!document.body.dataset.nexStatusStudioTabsWired) {
+        document.body.dataset.nexStatusStudioTabsWired = '1';
+        ['statusTabCodeBtn', 'statusTabAudioBtn', 'statusTabTextBtn', 'createStatusBtn', 'statusTabAddBtn'].forEach((id) => {
+          document.getElementById(id)?.addEventListener('click', () => {
+            requestAnimationFrame(() => this.enhanceStatusStudioTabs());
+          });
+        });
+      }
+    }
+
+    injectStudioEnhancementStyles() {
+      if (document.getElementById('nexStatusStudioEnhancementsCss')) return;
+      const style = document.createElement('style');
+      style.id = 'nexStatusStudioEnhancementsCss';
+      style.textContent = `
+        .nex-code-toolbar-extra {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          margin-left: auto;
+        }
+        .nex-code-fontsize-select {
+          background: rgba(15, 23, 42, 0.9);
+          color: #e2e8f0;
+          border: 1px solid rgba(56, 189, 248, 0.45);
+          border-radius: 6px;
+          padding: 3px 8px;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .nex-code-editor-shell {
+          display: flex;
+          align-items: stretch;
+          width: 100%;
+          min-height: 170px;
+          background: rgba(2, 6, 23, 0.85);
+          border-top: 1px solid rgba(148, 163, 184, 0.16);
+        }
+        .nex-code-line-numbers {
+          margin: 0;
+          padding: 12px 10px 12px 8px;
+          min-width: 36px;
+          text-align: right;
+          user-select: none;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          font-size: 14px;
+          line-height: 1.55;
+          color: #64748b;
+          background: rgba(15, 23, 42, 0.65);
+          border-right: 1px solid rgba(148, 163, 184, 0.16);
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+        .nex-code-editor-shell textarea#statusCodeStoryInput {
+          flex: 1 1 auto !important;
+          width: 100% !important;
+          line-height: 1.55 !important;
+          padding: 12px !important;
+          margin: 0 !important;
+          border: none !important;
+        }
+        .nex-voice-mic-prompt {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 11px 13px;
+          margin-bottom: 12px;
+          border-radius: 12px;
+          background: rgba(15, 23, 42, 0.86);
+          border: 1px solid rgba(0, 242, 255, 0.32);
+          color: #e2e8f0;
+          font-size: 12px;
+          line-height: 1.45;
+        }
+        .nex-voice-mic-prompt-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          width: 100%;
+          flex-wrap: wrap;
+        }
+        .nex-voice-mic-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          padding: 2px 8px;
+          border-radius: 999px;
+          font-size: 10.5px;
+          font-weight: 700;
+          background: rgba(0, 242, 255, 0.12);
+          border: 1px solid rgba(0, 242, 255, 0.4);
+          color: #67e8f9;
+        }
+        .nex-voice-mic-test-btn {
+          margin-left: auto;
+          background: rgba(0, 242, 255, 0.14);
+          border: 1px solid rgba(0, 242, 255, 0.48);
+          color: #e0f2fe;
+          border-radius: 8px;
+          padding: 5px 10px;
+          font-size: 11.5px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .nex-typography-live-preview {
+          margin-top: 10px;
+          border-radius: 14px;
+          padding: 14px 16px;
+          min-height: 92px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+          background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0e7490 100%);
+          transition: background 0.2s ease;
+        }
+        .nex-typography-preview-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          align-self: flex-start;
+          padding: 2px 8px;
+          margin-bottom: 8px;
+          border-radius: 999px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.6px;
+          text-transform: uppercase;
+          background: rgba(0, 0, 0, 0.4);
+          color: #f8fafc;
+        }
+        .nex-typography-preview-body {
+          color: #ffffff;
+          font-size: 17px;
+          font-weight: 700;
+          line-height: 1.4;
+          word-break: break-word;
+          white-space: pre-wrap;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    setupCodeStudioControls() {
+      const pane = document.getElementById('statusTabCodePane');
+      const codeInput = document.getElementById('statusCodeStoryInput');
+      if (!pane || !codeInput) return;
+
+      const bar = pane.querySelector('.status-code-window-bar');
+      let fontSelect = document.getElementById('statusCodeFontSizeSelect');
+      if (bar && !fontSelect) {
+        const extra = document.createElement('div');
+        extra.className = 'nex-code-toolbar-extra';
+        extra.innerHTML = `
+          <label for="statusCodeFontSizeSelect" style="font-size:11px;color:#94a3b8;font-weight:700;">Size</label>
+          <select id="statusCodeFontSizeSelect" class="nex-code-fontsize-select" aria-label="Code snippet font size">
+            <option value="12">12px</option>
+            <option value="13">13px</option>
+            <option value="14" selected>14px</option>
+            <option value="16">16px</option>
+            <option value="18">18px</option>
+          </select>
+        `;
+        bar.appendChild(extra);
+        fontSelect = document.getElementById('statusCodeFontSizeSelect');
+      }
+
+      if (!document.getElementById('statusCodeLineNumbers') && codeInput.parentElement) {
+        const shell = document.createElement('div');
+        shell.className = 'nex-code-editor-shell';
+        const gutter = document.createElement('pre');
+        gutter.id = 'statusCodeLineNumbers';
+        gutter.className = 'nex-code-line-numbers';
+        gutter.setAttribute('aria-hidden', 'true');
+        codeInput.parentElement.insertBefore(shell, codeInput);
+        shell.appendChild(gutter);
+        shell.appendChild(codeInput);
+      }
+
+      const gutterEl = document.getElementById('statusCodeLineNumbers');
+      const syncLineNumbers = () => {
+        if (!gutterEl) return;
+        const lines = Math.max(6, (codeInput.value || '').split(/\r?\n/).length);
+        const nums = [];
+        for (let i = 1; i <= lines; i++) nums.push(String(i));
+        gutterEl.textContent = nums.join('\n');
+        gutterEl.scrollTop = codeInput.scrollTop;
+      };
+
+      const applyFontSize = (px) => {
+        const sizePx = `${px || '14'}px`;
+        codeInput.style.fontSize = sizePx;
+        if (gutterEl) gutterEl.style.fontSize = sizePx;
+      };
+
+      if (fontSelect && !fontSelect.dataset.nexBound) {
+        fontSelect.dataset.nexBound = '1';
+        fontSelect.addEventListener('change', () => applyFontSize(fontSelect.value));
+      }
+      if (!codeInput.dataset.nexLinesBound) {
+        codeInput.dataset.nexLinesBound = '1';
+        codeInput.addEventListener('input', syncLineNumbers);
+        codeInput.addEventListener('scroll', () => {
+          if (gutterEl) gutterEl.scrollTop = codeInput.scrollTop;
+        });
+      }
+
+      applyFontSize(fontSelect ? fontSelect.value : '14');
+      syncLineNumbers();
+    }
+
+    setupVoiceMicPrompt() {
+      const pane = document.getElementById('statusTabAudioPane');
+      if (!pane) return;
+
+      if (!document.getElementById('statusVoiceMicPermissionPrompt')) {
+        const prompt = document.createElement('div');
+        prompt.id = 'statusVoiceMicPermissionPrompt';
+        prompt.className = 'nex-voice-mic-prompt';
+        prompt.setAttribute('role', 'status');
+        prompt.innerHTML = `
+          <div class="nex-voice-mic-prompt-head">
+            <span style="display:inline-flex;align-items:center;gap:7px;font-weight:800;color:#f8fafc;">
+              <i class="fa-solid fa-microphone-lines" style="color:#00f2ff;"></i>
+              Microphone Permission
+            </span>
+            <span id="statusMicPermBadge" class="nex-voice-mic-badge">
+              <i class="fa-solid fa-circle-info"></i> Prompt on record
+            </span>
+          </div>
+          <div style="flex:1 1 220px;color:#cbd5e1;">
+            Browser microphone permission is needed to capture your encrypted voice status (up to 30s). Nothing uploads until you press Share Status.
+          </div>
+          <button type="button" id="statusTestMicAccessBtn" class="nex-voice-mic-test-btn">
+            <i class="fa-solid fa-sliders"></i> Allow Microphone
+          </button>
+        `;
+        pane.insertBefore(prompt, pane.firstChild || null);
+      }
+
+      const badge = document.getElementById('statusMicPermBadge');
+      const updatePermLabel = (state) => {
+        if (!badge) return;
+        if (state === 'granted') {
+          badge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#00ff88;"></i> Mic Ready';
+        } else if (state === 'denied') {
+          badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:#f87171;"></i> Blocked in Browser';
+        } else {
+          badge.innerHTML = '<i class="fa-solid fa-circle-info"></i> Ask on Record';
+        }
+      };
+
+      if (navigator.permissions && typeof navigator.permissions.query === 'function') {
+        navigator.permissions.query({ name: 'microphone' }).then((status) => {
+          updatePermLabel(status.state);
+          status.onchange = () => updatePermLabel(status.state);
+        }).catch(() => { });
+      }
+
+      const testBtn = document.getElementById('statusTestMicAccessBtn');
+      if (testBtn && !testBtn.dataset.nexBound) {
+        testBtn.dataset.nexBound = '1';
+        testBtn.addEventListener('click', async () => {
+          if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+            updatePermLabel('denied');
+            return;
+          }
+          testBtn.disabled = true;
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach((t) => t.stop());
+            updatePermLabel('granted');
+          } catch (_) {
+            updatePermLabel('denied');
+          } finally {
+            testBtn.disabled = false;
+          }
+        });
+      }
+    }
+
+    setupTypographyLivePreview() {
+      const pane = document.getElementById('statusTabTextPane');
+      const textInput = document.getElementById('statusTextStoryInput');
+      if (!pane || !textInput) return;
+
+      if (!document.getElementById('statusTextLivePreviewCard')) {
+        const card = document.createElement('div');
+        card.id = 'statusTextLivePreviewCard';
+        card.className = 'nex-typography-live-preview';
+        card.innerHTML = `
+          <span class="nex-typography-preview-tag">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Live Styled Card Preview
+          </span>
+          <div id="statusTextLivePreviewBody" class="nex-typography-preview-body"></div>
+        `;
+        const canvas = document.getElementById('statusTextStoryCanvas');
+        if (canvas && canvas.parentElement === pane) {
+          canvas.insertAdjacentElement('afterend', card);
+        } else {
+          pane.insertBefore(card, textInput.nextSibling || null);
+        }
+      }
+
+      const syncPreview = () => {
+        const card = document.getElementById('statusTextLivePreviewCard');
+        const body = document.getElementById('statusTextLivePreviewBody');
+        const canvas = document.getElementById('statusTextStoryCanvas');
+        if (!card || !body) return;
+
+        const raw = (textInput.value || '').trim();
+        body.textContent = raw || 'Type above to preview your styled typography status live';
+        body.style.opacity = raw ? '1' : '0.72';
+
+        const activeSwatch = pane.querySelector('.gradient-swatch.active');
+        const bg = (activeSwatch && (activeSwatch.dataset.gradient || activeSwatch.style.background || activeSwatch.style.backgroundImage))
+          || (canvas && (canvas.style.background || canvas.style.backgroundImage));
+        if (bg) card.style.background = bg;
+
+        const activeFont = pane.querySelector('.status-font-pill.active');
+        if (activeFont) {
+          const ff = activeFont.dataset.font || activeFont.style.fontFamily;
+          if (ff) body.style.fontFamily = ff;
+        } else if (canvas && canvas.style.fontFamily) {
+          body.style.fontFamily = canvas.style.fontFamily;
+        }
+
+        const activeAlign = pane.querySelector('.status-align-pill.active');
+        body.style.textAlign = (activeAlign && activeAlign.dataset.align) || textInput.style.textAlign || 'center';
+      };
+
+      if (!pane.dataset.nexTypographyWired) {
+        pane.dataset.nexTypographyWired = '1';
+        textInput.addEventListener('input', syncPreview);
+        pane.addEventListener('click', (e) => {
+          if (e.target.closest('.gradient-swatch, .status-font-pill, .status-align-pill')) {
+            requestAnimationFrame(syncPreview);
+          }
+        });
+      }
+
+      syncPreview();
     }
 
     wireFileInput() {

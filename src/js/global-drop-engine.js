@@ -1282,45 +1282,49 @@ class GlobalDropEngine {
           <!-- X Action Row (Comment, Retweet, Like, Views, Bookmark, Share) -->
           <div class="x-action-row">
             <!-- 1. Reply -->
-            <button type="button" class="x-action-btn x-action-reply global-drop-action-btn discuss" data-drop-id="${drop.id}" title="Reply">
+            <button type="button" class="x-action-btn x-action-reply global-drop-action-btn discuss" data-drop-id="${drop.id}" title="Replies" aria-label="Replies: ${drop.repliesCount || 0}">
               <div class="x-action-icon-circle">
                 <i class="fa-regular fa-comment"></i>
               </div>
               <span class="x-action-count reply-count">${drop.repliesCount || 0}</span>
+              <span class="x-action-label">Replies</span>
             </button>
 
             <!-- 2. Repost / Echo -->
-            <button type="button" class="x-action-btn x-action-echo global-drop-action-btn echo ${isEchoed ? 'active' : ''}" data-drop-id="${drop.id}" title="Repost">
+            <button type="button" class="x-action-btn x-action-echo global-drop-action-btn echo ${isEchoed ? 'active' : ''}" data-drop-id="${drop.id}" title="Reposts" aria-pressed="${isEchoed ? 'true' : 'false'}" aria-label="Reposts: ${drop.echoesCount || 0}">
               <div class="x-action-icon-circle">
                 <i class="fa-solid fa-retweet"></i>
               </div>
               <span class="x-action-count echo-count">${drop.echoesCount || 0}</span>
+              <span class="x-action-label">Reposts</span>
             </button>
 
             <!-- 3. Like / Signal -->
-            <button type="button" class="x-action-btn x-action-like global-drop-action-btn signal ${isSignaled ? 'active' : ''}" data-drop-id="${drop.id}" title="Like">
+            <button type="button" class="x-action-btn x-action-like global-drop-action-btn signal ${isSignaled ? 'active' : ''}" data-drop-id="${drop.id}" title="Likes" aria-pressed="${isSignaled ? 'true' : 'false'}" aria-label="Likes: ${drop.signalsCount || drop.likesCount || (Array.isArray(drop.likes) ? drop.likes.length : 0)}">
               <div class="x-action-icon-circle">
                 <i class="${isSignaled ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i>
               </div>
               <span class="x-action-count signal-count">${drop.signalsCount || drop.likesCount || (Array.isArray(drop.likes) ? drop.likes.length : 0)}</span>
+              <span class="x-action-label">Likes</span>
             </button>
 
             <!-- 4. Views / Analytics -->
-            <button type="button" class="x-action-btn x-action-views" data-drop-id="${drop.id}" title="Views">
+            <button type="button" class="x-action-btn x-action-views" data-drop-id="${drop.id}" title="Views" aria-label="Views: ${drop.viewsCount || (drop.likesCount ? drop.likesCount * 4 + 18 : '84')}">
               <div class="x-action-icon-circle">
                 <i class="fa-solid fa-chart-simple"></i>
               </div>
               <span class="x-action-count">${drop.viewsCount || (drop.likesCount ? drop.likesCount * 4 + 18 : '84')}</span>
+              <span class="x-action-label">Views</span>
             </button>
 
             <!-- 5. Bookmark & Share -->
             <div class="x-action-group-right">
-              <button type="button" class="x-action-btn x-action-bookmark global-drop-action-btn bookmark ${isBookmarked ? 'active' : ''}" data-drop-id="${drop.id}" title="Bookmark">
+              <button type="button" class="x-action-btn x-action-bookmark global-drop-action-btn bookmark ${isBookmarked ? 'active' : ''}" data-drop-id="${drop.id}" title="Bookmark" aria-pressed="${isBookmarked ? 'true' : 'false'}" aria-label="Bookmark">
                 <div class="x-action-icon-circle">
                   <i class="${isBookmarked ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'}"></i>
                 </div>
               </button>
-              <button type="button" class="x-action-btn x-action-share global-drop-action-btn forward" data-drop-id="${drop.id}" title="Share">
+              <button type="button" class="x-action-btn x-action-share global-drop-action-btn forward" data-drop-id="${drop.id}" title="Share" aria-label="Share">
                 <div class="x-action-icon-circle">
                   <i class="fa-solid fa-arrow-up-from-bracket"></i>
                 </div>
@@ -1400,13 +1404,149 @@ class GlobalDropEngine {
     return url;
   }
 
+  ensureAuditPolishStyles() {
+    if (typeof document === 'undefined' || document.getElementById('nexDropAuditPolishStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'nexDropAuditPolishStyles';
+    style.textContent = `
+      .x-action-row,
+      .x-thread-parent-actions {
+        flex-wrap: wrap;
+        gap: 6px 10px;
+      }
+      .x-action-btn {
+        gap: 4px;
+      }
+      .x-action-label {
+        font-size: 10.5px;
+        font-weight: 600;
+        color: #94a3b8;
+        letter-spacing: 0.15px;
+      }
+      @media (max-width: 430px) {
+        .x-action-label {
+          font-size: 9.5px;
+        }
+      }
+      .x-video-error-fallback {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 170px;
+        padding: 20px 16px;
+        text-align: center;
+        border-radius: 14px;
+        background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.92));
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        color: #e2e8f0;
+      }
+      .x-video-fallback-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(56, 189, 248, 0.14);
+        border: 1px solid rgba(56, 189, 248, 0.36);
+        color: #38bdf8;
+        font-size: 17px;
+      }
+      .x-video-fallback-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        font-size: 12px;
+        color: #94a3b8;
+      }
+      .x-video-fallback-copy strong {
+        font-size: 13.5px;
+        color: #f8fafc;
+      }
+      .x-video-retry-btn {
+        margin-top: 2px;
+        padding: 6px 13px;
+        border-radius: 999px;
+        border: 1px solid rgba(0, 242, 255, 0.45);
+        background: rgba(0, 242, 255, 0.14);
+        color: #67e8f9;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  renderVideoFallbackCard(cell, video, playOverlay, titleText = 'Stream Unavailable', startStallTimer = null) {
+    if (!cell) return;
+    if (playOverlay) playOverlay.style.display = 'none';
+    if (video) video.style.display = 'none';
+
+    if (cell.querySelector('.x-video-error-fallback')) return;
+
+    const errBox = document.createElement('div');
+    errBox.className = 'x-video-error-fallback';
+    errBox.setAttribute('role', 'status');
+    errBox.innerHTML = `
+      <div class="x-video-fallback-icon"><i class="fa-solid fa-film"></i></div>
+      <div class="x-video-fallback-copy">
+        <strong>${this.escapeHtml(titleText)}</strong>
+        <span>Video stream unavailable or network interrupted.</span>
+      </div>
+      <button type="button" class="x-video-retry-btn">
+        <i class="fa-solid fa-rotate-right"></i> Retry Stream
+      </button>
+    `;
+
+    errBox.querySelector('.x-video-retry-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      errBox.remove();
+      if (playOverlay) playOverlay.style.display = '';
+      if (video) {
+        video.style.display = '';
+        if (typeof startStallTimer === 'function') startStallTimer();
+        try {
+          video.load();
+          video.play().catch(() => { });
+        } catch (_) { }
+      }
+    });
+
+    cell.appendChild(errBox);
+  }
+
   hydrateDropVideos(rootEl) {
     if (!rootEl) return;
+    this.ensureAuditPolishStyles();
     rootEl.querySelectorAll('.x-media-cell.is-video-cell').forEach((cell) => {
       const video = cell.querySelector('video');
       const playOverlay = cell.querySelector('.x-video-play-overlay-btn');
       if (!video || video.dataset.nexDropVideoBound === 'true') return;
       video.dataset.nexDropVideoBound = 'true';
+
+      let stallTimer = null;
+      const clearStallTimer = () => {
+        if (stallTimer) {
+          clearTimeout(stallTimer);
+          stallTimer = null;
+        }
+      };
+
+      const startStallTimer = () => {
+        clearStallTimer();
+        stallTimer = setTimeout(() => {
+          if (!video.isConnected) return;
+          if (video.readyState < 2 || video.networkState === 3) {
+            this.renderVideoFallbackCard(cell, video, playOverlay, 'Stream Unavailable', startStallTimer);
+          }
+        }, 4500);
+      };
 
       const syncOverlay = () => {
         if (!playOverlay) return;
@@ -1419,7 +1559,7 @@ class GlobalDropEngine {
           video.muted = false;
           video.play().then(syncOverlay).catch(() => {
             video.muted = true;
-            video.play().then(syncOverlay).catch(() => {});
+            video.play().then(syncOverlay).catch(() => { });
           });
         } else {
           video.pause();
@@ -1436,19 +1576,36 @@ class GlobalDropEngine {
         }
       });
 
+      const markHealthy = () => {
+        clearStallTimer();
+        cell.querySelector('.x-video-error-fallback')?.remove();
+        if (video.style.display === 'none') video.style.display = '';
+        if (playOverlay && playOverlay.style.display === 'none') playOverlay.style.display = '';
+        syncOverlay();
+      };
+
+      video.addEventListener('loadedmetadata', clearStallTimer);
+      video.addEventListener('loadeddata', markHealthy);
+      video.addEventListener('canplay', markHealthy);
       video.addEventListener('play', syncOverlay);
-      video.addEventListener('playing', syncOverlay);
+      video.addEventListener('playing', markHealthy);
       video.addEventListener('pause', syncOverlay);
       video.addEventListener('ended', syncOverlay);
       video.addEventListener('error', () => {
-        if (playOverlay) playOverlay.style.display = 'none';
-        if (!cell.querySelector('.x-video-error-fallback')) {
-          const errBox = document.createElement('div');
-          errBox.className = 'x-video-error-fallback';
-          errBox.innerHTML = '<i class="fa-solid fa-video-slash"></i><span>Video clip unavailable or still processing</span>';
-          cell.appendChild(errBox);
+        clearStallTimer();
+        this.renderVideoFallbackCard(cell, video, playOverlay, 'Stream Unavailable', startStallTimer);
+      });
+      video.addEventListener('stalled', () => {
+        if (video.readyState < 2 && !stallTimer) {
+          startStallTimer();
         }
       });
+
+      if (!video.getAttribute('src') || video.networkState === 3) {
+        this.renderVideoFallbackCard(cell, video, playOverlay, 'Stream Unavailable', startStallTimer);
+      } else if (video.readyState < 2) {
+        startStallTimer();
+      }
     });
   }
 
@@ -1470,7 +1627,7 @@ class GlobalDropEngine {
         const videoSrc = this.escapeHtml(this._withVideoPosterHint(url));
         return `
           <div class="x-media-cell global-drop-media-cell is-video-cell" data-media-url="${safeUrl}">
-            <video src="${videoSrc}" controls preload="auto" playsinline webkit-playsinline controlsList="nodownload"></video>
+            <video src="${videoSrc}" controls preload="metadata" playsinline webkit-playsinline controlsList="nodownload"></video>
             <button type="button" class="x-video-play-overlay-btn" aria-label="Play video" title="Play video">
               <i class="fa-solid fa-play"></i>
             </button>
@@ -1602,11 +1759,17 @@ class GlobalDropEngine {
     const isActive = btn?.classList.contains('active');
 
     // Optimistic UI
-    if (btn) btn.classList.toggle('active');
-    if (icon) icon.className = !isActive ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+    const nextActive = !isActive;
+    if (btn) {
+      btn.classList.toggle('active', nextActive);
+      btn.setAttribute('aria-pressed', nextActive ? 'true' : 'false');
+    }
+    if (icon) icon.className = nextActive ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
     if (countEl) {
       const cur = parseInt(countEl.textContent || '0', 10);
-      countEl.textContent = !isActive ? cur + 1 : Math.max(0, cur - 1);
+      const nextCount = nextActive ? cur + 1 : Math.max(0, cur - 1);
+      countEl.textContent = nextCount;
+      if (btn) btn.setAttribute('aria-label', `Likes: ${nextCount}`);
     }
 
     try {
@@ -1637,10 +1800,16 @@ class GlobalDropEngine {
     const countEl = btn?.querySelector('.echo-count');
     const isActive = btn?.classList.contains('active');
 
-    if (btn) btn.classList.toggle('active');
+    const nextEchoActive = !isActive;
+    if (btn) {
+      btn.classList.toggle('active', nextEchoActive);
+      btn.setAttribute('aria-pressed', nextEchoActive ? 'true' : 'false');
+    }
     if (countEl) {
       const cur = parseInt(countEl.textContent || '0', 10);
-      countEl.textContent = !isActive ? cur + 1 : Math.max(0, cur - 1);
+      const nextCount = nextEchoActive ? cur + 1 : Math.max(0, cur - 1);
+      countEl.textContent = nextCount;
+      if (btn) btn.setAttribute('aria-label', `Reposts: ${nextCount}`);
     }
 
     try {
@@ -1936,22 +2105,25 @@ class GlobalDropEngine {
       </div>
 
       <div class="x-thread-parent-actions">
-        <button type="button" class="x-action-btn x-action-reply global-drop-action-btn discuss" title="Reply">
+        <button type="button" class="x-action-btn x-action-reply global-drop-action-btn discuss" title="Replies" aria-label="Replies: ${repliesCount}">
           <div class="x-action-icon-circle"><i class="fa-regular fa-comment"></i></div>
           <span class="x-action-count">${repliesCount}</span>
+          <span class="x-action-label">Replies</span>
         </button>
-        <button type="button" class="x-action-btn x-action-echo global-drop-action-btn echo ${isEchoed ? 'active' : ''}" title="Repost">
+        <button type="button" class="x-action-btn x-action-echo global-drop-action-btn echo ${isEchoed ? 'active' : ''}" title="Reposts" aria-pressed="${isEchoed ? 'true' : 'false'}" aria-label="Reposts: ${echoesCount}">
           <div class="x-action-icon-circle"><i class="fa-solid fa-retweet"></i></div>
           <span class="x-action-count">${echoesCount}</span>
+          <span class="x-action-label">Reposts</span>
         </button>
-        <button type="button" class="x-action-btn x-action-like global-drop-action-btn signal ${isSignaled ? 'active' : ''}" id="threadParentLikeBtn" title="Like">
+        <button type="button" class="x-action-btn x-action-like global-drop-action-btn signal ${isSignaled ? 'active' : ''}" id="threadParentLikeBtn" title="Likes" aria-pressed="${isSignaled ? 'true' : 'false'}" aria-label="Likes: ${likesCount}">
           <div class="x-action-icon-circle"><i class="${isSignaled ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i></div>
           <span class="x-action-count">${likesCount}</span>
+          <span class="x-action-label">Likes</span>
         </button>
-        <button type="button" class="x-action-btn x-action-bookmark global-drop-action-btn bookmark" title="Bookmark">
+        <button type="button" class="x-action-btn x-action-bookmark global-drop-action-btn bookmark" title="Bookmark" aria-label="Bookmark">
           <div class="x-action-icon-circle"><i class="fa-regular fa-bookmark"></i></div>
         </button>
-        <button type="button" class="x-action-btn x-action-share global-drop-action-btn forward" title="Share">
+        <button type="button" class="x-action-btn x-action-share global-drop-action-btn forward" title="Share" aria-label="Share">
           <div class="x-action-icon-circle"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
         </button>
       </div>
@@ -2898,12 +3070,16 @@ class GlobalDropEngine {
             <div class="x-profile-video-footer-block">
               <div class="x-profile-video-caption">${this.escapeHtml(drop.content || 'Video drop')}</div>
               <div class="x-profile-video-footer">
-                <span><i class="fa-regular fa-heart"></i> ${drop.likesCount || 0}</span>
-                <span><i class="fa-solid fa-chart-simple"></i> ${this.formatCompactNumber(drop.viewsCount || 1)}</span>
+                <span><i class="fa-regular fa-heart"></i> ${drop.likesCount || 0} Likes</span>
+                <span><i class="fa-solid fa-chart-simple"></i> ${this.formatCompactNumber(drop.viewsCount || 1)} Views</span>
               </div>
             </div>
           </div>
         `;
+        const profVideo = card.querySelector('video');
+        profVideo?.addEventListener('error', () => {
+          profVideo.style.display = 'none';
+        });
         card.addEventListener('click', () => {
           this.openRepliesDrawer(drop);
         });
@@ -2965,10 +3141,10 @@ class GlobalDropEngine {
           ${mediaHtml}
           ${codeHtml}
           <div class="x-action-row">
-            <button type="button" class="x-action-btn x-action-reply"><i class="fa-regular fa-comment"></i> <span class="x-action-count">${drop.repliesCount || 0}</span></button>
-            <button type="button" class="x-action-btn x-action-echo ${isEchoed ? 'active' : ''}"><i class="fa-solid fa-retweet"></i> <span class="x-action-count">${drop.echoesCount || 0}</span></button>
-            <button type="button" class="x-action-btn x-action-like ${isSignaled ? 'active' : ''}"><i class="${isSignaled ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i> <span class="x-action-count">${drop.likesCount || 0}</span></button>
-            <button type="button" class="x-action-btn x-action-views"><i class="fa-solid fa-chart-simple"></i> <span class="x-action-count">${drop.viewsCount || 42}</span></button>
+            <button type="button" class="x-action-btn x-action-reply" title="Replies" aria-label="Replies: ${drop.repliesCount || 0}"><i class="fa-regular fa-comment"></i> <span class="x-action-count">${drop.repliesCount || 0}</span> <span class="x-action-label">Replies</span></button>
+            <button type="button" class="x-action-btn x-action-echo ${isEchoed ? 'active' : ''}" title="Reposts" aria-pressed="${isEchoed ? 'true' : 'false'}" aria-label="Reposts: ${drop.echoesCount || 0}"><i class="fa-solid fa-retweet"></i> <span class="x-action-count">${drop.echoesCount || 0}</span> <span class="x-action-label">Reposts</span></button>
+            <button type="button" class="x-action-btn x-action-like ${isSignaled ? 'active' : ''}" title="Likes" aria-pressed="${isSignaled ? 'true' : 'false'}" aria-label="Likes: ${drop.likesCount || 0}"><i class="${isSignaled ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i> <span class="x-action-count">${drop.likesCount || 0}</span> <span class="x-action-label">Likes</span></button>
+            <button type="button" class="x-action-btn x-action-views" title="Views" aria-label="Views: ${drop.viewsCount || 42}"><i class="fa-solid fa-chart-simple"></i> <span class="x-action-count">${drop.viewsCount || 42}</span> <span class="x-action-label">Views</span></button>
           </div>
         </div>
       `;

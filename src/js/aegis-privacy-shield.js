@@ -41,7 +41,8 @@
       const savedState = localStorage.getItem('nex_aegis_privacy_active');
       this.isActive = savedState === 'true';
 
-      // 2. Setup DOM Listeners & Keyboard Shortcuts
+      // 2. Inject visual glow/badge styles + Setup DOM Listeners & Keyboard Shortcuts
+      this.injectBadgeStyles();
       this.bindDOM();
       this.bindKeyboardShortcuts();
       this.bindTouchListeners();
@@ -53,24 +54,65 @@
       console.log('[NEX-AEGIS] Anti-Shoulder Surfing Privacy Shield initialized. State:', this.isActive ? 'ACTIVE' : 'STANDBY');
     }
 
-    bindDOM() {
-      // Desktop Header Button
-      const desktopBtn = document.getElementById('aegisPrivacyShieldBtn');
-      if (desktopBtn) {
-        desktopBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.toggleShield();
-        });
-      }
+    injectBadgeStyles() {
+      if (document.getElementById('nexAegisToggleBadgeStyles')) return;
+      const style = document.createElement('style');
+      style.id = 'nexAegisToggleBadgeStyles';
+      style.textContent = `
+        #aegisPrivacyShieldBtn.aegis-active,
+        #aegisPrivacyBtnMobile.aegis-active,
+        .aegis-privacy-toggle-btn.aegis-active {
+          color: #00f3ff !important;
+          border-color: rgba(0, 243, 255, 0.72) !important;
+          background: rgba(0, 243, 255, 0.16) !important;
+          box-shadow: 0 0 14px rgba(0, 243, 255, 0.42), inset 0 0 8px rgba(0, 243, 255, 0.2) !important;
+          position: relative;
+        }
+        .aegis-state-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-left: 5px;
+          padding: 1px 5px;
+          border-radius: 999px;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.4px;
+          text-transform: uppercase;
+          background: rgba(0, 243, 255, 0.2);
+          border: 1px solid rgba(0, 243, 255, 0.7);
+          color: #00f3ff;
+          line-height: 1.2;
+          pointer-events: none;
+        }
+        #aegisPrivacyBtnMobile .aegis-state-badge {
+          position: absolute;
+          top: 2px;
+          right: 2px;
+          margin-left: 0;
+          padding: 0 4px;
+          font-size: 8px;
+        }
+        .aegis-state-badge[data-state="off"] {
+          display: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
-      // Mobile Header Action Button
-      const mobileBtn = document.getElementById('aegisPrivacyBtnMobile');
-      if (mobileBtn) {
-        mobileBtn.addEventListener('click', (e) => {
+    bindDOM() {
+      const bindBtn = (btn) => {
+        if (!btn || btn.dataset.aegisBound === '1') return;
+        btn.dataset.aegisBound = '1';
+        btn.addEventListener('click', (e) => {
           e.preventDefault();
           this.toggleShield();
         });
-      }
+      };
+
+      bindBtn(document.getElementById('aegisPrivacyShieldBtn'));
+      bindBtn(document.getElementById('aegisPrivacyBtnMobile'));
+      document.querySelectorAll('.aegis-privacy-toggle-btn').forEach(bindBtn);
     }
 
     bindKeyboardShortcuts() {
@@ -137,26 +179,79 @@
         document.querySelectorAll('.aegis-touch-revealed').forEach(el => el.classList.remove('aegis-touch-revealed'));
       }
 
-      // Update Desktop Button UI
-      const desktopBtn = document.getElementById('aegisPrivacyShieldBtn');
-      if (desktopBtn) {
-        desktopBtn.setAttribute('data-aegis-active', active ? 'true' : 'false');
-        desktopBtn.setAttribute('title', active ? 'Aegis Privacy Shield: ACTIVE (Anti-Shoulder Surfing Blur Engaged)' : 'Aegis Privacy Shield: STANDBY (Ctrl+Shift+P)');
-      }
+      // Sync UI across desktop, mobile, and auxiliary Aegis toggle controls
+      this.syncTriggerButtons(active);
 
-      // Update Mobile Button UI
-      const mobileBtn = document.getElementById('aegisPrivacyBtnMobile');
-      if (mobileBtn) {
-        mobileBtn.setAttribute('data-aegis-active', active ? 'true' : 'false');
-        mobileBtn.style.color = active ? '#00f3ff' : '';
-      }
+      try {
+        window.dispatchEvent(new CustomEvent('nex:aegis:state_change', { detail: { active } }));
+      } catch (_) { }
 
-      if (showToast && typeof window.showCustomNotification === 'function') {
-        const msg = active 
-          ? '<i class="fa-solid fa-user-secret" style="color:#00f3ff;margin-right:6px;"></i> Aegis Privacy Shield Engaged (Hover or Touch to Reveal)'
-          : '<i class="fa-solid fa-shield-halved" style="color:#94a3b8;margin-right:6px;"></i> Aegis Privacy Shield Disengaged';
-        window.showCustomNotification(msg, 2800);
+      if (showToast) {
+        this.showStatusToast(active);
       }
+    }
+
+    syncTriggerButtons(active) {
+      const triggers = new Set([
+        document.getElementById('aegisPrivacyShieldBtn'),
+        document.getElementById('aegisPrivacyBtnMobile'),
+        ...document.querySelectorAll('.aegis-privacy-toggle-btn')
+      ]);
+
+      triggers.forEach((btn) => {
+        if (!btn) return;
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        btn.setAttribute('data-aegis-active', active ? 'true' : 'false');
+        btn.classList.toggle('active', active);
+        btn.classList.toggle('aegis-active', active);
+        btn.setAttribute(
+          'title',
+          active
+            ? 'Aegis Privacy Shield: ON (Anti-Shoulder Surfing Blur Engaged)'
+            : 'Aegis Privacy Shield: OFF (Ctrl+Shift+P)'
+        );
+        if (btn.id === 'aegisPrivacyBtnMobile') {
+          btn.style.color = active ? '#00f3ff' : '';
+        }
+
+        let badge = btn.querySelector('.aegis-state-badge');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'aegis-state-badge';
+          badge.setAttribute('aria-hidden', 'true');
+          btn.appendChild(badge);
+        }
+        badge.setAttribute('data-state', active ? 'on' : 'off');
+        badge.textContent = active ? 'ON' : '';
+      });
+    }
+
+    showStatusToast(active) {
+      const plainText = active ? 'Aegis Privacy Shield ON' : 'Aegis Privacy Shield OFF';
+      if (typeof window.showNotif === 'function') {
+        window.showNotif(plainText, active ? 'success' : 'info', 2500);
+        return;
+      }
+      if (typeof window.showCustomNotification === 'function') {
+        const htmlMsg = active
+          ? '<i class="fa-solid fa-user-secret" style="color:#00f3ff;margin-right:6px;"></i> Aegis Privacy Shield ON (Hover or Hold to Reveal)'
+          : '<i class="fa-solid fa-shield-halved" style="color:#94a3b8;margin-right:6px;"></i> Aegis Privacy Shield OFF';
+        window.showCustomNotification(htmlMsg, 2600);
+        return;
+      }
+      let toast = document.getElementById('nexAegisInlineToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'nexAegisInlineToast';
+        toast.style.cssText = 'position:fixed;bottom:84px;left:50%;transform:translateX(-50%);z-index:2147483000;background:rgba(15,23,42,0.95);color:#f8fafc;border:1px solid rgba(0,243,255,0.5);border-radius:999px;padding:8px 16px;font-size:12.5px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.45);pointer-events:none;transition:opacity 0.2s ease;';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = plainText;
+      toast.style.opacity = '1';
+      clearTimeout(this._inlineToastTimer);
+      this._inlineToastTimer = setTimeout(() => {
+        if (toast) toast.style.opacity = '0';
+      }, 2400);
     }
 
     mountHud() {
@@ -224,4 +319,4 @@
   // Export Singleton to global scope
   global.NexAegisShield = new NexAegisPrivacyShieldEngine();
 
-})(typeof window !== 'undefined' ? window : this);
+})(typeof window !== 'undefined' ? window : globalThis);

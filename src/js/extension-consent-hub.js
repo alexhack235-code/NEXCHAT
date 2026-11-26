@@ -261,6 +261,8 @@
     const hubModal = document.createElement('div');
     hubModal.id = 'nexExtensionHubModal';
     hubModal.className = 'nex-ext-modal-backdrop';
+    hubModal.setAttribute('role', 'dialog');
+    hubModal.setAttribute('aria-modal', 'true');
     hubModal.innerHTML = `
       <div class="nex-ext-modal-window">
         <!-- Header -->
@@ -309,6 +311,8 @@
     const consentModal = document.createElement('div');
     consentModal.id = 'nexConsentModal';
     consentModal.className = 'nex-ext-modal-backdrop';
+    consentModal.setAttribute('role', 'dialog');
+    consentModal.setAttribute('aria-modal', 'true');
     consentModal.innerHTML = `
       <div class="nex-ext-modal-window nex-consent-modal-window">
         <!-- Close Button -->
@@ -430,10 +434,76 @@
       handleDecision(false);
     });
 
+    // Enforce strict hidden + inert + display:none initial closed state
+    setModalVisibility(hubModal, false);
+    setModalVisibility(consentModal, false);
+
     // Search filter
     document.getElementById('nexExtSearchInput').addEventListener('input', (e) => {
       renderExtensionCards(e.target.value.toLowerCase());
     });
+
+    if (!window._nexExtEscBound) {
+      window._nexExtEscBound = true;
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const consent = document.getElementById('nexConsentModal');
+        const hub = document.getElementById('nexExtensionHubModal');
+        if (consent && consent.classList.contains('active')) {
+          closeConsentModal();
+        } else if (hub && hub.classList.contains('active')) {
+          closeExtensionHub();
+        }
+      });
+    }
+  }
+
+  let _lastFocusedBeforeModal = null;
+
+  /**
+   * Enforce non-focusable, non-interactive hidden state when closed,
+   * and restore visibility when opened. Prevents invisible opacity:0 focus traps.
+   */
+  function setModalVisibility(modal, isOpen, siblingIdToClose = null) {
+    if (!modal) return;
+    if (isOpen) {
+      if (siblingIdToClose) {
+        const sibling = document.getElementById(siblingIdToClose);
+        if (sibling && sibling !== modal) {
+          setModalVisibility(sibling, false);
+        }
+      }
+      const extDrawer = document.getElementById('extensionsDrawer');
+      if (extDrawer && extDrawer !== modal && extDrawer.classList.contains('active')) {
+        setModalVisibility(extDrawer, false);
+      }
+
+      if (document.activeElement && !modal.contains(document.activeElement) && typeof document.activeElement.focus === 'function') {
+        _lastFocusedBeforeModal = document.activeElement;
+      }
+      modal.hidden = false;
+      modal.removeAttribute('hidden');
+      modal.inert = false;
+      modal.removeAttribute('inert');
+      modal.setAttribute('aria-hidden', 'false');
+      modal.style.display = 'flex';
+      modal.classList.add('active');
+    } else {
+      const activeEl = document.activeElement;
+      if (activeEl && modal.contains(activeEl)) {
+        try { activeEl.blur(); } catch (_) { }
+        if (_lastFocusedBeforeModal && _lastFocusedBeforeModal.isConnected && !modal.contains(_lastFocusedBeforeModal)) {
+          try { _lastFocusedBeforeModal.focus({ preventScroll: true }); } catch (_) { }
+        }
+      }
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.hidden = true;
+      modal.setAttribute('hidden', '');
+      modal.inert = true;
+      modal.setAttribute('inert', '');
+      modal.style.display = 'none';
+    }
   }
 
   // Render cards in the Hub Modal
@@ -705,13 +775,12 @@
   function openExtensionHub() {
     injectDom();
     renderExtensionCards();
-    document.getElementById('nexExtensionHubModal').classList.add('active');
+    setModalVisibility(document.getElementById('nexExtensionHubModal'), true, 'nexConsentModal');
   }
 
   // Close Hub
   function closeExtensionHub() {
-    const modal = document.getElementById('nexExtensionHubModal');
-    if (modal) modal.classList.remove('active');
+    setModalVisibility(document.getElementById('nexExtensionHubModal'), false);
   }
 
   // Open Consent Modal
@@ -739,7 +808,7 @@
     if (userEmailEl) userEmailEl.textContent = email || 'your signed-in account';
     if (securityEmailEl) securityEmailEl.textContent = email || 'your signed-in email address';
 
-    document.getElementById('nexConsentModal').classList.add('active');
+    setModalVisibility(document.getElementById('nexConsentModal'), true, 'nexExtensionHubModal');
   }
 
   // Update CamShot Header Pill
@@ -760,8 +829,7 @@
   // Close Consent Modal
   function closeConsentModal() {
     sessionStorage.setItem('nex_reels_consent_dismissed', 'true');
-    const modal = document.getElementById('nexConsentModal');
-    if (modal) modal.classList.remove('active');
+    setModalVisibility(document.getElementById('nexConsentModal'), false);
   }
 
   // Auto trigger for new users or when requested via query params

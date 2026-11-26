@@ -603,11 +603,13 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
     this.updateHeaderButtonUI();
 
     if (typeof window !== 'undefined') {
+      const statusText = this.config.enabled
+        ? `Ghost Mode ON (${this.config.tone.toUpperCase()} tone)`
+        : 'Ghost Mode OFF';
       if (typeof window.showNotif === 'function') {
-        const statusText = this.config.enabled
-          ? `ChronEX Ghost Active: Tone [${this.config.tone.toUpperCase()}]`
-          : 'ChronEX Ghost: Standby Mode';
         window.showNotif(statusText, this.config.enabled ? 'success' : 'info', 2500);
+      } else {
+        this.showInlineToast(statusText, this.config.enabled);
       }
       if (typeof window.playCyberSfx === 'function') {
         window.playCyberSfx(this.config.enabled ? 'affirm' : 'toggle');
@@ -616,6 +618,24 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
     }
 
     return this.config.enabled;
+  }
+
+  showInlineToast(text, active) {
+    if (typeof document === 'undefined' || !document.body) return;
+    let toast = document.getElementById('chronexGhostInlineToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'chronexGhostInlineToast';
+      toast.style.cssText = 'position:fixed;bottom:84px;left:50%;transform:translateX(-50%);z-index:2147483000;background:rgba(15,23,42,0.95);color:#f8fafc;border-radius:999px;padding:8px 16px;font-size:12.5px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.45);pointer-events:none;transition:opacity 0.2s ease;';
+      document.body.appendChild(toast);
+    }
+    toast.style.border = active ? '1px solid rgba(0, 242, 255, 0.7)' : '1px solid rgba(148, 163, 184, 0.4)';
+    toast.textContent = text;
+    toast.style.opacity = '1';
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => {
+      if (toast) toast.style.opacity = '0';
+    }, 2400);
   }
 
   openGhostSettingsModal() {
@@ -627,6 +647,8 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
     modal = document.createElement('div');
     modal.id = 'chronexGhostSettingsModal';
     modal.className = 'nextgen-modal-overlay chronex-ghost-modal-backdrop';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
     modal.style.display = 'flex';
 
     modal.innerHTML = `
@@ -800,15 +822,22 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
       this.config.autoReplyDelayMs = selectedDelay;
 
       this.saveConfig();
+      this.updateHeaderButtonUI();
       closeModal();
 
       if (typeof window !== 'undefined') {
+        const statusMsg = this.config.enabled
+          ? 'Ghost Mode ON — ChronEX protocols armed'
+          : 'Ghost Mode OFF';
         if (typeof window.showNotif === 'function') {
-          window.showNotif('ChronEX Ghost protocols armed successfully', 'success', 2500);
+          window.showNotif(statusMsg, this.config.enabled ? 'success' : 'info', 2500);
+        } else {
+          this.showInlineToast(statusMsg, this.config.enabled);
         }
         if (typeof window.playCyberSfx === 'function') {
-          window.playCyberSfx('affirm');
+          window.playCyberSfx(this.config.enabled ? 'affirm' : 'toggle');
         }
+        window.dispatchEvent(new CustomEvent('nex_chronex_ghost_toggle', { detail: { enabled: this.config.enabled } }));
       }
     });
   }
@@ -953,7 +982,6 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
       btn.id = 'chronexGhostHeaderBtn';
       btn.className = 'header-icon-btn chronex-ghost-header-trigger';
       btn.title = 'ChronEX Ghost Digital Twin';
-      btn.innerHTML = `<i class="fa-solid fa-ghost ${this.config.enabled ? 'text-[#00f2ff]' : 'text-gray-400'}"></i>`;
 
       btn.addEventListener('click', () => {
         this.openGhostSettingsModal();
@@ -961,13 +989,20 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
 
       headerActions.insertBefore(btn, headerActions.firstChild || null);
     }
+    this.updateHeaderButtonUI();
   }
 
   updateHeaderButtonUI() {
     if (typeof document === 'undefined') return;
+    const enabled = Boolean(this.config.enabled);
     const btn = document.getElementById('chronexGhostHeaderBtn');
     if (btn) {
-      btn.innerHTML = `<i class="fa-solid fa-ghost ${this.config.enabled ? 'text-[#00f2ff]' : 'text-gray-400'}"></i>`;
+      btn.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+      btn.setAttribute('data-ghost-active', enabled ? 'true' : 'false');
+      btn.classList.toggle('active', enabled);
+      btn.classList.toggle('ghost-active', enabled);
+      btn.title = enabled ? 'ChronEX Ghost Mode ON' : 'ChronEX Ghost Mode OFF';
+      btn.innerHTML = `<i class="fa-solid fa-ghost ${enabled ? 'text-[#00f2ff]' : 'text-gray-400'}"></i><span class="chronex-ghost-badge" data-state="${enabled ? 'on' : 'off'}" aria-hidden="true">${enabled ? 'ON' : ''}</span>`;
     }
   }
 
@@ -1247,6 +1282,34 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
         border: 1px solid rgba(255, 255, 255, 0.05);
         border-radius: 6px;
         padding: 8px 10px;
+      }
+      .chronex-ghost-header-trigger {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .chronex-ghost-header-trigger.ghost-active {
+        color: #00f2ff !important;
+        border-color: rgba(0, 242, 255, 0.72) !important;
+        background: rgba(0, 242, 255, 0.16) !important;
+        box-shadow: 0 0 14px rgba(0, 242, 255, 0.42), inset 0 0 8px rgba(0, 242, 255, 0.2) !important;
+      }
+      .chronex-ghost-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1px 4px;
+        border-radius: 999px;
+        font-size: 8.5px;
+        font-weight: 800;
+        background: rgba(0, 242, 255, 0.22);
+        border: 1px solid rgba(0, 242, 255, 0.75);
+        color: #00f2ff;
+        line-height: 1.1;
+      }
+      .chronex-ghost-badge[data-state="off"] {
+        display: none !important;
       }
     `;
     document.head.appendChild(style);

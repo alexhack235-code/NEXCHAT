@@ -13,6 +13,7 @@
 
 export const SUPPORTED_COUNTRIES = {
   GLOBAL: { code: 'GLOBAL', name: 'Global Market', currency: 'USD', symbol: '$', icon: 'fa-globe', region: 'Worldwide' },
+  IS: { code: 'IS', name: 'Iceland', currency: 'ISK', symbol: 'ISK', icon: 'fa-map-pin', region: 'Europe' },
   CA: { code: 'CA', name: 'Canada', currency: 'CAD', symbol: 'CA$', icon: 'fa-map-pin', region: 'North America' },
   US: { code: 'US', name: 'United States', currency: 'USD', symbol: '$', icon: 'fa-map-pin', region: 'North America' },
   RU: { code: 'RU', name: 'Russia', currency: 'RUB', symbol: 'RUB', icon: 'fa-map-pin', region: 'Eurasia' },
@@ -26,6 +27,26 @@ export const SUPPORTED_COUNTRIES = {
   NG: { code: 'NG', name: 'Nigeria', currency: 'NGN', symbol: 'NGN', icon: 'fa-map-pin', region: 'Africa' }
 };
 
+const TIMEZONE_COUNTRY_RULES = [
+  { country: 'IS', patterns: ['Atlantic/Reykjavik', 'Iceland'] },
+  { country: 'CA', patterns: ['Toronto', 'Vancouver', 'Edmonton', 'Winnipeg', 'Halifax', 'St_Johns', 'Montreal', 'Regina', 'Moncton', 'Yellowknife', 'Whitehorse'] },
+  { country: 'US', patterns: ['New_York', 'Chicago', 'Los_Angeles', 'Denver', 'Phoenix', 'Anchorage', 'Honolulu', 'Detroit', 'Indianapolis'] },
+  { country: 'RU', patterns: ['Moscow', 'Yekaterinburg', 'Novosibirsk', 'Vladivostok', 'Samara', 'Kaliningrad', 'Irkutsk'] },
+  { country: 'GB', patterns: ['Europe/London', 'Europe/Belfast', 'Jersey', 'Guernsey', 'Isle_of_Man'] },
+  { country: 'EU', patterns: ['Paris', 'Berlin', 'Rome', 'Madrid', 'Amsterdam', 'Brussels', 'Vienna', 'Lisbon', 'Dublin', 'Helsinki', 'Athens', 'Warsaw', 'Prague', 'Stockholm', 'Oslo', 'Copenhagen', 'Zurich', 'Budapest', 'Bucharest'] },
+  { country: 'AE', patterns: ['Dubai', 'Abu_Dhabi'] },
+  { country: 'JP', patterns: ['Tokyo'] },
+  { country: 'AU', patterns: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Hobart', 'Darwin'] },
+  { country: 'IN', patterns: ['Kolkata', 'Calcutta'] },
+  { country: 'BR', patterns: ['Sao_Paulo', 'Fortaleza', 'Manaus', 'Recife', 'Belem'] },
+  { country: 'NG', patterns: ['Lagos'] }
+];
+
+const EU_LOCALE_REGIONS = new Set([
+  'DE', 'FR', 'IT', 'ES', 'NL', 'BE', 'AT', 'PT', 'IE', 'FI', 'GR', 'PL',
+  'CZ', 'SE', 'DK', 'NO', 'CH', 'LU', 'EE', 'LV', 'LT', 'SK', 'SI', 'HR', 'BG', 'RO', 'HU'
+]);
+
 class MarketGeoCdnEngine {
   constructor() {
     this.storageKey = 'nex_market_country_code';
@@ -36,54 +57,54 @@ class MarketGeoCdnEngine {
   }
 
   /**
-   * Detects user country via stored preference, CDN headers, or client timezone heuristics.
+   * Detects user country via stored preference, timezone rules, or browser locale heuristics.
+   * Defaults to 'GLOBAL' instead of hardcoding any single country.
+   * @param {string} [tzOverride]
+   * @param {string} [localeOverride]
    */
-  detectUserCountry() {
+  detectUserCountry(tzOverride, localeOverride) {
     try {
-      const stored = localStorage.getItem(this.storageKey);
-      if (stored && SUPPORTED_COUNTRIES[stored]) {
-        return stored;
+      if (!tzOverride && !localeOverride && typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(this.storageKey);
+        if (stored && SUPPORTED_COUNTRIES[stored]) {
+          return stored;
+        }
       }
 
-      // Timezone based geo-heuristic fallback
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-      
-      if (tz.includes('Toronto') || tz.includes('Vancouver') || tz.includes('Edmonton') || tz.includes('Winnipeg') || tz.includes('Halifax') || tz.includes('St_Johns')) {
-        return 'CA';
+      const tz = tzOverride !== undefined
+        ? String(tzOverride || '')
+        : (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+
+      for (const rule of TIMEZONE_COUNTRY_RULES) {
+        if (rule.patterns.some((p) => tz.includes(p))) {
+          return rule.country;
+        }
       }
-      if (tz.includes('New_York') || tz.includes('Chicago') || tz.includes('Los_Angeles') || tz.includes('Denver') || tz.includes('Phoenix')) {
-        return 'US';
-      }
-      if (tz.includes('Moscow') || tz.includes('Yekaterinburg') || tz.includes('Novosibirsk') || tz.includes('Vladivostok') || tz.includes('Samara')) {
-        return 'RU';
-      }
-      if (tz.includes('London')) {
-        return 'GB';
-      }
-      if (tz.includes('Paris') || tz.includes('Berlin') || tz.includes('Rome') || tz.includes('Madrid') || tz.includes('Amsterdam') || tz.includes('Brussels')) {
+
+      if (tz.startsWith('Europe/')) {
         return 'EU';
       }
-      if (tz.includes('Dubai')) {
-        return 'AE';
-      }
-      if (tz.includes('Tokyo')) {
-        return 'JP';
-      }
-      if (tz.includes('Sydney') || tz.includes('Melbourne') || tz.includes('Brisbane') || tz.includes('Perth')) {
-        return 'AU';
-      }
-      if (tz.includes('Kolkata') || tz.includes('Calcutta')) {
-        return 'IN';
-      }
-      if (tz.includes('Sao_Paulo')) {
-        return 'BR';
-      }
-      if (tz.includes('Lagos')) {
-        return 'NG';
-      }
-    } catch (_) {}
 
-    return 'CA'; // Default to Canada
+      const locales = localeOverride !== undefined
+        ? [String(localeOverride || '')]
+        : (typeof navigator !== 'undefined'
+            ? (Array.isArray(navigator.languages) && navigator.languages.length ? navigator.languages : [navigator.language])
+            : []);
+
+      for (const loc of locales) {
+        if (!loc) continue;
+        const normalized = String(loc).trim();
+        if (normalized.toLowerCase().startsWith('is')) return 'IS';
+        const regionMatch = normalized.match(/[-_]([A-Za-z]{2})(?:[-_]|$)/);
+        if (regionMatch) {
+          const region = regionMatch[1].toUpperCase();
+          if (SUPPORTED_COUNTRIES[region]) return region;
+          if (EU_LOCALE_REGIONS.has(region)) return 'EU';
+        }
+      }
+    } catch (_) { }
+
+    return 'GLOBAL';
   }
 
   getActiveCountry() {
