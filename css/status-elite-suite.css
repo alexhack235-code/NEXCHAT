@@ -808,6 +808,7 @@
 /* ==========================================================================
    STATUS CREATION STUDIO (WORLD-CLASS OBSIDIAN GLASSMORPHISM)
    ========================================================================== */
+#createStatusModal,
 .status-studio-modal {
   position: fixed !important;
   inset: 0 !important;
@@ -815,19 +816,31 @@
   background: rgba(3, 6, 12, 0.85) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
-  display: flex !important;
+  display: flex;
+  flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
+  max-height: 100dvh !important;
+  height: 100dvh !important;
+  overflow: hidden !important;
   padding: 16px !important;
   box-sizing: border-box !important;
   user-select: none !important;
 }
 
+#createStatusModal:not([style*="display: none"]):not([style*="display:none"]):not([hidden]):not([aria-hidden="true"]):not([data-nex-modal-closed="true"]),
+.status-studio-modal:not([style*="display: none"]):not([style*="display:none"]):not([hidden]):not([aria-hidden="true"]):not([data-nex-modal-closed="true"]) {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+#createStatusModal .status-studio-card,
 .status-studio-card {
   width: 100% !important;
   max-width: 490px !important;
-  max-height: 94vh !important;
+  max-height: min(94vh, calc(100dvh - 32px)) !important;
   height: auto !important;
+  min-height: 0 !important;
   background: linear-gradient(180deg, #0e1520 0%, #070b12 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 26px !important;
@@ -988,10 +1001,13 @@
 }
 
 /* Studio Scrollable Body */
+#createStatusModal .status-studio-body,
 .status-studio-body {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
@@ -1894,26 +1910,44 @@
 
 /* Studio Mobile Responsive Rules */
 @media (max-width: 600px) {
+  #createStatusModal,
   .status-studio-modal {
     padding: 0 !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
   }
+  #createStatusModal .status-studio-card,
   .status-studio-card {
     width: 100% !important;
     max-width: 100vw !important;
     height: 100% !important;
     height: 100dvh !important;
     max-height: 100dvh !important;
+    min-height: 0 !important;
     border-radius: 0 !important;
     border: none !important;
+    overflow: hidden !important;
   }
+  #createStatusModal .status-studio-header,
   .status-studio-header {
-    padding: 12px 14px !important;
+    padding: 10px 14px !important;
+    flex-shrink: 0 !important;
   }
+  #createStatusModal .status-studio-body,
   .status-studio-body {
-    padding: 12px 14px;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 10px 14px !important;
   }
+  #createStatusModal .status-studio-footer,
   .status-studio-footer {
-    padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)) 14px;
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    bottom: 0 !important;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px)) 14px !important;
+    gap: 8px !important;
   }
   .status-studio-btn-group {
     flex-direction: column-reverse;
@@ -1930,18 +1964,18 @@
   }
   .status-studio-dropzone {
     max-width: 290px;
-    max-height: calc(100dvh - 240px);
-    min-height: 300px;
+    max-height: calc(100dvh - 300px);
+    min-height: 220px;
   }
   .status-studio-preview-card {
     max-width: 290px;
-    max-height: calc(100dvh - 240px);
-    min-height: 300px;
+    max-height: calc(100dvh - 300px);
+    min-height: 220px;
   }
   .status-studio-text-canvas {
     max-width: 290px;
-    max-height: calc(100dvh - 260px);
-    min-height: 300px;
+    max-height: calc(100dvh - 300px);
+    min-height: 220px;
   }
 }
 

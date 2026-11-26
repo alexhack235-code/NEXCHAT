@@ -85,6 +85,12 @@ export class ChronexGhostEngine {
     this.setupIncomingMessageListener();
     this.injectStyles();
 
+    if (typeof window !== 'undefined') {
+      window.addEventListener('nex:stealth:state_change', (e) => {
+        this.syncStealthToggleButtons(Boolean(e?.detail?.active));
+      });
+    }
+
     if (typeof document !== 'undefined') {
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
@@ -970,6 +976,34 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
   // ---------------------------------------------------------------------------
   // 8. HEADER TRIGGER BUTTON INJECTION
   // ---------------------------------------------------------------------------
+  resolveStealthStorageState() {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const airgapVal = localStorage.getItem('nexchat_stealth_ghost_mode');
+        if (airgapVal !== null) return airgapVal === 'true';
+        const legacyVal = localStorage.getItem('nex_stealth_mode');
+        if (legacyVal !== null) return legacyVal === 'true';
+      }
+    } catch (_) {}
+    if (typeof document !== 'undefined') {
+      return document.getElementById('ghostModeToggle')?.checked === true;
+    }
+    return false;
+  }
+
+  syncStealthToggleButtons(explicitState = null) {
+    if (typeof document === 'undefined') return;
+    const active = typeof explicitState === 'boolean' ? explicitState : this.resolveStealthStorageState();
+    const pressed = active ? 'true' : 'false';
+    ['stealthGhostToggleBtn', 'stealthGhostBtnMobile'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.setAttribute('aria-pressed', pressed);
+        el.dataset.stealthActive = pressed;
+      }
+    });
+  }
+
   bindHeaderTrigger() {
     if (typeof document === 'undefined' || typeof document.querySelector !== 'function') return;
 
@@ -990,6 +1024,7 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
       headerActions.insertBefore(btn, headerActions.firstChild || null);
     }
     this.updateHeaderButtonUI();
+    this.syncStealthToggleButtons();
   }
 
   updateHeaderButtonUI() {
@@ -1004,6 +1039,7 @@ Write a short, natural auto-reply speaking on behalf of the user who is temporar
       btn.title = enabled ? 'ChronEX Ghost Mode ON' : 'ChronEX Ghost Mode OFF';
       btn.innerHTML = `<i class="fa-solid fa-ghost ${enabled ? 'text-[#00f2ff]' : 'text-gray-400'}"></i><span class="chronex-ghost-badge" data-state="${enabled ? 'on' : 'off'}" aria-hidden="true">${enabled ? 'ON' : ''}</span>`;
     }
+    this.syncStealthToggleButtons();
   }
 
   // ---------------------------------------------------------------------------

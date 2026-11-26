@@ -574,19 +574,27 @@ html body[class*="dark-theme-"] .chats-section {
   color: var(--nex-theme-text) !important;
 }
 
-/* ── Top Header ── */
+/* ── Top Header (defeats body.nex-liquid-glass:not(.nex-low-end) specificity 0,4,1) ── */
 html body.light-mode .top-header,
 html body.light-theme .top-header,
 html body[class*="light-theme-"] .top-header,
-html body[class*="dark-theme-"] .top-header {
+html body[class*="dark-theme-"] .top-header,
+html body.light-mode.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .top-header,
+html body.light-theme.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .top-header,
+html body[class*="light-theme-"].nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .top-header {
   background: var(--nex-theme-header) !important;
   background-color: var(--nex-theme-header) !important;
   color: var(--nex-theme-text) !important;
   border-bottom: 1px solid var(--nex-theme-border) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
 }
 
 html body.light-mode .top-header .nex-brand-title,
 html body.light-theme .top-header .nex-brand-title,
+html body[class*="light-theme-"] .top-header .nex-brand-title,
+html body.light-mode .top-header .app-logo-text,
+html body.light-theme .top-header .app-logo-text,
+html body[class*="light-theme-"] .top-header .app-logo-text,
 html body.light-mode .top-header .nex-text,
 html body.light-theme .top-header .nex-text,
 html body.light-mode .top-header h1,
@@ -599,14 +607,20 @@ html body[class*="dark-theme-"] .top-header .nex-text {
 
 html body.light-mode .top-header .brand-subtitle,
 html body.light-theme .top-header .brand-subtitle,
+html body[class*="light-theme-"] .top-header .brand-subtitle,
+html body.light-mode .top-header .token-label,
+html body.light-theme .top-header .token-label,
+html body[class*="light-theme-"] .top-header .token-label,
 html body[class*="dark-theme-"] .top-header .brand-subtitle {
   color: var(--nex-theme-text-muted) !important;
 }
 
 html body.light-mode .top-header .header-icon-btn,
 html body.light-theme .top-header .header-icon-btn,
+html body[class*="light-theme-"] .top-header .header-icon-btn,
 html body.light-mode .top-header .mobile-action-btn,
 html body.light-theme .top-header .mobile-action-btn,
+html body[class*="light-theme-"] .top-header .mobile-action-btn,
 html body[class*="dark-theme-"] .top-header .header-icon-btn,
 html body[class*="dark-theme-"] .top-header .mobile-action-btn {
   background: var(--nex-theme-surface-2) !important;
@@ -616,8 +630,10 @@ html body[class*="dark-theme-"] .top-header .mobile-action-btn {
 
 html body.light-mode .top-header .token-display,
 html body.light-theme .top-header .token-display,
+html body[class*="light-theme-"] .top-header .token-display,
 html body.light-mode .top-header .user-badge,
-html body.light-theme .top-header .user-badge {
+html body.light-theme .top-header .user-badge,
+html body[class*="light-theme-"] .top-header .user-badge {
   background: var(--nex-theme-surface-2) !important;
   color: var(--nex-theme-text) !important;
   border: 1px solid var(--nex-theme-border) !important;
@@ -628,6 +644,9 @@ html body.light-mode .bottom-nav,
 html body.light-theme .bottom-nav,
 html body[class*="light-theme-"] .bottom-nav,
 html body[class*="dark-theme-"] .bottom-nav,
+html body.light-mode.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .bottom-nav,
+html body.light-theme.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .bottom-nav,
+html body[class*="light-theme-"].nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .bottom-nav,
 html body.light-mode .desktop-nav,
 html body.light-theme .desktop-nav,
 html body[class*="light-theme-"] .desktop-nav,
@@ -639,10 +658,18 @@ html body[class*="dark-theme-"] .desktop-only-nav {
   background-color: var(--nex-theme-nav) !important;
   color: var(--nex-theme-text) !important;
   border-color: var(--nex-theme-border) !important;
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.08) !important;
 }
 
 html body.light-mode .bottom-nav .nav-item,
 html body.light-theme .bottom-nav .nav-item,
+html body[class*="light-theme-"] .bottom-nav .nav-item,
+html body.light-mode .bottom-nav .nav-item .nav-label,
+html body.light-theme .bottom-nav .nav-item .nav-label,
+html body[class*="light-theme-"] .bottom-nav .nav-item .nav-label,
+html body.light-mode .bottom-nav .nav-item .nav-icon-wrapper,
+html body.light-theme .bottom-nav .nav-item .nav-icon-wrapper,
+html body[class*="light-theme-"] .bottom-nav .nav-item .nav-icon-wrapper,
 html body.light-mode .desktop-nav .nav-item,
 html body.light-theme .desktop-nav .nav-item,
 html body[class*="dark-theme-"] .bottom-nav .nav-item,
@@ -652,6 +679,7 @@ html body[class*="dark-theme-"] .desktop-nav .nav-item {
 
 html body.light-mode .bottom-nav .nav-item svg,
 html body.light-theme .bottom-nav .nav-item svg,
+html body[class*="light-theme-"] .bottom-nav .nav-item svg,
 html body.light-mode .desktop-nav .nav-item svg,
 html body.light-theme .desktop-nav .nav-item svg {
   color: inherit !important;
@@ -660,6 +688,7 @@ html body.light-theme .desktop-nav .nav-item svg {
 
 html body.light-mode .bottom-nav .nav-item.active,
 html body.light-theme .bottom-nav .nav-item.active,
+html body[class*="light-theme-"] .bottom-nav .nav-item.active,
 html body.light-mode .desktop-nav .nav-item.active,
 html body.light-theme .desktop-nav .nav-item.active,
 html body[class*="dark-theme-"] .bottom-nav .nav-item.active,
@@ -668,11 +697,27 @@ html body[class*="dark-theme-"] .desktop-nav .nav-item.active {
   background: var(--nex-theme-active) !important;
 }
 
+html body.light-mode .bottom-nav .nav-item.active .nav-label,
+html body.light-theme .bottom-nav .nav-item.active .nav-label,
+html body[class*="light-theme-"] .bottom-nav .nav-item.active .nav-label,
+html body.light-mode .bottom-nav .super-app-label,
+html body.light-theme .bottom-nav .super-app-label,
+html body[class*="light-theme-"] .bottom-nav .super-app-label {
+  color: var(--nex-theme-accent) !important;
+  background: transparent !important;
+}
+
 html body.light-mode .bottom-nav .nav-item.active .nav-icon,
 html body.light-theme .bottom-nav .nav-item.active .nav-icon,
+html body[class*="light-theme-"] .bottom-nav .nav-item.active .nav-icon,
+html body.light-mode .bottom-nav .nav-item.active .nav-icon-wrapper:not(.super-app-icon-wrapper),
+html body.light-theme .bottom-nav .nav-item.active .nav-icon-wrapper:not(.super-app-icon-wrapper),
+html body[class*="light-theme-"] .bottom-nav .nav-item.active .nav-icon-wrapper:not(.super-app-icon-wrapper),
 html body[class*="dark-theme-"] .bottom-nav .nav-item.active .nav-icon {
   background: var(--nex-theme-active) !important;
   color: var(--nex-theme-accent) !important;
+  border-color: var(--nex-theme-border) !important;
+  box-shadow: none !important;
 }
 
 /* ── Chat List View, Search Pill, Filter Tabs, Chat Items ── */
@@ -804,12 +849,28 @@ html body[class*="dark-theme-"] #contactList .chat-list-item.active {
   background-color: var(--nex-theme-active) !important;
 }
 
+html body.light-mode .chat-name,
+html body.light-theme .chat-name,
+html body[class*="light-theme-"] .chat-name,
 html body.light-mode #contactList .chat-item .chat-name,
 html body.light-theme #contactList .chat-item .chat-name,
+html body[class*="light-theme-"] #contactList .chat-item .chat-name,
 html body.light-mode #contactList .chat-list-item .chat-name,
 html body.light-theme #contactList .chat-list-item .chat-name,
+html body[class*="light-theme-"] #contactList .chat-list-item .chat-name,
+html body[class*="dark-theme-"] .chat-name,
 html body[class*="dark-theme-"] #contactList .chat-item .chat-name,
-html body[class*="dark-theme-"] #contactList .chat-list-item .chat-name {
+html body[class*="dark-theme-"] #contactList .chat-list-item .chat-name,
+html body[class*="dark-theme-"] #contactList .chronex-ai-item .chat-name,
+html body[class*="dark-theme-"] #groupsList .chat-name,
+html body[class*="dark-theme-"] #archivedList .chat-name,
+html body[class*="dark-theme-"] .nex-chatlist-preview-row .chat-name,
+html body.dark-mode:not(.light-mode):not([class*="light-theme-"]) .chat-name,
+html body.dark-mode:not(.light-mode):not([class*="light-theme-"]) #contactList .chat-item .chat-name,
+html body.dark-mode:not(.light-mode):not([class*="light-theme-"]) #contactList .chat-list-item .chat-name,
+html body.dark-mode:not(.light-mode):not([class*="light-theme-"]) #contactList .chronex-ai-item .chat-name,
+html body.dark-mode:not(.light-mode):not([class*="light-theme-"]).nex-liquid-glass:not(.nex-low-end) #contactList .chat-item .chat-name,
+html body.dark-mode:not(.light-mode):not([class*="light-theme-"]).nex-liquid-glass:not(.nex-low-end) #contactList .chat-list-item .chat-name {
   color: var(--nex-theme-text) !important;
 }
 
@@ -875,7 +936,7 @@ html body[class*="dark-theme-"] #chatWelcomePanel .welcome-feature-card {
   border: 1px solid var(--nex-theme-border) !important;
 }
 
-/* ── Chat Detail View, Header, Messages Area, Bubbles & Composer ── */
+/* ── Chat Detail View, Header, Messages Area, ChronEX AI Stage, Bubbles & Composer ── */
 html body.light-mode #chatDetailView:not(.has-custom-wallpaper),
 html body.light-theme #chatDetailView:not(.has-custom-wallpaper),
 html body[class*="light-theme-"] #chatDetailView:not(.has-custom-wallpaper),
@@ -889,22 +950,54 @@ html body[class*="light-theme-"] #messages-area:not(.has-custom-wallpaper),
 html body[class*="dark-theme-"] #messages-area:not(.has-custom-wallpaper),
 html body.light-mode .messages-area:not(.has-custom-wallpaper),
 html body.light-theme .messages-area:not(.has-custom-wallpaper),
-html body[class*="dark-theme-"] .messages-area:not(.has-custom-wallpaper) {
+html body[class*="dark-theme-"] .messages-area:not(.has-custom-wallpaper),
+html body.light-mode #chatDetailView.ai-chat #messages-area,
+html body.light-theme #chatDetailView.ai-chat #messages-area,
+html body[class*="light-theme-"] #chatDetailView.ai-chat #messages-area,
+html body.light-mode #messages-area:has(.chronex-welcome-stage),
+html body.light-theme #messages-area:has(.chronex-welcome-stage),
+html body[class*="light-theme-"] #messages-area:has(.chronex-welcome-stage) {
   background: var(--nex-theme-bg-app) !important;
   background-color: var(--nex-theme-bg-app) !important;
   color: var(--nex-theme-text) !important;
 }
 
-/* Keep custom chat wallpaper clearly visible under a light translucent scrim */
+/* Keep custom chat wallpaper clearly visible under a high-contrast light scrim */
+html body.light-mode #chatDetailView.has-custom-wallpaper,
+html body.light-theme #chatDetailView.has-custom-wallpaper,
+html body[class*="light-theme-"] #chatDetailView.has-custom-wallpaper,
+html body.light-mode .app[data-custom-bg="true"] #chatDetailView,
+html body.light-theme .app[data-custom-bg="true"] #chatDetailView,
+html body[class*="light-theme-"] .app[data-custom-bg="true"] #chatDetailView {
+  background-color: var(--nex-theme-bg-app) !important;
+}
+
 html body.light-mode #messages-area.has-custom-wallpaper,
-html body.light-theme #messages-area.has-custom-wallpaper {
-  background-color: rgba(248, 250, 252, 0.25) !important;
+html body.light-theme #messages-area.has-custom-wallpaper,
+html body[class*="light-theme-"] #messages-area.has-custom-wallpaper,
+html body.light-mode .app[data-custom-bg="true"] #messages-area,
+html body.light-theme .app[data-custom-bg="true"] #messages-area,
+html body[class*="light-theme-"] .app[data-custom-bg="true"] #messages-area {
+  background: rgba(255, 255, 255, 0.82) !important;
+  background-color: rgba(255, 255, 255, 0.82) !important;
   color: var(--nex-theme-text) !important;
 }
 
 html body.light-mode .chat-detail-header,
 html body.light-theme .chat-detail-header,
+html body[class*="light-theme-"] .chat-detail-header,
 html body[class*="dark-theme-"] .chat-detail-header,
+html body.light-mode #chatDetailView .chat-detail-header,
+html body.light-theme #chatDetailView .chat-detail-header,
+html body[class*="light-theme-"] #chatDetailView .chat-detail-header,
+html body.light-mode.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .chat-detail-header,
+html body.light-theme.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .chat-detail-header,
+html body[class*="light-theme-"].nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .chat-detail-header,
+html body.light-mode.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) #chatDetailView .chat-detail-header,
+html body.light-theme.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) #chatDetailView .chat-detail-header,
+html body[class*="light-theme-"].nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) #chatDetailView .chat-detail-header,
+html body.light-mode.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .active-chat-header,
+html body.light-theme.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .active-chat-header,
 html body.light-mode #chatDetailView .chat-header,
 html body.light-theme #chatDetailView .chat-header,
 html body[class*="dark-theme-"] #chatDetailView .chat-header {
@@ -912,20 +1005,241 @@ html body[class*="dark-theme-"] #chatDetailView .chat-header {
   background-color: var(--nex-theme-header) !important;
   color: var(--nex-theme-text) !important;
   border-bottom: 1px solid var(--nex-theme-border) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
 }
 
 html body.light-mode .chat-detail-header *,
 html body.light-theme .chat-detail-header *,
+html body[class*="light-theme-"] .chat-detail-header *,
+html body.light-mode #chatDetailView .chat-detail-header #chatName,
+html body.light-theme #chatDetailView .chat-detail-header #chatName,
+html body[class*="light-theme-"] #chatDetailView .chat-detail-header #chatName,
+html body.light-mode .chat-detail-header #chatName,
+html body.light-theme .chat-detail-header #chatName,
 html body.light-mode #chatDetailView .chat-header .chat-user-name,
 html body.light-theme #chatDetailView .chat-header .chat-user-name {
   color: var(--nex-theme-text) !important;
 }
 
+html body.light-mode #chatDetailView .chat-detail-header #statusText,
+html body.light-theme #chatDetailView .chat-detail-header #statusText,
+html body[class*="light-theme-"] #chatDetailView .chat-detail-header #statusText,
+html body.light-mode .chat-detail-header #statusText,
+html body.light-theme .chat-detail-header #statusText,
+html body.light-mode #chatDetailView .chat-detail-header .status-subtitle,
+html body.light-theme #chatDetailView .chat-detail-header .status-subtitle,
 html body.light-mode #chatDetailView .chat-header .chat-user-status,
 html body.light-theme #chatDetailView .chat-header .chat-user-status,
 html body.light-mode .chat-detail-header .chat-status-text,
 html body.light-theme .chat-detail-header .chat-status-text {
   color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode #chatDetailView .chat-detail-header .back-btn,
+html body.light-theme #chatDetailView .chat-detail-header .back-btn,
+html body[class*="light-theme-"] #chatDetailView .chat-detail-header .back-btn,
+html body.light-mode #chatDetailView .chat-detail-header #headerVideoBtn,
+html body.light-theme #chatDetailView .chat-detail-header #headerVideoBtn,
+html body.light-mode #chatDetailView .chat-detail-header #headerCallBtn,
+html body.light-theme #chatDetailView .chat-detail-header #headerCallBtn,
+html body.light-mode #chatDetailView .chat-detail-header #menuBtn,
+html body.light-theme #chatDetailView .chat-detail-header #menuBtn,
+html body.light-mode #chatDetailView .chat-detail-header #btnQuickLockChat,
+html body.light-theme #chatDetailView .chat-detail-header #btnQuickLockChat {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #chatDetailView .chat-detail-header #chronexHeaderModelBtn,
+html body.light-theme #chatDetailView .chat-detail-header #chronexHeaderModelBtn,
+html body[class*="light-theme-"] #chatDetailView .chat-detail-header #chronexHeaderModelBtn {
+  background: var(--nex-theme-surface-2) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #chatDetailView .chat-detail-header #chronexHeaderModelBtn i,
+html body.light-theme #chatDetailView .chat-detail-header #chronexHeaderModelBtn i {
+  color: var(--nex-theme-accent) !important;
+}
+
+html body.light-mode #chronexHeaderModelMenu,
+html body.light-theme #chronexHeaderModelMenu,
+html body[class*="light-theme-"] #chronexHeaderModelMenu {
+  background: var(--nex-theme-surface) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-text) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
+}
+
+html body.light-mode #chronexHeaderModelMenu .chronex-model-drop-item,
+html body.light-theme #chronexHeaderModelMenu .chronex-model-drop-item,
+html body.light-mode #chronexHeaderModelMenu .model-drop-text strong,
+html body.light-theme #chronexHeaderModelMenu .model-drop-text strong {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #chronexHeaderModelMenu .model-drop-text small,
+html body.light-theme #chronexHeaderModelMenu .model-drop-text small {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+/* E2EE SECURE telemetry bar inside chat detail header */
+html body.light-mode #nexChatTelemetryBar,
+html body.light-theme #nexChatTelemetryBar,
+html body[class*="light-theme-"] #nexChatTelemetryBar,
+html body.light-mode .nex-chat-telemetry-bar,
+html body.light-theme .nex-chat-telemetry-bar,
+html body[class*="light-theme-"] .nex-chat-telemetry-bar {
+  background: var(--nex-theme-surface-2) !important;
+  background-color: var(--nex-theme-surface-2) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #nexChatTelemetryBar .nex-telemetry-badge,
+html body.light-theme #nexChatTelemetryBar .nex-telemetry-badge,
+html body.light-mode #nexChatTelemetryBar .nex-telemetry-badge.e2ee,
+html body.light-theme #nexChatTelemetryBar .nex-telemetry-badge.e2ee,
+html body.light-mode #nexChatTelemetryBar .nex-telemetry-ping,
+html body.light-theme #nexChatTelemetryBar .nex-telemetry-ping,
+html body.light-mode .nex-chat-telemetry-bar .nex-telemetry-badge,
+html body.light-theme .nex-chat-telemetry-bar .nex-telemetry-badge,
+html body.light-mode .nex-chat-telemetry-bar .nex-telemetry-badge.e2ee,
+html body.light-theme .nex-chat-telemetry-bar .nex-telemetry-badge.e2ee,
+html body.light-mode .nex-chat-telemetry-bar .nex-telemetry-ping,
+html body.light-theme .nex-chat-telemetry-bar .nex-telemetry-ping {
+  color: var(--nex-theme-accent) !important;
+}
+
+html body.light-mode .nex-chat-telemetry-bar .nex-telemetry-divider,
+html body.light-theme .nex-chat-telemetry-bar .nex-telemetry-divider {
+  background: var(--nex-theme-border) !important;
+}
+
+/* ChronEX AI Assistant Welcome Stage & Spark Cards */
+html body.light-mode .chronex-welcome-stage,
+html body.light-theme .chronex-welcome-stage,
+html body[class*="light-theme-"] .chronex-welcome-stage {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .chronex-welcome-stage .chronex-hero-title,
+html body.light-theme .chronex-welcome-stage .chronex-hero-title,
+html body[class*="light-theme-"] .chronex-welcome-stage .chronex-hero-title,
+html body.light-mode .chronex-hero-title,
+html body.light-theme .chronex-hero-title {
+  color: var(--nex-theme-text) !important;
+  text-shadow: none !important;
+}
+
+html body.light-mode .chronex-welcome-stage .chronex-hero-desc,
+html body.light-theme .chronex-welcome-stage .chronex-hero-desc,
+html body[class*="light-theme-"] .chronex-welcome-stage .chronex-hero-desc,
+html body.light-mode .chronex-hero-desc,
+html body.light-theme .chronex-hero-desc {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode .chronex-welcome-stage .chronex-hero-badge,
+html body.light-theme .chronex-welcome-stage .chronex-hero-badge,
+html body[class*="light-theme-"] .chronex-welcome-stage .chronex-hero-badge {
+  background: var(--nex-theme-active) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-accent) !important;
+}
+
+html body.light-mode .chronex-welcome-stage .chronex-sparks-header,
+html body.light-theme .chronex-welcome-stage .chronex-sparks-header,
+html body[class*="light-theme-"] .chronex-welcome-stage .chronex-sparks-header {
+  color: var(--nex-theme-accent) !important;
+}
+
+html body.light-mode .chronex-welcome-stage .chronex-mode-chip,
+html body.light-theme .chronex-welcome-stage .chronex-mode-chip,
+html body[class*="light-theme-"] .chronex-welcome-stage .chronex-mode-chip {
+  background: var(--nex-theme-surface-2) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .chronex-welcome-stage .chronex-mode-chip.active,
+html body.light-theme .chronex-welcome-stage .chronex-mode-chip.active,
+html body[class*="light-theme-"] .chronex-welcome-stage .chronex-mode-chip.active {
+  background: var(--nex-theme-accent) !important;
+  border-color: var(--nex-theme-accent) !important;
+  color: var(--nex-theme-accent-fg) !important;
+  box-shadow: none !important;
+}
+
+html body.light-mode .chronex-spark-card,
+html body.light-theme .chronex-spark-card,
+html body[class*="light-theme-"] .chronex-spark-card,
+html body.light-mode .spark-card,
+html body.light-theme .spark-card,
+html body[class*="light-theme-"] .spark-card {
+  background: var(--nex-theme-card) !important;
+  background-color: var(--nex-theme-card) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-text) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
+}
+
+html body.light-mode .chronex-spark-card:hover,
+html body.light-theme .chronex-spark-card:hover,
+html body.light-mode .spark-card:hover,
+html body.light-theme .spark-card:hover {
+  background: var(--nex-theme-surface-2) !important;
+  border-color: var(--nex-theme-accent) !important;
+}
+
+html body.light-mode .chronex-spark-card .spark-card-icon,
+html body.light-theme .chronex-spark-card .spark-card-icon,
+html body.light-mode .chronex-spark-card .spark-badge,
+html body.light-theme .chronex-spark-card .spark-badge,
+html body.light-mode .spark-card .spark-card-icon,
+html body.light-theme .spark-card .spark-card-icon,
+html body.light-mode .spark-card .spark-badge,
+html body.light-theme .spark-card .spark-badge {
+  background: var(--nex-theme-active) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-accent) !important;
+}
+
+html body.light-mode .chronex-spark-card .spark-card-title,
+html body.light-theme .chronex-spark-card .spark-card-title,
+html body[class*="light-theme-"] .chronex-spark-card .spark-card-title,
+html body.light-mode .spark-card .spark-card-title,
+html body.light-theme .spark-card .spark-card-title {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .chronex-spark-card .spark-card-desc,
+html body.light-theme .chronex-spark-card .spark-card-desc,
+html body[class*="light-theme-"] .chronex-spark-card .spark-card-desc,
+html body.light-mode .spark-card .spark-card-desc,
+html body.light-theme .spark-card .spark-card-desc {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode .chronex-welcome-stage .telemetry-pill,
+html body.light-theme .chronex-welcome-stage .telemetry-pill,
+html body[class*="light-theme-"] .chronex-welcome-stage .telemetry-pill {
+  background: var(--nex-theme-surface-2) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode .chronex-ai-bubble,
+html body.light-theme .chronex-ai-bubble,
+html body[class*="light-theme-"] .chronex-ai-bubble {
+  background: var(--nex-theme-bubble-recv) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode .chronex-ai-bubble .ai-body-content,
+html body.light-theme .chronex-ai-bubble .ai-body-content {
+  color: var(--nex-theme-text) !important;
 }
 
 html body.light-mode .message-bubble.received,
@@ -1015,6 +1329,9 @@ html body.light-theme .message-input-area,
 html body[class*="dark-theme-"] .message-input-area,
 html body.light-mode #message-form,
 html body.light-theme #message-form,
+html body.light-mode.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .message-form,
+html body.light-theme.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .message-form,
+html body[class*="light-theme-"].nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .message-form,
 html body[class*="dark-theme-"] #message-form {
   background: var(--nex-theme-header) !important;
   background-color: var(--nex-theme-header) !important;
@@ -1175,10 +1492,49 @@ html body.light-mode #statusContainer .channel-followers,
 html body.light-mode #statusContainer .updates-section-subtitle,
 html body.light-mode #callHistoryContainer .call-meta,
 html body.light-mode #callHistoryContainer .call-time,
+html body.light-mode #callHistoryContainer .calls-recent-title,
+html body.light-theme #callHistoryContainer .calls-recent-title,
+html body[class*="light-theme-"] #callHistoryContainer .calls-recent-title,
+html body.light-mode .calls-recent-title,
+html body.light-theme .calls-recent-title,
+html body[class*="light-theme-"] .calls-recent-title,
+html body.light-mode #callHistoryContainer .calls-action-label,
+html body.light-theme #callHistoryContainer .calls-action-label,
+html body.light-mode .calls-action-label,
+html body.light-theme .calls-action-label,
+html body[class*="light-theme-"] .calls-action-label,
+html body.light-mode #callHistoryContainer .call-status-line,
+html body.light-theme #callHistoryContainer .call-status-line,
 html body.light-mode #announcementsContainer .announcement-meta,
 html body.light-mode #announcementsContainer p,
 html body.light-mode #groupsContainer .group-meta {
   color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode #callHistoryContainer .calls-action-circle,
+html body.light-theme #callHistoryContainer .calls-action-circle,
+html body[class*="light-theme-"] #callHistoryContainer .calls-action-circle,
+html body.light-mode .calls-action-circle,
+html body.light-theme .calls-action-circle {
+  background: var(--nex-theme-surface-2) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-text) !important;
+  box-shadow: var(--nex-theme-shadow) !important;
+}
+
+html body.light-mode #callHistoryContainer .call-name-answered,
+html body.light-theme #callHistoryContainer .call-name-answered,
+html body[class*="light-theme-"] #callHistoryContainer .call-name-answered,
+html body.light-mode .call-name-answered,
+html body.light-theme .call-name-answered {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #callHistoryContainer .call-name-missed,
+html body.light-theme #callHistoryContainer .call-name-missed,
+html body.light-mode .call-name-missed,
+html body.light-theme .call-name-missed {
+  color: #b91c1c !important;
 }
 
 /* ── Settings Modal, Sidebar, Tabs, Cards, Selects, Inputs ── */
@@ -1194,12 +1550,20 @@ html body[class*="dark-theme-"] #settingsModal {
 
 html body.light-mode #settingsModal .modal-content,
 html body.light-theme #settingsModal .modal-content,
+html body[class*="light-theme-"] #settingsModal .modal-content,
+html body.light-mode.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) #settingsModal .modal-content,
+html body.light-theme.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) #settingsModal .modal-content,
+html body[class*="light-theme-"].nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) #settingsModal .modal-content,
 html body[class*="dark-theme-"] #settingsModal .modal-content,
 html body.light-mode #settingsModal .settings-content,
 html body.light-theme #settingsModal .settings-content,
 html body[class*="dark-theme-"] #settingsModal .settings-content,
 html body.light-mode #settingsModal .settings-modal-content,
 html body.light-theme #settingsModal .settings-modal-content,
+html body[class*="light-theme-"] #settingsModal .settings-modal-content,
+html body.light-mode #settingsModal .settings-modal-content.luxury-settings-suite,
+html body.light-theme #settingsModal .settings-modal-content.luxury-settings-suite,
+html body[class*="light-theme-"] #settingsModal .settings-modal-content.luxury-settings-suite,
 html body[class*="dark-theme-"] #settingsModal .settings-modal-content,
 html body.light-mode .settings-content,
 html body.light-theme .settings-content,
@@ -1213,6 +1577,7 @@ html body.light-theme .settings-modal-content {
 
 html body.light-mode #settingsModal .settings-header,
 html body.light-theme #settingsModal .settings-header,
+html body[class*="light-theme-"] #settingsModal .settings-header,
 html body[class*="dark-theme-"] #settingsModal .settings-header,
 html body.light-mode #settingsModal .settings-footer,
 html body.light-theme #settingsModal .settings-footer,
@@ -1223,8 +1588,165 @@ html body[class*="dark-theme-"] #settingsModal .settings-footer {
   border-color: var(--nex-theme-border) !important;
 }
 
+html body.light-mode #settingsModal .settings-header-left h2,
+html body.light-theme #settingsModal .settings-header-left h2,
+html body[class*="light-theme-"] #settingsModal .settings-header-left h2,
+html body.light-mode #settingsModal .settings-pane-header h3,
+html body.light-theme #settingsModal .settings-pane-header h3,
+html body[class*="light-theme-"] #settingsModal .settings-pane-header h3,
+html body.light-mode #settingsModal .settings-card-header h3,
+html body.light-theme #settingsModal .settings-card-header h3,
+html body[class*="light-theme-"] #settingsModal .settings-card-header h3,
+html body.light-mode #settingsModal .settings-profile-name,
+html body.light-theme #settingsModal .settings-profile-name,
+html body[class*="light-theme-"] #settingsModal .settings-profile-name,
+html body.light-mode #settingsModal #tabProfileName,
+html body.light-theme #settingsModal #tabProfileName,
+html body.light-mode #settingsModal .settings-profile-edit-name-btn,
+html body.light-theme #settingsModal .settings-profile-edit-name-btn,
+html body.light-mode #settingsModal .tg-settings-row-title,
+html body.light-theme #settingsModal .tg-settings-row-title,
+html body.light-mode #settingsModal .settings-item-label strong,
+html body.light-theme #settingsModal .settings-item-label strong,
+html body.light-mode #settingsModal .luxury-toggle-row strong,
+html body.light-theme #settingsModal .luxury-toggle-row strong {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #settingsModal .settings-subtitle,
+html body.light-theme #settingsModal .settings-subtitle,
+html body.light-mode #settingsModal .settings-pane-header p,
+html body.light-theme #settingsModal .settings-pane-header p,
+html body[class*="light-theme-"] #settingsModal .settings-pane-header p,
+html body.light-mode #settingsModal .settings-nav-group-title,
+html body.light-theme #settingsModal .settings-nav-group-title,
+html body.light-mode #settingsModal .tg-settings-row-desc,
+html body.light-theme #settingsModal .tg-settings-row-desc,
+html body.light-mode #settingsModal .settings-item-label span,
+html body.light-theme #settingsModal .settings-item-label span,
+html body.light-mode #settingsModal .luxury-toggle-row p,
+html body.light-theme #settingsModal .luxury-toggle-row p {
+  color: var(--nex-theme-text-muted) !important;
+}
+
+html body.light-mode #settingsModal .settings-profile-handle,
+html body.light-theme #settingsModal .settings-profile-handle,
+html body[class*="light-theme-"] #settingsModal .settings-profile-handle,
+html body.light-mode #settingsModal .settings-profile-status,
+html body.light-theme #settingsModal .settings-profile-status,
+html body[class*="light-theme-"] #settingsModal .settings-profile-status {
+  color: var(--nex-theme-accent) !important;
+}
+
+html body.light-mode #settingsModal .settings-profile-btn,
+html body.light-theme #settingsModal .settings-profile-btn,
+html body[class*="light-theme-"] #settingsModal .settings-profile-btn,
+html body.light-mode #settingsModal .settings-profile-btn.studio-btn,
+html body.light-theme #settingsModal .settings-profile-btn.studio-btn,
+html body[class*="light-theme-"] #settingsModal .settings-profile-btn.studio-btn,
+html body.light-mode #settingsModal .btn-secondary,
+html body.light-theme #settingsModal .btn-secondary,
+html body[class*="light-theme-"] #settingsModal .btn-secondary,
+html body.light-mode #settingsModal .install-platform-grid button,
+html body.light-theme #settingsModal .install-platform-grid button,
+html body.light-mode #settingsModal .radio-pill,
+html body.light-theme #settingsModal .radio-pill {
+  background: var(--nex-theme-surface-2) !important;
+  background-color: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode #settingsModal .settings-profile-btn span,
+html body.light-theme #settingsModal .settings-profile-btn span,
+html body[class*="light-theme-"] #settingsModal .settings-profile-btn span {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #settingsModal .settings-profile-btn:hover,
+html body.light-theme #settingsModal .settings-profile-btn:hover {
+  background: var(--nex-theme-active) !important;
+  border-color: var(--nex-theme-accent) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #settingsModal #userUIDDisplay,
+html body.light-theme #settingsModal #userUIDDisplay,
+html body[class*="light-theme-"] #settingsModal #userUIDDisplay,
+html body.light-mode #settingsModal .uid-display-card,
+html body.light-theme #settingsModal .uid-display-card,
+html body[class*="light-theme-"] #settingsModal .uid-display-card {
+  background: var(--nex-theme-input) !important;
+  background-color: var(--nex-theme-input) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode #settingsModal #copyUIDBtn,
+html body.light-theme #settingsModal #copyUIDBtn,
+html body[class*="light-theme-"] #settingsModal #copyUIDBtn,
+html body.light-mode #settingsModal .btn-primary,
+html body.light-theme #settingsModal .btn-primary,
+html body[class*="light-theme-"] #settingsModal .btn-primary,
+html body.light-mode #settingsModal .settings-action-btn,
+html body.light-theme #settingsModal .settings-action-btn {
+  background: var(--nex-theme-accent) !important;
+  background-color: var(--nex-theme-accent) !important;
+  color: var(--nex-theme-accent-fg) !important;
+  border: 1px solid var(--nex-theme-accent) !important;
+}
+
+html body.light-mode #settingsModal .close-btn,
+html body.light-theme #settingsModal .close-btn,
+html body.light-mode #settingsModal .settings-back-btn,
+html body.light-theme #settingsModal .settings-back-btn {
+  background: var(--nex-theme-surface-2) !important;
+  color: var(--nex-theme-text) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode #settingsModal .settings-search-bar-wrap,
+html body.light-theme #settingsModal .settings-search-bar-wrap,
+html body[class*="light-theme-"] #settingsModal .settings-search-bar-wrap {
+  background: var(--nex-theme-input) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode #settingsModal .slider,
+html body.light-theme #settingsModal .slider,
+html body.light-mode #settingsModal .tg-slider,
+html body.light-theme #settingsModal .tg-slider {
+  background-color: rgba(15, 23, 42, 0.24) !important;
+}
+
+html body.light-mode #settingsModal input:checked + .slider,
+html body.light-theme #settingsModal input:checked + .slider,
+html body.light-mode #settingsModal input:checked + .tg-slider,
+html body.light-theme #settingsModal input:checked + .tg-slider {
+  background-color: var(--nex-theme-accent) !important;
+  border-color: var(--nex-theme-accent) !important;
+}
+
+html body.light-mode #settingsModal .ai-model-card,
+html body.light-theme #settingsModal .ai-model-card {
+  background: var(--nex-theme-surface-2) !important;
+  border: 1px solid var(--nex-theme-border) !important;
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #settingsModal .ai-model-card-title,
+html body.light-theme #settingsModal .ai-model-card-title {
+  color: var(--nex-theme-text) !important;
+}
+
+html body.light-mode #settingsModal .ai-model-card-desc,
+html body.light-theme #settingsModal .ai-model-card-desc {
+  color: var(--nex-theme-text-muted) !important;
+}
+
 html body.light-mode #settingsModal .settings-sidebar,
 html body.light-theme #settingsModal .settings-sidebar,
+html body[class*="light-theme-"] #settingsModal .settings-sidebar,
 html body[class*="dark-theme-"] #settingsModal .settings-sidebar,
 html body.light-mode .settings-sidebar,
 html body.light-theme .settings-sidebar {
@@ -1237,6 +1759,12 @@ html body.light-theme .settings-sidebar {
 html body.light-mode #settingsModal .settings-body,
 html body.light-theme #settingsModal .settings-body,
 html body[class*="dark-theme-"] #settingsModal .settings-body,
+html body.light-mode #settingsModal .settings-layout,
+html body.light-theme #settingsModal .settings-layout,
+html body[class*="light-theme-"] #settingsModal .settings-layout,
+html body.light-mode #settingsModal .settings-pane-container,
+html body.light-theme #settingsModal .settings-pane-container,
+html body[class*="light-theme-"] #settingsModal .settings-pane-container,
 html body.light-mode #settingsModal .settings-content-area,
 html body.light-theme #settingsModal .settings-content-area,
 html body[class*="dark-theme-"] #settingsModal .settings-content-area,
@@ -1250,10 +1778,27 @@ html body.light-theme #settingsModal .settings-main {
 @media (max-width: 768px) {
   html body.light-mode #settingsModal .settings-sidebar,
   html body.light-theme #settingsModal .settings-sidebar,
+  html body[class*="light-theme-"] #settingsModal .settings-sidebar,
   html body[class*="dark-theme-"] #settingsModal .settings-sidebar {
     background: var(--nex-theme-surface) !important;
     background-color: var(--nex-theme-surface) !important;
     border-bottom: 1px solid var(--nex-theme-border) !important;
+  }
+
+  html body.light-mode #settingsModal .settings-nav-tab,
+  html body.light-theme #settingsModal .settings-nav-tab,
+  html body[class*="light-theme-"] #settingsModal .settings-nav-tab {
+    background: var(--nex-theme-surface-2) !important;
+    color: var(--nex-theme-text-muted) !important;
+    border: 1px solid var(--nex-theme-border) !important;
+  }
+
+  html body.light-mode #settingsModal .settings-nav-tab.active,
+  html body.light-theme #settingsModal .settings-nav-tab.active,
+  html body[class*="light-theme-"] #settingsModal .settings-nav-tab.active {
+    background: var(--nex-theme-accent) !important;
+    color: var(--nex-theme-accent-fg) !important;
+    border-color: var(--nex-theme-accent) !important;
   }
 }
 
@@ -1339,21 +1884,33 @@ html body.light-theme #settingsModal #tab-privacy [style*="rgba(0,0,0"] {
 
 html body.light-mode .settings-select,
 html body.light-theme .settings-select,
+html body[class*="light-theme-"] .settings-select,
 html body[class*="dark-theme-"] .settings-select,
 html body.light-mode .settings-input,
 html body.light-theme .settings-input,
+html body[class*="light-theme-"] .settings-input,
 html body[class*="dark-theme-"] .settings-input,
-html body.light-mode #settingsSearchInput,
-html body.light-theme #settingsSearchInput,
-html body[class*="dark-theme-"] #settingsSearchInput,
 html body.light-mode #settingsModal select,
 html body.light-mode #settingsModal input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html body.light-mode #settingsModal textarea,
 html body.light-theme #settingsModal select,
-html body.light-theme #settingsModal input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+html body.light-theme #settingsModal input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html body.light-theme #settingsModal textarea,
+html body[class*="light-theme-"] #settingsModal select,
+html body[class*="light-theme-"] #settingsModal input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
   background: var(--nex-theme-input) !important;
   background-color: var(--nex-theme-input) !important;
   color: var(--nex-theme-text) !important;
   border: 1px solid var(--nex-theme-border) !important;
+}
+
+html body.light-mode #settingsModal #settingsSearchInput,
+html body.light-theme #settingsModal #settingsSearchInput,
+html body[class*="light-theme-"] #settingsModal #settingsSearchInput {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  color: var(--nex-theme-text) !important;
 }
 
 /* ── Studio Modal, Chat Options Menu, General Modals & Popups ── */
@@ -1413,9 +1970,16 @@ html body.light-mode #mobileDropdownMenu button:hover {
 
 html body.light-mode .modal:not(#statusViewerModal):not(.small-popup) > .modal-content,
 html body.light-theme .modal:not(#statusViewerModal):not(.small-popup) > .modal-content,
+html body[class*="light-theme-"] .modal:not(#statusViewerModal):not(.small-popup) > .modal-content,
+html body.light-mode.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .modal:not(#statusViewerModal):not(.small-popup) > .modal-content,
+html body.light-theme.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .modal:not(#statusViewerModal):not(.small-popup) > .modal-content,
 html body[class*="dark-theme-"] .modal:not(#statusViewerModal):not(.small-popup) > .modal-content,
 html body.light-mode .modal-content:not(#statusViewerModal *),
-html body.light-theme .modal-content:not(#statusViewerModal *) {
+html body.light-theme .modal-content:not(#statusViewerModal *),
+html body[class*="light-theme-"] .modal-content:not(#statusViewerModal *),
+html body.light-mode.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .modal-content:not(#statusViewerModal *),
+html body.light-theme.nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .modal-content:not(#statusViewerModal *),
+html body[class*="light-theme-"].nex-liquid-glass:not(.nex-low-end):not(.nex-theme-sentinel) .modal-content:not(#statusViewerModal *) {
   background: var(--nex-theme-surface) !important;
   background-color: var(--nex-theme-surface) !important;
   color: var(--nex-theme-text) !important;

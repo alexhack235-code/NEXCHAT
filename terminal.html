@@ -909,6 +909,10 @@
       ];
       let isClientGateVerified = false;
       let stagedServerToken = '';
+      let cloudSocket = null;
+      let isCloudConnected = false;
+      let cloudTargetUrl = '';
+      try { cloudTargetUrl = localStorage.getItem('nex_cloud_terminal_url') || ''; } catch (_) {}
 
       async function sha256Hex(str) {
         if (window.crypto && window.crypto.subtle) {
@@ -1026,9 +1030,6 @@
 
 
       // ─── CLOUD TERMINAL BRIDGE (LINODE VPS / REAL SHELL) ───
-      let cloudSocket = null;
-      let isCloudConnected = false;
-      let cloudTargetUrl = localStorage.getItem('nex_cloud_terminal_url') || '';
 
       function updateCloudBadge(status, text) {
         const badge = document.getElementById('termCloudBadge');

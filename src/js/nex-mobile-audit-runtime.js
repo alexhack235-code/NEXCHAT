@@ -101,6 +101,8 @@ class NexMobileAuditRuntimeController {
   constructor() {
     this.isBooted = false;
     this.isCoordinatingModals = false;
+    this._modalObserver = null;
+    this._modalObserverConfig = null;
     this.suspendedStatusParent = false;
     this.previouslyFocusedByModal = new WeakMap();
     this.openModalOrder = [];
@@ -381,6 +383,33 @@ class NexMobileAuditRuntimeController {
     return false;
   }
 
+  isModalAlreadyClosed(el) {
+    if (!el) return true;
+    return (
+      el.dataset?.nexModalClosed === 'true' &&
+      el.getAttribute('aria-hidden') === 'true' &&
+      el.hidden === true &&
+      el.inert === true &&
+      !el.classList.contains('open') &&
+      !el.classList.contains('active') &&
+      !el.classList.contains('show') &&
+      el.style.display === 'none'
+    );
+  }
+
+  runWithModalCoordination(fn) {
+    if (this.isCoordinatingModals) return;
+    this.isCoordinatingModals = true;
+    try {
+      fn();
+    } finally {
+      if (this._modalObserver) {
+        try { this._modalObserver.takeRecords(); } catch (_) { }
+      }
+      this.isCoordinatingModals = false;
+    }
+  }
+
   markModalClosed(el) {
     if (!el || !el.isConnected) return;
     const activeEl = document.activeElement;
@@ -392,17 +421,38 @@ class NexMobileAuditRuntimeController {
       }
     }
 
-    el.setAttribute('data-nex-modal-closed', 'true');
-    el.setAttribute('aria-hidden', 'true');
-    el.hidden = true;
-    el.setAttribute('hidden', '');
-    el.inert = true;
-    el.setAttribute('inert', '');
-    el.classList.remove('open', 'active', 'show');
+    if (this.openModalOrder.includes(el)) {
+      this.openModalOrder = this.openModalOrder.filter((m) => m !== el);
+    }
+
+    if (this.isModalAlreadyClosed(el)) {
+      return;
+    }
+
+    if (el.dataset?.nexModalClosed !== 'true') {
+      el.setAttribute('data-nex-modal-closed', 'true');
+    }
+    if (el.getAttribute('aria-hidden') !== 'true') {
+      el.setAttribute('aria-hidden', 'true');
+    }
+    if (!el.hidden) {
+      el.hidden = true;
+    }
+    if (!el.hasAttribute('hidden')) {
+      el.setAttribute('hidden', '');
+    }
+    if (!el.inert) {
+      el.inert = true;
+    }
+    if (!el.hasAttribute('inert')) {
+      el.setAttribute('inert', '');
+    }
+    if (el.classList.contains('open') || el.classList.contains('active') || el.classList.contains('show')) {
+      el.classList.remove('open', 'active', 'show');
+    }
     if (el.style.display !== 'none') {
       el.style.display = 'none';
     }
-    this.openModalOrder = this.openModalOrder.filter((m) => m !== el);
   }
 
   markModalOpen(el) {
@@ -412,12 +462,24 @@ class NexMobileAuditRuntimeController {
       this.previouslyFocusedByModal.set(el, prev);
     }
 
-    el.removeAttribute('data-nex-modal-closed');
-    el.hidden = false;
-    el.removeAttribute('hidden');
-    el.inert = false;
-    el.removeAttribute('inert');
-    el.setAttribute('aria-hidden', 'false');
+    if (el.hasAttribute('data-nex-modal-closed')) {
+      el.removeAttribute('data-nex-modal-closed');
+    }
+    if (el.hidden) {
+      el.hidden = false;
+    }
+    if (el.hasAttribute('hidden')) {
+      el.removeAttribute('hidden');
+    }
+    if (el.inert) {
+      el.inert = false;
+    }
+    if (el.hasAttribute('inert')) {
+      el.removeAttribute('inert');
+    }
+    if (el.getAttribute('aria-hidden') !== 'false') {
+      el.setAttribute('aria-hidden', 'false');
+    }
     if (el.style.display === 'none') {
       el.style.display = 'flex';
     }
@@ -427,8 +489,7 @@ class NexMobileAuditRuntimeController {
 
   enforceSingleModalFor(activeModal) {
     if (!activeModal || this.isCoordinatingModals) return;
-    this.isCoordinatingModals = true;
-    try {
+    this.runWithModalCoordination(() => {
       // Nested Status Music Picker pauses Create Status without wiping draft
       if (activeModal.id === 'statusMusicPickerModal') {
         const statusModal = document.getElementById('createStatusModal');
@@ -447,15 +508,12 @@ class NexMobileAuditRuntimeController {
       });
 
       this.markModalOpen(activeModal);
-    } finally {
-      this.isCoordinatingModals = false;
-    }
+    });
   }
 
   sweepAllModals() {
     if (this.isCoordinatingModals) return;
-    this.isCoordinatingModals = true;
-    try {
+    this.runWithModalCoordination(() => {
       const openModals = [];
       document.querySelectorAll(MODAL_ROOT_SELECTOR).forEach((el) => {
         if (!this.isModalRoot(el)) return;
@@ -475,9 +533,7 @@ class NexMobileAuditRuntimeController {
           }
         });
       }
-    } finally {
-      this.isCoordinatingModals = false;
-    }
+    });
   }
 
   didMutationOpenModal(el, mutation) {
@@ -542,8 +598,8 @@ class NexMobileAuditRuntimeController {
             candidates.forEach((modalEl) => {
               if (this.isModalVisuallyOpen(modalEl)) {
                 this.enforceSingleModalFor(modalEl);
-              } else {
-                this.markModalClosed(modalEl);
+              } else if (!this.isModalAlreadyClosed(modalEl)) {
+                this.runWithModalCoordination(() => this.markModalClosed(modalEl));
               }
             });
           });
@@ -562,11 +618,8 @@ class NexMobileAuditRuntimeController {
           if (this.didMutationOpenModal(el, m)) {
             this.enforceSingleModalFor(el);
           } else if (this.didMutationCloseModal(el, m)) {
-            this.isCoordinatingModals = true;
-            try {
-              this.markModalClosed(el);
-            } finally {
-              this.isCoordinatingModals = false;
+            if (!this.isModalAlreadyClosed(el)) {
+              this.runWithModalCoordination(() => this.markModalClosed(el));
             }
             if (el.id === 'statusMusicPickerModal' && this.suspendedStatusParent) {
               this.suspendedStatusParent = false;
@@ -578,13 +631,15 @@ class NexMobileAuditRuntimeController {
       }
     });
 
-    observer.observe(document.body, {
+    this._modalObserver = observer;
+    this._modalObserverConfig = {
       childList: true,
       subtree: true,
       attributes: true,
       attributeOldValue: true,
       attributeFilter: ['style', 'class', 'hidden', 'aria-hidden']
-    });
+    };
+    observer.observe(document.body, this._modalObserverConfig);
 
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
@@ -598,12 +653,7 @@ class NexMobileAuditRuntimeController {
       if (topModal.id === 'createStatusModal' && typeof window.closeCreateStatusModal === 'function') {
         window.closeCreateStatusModal();
       } else {
-        this.isCoordinatingModals = true;
-        try {
-          this.markModalClosed(topModal);
-        } finally {
-          this.isCoordinatingModals = false;
-        }
+        this.runWithModalCoordination(() => this.markModalClosed(topModal));
       }
     });
   }
@@ -617,16 +667,10 @@ class NexMobileAuditRuntimeController {
         const hub = document.getElementById('cyberHubModal') || document.getElementById('nexCyberHubModal');
         if (hub && !document.getElementById('cyberHubModal')) {
           const isOpen = this.isModalVisuallyOpen(hub);
-          this.isCoordinatingModals = true;
-          try {
-            if (isOpen) {
-              this.markModalClosed(hub);
-            } else {
-              this.isCoordinatingModals = false;
-              this.enforceSingleModalFor(hub);
-            }
-          } finally {
-            this.isCoordinatingModals = false;
+          if (isOpen) {
+            this.runWithModalCoordination(() => this.markModalClosed(hub));
+          } else {
+            this.enforceSingleModalFor(hub);
           }
         }
         return res;
@@ -804,34 +848,45 @@ class NexMobileAuditRuntimeController {
     this.organizeChatOptionsMenu(menu);
     this.ensureChatOptionsBackdrop(menu);
 
+    let isSyncingMenu = false;
+    let menuObs = null;
     const syncMenuState = () => {
-      const isOpen = menu.style.display && menu.style.display !== 'none' && !menu.hidden && !menu.classList.contains('hidden');
-      if (isOpen) {
-        menu.hidden = false;
-        menu.removeAttribute('hidden');
-        menu.inert = false;
-        menu.removeAttribute('inert');
-        menu.setAttribute('aria-hidden', 'false');
-        if (this.chatOptionsBackdrop) this.chatOptionsBackdrop.classList.add('open');
-      } else {
-        if (document.activeElement && menu.contains(document.activeElement)) {
-          try { document.activeElement.blur(); } catch (_) { }
+      if (isSyncingMenu) return;
+      isSyncingMenu = true;
+      try {
+        const isOpen = menu.style.display && menu.style.display !== 'none' && !menu.hidden && !menu.classList.contains('hidden');
+        if (isOpen) {
+          if (menu.hidden) menu.hidden = false;
+          if (menu.hasAttribute('hidden')) menu.removeAttribute('hidden');
+          if (menu.inert) menu.inert = false;
+          if (menu.hasAttribute('inert')) menu.removeAttribute('inert');
+          if (menu.getAttribute('aria-hidden') !== 'false') menu.setAttribute('aria-hidden', 'false');
+          if (this.chatOptionsBackdrop) this.chatOptionsBackdrop.classList.add('open');
+        } else {
+          if (document.activeElement && menu.contains(document.activeElement)) {
+            try { document.activeElement.blur(); } catch (_) { }
+          }
+          if (menu.getAttribute('aria-hidden') !== 'true') menu.setAttribute('aria-hidden', 'true');
+          if (!menu.inert) menu.inert = true;
+          if (!menu.hasAttribute('inert')) menu.setAttribute('inert', '');
+          if (this.chatOptionsBackdrop) this.chatOptionsBackdrop.classList.remove('open');
+          const filterInput = document.getElementById('chatOptionsFilterInput');
+          if (filterInput && filterInput.value) {
+            filterInput.value = '';
+            this.filterChatOptions(menu, '');
+          }
         }
-        menu.setAttribute('aria-hidden', 'true');
-        menu.inert = true;
-        menu.setAttribute('inert', '');
-        if (this.chatOptionsBackdrop) this.chatOptionsBackdrop.classList.remove('open');
-        const filterInput = document.getElementById('chatOptionsFilterInput');
-        if (filterInput && filterInput.value) {
-          filterInput.value = '';
-          this.filterChatOptions(menu, '');
+      } finally {
+        if (menuObs) {
+          try { menuObs.takeRecords(); } catch (_) { }
         }
+        isSyncingMenu = false;
       }
     };
 
     syncMenuState();
 
-    const menuObs = new MutationObserver(syncMenuState);
+    menuObs = new MutationObserver(syncMenuState);
     menuObs.observe(menu, { attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
 
     if (typeof window.closeChatOptionsMenu === 'function' && !window.closeChatOptionsMenu._nexAuditWrapped) {
@@ -1023,7 +1078,7 @@ class NexMobileAuditRuntimeController {
       if (typeof window._origCloseCreateStatusModal === 'function') {
         window._origCloseCreateStatusModal(true);
       } else {
-        this.markModalClosed(modal);
+        this.runWithModalCoordination(() => this.markModalClosed(modal));
       }
     });
 
@@ -1113,7 +1168,14 @@ class NexMobileAuditRuntimeController {
       this.lastGhostState = enabled;
     };
 
-    const initial = localStorage.getItem('nex_stealth_mode') === 'true' || document.getElementById('ghostModeToggle')?.checked === true;
+    let initial = false;
+    try {
+      initial = localStorage.getItem('nexchat_stealth_ghost_mode') === 'true' ||
+        localStorage.getItem('nex_stealth_mode') === 'true' ||
+        document.getElementById('ghostModeToggle')?.checked === true;
+    } catch (_) {
+      initial = document.getElementById('ghostModeToggle')?.checked === true;
+    }
     this.lastGhostState = initial;
     syncStealthButtons(initial, false);
 
