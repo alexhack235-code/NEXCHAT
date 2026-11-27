@@ -308,6 +308,89 @@ function showResult(msg, isError = false) {
   }
 }
 
+function attachLoginHandler() {
+  const loginForm = document.getElementById('loginForm');
+  if (!loginForm) return;
+  if (loginForm.dataset.authAttached === 'true') return;
+  loginForm.dataset.authAttached = 'true';
+
+  loginForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const emailInput = document.getElementById('loginEmail');
+    const email = emailInput?.value?.trim() || '';
+    const pass = document.getElementById('loginPassword')?.value || '';
+
+    if (!email) {
+      showResult('Please enter your email address.', true);
+      return;
+    }
+
+    if (!email.includes('@')) {
+      showResult('Please sign in with your registered email address (e.g. name@example.com).', true);
+      return;
+    }
+
+    if (!pass) {
+      showResult('Please enter your password.', true);
+      return;
+    }
+
+    const loginRateLimit = checkRateLimit(email, 'login', 5, 900000);
+    if (!loginRateLimit.allowed) {
+      showResult(`${loginRateLimit.message}`, true);
+      return;
+    }
+
+    showLoginLoader('Checking credentials...');
+
+    try {
+      const rememberEl = document.getElementById('rememberMe');
+      const shouldRemember = !rememberEl || rememberEl.checked !== false;
+      const targetPersistence = shouldRemember ? indexedDBLocalPersistence : browserSessionPersistence;
+      await setPersistence(auth, targetPersistence).catch(() => setPersistence(auth, browserLocalPersistence).catch(() => {}));
+      const cred = await signInWithEmailAndPassword(auth, email, pass);
+      showResult('Successfully signed in!');
+
+      // Cache session UID & remember logged device/account immediately
+      try {
+        localStorage.setItem('auth_uid', cred.user.uid);
+        localStorage.setItem('auth_email', email);
+        if (shouldRemember) {
+          rememberLoggedDeviceAccount(cred.user, email);
+        }
+      } catch (_) { }
+
+      // Update online status in Firestore (with 2s race) and non-blocking RTDB
+      try {
+        const userRef = doc(db, 'users', cred.user.uid);
+        Promise.race([
+          setDoc(userRef, { online: true, lastLogin: new Date().toISOString() }, { merge: true }),
+          new Promise(res => setTimeout(res, 2000))
+        ]).catch(() => { });
+
+        // RTDB online update: NEVER AWAIT
+        set(ref(rtdb, 'users/' + cred.user.uid + '/online'), true).catch(() => { });
+      } catch (statusErr) {
+        console.warn('Status update notice:', statusErr);
+      }
+
+      setTimeout(async () => {
+        hideLoginLoader();
+        await clearCacheAndRedirectToChat('chat.html', true);
+      }, 300);
+    } catch (err) {
+      hideLoginLoader();
+      let errorMsg = err.message || 'Login failed. Please verify your credentials.';
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        errorMsg = 'Incorrect email or password. Please try again or reset your password.';
+      } else if (err.code === 'auth/too-many-requests') {
+        errorMsg = 'Too many failed login attempts. Please reset your password or try again later.';
+      }
+      showResult(`${errorMsg}`, true);
+    }
+  });
+}
+
 function attachRegisterHandler() {
   const registerForm = document.getElementById('registerForm');
   if (!registerForm) return;
@@ -587,6 +670,7 @@ function initializePasswordToggles() {
 }
 
 function initializeFormHandlers() {
+  attachLoginHandler();
   attachRegisterHandler();
   attachResetHandler();
   initializePasswordToggles();
@@ -597,8 +681,6 @@ if (document.readyState === 'loading') {
 } else {
   initializeFormHandlers();
 }
-
-const loginForm = document.getElementById('loginForm');
 
 let loaderWatchdog = null;
   
@@ -732,68 +814,6 @@ document.addEventListener('keydown', (e) => {
     hideLoginLoader();
   }
 });
-
-if (loginForm) {
-  loginForm.addEventListener('submit', async e => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail')?.value?.trim() || '';
-    const pass = document.getElementById('loginPassword')?.value || '';
-
-    const loginRateLimit = checkRateLimit(email, 'login', 5, 900000);
-    if (!loginRateLimit.allowed) {
-      showResult(`${loginRateLimit.message}`, true);
-      return;
-    }
-
-    showLoginLoader('Checking credentials...');
-
-    try {
-      const rememberEl = document.getElementById('rememberMe');
-      const shouldRemember = !rememberEl || rememberEl.checked !== false;
-      const targetPersistence = shouldRemember ? indexedDBLocalPersistence : browserSessionPersistence;
-      await setPersistence(auth, targetPersistence).catch(() => setPersistence(auth, browserLocalPersistence).catch(() => {}));
-      const cred = await signInWithEmailAndPassword(auth, email, pass);
-      showResult('Successfully signed in!');
-
-      // Cache session UID & remember logged device/account immediately
-      try {
-        localStorage.setItem('auth_uid', cred.user.uid);
-        localStorage.setItem('auth_email', email);
-        if (shouldRemember) {
-          rememberLoggedDeviceAccount(cred.user, email);
-        }
-      } catch (_) { }
-
-      // Update online status in Firestore (with 2s race) and non-blocking RTDB
-      try {
-        const userRef = doc(db, 'users', cred.user.uid);
-        Promise.race([
-          setDoc(userRef, { online: true, lastLogin: new Date().toISOString() }, { merge: true }),
-          new Promise(res => setTimeout(res, 2000))
-        ]).catch(() => { });
-
-        // RTDB online update: NEVER AWAIT
-        set(ref(rtdb, 'users/' + cred.user.uid + '/online'), true).catch(() => { });
-      } catch (statusErr) {
-        console.warn('Status update notice:', statusErr);
-      }
-
-      setTimeout(async () => {
-        hideLoginLoader();
-        await clearCacheAndRedirectToChat('chat.html', true);
-      }, 300);
-    } catch (err) {
-      hideLoginLoader();
-      let errorMsg = err.message || 'Login failed. Please verify your credentials.';
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        errorMsg = 'Incorrect email or password. Please try again or reset your password.';
-      } else if (err.code === 'auth/too-many-requests') {
-        errorMsg = 'Too many failed login attempts. Please reset your password or try again later.';
-      }
-      showResult(`${errorMsg}`, true);
-    }
-  });
-}
 
 async function clearCacheAndRedirectToChat(targetUrl = 'chat.html', forceOnce = false) {
   const hasPurgedThisSession = sessionStorage.getItem('nex_cache_purged_session') === 'true';

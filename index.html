@@ -145,7 +145,7 @@
     <script>
     // NEXCHAT INSTANT CACHE BUSTER & BUILD GUARD (STRICTLY ONCE PER LOGIN SESSION)
     (function() {
-      const BUILD_ID = 'v11_20261114_LIVE_FRESH';
+      const BUILD_ID = 'v12_20261114_FRESH_RELEASE';
       const hasPurgedThisSession = sessionStorage.getItem('nex_cache_purged_session') === 'true';
       const isFreshLogin = sessionStorage.getItem('nex_fresh_login_refresh') === 'true' || window.location.search.includes('fresh=');
 
@@ -316,12 +316,12 @@
       <p class="brand-subtitle">Secure neural messaging, calls & decentralized cloud vaults.</p>
     </div>
 
-    <form id="loginForm" aria-describedby="result" autocomplete="on">
+    <form id="loginForm" aria-describedby="result" autocomplete="on" onsubmit="return false;">
       <div class="input-group">
         <label for="loginEmail" class="sr-only">Email address</label>
         <div class="input-field-wrapper">
           <i class="fa-solid fa-envelope input-icon" aria-hidden="true"></i>
-          <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email" required>
+          <input type="text" id="loginEmail" placeholder="Email address" autocomplete="email" inputmode="email" required>
         </div>
       </div>
 

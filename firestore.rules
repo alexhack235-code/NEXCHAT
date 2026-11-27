@@ -315,7 +315,7 @@ service cloud.firestore {
              (!('isSuperAdmin' in data) || data.isSuperAdmin == false || isSuperAdmin()) &&
              (!('role' in data) || data.role in ['user', 'member', 'client', 'guest', 'creator'] || isSuperAdmin()) &&
              (!('banned' in data) || data.banned == false || isSuperAdmin()) &&
-             (!('tokens' in data) || (data.tokens is number && data.tokens >= 0 && data.tokens <= 2000) || isSuperAdmin()) &&
+             (!('tokens' in data) || (data.tokens is number && data.tokens >= 0 && data.tokens <= 2020) || isSuperAdmin()) &&
              isValidOptionalString('username', 0, 100) &&
              isValidOptionalString('displayName', 0, 100) &&
              isValidOptionalString('bio', 0, 1000) &&
@@ -342,7 +342,7 @@ service cloud.firestore {
              (!('isSuperAdmin' in data) || (('isSuperAdmin' in prev && data.isSuperAdmin == prev.isSuperAdmin) || (!('isSuperAdmin' in prev) && data.isSuperAdmin == false)) || isSuperAdmin()) &&
              (!('role' in data) || (('role' in prev && data.role == prev.role) || (!('role' in prev) && data.role in ['user', 'member', 'client', 'guest', 'creator'])) || isSuperAdmin()) &&
              (!('banned' in data) || (('banned' in prev && data.banned == prev.banned) || (!('banned' in prev) && data.banned == false)) || isSuperAdmin()) &&
-             (!('tokens' in data) || (data.tokens is number && data.tokens >= 0 && (('tokens' in prev && data.tokens <= prev.tokens) || (!('tokens' in prev) && data.tokens <= 2000))) || isSuperAdmin()) &&
+             (!('tokens' in data) || (data.tokens is number && data.tokens >= 0 && (('tokens' in prev && (data.tokens <= prev.tokens || (prev.tokens <= 100 && data.tokens <= 2020))) || (!('tokens' in prev) && data.tokens <= 2020))) || isSuperAdmin()) &&
              (!('uid' in data) || !('uid' in prev) || data.uid == prev.uid) &&
              isValidOptionalString('username', 0, 100) &&
              isValidOptionalString('displayName', 0, 100) &&

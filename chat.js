@@ -17436,7 +17436,7 @@ console.warn('[AUTH] No authenticated user detected, redirecting to login...');
 authRedirectInProgress = false;
 authRedirectTimer = null;
 window.location.href = 'index.html';
-        }, 1200);
+        }, 10000);
 } else {
         console.log(" Auth redirect already in progress or blocked — ignoring");
       }

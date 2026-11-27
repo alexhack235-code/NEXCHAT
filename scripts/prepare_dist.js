@@ -65,6 +65,11 @@ const rootFiles = fs.readdirSync('.').filter(file => {
 const forceOverwriteRootFiles = ['province-', 'unity_game', 'game_module', 'dom.html', 'game.html', 'admin-dashboard.html'];
 for (const file of rootFiles) {
   const destPath = path.join(distDir, file);
+  // Never overwrite any JS file that Vite already built into dist
+  if (file.endsWith('.js') && fs.existsSync(destPath)) {
+    console.log(`[prepare_dist.js] Preserving Vite-compiled JS bundle: ${file}`);
+    continue;
+  }
   const shouldOverwrite = forceOverwriteRootFiles.some(prefix => file.includes(prefix));
   if (shouldOverwrite || !fs.existsSync(destPath)) {
     fs.copyFileSync(path.resolve(file), destPath);
