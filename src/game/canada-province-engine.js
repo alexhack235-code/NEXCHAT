@@ -351,6 +351,13 @@
         playNoise(0.28, 340, 'lowpass', 0.22);
         playTone(110, 32, 0.26, 'sawtooth', 0.16, 0);
       },
+      playCrash: function (intensity) {
+        if (!getEnabled()) return;
+        const scale = Math.min(1.5, Math.max(0.4, intensity || 1.0));
+        playNoise(0.24 * scale, 340, 'lowpass', Math.min(0.35, 0.22 * scale));
+        playNoise(0.16 * scale, 1600, 'bandpass', Math.min(0.25, 0.16 * scale));
+        playTone(135, 36, 0.22 * scale, 'sawtooth', Math.min(0.26, 0.18 * scale), 0);
+      },
       playAlert: function () {
         if (!getEnabled()) return;
         playTone(540, 720, 0.1, 'triangle', 0.07, 0);
@@ -1150,6 +1157,143 @@
   }
 
   // ============================================================================
+  // SOLID WORLD COLLIDERS (60-FPS Wall/Building/Mountain/Pier collision)
+  // ============================================================================
+  function buildStaticColliders(world, province) {
+    const list = [];
+    const seen = new Set();
+
+    function add(col) {
+      if (!col) return;
+      const type = col.type || 'box';
+      const x = Math.round((col.x || 0) * 10) / 10;
+      const z = Math.round((col.z || 0) * 10) / 10;
+      const key = type + ':' + x + ':' + z;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      const entry = {
+        type: type,
+        x: col.x || 0,
+        z: col.z || 0,
+        hw: col.hw || 1,
+        hd: col.hd || 1,
+        r: col.r || 1,
+        maxExtent: 1
+      };
+      if (entry.type === 'box') {
+        entry.maxExtent = Math.hypot(entry.hw, entry.hd);
+      } else {
+        entry.maxExtent = entry.r;
+      }
+      list.push(entry);
+    }
+
+    // 1. Read world.colliders if available from CanadaLandmarks
+    if (world && Array.isArray(world.colliders) && world.colliders.length > 0) {
+      for (let i = 0; i < world.colliders.length; i += 1) {
+        add(world.colliders[i]);
+      }
+    }
+
+    // 2. Safe Fallback Colliders: functional buildings, city block, storefronts, gantries, landmarks, mountains
+    // Functional Buildings (Explorer Safe House, Syndicate Ops, Customs Garage)
+    const fbs = (world && Array.isArray(world.functionalBuildings) && world.functionalBuildings.length > 0)
+      ? world.functionalBuildings
+      : [
+          { x: -11.6, z: 24 },
+          { x:  11.6, z: 6 },
+          { x: -11.6, z: 2 }
+        ];
+    for (let i = 0; i < fbs.length; i += 1) {
+      const fb = fbs[i];
+      const bx = fb.x < 0 ? -11.6 : 11.6;
+      add({ type: 'box', x: bx, z: fb.z, hw: 2.8, hd: 4.2 });
+    }
+
+    // City block skyscrapers (stepped back at |x| = 28)
+    const skyscrapers = [
+      { x: -28, z: -14 }, { x: -28, z: 8 }, { x: -28, z: 28 },
+      { x:  28, z: -18 }, { x:  28, z: 4 }, { x:  28, z: 26 }
+    ];
+    for (let i = 0; i < skyscrapers.length; i += 1) {
+      add({ type: 'box', x: skyscrapers[i].x, z: skyscrapers[i].z, hw: 6.0, hd: 7.0 });
+    }
+
+    // Commercial mid-rise strip (at |x| = 19)
+    const comms = [
+      { x: -19, z: -10 }, { x: -19, z: 12 }, { x: -19, z: 34 },
+      { x:  19, z: -14 }, { x:  19, z: 6 },  { x:  19, z: 28 }
+    ];
+    for (let i = 0; i < comms.length; i += 1) {
+      add({ type: 'box', x: comms[i].x, z: comms[i].z, hw: 4.5, hd: 5.5 });
+    }
+
+    // Storefronts (stepped back at |x| = 18)
+    const stores = [
+      { x: -18, z: -12 }, { x:  18, z: -8 },
+      { x: -18, z:   5 }, { x:  18, z: 10 },
+      { x: -18, z:  20 }, { x:  18, z: 30 },
+      { x: -18, z:  38 }, { x:  18, z: 44 }
+    ];
+    for (let i = 0; i < stores.length; i += 1) {
+      add({ type: 'box', x: stores[i].x, z: stores[i].z, hw: 3.5, hd: 3.2 });
+    }
+
+    // Heritage Civic Hall
+    add({ type: 'box', x: -40, z: 30, hw: 10.5, hd: 6.5 });
+
+    // Overhead Trans-Canada Highway Gantries support columns at x = ±9.8
+    const gantryZs = [-380, -180, 160, 380];
+    for (let i = 0; i < gantryZs.length; i += 1) {
+      const gz = gantryZs[i];
+      add({ type: 'box', x: -9.8, z: gz, hw: 0.55, hd: 0.55 });
+      add({ type: 'box', x:  9.8, z: gz, hw: 0.55, hd: 0.55 });
+    }
+
+    // Roadside Cabins & Service Stations
+    const cabinZs = [-320, -220, -110, 80, 200, 310, 420];
+    for (let i = 0; i < cabinZs.length; i += 1) {
+      const cz = cabinZs[i];
+      const side = (i % 2 === 0) ? -1 : 1;
+      add({ type: 'box', x: side * 30, z: cz, hw: 4.8, hd: 4.5 });
+    }
+    add({ type: 'box', x: -35, z: -252, hw: 4.5, hd: 5.5 });
+    add({ type: 'box', x:  35, z:  248, hw: 4.5, hd: 5.5 });
+
+    // Landmark structures from province.landmarks
+    if (province && province.landmarks) {
+      for (let i = 0; i < province.landmarks.length; i += 1) {
+        const lm = province.landmarks[i];
+        if (lm && lm.coords) {
+          const lx = lm.coords[0];
+          const lz = lm.coords[2];
+          if (Math.abs(lx) >= 8.5) {
+            add({ type: 'circle', x: lx, z: lz, r: 10.5 });
+          } else {
+            // Landmark structure model is placed off the highway
+            add({ type: 'circle', x: -42, z: lz, r: 12.0 });
+          }
+        }
+      }
+    }
+
+    // Distant Mountain Ridges framing both sides across the 1000m corridor
+    for (let rz = -480; rz <= 480; rz += 35) {
+      add({ type: 'circle', x: -135, z: rz, r: 28 });
+      add({ type: 'circle', x:  135, z: rz, r: 28 });
+    }
+
+    // Corridor Perimeter Rock Walls
+    add({ type: 'box', x: -228, z:    0, hw: 3.0, hd: 480 });
+    add({ type: 'box', x:  228, z:    0, hw: 3.0, hd: 480 });
+    add({ type: 'box', x:    0, z: -472, hw: 230, hd: 3.0 });
+    add({ type: 'box', x:    0, z:  472, hw: 230, hd: 3.0 });
+
+    return list;
+  }
+
+  // ============================================================================
   // MAIN BOOT
   // ============================================================================
   function boot(provinceId) {
@@ -1182,6 +1326,12 @@
     let world = null;
     let pools = null;
     let trafficPool = null;
+    let staticColliders = [];
+    let crashTiltTimer = 0;
+    let crashPitch = 0;
+    let crashRoll = 0;
+    let cameraShake = 0;
+    let crashDamageCooldown = 0;
 
     let qualityKey = 'balanced';
     let lightingIdx = (province.id === 'northwest-territories' || province.id === 'nunavut') ? 2 : 0;
@@ -2095,6 +2245,7 @@
 
       pools = createCombatPools(THREE, scene);
       trafficPool = createTrafficPool(THREE, scene);
+      staticColliders = buildStaticColliders(world, province);
     } catch (err) {
       container.innerHTML =
         '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#e2e8f0;font-family:sans-serif;padding:24px;text-align:center;">' +
@@ -2304,6 +2455,20 @@
         }
       }
 
+      // Crash tilt animation decay
+      let crashTiltPitch = 0;
+      let crashTiltRoll = 0;
+      if (crashTiltTimer > 0) {
+        crashTiltTimer = Math.max(0, crashTiltTimer - dt);
+        const progress = crashTiltTimer / 0.38;
+        const osc = Math.sin((1 - progress) * Math.PI * 4.5) * progress;
+        crashTiltPitch = crashPitch * osc;
+        crashTiltRoll = crashRoll * osc;
+      }
+      if (crashDamageCooldown > 0) {
+        crashDamageCooldown = Math.max(0, crashDamageCooldown - dt);
+      }
+
       // Movement
       const forward = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - touchInput.y;
       const turn = (keys.KeyA || keys.ArrowLeft ? 1 : 0) - (keys.KeyD || keys.ArrowRight ? 1 : 0) - touchInput.x;
@@ -2333,11 +2498,218 @@
         if (player.y === 0) player.vy = 0;
       }
 
-      player.x -= Math.sin(player.yaw) * player.speed * dt;
-      player.z -= Math.cos(player.yaw) * player.speed * dt;
-      // 1000m corridor: x ∈ [-230, 230], z ∈ [-475, 475]
-      player.x = Math.max(-230, Math.min(230, player.x));
-      player.z = Math.max(-475, Math.min(475, player.z));
+      const moveVx = -Math.sin(player.yaw) * player.speed;
+      const moveVz = -Math.cos(player.yaw) * player.speed;
+      const initialSpeed = player.speed;
+      const absSpeed = Math.abs(initialSpeed);
+
+      player.x += moveVx * dt;
+      player.z += moveVz * dt;
+      // 1000m corridor boundaries: x ∈ [-228, 228], z ∈ [-472, 472]
+      player.x = Math.max(-228, Math.min(228, player.x));
+      player.z = Math.max(-472, Math.min(472, player.z));
+
+      // Solid Collision Resolution (ZERO per-frame allocations)
+      const entityRadius = inCruiser ? 1.8 : 0.6;
+      let collidedThisFrame = false;
+      let maxImpactSpeed = 0;
+      let bestHitNx = 0;
+      let bestHitNz = 0;
+      let impactContactX = player.x;
+      let impactContactZ = player.z;
+      let isTrafficHit = false;
+
+      for (let iter = 0; iter < 2; iter += 1) {
+        // 1. Static World Colliders (Walls, Buildings, Piers, Rocks, Mountains, Landmarks)
+        for (let i = 0; i < staticColliders.length; i += 1) {
+          const col = staticColliders[i];
+          const distBound = col.maxExtent + entityRadius;
+          if (Math.abs(player.x - col.x) > distBound || Math.abs(player.z - col.z) > distBound) {
+            continue;
+          }
+
+          if (col.type === 'box') {
+            const cx = Math.max(col.x - col.hw, Math.min(col.x + col.hw, player.x));
+            const cz = Math.max(col.z - col.hd, Math.min(col.z + col.hd, player.z));
+            const dx = player.x - cx;
+            const dz = player.z - cz;
+            const dSq = dx * dx + dz * dz;
+
+            if (dSq < entityRadius * entityRadius) {
+              let nx = 0, nz = 0, pen = 0;
+              if (dSq > 0.00001) {
+                const dist = Math.sqrt(dSq);
+                nx = dx / dist;
+                nz = dz / dist;
+                pen = entityRadius - dist;
+              } else {
+                const left = player.x - (col.x - col.hw);
+                const right = (col.x + col.hw) - player.x;
+                const top = player.z - (col.z - col.hd);
+                const bottom = (col.z + col.hd) - player.z;
+                const minD = Math.min(left, right, top, bottom);
+                if (minD === left) { nx = -1; nz = 0; pen = left + entityRadius; }
+                else if (minD === right) { nx = 1; nz = 0; pen = right + entityRadius; }
+                else if (minD === top) { nx = 0; nz = -1; pen = top + entityRadius; }
+                else { nx = 0; nz = 1; pen = bottom + entityRadius; }
+              }
+
+              player.x += nx * pen;
+              player.z += nz * pen;
+
+              if (iter === 0) {
+                const normalVel = -(moveVx * nx + moveVz * nz);
+                const impactVel = Math.max(normalVel, absSpeed * 0.7);
+                if (impactVel > maxImpactSpeed) {
+                  maxImpactSpeed = impactVel;
+                  bestHitNx = nx;
+                  bestHitNz = nz;
+                  impactContactX = cx;
+                  impactContactZ = cz;
+                  collidedThisFrame = true;
+                }
+              }
+            }
+          } else if (col.type === 'circle') {
+            const dx = player.x - col.x;
+            const dz = player.z - col.z;
+            const minDist = entityRadius + col.r;
+            const dSq = dx * dx + dz * dz;
+
+            if (dSq < minDist * minDist) {
+              let nx = 1, nz = 0, pen = minDist;
+              if (dSq > 0.00001) {
+                const dist = Math.sqrt(dSq);
+                nx = dx / dist;
+                nz = dz / dist;
+                pen = minDist - dist;
+              }
+              player.x += nx * pen;
+              player.z += nz * pen;
+
+              if (iter === 0) {
+                const normalVel = -(moveVx * nx + moveVz * nz);
+                const impactVel = Math.max(normalVel, absSpeed * 0.7);
+                if (impactVel > maxImpactSpeed) {
+                  maxImpactSpeed = impactVel;
+                  bestHitNx = nx;
+                  bestHitNz = nz;
+                  impactContactX = col.x + nx * col.r;
+                  impactContactZ = col.z + nz * col.r;
+                  collidedThisFrame = true;
+                }
+              }
+            }
+          }
+        }
+
+        // 2. Active AI Highway Traffic Vehicles
+        if (trafficPool) {
+          for (let ti = 0; ti < trafficPool.length; ti += 1) {
+            const tr = trafficPool[ti];
+            const tx = tr.group ? tr.group.position.x : tr.x;
+            const tz = tr.group ? tr.group.position.z : tr.z;
+            const thw = tr.typeName === 'truck' ? 1.25 : (tr.typeName === 'suv' ? 1.1 : 0.95);
+            const thd = tr.typeName === 'truck' ? 3.3 : (tr.typeName === 'suv' ? 2.4 : 2.1);
+
+            const distBound = 4.2 + entityRadius;
+            if (Math.abs(player.x - tx) > distBound || Math.abs(player.z - tz) > distBound) {
+              continue;
+            }
+
+            const cx = Math.max(tx - thw, Math.min(tx + thw, player.x));
+            const cz = Math.max(tz - thd, Math.min(tz + thd, player.z));
+            const dx = player.x - cx;
+            const dz = player.z - cz;
+            const dSq = dx * dx + dz * dz;
+
+            if (dSq < entityRadius * entityRadius) {
+              let nx = 0, nz = 0, pen = 0;
+              if (dSq > 0.00001) {
+                const dist = Math.sqrt(dSq);
+                nx = dx / dist;
+                nz = dz / dist;
+                pen = entityRadius - dist;
+              } else {
+                nx = dx >= 0 ? 1 : -1;
+                nz = 0;
+                pen = entityRadius;
+              }
+
+              player.x += nx * pen;
+              player.z += nz * pen;
+
+              if (iter === 0) {
+                const trVz = tr.lane > 0 ? -tr.speed : tr.speed;
+                const relVx = moveVx;
+                const relVz = moveVz - trVz;
+                const normalVel = -(relVx * nx + relVz * nz);
+                const impactVel = Math.max(normalVel, Math.abs(relVz) * 0.75, absSpeed * 0.7);
+
+                if (impactVel > maxImpactSpeed) {
+                  maxImpactSpeed = impactVel;
+                  bestHitNx = nx;
+                  bestHitNz = nz;
+                  impactContactX = cx;
+                  impactContactZ = cz;
+                  collidedThisFrame = true;
+                  isTrafficHit = true;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Visceral Crash Response, Sparks, Camera Shake & Audio
+      if (collidedThisFrame) {
+        const crashThreshold = inCruiser ? 3.2 : 2.0;
+        if (maxImpactSpeed > crashThreshold) {
+          // 1. Velocity bounce and dampening along impact normal
+          if (maxImpactSpeed > (inCruiser ? 4.8 : 3.0)) {
+            player.speed = -initialSpeed * (inCruiser ? 0.30 : 0.18);
+          } else {
+            player.speed *= 0.65;
+          }
+
+          // 2. Visceral crash animation jolt (cruiser/character pitch & roll)
+          crashTiltTimer = 0.38;
+          const fwdDot = -Math.sin(player.yaw) * bestHitNx - Math.cos(player.yaw) * bestHitNz;
+          crashPitch = (fwdDot > 0 ? -0.24 : 0.18) * Math.min(1.6, maxImpactSpeed / 12);
+          const rightX = -Math.cos(player.yaw);
+          const rightZ = Math.sin(player.yaw);
+          const rightDot = rightX * bestHitNx + rightZ * bestHitNz;
+          crashRoll = rightDot * 0.28 * Math.min(1.6, maxImpactSpeed / 12);
+
+          // 3. Camera shake impulse
+          const shakeImpulse = Math.min(1.5, (maxImpactSpeed / 22) * (inCruiser ? 1.0 : 0.6));
+          cameraShake = Math.max(cameraShake, shakeImpulse);
+
+          // 4. Burst of pooled impact sparks at contact point (zero per-frame allocations)
+          if (pools) {
+            const sparkCount = inCruiser ? (maxImpactSpeed > 18 ? 8 : (maxImpactSpeed > 8 ? 5 : 3)) : 2;
+            const sparkY = inCruiser ? 0.65 : 0.95;
+            spawnSparkBurst(impactContactX, sparkY, impactContactZ, sparkCount, pools.mats.sparkGoldMat);
+            if (isTrafficHit || maxImpactSpeed > 16) {
+              spawnSparkBurst(impactContactX, sparkY, impactContactZ, 2, pools.mats.sparkRedMat);
+            }
+          }
+
+          // 5. Synthesized Web Audio metallic/thud crash SFX
+          if (sfx && typeof sfx.playCrash === 'function') {
+            sfx.playCrash(maxImpactSpeed / 20);
+          }
+
+          // 6. Speed-proportional minor HP/Armor impact damage on heavy high-speed crashes
+          if (maxImpactSpeed >= (inCruiser ? 18.0 : 12.0) && crashDamageCooldown <= 0) {
+            crashDamageCooldown = 0.85;
+            const baseDmg = inCruiser ? (maxImpactSpeed - 14) * 0.45 : (maxImpactSpeed - 9) * 0.35;
+            const dmg = Math.min(25, Math.max(3, Math.round(baseDmg)));
+            damagePlayer(dmg);
+            showNotify('CRASH IMPACT! -' + dmg + (player.armor > 0 ? ' AP' : ' HP'));
+          }
+        }
+      }
 
       const isMoving = Math.abs(player.speed) > 0.2;
       const isGrounded = player.y <= 0.01;
@@ -2346,6 +2718,10 @@
       if (operativeMesh) {
         operativeMesh.position.set(player.x, inCruiser ? -0.05 : player.y, player.z);
         operativeMesh.rotation.y = operativeRig ? (player.yaw + Math.PI) : player.yaw;
+        if (!inCruiser) {
+          operativeMesh.rotation.x = crashTiltPitch * 0.45;
+          operativeMesh.rotation.z = crashTiltRoll * 0.45;
+        }
       }
       if (operativeRig && rigLib && typeof rigLib.animateHumanoid === 'function') {
         rigLib.animateHumanoid(operativeRig, {
@@ -2362,6 +2738,8 @@
       if (cruiserMesh) {
         cruiserMesh.position.set(player.x, 0, player.z);
         cruiserMesh.rotation.y = cruiserRig ? (player.yaw + Math.PI) : player.yaw;
+        cruiserMesh.rotation.x = crashTiltPitch;
+        cruiserMesh.rotation.z = crashTiltRoll;
         if (inCruiser && cruiserRig && cruiserRig.wheels && cruiserRig.wheels.length) {
           const wheelSpin = (player.speed * dt) / 0.38;
           for (let w = 0; w < cruiserRig.wheels.length; w += 1) {
@@ -2472,6 +2850,18 @@
       );
       camera.position.lerp(camDesired, 1 - Math.pow(0.008, dt));
       camTarget.set(player.x, player.y + 1.6, player.z);
+
+      if (cameraShake > 0.001) {
+        const shakeMag = cameraShake * 0.45;
+        camera.position.x += (Math.random() - 0.5) * shakeMag;
+        camera.position.y += (Math.random() - 0.5) * shakeMag;
+        camera.position.z += (Math.random() - 0.5) * shakeMag;
+        camTarget.x += (Math.random() - 0.5) * shakeMag * 0.4;
+        camTarget.y += (Math.random() - 0.5) * shakeMag * 0.4;
+        camTarget.z += (Math.random() - 0.5) * shakeMag * 0.4;
+        cameraShake = Math.max(0, cameraShake - dt * 2.8);
+      }
+
       camera.lookAt(camTarget);
 
       if (world && world.update) {

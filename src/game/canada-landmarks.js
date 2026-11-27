@@ -40,6 +40,22 @@
     return 1.0;
   }
 
+  function addCollider(state, col) {
+    if (!state || !state.colliders || !col) return;
+    if (col.type === 'box') {
+      const hw = col.hw || 1;
+      if (Math.abs(col.x) - hw < 9.2) {
+        col.x = col.x < 0 ? -(9.2 + hw) : (9.2 + hw);
+      }
+    } else if (col.type === 'circle') {
+      const r = col.r || 1;
+      if (Math.abs(col.x) - r < 9.2) {
+        col.x = col.x < 0 ? -(9.2 + r) : (9.2 + r);
+      }
+    }
+    state.colliders.push(col);
+  }
+
   function getCachedTexture(THREE, key, size, drawFn, opts) {
     if (TEX_CACHE[key]) return TEX_CACHE[key];
     const o = opts || {};
@@ -662,7 +678,7 @@
 
   // ─── Ground & 1000m Highway Corridor ─────────────────────────────────────
 
-  function buildGroundAndHighway(THREE, scene, province, scale) {
+  function buildGroundAndHighway(THREE, scene, province, scale, state) {
     const c = province.climate;
     const biome = province.biome;
     const isNunavut = province.id === 'nunavut';
@@ -770,11 +786,12 @@
     scene.add(posts);
 
     // Instanced streetlights across z ∈ [-480, +480] (every ~24m alternating sides = 40 lamps)
+    // Mounted outside the roadway corridor at x = ±10.5m with high mast clearance (y = 8.5m)
     const lampCount = Math.max(20, Math.round(40 * scale));
-    const poleGeo = new THREE.CylinderGeometry(0.09, 0.14, 6.2, 6);
-    poleGeo.translate(0, 3.1, 0);
-    const armGeo = new THREE.BoxGeometry(1.6, 0.1, 0.12);
-    const headGeo = new THREE.BoxGeometry(0.65, 0.14, 0.32);
+    const poleGeo = new THREE.CylinderGeometry(0.10, 0.16, 9.0, 6);
+    poleGeo.translate(0, 4.5, 0);
+    const armGeo = new THREE.BoxGeometry(2.0, 0.1, 0.12);
+    const headGeo = new THREE.BoxGeometry(0.7, 0.14, 0.35);
     const poleMat = mat(THREE, 0x475569, { roughness: 0.4, metalness: 0.7 });
     const streetlightMat = new THREE.MeshStandardMaterial({ color: 0xfef3c7, emissive: 0xffcf70, emissiveIntensity: 0.05, roughness: 0.2 });
     const poles = new THREE.InstancedMesh(poleGeo, poleMat, lampCount);
@@ -782,11 +799,11 @@
     const heads = new THREE.InstancedMesh(headGeo, streetlightMat, lampCount);
     for (let i = 0; i < lampCount; i += 1) {
       const side = i % 2 === 0 ? -1 : 1;
-      const x = side * 6.75;
+      const x = side * 10.5;
       const z = -480 + (i / Math.max(1, lampCount - 1)) * 960;
       dummy.position.set(x, 0, z); dummy.rotation.set(0, 0, 0); dummy.scale.set(1, 1, 1); dummy.updateMatrix(); poles.setMatrixAt(i, dummy.matrix);
-      dummy.position.set(x - side * 0.72, 6.1, z); dummy.updateMatrix(); arms.setMatrixAt(i, dummy.matrix);
-      dummy.position.set(x - side * 1.35, 6.0, z); dummy.updateMatrix(); heads.setMatrixAt(i, dummy.matrix);
+      dummy.position.set(x - side * 0.9, 8.6, z); dummy.updateMatrix(); arms.setMatrixAt(i, dummy.matrix);
+      dummy.position.set(x - side * 1.8, 8.5, z); dummy.updateMatrix(); heads.setMatrixAt(i, dummy.matrix);
     }
     poles.instanceMatrix.needsUpdate = true; arms.instanceMatrix.needsUpdate = true; heads.instanceMatrix.needsUpdate = true;
     scene.add(poles); scene.add(arms); scene.add(heads);
@@ -801,7 +818,7 @@
     swR.position.set(8.2, 0.06, 0); swR.receiveShadow = true; scene.add(swR);
 
     // ── Overhead Trans-Canada Highway Gantries across the road ──
-    buildOverheadGantries(THREE, scene, province);
+    buildOverheadGantries(THREE, scene, province, state);
 
     // ── Roadside Canadian Highway Signs along the drive ──
     buildHighwaySigns(THREE, scene, province);
@@ -913,7 +930,7 @@
     ]
   };
 
-  function buildOverheadGantries(THREE, scene, province) {
+  function buildOverheadGantries(THREE, scene, province, state) {
     const list = PROVINCE_GANTRY_DATA[province.id] || PROVINCE_GANTRY_DATA['ontario'];
     const steelMat = mat(THREE, 0x64748b, { roughness: 0.38, metalness: 0.75 });
     const concMat = mat(THREE, 0x94a3b8, { roughness: 0.85, metalness: 0.1 });
@@ -923,60 +940,72 @@
       const gGroup = new THREE.Group();
       gGroup.position.set(0, 0, g.z);
 
-      // Dual support columns flanking the highway (at x = -7.8 and +7.8, road is 11.2m wide)
+      // Support columns flanking the highway: support piers/pillars strictly outside |x| >= 9.2
+      // colX = 9.8, footing width 0.9 -> inner edge: 9.8 - 0.45 = 9.35 >= 9.2
+      const colX = 9.8;
+
       // Concrete footings
-      addBox(THREE, gGroup, 0.9, 0.7, 0.9, 0x94a3b8, -7.8, 0.35, 0, { roughness: 0.85 });
-      addBox(THREE, gGroup, 0.9, 0.7, 0.9, 0x94a3b8,  7.8, 0.35, 0, { roughness: 0.85 });
+      addBox(THREE, gGroup, 0.9, 0.7, 0.9, 0x94a3b8, -colX, 0.35, 0, { roughness: 0.85 });
+      addBox(THREE, gGroup, 0.9, 0.7, 0.9, 0x94a3b8,  colX, 0.35, 0, { roughness: 0.85 });
 
-      // Steel vertical tubular columns
-      addCyl(THREE, gGroup, 0.22, 0.26, 6.6, 8, 0x64748b, -7.8, 3.8, 0, { metalness: 0.75, roughness: 0.4 });
-      addCyl(THREE, gGroup, 0.22, 0.26, 6.6, 8, 0x64748b,  7.8, 3.8, 0, { metalness: 0.75, roughness: 0.4 });
+      // Steel vertical tubular columns (reaching y = 10.5m)
+      addCyl(THREE, gGroup, 0.24, 0.28, 10.2, 8, 0x64748b, -colX, 5.45, 0, { metalness: 0.75, roughness: 0.4 });
+      addCyl(THREE, gGroup, 0.24, 0.28, 10.2, 8, 0x64748b,  colX, 5.45, 0, { metalness: 0.75, roughness: 0.4 });
 
-      // Diagonal side braces
-      addBox(THREE, gGroup, 1.4, 0.12, 0.12, 0x64748b, -8.3, 1.5, 0, { rz: 0.6, metalness: 0.7 });
-      addBox(THREE, gGroup, 1.4, 0.12, 0.12, 0x64748b,  8.3, 1.5, 0, { rz: -0.6, metalness: 0.7 });
+      // Diagonal side braces on outer sides
+      addBox(THREE, gGroup, 1.8, 0.14, 0.14, 0x64748b, -(colX + 0.6), 2.0, 0, { rz: 0.6, metalness: 0.7 });
+      addBox(THREE, gGroup, 1.8, 0.14, 0.14, 0x64748b,  (colX + 0.6), 2.0, 0, { rz: -0.6, metalness: 0.7 });
 
-      // Horizontal steel truss bridge beams spanning 16.2m across the highway
-      addBox(THREE, gGroup, 16.2, 0.22, 0.22, 0x64748b, 0, 5.4, 0, { metalness: 0.75, roughness: 0.4 });
-      addBox(THREE, gGroup, 16.2, 0.22, 0.22, 0x64748b, 0, 6.8, 0, { metalness: 0.75, roughness: 0.4 });
+      // Truss bridge span across 20.4m (underside clearance y >= 7.5m: lower beam at y = 7.72m, underside 7.60m)
+      addBox(THREE, gGroup, 20.4, 0.24, 0.24, 0x64748b, 0, 7.72, 0, { metalness: 0.75, roughness: 0.4 });
+      addBox(THREE, gGroup, 20.4, 0.24, 0.24, 0x64748b, 0, 10.32, 0, { metalness: 0.75, roughness: 0.4 });
 
       // Diagonal truss lattice struts
-      for (let tx = -7.0; tx <= 7.0; tx += 2.0) {
-        addBox(THREE, gGroup, 2.2, 0.10, 0.10, 0x64748b, tx, 6.1, 0, { rz: 0.65, metalness: 0.75 });
+      for (let tx = -8.0; tx <= 8.0; tx += 2.0) {
+        addBox(THREE, gGroup, 3.2, 0.10, 0.10, 0x64748b, tx, 9.02, 0, { rz: 0.65, metalness: 0.75 });
       }
 
-      // Catwalk maintenance platform along the truss
-      addBox(THREE, gGroup, 15.6, 0.08, 0.7, 0x475569, 0, 5.25, 0, { metalness: 0.65, roughness: 0.5 });
-      addBox(THREE, gGroup, 15.6, 0.75, 0.04, 0x64748b, 0, 5.65, 0.35, { metalness: 0.7 });
+      // Catwalk maintenance platform along the truss (y = 7.62m, deck thickness 0.08 -> underside 7.58m >= 7.5m)
+      addBox(THREE, gGroup, 19.8, 0.08, 0.7, 0x475569, 0, 7.62, 0, { metalness: 0.65, roughness: 0.5 });
+      addBox(THREE, gGroup, 19.8, 0.75, 0.04, 0x64748b, 0, 8.02, 0.35, { metalness: 0.7 });
 
-      // Overhead green highway signboards
+      // Overhead green highway signboards (height 2.4m, centered at y = 9.02m -> underside 7.82m >= 7.5m)
       const signTex = getOverheadGantrySignTexture(THREE, g.dest, g.sub, g.route, g.exit);
       const signMat = new THREE.MeshStandardMaterial({
         map: signTex, emissiveMap: signTex, emissive: 0xffffff,
-        emissiveIntensity: 0.18, roughness: 0.45, metalness: 0.2
+        emissiveIntensity: 0.22, roughness: 0.45, metalness: 0.2,
+        side: THREE.DoubleSide
       });
 
-      // North-facing sign (faces traffic driving from -z towards +z)
-      const signMeshN = new THREE.Mesh(new THREE.PlaneGeometry(8.6, 2.6), signMat);
-      signMeshN.position.set(0, 6.1, -0.22);
+      // -Z facing sign (faces traffic driving from -z towards +z)
+      const signMeshN = new THREE.Mesh(new THREE.PlaneGeometry(8.6, 2.4), signMat);
+      signMeshN.position.set(0, 9.02, -0.22);
+      signMeshN.rotation.y = Math.PI; // Face points toward -Z
       gGroup.add(signMeshN);
 
-      // South-facing sign (faces traffic driving from +z towards -z)
-      const signMeshS = new THREE.Mesh(new THREE.PlaneGeometry(8.6, 2.6), signMat);
-      signMeshS.position.set(0, 6.1, 0.22);
-      signMeshS.rotation.y = Math.PI;
+      // +Z facing sign (faces traffic driving from +z towards -z)
+      const signMeshS = new THREE.Mesh(new THREE.PlaneGeometry(8.6, 2.4), signMat);
+      signMeshS.position.set(0, 9.02, 0.22);
+      signMeshS.rotation.y = 0; // Face points toward +Z
       gGroup.add(signMeshS);
 
       // Sign backing enclosure
-      addBox(THREE, gGroup, 8.7, 2.7, 0.38, 0x334155, 0, 6.1, 0, { roughness: 0.6, metalness: 0.4 });
+      addBox(THREE, gGroup, 8.7, 2.5, 0.38, 0x334155, 0, 9.02, 0, { roughness: 0.6, metalness: 0.4 });
 
-      // Overhead luminaire lamps lighting the sign face
+      // Overhead luminaire lamps lighting both sign faces
       for (let lx = -3.2; lx <= 3.2; lx += 2.1) {
-        addBox(THREE, gGroup, 0.10, 0.10, 0.85, 0x475569, lx, 7.15, -0.45, { metalness: 0.6 });
-        addBox(THREE, gGroup, 0.45, 0.14, 0.24, 0xfef08a, lx, 7.1, -0.85, { emissive: 0xfef08a, emissiveIntensity: 0.6 });
+        addBox(THREE, gGroup, 0.10, 0.10, 0.85, 0x475569, lx, 10.45, -0.45, { metalness: 0.6 });
+        addBox(THREE, gGroup, 0.45, 0.14, 0.24, 0xfef08a, lx, 10.4, -0.85, { emissive: 0xfef08a, emissiveIntensity: 0.6 });
+        addBox(THREE, gGroup, 0.10, 0.10, 0.85, 0x475569, lx, 10.45, 0.45, { metalness: 0.6 });
+        addBox(THREE, gGroup, 0.45, 0.14, 0.24, 0xfef08a, lx, 10.4, 0.85, { emissive: 0xfef08a, emissiveIntensity: 0.6 });
       }
 
       scene.add(gGroup);
+
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: -colX, z: g.z, hw: 0.45, hd: 0.45 });
+        addCollider(state, { type: 'box', x:  colX, z: g.z, hw: 0.45, hd: 0.45 });
+      }
     }
   }
 
@@ -997,7 +1026,7 @@
 
     for (let i = 0; i < signs.length; i += 1) {
       const s = signs[i];
-      const sx = s.side * 14.5;
+      const sx = s.side * 15.5;
 
       const post = new THREE.Mesh(
         new THREE.CylinderGeometry(0.1, 0.12, 5.5, 6),
@@ -1062,7 +1091,7 @@
       const dummy = new THREE.Object3D(), tmp = new THREE.Color();
       for (let i = 0; i < count; i += 1) {
         const side = rng() > 0.5 ? 1 : -1;
-        const x = side * (12 + rng() * 200), z = -485 + rng() * 970;
+        const x = side * (14.5 + rng() * 200), z = -485 + rng() * 970;
         if (Math.abs(x) < 17 && z > -6 && z < 36) continue;
         dummy.position.set(x, 0, z);
         dummy.rotation.set((rng() - 0.5) * 0.14, rng() * Math.PI * 2, (rng() - 0.5) * 0.14);
@@ -1117,7 +1146,7 @@
     while (placed < treeCount && attempts < treeCount * 6) {
       attempts += 1;
       const side = rng() > 0.5 ? 1 : -1;
-      const x = side * (15 + rng() * 200);
+      const x = side * (16 + rng() * 200);
       const z = -485 + rng() * 970;
       if (Math.abs(x) < 18 && Math.abs(z + 52) < 22) continue;
       if (Math.abs(x) < 17 && z > -6 && z < 36) continue;
@@ -1159,7 +1188,7 @@
 
   // ─── Mountains & Horizon Ridges ───────────────────────────────────────────
 
-  function buildInstancedMountains(THREE, scene, count, xRange, zBase, maxHeight, snowCap, rng) {
+  function buildInstancedMountains(THREE, scene, count, xRange, zBase, maxHeight, snowCap, rng, state) {
     const mGeo = new THREE.ConeGeometry(18, 1, 7);
     mGeo.translate(0, 0.5, 0);
     const stoneTex = getStoneTexture(THREE);
@@ -1167,14 +1196,24 @@
     const snow = snowCap ? new THREE.InstancedMesh(mGeo, mat(THREE, 0xeef5fc, { roughness: 0.55 }), count) : null;
     const dummy = new THREE.Object3D();
     for (let i = 0; i < count; i += 1) {
-      const x = -xRange + (i / Math.max(1, count - 1)) * xRange * 2 + (rng() - 0.5) * 16;
+      const h = maxHeight * (0.55 + rng() * 0.55);
+      const w = 0.8 + rng() * 1.3;
+      const baseRadius = 18 * w;
+      // Strict highway clearance: ensure mountain skirts NEVER spill onto asphalt/curbs/shoulders!
+      const minX = 14.5 + baseRadius;
+      const side = (i % 2 === 0) ? 1 : -1;
+      const span = Math.max(0, xRange - minX);
+      const frac = Math.floor(i / 2) / Math.max(1, Math.floor(count / 2) - 1);
+      const x = side * (minX + frac * span + rng() * 8);
       const z = zBase - rng() * 75;
-      const h = maxHeight * (0.55 + rng() * 0.55), w = 0.8 + rng() * 1.3;
       dummy.position.set(x, -1, z); dummy.rotation.y = rng() * Math.PI; dummy.scale.set(w, h, w);
       dummy.updateMatrix(); rock.setMatrixAt(i, dummy.matrix);
       if (snow) {
         dummy.position.set(x, h * 0.52 - 1, z); dummy.scale.set(w * 0.48, h * 0.5, w * 0.48);
         dummy.updateMatrix(); snow.setMatrixAt(i, dummy.matrix);
+      }
+      if (state && state.colliders) {
+        addCollider(state, { type: 'circle', x, z, r: baseRadius });
       }
     }
     rock.instanceMatrix.needsUpdate = true; scene.add(rock);
@@ -1232,13 +1271,13 @@
 
   // ─── Roadside Structures across 1000m corridor ────────────────────────────
 
-  function buildRoadsideStructures(THREE, scene, province, scale, rng) {
+  function buildRoadsideStructures(THREE, scene, province, scale, rng, state) {
     const biome = province.biome;
     const stoneTex = getStoneTexture(THREE);
     const woodTex = getWoodTexture(THREE);
     const concreteTex = getConcreteTexture(THREE);
 
-    // 1. Alpine Chalets / Canadian Cabins along the 1000m drive (stepped back: |x| >= 20)
+    // 1. Alpine Chalets / Canadian Cabins along the 1000m drive (stepped back: |x| >= 22)
     const chaletPositions = [
       { x: -22, z: -420 }, { x: 24, z: -360 }, { x: -22, z: -290 },
       { x:  24, z: -230 }, { x: -24, z: -140 }, { x:  24, z: 120 },
@@ -1249,11 +1288,15 @@
       const cp = chaletPositions[i];
       const h = 4.5 + rng() * 2.5, w = 7 + rng() * 4;
       addBox(THREE, scene, w, h, 7, 0x78350f, cp.x, h * 0.5, cp.z, { map: woodTex, castShadow: true });
-      addBox(THREE, scene, w + 1.2, 0.3, 8, 0x374151, cp.x, h + 1.5, cp.z, { ry: 0, castShadow: true });
-      addCone(THREE, scene, (w + 1.2) * 0.6, 3.2, 4, 0x374151, cp.x, h + 3.1, cp.z, { castShadow: true });
-      addBox(THREE, scene, 0.8, 2.5, 0.8, 0x64748b, cp.x + w * 0.3, h + 2.5, cp.z - 1.5, { map: stoneTex });
+      // Seat pitched roof and trim flush onto wall box (zero floating gap!)
+      addBox(THREE, scene, w + 1.2, 0.3, 8, 0x374151, cp.x, h + 0.15, cp.z, { ry: 0, castShadow: true });
+      addCone(THREE, scene, (w + 1.2) * 0.6, 3.2, 4, 0x374151, cp.x, h + 1.9, cp.z, { castShadow: true });
+      addBox(THREE, scene, 0.8, 2.5, 0.8, 0x64748b, cp.x + w * 0.3, h + 1.55, cp.z - 1.5, { map: stoneTex });
       if (biome === 'rockies-foothills' || biome === 'klondike-glacier' || biome === 'arctic-tundra') {
-        addBox(THREE, scene, w + 0.4, 0.5, 7.4, 0xf8fafc, cp.x, h + 1.6, cp.z, { roughness: 0.5 });
+        addBox(THREE, scene, w + 0.4, 0.3, 7.4, 0xf8fafc, cp.x, h + 0.45, cp.z, { roughness: 0.5 });
+      }
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: cp.x, z: cp.z, hw: (w + 1.2) * 0.5, hd: 4.2 });
       }
     }
 
@@ -1267,6 +1310,9 @@
       addBox(THREE, scene, 8, 4, 10, 0xe2e8f0, rs.x, 2, rs.z + 8, { map: concreteTex, castShadow: true });
       addBox(THREE, scene, 8.4, 0.3, 10.4, 0x334155, rs.x, 4.2, rs.z + 8, {});
       addBox(THREE, scene, 3.2, 1.2, 0.2, 0xc8102e, rs.x, 5.8, rs.z + 2.8, { emissive: 0xc8102e, emissiveIntensity: 0.3 });
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: rs.x, z: rs.z + 8, hw: 4.5, hd: 5.5 });
+      }
     }
 
     // 3. Distant Mountain Ridges framing both sides across 1000m corridor
@@ -1330,6 +1376,9 @@
       addBox(THREE, scene, b.w, b.h, b.d, b.color, b.x, b.h * 0.5, b.z, { map: bTex.map, roughness: 0.42, metalness: 0.35, castShadow: true });
       addBox(THREE, scene, b.w + 1.2, 1.5, b.d + 1.2, 0x334155, b.x, 0.75, b.z, { map: concreteTex });
       addBox(THREE, scene, b.w + 0.4, 0.5, b.d + 0.4, 0x475569, b.x, b.h + 0.25, b.z, { roughness: 0.65 });
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: b.x, z: b.z, hw: b.w * 0.5, hd: b.d * 0.5 });
+      }
     }
 
     // 3. Mid-rise commercial strip — right side (stepped back at x = +19)
@@ -1346,24 +1395,30 @@
       addBox(THREE, scene, b.w, b.h, b.d, b.color, b.x, b.h * 0.5, b.z, { map: bTex.map, roughness: 0.42, metalness: 0.35, castShadow: true });
       addBox(THREE, scene, b.w + 1.2, 1.5, b.d + 1.2, 0x334155, b.x, 0.75, b.z, { map: concreteTex });
       addBox(THREE, scene, b.w + 0.4, 0.5, b.d + 0.4, 0x475569, b.x, b.h + 0.25, b.z, { roughness: 0.65 });
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: b.x, z: b.z, hw: b.w * 0.5, hd: b.d * 0.5 });
+      }
     }
 
-    // 4. Street-level storefronts (stepped back at |x| = 17 to ensure chase camera clearance)
+    // 4. Street-level storefronts (stepped back at |x| = 18 to ensure chase camera clearance)
     const storefronts = [
-      { x: -17, z: -12, color: 0xfef3c7, h: 4 },
-      { x:  17, z:  -8, color: 0xdbeafe, h: 4.5 },
-      { x: -17, z:   5, color: 0xfce7f3, h: 3.8 },
-      { x:  17, z:  10, color: 0xecfdf5, h: 4.2 },
-      { x: -17, z:  20, color: 0xfef3c7, h: 4 },
-      { x:  17, z:  30, color: 0xdbeafe, h: 3.8 },
-      { x: -17, z:  38, color: 0xecfdf5, h: 4.5 },
-      { x:  17, z:  44, color: 0xfce7f3, h: 4 }
+      { x: -18, z: -12, color: 0xfef3c7, h: 4 },
+      { x:  18, z:  -8, color: 0xdbeafe, h: 4.5 },
+      { x: -18, z:   5, color: 0xfce7f3, h: 3.8 },
+      { x:  18, z:  10, color: 0xecfdf5, h: 4.2 },
+      { x: -18, z:  20, color: 0xfef3c7, h: 4 },
+      { x:  18, z:  30, color: 0xdbeafe, h: 3.8 },
+      { x: -18, z:  38, color: 0xecfdf5, h: 4.5 },
+      { x:  18, z:  44, color: 0xfce7f3, h: 4 }
     ];
     for (let i = 0; i < storefronts.length; i += 1) {
       const sf = storefronts[i];
       addBox(THREE, scene, 6.5, sf.h, 6, sf.color, sf.x, sf.h * 0.5, sf.z, { map: concreteTex, roughness: 0.65, castShadow: true });
       addBox(THREE, scene, 6.8, 0.3, 2.2, 0xc8102e, sf.x, sf.h + 0.15, sf.z - 1.2, { roughness: 0.5 });
       addBox(THREE, scene, 7.0, 0.3, 6.4, 0x64748b, sf.x, sf.h + 0.3, sf.z, {});
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: sf.x, z: sf.z, hw: 3.5, hd: 3.2 });
+      }
     }
 
     // 5. Canadian Heritage Civic block
@@ -1371,6 +1426,9 @@
     addBox(THREE, scene, 20.5, 2.5, 12.5, 0xd6d3d1, -40, 11.25, 30, { map: stoneTex });
     addCyl(THREE, scene, 2.0, 2.0, 7, 12, 0xd6d3d1, -40, 14.5, 25, { map: stoneTex, castShadow: true });
     addCone(THREE, scene, 2.4, 4.5, 4, 0x2dd4bf, -40, 20, 25, { metalness: 0.35, roughness: 0.45 });
+    if (state && state.colliders) {
+      addCollider(state, { type: 'box', x: -40, z: 30, hw: 10.5, hd: 6.5 });
+    }
 
     // 6. Central parking pad near functional buildings
     addBox(THREE, scene, 22, 0.08, 36, 0x1e293b, 0, 0.04, 14, { roughness: 0.92 });
@@ -1396,7 +1454,7 @@
     // 1. ONTARIO: Pink-Grey Shield Rock Cuts, Autumn Maples & CN Tower
     // ──────────────────────────────────────────────────────────────────────────
     if (id === 'ontario') {
-      // Canadian Shield Pink-Grey Granite Rock Cuts flanking highway
+      // Canadian Shield Pink-Grey Granite Rock Cuts flanking highway (stepped back to x = ±16.0, clear zone |x| >= 12.85)
       const rockCutGeo = new THREE.BoxGeometry(4.5, 5.5, 18);
       const rockCutMat = mat(THREE, 0xffffff, { map: pinkGraniteTex, roughness: 0.90 });
       const cutCount = 20;
@@ -1407,13 +1465,18 @@
         const cz = -360 + (i / (cutCount - 1)) * 720;
         if (cz > -50 && cz < 50) continue; // Leave central hub clear
         const hL = 4.0 + rng() * 3.5, hR = 4.0 + rng() * 3.5;
-        dummy.position.set(-11.5, hL * 0.5, cz); dummy.scale.set(1.0 + rng() * 0.4, hL / 5.5, 1.0);
+        dummy.position.set(-16.0, hL * 0.5, cz); dummy.scale.set(1.0 + rng() * 0.4, hL / 5.5, 1.0);
         dummy.rotation.set((rng() - 0.5) * 0.08, (rng() - 0.5) * 0.1, (rng() - 0.5) * 0.08);
         dummy.updateMatrix(); cuts.setMatrixAt(cIdx++, dummy.matrix);
 
-        dummy.position.set(11.5, hR * 0.5, cz); dummy.scale.set(1.0 + rng() * 0.4, hR / 5.5, 1.0);
+        dummy.position.set(16.0, hR * 0.5, cz); dummy.scale.set(1.0 + rng() * 0.4, hR / 5.5, 1.0);
         dummy.rotation.set((rng() - 0.5) * 0.08, (rng() - 0.5) * 0.1, (rng() - 0.5) * 0.08);
         dummy.updateMatrix(); cuts.setMatrixAt(cIdx++, dummy.matrix);
+
+        if (state && state.colliders) {
+          addCollider(state, { type: 'box', x: -16.0, z: cz, hw: 2.5, hd: 9.0 });
+          addCollider(state, { type: 'box', x:  16.0, z: cz, hw: 2.5, hd: 9.0 });
+        }
       }
       cuts.count = cIdx;
       cuts.instanceMatrix.needsUpdate = true;
@@ -1435,12 +1498,14 @@
       addCyl(THREE, cn, 0.35, 1.6, 18, 10, 0xf1f5f9, 0, 60, 0, { metalness: 0.65, roughness: 0.3 });
       const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.75, 10, 10), mat(THREE, 0xff2244, { emissive: 0xff2244, emissiveIntensity: 1.6 }));
       beacon.position.set(0, 69.5, 0); cn.add(beacon); state.beaconMeshes.push(beacon); scene.add(cn);
+      if (state && state.colliders) addCollider(state, { type: 'circle', x: cnX, z: cnZ, r: 4.5 });
 
       // Rogers-style Dome (x = -52, z = -120)
       const domeC = lmCoords(1, -48, 0, -120);
       const dome = new THREE.Mesh(new THREE.SphereGeometry(14, 24, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), mat(THREE, 0xdbeafe, { map: concreteTex, roughness: 0.38, metalness: 0.32 }));
       dome.position.set(domeC[0], 0, domeC[2]); scene.add(dome);
       addCyl(THREE, scene, 14.6, 15.2, 4.0, 24, 0x334155, domeC[0], 2.0, domeC[2], { map: concreteTex, metalness: 0.35 });
+      if (state && state.colliders) addCollider(state, { type: 'circle', x: domeC[0], z: domeC[2], r: 15.2 });
 
       // Niagara Falls Horseshoe Cataract at landmark 2
       const niaC = lmCoords(2, 82, 0, 205);
@@ -1448,6 +1513,7 @@
       const falls = addBox(THREE, scene, 24, 13.5, 2.8, 0x7dd3fc, niaC[0], 6.8, niaC[2], {
         bumpMap: waterBump, bumpScale: 0.25, roughness: 0.2, emissive: 0x0284c7, emissiveIntensity: 0.35, transparent: true, opacity: 0.85
       });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: niaC[0], z: niaC[2] - 8, hw: 15.0, hd: 9.0 });
       const mistCount = Math.round(90 * scale);
       const mistPos = new Float32Array(mistCount * 3), mistBase = new Float32Array(mistCount * 3);
       for (let i = 0; i < mistCount; i += 1) {
@@ -1490,6 +1556,7 @@
       // Silver cross
       addBox(THREE, scene, 0.2, 2.2, 0.2, 0xffffff, chX, 35, chZ - 13, { emissive: 0xffffff, emissiveIntensity: 0.5 });
       addBox(THREE, scene, 1.4, 0.2, 0.2, 0xffffff, chX, 35.4, chZ - 13, { emissive: 0xffffff, emissiveIntensity: 0.5 });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: chX, z: chZ, hw: 8.5, hd: 14.5 });
 
       // Row of Steep-roofed heritage village houses with curved bell-cast eaves
       const villageX = 24;
@@ -1500,11 +1567,12 @@
         addCone(THREE, scene, 7.5, 5.5, 4, i % 2 === 0 ? 0xef4444 : 0x2dd4bf, villageX, 9.25, vz, { ry: Math.PI / 4, metalness: 0.3 });
         // Stone end-chimneys
         addBox(THREE, scene, 0.9, 3.5, 0.9, 0x78716c, villageX + 3.8, 8.5, vz, { map: stoneTex });
+        if (state && state.colliders) addCollider(state, { type: 'box', x: villageX, z: vz, hw: 4.8, hd: 5.2 });
       }
 
-      // Château Frontenac at landmark 0 (x = -24, z = -68)
+      // Château Frontenac at landmark 0 (stepped back to x = -38 to keep highway clear zone |x| >= 16)
       const cfC = lmCoords(0, 0, 10, -68);
-      const cfX = -26, cfZ = cfC[2];
+      const cfX = -38, cfZ = cfC[2];
       addBox(THREE, scene, 44, 10, 26, 0x57534e, cfX, 5, cfZ, { map: stoneTex, roughness: 0.92 });
       const ch = new THREE.Group(); ch.position.set(cfX, 10, cfZ);
       addBox(THREE, ch, 22, 14, 14, 0x9a3412, 0, 7, 0, { map: stoneTex, castShadow: true });
@@ -1515,11 +1583,13 @@
       addCyl(THREE, ch, 3.2, 3.2, 16, 10, 0x9a3412, 11, 8, 5, { map: stoneTex });
       addCone(THREE, ch, 3.6, 8, 8, 0x2dd4bf, 11, 20, 5, { metalness: 0.35, roughness: 0.45 });
       scene.add(ch);
+      if (state && state.colliders) addCollider(state, { type: 'box', x: cfX, z: cfZ, hw: 22.0, hd: 13.0 });
 
       // Montreal Inclined Tower at landmark 1
       const mtlC = lmCoords(1, -78, 0, 210);
       addBox(THREE, scene, 4.5, 34, 4.5, 0xe2e8f0, mtlC[0], 15, mtlC[2], { map: concreteTex, rz: -0.45, castShadow: true });
       addCyl(THREE, scene, 12, 14, 4, 20, 0x475569, mtlC[0] + 10, 2, mtlC[2], { map: concreteTex });
+      if (state && state.colliders) addCollider(state, { type: 'circle', x: mtlC[0], z: mtlC[2], r: 7.0 });
       buildInstancedSkyline(THREE, scene, Math.round(22 * scale), cfX + 54, cfZ - 46, 55, 18, rng, state);
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -1527,44 +1597,50 @@
     // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'british-columbia') {
       // Highway Avalanche Shed / Rock Gallery (z ∈ [-170, -125], length 45m spanning highway!)
+      // Strict highway clearance: retaining wall at x = -10.5, pillars at x = +10.5, underside clearance y >= 7.5m
       const shedZStart = -170, shedZEnd = -125, shedLen = shedZEnd - shedZStart;
       const shedMidZ = (shedZStart + shedZEnd) * 0.5;
       const hazardTex = getHazardStripesTexture(THREE);
 
-      // Mountain-side solid concrete retaining wall (x = -6.4)
-      addBox(THREE, scene, 0.9, 6.2, shedLen, 0x475569, -6.4, 3.1, shedMidZ, { map: concreteTex, castShadow: true });
+      // Mountain-side solid concrete retaining wall (x = -10.5, clearance >= 9.9m)
+      addBox(THREE, scene, 1.2, 8.5, shedLen, 0x475569, -10.5, 4.25, shedMidZ, { map: concreteTex, castShadow: true });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: -10.5, z: shedMidZ, hw: 0.8, hd: shedLen * 0.5 });
 
-      // Sloped reinforced concrete roof (sloped down towards the fjord so avalanches slide off)
-      const roof = addBox(THREE, scene, 13.8, 0.45, shedLen, 0x334155, 0.2, 6.3, shedMidZ, { map: concreteTex });
-      roof.rotation.z = -0.10;
+      // Sloped reinforced concrete roof (y = 8.35m, underside > 7.9m >= 7.5m)
+      const roof = addBox(THREE, scene, 22.8, 0.5, shedLen, 0x334155, 0, 8.35, shedMidZ, { map: concreteTex });
+      roof.rotation.z = -0.05;
 
-      // Heavy timber ceiling cross-beams
+      // Heavy timber ceiling cross-beams spanning across the road (underside 7.57m >= 7.5m)
       for (let bz = shedZStart + 4; bz <= shedZEnd - 4; bz += 6) {
-        addBox(THREE, scene, 13.2, 0.35, 0.4, 0x5c4028, 0.2, 6.0, bz, { map: woodTex });
+        addBox(THREE, scene, 22.0, 0.45, 0.5, 0x5c4028, 0, 7.8, bz, { map: woodTex });
       }
 
-      // Outer pillars facing the fjord (x = +6.4, allowing views of Howe Sound!)
+      // Outer pillars facing the fjord (x = +10.5, clearance >= 10.1m >= 9.2m)
       for (let pz = shedZStart + 3; pz <= shedZEnd - 3; pz += 6.5) {
-        addBox(THREE, scene, 0.7, 5.8, 0.8, 0x475569, 6.4, 2.9, pz, { map: concreteTex });
+        addBox(THREE, scene, 0.8, 8.5, 0.8, 0x475569, 10.5, 4.25, pz, { map: concreteTex });
+        if (state && state.colliders) addCollider(state, { type: 'box', x: 10.5, z: pz, hw: 0.5, hd: 0.5 });
       }
 
-      // Portal entrances with yellow/black diagonal hazard stripes
+      // Portal entrances with yellow/black diagonal hazard stripes (underside 7.85m >= 7.5m)
       const portalMat = new THREE.MeshStandardMaterial({ map: hazardTex, roughness: 0.4 });
-      const portalN = new THREE.Mesh(new THREE.BoxGeometry(13.8, 0.8, 0.3), portalMat);
-      portalN.position.set(0.2, 6.4, shedZStart - 0.2); scene.add(portalN);
-      const portalS = new THREE.Mesh(new THREE.BoxGeometry(13.8, 0.8, 0.3), portalMat);
-      portalS.position.set(0.2, 6.4, shedZEnd + 0.2); scene.add(portalS);
+      const portalN = new THREE.Mesh(new THREE.BoxGeometry(22.8, 1.0, 0.4), portalMat);
+      portalN.position.set(0, 8.35, shedZStart - 0.2); scene.add(portalN);
+      const portalS = new THREE.Mesh(new THREE.BoxGeometry(22.8, 1.0, 0.4), portalMat);
+      portalS.position.set(0, 8.35, shedZEnd + 0.2); scene.add(portalS);
 
-      // Sea-to-Sky sheer granite cliffs along mountain side (x = -35 to -70)
+      // Sea-to-Sky sheer granite cliffs along mountain side (x = -38 to -70)
       for (let i = 0; i < 7; i += 1) {
         const cx = -38 - (i % 2) * 12, cz = -320 + i * 85;
         addBox(THREE, scene, 26, 42 + (i % 3) * 12, 45, 0x475569, cx, 20, cz, { map: stoneTex, roughness: 0.95 });
+        if (state && state.colliders) addCollider(state, { type: 'box', x: cx, z: cz, hw: 13.5, hd: 23.0 });
       }
 
-      // Canada Place Sails at landmark 0 (x = -22, z = -72)
-      const cpC = lmCoords(0, -18, 0, -72);
-      addBox(THREE, scene, 26, 3, 12, 0x334155, cpC[0], 1.5, cpC[2], { map: concreteTex });
-      for (let i = 0; i < 5; i += 1) addCone(THREE, scene, 2.8, 11, 4, 0xf8fafc, cpC[0] - 10 + i * 4.2, 8.5, cpC[2], { roughness: 0.45, castShadow: true });
+      // Canada Place Sails at landmark 0 (stepped back to x = -32, clear zone >= 19m)
+      const cpC = lmCoords(0, -32, 0, -72);
+      const cpX = -32, cpZ = cpC[2];
+      addBox(THREE, scene, 26, 3, 12, 0x334155, cpX, 1.5, cpZ, { map: concreteTex });
+      for (let i = 0; i < 5; i += 1) addCone(THREE, scene, 2.8, 11, 4, 0xf8fafc, cpX - 8 + i * 4.0, 8.5, cpZ, { roughness: 0.45, castShadow: true });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: cpX, z: cpZ, hw: 13.5, hd: 6.5 });
 
       // Lions Gate Bridge at landmark 1
       const lgC = lmCoords(1, 70, 0, -140);
@@ -1573,45 +1649,54 @@
       addBox(THREE, scene, 2, 24, 5, 0x059669, lgC[0] + 18, 12, lgC[2], { metalness: 0.6 });
       addBox(THREE, scene, 20, 0.25, 0.25, 0x34d399, lgC[0] - 28, 18, lgC[2], { rz: 0.48, metalness: 0.7 });
       addBox(THREE, scene, 20, 0.25, 0.25, 0x34d399, lgC[0] + 28, 18, lgC[2], { rz: -0.48, metalness: 0.7 });
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: lgC[0] - 18, z: lgC[2], hw: 1.2, hd: 2.8 });
+        addCollider(state, { type: 'box', x: lgC[0] + 18, z: lgC[2], hw: 1.2, hd: 2.8 });
+      }
 
       // Coast Mountains massifs
-      buildInstancedMountains(THREE, scene, Math.round(30 * scale), 190, -220, 68, true, rng);
-      buildInstancedSkyline(THREE, scene, Math.round(20 * scale), cpC[0] - 18, cpC[2] - 20, 50, 22, rng, state);
+      buildInstancedMountains(THREE, scene, Math.round(30 * scale), 190, -220, 68, true, rng, state);
+      buildInstancedSkyline(THREE, scene, Math.round(20 * scale), cpX - 18, cpZ - 20, 50, 22, rng, state);
 
     // ──────────────────────────────────────────────────────────────────────────
     // 4. ALBERTA: Banff Wildlife Overpass, Banff Springs Hotel & Hoodoos
     // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'alberta') {
       // Banff Forested Wildlife Overpass spanning over Trans-Canada Highway at z = -120
+      // Strict highway clearance: abutments at x = ±10.5, underside clearance y = 7.5m >= 7.5m
       const woZ = -120;
       const woGroup = new THREE.Group();
       woGroup.position.set(0, 0, woZ);
 
-      // Heavy curved concrete arch abutments flanking the road
-      addBox(THREE, woGroup, 1.8, 6.2, 22, 0x64748b, -7.5, 3.1, 0, { map: concreteTex });
-      addBox(THREE, woGroup, 1.8, 6.2, 22, 0x64748b,  7.5, 3.1, 0, { map: concreteTex });
+      // Heavy curved concrete arch abutments flanking the road (x = ±10.5, inner edge 9.6m >= 9.2m)
+      addBox(THREE, woGroup, 1.8, 8.5, 22, 0x64748b, -10.5, 4.25, 0, { map: concreteTex });
+      addBox(THREE, woGroup, 1.8, 8.5, 22, 0x64748b,  10.5, 4.25, 0, { map: concreteTex });
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: -10.5, z: woZ, hw: 1.0, hd: 11.5 });
+        addCollider(state, { type: 'box', x:  10.5, z: woZ, hw: 1.0, hd: 11.5 });
+      }
 
-      // Concrete arch bridge span over the highway (clearance: 5.8m)
-      addBox(THREE, woGroup, 16.8, 1.0, 22, 0x475569, 0, 6.4, 0, { map: concreteTex });
+      // Concrete arch bridge span over the highway (y = 8.1m, underside 7.50m >= 7.5m)
+      addBox(THREE, woGroup, 22.8, 1.2, 22, 0x475569, 0, 8.1, 0, { map: concreteTex });
 
       // Vegetated earth berm on top of the overpass
-      addBox(THREE, woGroup, 16.0, 0.8, 21.6, 0x365314, 0, 7.3, 0, { roughness: 0.95 });
+      addBox(THREE, woGroup, 22.0, 0.8, 21.6, 0x365314, 0, 9.1, 0, { roughness: 0.95 });
 
       // Rustic wooden privacy/sound fences along both edges of overpass
-      addBox(THREE, woGroup, 16.4, 1.8, 0.3, 0x78350f, 0, 8.2, -10.8, { map: woodTex });
-      addBox(THREE, woGroup, 16.4, 1.8, 0.3, 0x78350f, 0, 8.2,  10.8, { map: woodTex });
+      addBox(THREE, woGroup, 22.4, 1.8, 0.3, 0x78350f, 0, 10.1, -10.8, { map: woodTex });
+      addBox(THREE, woGroup, 22.4, 1.8, 0.3, 0x78350f, 0, 10.1,  10.8, { map: woodTex });
 
       // Living pine & spruce trees planted on top of the overpass for wildlife
-      for (let tx = -5.5; tx <= 5.5; tx += 2.8) {
+      for (let tx = -8.5; tx <= 8.5; tx += 3.2) {
         for (let tz = -7.5; tz <= 7.5; tz += 5.0) {
-          addCone(THREE, woGroup, 1.2, 3.2, 6, 0x14532d, tx + (rng() - 0.5) * 0.8, 9.2, tz + (rng() - 0.5) * 0.8);
+          addCone(THREE, woGroup, 1.2, 3.2, 6, 0x14532d, tx + (rng() - 0.5) * 0.8, 11.2, tz + (rng() - 0.5) * 0.8);
         }
       }
       scene.add(woGroup);
 
-      // Banff Springs Hotel chateau silhouette (x = -28, z = -215)
+      // Banff Springs Hotel chateau silhouette (stepped back to x = -42, inner edge -18 <= -14)
       const banffC = lmCoords(1, -80, 0, -215);
-      const banff = new THREE.Group(); banff.position.set(-28, 0, banffC[2]);
+      const banff = new THREE.Group(); banff.position.set(-42, 0, banffC[2]);
       addBox(THREE, banff, 48, 12, 26, 0x57534e, 0, 6, 0, { map: stoneTex, roughness: 0.92, castShadow: true });
       addBox(THREE, banff, 18, 24, 18, 0x9a3412, 0, 18, 0, { map: stoneTex, castShadow: true });
       addCone(THREE, banff, 10, 14, 8, 0x2dd4bf, 0, 37, 0, { metalness: 0.35, roughness: 0.45 });
@@ -1622,9 +1707,10 @@
         }
       }
       scene.add(banff);
+      if (state && state.colliders) addCollider(state, { type: 'box', x: -42, z: banffC[2], hw: 24.5, hd: 13.5 });
 
       // Jagged Rockies peaks behind Banff
-      buildInstancedMountains(THREE, scene, Math.round(34 * scale), 200, banffC[2] - 25, 82, true, rng);
+      buildInstancedMountains(THREE, scene, Math.round(34 * scale), 200, banffC[2] - 25, 82, true, rng, state);
 
       // Turquoise Lake Louise Basin at landmark 2
       const louiseC = lmCoords(2, 72, 0, 120);
@@ -1633,7 +1719,7 @@
         mat(THREE, 0x14b8a6, { roughness: 0.12, metalness: 0.4, bumpMap: waterBump, bumpScale: 0.14, emissive: 0x0d9488, emissiveIntensity: 0.25 })
       );
       louise.rotation.x = -Math.PI / 2; louise.position.set(louiseC[0], 0.12, louiseC[2]); scene.add(louise);
-      buildInstancedMountains(THREE, scene, Math.round(18 * scale), 130, louiseC[2] - 30, 75, true, rng);
+      buildInstancedMountains(THREE, scene, Math.round(18 * scale), 130, louiseC[2] - 30, 75, true, rng, state);
 
       // Alberta Badlands Terracotta Hoodoos at z = 180
       for (let i = 0; i < 8; i += 1) {
@@ -1641,6 +1727,7 @@
         const hh = 10 + rng() * 8;
         addCyl(THREE, scene, 1.4 + rng() * 0.8, 2.6 + rng() * 1.0, hh, 7, 0xb45309, hx, hh * 0.5, hz, { map: stoneTex, castShadow: true });
         addBox(THREE, scene, 3.5 + rng() * 2, 2.0, 3.5 + rng() * 2, 0x92400e, hx, hh + 1.0, hz, { map: stoneTex });
+        if (state && state.colliders) addCollider(state, { type: 'circle', x: hx, z: hz, r: 2.2 });
       }
 
       // Calgary Tower (stepped back at x = -24, z = -65)
@@ -1648,27 +1735,30 @@
       addCyl(THREE, scene, 2.0, 2.9, 36, 14, 0xdbeafe, -24, 18, calC[2], { map: concreteTex, castShadow: true });
       addCyl(THREE, scene, 4.6, 3.8, 3.2, 18, 0xf59e0b, -24, 36, calC[2], { metalness: 0.45, roughness: 0.25, emissive: 0xd97706, emissiveIntensity: 0.35 });
       addCyl(THREE, scene, 0.3, 0.8, 9, 8, 0xffffff, -24, 42, calC[2], { metalness: 0.7 });
+      if (state && state.colliders) addCollider(state, { type: 'circle', x: -24, z: calC[2], r: 3.5 });
       buildInstancedSkyline(THREE, scene, Math.round(22 * scale), -35, calC[2] - 14, 56, 26, rng, state);
 
     // ──────────────────────────────────────────────────────────────────────────
     // 5. NATIONAL CAPITAL: Rideau Canal Embankments & Gothic Heritage Blocks
     // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'national-capital') {
-      // Parliament Hill Centre Block & Peace Tower (stepped back at x = -26, z = -70)
+      // Parliament Hill Centre Block & Peace Tower (stepped back at x = -36, clear zone >= 17m)
       const parlC = lmCoords(0, 0, 0, -70);
-      const px = -26, pz = parlC[2];
+      const px = -36, pz = parlC[2];
       addBox(THREE, scene, 36, 11, 14, 0xd6d3d1, px, 5.5, pz, { map: stoneTex, roughness: 0.85, castShadow: true });
       addBox(THREE, scene, 37, 2.5, 15, 0x2dd4bf, px, 12.2, pz, { metalness: 0.35, roughness: 0.45 });
       // Peace Tower
       addBox(THREE, scene, 6.2, 34, 6.2, 0xe7e5e4, px, 17, pz + 6, { map: stoneTex, roughness: 0.85, castShadow: true });
       addCone(THREE, scene, 4.4, 9, 4, 0x2dd4bf, px, 38.5, pz + 6, { metalness: 0.35, roughness: 0.45 });
       addBox(THREE, scene, 2.6, 2.6, 0.4, 0xfef08a, px, 27, pz + 9.8, { emissive: 0xfacc15, emissiveIntensity: 0.7 });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: px, z: pz, hw: 19.0, hd: 8.5 });
 
-      // Gothic copper-roofed heritage blocks (East Block & West Block style)
+      // Gothic copper-roofed heritage blocks (East Block & West Block style at x = 28)
       addBox(THREE, scene, 24, 10, 12, 0xd6d3d1, 28, 5, -70, { map: stoneTex, castShadow: true });
       addBox(THREE, scene, 25, 2.8, 13, 0x2dd4bf, 28, 11.4, -70, { metalness: 0.35, roughness: 0.45 });
       addCone(THREE, scene, 3.2, 6, 4, 0x2dd4bf, 28 - 9, 15.8, -70);
       addCone(THREE, scene, 3.2, 6, 4, 0x2dd4bf, 28 + 9, 15.8, -70);
+      if (state && state.colliders) addCollider(state, { type: 'box', x: 28, z: -70, hw: 13.0, hd: 7.0 });
 
       // Rideau Canal stone embankments with canal lock gates (x = 38, z ∈ [-160, 120])
       addBox(THREE, scene, 12, 0.22, 180, 0x1e6b8a, 42, 0.1, -20, { bumpMap: waterBump, roughness: 0.14, metalness: 0.42 });
@@ -1686,6 +1776,10 @@
       addBox(THREE, scene, 46, 2.6, 0.35, 0x475569, abC[0], 10, abC[2] + 2, { metalness: 0.65 });
       addBox(THREE, scene, 1.6, 10, 4.8, 0x475569, abC[0] - 14, 5, abC[2], { map: stoneTex });
       addBox(THREE, scene, 1.6, 10, 4.8, 0x475569, abC[0] + 14, 5, abC[2], { map: stoneTex });
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: abC[0] - 14, z: abC[2], hw: 1.2, hd: 2.8 });
+        addCollider(state, { type: 'box', x: abC[0] + 14, z: abC[2], hw: 1.2, hd: 2.8 });
+      }
 
     // ──────────────────────────────────────────────────────────────────────────
     // 6. SASKATCHEWAN: Historic Grain Elevators, Railway & Onion-Domed Church
@@ -1707,6 +1801,7 @@
         addCone(THREE, scene, 4.2, 3.8, 4, ec, -28, 17.9, ez + 7.5, { ry: Math.PI / 4 });
         // White lettering sign
         addBox(THREE, scene, 0.2, 2.5, 6.8, 0xffffff, -23.6, 17, ez, { emissive: 0xffffff, emissiveIntensity: 0.1 });
+        if (state && state.colliders) addCollider(state, { type: 'box', x: -28, z: ez, hw: 4.8, hd: 4.8 });
       }
 
       // Transcontinental Railway parallel to highway (x = -18, full z corridor)
@@ -1724,6 +1819,7 @@
       const uchX = 34, uchZ = 160;
       addBox(THREE, scene, 14, 8, 20, 0xf8fafc, uchX, 4, uchZ, { map: woodTex, castShadow: true });
       addCone(THREE, scene, 9.5, 5.5, 4, 0x2dd4bf, uchX, 10.75, uchZ, { ry: Math.PI / 4, metalness: 0.4 });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: uchX, z: uchZ, hw: 7.5, hd: 10.5 });
       // Three ornate gilded/green onion domes (banyas)
       const domeOffsets = [-5, 0, 5];
       for (let d = 0; d < 3; d += 1) {
@@ -1737,11 +1833,13 @@
         addBox(THREE, scene, 0.1, 1.6, 0.1, 0xfacc15, uchX, dh + 2.8, dz, { emissive: 0xfacc15, emissiveIntensity: 0.5 });
       }
 
-      // Regina Legislative building dome at landmark 0
+      // Regina Legislative building dome at landmark 0 (stepped back to x = -34, clear zone >= 18m)
       const regC = lmCoords(0, 0, 0, -70);
-      addBox(THREE, scene, 32, 10, 12, 0xe7e5e4, -26, 5, regC[2], { map: stoneTex, castShadow: true });
+      const regX = -34;
+      addBox(THREE, scene, 32, 10, 12, 0xe7e5e4, regX, 5, regC[2], { map: stoneTex, castShadow: true });
       const skDome = new THREE.Mesh(new THREE.SphereGeometry(5.5, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), mat(THREE, 0x2dd4bf, { metalness: 0.35, roughness: 0.4 }));
-      skDome.position.set(-26, 10, regC[2]); scene.add(skDome);
+      skDome.position.set(regX, 10, regC[2]); scene.add(skDome);
+      if (state && state.colliders) addCollider(state, { type: 'box', x: regX, z: regC[2], hw: 16.5, hd: 6.5 });
 
     // ──────────────────────────────────────────────────────────────────────────
     // 7. MANITOBA: Terracotta Exchange District Warehouses & CMHR Spire
@@ -1758,13 +1856,15 @@
         addBox(THREE, scene, 13.0, 1.2, 15.0, 0xb45309, wx, 15.6, wz, { roughness: 0.7 });
         // Rooftop timber water tower
         addCyl(THREE, scene, 1.6, 1.6, 3.2, 10, 0x78350f, wx + 3, 18, wz, { map: woodTex });
+        if (state && state.colliders) addCollider(state, { type: 'box', x: wx, z: wz, hw: 6.8, hd: 7.8 });
       }
 
-      // Canadian Museum for Human Rights (CMHR) at landmark 0
+      // Canadian Museum for Human Rights (CMHR) at landmark 0 (stepped back to x = -28, clear zone >= 16m)
       const cmhrC = lmCoords(0, 0, 0, -68);
-      const cmhrX = -26, cmhrZ = cmhrC[2];
+      const cmhrX = -28, cmhrZ = cmhrC[2];
       addBox(THREE, scene, 24, 11, 15, 0x94a3b8, cmhrX, 5.5, cmhrZ, { map: stoneTex, castShadow: true });
       addCone(THREE, scene, 5.5, 30, 8, 0x38bdf8, cmhrX, 20.5, cmhrZ, { roughness: 0.15, metalness: 0.7, transparent: true, opacity: 0.82, emissive: 0x0284c7, emissiveIntensity: 0.35 });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: cmhrX, z: cmhrZ, hw: 12.5, hd: 8.0 });
 
       // The Forks Red & Assiniboine River Confluence
       const wpgC = lmCoords(1, 44, 0, 115);
@@ -1781,6 +1881,7 @@
       for (let i = 0; i < stacks.length; i += 1) {
         addCyl(THREE, scene, 4.0, 2.2, 14, 9, 0xb45309, stacks[i][0], 7.0, stacks[i][1], { map: stoneTex, castShadow: true });
         addCone(THREE, scene, 3.6, 6.0, 7, 0x15803d, stacks[i][0], 16.5, stacks[i][1]);
+        if (state && state.colliders) addCollider(state, { type: 'circle', x: stacks[i][0], z: stacks[i][1], r: 4.2 });
       }
 
       // Hartland-Style Covered Wooden Bridge spanning a river branch at x = 45, z = 140
@@ -1795,10 +1896,12 @@
       // Stone river piers
       addCyl(THREE, scene, 2.0, 2.5, 6, 8, 0x78716c, brX, 1.5, brZ - 12, { map: stoneTex });
       addCyl(THREE, scene, 2.0, 2.5, 6, 8, 0x78716c, brX, 1.5, brZ + 12, { map: stoneTex });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: brX, z: brZ, hw: 5.0, hd: 19.5 });
 
       // Coastal Lighthouse (x = -48, z = 260)
       addCyl(THREE, scene, 2.2, 3.6, 16, 10, 0xf8fafc, -48, 8, 260, { map: concreteTex, castShadow: true });
       addCyl(THREE, scene, 2.4, 2.4, 3.0, 10, 0xef4444, -48, 17.5, 260);
+      if (state && state.colliders) addCollider(state, { type: 'circle', x: -48, z: 260, r: 4.0 });
 
     // ──────────────────────────────────────────────────────────────────────────
     // 9. PRINCE EDWARD ISLAND: Red Cliffs, Green Gables & Confederation Bridge
@@ -1807,6 +1910,7 @@
       // Vivid Rust-Red Sandstone Cliffs flanking roadside (x = -32 to -65)
       for (let i = 0; i < 6; i += 1) {
         addBox(THREE, scene, 24, 8 + (i % 2) * 4, 32, 0xb91c1c, -45, 4, -260 + i * 90, { map: stoneTex, roughness: 0.95 });
+        if (state && state.colliders) addCollider(state, { type: 'box', x: -45, z: -260 + i * 90, hw: 12.5, hd: 16.5 });
       }
 
       // Green Gables Heritage Farmhouse at landmark 1 (x = -32, z = 125)
@@ -1819,6 +1923,10 @@
       addBox(THREE, scene, 14.5, 0.4, 3.5, 0xf8fafc, ggX, 0.2, ggZ - 6);
       // Red PEI barn
       addBox(THREE, scene, 16, 9, 12, 0xb91c1c, ggX - 18, 4.5, ggZ + 8, { map: woodTex });
+      if (state && state.colliders) {
+        addCollider(state, { type: 'box', x: ggX, z: ggZ, hw: 7.0, hd: 5.5 });
+        addCollider(state, { type: 'box', x: ggX - 18, z: ggZ + 8, hw: 8.5, hd: 6.5 });
+      }
 
       // Confederation Bridge piers & marine spans crossing Northumberland Strait
       const confC = lmCoords(0, 20, 0, -78);
@@ -1857,20 +1965,23 @@
         addCone(THREE, scene, 5.2, 3.2, 4, 0x374151, 32, 8.0, sz, { ry: Math.PI / 4 });
         // Stacked lobster traps
         addBox(THREE, scene, 1.5, 0.8, 1.2, 0x92400e, 27.5, 2.0, sz + 2);
+        if (state && state.colliders) addCollider(state, { type: 'box', x: 32, z: sz, hw: 4.0, hd: 3.5 });
       }
 
-      // Peggy's Point Lighthouse at landmark 0
+      // Peggy's Point Lighthouse at landmark 0 (stepped back to x = -30, clear zone >= 17m)
       const pcC = lmCoords(0, 0, 4, -72);
-      const pcX = -26, pcZ = pcC[2];
+      const pcX = -30, pcZ = pcC[2];
       addCyl(THREE, scene, 9, 13, 4.5, 9, 0x64748b, pcX, 2.25, pcZ, { map: stoneTex, roughness: 0.92 });
       addCyl(THREE, scene, 2.2, 3.6, 16, 10, 0xf8fafc, pcX, 12, pcZ, { map: concreteTex, castShadow: true });
       addCyl(THREE, scene, 2.4, 2.4, 3.2, 10, 0xef4444, pcX, 21.6, pcZ, { metalness: 0.35 });
       const lamp = new THREE.Mesh(new THREE.SphereGeometry(1.1, 10, 10), mat(THREE, 0xfef08a, { emissive: 0xfde047, emissiveIntensity: 1.8 }));
       lamp.position.set(pcX, 23.8, pcZ); scene.add(lamp); state.beaconMeshes.push(lamp);
+      if (state && state.colliders) addCollider(state, { type: 'circle', x: pcX, z: pcZ, r: 13.5 });
 
       // Halifax Citadel star ramparts
       const hfxC = lmCoords(1, 0, 0, 80);
       addBox(THREE, scene, 34, 8, 22, 0x78716c, -45, 4, hfxC[2], { map: stoneTex, castShadow: true });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: -45, z: hfxC[2], hw: 17.5, hd: 11.5 });
 
     // ──────────────────────────────────────────────────────────────────────────
     // 11. NEWFOUNDLAND: Jellybean Row Jewel-Tone Houses & Drifting Icebergs
@@ -1889,6 +2000,7 @@
         addCone(THREE, scene, 5.5, 3.2, 4, 0x334155, -26, jh + 1.6, jz, { ry: Math.PI / 4 });
         // Stepped front entrance stairs
         addBox(THREE, scene, 1.8, 0.8, 1.5, 0xffffff, -21.8, 0.4, jz);
+        if (state && state.colliders) addCollider(state, { type: 'box', x: -26, z: jz, hw: 4.2, hd: 4.5 });
       }
 
       // Drifting Icebergs in Iceberg Alley (floating offshore with animation)
@@ -1907,16 +2019,18 @@
         }
       });
 
-      // Signal Hill Cabot Tower atop rocky hill at landmark 0
+      // Signal Hill Cabot Tower atop rocky hill at landmark 0 (stepped back to x = -38, clear zone >= 16m)
       const shC = lmCoords(0, 0, 12, -75);
-      const shX = -32, shZ = shC[2];
+      const shX = -38, shZ = shC[2];
       addCyl(THREE, scene, 14, 22, 12, 10, 0x4b5563, shX, 6, shZ, { map: stoneTex, roughness: 0.92 });
       addBox(THREE, scene, 8, 12, 8, 0x9a3412, shX, 18, shZ, { map: stoneTex, castShadow: true });
       addBox(THREE, scene, 4.5, 6, 4.5, 0x7c2d12, shX, 27, shZ, { map: stoneTex });
+      if (state && state.colliders) addCollider(state, { type: 'circle', x: shX, z: shZ, r: 22.5 });
 
       // Gros Morne flat-topped tablelands plateau cliffs
       for (let i = 0; i < 5; i += 1) {
         addBox(THREE, scene, 55, 38, 50, 0x9a3412, 180, 19, -280 + i * 110, { map: stoneTex, roughness: 0.95 });
+        if (state && state.colliders) addCollider(state, { type: 'box', x: 180, z: -280 + i * 110, hw: 28.0, hd: 25.5 });
       }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -1933,18 +2047,20 @@
         addBox(THREE, scene, 8.8, 3.5, 0.4, 0x78350f, -19.6, 8.25, sz, { map: woodTex });
         // Continuous raised wooden boardwalk sidewalk
         addBox(THREE, scene, 3.2, 0.35, 28, 0x78350f, -18.0, 0.35, sz, { map: woodTex });
+        if (state && state.colliders) addCollider(state, { type: 'box', x: -24, z: sz, hw: 4.5, hd: 4.5 });
       }
 
-      // SS Klondike Sternwheeler at landmark 0 (with animated revolving paddle wheel)
+      // SS Klondike Sternwheeler at landmark 0 (stepped back to x = 28, clear zone >= 16m)
       const ssC = lmCoords(0, 18, 0, -62);
-      const ssX = 24, ssZ = ssC[2];
+      const ssX = 28, ssZ = ssC[2];
       addBox(THREE, scene, 24, 4, 8, 0xf8fafc, ssX, 2, ssZ, { map: woodTex, castShadow: true });
       addBox(THREE, scene, 16, 4, 6, 0xe2e8f0, ssX, 6, ssZ, { map: woodTex });
       const wheel = addCyl(THREE, scene, 3.2, 3.2, 5.5, 12, 0xef4444, ssX + 14, 3.2, ssZ, { rx: Math.PI / 2 });
       state.animators.push(function (t) { wheel.rotation.y = t * 1.5; });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: ssX, z: ssZ, hw: 12.5, hd: 4.5 });
 
       // Mount Logan glacier peaks (Canada's highest peak 5,959m)
-      buildInstancedMountains(THREE, scene, Math.round(30 * scale), 200, -230, 85, true, rng);
+      buildInstancedMountains(THREE, scene, Math.round(30 * scale), 200, -230, 85, true, rng, state);
 
     // ──────────────────────────────────────────────────────────────────────────
     // 13. NORTHWEST TERRITORIES: Elevated Permafrost Buildings & Ice Road
@@ -1963,14 +2079,17 @@
         addBox(THREE, scene, 8.5, 5.0, 8.5, i % 2 === 0 ? 0x0284c7 : 0xe2e8f0, -24, 4.3, bz, { map: concreteTex, castShadow: true });
         // Metal snow stairs down to ground
         addBox(THREE, scene, 1.8, 1.6, 2.5, 0x64748b, -19.2, 0.8, bz);
+        if (state && state.colliders) addCollider(state, { type: 'box', x: -24, z: bz, hw: 4.5, hd: 4.5 });
       }
       // Above-ground silver insulated Utilidor pipeline connecting the buildings
       addBox(THREE, scene, 0.5, 0.5, 80, 0x94a3b8, -20.0, 1.2, -85, { metalness: 0.8, roughness: 0.3 });
 
-      // Diamond Mine Industrial Headframe at landmark 0
-      const dmC = lmCoords(0, -65, 0, -135);
-      addBox(THREE, scene, 12, 28, 12, 0x475569, dmC[0], 14, dmC[2], { metalness: 0.6, roughness: 0.4, castShadow: true });
-      addCyl(THREE, scene, 5.5, 5.5, 2.5, 16, 0x38bdf8, dmC[0], 29, dmC[2], { emissive: 0x0284c7, emissiveIntensity: 0.6 });
+      // Diamond Mine Industrial Headframe at landmark 1
+      const dmC = lmCoords(1, -78, 0, -195);
+      const dmX = dmC[0], dmZ = dmC[2];
+      addBox(THREE, scene, 12, 28, 12, 0x475569, dmX, 14, dmZ, { metalness: 0.6, roughness: 0.4, castShadow: true });
+      addCyl(THREE, scene, 5.5, 5.5, 2.5, 16, 0x38bdf8, dmX, 29, dmZ, { emissive: 0x0284c7, emissiveIntensity: 0.6 });
+      if (state && state.colliders) addCollider(state, { type: 'box', x: dmX, z: dmZ, hw: 6.5, hd: 6.5 });
 
       buildAuroraCurtains(THREE, scene, state.auroraMeshes);
 
@@ -1997,6 +2116,7 @@
         addBox(THREE, scene, 7.8, 1.2, 1.6, 0x78716c, inu.x, 9.4, inu.z, { map: stoneTex, roughness: 0.95 });
         // Head stone
         addBox(THREE, scene, 2.2, 2.2, 1.6, 0x94a3b8, inu.x, 11.1, inu.z, { map: stoneTex, roughness: 0.95 });
+        if (state && state.colliders) addCollider(state, { type: 'box', x: inu.x, z: inu.z, hw: 4.0, hd: 1.2 });
       }
 
       // Insulated Polar Community Geodesic Domes & High Arctic Research Pods on stilts
@@ -2009,6 +2129,7 @@
         // Geodesic insulated polar dome
         const pod = new THREE.Mesh(new THREE.SphereGeometry(4.8, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.6), mat(THREE, 0xf1f5f9, { roughness: 0.35, metalness: 0.2 }));
         pod.position.set(dl.x, 1.5, dl.z); scene.add(pod);
+        if (state && state.colliders) addCollider(state, { type: 'circle', x: dl.x, z: dl.z, r: 5.0 });
       }
 
       // Arctic Sea Ice Floes & Tabular Bergs in Frobisher Bay
@@ -2018,7 +2139,7 @@
       }
 
       // Baffin Island glaciated peaks
-      buildInstancedMountains(THREE, scene, Math.round(26 * scale), 180, -220, 65, true, rng);
+      buildInstancedMountains(THREE, scene, Math.round(26 * scale), 180, -220, 65, true, rng, state);
       buildAuroraCurtains(THREE, scene, state.auroraMeshes);
     }
   }
@@ -2035,16 +2156,17 @@
       );
       ring.rotation.x = -Math.PI / 2;
       ring.position.set(lm.coords[0], 0.18, lm.coords[2]); scene.add(ring);
+      // Elevated beacon pillar (base y = 8.0m >= 7.5m > 6.5m so road corridor is never obstructed)
       const pillar = new THREE.Mesh(
         new THREE.CylinderGeometry(0.18, 0.18, 16, 8),
         new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.28 })
       );
-      pillar.position.set(lm.coords[0], 8, lm.coords[2]); scene.add(pillar);
+      pillar.position.set(lm.coords[0], 16, lm.coords[2]); scene.add(pillar);
       state.landmarkMarkers.push({ id: lm.id, ring, pillar });
     }
   }
 
-  // ─── Functional Buildings (Gameplay Hubs at x = ±8.2, z ∈ [2, 28]) ─────────
+  // ─── Functional Buildings (Gameplay Hubs at |x| = 15.5, z ∈ [2, 28]) ───────
 
   const FUNCTIONAL_HUB_SPECS = [
     { id: 'hub-gunshop', type: 'gunshop', name: 'Ammu-North Armory', subtitle: 'Weapons, Ammo & Tactical Gear', shortTitle: 'AMMU-NORTH', tag: 'ARMORY', color: '#f59e0b', side: 1, z: 28 },
@@ -2088,8 +2210,8 @@
 
     for (let i = 0; i < FUNCTIONAL_HUB_SPECS.length; i += 1) {
       const spec = FUNCTIONAL_HUB_SPECS[i];
-      const side = spec.side, bx = side * 11.6, bz = spec.z;
-      const faceDir = -side, frontX = bx + faceDir * 2.5, padX = side * 8.2;
+      const side = spec.side, bx = side * 15.5, bz = spec.z;
+      const faceDir = -side, frontX = bx + faceDir * 2.5, padX = side * 10.5;
       const accentMat = new THREE.MeshStandardMaterial({ color: spec.color, emissive: spec.color, emissiveIntensity: 0.72, roughness: 0.28, metalness: 0.2 });
       const signTex = getHubSignTexture(THREE, spec);
       const signFaceMat = new THREE.MeshStandardMaterial({ map: signTex, emissiveMap: signTex, emissive: 0xffffff, emissiveIntensity: 0.55, roughness: 0.35 });
@@ -2102,13 +2224,14 @@
       const jambR = new THREE.Mesh(doorJambGeo, accentMat); jambR.position.set(frontX + faceDir * 0.12, 1.45, bz + 1.24); scene.add(jambR);
       const header = new THREE.Mesh(doorHeaderGeo, accentMat); header.position.set(frontX + faceDir * 0.12, 2.95, bz); scene.add(header);
       const strip = new THREE.Mesh(doorStripGeo, accentMat); strip.position.set(frontX + faceDir * 0.26, 2.75, bz); scene.add(strip);
-      const awning = new THREE.Mesh(awningGeo, accentMat); awning.position.set(frontX + faceDir * 0.62, 3.25, bz); awning.rotation.z = faceDir * -0.18; scene.add(awning);
+      const awning = new THREE.Mesh(awningGeo, accentMat); awning.position.set(frontX + faceDir * 0.45, 3.25, bz); awning.rotation.z = faceDir * -0.18; scene.add(awning);
       const signBack = new THREE.Mesh(signBackGeo, trimMat); signBack.position.set(frontX + faceDir * 0.12, 4.25, bz); scene.add(signBack);
       const signFace = new THREE.Mesh(signFaceGeo, signFaceMat); signFace.position.set(frontX + faceDir * 0.22, 4.25, bz); signFace.rotation.y = faceDir > 0 ? Math.PI / 2 : -Math.PI / 2; scene.add(signFace);
       const pad = new THREE.Mesh(padGeo, padMat); pad.position.set(padX, 0.04, bz); pad.receiveShadow = true; scene.add(pad);
       const ringMat = new THREE.MeshBasicMaterial({ color: spec.color, side: THREE.DoubleSide, transparent: true, opacity: 0.78 });
       const ringMesh = new THREE.Mesh(ringGeo, ringMat); ringMesh.rotation.x = -Math.PI / 2; ringMesh.position.set(padX, 0.14, bz); scene.add(ringMesh);
 
+      if (state && state.colliders) addCollider(state, { type: 'box', x: bx, z: bz, hw: 2.8, hd: 4.0 });
       state.functionalBuildings.push({ id: spec.id, type: spec.type, name: spec.name, subtitle: spec.subtitle, x: padX, z: bz, radius: 5.5, color: spec.color, ringMesh: ringMesh });
     }
   }
@@ -2128,6 +2251,7 @@
       beaconMeshes: [],
       landmarkMarkers: [],
       functionalBuildings: [],
+      colliders: [],
       lights: null,
       waterMesh: null,
       waterBump: null,
@@ -2136,13 +2260,13 @@
     };
 
     state.lights = buildSkyAndLighting(THREE, scene, province, tier);
-    const groundInfo = buildGroundAndHighway(THREE, scene, province, scale);
+    const groundInfo = buildGroundAndHighway(THREE, scene, province, scale, state);
     state.waterMesh = groundInfo.waterMesh;
     state.waterBump = groundInfo.waterBump;
     state.streetlightMat = groundInfo.streetlightMat;
 
     buildInstancedForest(THREE, scene, province, scale, rng);
-    buildRoadsideStructures(THREE, scene, province, scale, rng);
+    buildRoadsideStructures(THREE, scene, province, scale, rng, state);
     buildStartingCityBlock(THREE, scene, province, scale, rng, state);
     buildProvinceLandmarks(THREE, scene, province, scale, rng, state);
     buildLandmarkMarkers(THREE, scene, province, state);
@@ -2150,6 +2274,7 @@
 
     return {
       scene: scene,
+      colliders: state.colliders,
       fogDensityBase: state.lights.fogDensityBase,
       lights: state.lights,
       waterMesh: state.waterMesh,
