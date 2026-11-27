@@ -31,29 +31,29 @@
         {
           id: 'cn-tower',
           name: 'CN Tower',
-          coords: [0, 0, -65],
+          coords: [0, 0, -85],
           elevationM: 553,
-          description: '553.3 m concrete communications and observation tower anchoring the Toronto skyline above Lake Ontario.'
+          description: '553.3 m post-tensioned slip-formed concrete telecommunications and observation spire anchoring the Toronto skyline over Lake Ontario.'
         },
         {
           id: 'rogers-centre',
           name: 'Rogers Harbour Dome',
-          coords: [-48, 0, -120],
+          coords: [-56, 0, -165],
           elevationM: 86,
-          description: 'Iconic retractable-roof stadium beside the CN Tower along the Toronto waterfront rail corridor.'
+          description: 'Iconic multi-purpose stadium featuring the world’s first fully retractable motorized four-panel roof along the Union Station railway corridor.'
         },
         {
           id: 'niagara-falls',
           name: 'Niagara Horseshoe Falls',
-          coords: [82, 0, 205],
+          coords: [95, 0, 310],
           elevationM: 51,
-          description: 'Thundering emerald-white cataract plunging 51 metres into the Niagara Gorge with constant rising mist.'
+          description: 'Thundering emerald-white Horseshoe Falls plunging 51 metres into the Niagara Gorge along the scenic Niagara Parkway with constant billowing mist plumes.'
         }
       ],
       codexFacts: [
-        'Ontario borders four of the five Great Lakes: Superior, Huron, Erie, and Ontario.',
-        'Highway 401 is North America’s busiest highway corridor, linking Windsor through Toronto to the Quebec border.',
-        'Completed in 1976, the CN Tower held the world’s tallest free-standing structure record for 32 years.'
+        'Highway 401 (Macdonald-Cartier Freeway) is North America’s busiest highway corridor, carrying up to 500,000 vehicles daily through the Greater Toronto Area.',
+        'North of Georgian Bay, Highway 69 and the Trans-Canada Highway cut directly through billions-of-years-old pink granite and gneiss Canadian Shield rock cuts.',
+        'Completed in 1976 by Canadian National, the 553.3 m CN Tower held the record as the world’s tallest free-standing structure for over three decades.'
       ],
       href: 'province-ontario.html'
     },
@@ -81,29 +81,29 @@
         {
           id: 'chateau-frontenac',
           name: 'Château Frontenac',
-          coords: [0, 10, -68],
+          coords: [0, 10, -90],
           elevationM: 80,
-          description: 'Copper-turreted railway grand hotel crowning Cap Diamant above Old Québec and the St. Lawrence River.'
+          description: 'Grand Chateauesque railway palace with steep verdigris copper roofs and stone turrets crowning Cap Diamant high above Old Québec and the St. Lawrence River.'
         },
         {
           id: 'st-lawrence-port',
           name: 'St. Lawrence Riverfront & Citadel',
-          coords: [62, 0, -135],
+          coords: [75, 0, -185],
           elevationM: 35,
-          description: 'Historic fortified promontory and deep-water maritime corridor connecting the Great Lakes to the Atlantic.'
+          description: 'Historic fortified stone citadel promontory and deep-water maritime port along the St. Lawrence Seaway corridor connecting the Great Lakes to the Atlantic.'
         },
         {
           id: 'montreal-olympic-tower',
           name: 'Montréal Inclined Tower',
-          coords: [-78, 0, 210],
+          coords: [-88, 0, 315],
           elevationM: 165,
-          description: '165-metre 45-degree inclined concrete tower rising over Hochelaga and the St. Lawrence bridges.'
+          description: 'World’s tallest inclined structure at 165 metres and 45 degrees, soaring over Hochelaga-Maisonneuve and the St. Lawrence bridge network.'
         }
       ],
       codexFacts: [
-        'Québec City is the only fortified walled city north of Mexico, founded by Samuel de Champlain in 1608.',
-        'The St. Lawrence River drains the Great Lakes and stretches over 1,197 km to the Gulf of St. Lawrence.',
-        'Montréal’s Olympic Tower is the tallest inclined structure in the world at a 45-degree angle.'
+        'Québec City is the only preserved fortified walled city north of Mexico, safeguarded by 4.6 km of historic ramparts and the Citadelle atop Cap Diamant.',
+        'Autoroute 20 and Autoroute 40 flank the historic St. Lawrence River valley, traversing centuries-old French seigneurial agricultural strip farms.',
+        'The Pont de Québec across the St. Lawrence River has the longest cantilever bridge span in the world at 549 metres.'
       ],
       href: 'province-quebec.html'
     },
@@ -131,29 +131,29 @@
         {
           id: 'canada-place',
           name: 'Canada Place Sails',
-          coords: [-18, 0, -72],
+          coords: [-22, 0, -95],
           elevationM: 42,
-          description: 'Five iconic white tensioned-fabric sails jutting into Burrard Inlet at Vancouver’s Pacific waterfront.'
+          description: 'Five iconic Teflon-coated fiberglass architectural sails jutting into Burrard Inlet at Vancouver’s vibrant Pacific harbour terminus.'
         },
         {
           id: 'lions-gate-bridge',
           name: 'Lions Gate Suspension Bridge',
-          coords: [70, 0, -140],
+          coords: [78, 0, -195],
           elevationM: 111,
-          description: 'Emerald-green art deco suspension bridge spanning First Narrows between Stanley Park and the North Shore.'
+          description: 'Emerald-green art deco three-lane suspension bridge spanning First Narrows between Stanley Park and the North Shore Coast Mountains.'
         },
         {
           id: 'coast-mountains-fjord',
           name: 'Coast Mountains & Howe Sound',
-          coords: [-88, 0, 215],
+          coords: [-95, 0, 320],
           elevationM: 1850,
-          description: 'Glaciated granite peaks plunging straight into deep Pacific fjord waters and temperate Douglas-fir rainforest.'
+          description: 'Glaciated granite peaks and cascading waterfalls along the Sea-to-Sky Highway corridor where the Coast Mountains plunge sheer into deep Pacific fjord waters.'
         }
       ],
       codexFacts: [
-        'British Columbia has more than 25,700 km of coastline including Vancouver Island and Haida Gwaii.',
-        'Lions Gate Bridge opened in 1938 and links downtown Vancouver to the Coast Mountains.',
-        'Temperate coastal rainforests in BC host centuries-old Western Red Cedar and Sitka Spruce.'
+        'The Sea-to-Sky Highway (BC Hwy 99) climbs 670 metres from sea-level Howe Sound fjords to alpine Whistler, flanked by sheer granite cliffs and engineered rock sheds.',
+        'Rogers Pass on Trans-Canada Highway 1 features heavy reinforced-concrete avalanche snowsheds and active artillery fire control to maintain winter corridor safety.',
+        'Lions Gate Bridge opened in 1938 and links downtown Vancouver to the Pacific Coast Mountains via a historic 472-metre main suspension span.'
       ],
       href: 'province-british-columbia.html'
     },
@@ -181,29 +181,29 @@
         {
           id: 'calgary-tower',
           name: 'Calgary Tower & Bow Skyline',
-          coords: [0, 0, -65],
+          coords: [0, 0, -90],
           elevationM: 191,
-          description: '191-metre observation spire overlooking the Bow River Valley and glass towers of downtown Calgary.'
+          description: '191-metre observation spire and flame cauldron overlooking the Bow River Valley and corporate towers of downtown Calgary.'
         },
         {
           id: 'banff-rockies',
           name: 'Banff Rundle & Cascade Massif',
-          coords: [-80, 0, -215],
+          coords: [-92, 0, -320],
           elevationM: 2948,
-          description: 'Dramatic tilted limestone strata of the Canadian Rockies rising sharply above spruce foothills.'
+          description: 'Massive tilted limestone and dolomite strata of Mount Rundle and Cascade Mountain framing Trans-Canada Highway 1 through Bow Valley.'
         },
         {
           id: 'lake-louise',
           name: 'Lake Louise Glacial Basin',
-          coords: [72, 0, 120],
+          coords: [85, 0, 220],
           elevationM: 1750,
-          description: 'Turquoise rock-flour glacial lake cradled beneath Victoria Glacier and subalpine larch slopes.'
+          description: 'Turquoise rock-flour glacial lake cradled beneath Mount Victoria and the historic Fairmont Chateau Lake Louise along the Continental Divide.'
         }
       ],
       codexFacts: [
-        'Banff National Park, established in 1885, is Canada’s oldest national park.',
-        'Lake Louise owes its vivid turquoise colour to finely ground glacial silt suspended in meltwater.',
-        'Warm Chinook winds sweeping down the eastern slopes of the Rockies can raise Alberta temperatures by 20 °C in hours.'
+        'Trans-Canada Highway 1 through Banff National Park pioneered world-famous landscaped wildlife overpasses and underpasses, reducing animal collisions by over 80%.',
+        'Highway 93 North (Icefields Parkway) weaves 232 km across the spine of the Canadian Rockies past the Columbia Icefield and Athabasca Glacier.',
+        'Warm Chinook winds descending from the Rockies can raise southern Alberta highway temperatures by 20 °C in mere hours.'
       ],
       href: 'province-alberta.html'
     },
@@ -231,29 +231,29 @@
         {
           id: 'peace-tower',
           name: 'Parliament Hill & Peace Tower',
-          coords: [0, 0, -70],
+          coords: [0, 0, -90],
           elevationM: 92,
-          description: 'High Victorian Gothic Revival Centre Block crowned by the 92.2 m Peace Tower and patinated copper roofs.'
+          description: 'High Victorian Gothic Revival Centre Block on Parliament Hill crowned by the 92.2 m Peace Tower, Memorial Chamber, and patinated copper roofs.'
         },
         {
           id: 'rideau-canal',
           name: 'Rideau Canal Locks',
-          coords: [50, 0, -120],
+          coords: [58, 0, -175],
           elevationM: 60,
-          description: 'UNESCO World Heritage 202-km canal and winter skateway winding past Chateau Laurier to the Ottawa River.'
+          description: 'UNESCO World Heritage 202-km stone canal and lockstation corridor winding past Château Laurier, transforming in winter into the 7.8 km Rideau Canal Skateway.'
         },
         {
           id: 'alexandra-bridge',
           name: 'Alexandra Interprovincial Bridge',
-          coords: [-62, 0, 200],
+          coords: [-74, 0, 305],
           elevationM: 45,
-          description: 'Cantilever steel truss bridge linking Ottawa, Ontario and Gatineau, Quebec across the Ottawa River.'
+          description: 'Historic 1901 cantilever steel truss bridge spanning the Ottawa River between Ottawa, Ontario and Gatineau, Quebec with scenic boardwalk views of Parliament Hill.'
         }
       ],
       codexFacts: [
-        'Opened in 1832, the Rideau Canal is the oldest continuously operated canal system in North America.',
-        'In winter, a 7.8-km stretch of the Rideau Canal freezes into the world’s largest naturally frozen skating rink.',
-        'The Peace Tower carillon houses 53 bronze bells and commemorates Canadians who served in WWI.'
+        'Completed in 1832 under Lt.-Col. John By, the Rideau Canal is North America’s oldest continuously operated slackwater canal system.',
+        'Highway 417 (The Queensway) serves as the primary east-west freeway spine through Ottawa, connecting high-tech Silicon Valley North in Kanata.',
+        'The Peace Tower carillon houses 53 tuned bronze bells weighing up to 10 tonnes, commemorating Canadian service in World War I.'
       ],
       href: 'province-national-capital.html'
     },
@@ -281,29 +281,29 @@
         {
           id: 'peggys-cove-lighthouse',
           name: 'Peggy’s Point Lighthouse',
-          coords: [0, 4, -72],
+          coords: [0, 4, -95],
           elevationM: 15,
-          description: 'Iconic 1915 octagonal white-and-red beacon perched on glacially scoured Devonian granite boulders.'
+          description: 'Iconic 1915 reinforced concrete octagonal beacon perched on glacially scoured Devonian granite boulders at the entrance to St. Margarets Bay.'
         },
         {
           id: 'granite-headland',
           name: 'Peggy’s Cove Granite Batholith',
-          coords: [-42, 0, -130],
+          coords: [-52, 0, -185],
           elevationM: 12,
-          description: 'Smooth wave-swept coastal granite ledges meeting the surging swells of St. Margarets Bay.'
+          description: 'Smooth, wave-swept South Mountain Batholith granite ledges meeting the relentless North Atlantic ocean swells along the scenic Lighthouse Route.'
         },
         {
           id: 'halifax-harbour-pier',
           name: 'Halifax Harbour & Pier 21',
-          coords: [80, 0, 210],
+          coords: [90, 0, 315],
           elevationM: 8,
-          description: 'One of the world’s deepest ice-free natural harbours guarded by Citadel Hill.'
+          description: 'Historic naval dockyards and Pier 21 immigration gateway guarding one of the world’s deepest ice-free natural harbours beneath Citadel Hill.'
         }
       ],
       codexFacts: [
-        'Peggy’s Point Lighthouse has guided North Atlantic mariners since 1868 (current concrete tower built 1915).',
-        'No point in Nova Scotia is more than 67 km from the ocean.',
-        'Halifax Harbour is the second-largest natural harbour in the world after Sydney, Australia.'
+        'Peggy’s Point Lighthouse sits atop the 370-million-year-old South Mountain Batholith, weathered smooth by ancient Pleistocene glaciers.',
+        'Cape Breton’s world-renowned Cabot Trail highway climbs over 450-metre coastal plateaus with hair-raising switchbacks above the Gulf of St. Lawrence.',
+        'Pier 21 in Halifax was the port of entry for over 1.5 million immigrants, refugees, and returning wartime troops between 1928 and 1971.'
       ],
       href: 'province-nova-scotia.html'
     },
@@ -331,29 +331,29 @@
         {
           id: 'cabot-tower',
           name: 'Signal Hill Cabot Tower',
-          coords: [0, 12, -75],
+          coords: [0, 12, -95],
           elevationM: 150,
-          description: 'Sandstone tower on Signal Hill where Guglielmo Marconi received the first transatlantic wireless signal in 1901.'
+          description: 'Gothic revival red sandstone fortification crowning Signal Hill where Guglielmo Marconi received the world’s first transatlantic wireless signal in 1901.'
         },
         {
           id: 'jellybean-row',
           name: 'Jellybean Row Heritage Terrace',
-          coords: [-55, 0, -145],
+          coords: [-68, 0, -195],
           elevationM: 25,
-          description: 'Steep St. John’s clapboard rowhouses painted in vibrant yellow, crimson, cobalt, and teal.'
+          description: 'Steep downtown St. John’s heritage clapboard rowhouses painted in vibrant crimson, gold, cobalt, and emerald to pierce the dense North Atlantic fog.'
         },
         {
           id: 'iceberg-alley',
           name: 'Iceberg Alley Tabular Bergs',
-          coords: [75, 0, 205],
+          coords: [88, 0, 320],
           elevationM: 45,
-          description: '10,000-year-old Greenland glacial icebergs drifting south along the Labrador Current.'
+          description: '10,000-year-old glacial tabular icebergs drifting south from Greenland along the cold Labrador Current past Cape Spear.'
         }
       ],
       codexFacts: [
-        'Cape Spear near St. John’s is the easternmost point in North America.',
-        'On December 12, 1901, Marconi received the letter "S" in Morse code at Signal Hill from Cornwall, England.',
-        'L’Anse aux Meadows in northern Newfoundland is the only confirmed Norse Viking settlement in North America (~1000 CE).'
+        'Mile One of the 7,821-km Trans-Canada Highway begins in St. John’s, traversing 905 km of rugged Newfoundland wilderness to Port aux Basques.',
+        'Signal Hill at the entrance to St. John’s Harbour was the site of the pivotal final battle of the Seven Years’ War in North America in 1762.',
+        'St. John’s Jellybean Row houses feature traditional clapboard siding, heavy wooden storm doors, and ornate trim engineered to endure harsh Atlantic blizzards.'
       ],
       href: 'province-newfoundland.html'
     },
@@ -381,29 +381,29 @@
         {
           id: 'hopewell-rocks',
           name: 'Hopewell Flowerpot Rocks',
-          coords: [0, 0, -65],
+          coords: [0, 0, -88],
           elevationM: 21,
-          description: 'Red sandstone sea stacks sculpted by the world’s highest tides and topped with resilient spruce trees.'
+          description: 'Red sandstone flowerpot rock sea stacks sculpted by the world’s highest tides and crowned with hardy spruce trees along Shepody Bay.'
         },
         {
           id: 'fundy-cliffs',
           name: 'Bay of Fundy Red Cliffs',
-          coords: [-62, 0, -135],
+          coords: [-75, 0, -190],
           elevationM: 32,
-          description: 'Iron-rich conglomerate cliffs experiencing 16-metre vertical tidal swings twice every day.'
+          description: 'Towering Carboniferous red conglomerate coastal cliffs along Route 114 undergoing 16-metre semi-diurnal tidal fluctuations twice each day.'
         },
         {
           id: 'reversing-falls-bridge',
           name: 'Saint John Harbour Span',
-          coords: [72, 0, 200],
+          coords: [84, 0, 310],
           elevationM: 40,
-          description: 'Steel arch crossing over the tidal gorge where Fundy’s surge reverses the Saint John River.'
+          description: 'Steel highway and railway through-arch bridges spanning the rocky gorge where massive Bay of Fundy high tides force the Saint John River to reverse its flow.'
         }
       ],
       codexFacts: [
-        'The Bay of Fundy has the highest tidal range on Earth, reaching up to 16.3 metres (53 ft).',
-        'New Brunswick is Canada’s only officially bilingual province.',
-        'Hartland Covered Bridge in New Brunswick is the longest covered bridge in the world at 391 metres.'
+        'The Bay of Fundy moves 160 billion tonnes of seawater each 12-hour tide cycle—exceeding the combined flow of all freshwater rivers on Earth.',
+        'Hartland Covered Bridge in western New Brunswick is the world’s longest wooden covered bridge, spanning 391 metres across the Saint John River.',
+        'New Brunswick is Canada’s only constitutionally bilingual province, with the Trans-Canada Hwy 2 corridor connecting Acadian and English heritage communities.'
       ],
       href: 'province-new-brunswick.html'
     },
@@ -431,29 +431,29 @@
         {
           id: 'confederation-bridge',
           name: 'Confederation Bridge',
-          coords: [20, 0, -78],
+          coords: [24, 0, -110],
           elevationM: 60,
-          description: '12.9-km curved concrete box-girder bridge spanning the Abegweit Passage of Northumberland Strait.'
+          description: '12.9-km post-tensioned curved concrete box-girder bridge spanning the Abegweit Passage with conical ice shields to fracture winter drift ice.'
         },
         {
           id: 'green-gables',
           name: 'Green Gables Heritage House',
-          coords: [-58, 0, 125],
+          coords: [-68, 0, 195],
           elevationM: 12,
-          description: 'White farmhouse with forest-green gables in Cavendish that inspired L.M. Montgomery’s Anne of Green Gables.'
+          description: '19th-century white farmhouse with dark-green gables in Cavendish that inspired L.M. Montgomery’s timeless novel Anne of Green Gables.'
         },
         {
           id: 'point-prim-lighthouse',
           name: 'Red Sandstone Cliffs & Lighthouse',
-          coords: [-74, 0, -215],
+          coords: [-85, 0, -315],
           elevationM: 18,
-          description: 'Iron-oxide red sandstone bluffs paired with a classic round brick coastal lighthouse.'
+          description: 'Historic 1845 circular brick lighthouse standing sentinel atop the iron-rich rust-red Permian sandstone bluffs of Hillsborough Bay.'
         }
       ],
       codexFacts: [
-        'Confederation Bridge (opened 1997) is the longest bridge in the world crossing ice-covered water.',
-        'PEI’s famous red soil gets its colour from high iron oxide content that rusts on contact with air.',
-        'The 1864 Charlottetown Conference laid the groundwork for Canadian Confederation in 1867.'
+        'Opened in 1997, Confederation Bridge is the world’s longest continuous bridge spanning ice-covered marine waters, linking Borden-Carleton to New Brunswick.',
+        'PEI’s rolling agricultural soil and coastal cliffs get their striking red coloration from high iron oxide content oxidized over 300 million years.',
+        'The 1864 Charlottetown Conference held at Province House laid the founding blueprint for the Dominion of Canada.'
       ],
       href: 'province-prince-edward-island.html'
     },
@@ -481,29 +481,29 @@
         {
           id: 'cmhr-spire',
           name: 'Canadian Museum for Human Rights',
-          coords: [0, 0, -68],
+          coords: [0, 0, -90],
           elevationM: 100,
-          description: 'Sweeping curvilinear glass cloud and 100-metre Tower of Hope rising at The Forks in Winnipeg.'
+          description: 'Sweeping Antoine Predock curved glass cloud facade and 100-metre Tower of Hope spire anchoring The Forks in Winnipeg.'
         },
         {
           id: 'the-forks',
           name: 'Red & Assiniboine Forks Confluence',
-          coords: [44, 0, 115],
+          coords: [56, 0, 175],
           elevationM: 230,
-          description: '6,000-year-old Indigenous meeting place and riverfront promenade where two prairie rivers merge.'
+          description: '6,000-year-old Indigenous trade and ceremonial gathering site at the scenic confluence of the Red and Assiniboine rivers.'
         },
         {
           id: 'churchill-aurora-station',
           name: 'Northern Boreal Aurora Ridge',
-          coords: [-76, 0, -225],
+          coords: [-90, 0, -320],
           elevationM: 45,
-          description: 'Subarctic spruce-tundra horizon under the Hudson Bay auroral oval.'
+          description: 'Subarctic boreal research ridge and Hudson Bay tundra outpost positioned directly under the primary northern auroral oval.'
         }
       ],
       codexFacts: [
-        'Manitoba has over 100,000 lakes, including Lake Winnipeg—one of the largest freshwater lakes in the world.',
-        'Churchill on Hudson Bay is known as the Polar Bear Capital of the World and sits directly beneath the Aurora Oval.',
-        'The Forks in Winnipeg has been a crossroads for Indigenous trade and gathering for over 6,000 years.'
+        'Trans-Canada Highway 1 passes the Longitudinal Centre of Canada (96° 48’ 35” W) just east of Winnipeg, marking the halfway point between oceans.',
+        'Churchill on Hudson Bay is recognized as the Polar Bear Capital of the World and one of the globe’s best locations for Aurora Borealis viewings.',
+        'The Forks in Winnipeg has served as an essential seasonal crossroads for First Nations and Métis trade for over six millennia.'
       ],
       href: 'province-manitoba.html'
     },
@@ -531,29 +531,29 @@
         {
           id: 'regina-legislative',
           name: 'Saskatchewan Legislative Building',
-          coords: [0, 0, -70],
+          coords: [0, 0, -90],
           elevationM: 53,
-          description: 'Beaux-Arts Tyndall limestone dome overlooking Wascana Lake in Regina.'
+          description: 'Grand Beaux-Arts legislative dome clad in native Manitoba Tyndall limestone, overlooking Wascana Centre gardens in Regina.'
         },
         {
           id: 'grain-elevators',
           name: 'Prairie Sentinel Grain Elevators',
-          coords: [-60, 0, -140],
+          coords: [-75, 0, -210],
           elevationM: 32,
-          description: 'Iconic timber-cribbed prairie grain elevators standing along the transcontinental rail line.'
+          description: 'Iconic timber-cribbed "Prairies sentinels" painted in CPR and wheat pool heritage liveries standing along the transcontinental railway line.'
         },
         {
           id: 'wascana-lake',
           name: 'Wascana Centre & Golden Wheatfields',
-          coords: [68, 0, 195],
+          coords: [85, 0, 315],
           elevationM: 575,
-          description: 'Expansive prairie parkland and shimmering amber wheatfields under endless Living Skies.'
+          description: 'Expansive 930-hectare urban parkland basin and golden wheatfield horizons stretching beneath Saskatchewan’s legendary Living Skies.'
         }
       ],
       codexFacts: [
-        'Saskatchewan has over 40% of Canada’s cultivated farmland and is a global leader in wheat, canola, and lentils.',
-        'The province receives more hours of sunshine annually than any other Canadian province.',
-        'Wascana Centre in Regina is one of the largest urban parks in North America at 930 hectares.'
+        'Historic timber-cribbed prairie grain elevators were engineered with interlocking 2x4 spruce planks to withstand thousands of tons of outward grain pressure.',
+        'Saskatchewan contains over 40% of Canada’s total cultivated farmland, serving as a global agricultural powerhouse for wheat, canola, and pulses.',
+        'The Yellowhead Highway (Hwy 16) and Trans-Canada Hwy 1 span vast post-glacial plains and scenic coulees under more annual sunshine than any other Canadian province.'
       ],
       href: 'province-saskatchewan.html'
     },
@@ -581,29 +581,29 @@
         {
           id: 'ss-klondike',
           name: 'SS Klondike Sternwheeler',
-          coords: [18, 0, -62],
+          coords: [20, 0, -90],
           elevationM: 18,
-          description: 'Restored 1937 Yukon River sternwheel paddleboat dry-docked on the Whitehorse riverfront.'
+          description: 'Restored 1937 British Yukon Navigation Co. sternwheel steam paddleboat dry-docked on the Yukon River embankment in Whitehorse.'
         },
         {
           id: 'dawson-boardwalk',
           name: 'Dawson City Klondike Boardwalk',
-          coords: [-58, 0, 130],
+          coords: [-70, 0, 195],
           elevationM: 14,
-          description: 'False-front heritage timber buildings and wooden sidewalks from the 1898 Klondike Gold Rush.'
+          description: 'Preserved 1898 gold rush false-front timber architecture and raised boardwalks along Front Street in Dawson City.'
         },
         {
           id: 'mount-logan',
           name: 'Mount Logan & Kluane Icefields',
-          coords: [-90, 0, -225],
+          coords: [-105, 0, -320],
           elevationM: 5959,
-          description: 'Canada’s highest peak (5,959 m) rising from the vast St. Elias non-polar icefields.'
+          description: 'Canada’s highest mountain summit (5,959 m) rising from the monumental sub-polar glaciers of Kluane National Park.'
         }
       ],
       codexFacts: [
-        'Mount Logan in Kluane National Park is Canada’s highest mountain at 5,959 metres.',
-        'The 1896–1899 Klondike Gold Rush brought roughly 100,000 prospectors toward Dawson City.',
-        'The Dempster Highway is Canada’s only all-season highway crossing the Arctic Circle.'
+        'The Alaska Highway was surveyed and pushed through 2,232 km of subarctic muskeg, mountains, and permafrost in only eight months in 1942.',
+        'The Dempster Highway (Yukon Hwy 5) is Canada’s premier all-season gravel roadway crossing the Arctic Circle to the Mackenzie Delta and Arctic Ocean.',
+        'Mount Logan in Kluane National Park features eleven distinct peaks exceeding 5,000 metres and the largest base circumference of any non-volcanic peak on Earth.'
       ],
       href: 'province-yukon.html'
     },
@@ -631,29 +631,29 @@
         {
           id: 'great-slave-ice-road',
           name: 'Great Slave Lake Ice Road',
-          coords: [0, 0, -64],
+          coords: [0, 0, -88],
           elevationM: 156,
-          description: 'Engineered winter ice highway linking Yellowknife across frozen Great Slave Lake to Dettah.'
+          description: 'Engineered winter ice freeway plowed 1.5 metres deep across the crystal-clear frozen surface of Great Slave Lake connecting Yellowknife to Dettah.'
         },
         {
           id: 'diamond-headframe',
           name: 'Canadian Shield Diamond Headframe',
-          coords: [-65, 0, -135],
+          coords: [-78, 0, -195],
           elevationM: 48,
-          description: 'Subarctic mine headframe perched on ancient 4-billion-year-old Precambrian Shield granite.'
+          description: 'Subarctic mine exploration headframe anchored directly into billions-of-years-old Precambrian Canadian Shield granite.'
         },
         {
           id: 'yellowknife-aurora',
           name: 'Yellowknife Auroral Zenith',
-          coords: [68, 0, 205],
+          coords: [84, 0, 315],
           elevationM: 180,
-          description: 'Curtains of emerald and violet Aurora Borealis shimmering directly overhead in the clear subarctic sky.'
+          description: 'Vibrant curtains of dancing emerald and violet Aurora Borealis illuminating the subarctic night sky above the Canadian Shield.'
         }
       ],
       codexFacts: [
-        'Great Slave Lake is the deepest lake in North America at 614 metres.',
-        'Yellowknife sits directly beneath the Auroral Oval, offering aurora sightings over 240 nights per year.',
-        'The Acasta Gneiss in the Northwest Territories is among the oldest known intact rock on Earth (~4.03 billion years).'
+        'The Tibbitt to Contwoyto Winter Road is the world’s longest heavy-haul ice road, engineered across frozen subarctic lakes to service remote diamond mines.',
+        'Great Slave Lake is the deepest body of water in North America at 614 metres, feeding the vast 1,738 km Mackenzie River corridor.',
+        'Yellowknife’s northern latitude and inland shield climate create optimal viewing for the Northern Lights on more than 240 nights each year.'
       ],
       href: 'province-northwest-territories.html'
     },
@@ -681,29 +681,29 @@
         {
           id: 'monumental-inuksuk',
           name: 'Iqaluit Monumental Inuksuk',
-          coords: [0, 0, -66],
+          coords: [0, 0, -90],
           elevationM: 22,
-          description: 'Traditional stacked-stone Inuit directional landmark standing sentinel over Frobisher Bay.'
+          description: 'Traditional stacked-granite Inuit directional marker and cultural sentinel overlooking the tidal shoreline of Koojesse Inlet in Iqaluit.'
         },
         {
           id: 'frobisher-sea-ice',
           name: 'Frobisher Bay Sea Ice & Pack',
-          coords: [64, 0, 120],
+          coords: [78, 0, 195],
           elevationM: 0,
-          description: 'Fractured Arctic sea ice plates and pressure ridges bordering Baffin Island’s tidal bay.'
+          description: 'Dynamic frozen sea ice plateaus, tidal cracks, and pressure ridges extending across Frobisher Bay and Davis Strait.'
         },
         {
           id: 'baffin-peaks',
           name: 'Baffin Island Fjord Peaks',
-          coords: [-78, 0, -220],
+          coords: [-95, 0, -320],
           elevationM: 2100,
-          description: 'Jagged glaciated granite spires of the Arctic Cordillera glowing beneath polar aurora ribbons.'
+          description: 'Sheer glaciated granite towers and deep Arctic fjords of Baffin Island glowing beneath polar twilight.'
         }
       ],
       codexFacts: [
-        'Created on April 1, 1999, Nunavut covers over 2 million sq km—roughly one-fifth of Canada’s total landmass.',
-        'Alert on Ellesmere Island in Nunavut is the northernmost permanently inhabited place on Earth.',
-        'An Inuksuk ("in the likeness of a human") serves Inuit travellers as a navigation beacon, marker, and cultural emblem.'
+        'An Inuksuk (plural: Inuksuit) is constructed from unshaped tundra stone to serve as navigation guides, hunting markers, and sacred cultural beacons across the Arctic.',
+        'Nunavut spans roughly 2.09 million square kilometres—one-fifth of Canada’s total area—with communities linked entirely by air, sea, and winter sea ice travel.',
+        'The Legislative Assembly building in Iqaluit reflects Inuit traditions, featuring a woven seal-skin chamber and an official mace carved from narwhal tusk and caribou antler.'
       ],
       href: 'province-nunavut.html'
     }

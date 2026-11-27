@@ -635,7 +635,7 @@
       tailR.position.set(0.55, 0.78, halfLen);
       group.add(tailR);
 
-      const startZ = -340 + i * (680 / MAX_TRAFFIC);
+      const startZ = -460 + i * (920 / MAX_TRAFFIC);
       const xPos = lane > 0 ? 2.8 : -2.8;
       group.position.set(xPos, 0, startZ);
       // Local -Z is forward: lane > 0 moves -Z (yaw = 0); lane < 0 moves +Z (yaw = Math.PI)
@@ -1040,8 +1040,8 @@
     if (!ctx) return;
     const cx = width * 0.5;
     const cy = height * 0.5;
-    // radarRange ~160m — distant landmarks and nearby buildings both read clearly
-    const radarRange = 160;
+    // radarRange ~200m — distant landmarks and nearby buildings both read clearly
+    const radarRange = 200;
     const scale = (cx - 4) / radarRange;
     const ringR = cx - 2;
 
@@ -1455,8 +1455,8 @@
         if (!en.active) {
           const angle = Math.random() * Math.PI * 2;
           const dist = 34 + Math.random() * 24;
-          en.x = Math.max(-195, Math.min(195, player.x + Math.cos(angle) * dist));
-          en.z = Math.max(-355, Math.min(355, player.z + Math.sin(angle) * dist));
+          en.x = Math.max(-230, Math.min(230, player.x + Math.cos(angle) * dist));
+          en.z = Math.max(-475, Math.min(475, player.z + Math.sin(angle) * dist));
           en.y = 1.9;
           en.active = true;
           en.type = type || 'drone';
@@ -2312,7 +2312,7 @@
       if (inCruiser) {
         const tierMult = 1 + (profile.cruiserTier - 1) * 0.16;
         const boostMult = 1 + (profile.boostTier - 1) * 0.14;
-        // Increased top speed for 760m long-drive corridor: cruise 36 km/h-eq, boost 52
+        // Increased top speed for 1000m long-drive corridor: cruise 36 km/h-eq, boost 52
         const maxSpd = (boosting ? 52 * boostMult : 36) * tierMult;
         if (Math.abs(forward) > 0.05) {
           player.speed += forward * 36 * tierMult * dt;
@@ -2335,9 +2335,9 @@
 
       player.x -= Math.sin(player.yaw) * player.speed * dt;
       player.z -= Math.cos(player.yaw) * player.speed * dt;
-      // 760m corridor: x ∈ [-195, 195], z ∈ [-355, 355]
-      player.x = Math.max(-195, Math.min(195, player.x));
-      player.z = Math.max(-355, Math.min(355, player.z));
+      // 1000m corridor: x ∈ [-230, 230], z ∈ [-475, 475]
+      player.x = Math.max(-230, Math.min(230, player.x));
+      player.z = Math.max(-475, Math.min(475, player.z));
 
       const isMoving = Math.abs(player.speed) > 0.2;
       const isGrounded = player.y <= 0.01;
@@ -2446,6 +2446,8 @@
             en.x += -dirZ * en.speed * 0.65 * dt;
             en.z += dirX * en.speed * 0.65 * dt;
           }
+          en.x = Math.max(-230, Math.min(230, en.x));
+          en.z = Math.max(-475, Math.min(475, en.z));
 
           en.y = 1.9 + Math.sin(elapsed * 3.2 + en.hoverPhase) * 0.25;
           en.yaw = Math.atan2(-dirX, -dirZ);
@@ -2482,10 +2484,10 @@
           const tr = trafficPool[i];
           if (tr.lane > 0) {
             tr.z -= tr.speed * dt;
-            if (tr.z < -340) tr.z += 680;
+            if (tr.z < -460) tr.z += 920;
           } else {
             tr.z += tr.speed * dt;
-            if (tr.z > 340) tr.z -= 680;
+            if (tr.z > 460) tr.z -= 920;
           }
           tr.group.position.z = tr.z;
         }

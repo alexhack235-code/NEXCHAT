@@ -4,9 +4,11 @@
  * Uses cached procedural CanvasTextures, shared BufferGeometries, and InstancedMesh
  * for 60 FPS performance with zero per-frame allocations.
  *
- * Full 760-metre Trans-Canada Highway corridor (z: -380 → +380, terrain width 440m).
- * Dense roadside biomes, highway signage, 30+ city buildings, chalets, grain elevators,
- * lighthouses, and grand Banff/Rockies + all provincial landmarks at expanded coordinates.
+ * Full 1000-metre Trans-Canada Highway corridor (z ∈ [-500, +500], terrain width 520m).
+ * Dense roadside biomes, overhead Trans-Canada highway gantry signs spanning across the road,
+ * roadside signage, curbs/guardrails/streetlights across z ∈ [-490, +490], stepped-back city
+ * architecture (|x| >= 16) preserving camera clearance, functional buildings at x = ±8.2, z ∈ [2, 28],
+ * and distinct real-life Canadian architecture & scenery for all 14 provinces and territories.
  */
 (function (global) {
   'use strict';
@@ -34,7 +36,7 @@
 
   function tierScale(qualityTier) {
     if (qualityTier === 'battery') return 0.45;
-    if (qualityTier === 'balanced') return 0.72;
+    if (qualityTier === 'balanced') return 0.75;
     return 1.0;
   }
 
@@ -42,10 +44,15 @@
     if (TEX_CACHE[key]) return TEX_CACHE[key];
     const o = opts || {};
     const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
+    if (typeof size === 'number') {
+      canvas.width = size;
+      canvas.height = size;
+    } else {
+      canvas.width = size.w || 256;
+      canvas.height = size.h || 256;
+    }
     const ctx = canvas.getContext('2d');
-    drawFn(ctx, size);
+    drawFn(ctx, canvas.width, canvas.height);
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.RepeatWrapping;
@@ -69,66 +76,119 @@
       const isShield = biome === 'subarctic-shield' || biome === 'granite-lighthouse';
       const isRed = biome === 'red-sand-island' || biome === 'fundy-coast';
       const isPrairie = biome === 'living-skies-wheat' || biome === 'prairie-lake';
-      for (let i = 0; i < 2400; i += 1) {
-        const x = rng() * s, y = rng() * s, r = 1 + rng() * (isSnow ? 4.5 : 3.2), v = rng();
-        if (isSnow) ctx.fillStyle = v > 0.78 ? 'rgba(203,213,225,0.28)' : (v > 0.35 ? 'rgba(255,255,255,0.34)' : 'rgba(148,163,184,0.18)');
-        else if (isShield) ctx.fillStyle = v > 0.7 ? 'rgba(100,116,139,0.26)' : (v > 0.35 ? 'rgba(74,107,68,0.28)' : 'rgba(163,177,138,0.2)');
-        else if (isRed) ctx.fillStyle = v > 0.65 ? 'rgba(180,83,9,0.24)' : (v > 0.3 ? 'rgba(63,115,62,0.26)' : 'rgba(217,119,6,0.16)');
-        else if (isPrairie) ctx.fillStyle = v > 0.65 ? 'rgba(161,132,48,0.25)' : (v > 0.3 ? 'rgba(84,122,58,0.25)' : 'rgba(120,96,48,0.18)');
-        else ctx.fillStyle = v > 0.68 ? 'rgba(34,84,45,0.28)' : (v > 0.32 ? 'rgba(82,128,64,0.24)' : 'rgba(78,64,46,0.18)');
+      for (let i = 0; i < 2600; i += 1) {
+        const x = rng() * s, y = rng() * s, r = 1 + rng() * (isSnow ? 4.8 : 3.4), v = rng();
+        if (isSnow) ctx.fillStyle = v > 0.78 ? 'rgba(203,213,225,0.32)' : (v > 0.35 ? 'rgba(255,255,255,0.38)' : 'rgba(148,163,184,0.22)');
+        else if (isShield) ctx.fillStyle = v > 0.7 ? 'rgba(100,116,139,0.30)' : (v > 0.35 ? 'rgba(74,107,68,0.32)' : 'rgba(180,165,160,0.24)');
+        else if (isRed) ctx.fillStyle = v > 0.65 ? 'rgba(185,28,28,0.28)' : (v > 0.3 ? 'rgba(180,83,9,0.28)' : 'rgba(217,119,6,0.18)');
+        else if (isPrairie) ctx.fillStyle = v > 0.65 ? 'rgba(161,132,48,0.28)' : (v > 0.3 ? 'rgba(84,122,58,0.26)' : 'rgba(120,96,48,0.20)');
+        else ctx.fillStyle = v > 0.68 ? 'rgba(34,84,45,0.30)' : (v > 0.32 ? 'rgba(82,128,64,0.25)' : 'rgba(78,64,46,0.20)');
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
       }
-      ctx.strokeStyle = isSnow ? 'rgba(255,255,255,0.16)' : 'rgba(20,40,20,0.14)';
+      ctx.strokeStyle = isSnow ? 'rgba(255,255,255,0.18)' : 'rgba(20,40,20,0.15)';
       ctx.lineWidth = 1;
-      for (let i = 0; i < 420; i += 1) {
+      for (let i = 0; i < 480; i += 1) {
         const x = rng() * s, y = rng() * s;
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + (rng() - 0.5) * 6, y - 2 - rng() * 5); ctx.stroke();
       }
-    }, { rx: 22, ry: 22, srgb: true });
+    }, { rx: 28, ry: 28, srgb: true });
+
     const bump = getCachedTexture(THREE, keyBase + '_bump', 256, function (ctx, s) {
       ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, s, s);
       const bRng = mulberry32(hashString(keyBase + '_b'));
-      for (let i = 0; i < 2200; i += 1) {
+      for (let i = 0; i < 2400; i += 1) {
         const shade = Math.floor(85 + bRng() * 90);
         ctx.fillStyle = 'rgb(' + shade + ',' + shade + ',' + shade + ')';
         ctx.fillRect(bRng() * s, bRng() * s, 2 + bRng() * 3, 2 + bRng() * 3);
       }
-    }, { rx: 22, ry: 22, srgb: false });
+    }, { rx: 28, ry: 28, srgb: false });
     return { map, bump };
   }
 
-  function getRoadTextures(THREE, isIceRoad) {
-    const key = isIceRoad ? 'road_ice' : 'road_asphalt';
+  function getRoadTextures(THREE, isIceRoad, isPackedSnow) {
+    let key = 'road_asphalt';
+    if (isPackedSnow) key = 'road_packed_snow';
+    else if (isIceRoad) key = 'road_ice';
+
     const rng = mulberry32(hashString(key));
     const map = getCachedTexture(THREE, key + '_diff', 256, function (ctx, s) {
-      ctx.fillStyle = isIceRoad ? '#9ec5de' : '#262b33';
-      ctx.fillRect(0, 0, s, s);
-      for (let i = 0; i < 3600; i += 1) {
-        const x = rng() * s, y = rng() * s, v = rng();
-        if (isIceRoad) ctx.fillStyle = v > 0.5 ? 'rgba(224,242,254,0.28)' : 'rgba(125,175,205,0.24)';
-        else ctx.fillStyle = v > 0.55 ? 'rgba(71,85,105,0.28)' : 'rgba(15,23,42,0.34)';
-        ctx.fillRect(x, y, 1.5, 1.5);
+      if (isPackedSnow) {
+        // Nunavut packed polar snow & hardpack ice trail
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(0, 0, s, s);
+        for (let i = 0; i < 3800; i += 1) {
+          const x = rng() * s, y = rng() * s, v = rng();
+          ctx.fillStyle = v > 0.6 ? 'rgba(241,245,249,0.55)' : (v > 0.3 ? 'rgba(186,230,253,0.35)' : 'rgba(148,163,184,0.30)');
+          ctx.fillRect(x, y, 2, 2);
+        }
+        // Packed snow tyre tracks
+        const trackL = ctx.createLinearGradient(s * 0.16, 0, s * 0.44, 0);
+        trackL.addColorStop(0, 'rgba(0,0,0,0)');
+        trackL.addColorStop(0.5, 'rgba(100,116,139,0.32)');
+        trackL.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = trackL; ctx.fillRect(s * 0.16, 0, s * 0.28, s);
+
+        const trackR = ctx.createLinearGradient(s * 0.56, 0, s * 0.84, 0);
+        trackR.addColorStop(0, 'rgba(0,0,0,0)');
+        trackR.addColorStop(0.5, 'rgba(100,116,139,0.32)');
+        trackR.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = trackR; ctx.fillRect(s * 0.56, 0, s * 0.28, s);
+
+        // Cyan-white ice track edges
+        ctx.fillStyle = 'rgba(224,242,254,0.7)';
+        ctx.fillRect(s * 0.045, 0, s * 0.03, s);
+        ctx.fillRect(s * 0.925, 0, s * 0.03, s);
+      } else if (isIceRoad) {
+        // NWT Great Slave Lake winter ice road
+        ctx.fillStyle = '#9ec5de';
+        ctx.fillRect(0, 0, s, s);
+        for (let i = 0; i < 3600; i += 1) {
+          const x = rng() * s, y = rng() * s, v = rng();
+          ctx.fillStyle = v > 0.5 ? 'rgba(224,242,254,0.32)' : 'rgba(125,175,205,0.26)';
+          ctx.fillRect(x, y, 1.5, 1.5);
+        }
+        const trackGradL = ctx.createLinearGradient(s * 0.18, 0, s * 0.42, 0);
+        trackGradL.addColorStop(0, 'rgba(0,0,0,0)');
+        trackGradL.addColorStop(0.5, 'rgba(186,230,253,0.30)');
+        trackGradL.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = trackGradL; ctx.fillRect(s * 0.18, 0, s * 0.24, s);
+
+        const trackGradR = ctx.createLinearGradient(s * 0.58, 0, s * 0.82, 0);
+        trackGradR.addColorStop(0, 'rgba(0,0,0,0)');
+        trackGradR.addColorStop(0.5, 'rgba(186,230,253,0.30)');
+        trackGradR.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = trackGradR; ctx.fillRect(s * 0.58, 0, s * 0.24, s);
+
+        ctx.fillStyle = 'rgba(224,242,254,0.75)';
+        ctx.fillRect(s * 0.045, 0, s * 0.022, s);
+        ctx.fillRect(s * 0.933, 0, s * 0.022, s);
+      } else {
+        // Heavy-duty Trans-Canada asphalt
+        ctx.fillStyle = '#262b33';
+        ctx.fillRect(0, 0, s, s);
+        for (let i = 0; i < 3600; i += 1) {
+          const x = rng() * s, y = rng() * s, v = rng();
+          ctx.fillStyle = v > 0.55 ? 'rgba(71,85,105,0.28)' : 'rgba(15,23,42,0.34)';
+          ctx.fillRect(x, y, 1.5, 1.5);
+        }
+        const trackGradL = ctx.createLinearGradient(s * 0.18, 0, s * 0.42, 0);
+        trackGradL.addColorStop(0, 'rgba(0,0,0,0)');
+        trackGradL.addColorStop(0.5, 'rgba(12,16,22,0.32)');
+        trackGradL.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = trackGradL; ctx.fillRect(s * 0.18, 0, s * 0.24, s);
+
+        const trackGradR = ctx.createLinearGradient(s * 0.58, 0, s * 0.82, 0);
+        trackGradR.addColorStop(0, 'rgba(0,0,0,0)');
+        trackGradR.addColorStop(0.5, 'rgba(12,16,22,0.32)');
+        trackGradR.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = trackGradR; ctx.fillRect(s * 0.58, 0, s * 0.24, s);
+
+        ctx.fillStyle = 'rgba(241,245,249,0.78)';
+        ctx.fillRect(s * 0.045, 0, s * 0.022, s);
+        ctx.fillRect(s * 0.933, 0, s * 0.022, s);
       }
-      const trackGradL = ctx.createLinearGradient(s * 0.18, 0, s * 0.42, 0);
-      trackGradL.addColorStop(0, 'rgba(0,0,0,0)');
-      trackGradL.addColorStop(0.5, isIceRoad ? 'rgba(186,230,253,0.25)' : 'rgba(12,16,22,0.28)');
-      trackGradL.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = trackGradL; ctx.fillRect(s * 0.18, 0, s * 0.24, s);
-      const trackGradR = ctx.createLinearGradient(s * 0.58, 0, s * 0.82, 0);
-      trackGradR.addColorStop(0, 'rgba(0,0,0,0)');
-      trackGradR.addColorStop(0.5, isIceRoad ? 'rgba(186,230,253,0.25)' : 'rgba(12,16,22,0.28)');
-      trackGradR.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = trackGradR; ctx.fillRect(s * 0.58, 0, s * 0.24, s);
-      ctx.fillStyle = isIceRoad ? 'rgba(224,242,254,0.65)' : 'rgba(241,245,249,0.75)';
-      ctx.fillRect(s * 0.045, 0, s * 0.022, s);
-      ctx.fillRect(s * 0.933, 0, s * 0.022, s);
-      ctx.strokeStyle = isIceRoad ? 'rgba(255,255,255,0.22)' : 'rgba(10,12,16,0.38)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i < 6; i += 1) {
-        const y0 = rng() * s;
-        ctx.beginPath(); ctx.moveTo(rng() * s * 0.5, y0); ctx.lineTo(rng() * s, y0 + (rng() - 0.5) * 18); ctx.stroke();
-      }
-    }, { rx: 1, ry: 56, srgb: true });
+    }, { rx: 1, ry: 75, srgb: true });
+
     const bump = getCachedTexture(THREE, key + '_bump', 256, function (ctx, s) {
       ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, s, s);
       const bRng = mulberry32(hashString(key + '_b'));
@@ -137,7 +197,7 @@
         ctx.fillStyle = 'rgb(' + shade + ',' + shade + ',' + shade + ')';
         ctx.fillRect(bRng() * s, bRng() * s, 1.5, 1.5);
       }
-    }, { rx: 1, ry: 56, srgb: false });
+    }, { rx: 1, ry: 75, srgb: false });
     return { map, bump };
   }
 
@@ -156,7 +216,7 @@
         }
       }
       ctx.putImageData(img, 0, 0);
-    }, { rx: 14, ry: 7, srgb: false });
+    }, { rx: 18, ry: 9, srgb: false });
   }
 
   function getConcreteTexture(THREE) {
@@ -188,6 +248,25 @@
     }, { rx: 2, ry: 2, srgb: true });
   }
 
+  function getPinkGraniteTexture(THREE) {
+    return getCachedTexture(THREE, 'pink_granite_diff', 256, function (ctx, s) {
+      ctx.fillStyle = '#9e807c'; ctx.fillRect(0, 0, s, s);
+      const rng = mulberry32(8821);
+      for (let i = 0; i < 2800; i += 1) {
+        const v = rng();
+        if (v > 0.6) ctx.fillStyle = 'rgba(214,148,136,0.38)';
+        else if (v > 0.3) ctx.fillStyle = 'rgba(74,68,70,0.35)';
+        else ctx.fillStyle = 'rgba(240,210,205,0.28)';
+        ctx.fillRect(rng() * s, rng() * s, 2 + rng() * 3, 2 + rng() * 2);
+      }
+      ctx.strokeStyle = 'rgba(50,40,42,0.45)'; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 18; i += 1) {
+        const y0 = rng() * s;
+        ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(s, y0 + (rng() - 0.5) * 30); ctx.stroke();
+      }
+    }, { rx: 3, ry: 3, srgb: true });
+  }
+
   function getWoodTexture(THREE) {
     return getCachedTexture(THREE, 'wood_planks_diff', 256, function (ctx, s) {
       ctx.fillStyle = '#78350f'; ctx.fillRect(0, 0, s, s);
@@ -211,6 +290,7 @@
         ctx.fillRect(x, 0, 1 + rng() * 3, s);
       }
     }, { rx: 1, ry: 2, srgb: true });
+
     const bump = getCachedTexture(THREE, 'bark_bump', 128, function (ctx, s) {
       ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, s, s);
       const rng = mulberry32(1338);
@@ -223,16 +303,19 @@
     return { map, bump };
   }
 
-  function getFoliageTexture(THREE, isConifer) {
-    const key = isConifer ? 'foliage_conifer' : 'foliage_deciduous';
+  function getFoliageTexture(THREE, foliageType) {
+    const key = 'foliage_' + (foliageType || 'conifer');
     return getCachedTexture(THREE, key, 128, function (ctx, s) {
       ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, s, s);
       const rng = mulberry32(hashString(key));
       for (let i = 0; i < 900; i += 1) {
         const shade = Math.floor(175 + rng() * 80);
         ctx.fillStyle = 'rgb(' + shade + ',' + shade + ',' + shade + ')';
-        if (isConifer) { const x = rng() * s, y = rng() * s; ctx.fillRect(x, y, 2, 5); }
-        else { ctx.beginPath(); ctx.arc(rng() * s, rng() * s, 2 + rng() * 3.5, 0, Math.PI * 2); ctx.fill(); }
+        if (foliageType === 'conifer' || foliageType === 'pine') {
+          const x = rng() * s, y = rng() * s; ctx.fillRect(x, y, 2, 5);
+        } else {
+          ctx.beginPath(); ctx.arc(rng() * s, rng() * s, 2 + rng() * 3.5, 0, Math.PI * 2); ctx.fill();
+        }
       }
     }, { rx: 2, ry: 2, srgb: true });
   }
@@ -250,6 +333,7 @@
         }
       }
     }, { rx: 1, ry: 2, srgb: true });
+
     const emissiveMap = getCachedTexture(THREE, 'building_win_emis', 256, function (ctx, s) {
       ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, s, s);
       const rng = mulberry32(5052), cols = 8, rows = 12, cw = s / cols, rh = s / rows;
@@ -276,38 +360,120 @@
     }, { srgb: true });
   }
 
-  // Canadian Highway sign texture (green shield with maple leaf)
+  // ─── Canadian Overhead Gantry Sign Texture (Large Green Trans-Canada Sign) ───
+
+  function getOverheadGantrySignTexture(THREE, destText, subText, routeCode, exitText) {
+    const key = 'gantry_' + destText + '_' + (routeCode || 'TCH1') + '_' + (exitText || '');
+    return getCachedTexture(THREE, key, { w: 512, h: 256 }, function (ctx, w, h) {
+      // Canadian Highway green background
+      ctx.fillStyle = '#14532d';
+      ctx.fillRect(0, 0, w, h);
+
+      // White reflective outer border
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 10;
+      ctx.strokeRect(10, 10, w - 20, h - 20);
+
+      // Inner thin border
+      ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(18, 18, w - 36, h - 36);
+
+      // Route Shield on the left
+      const shieldW = 90, shieldH = 100, sx = 28, sy = 28;
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(sx, sy, shieldW, shieldH, 12) : ctx.rect(sx, sy, shieldW, shieldH);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 5;
+      ctx.stroke();
+
+      // Maple Leaf symbol & route code
+      ctx.fillStyle = '#dc2626';
+      ctx.font = '28px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('\u{1F341}', sx + shieldW * 0.5, sy + 36);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText(routeCode || '1', sx + shieldW * 0.5, sy + 74);
+
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('TRANS-CANADA', sx + shieldW * 0.5, sy + 92);
+
+      // Exit / Header badge (if present)
+      if (exitText) {
+        ctx.fillStyle = '#facc15';
+        ctx.fillRect(w - 140, 18, 120, 32);
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(exitText, w - 80, 40);
+      }
+
+      // Destination in clean bold highway typography
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 36px sans-serif';
+      const parts = destText.split('/');
+      ctx.fillText(parts[0].trim(), 135, exitText ? 82 : 72);
+      if (parts[1]) {
+        ctx.font = 'bold 30px sans-serif';
+        ctx.fillStyle = '#f1f5f9';
+        ctx.fillText(parts[1].trim(), 135, exitText ? 124 : 116);
+      }
+
+      // Sub-text / distance indicator with white arrow
+      if (subText) {
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 22px sans-serif';
+        ctx.fillText(subText, 135, h - 54);
+      }
+
+      // Action line / lane indicator
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(135, h - 34); ctx.lineTo(w - 38, h - 34);
+      ctx.stroke();
+
+      // White lane arrows at bottom
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('\u2193   THRU TRAFFIC   \u2193', (w + 135) * 0.5, h - 14);
+    }, { srgb: true });
+  }
+
+  // Canadian Highway sign texture (ground mounted)
   function getHighwaySignTexture(THREE, destText, subText) {
     const key = 'hwy_sign_' + destText;
     return getCachedTexture(THREE, key, 256, function (ctx, s) {
-      // Green background
-      ctx.fillStyle = '#1a5c2a';
+      ctx.fillStyle = '#166534';
       ctx.fillRect(0, 0, s, s);
-      // White border
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 8;
       ctx.strokeRect(6, 6, s - 12, s - 12);
-      // Maple leaf shield shape (simplified red shield)
+      // Maple leaf shield
       ctx.fillStyle = '#c8102e';
       ctx.fillRect(s * 0.35, 10, s * 0.3, s * 0.28);
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 20px sans-serif';
+      ctx.font = 'bold 18px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('TCH', s * 0.5, 44);
-      // Maple leaf icon (simple)
-      ctx.fillStyle = '#ffffff';
+      ctx.fillText('TCH', s * 0.5, 42);
       ctx.font = '22px sans-serif';
-      ctx.fillText('\u{1F341}', s * 0.5, 72);
+      ctx.fillText('\u{1F341}', s * 0.5, 70);
       // Destination text
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 26px sans-serif';
+      ctx.font = 'bold 24px sans-serif';
       ctx.textAlign = 'center';
       const words = destText.split('/');
-      ctx.fillText(words[0], s * 0.5, s * 0.60);
+      ctx.fillText(words[0].trim(), s * 0.5, s * 0.60);
       if (words[1]) ctx.fillText(words[1].trim(), s * 0.5, s * 0.76);
       if (subText) {
-        ctx.font = '18px sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.80)';
+        ctx.font = '17px sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
         ctx.fillText(subText, s * 0.5, s * 0.90);
       }
     }, { srgb: true });
@@ -327,6 +493,32 @@
       ctx.font = 'bold 15px sans-serif';
       ctx.fillText('km/h', s * 0.5, 104);
     }, { srgb: true });
+  }
+
+  // Railway Crossing Crossbuck Texture
+  function getRailwayCrossbuckTexture(THREE) {
+    return getCachedTexture(THREE, 'railway_crossbuck', 128, function (ctx, s) {
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, s, s);
+      ctx.strokeStyle = '#000000'; ctx.lineWidth = 5; ctx.strokeRect(2, 2, s - 4, s - 4);
+      ctx.fillStyle = '#000000';
+      ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('RAILWAY', s * 0.5, 52);
+      ctx.fillText('CROSSING', s * 0.5, 82);
+    }, { srgb: true });
+  }
+
+  // Avalanche Hazard portal warning stripes (yellow/black diagonal chevron)
+  function getHazardStripesTexture(THREE) {
+    return getCachedTexture(THREE, 'hazard_stripes_yb', 128, function (ctx, s) {
+      ctx.fillStyle = '#facc15'; ctx.fillRect(0, 0, s, s);
+      ctx.fillStyle = '#0f172a';
+      const stripeW = 24;
+      for (let x = -s; x < s * 2; x += stripeW * 2) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x + stripeW, 0); ctx.lineTo(x + stripeW - s, s); ctx.lineTo(x - s, s); ctx.closePath();
+        ctx.fill();
+      }
+    }, { rx: 4, ry: 1, srgb: true });
   }
 
   // ─── Material Helper ─────────────────────────────────────────────────────
@@ -365,6 +557,7 @@
     const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat(THREE, color, opts));
     mesh.position.set(x, y, z);
     if (opts && opts.rx) mesh.rotation.x = opts.rx;
+    if (opts && opts.ry) mesh.rotation.y = opts.ry;
     if (opts && opts.rz) mesh.rotation.z = opts.rz;
     if (opts && opts.castShadow) mesh.castShadow = true;
     if (opts && opts.receiveShadow) mesh.receiveShadow = true;
@@ -375,6 +568,9 @@
   function addCone(THREE, parent, r, h, seg, color, x, y, z, opts) {
     const mesh = new THREE.Mesh(new THREE.ConeGeometry(r, h, seg), mat(THREE, color, opts));
     mesh.position.set(x, y, z);
+    if (opts && opts.rx) mesh.rotation.x = opts.rx;
+    if (opts && opts.ry) mesh.rotation.y = opts.ry;
+    if (opts && opts.rz) mesh.rotation.z = opts.rz;
     if (opts && opts.castShadow) mesh.castShadow = true;
     parent.add(mesh);
     return mesh;
@@ -384,35 +580,35 @@
 
   function buildSkyAndLighting(THREE, scene, province, qualityTier) {
     const c = province.climate;
-    const fogDensityBase = qualityTier === 'battery' ? 0.0040 : 0.0022;
+    const fogDensityBase = qualityTier === 'battery' ? 0.0034 : 0.0019;
     scene.background = new THREE.Color(c.skyHorizon);
     scene.fog = new THREE.FogExp2(c.fogColor, fogDensityBase);
 
     const hemi = new THREE.HemisphereLight(c.skyTop, c.groundColor, 0.74);
     scene.add(hemi);
 
-    const sun = new THREE.DirectionalLight(c.sunColor, 1.22);
-    sun.position.set(75, 110, 55);
+    const sun = new THREE.DirectionalLight(c.sunColor, 1.25);
+    sun.position.set(90, 130, 65);
     if (qualityTier !== 'battery') {
       sun.castShadow = true;
       sun.shadow.mapSize.width = qualityTier === 'ultra' ? 2048 : 1024;
       sun.shadow.mapSize.height = qualityTier === 'ultra' ? 2048 : 1024;
       sun.shadow.camera.near = 10;
-      sun.shadow.camera.far = 500;
+      sun.shadow.camera.far = 600;
       sun.shadow.bias = -0.0005;
       sun.shadow.normalBias = 0.03;
-      const d = 220;
+      const d = 260;
       sun.shadow.camera.left = -d; sun.shadow.camera.right = d;
       sun.shadow.camera.top = d; sun.shadow.camera.bottom = -d;
     }
     scene.add(sun);
 
-    const fill = new THREE.DirectionalLight(c.accent, 0.25);
-    fill.position.set(-70, 40, -60);
+    const fill = new THREE.DirectionalLight(c.accent, 0.28);
+    fill.position.set(-85, 45, -70);
     scene.add(fill);
 
     // Atmospheric gradient sky dome
-    const skyGeo = new THREE.SphereGeometry(430, 32, 20);
+    const skyGeo = new THREE.SphereGeometry(520, 32, 20);
     const skyMat = new THREE.ShaderMaterial({
       side: THREE.BackSide,
       depthWrite: false,
@@ -464,32 +660,35 @@
     return { hemi, sun, fill, skyMesh, skyMat, fogDensityBase };
   }
 
-  // ─── Ground & 760m Highway Corridor ──────────────────────────────────────
+  // ─── Ground & 1000m Highway Corridor ─────────────────────────────────────
 
   function buildGroundAndHighway(THREE, scene, province, scale) {
     const c = province.climate;
     const biome = province.biome;
-    const isIceRoad = province.id === 'northwest-territories' || province.id === 'nunavut';
+    const isNunavut = province.id === 'nunavut';
+    const isNWT = province.id === 'northwest-territories';
+    const isIceRoad = isNWT;
+    const isPackedSnow = isNunavut;
 
-    // Extended terrain: 440m wide, 800m long to cover the full 760m corridor
-    const groundGeo = new THREE.PlaneGeometry(440, 800, 80, 160);
+    // Full 1000m corridor terrain: 520m wide, 1040m long (z: -520 to +520)
+    const groundGeo = new THREE.PlaneGeometry(520, 1040, 96, 192);
     groundGeo.rotateX(-Math.PI / 2);
     const pos = groundGeo.attributes.position;
     const colors = new Float32Array(pos.count * 3);
     const baseCol = new THREE.Color(c.groundColor);
-    const rockCol = new THREE.Color(biome === 'red-sand-island' || biome === 'fundy-coast' ? 0x9a4a2a : 0x64748b);
+    const rockCol = new THREE.Color(biome === 'red-sand-island' || biome === 'fundy-coast' ? 0x9a4a2a : (province.id === 'ontario' ? 0x9e807c : 0x64748b));
     const peakCol = new THREE.Color(biome === 'arctic-tundra' || biome === 'klondike-glacier' || biome === 'rockies-foothills' ? 0xe2e8f0 : 0x4b5d44);
     const tmpCol = new THREE.Color();
 
-    const isFlat = biome === 'living-skies-wheat' || biome === 'prairie-lake' || biome === 'subarctic-shield';
-    const amp = isFlat ? 0.65 : 2.8;
+    const isFlat = biome === 'living-skies-wheat' || biome === 'prairie-lake';
+    const amp = isFlat ? 0.7 : (biome === 'pacific-fjord' || biome === 'rockies-foothills' ? 3.6 : 2.5);
     for (let i = 0; i < pos.count; i += 1) {
       const x = pos.getX(i), z = pos.getZ(i);
       const distFromRoad = Math.abs(x);
       let y = 0;
-      if (distFromRoad > 14 && Math.abs(z) > 10) {
-        const hill = Math.sin(x * 0.038) * Math.cos(z * 0.038) * amp + Math.sin((x + z) * 0.018) * amp * 0.6;
-        y = Math.max(-0.4, hill * Math.min(1, (distFromRoad - 14) / 22));
+      if (distFromRoad > 15 && Math.abs(z) > 10) {
+        const hill = Math.sin(x * 0.032) * Math.cos(z * 0.032) * amp + Math.sin((x + z) * 0.016) * amp * 0.6;
+        y = Math.max(-0.4, hill * Math.min(1, (distFromRoad - 15) / 22));
         pos.setY(i, y);
       }
       tmpCol.copy(baseCol);
@@ -509,54 +708,59 @@
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // ── Full 760m road (z: -375 to +375) ──
-    const roadTex = getRoadTextures(THREE, isIceRoad);
+    // ── Full 1000m road (z: -500 to +500) ──
+    const roadTex = getRoadTextures(THREE, isIceRoad, isPackedSnow);
     const road = new THREE.Mesh(
-      new THREE.PlaneGeometry(11.2, 760),
-      mat(THREE, 0xffffff, { map: roadTex.map, bumpMap: roadTex.bump, bumpScale: 0.08, roughness: isIceRoad ? 0.32 : 0.78, metalness: isIceRoad ? 0.22 : 0.06 })
+      new THREE.PlaneGeometry(11.2, 1000),
+      mat(THREE, 0xffffff, {
+        map: roadTex.map, bumpMap: roadTex.bump, bumpScale: 0.08,
+        roughness: isPackedSnow ? 0.45 : (isIceRoad ? 0.32 : 0.78),
+        metalness: isPackedSnow ? 0.12 : (isIceRoad ? 0.22 : 0.06)
+      })
     );
     road.rotation.x = -Math.PI / 2;
     road.position.y = 0.05;
     road.receiveShadow = true;
     scene.add(road);
 
-    // Centre dashed line across full 760m (76 dashes)
-    const dashCount = 76;
-    const dashGeo = new THREE.PlaneGeometry(0.28, 4.2);
+    // Centre dashed line across full 1000m (100 dashes from z = -495 to +495)
+    const dashCount = 100;
+    const dashGeo = new THREE.PlaneGeometry(0.28, 4.5);
     dashGeo.rotateX(-Math.PI / 2);
-    const dashMat = new THREE.MeshBasicMaterial({ color: isIceRoad ? 0x38bdf8 : 0xfbbf24 });
+    const dashColor = isPackedSnow ? 0x7dd3fc : (isIceRoad ? 0x38bdf8 : 0xfbbf24);
+    const dashMat = new THREE.MeshBasicMaterial({ color: dashColor });
     const dashes = new THREE.InstancedMesh(dashGeo, dashMat, dashCount);
     const dummy = new THREE.Object3D();
     for (let i = 0; i < dashCount; i += 1) {
-      dummy.position.set(0, 0.08, -375 + i * 10);
+      dummy.position.set(0, 0.08, -495 + i * 10);
       dummy.rotation.set(0, 0, 0); dummy.scale.set(1, 1, 1);
       dummy.updateMatrix(); dashes.setMatrixAt(i, dummy.matrix);
     }
     dashes.instanceMatrix.needsUpdate = true;
     scene.add(dashes);
 
-    // Concrete curbs — full 760m
+    // Concrete curbs — full 1000m across z ∈ [-500, +500]
     const concreteTex = getConcreteTexture(THREE);
-    const curbGeo = new THREE.BoxGeometry(0.45, 0.24, 760);
+    const curbGeo = new THREE.BoxGeometry(0.45, 0.24, 1000);
     const curbMat = mat(THREE, 0xcbd5e1, { map: concreteTex, roughness: 0.85, metalness: 0.05 });
     const curbL = new THREE.Mesh(curbGeo, curbMat); curbL.position.set(-5.78, 0.12, 0); curbL.receiveShadow = true; scene.add(curbL);
     const curbR = new THREE.Mesh(curbGeo, curbMat); curbR.position.set(5.78, 0.12, 0); curbR.receiveShadow = true; scene.add(curbR);
 
-    // Galvanized guardrails — full 760m
-    const railGeo = new THREE.BoxGeometry(0.14, 0.32, 760);
+    // Galvanized guardrails — full 1000m across z ∈ [-500, +500]
+    const railGeo = new THREE.BoxGeometry(0.14, 0.32, 1000);
     const railMat = mat(THREE, 0x94a3b8, { roughness: 0.38, metalness: 0.65 });
     const railL = new THREE.Mesh(railGeo, railMat); railL.position.set(-6.32, 0.64, 0); scene.add(railL);
     const railR = new THREE.Mesh(railGeo, railMat); railR.position.set(6.32, 0.64, 0); scene.add(railR);
 
-    // Instanced guardrail posts (every 8m over 760m = ~95 × 2 sides)
+    // Instanced guardrail posts (every 8m over 984m across z ∈ [-492, +492] = 124 × 2 sides)
     const postSpacing = 8;
-    const postHalfCount = Math.floor(760 / postSpacing);
+    const postHalfCount = Math.floor(984 / postSpacing);
     const postGeo = new THREE.BoxGeometry(0.18, 0.82, 0.18);
     const postMat = mat(THREE, 0x64748b, { roughness: 0.45, metalness: 0.6 });
     const posts = new THREE.InstancedMesh(postGeo, postMat, postHalfCount * 2);
     let pIdx = 0;
     for (let i = 0; i < postHalfCount; i += 1) {
-      const z = -380 + i * postSpacing;
+      const z = -492 + i * postSpacing;
       dummy.rotation.set(0, 0, 0); dummy.scale.set(1, 1, 1);
       dummy.position.set(-6.35, 0.41, z); dummy.updateMatrix(); posts.setMatrixAt(pIdx++, dummy.matrix);
       dummy.position.set(6.35, 0.41, z); dummy.updateMatrix(); posts.setMatrixAt(pIdx++, dummy.matrix);
@@ -565,8 +769,8 @@
     posts.instanceMatrix.needsUpdate = true;
     scene.add(posts);
 
-    // Instanced streetlights (every ~25m alternating sides over 760m = ~30 lamps)
-    const lampCount = Math.max(16, Math.round(30 * scale));
+    // Instanced streetlights across z ∈ [-480, +480] (every ~24m alternating sides = 40 lamps)
+    const lampCount = Math.max(20, Math.round(40 * scale));
     const poleGeo = new THREE.CylinderGeometry(0.09, 0.14, 6.2, 6);
     poleGeo.translate(0, 3.1, 0);
     const armGeo = new THREE.BoxGeometry(1.6, 0.1, 0.12);
@@ -579,7 +783,7 @@
     for (let i = 0; i < lampCount; i += 1) {
       const side = i % 2 === 0 ? -1 : 1;
       const x = side * 6.75;
-      const z = -370 + (i / Math.max(1, lampCount - 1)) * 740;
+      const z = -480 + (i / Math.max(1, lampCount - 1)) * 960;
       dummy.position.set(x, 0, z); dummy.rotation.set(0, 0, 0); dummy.scale.set(1, 1, 1); dummy.updateMatrix(); poles.setMatrixAt(i, dummy.matrix);
       dummy.position.set(x - side * 0.72, 6.1, z); dummy.updateMatrix(); arms.setMatrixAt(i, dummy.matrix);
       dummy.position.set(x - side * 1.35, 6.0, z); dummy.updateMatrix(); heads.setMatrixAt(i, dummy.matrix);
@@ -587,50 +791,214 @@
     poles.instanceMatrix.needsUpdate = true; arms.instanceMatrix.needsUpdate = true; heads.instanceMatrix.needsUpdate = true;
     scene.add(poles); scene.add(arms); scene.add(heads);
 
-    // ── Canadian Highway Signage along the drive ──
+    // Sidewalks across 1000m corridor (x = ±8.2, width 3.5m)
+    const concMat = mat(THREE, 0xcbd5e1, { map: concreteTex, roughness: 0.88 });
+    const sidewalkGeoL = new THREE.BoxGeometry(3.5, 0.12, 1000);
+    const sidewalkGeoR = new THREE.BoxGeometry(3.5, 0.12, 1000);
+    const swL = new THREE.Mesh(sidewalkGeoL, concMat);
+    swL.position.set(-8.2, 0.06, 0); swL.receiveShadow = true; scene.add(swL);
+    const swR = new THREE.Mesh(sidewalkGeoR, concMat);
+    swR.position.set(8.2, 0.06, 0); swR.receiveShadow = true; scene.add(swR);
+
+    // ── Overhead Trans-Canada Highway Gantries across the road ──
+    buildOverheadGantries(THREE, scene, province);
+
+    // ── Roadside Canadian Highway Signs along the drive ──
     buildHighwaySigns(THREE, scene, province);
 
     // ── Water body ──
     const waterBump = getWaterBumpTexture(THREE);
-    const waterGeo = new THREE.PlaneGeometry(440, 300);
+    const waterGeo = new THREE.PlaneGeometry(520, 360);
     waterGeo.rotateX(-Math.PI / 2);
     const waterMat = new THREE.MeshStandardMaterial({
-      color: c.waterColor, roughness: isIceRoad ? 0.24 : 0.12, metalness: 0.48,
+      color: c.waterColor, roughness: isPackedSnow ? 0.35 : (isIceRoad ? 0.24 : 0.12), metalness: 0.48,
       bumpMap: waterBump, bumpScale: 0.18, transparent: true, opacity: 0.88
     });
     const waterMesh = new THREE.Mesh(waterGeo, waterMat);
-    waterMesh.position.set(170, -0.35, -210);
-    if (biome === 'atlantic-iceberg' || biome === 'granite-lighthouse' || biome === 'fundy-coast') {
-      waterMesh.position.set(170, -0.35, -145);
+    waterMesh.position.set(190, -0.35, -240);
+    if (biome === 'atlantic-iceberg' || biome === 'granite-lighthouse' || biome === 'fundy-coast' || biome === 'pacific-fjord') {
+      waterMesh.position.set(180, -0.35, -160);
     }
     scene.add(waterMesh);
 
     return { ground, road, waterMesh, waterBump, streetlightMat };
   }
 
-  // ─── Canadian Highway Signs ───────────────────────────────────────────────
+  // ─── Overhead Trans-Canada Highway Gantries ───────────────────────────────
+
+  const PROVINCE_GANTRY_DATA = {
+    'ontario': [
+      { z: -380, dest: 'TORONTO / HWY 401', sub: 'CN Tower / Harbourfront 12 km', route: '401', exit: 'EXIT 15' },
+      { z: -180, dest: 'NIAGARA FALLS / QEW', sub: 'Horseshoe Falls / Mist 32 km', route: 'QEW', exit: 'EXIT 28' },
+      { z:  160, dest: 'OTTAWA / HWY 416', sub: 'National Capital Region 75 km', route: '416', exit: 'EXIT 42' },
+      { z:  380, dest: 'CANADIAN SHIELD / TCH', sub: 'Pink Granite Cuts & Muskoka Lakes', route: 'TCH 17', exit: 'NORTH' }
+    ],
+    'quebec': [
+      { z: -380, dest: 'QUÉBEC / AUTOROUTE 20', sub: 'Château Frontenac / Cap Diamant 15 km', route: 'AUT 20', exit: 'SORTIE 18' },
+      { z: -180, dest: 'MONTRÉAL / CENTRE-VILLE', sub: 'Tour Olympique / Pont Jacques-Cartier 24 km', route: 'AUT 40', exit: 'SORTIE 26' },
+      { z:  160, dest: 'FLEUVE SAINT-LAURENT', sub: 'Côte-de-Beaupré / Église Historique', route: 'AUT 138', exit: 'EST' },
+      { z:  380, dest: 'SAGUENAY / FJORD', sub: 'Parc National / Laurentides', route: 'AUT 175', exit: 'NORD' }
+    ],
+    'british-columbia': [
+      { z: -380, dest: 'VANCOUVER / HWY 1', sub: 'Canada Place / Lions Gate 18 km', route: 'TCH 1', exit: 'EXIT 12' },
+      { z: -180, dest: 'SEA-TO-SKY / HWY 99', sub: 'Howe Sound Fjord / Whistler 52 km', route: 'BC 99', exit: 'SCENIC' },
+      { z:  160, dest: 'ROCK GALLERY / SHED', sub: 'Highway Avalanche Shed / Steep Grade Ahead', route: 'BC 99', exit: 'CAUTION' },
+      { z:  380, dest: 'PACIFIC FJORD / FERRY', sub: 'Horseshoe Bay Terminal 25 km', route: 'TCH 1', exit: 'WEST' }
+    ],
+    'alberta': [
+      { z: -380, dest: 'BANFF NATIONAL PARK', sub: 'Banff Springs / Bow Valley 14 km', route: 'TCH 1', exit: 'PARK' },
+      { z: -180, dest: 'WILDLIFE OVERPASS', sub: 'Forested Bear & Elk Crossing Ahead 500m', route: 'TCH 1', exit: 'WILDLIFE' },
+      { z:  160, dest: 'LAKE LOUISE / GLACIER', sub: 'Turquoise Basin / Victoria Glacier 45 km', route: 'TCH 1', exit: 'EXIT 34' },
+      { z:  380, dest: 'CALGARY / HWY 2', sub: 'Bow River Valley / Calgary Tower 30 km', route: 'HWY 2', exit: 'EXIT 55' }
+    ],
+    'national-capital': [
+      { z: -380, dest: 'PARLIAMENT HILL / COLLINE', sub: 'Peace Tower & Heritage Blocks 8 km', route: '417', exit: 'EXIT 10' },
+      { z: -180, dest: 'CANAL RIDEAU LOCKS', sub: 'UNESCO Skateway & Lockmaster 4 km', route: '417', exit: 'HERITAGE' },
+      { z:  160, dest: 'ALEXANDRA BRIDGE', sub: 'Interprovincial Span to Gatineau 6 km', route: 'AUT 5', exit: 'CROSSING' },
+      { z:  380, dest: 'GATINEAU PARK / PARC', sub: 'Champlain Lookout / Mackenzie King', route: 'QC 105', exit: 'NORTH' }
+    ],
+    'nova-scotia': [
+      { z: -380, dest: 'PEGGY\'S COVE / HWY 333', sub: 'Peggy\'s Point Lighthouse 12 km', route: 'NS 333', exit: 'LIGHTHOUSE' },
+      { z: -180, dest: 'HALIFAX / CITADEL HILL', sub: 'Historic Harbour & Pier 21 22 km', route: 'HWY 102', exit: 'EXIT 4' },
+      { z:  160, dest: 'FISHING STAGES / SHACKS', sub: 'Pastel Wooden Docks & Lobster Traps', route: 'NS 333', exit: 'COASTAL' },
+      { z:  380, dest: 'CABOT TRAIL / CAPE BRETON', sub: 'Highland Coastal Cliffs 90 km', route: 'TCH 105', exit: 'SCENIC' }
+    ],
+    'newfoundland': [
+      { z: -380, dest: 'ST. JOHN\'S / TRANS-CANADA', sub: 'Signal Hill / Cabot Tower 10 km', route: 'TCH 1', exit: 'MILE 0' },
+      { z: -180, dest: 'JELLYBEAN ROW / HARBOUR', sub: 'Victorian Jewel-Tone Saltbox Houses', route: 'TCH 1', exit: 'HISTORIC' },
+      { z:  160, dest: 'ICEBERG ALLEY / COAST', sub: 'Drifting Arctic Tabular Bergs 5 km', route: 'ROUTE 10', exit: 'OCEAN' },
+      { z:  380, dest: 'GROS MORNE / TABLELANDS', sub: 'Flat-Topped Fjord Cliffs 110 km', route: 'ROUTE 430', exit: 'UNESCO' }
+    ],
+    'new-brunswick': [
+      { z: -380, dest: 'HOPEWELL ROCKS / FUNDY', sub: 'World\'s Highest Tides / Sea Stacks 15 km', route: 'TCH 2', exit: 'EXIT 19' },
+      { z: -180, dest: 'HARTLAND COVERED BRIDGE', sub: 'World\'s Longest Covered Bridge 28 km', route: 'NB 105', exit: 'SPAN' },
+      { z:  160, dest: 'SAINT JOHN / REVERSING FALLS', sub: 'Fundy Tidal Gorge & Harbour Span 18 km', route: 'HWY 1', exit: 'BAY' },
+      { z:  380, dest: 'FREDERICTON / MONCTON', sub: 'Miramichi River Salmon Route', route: 'TCH 2', exit: 'TRANS-CANADA' }
+    ],
+    'prince-edward-island': [
+      { z: -380, dest: 'CONFEDERATION BRIDGE', sub: '12.9 km Northumberland Strait Marine Span', route: 'TCH 1', exit: 'GATEWAY' },
+      { z: -180, dest: 'CAVENDISH / GREEN GABLES', sub: 'Anne of Green Gables Heritage Farm 20 km', route: 'PE 6', exit: 'HERITAGE' },
+      { z:  160, dest: 'CHARLOTTETOWN / HARBOUR', sub: 'Birthplace of Confederation 15 km', route: 'TCH 1', exit: 'CAPITAL' },
+      { z:  380, dest: 'RED SAND CLIFFS / POINT PRIM', sub: 'Rust-Red Sandstone Shore & Lighthouse', route: 'PE 1', exit: 'SCENIC' }
+    ],
+    'manitoba': [
+      { z: -380, dest: 'WINNIPEG / TRANS-CANADA', sub: 'Museum for Human Rights / Spire 14 km', route: 'TCH 1', exit: 'EXIT 8' },
+      { z: -180, dest: 'EXCHANGE DISTRICT / HERITAGE', sub: 'Terracotta Chicago-Style Warehouses', route: 'HWY 75', exit: 'HISTORIC' },
+      { z:  160, dest: 'THE FORKS / RIVER CONFLUENCE', sub: 'Red & Assiniboine Rivers 8 km', route: 'TCH 1', exit: 'THE FORKS' },
+      { z:  380, dest: 'CHURCHILL / HUDSON BAY', sub: 'Polar Bear Capital & Auroral Oval', route: 'HWY 6', exit: 'SUBARCTIC' }
+    ],
+    'saskatchewan': [
+      { z: -380, dest: 'REGINA / TRANS-CANADA', sub: 'Legislative Dome & Wascana Centre 15 km', route: 'TCH 1', exit: 'EXIT 14' },
+      { z: -180, dest: 'GRAIN ELEVATOR ROW', sub: 'Historic Wooden Prairie Sentinels', route: 'TCH 1', exit: 'RAILWAY' },
+      { z:  160, dest: 'UKRAINIAN PRAIRIE CHURCH', sub: 'Triple Onion Domes & Banya Spire', route: 'TCH 1', exit: 'HERITAGE' },
+      { z:  380, dest: 'SASKATOON / LIVING SKIES', sub: 'Golden Wheat Plains & Big Sky', route: 'HWY 11', exit: 'YELLOWHEAD' }
+    ],
+    'yukon': [
+      { z: -380, dest: 'WHITEHORSE / ALASKA HWY', sub: 'SS Klondike Sternwheeler 12 km', route: 'AK HWY', exit: 'MILE 918' },
+      { z: -180, dest: 'DAWSON CITY / GOLD RUSH', sub: 'Klondike Boardwalk & Eldorado Saloon', route: 'KLONDIKE 2', exit: 'BONANZA' },
+      { z:  160, dest: 'MOUNT LOGAN / KLUANE', sub: 'Canada\'s Highest Peak (5,959 m)', route: 'AK HWY', exit: 'ICEFIELDS' },
+      { z:  380, dest: 'DEMPSTER HWY / ARCTIC CIRCLE', sub: 'Tombstone Peaks & Tundra Trail', route: 'DEMPSTER 5', exit: 'NORTH' }
+    ],
+    'northwest-territories': [
+      { z: -380, dest: 'YELLOWKNIFE / INGRAHAM TRAIL', sub: 'Elevated Permafrost Buildings & Stilt Homes', route: 'NWT 4', exit: 'OLD TOWN' },
+      { z: -180, dest: 'GREAT SLAVE ICE ROAD', sub: 'Dettah Winter Crossing / Frozen Lake', route: 'ICE ROAD', exit: 'CROSSING' },
+      { z:  160, dest: 'DIAMOND MINE HEADFRAME', sub: 'Precambrian Shield Granite 16 km', route: 'NWT 3', exit: 'MINE' },
+      { z:  380, dest: 'TAIGA / DRUNKEN FOREST', sub: 'Muskeg & Stunted Black Spruce Taiga', route: 'MACKENZIE 1', exit: 'AURORA' }
+    ],
+    'nunavut': [
+      { z: -380, dest: 'IQALUIT / POLAR ROUTE', sub: 'Monumental Inuksuk / Frobisher Bay 8 km', route: 'POLAR 1', exit: 'ARCTIC' },
+      { z: -180, dest: 'INUKSUK STONE SENTINEL', sub: 'Traditional Inuit Navigation Marker 500m', route: 'TRAIL', exit: 'INUKSUIT' },
+      { z:  160, dest: 'HIGH ARCTIC RESEARCH STATION', sub: 'Insulated Polar Domes & Science Pods', route: 'POLAR 1', exit: 'RESEARCH' },
+      { z:  380, dest: 'BAFFIN ISLAND FJORD PEAKS', sub: 'Sea Ice Pack & Glaciated Spires 35 km', route: 'TRAIL', exit: 'POLAR' }
+    ]
+  };
+
+  function buildOverheadGantries(THREE, scene, province) {
+    const list = PROVINCE_GANTRY_DATA[province.id] || PROVINCE_GANTRY_DATA['ontario'];
+    const steelMat = mat(THREE, 0x64748b, { roughness: 0.38, metalness: 0.75 });
+    const concMat = mat(THREE, 0x94a3b8, { roughness: 0.85, metalness: 0.1 });
+
+    for (let i = 0; i < list.length; i += 1) {
+      const g = list[i];
+      const gGroup = new THREE.Group();
+      gGroup.position.set(0, 0, g.z);
+
+      // Dual support columns flanking the highway (at x = -7.8 and +7.8, road is 11.2m wide)
+      // Concrete footings
+      addBox(THREE, gGroup, 0.9, 0.7, 0.9, 0x94a3b8, -7.8, 0.35, 0, { roughness: 0.85 });
+      addBox(THREE, gGroup, 0.9, 0.7, 0.9, 0x94a3b8,  7.8, 0.35, 0, { roughness: 0.85 });
+
+      // Steel vertical tubular columns
+      addCyl(THREE, gGroup, 0.22, 0.26, 6.6, 8, 0x64748b, -7.8, 3.8, 0, { metalness: 0.75, roughness: 0.4 });
+      addCyl(THREE, gGroup, 0.22, 0.26, 6.6, 8, 0x64748b,  7.8, 3.8, 0, { metalness: 0.75, roughness: 0.4 });
+
+      // Diagonal side braces
+      addBox(THREE, gGroup, 1.4, 0.12, 0.12, 0x64748b, -8.3, 1.5, 0, { rz: 0.6, metalness: 0.7 });
+      addBox(THREE, gGroup, 1.4, 0.12, 0.12, 0x64748b,  8.3, 1.5, 0, { rz: -0.6, metalness: 0.7 });
+
+      // Horizontal steel truss bridge beams spanning 16.2m across the highway
+      addBox(THREE, gGroup, 16.2, 0.22, 0.22, 0x64748b, 0, 5.4, 0, { metalness: 0.75, roughness: 0.4 });
+      addBox(THREE, gGroup, 16.2, 0.22, 0.22, 0x64748b, 0, 6.8, 0, { metalness: 0.75, roughness: 0.4 });
+
+      // Diagonal truss lattice struts
+      for (let tx = -7.0; tx <= 7.0; tx += 2.0) {
+        addBox(THREE, gGroup, 2.2, 0.10, 0.10, 0x64748b, tx, 6.1, 0, { rz: 0.65, metalness: 0.75 });
+      }
+
+      // Catwalk maintenance platform along the truss
+      addBox(THREE, gGroup, 15.6, 0.08, 0.7, 0x475569, 0, 5.25, 0, { metalness: 0.65, roughness: 0.5 });
+      addBox(THREE, gGroup, 15.6, 0.75, 0.04, 0x64748b, 0, 5.65, 0.35, { metalness: 0.7 });
+
+      // Overhead green highway signboards
+      const signTex = getOverheadGantrySignTexture(THREE, g.dest, g.sub, g.route, g.exit);
+      const signMat = new THREE.MeshStandardMaterial({
+        map: signTex, emissiveMap: signTex, emissive: 0xffffff,
+        emissiveIntensity: 0.18, roughness: 0.45, metalness: 0.2
+      });
+
+      // North-facing sign (faces traffic driving from -z towards +z)
+      const signMeshN = new THREE.Mesh(new THREE.PlaneGeometry(8.6, 2.6), signMat);
+      signMeshN.position.set(0, 6.1, -0.22);
+      gGroup.add(signMeshN);
+
+      // South-facing sign (faces traffic driving from +z towards -z)
+      const signMeshS = new THREE.Mesh(new THREE.PlaneGeometry(8.6, 2.6), signMat);
+      signMeshS.position.set(0, 6.1, 0.22);
+      signMeshS.rotation.y = Math.PI;
+      gGroup.add(signMeshS);
+
+      // Sign backing enclosure
+      addBox(THREE, gGroup, 8.7, 2.7, 0.38, 0x334155, 0, 6.1, 0, { roughness: 0.6, metalness: 0.4 });
+
+      // Overhead luminaire lamps lighting the sign face
+      for (let lx = -3.2; lx <= 3.2; lx += 2.1) {
+        addBox(THREE, gGroup, 0.10, 0.10, 0.85, 0x475569, lx, 7.15, -0.45, { metalness: 0.6 });
+        addBox(THREE, gGroup, 0.45, 0.14, 0.24, 0xfef08a, lx, 7.1, -0.85, { emissive: 0xfef08a, emissiveIntensity: 0.6 });
+      }
+
+      scene.add(gGroup);
+    }
+  }
+
+  // ─── Canadian Roadside Highway Signs ──────────────────────────────────────
 
   function buildHighwaySigns(THREE, scene, province) {
-    // Signs at z positions along the 760m drive
     const signs = [
-      { z: -320, dest: 'BANFF NATIONAL PARK', sub: 'Trans-Canada Hwy 1', side: 1 },
-      { z: -240, dest: 'LAKE LOUISE', sub: '48 km ahead', side: -1 },
-      { z: -160, dest: 'CALGARY / HWY 2', sub: 'Alberta', side: 1 },
-      { z: -80, dest: 'JASPER NAT\'L PARK', sub: 'Hwy 93 N', side: -1 },
-      { z:  0,  dest: 'TORONTO / HWY 401', sub: 'Ontario', side: 1, speed: true },
-      { z:  80, dest: 'VANCOUVER / HWY 1', sub: 'British Columbia', side: -1 },
-      { z:  160, dest: 'MONTREAL / HWY 20', sub: 'Quebec', side: 1 },
-      { z:  240, dest: 'PEGGY\'S COVE', sub: 'Nova Scotia', side: -1 },
-      { z:  320, dest: 'NIAGARA FALLS', sub: 'QEW / HWY 420', side: 1, speed: true }
+      { z: -440, dest: 'TRANS-CANADA HWY 1', sub: 'National Highway Corridor', side: 1 },
+      { z: -320, dest: 'BANFF NATIONAL PARK', sub: 'Scenic Route', side: -1 },
+      { z: -240, dest: 'LAKE LOUISE / JASPER', sub: 'Rocky Mountain Corridor', side: 1 },
+      { z: -100, dest: 'PROVINCE WELCOME', sub: province.name, side: -1, speed: true },
+      { z:    0, dest: 'TORONTO / HWY 401', sub: 'Trans-Canada', side: 1, speed: true },
+      { z:  100, dest: 'PEGGY\'S COVE', sub: 'Atlantic Scenic Coast', side: -1 },
+      { z:  240, dest: 'ST. JOHN\'S / MILE 0', sub: 'Signal Hill 14 km', side: 1 },
+      { z:  340, dest: 'NIAGARA FALLS', sub: 'QEW / Scenic Parkway', side: -1, speed: true },
+      { z:  440, dest: 'PACIFIC FJORD', sub: 'Sea-to-Sky Route', side: 1 }
     ];
-
-    const stoneTex = getStoneTexture(THREE);
 
     for (let i = 0; i < signs.length; i += 1) {
       const s = signs[i];
       const sx = s.side * 14.5;
 
-      // Post
       const post = new THREE.Mesh(
         new THREE.CylinderGeometry(0.1, 0.12, 5.5, 6),
         mat(THREE, 0x64748b, { roughness: 0.5, metalness: 0.6 })
@@ -638,7 +1006,6 @@
       post.position.set(sx, 2.75, s.z);
       scene.add(post);
 
-      // Sign face
       const signTex = getHighwaySignTexture(THREE, s.dest, s.sub);
       const signMesh = new THREE.Mesh(
         new THREE.PlaneGeometry(4.8, 2.8),
@@ -648,7 +1015,6 @@
       signMesh.rotation.y = s.side > 0 ? Math.PI : 0;
       scene.add(signMesh);
 
-      // Optional speed limit sign below
       if (s.speed) {
         const speedTex = getSpeedSignTexture(THREE);
         const speedMesh = new THREE.Mesh(
@@ -662,19 +1028,19 @@
     }
   }
 
-  // ─── Instanced Forest (full 760m corridor) ────────────────────────────────
+  // ─── Instanced Forest (Full 1000m corridor: z ∈ [-490, +490]) ─────────────
 
   function buildInstancedForest(THREE, scene, province, scale, rng) {
     const biome = province.biome;
 
     if (biome === 'arctic-tundra') {
-      const rCount = Math.round(80 * scale);
+      const rCount = Math.round(110 * scale);
       const rGeo = new THREE.DodecahedronGeometry(1.1, 0);
       const rocks = new THREE.InstancedMesh(rGeo, mat(THREE, 0x64748b, { roughness: 0.92 }), rCount);
       const dummy = new THREE.Object3D(), tmp = new THREE.Color();
       for (let i = 0; i < rCount; i += 1) {
         const side = rng() > 0.5 ? 1 : -1;
-        const rx = side * (16 + rng() * 170), rz = -375 + rng() * 750;
+        const rx = side * (16 + rng() * 190), rz = -485 + rng() * 970;
         if (Math.abs(rx) < 18 && rz > -6 && rz < 36) continue;
         dummy.position.set(rx, 0.25, rz);
         dummy.rotation.set(rng() * 2, rng() * 2, rng() * 2);
@@ -689,14 +1055,14 @@
     }
 
     if (biome === 'living-skies-wheat') {
-      const count = Math.round(1400 * scale);
+      const count = Math.round(1800 * scale);
       const stalkGeo = new THREE.ConeGeometry(0.16, 1.5, 4);
       stalkGeo.translate(0, 0.75, 0);
       const wheat = new THREE.InstancedMesh(stalkGeo, mat(THREE, 0xffffff, { roughness: 0.85 }), count);
       const dummy = new THREE.Object3D(), tmp = new THREE.Color();
       for (let i = 0; i < count; i += 1) {
         const side = rng() > 0.5 ? 1 : -1;
-        const x = side * (12 + rng() * 170), z = -375 + rng() * 750;
+        const x = side * (12 + rng() * 200), z = -485 + rng() * 970;
         if (Math.abs(x) < 17 && z > -6 && z < 36) continue;
         dummy.position.set(x, 0, z);
         dummy.rotation.set((rng() - 0.5) * 0.14, rng() * Math.PI * 2, (rng() - 0.5) * 0.14);
@@ -711,26 +1077,31 @@
       return;
     }
 
-    // Dense pine/maple/spruce forest flanking the full 760m highway
-    const treeCount = Math.round((biome === 'subarctic-shield' ? 160 : 320) * scale);
-    const isDeciduous = biome === 'great-lakes-metro' || biome === 'capital-canal' || biome === 'red-sand-island' || biome === 'st-lawrence-citadel';
+    // Dense pine/maple/spruce/Douglas-fir forest flanking the 1000m highway
+    const isOntario = province.id === 'ontario';
+    const isBC = province.id === 'british-columbia';
+    const isDeciduous = isOntario || biome === 'great-lakes-metro' || biome === 'capital-canal' || biome === 'red-sand-island' || biome === 'st-lawrence-citadel';
+    const treeCount = Math.round((biome === 'subarctic-shield' ? 220 : 420) * scale);
     const barkTex = getBarkTexture(THREE);
-    const foliageTex = getFoliageTexture(THREE, !isDeciduous);
+    const foliageTex = getFoliageTexture(THREE, isDeciduous ? 'deciduous' : 'conifer');
 
-    const trunkGeo = new THREE.CylinderGeometry(0.16, 0.36, 2.7, 7);
-    trunkGeo.translate(0, 1.35, 0);
+    // Douglas firs in BC are towering
+    const trunkH = isBC ? 4.2 : 2.7;
+    const trunkGeo = new THREE.CylinderGeometry(0.18, 0.38, trunkH, 7);
+    trunkGeo.translate(0, trunkH * 0.5, 0);
     const trunkMat = mat(THREE, 0x5c4028, { map: barkTex.map, bumpMap: barkTex.bump, bumpScale: 0.12, roughness: 0.92 });
     const trunks = new THREE.InstancedMesh(trunkGeo, trunkMat, treeCount);
     trunks.castShadow = scale > 0.5;
 
     const layerGeos = isDeciduous
-      ? [new THREE.DodecahedronGeometry(1.45, 1), new THREE.DodecahedronGeometry(1.25, 1), new THREE.DodecahedronGeometry(1.05, 1)]
-      : [new THREE.ConeGeometry(2.05, 3.0, 8), new THREE.ConeGeometry(1.55, 2.7, 8), new THREE.ConeGeometry(1.05, 2.3, 8)];
+      ? [new THREE.DodecahedronGeometry(1.5, 1), new THREE.DodecahedronGeometry(1.3, 1), new THREE.DodecahedronGeometry(1.1, 1)]
+      : [new THREE.ConeGeometry(2.1, 3.2, 8), new THREE.ConeGeometry(1.6, 2.8, 8), new THREE.ConeGeometry(1.1, 2.4, 8)];
 
     if (isDeciduous) {
       layerGeos[0].translate(0, 3.5, 0); layerGeos[1].translate(0.55, 4.2, 0.35); layerGeos[2].translate(-0.45, 4.5, -0.35);
     } else {
-      layerGeos[0].translate(0, 3.1, 0); layerGeos[1].translate(0, 4.6, 0); layerGeos[2].translate(0, 5.9, 0);
+      const bY = isBC ? 2.5 : 0;
+      layerGeos[0].translate(0, 3.1 + bY, 0); layerGeos[1].translate(0, 4.6 + bY, 0); layerGeos[2].translate(0, 5.9 + bY, 0);
     }
 
     const foliageMat = mat(THREE, 0xffffff, { map: foliageTex, roughness: 0.82, metalness: 0.02 });
@@ -743,15 +1114,15 @@
 
     const dummy = new THREE.Object3D(), tmpCol = new THREE.Color();
     let placed = 0, attempts = 0;
-    while (placed < treeCount && attempts < treeCount * 5) {
+    while (placed < treeCount && attempts < treeCount * 6) {
       attempts += 1;
       const side = rng() > 0.5 ? 1 : -1;
-      const x = side * (14 + rng() * 170);
-      const z = -375 + rng() * 750;
+      const x = side * (15 + rng() * 200);
+      const z = -485 + rng() * 970;
       if (Math.abs(x) < 18 && Math.abs(z + 52) < 22) continue;
       if (Math.abs(x) < 17 && z > -6 && z < 36) continue;
 
-      const s = 0.72 + rng() * 0.85, sy = s * (0.88 + rng() * 0.28);
+      const s = (isBC ? 1.05 : 0.72) + rng() * 0.85, sy = s * (isBC ? 1.45 : 1.0) * (0.88 + rng() * 0.28);
       dummy.position.set(x, 0, z);
       dummy.rotation.set((rng() - 0.5) * 0.06, rng() * Math.PI * 2, (rng() - 0.5) * 0.06);
       dummy.scale.set(s, sy, s); dummy.updateMatrix();
@@ -760,12 +1131,19 @@
       for (let l = 0; l < layers.length; l += 1) {
         dummy.rotation.y += l * 0.85; dummy.updateMatrix();
         layers[l].setMatrixAt(placed, dummy.matrix);
-        if (isDeciduous) {
-          if (rng() > 0.86) tmpCol.setHSL(0.03 + rng() * 0.06, 0.72, 0.40 + rng() * 0.08);
+        if (isOntario) {
+          // Rich autumn scarlet, burnt-orange, and golden sugar maples mixed with dark pines
+          const roll = rng();
+          if (roll > 0.65) tmpCol.setHex(0xdc2626); // Scarlet maple
+          else if (roll > 0.38) tmpCol.setHex(0xea580c); // Burnt orange
+          else if (roll > 0.20) tmpCol.setHex(0xca8a04); // Golden birch/maple
+          else tmpCol.setHex(0x1e3a1e); // White pine evergreen
+        } else if (isDeciduous) {
+          if (rng() > 0.80) tmpCol.setHSL(0.04 + rng() * 0.06, 0.75, 0.40 + rng() * 0.08);
           else tmpCol.setHSL(0.32 + (rng() - 0.5) * 0.08, 0.45 + rng() * 0.15, 0.25 + rng() * 0.10);
         } else {
-          const baseHue = biome === 'subarctic-shield' ? 0.38 : 0.36;
-          tmpCol.setHSL(baseHue + (rng() - 0.5) * 0.05, 0.42 + rng() * 0.14, 0.18 + rng() * 0.08);
+          const baseHue = isBC ? 0.35 : (biome === 'subarctic-shield' ? 0.38 : 0.36);
+          tmpCol.setHSL(baseHue + (rng() - 0.5) * 0.05, 0.44 + rng() * 0.14, 0.18 + rng() * 0.08);
         }
         layers[l].setColorAt(placed, tmpCol);
       }
@@ -779,18 +1157,18 @@
     }
   }
 
-  // ─── Mountains ───────────────────────────────────────────────────────────
+  // ─── Mountains & Horizon Ridges ───────────────────────────────────────────
 
   function buildInstancedMountains(THREE, scene, count, xRange, zBase, maxHeight, snowCap, rng) {
-    const mGeo = new THREE.ConeGeometry(16, 1, 7);
+    const mGeo = new THREE.ConeGeometry(18, 1, 7);
     mGeo.translate(0, 0.5, 0);
     const stoneTex = getStoneTexture(THREE);
     const rock = new THREE.InstancedMesh(mGeo, mat(THREE, 0x525b66, { map: stoneTex, roughness: 0.92 }), count);
     const snow = snowCap ? new THREE.InstancedMesh(mGeo, mat(THREE, 0xeef5fc, { roughness: 0.55 }), count) : null;
     const dummy = new THREE.Object3D();
     for (let i = 0; i < count; i += 1) {
-      const x = -xRange + (i / Math.max(1, count - 1)) * xRange * 2 + (rng() - 0.5) * 14;
-      const z = zBase - rng() * 60;
+      const x = -xRange + (i / Math.max(1, count - 1)) * xRange * 2 + (rng() - 0.5) * 16;
+      const z = zBase - rng() * 75;
       const h = maxHeight * (0.55 + rng() * 0.55), w = 0.8 + rng() * 1.3;
       dummy.position.set(x, -1, z); dummy.rotation.y = rng() * Math.PI; dummy.scale.set(w, h, w);
       dummy.updateMatrix(); rock.setMatrixAt(i, dummy.matrix);
@@ -803,7 +1181,7 @@
     if (snow) { snow.instanceMatrix.needsUpdate = true; scene.add(snow); }
   }
 
-  // ─── Instanced City Skyline ───────────────────────────────────────────────
+  // ─── Instanced City Skyline (Stepped back: |x| >= 16) ─────────────────────
 
   function buildInstancedSkyline(THREE, scene, count, centerX, centerZ, spreadX, maxH, rng, state) {
     const bTex = getBuildingTextures(THREE);
@@ -823,7 +1201,9 @@
     const dummy = new THREE.Object3D(), tmpCol = new THREE.Color();
     const palette = [0x94a3b8, 0x64748b, 0x7dd3fc, 0xa8a29e, 0x475569];
     for (let i = 0; i < count; i += 1) {
-      const x = centerX + (rng() - 0.5) * spreadX, z = centerZ + (rng() - 0.5) * 42;
+      let x = centerX + (rng() - 0.5) * spreadX;
+      if (Math.abs(x) < 18) x = x < 0 ? -22 - rng() * 12 : 22 + rng() * 12;
+      const z = centerZ + (rng() - 0.5) * 44;
       const w = 4.2 + rng() * 5.8, d = 4.2 + rng() * 5.8, h = 11 + rng() * maxH;
       dummy.rotation.set(0, 0, 0); dummy.position.set(x, 0, z); dummy.scale.set(w, h, d); dummy.updateMatrix();
       buildings.setMatrixAt(i, dummy.matrix); tmpCol.setHex(palette[Math.floor(rng() * palette.length)]); buildings.setColorAt(i, tmpCol);
@@ -841,16 +1221,16 @@
   function buildAuroraCurtains(THREE, scene, auroraMeshes) {
     const colors = [0x22d3ee, 0x34d399, 0xa855f7];
     for (let i = 0; i < 3; i += 1) {
-      const geo = new THREE.PlaneGeometry(160, 26, 20, 4);
-      const m = new THREE.MeshBasicMaterial({ color: colors[i], transparent: true, opacity: 0.24, side: THREE.DoubleSide, depthWrite: false });
+      const geo = new THREE.PlaneGeometry(180, 28, 20, 4);
+      const m = new THREE.MeshBasicMaterial({ color: colors[i], transparent: true, opacity: 0.25, side: THREE.DoubleSide, depthWrite: false });
       const ribbon = new THREE.Mesh(geo, m);
-      ribbon.position.set(-20 + i * 25, 62 + i * 7, -110 - i * 18);
+      ribbon.position.set(-25 + i * 26, 64 + i * 7, -130 - i * 20);
       ribbon.rotation.x = 0.35; ribbon.rotation.y = (i - 1) * 0.22;
       scene.add(ribbon); auroraMeshes.push(ribbon);
     }
   }
 
-  // ─── Roadside Structures (chalets, cabins, rest stops, grain elevators, lighthouses) ──
+  // ─── Roadside Structures across 1000m corridor ────────────────────────────
 
   function buildRoadsideStructures(THREE, scene, province, scale, rng) {
     const biome = province.biome;
@@ -858,105 +1238,66 @@
     const woodTex = getWoodTexture(THREE);
     const concreteTex = getConcreteTexture(THREE);
 
-    // 1. Alpine Chalets / Canadian Cabins along the 760m drive (outside city stretch)
+    // 1. Alpine Chalets / Canadian Cabins along the 1000m drive (stepped back: |x| >= 20)
     const chaletPositions = [
-      { x: -18, z: -280 }, { x: 20, z: -260 }, { x: -22, z: -210 },
-      { x: 18, z: -180 }, { x: -20, z: 120 }, { x: 22, z: 155 },
-      { x: -18, z: 200 }, { x: 20, z: 250 }, { x: -24, z: 310 },
-      { x: 22, z: 340 }
+      { x: -22, z: -420 }, { x: 24, z: -360 }, { x: -22, z: -290 },
+      { x:  24, z: -230 }, { x: -24, z: -140 }, { x:  24, z: 120 },
+      { x: -22, z:  190 }, { x: 24, z:  270 }, { x: -24, z: 350 },
+      { x:  22, z:  430 }
     ];
     for (let i = 0; i < chaletPositions.length; i += 1) {
       const cp = chaletPositions[i];
       const h = 4.5 + rng() * 2.5, w = 7 + rng() * 4;
-      // Cabin body
       addBox(THREE, scene, w, h, 7, 0x78350f, cp.x, h * 0.5, cp.z, { map: woodTex, castShadow: true });
-      // A-frame peaked roof
       addBox(THREE, scene, w + 1.2, 0.3, 8, 0x374151, cp.x, h + 1.5, cp.z, { ry: 0, castShadow: true });
       addCone(THREE, scene, (w + 1.2) * 0.6, 3.2, 4, 0x374151, cp.x, h + 3.1, cp.z, { castShadow: true });
-      // Chimney
       addBox(THREE, scene, 0.8, 2.5, 0.8, 0x64748b, cp.x + w * 0.3, h + 2.5, cp.z - 1.5, { map: stoneTex });
-      // Snow drift on roof (winter)
       if (biome === 'rockies-foothills' || biome === 'klondike-glacier' || biome === 'arctic-tundra') {
         addBox(THREE, scene, w + 0.4, 0.5, 7.4, 0xf8fafc, cp.x, h + 1.6, cp.z, { roughness: 0.5 });
       }
     }
 
-    // 2. Rest stop / gas station (z = 90 and z = -155)
-    const restStops = [{ x: -26, z: 90 }, { x: 26, z: -155 }];
+    // 2. Trans-Canada Rest Stop / Gas Stations (stepped back: |x| = 26)
+    const restStops = [{ x: -26, z: 90 }, { x: 26, z: -160 }, { x: -26, z: 320 }];
     for (let i = 0; i < restStops.length; i += 1) {
       const rs = restStops[i];
-      // Canopy
       addBox(THREE, scene, 18, 0.4, 10, 0x334155, rs.x, 5.2, rs.z, { map: concreteTex, castShadow: true });
       addCyl(THREE, scene, 0.2, 0.25, 5.2, 6, 0x475569, rs.x - 7, 2.6, rs.z - 3, {});
       addCyl(THREE, scene, 0.2, 0.25, 5.2, 6, 0x475569, rs.x + 7, 2.6, rs.z - 3, {});
-      // Building
       addBox(THREE, scene, 8, 4, 10, 0xe2e8f0, rs.x, 2, rs.z + 8, { map: concreteTex, castShadow: true });
       addBox(THREE, scene, 8.4, 0.3, 10.4, 0x334155, rs.x, 4.2, rs.z + 8, {});
-      // Red/white maple-leaf logo sign
       addBox(THREE, scene, 3.2, 1.2, 0.2, 0xc8102e, rs.x, 5.8, rs.z + 2.8, { emissive: 0xc8102e, emissiveIntensity: 0.3 });
     }
 
-    // 3. Prairie grain elevators (Saskatchewan/Manitoba/Alberta)
-    if (biome === 'living-skies-wheat' || biome === 'prairie-lake' || biome === 'rockies-foothills') {
-      const elevatorZ = [-335, -295, 265, 310];
-      const elevatorSides = [-1, 1, -1, 1];
-      for (let i = 0; i < elevatorZ.length; i += 1) {
-        const ex = elevatorSides[i] * 24;
-        const ez = elevatorZ[i];
-        // Main shaft
-        addBox(THREE, scene, 7, 22, 7, 0xb91c1c, ex, 11, ez, { map: woodTex, castShadow: true });
-        addCone(THREE, scene, 5, 4.5, 4, 0x7f1d1d, ex, 24.25, ez, {});
-        // Annex
-        addBox(THREE, scene, 5, 15, 5, 0x92400e, ex + 7, 7.5, ez, { map: woodTex });
-        addCone(THREE, scene, 3.5, 3.5, 4, 0x78350f, ex + 7, 17, ez, {});
-        // "POOL" or "PIONEER" text panel (simple sign)
-        addBox(THREE, scene, 0.1, 2.2, 5.5, 0xffffff, ex - 3.5, 15, ez, { emissive: 0xffffff, emissiveIntensity: 0.1 });
-      }
-    }
-
-    // 4. Lighthouse silhouette (coastal biomes)
-    if (biome === 'granite-lighthouse' || biome === 'atlantic-iceberg' || biome === 'fundy-coast') {
-      const lhPositions = [{ x: -60, z: -310 }, { x: 55, z: 280 }];
-      for (let i = 0; i < lhPositions.length; i += 1) {
-        const lh = lhPositions[i];
-        addCyl(THREE, scene, 2.4, 3.8, 18, 10, 0xf8fafc, lh.x, 9, lh.z, { map: concreteTex, castShadow: true });
-        addCyl(THREE, scene, 2.6, 2.6, 2.8, 10, 0xef4444, lh.x, 19.4, lh.z, { metalness: 0.35 });
-        const lamp = new THREE.Mesh(new THREE.SphereGeometry(1.0, 10, 10), mat(THREE, 0xfef08a, { emissive: 0xfde047, emissiveIntensity: 2.0 }));
-        lamp.position.set(lh.x, 21.5, lh.z);
-        scene.add(lamp);
-      }
-    }
-
-    // 5. Distant mountain ridges framing the horizon on both sides
-    // These are large low-poly silhouette ridges far off the road
+    // 3. Distant Mountain Ridges framing both sides across 1000m corridor
     const ridgeGeo = new THREE.BoxGeometry(1, 1, 1);
     ridgeGeo.translate(0, 0.5, 0);
     const ridgeMat = mat(THREE, 0x334155, { roughness: 0.98, metalness: 0 });
-    const ridgeCount = 28;
+    const ridgeCount = 36;
     const ridges = new THREE.InstancedMesh(ridgeGeo, ridgeMat, ridgeCount);
     const dummy = new THREE.Object3D();
     for (let i = 0; i < ridgeCount; i += 1) {
       const side = i % 2 === 0 ? 1 : -1;
-      const rx = side * (160 + rng() * 60);
-      const rz = -360 + (i / (ridgeCount - 1)) * 720;
-      const rh = 30 + rng() * 50, rw = 40 + rng() * 60;
-      dummy.position.set(rx, 0, rz); dummy.rotation.set(0, rng() * 0.3, 0); dummy.scale.set(rw, rh, 25 + rng() * 30);
+      const rx = side * (180 + rng() * 60);
+      const rz = -480 + (i / (ridgeCount - 1)) * 960;
+      const rh = 35 + rng() * 55, rw = 45 + rng() * 65;
+      dummy.position.set(rx, 0, rz); dummy.rotation.set(0, rng() * 0.3, 0); dummy.scale.set(rw, rh, 28 + rng() * 32);
       dummy.updateMatrix(); ridges.setMatrixAt(i, dummy.matrix);
     }
     ridges.instanceMatrix.needsUpdate = true;
     scene.add(ridges);
 
-    // Snow caps on ridges (for mountainous provinces)
-    if (biome === 'rockies-foothills' || biome === 'klondike-glacier' || biome === 'arctic-tundra') {
-      const capCount = 14;
+    // Snow caps on ridges for mountain biomes
+    if (biome === 'rockies-foothills' || biome === 'klondike-glacier' || biome === 'arctic-tundra' || biome === 'pacific-fjord') {
+      const capCount = 18;
       const caps = new THREE.InstancedMesh(ridgeGeo, mat(THREE, 0xeef5fc, { roughness: 0.5 }), capCount);
       for (let i = 0; i < capCount; i += 1) {
         const side = i % 2 === 0 ? 1 : -1;
-        const rx = side * (165 + rng() * 55);
-        const rz = -340 + (i / (capCount - 1)) * 680;
-        const rh = 20 + rng() * 25, rw = 20 + rng() * 30;
-        const baseH = 30 + rng() * 50;
-        dummy.position.set(rx, baseH * 0.6, rz); dummy.rotation.set(0, 0, 0); dummy.scale.set(rw, rh, 12 + rng() * 18);
+        const rx = side * (185 + rng() * 55);
+        const rz = -460 + (i / (capCount - 1)) * 920;
+        const rh = 22 + rng() * 26, rw = 22 + rng() * 32;
+        const baseH = 35 + rng() * 55;
+        dummy.position.set(rx, baseH * 0.6, rz); dummy.rotation.set(0, 0, 0); dummy.scale.set(rw, rh, 14 + rng() * 18);
         dummy.updateMatrix(); caps.setMatrixAt(i, dummy.matrix);
       }
       caps.instanceMatrix.needsUpdate = true;
@@ -964,45 +1305,41 @@
     }
   }
 
-  // ─── Richer City Block (z -95 to +45, 28-40 varied buildings) ─────────────
+  // ─── Starting City Block (Stepped back: |x| >= 16) ────────────────────────
 
   function buildStartingCityBlock(THREE, scene, province, scale, rng, state) {
     const concreteTex = getConcreteTexture(THREE);
     const stoneTex = getStoneTexture(THREE);
-    const woodTex = getWoodTexture(THREE);
     const bTex = getBuildingTextures(THREE);
 
-    // 1. Main downtown skyline cluster (left side)
-    buildInstancedSkyline(THREE, scene, Math.round(18 * scale), -32, -55, 44, 28, rng, state);
-    // Right side skyline
-    buildInstancedSkyline(THREE, scene, Math.round(14 * scale), 32, -55, 38, 22, rng, null);
+    // 1. Downtown skyline clusters stepped back at |x| = 36
+    buildInstancedSkyline(THREE, scene, Math.round(20 * scale), -36, -55, 46, 28, rng, state);
+    buildInstancedSkyline(THREE, scene, Math.round(16 * scale),  36, -55, 40, 22, rng, null);
 
-    // 2. Mid-rise commercial strip — left of road z: -90 to -20
+    // 2. Mid-rise commercial strip — left side (stepped back at x = -19)
     const commercialLeft = [
-      { w: 10, h: 8, d: 7, x: -18, z: -85, color: 0x94a3b8 },
-      { w: 8, h: 12, d: 7, x: -18, z: -72, color: 0x64748b },
-      { w: 11, h: 6, d: 8, x: -19, z: -60, color: 0xa8a29e },
+      { w: 9, h: 8, d: 7, x: -19, z: -85, color: 0x94a3b8 },
+      { w: 8, h: 12, d: 7, x: -19, z: -72, color: 0x64748b },
+      { w: 10, h: 6, d: 8, x: -20, z: -60, color: 0xa8a29e },
       { w: 9, h: 9, d: 7, x: -19, z: -47, color: 0x7dd3fc },
-      { w: 8, h: 7, d: 8, x: -18, z: -34, color: 0x94a3b8 },
-      { w: 10, h: 5, d: 7, x: -19, z: -22, color: 0x64748b }
+      { w: 8, h: 7, d: 8, x: -19, z: -34, color: 0x94a3b8 },
+      { w: 9, h: 5, d: 7, x: -20, z: -22, color: 0x64748b }
     ];
     for (let i = 0; i < commercialLeft.length; i += 1) {
       const b = commercialLeft[i];
       addBox(THREE, scene, b.w, b.h, b.d, b.color, b.x, b.h * 0.5, b.z, { map: bTex.map, roughness: 0.42, metalness: 0.35, castShadow: true });
-      // Podium
       addBox(THREE, scene, b.w + 1.2, 1.5, b.d + 1.2, 0x334155, b.x, 0.75, b.z, { map: concreteTex });
-      // Rooftop parapet
       addBox(THREE, scene, b.w + 0.4, 0.5, b.d + 0.4, 0x475569, b.x, b.h + 0.25, b.z, { roughness: 0.65 });
     }
 
-    // 3. Mid-rise strip — right side z: -90 to -20
+    // 3. Mid-rise commercial strip — right side (stepped back at x = +19)
     const commercialRight = [
-      { w: 9, h: 10, d: 7, x: 19, z: -88, color: 0x475569 },
-      { w: 11, h: 7, d: 8, x: 19, z: -76, color: 0x64748b },
-      { w: 8, h: 14, d: 7, x: 18, z: -63, color: 0x94a3b8 },
-      { w: 10, h: 6, d: 8, x: 19, z: -50, color: 0x7dd3fc },
-      { w: 9, h: 8, d: 7, x: 19, z: -38, color: 0x475569 },
-      { w: 11, h: 5, d: 7, x: 19, z: -25, color: 0xa8a29e }
+      { w: 9, h: 10, d: 7, x: 20, z: -88, color: 0x475569 },
+      { w: 10, h: 7, d: 8, x: 20, z: -76, color: 0x64748b },
+      { w: 8, h: 14, d: 7, x: 19, z: -63, color: 0x94a3b8 },
+      { w: 10, h: 6, d: 8, x: 20, z: -50, color: 0x7dd3fc },
+      { w: 9, h: 8, d: 7, x: 20, z: -38, color: 0x475569 },
+      { w: 10, h: 5, d: 7, x: 20, z: -25, color: 0xa8a29e }
     ];
     for (let i = 0; i < commercialRight.length; i += 1) {
       const b = commercialRight[i];
@@ -1011,53 +1348,35 @@
       addBox(THREE, scene, b.w + 0.4, 0.5, b.d + 0.4, 0x475569, b.x, b.h + 0.25, b.z, { roughness: 0.65 });
     }
 
-    // 4. Street-level storefronts (small shopfronts z: -15 to +45)
+    // 4. Street-level storefronts (stepped back at |x| = 17 to ensure chase camera clearance)
     const storefronts = [
-      { x: -16, z: -12, color: 0xfef3c7, h: 4 },
-      { x: 16, z: -8, color: 0xdbeafe, h: 4.5 },
-      { x: -16, z: 5, color: 0xfce7f3, h: 3.8 },
-      { x: 16, z: 10, color: 0xecfdf5, h: 4.2 },
-      { x: -16, z: 20, color: 0xfef3c7, h: 4 },
-      { x: 16, z: 30, color: 0xdbeafe, h: 3.8 },
-      { x: -16, z: 38, color: 0xecfdf5, h: 4.5 },
-      { x: 16, z: 44, color: 0xfce7f3, h: 4 }
+      { x: -17, z: -12, color: 0xfef3c7, h: 4 },
+      { x:  17, z:  -8, color: 0xdbeafe, h: 4.5 },
+      { x: -17, z:   5, color: 0xfce7f3, h: 3.8 },
+      { x:  17, z:  10, color: 0xecfdf5, h: 4.2 },
+      { x: -17, z:  20, color: 0xfef3c7, h: 4 },
+      { x:  17, z:  30, color: 0xdbeafe, h: 3.8 },
+      { x: -17, z:  38, color: 0xecfdf5, h: 4.5 },
+      { x:  17, z:  44, color: 0xfce7f3, h: 4 }
     ];
     for (let i = 0; i < storefronts.length; i += 1) {
       const sf = storefronts[i];
-      addBox(THREE, scene, 7, sf.h, 6, sf.color, sf.x, sf.h * 0.5, sf.z, { map: concreteTex, roughness: 0.65, castShadow: true });
-      // Awning
-      addBox(THREE, scene, 7.4, 0.3, 2.5, 0xc8102e, sf.x, sf.h + 0.15, sf.z - 1.5, { roughness: 0.5 });
-      // Flat roof
-      addBox(THREE, scene, 7.6, 0.3, 6.6, 0x64748b, sf.x, sf.h + 0.3, sf.z, {});
+      addBox(THREE, scene, 6.5, sf.h, 6, sf.color, sf.x, sf.h * 0.5, sf.z, { map: concreteTex, roughness: 0.65, castShadow: true });
+      addBox(THREE, scene, 6.8, 0.3, 2.2, 0xc8102e, sf.x, sf.h + 0.15, sf.z - 1.2, { roughness: 0.5 });
+      addBox(THREE, scene, 7.0, 0.3, 6.4, 0x64748b, sf.x, sf.h + 0.3, sf.z, {});
     }
 
-    // 5. Canadian Heritage/Cultural buildings (heritage stone look)
-    // Post office / Town Hall
-    addBox(THREE, scene, 20, 10, 12, 0xd6d3d1, -38, 5, 30, { map: stoneTex, roughness: 0.88, castShadow: true });
-    addBox(THREE, scene, 20.5, 2.5, 12.5, 0xd6d3d1, -38, 11.25, 30, { map: stoneTex, roughness: 0.88 });
-    addCyl(THREE, scene, 2.0, 2.0, 7, 12, 0xd6d3d1, -38, 14.5, 25, { map: stoneTex, castShadow: true });
-    addCone(THREE, scene, 2.4, 4.5, 4, 0x2dd4bf, -38, 20, 25, { metalness: 0.35, roughness: 0.45 });
-    // Library / Museum
-    addBox(THREE, scene, 16, 7, 10, 0xc7c0b8, 36, 3.5, 36, { map: stoneTex, roughness: 0.88, castShadow: true });
-    addBox(THREE, scene, 16.4, 1.2, 10.4, 0xd6d3d1, 36, 7.6, 36, { map: stoneTex });
-    // Corner Bank building
-    addBox(THREE, scene, 12, 14, 10, 0x78716c, -38, 7, -15, { map: stoneTex, castShadow: true });
-    addBox(THREE, scene, 12.4, 1.5, 10.4, 0x57534e, -38, 14.75, -15, { map: stoneTex });
+    // 5. Canadian Heritage Civic block
+    addBox(THREE, scene, 20, 10, 12, 0xd6d3d1, -40, 5, 30, { map: stoneTex, roughness: 0.88, castShadow: true });
+    addBox(THREE, scene, 20.5, 2.5, 12.5, 0xd6d3d1, -40, 11.25, 30, { map: stoneTex });
+    addCyl(THREE, scene, 2.0, 2.0, 7, 12, 0xd6d3d1, -40, 14.5, 25, { map: stoneTex, castShadow: true });
+    addCone(THREE, scene, 2.4, 4.5, 4, 0x2dd4bf, -40, 20, 25, { metalness: 0.35, roughness: 0.45 });
 
-    // 6. Parking lot / pavement pad near functional buildings
+    // 6. Central parking pad near functional buildings
     addBox(THREE, scene, 22, 0.08, 36, 0x1e293b, 0, 0.04, 14, { roughness: 0.92 });
-
-    // 7. Pedestrian sidewalks
-    const concMat = mat(THREE, 0xcbd5e1, { map: concreteTex, roughness: 0.88 });
-    const sidewalkGeoL = new THREE.BoxGeometry(3.5, 0.12, 760);
-    const sidewalkGeoR = new THREE.BoxGeometry(3.5, 0.12, 760);
-    const swL = new THREE.Mesh(sidewalkGeoL, concMat);
-    swL.position.set(-8.2, 0.06, 0); swL.receiveShadow = true; scene.add(swL);
-    const swR = new THREE.Mesh(sidewalkGeoR, concMat);
-    swR.position.set(8.2, 0.06, 0); swR.receiveShadow = true; scene.add(swR);
   }
 
-  // ─── Province Landmarks ───────────────────────────────────────────────────
+  // ─── Real-Life Architecture & Scenery for All 14 Provinces ───────────────
 
   function buildProvinceLandmarks(THREE, scene, province, scale, rng, state) {
     const id = province.id;
@@ -1065,53 +1384,80 @@
     const stoneTex = getStoneTexture(THREE);
     const woodTex = getWoodTexture(THREE);
     const waterBump = getWaterBumpTexture(THREE);
+    const pinkGraniteTex = getPinkGraniteTexture(THREE);
 
-    // Helper to get landmark coords (falls back to defaults)
     function lmCoords(idx, defX, defY, defZ) {
       const lm = province.landmarks && province.landmarks[idx];
       if (lm && lm.coords) return lm.coords;
       return [defX, defY, defZ];
     }
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // 1. ONTARIO: Pink-Grey Shield Rock Cuts, Autumn Maples & CN Tower
+    // ──────────────────────────────────────────────────────────────────────────
     if (id === 'ontario') {
-      // ── CN Tower at landmark 0 coords ──
-      const cnC = lmCoords(0, 0, 0, -55);
+      // Canadian Shield Pink-Grey Granite Rock Cuts flanking highway
+      const rockCutGeo = new THREE.BoxGeometry(4.5, 5.5, 18);
+      const rockCutMat = mat(THREE, 0xffffff, { map: pinkGraniteTex, roughness: 0.90 });
+      const cutCount = 20;
+      const cuts = new THREE.InstancedMesh(rockCutGeo, rockCutMat, cutCount * 2);
+      const dummy = new THREE.Object3D();
+      let cIdx = 0;
+      for (let i = 0; i < cutCount; i += 1) {
+        const cz = -360 + (i / (cutCount - 1)) * 720;
+        if (cz > -50 && cz < 50) continue; // Leave central hub clear
+        const hL = 4.0 + rng() * 3.5, hR = 4.0 + rng() * 3.5;
+        dummy.position.set(-11.5, hL * 0.5, cz); dummy.scale.set(1.0 + rng() * 0.4, hL / 5.5, 1.0);
+        dummy.rotation.set((rng() - 0.5) * 0.08, (rng() - 0.5) * 0.1, (rng() - 0.5) * 0.08);
+        dummy.updateMatrix(); cuts.setMatrixAt(cIdx++, dummy.matrix);
+
+        dummy.position.set(11.5, hR * 0.5, cz); dummy.scale.set(1.0 + rng() * 0.4, hR / 5.5, 1.0);
+        dummy.rotation.set((rng() - 0.5) * 0.08, (rng() - 0.5) * 0.1, (rng() - 0.5) * 0.08);
+        dummy.updateMatrix(); cuts.setMatrixAt(cIdx++, dummy.matrix);
+      }
+      cuts.count = cIdx;
+      cuts.instanceMatrix.needsUpdate = true;
+      scene.add(cuts);
+
+      // CN Tower (stepped back at x = -26, z = -65 to preserve chase camera clearance)
+      const cnC = lmCoords(0, 0, 0, -65);
+      const cnX = -26, cnZ = cnC[2];
       const cn = new THREE.Group();
-      cn.position.set(cnC[0], 0, cnC[2]);
-      addCyl(THREE, cn, 2.2, 5.4, 46, 14, 0xdbe4ee, 0, 23, 0, { map: concreteTex, roughness: 0.75, castShadow: true });
+      cn.position.set(cnX, 0, cnZ);
+      addCyl(THREE, cn, 2.2, 5.4, 48, 14, 0xdbe4ee, 0, 24, 0, { map: concreteTex, roughness: 0.75, castShadow: true });
       for (let r = 0; r < 3; r += 1) {
         const ang = (r / 3) * Math.PI * 2;
-        addBox(THREE, cn, 1.3, 42, 1.8, 0xcbd5e1, Math.sin(ang) * 3.1, 21, Math.cos(ang) * 3.1, { ry: ang, map: concreteTex });
+        addBox(THREE, cn, 1.3, 44, 1.8, 0xcbd5e1, Math.sin(ang) * 3.1, 22, Math.cos(ang) * 3.1, { ry: ang, map: concreteTex });
       }
-      addCyl(THREE, cn, 6.4, 5.4, 4.4, 24, 0xe2e8f0, 0, 46, 0, { map: concreteTex, metalness: 0.25, castShadow: true });
-      addCyl(THREE, cn, 6.0, 6.0, 1.6, 24, 0x38bdf8, 0, 46.2, 0, { roughness: 0.15, metalness: 0.7, emissive: 0x0ea5e9, emissiveIntensity: 0.45 });
-      addCyl(THREE, cn, 2.5, 2.8, 2.4, 16, 0x94a3b8, 0, 54.5, 0, { metalness: 0.5 });
-      addCyl(THREE, cn, 0.35, 1.6, 18, 10, 0xf1f5f9, 0, 58, 0, { metalness: 0.65, roughness: 0.3 });
+      addCyl(THREE, cn, 6.4, 5.4, 4.4, 24, 0xe2e8f0, 0, 48, 0, { map: concreteTex, metalness: 0.25, castShadow: true });
+      addCyl(THREE, cn, 6.0, 6.0, 1.6, 24, 0x38bdf8, 0, 48.2, 0, { roughness: 0.15, metalness: 0.7, emissive: 0x0ea5e9, emissiveIntensity: 0.5 });
+      addCyl(THREE, cn, 2.5, 2.8, 2.4, 16, 0x94a3b8, 0, 56.5, 0, { metalness: 0.5 });
+      addCyl(THREE, cn, 0.35, 1.6, 18, 10, 0xf1f5f9, 0, 60, 0, { metalness: 0.65, roughness: 0.3 });
       const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.75, 10, 10), mat(THREE, 0xff2244, { emissive: 0xff2244, emissiveIntensity: 1.6 }));
-      beacon.position.set(0, 67.5, 0); cn.add(beacon); state.beaconMeshes.push(beacon); scene.add(cn);
+      beacon.position.set(0, 69.5, 0); cn.add(beacon); state.beaconMeshes.push(beacon); scene.add(cn);
 
-      // Rogers-style Dome
-      const domeC = lmCoords(1, -42, 0, -42);
-      const dome = new THREE.Mesh(new THREE.SphereGeometry(12, 24, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), mat(THREE, 0xdbeafe, { map: concreteTex, roughness: 0.38, metalness: 0.32 }));
+      // Rogers-style Dome (x = -52, z = -120)
+      const domeC = lmCoords(1, -48, 0, -120);
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(14, 24, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), mat(THREE, 0xdbeafe, { map: concreteTex, roughness: 0.38, metalness: 0.32 }));
       dome.position.set(domeC[0], 0, domeC[2]); scene.add(dome);
-      addCyl(THREE, scene, 12.6, 13.2, 3.6, 24, 0x334155, domeC[0], 1.8, domeC[2], { map: concreteTex, metalness: 0.35 });
+      addCyl(THREE, scene, 14.6, 15.2, 4.0, 24, 0x334155, domeC[0], 2.0, domeC[2], { map: concreteTex, metalness: 0.35 });
 
-      // Niagara Falls at landmark 2 coords
-      const niaC = lmCoords(2, 78, 0, 52);
-      addBox(THREE, scene, 28, 12, 16, 0x475569, niaC[0], 6, niaC[2] - 8, { map: stoneTex, roughness: 0.9 });
-      const falls = addBox(THREE, scene, 21, 12.2, 2.6, 0x7dd3fc, niaC[0], 6, niaC[2], {
-        bumpMap: waterBump, bumpScale: 0.25, roughness: 0.2, emissive: 0x0284c7, emissiveIntensity: 0.3, transparent: true, opacity: 0.84
+      // Niagara Falls Horseshoe Cataract at landmark 2
+      const niaC = lmCoords(2, 82, 0, 205);
+      addBox(THREE, scene, 30, 14, 18, 0x475569, niaC[0], 7, niaC[2] - 8, { map: stoneTex, roughness: 0.9 });
+      const falls = addBox(THREE, scene, 24, 13.5, 2.8, 0x7dd3fc, niaC[0], 6.8, niaC[2], {
+        bumpMap: waterBump, bumpScale: 0.25, roughness: 0.2, emissive: 0x0284c7, emissiveIntensity: 0.35, transparent: true, opacity: 0.85
       });
       const mistCount = Math.round(90 * scale);
       const mistPos = new Float32Array(mistCount * 3), mistBase = new Float32Array(mistCount * 3);
       for (let i = 0; i < mistCount; i += 1) {
-        const mx = niaC[0] + (rng() - 0.5) * 22, my = 0.5 + rng() * 6.5, mz = niaC[2] + rng() * 5.5;
+        const mx = niaC[0] + (rng() - 0.5) * 24, my = 0.5 + rng() * 7.0, mz = niaC[2] + rng() * 6.0;
         mistPos[i * 3] = mx; mistPos[i * 3 + 1] = my; mistPos[i * 3 + 2] = mz;
         mistBase[i * 3] = mx; mistBase[i * 3 + 1] = my; mistBase[i * 3 + 2] = mz;
       }
       const mistGeo = new THREE.BufferGeometry();
       mistGeo.setAttribute('position', new THREE.BufferAttribute(mistPos, 3));
-      const mistMat = new THREE.PointsMaterial({ size: 4.8, map: getMistSpriteTexture(THREE), transparent: true, opacity: 0.58, depthWrite: false });
+      const mistMat = new THREE.PointsMaterial({ size: 5.0, map: getMistSpriteTexture(THREE), transparent: true, opacity: 0.6, depthWrite: false });
       const mistPoints = new THREE.Points(mistGeo, mistMat); scene.add(mistPoints);
       state.animators.push(function (t) {
         falls.material.opacity = 0.74 + Math.sin(t * 4.5) * 0.1;
@@ -1119,18 +1465,48 @@
         for (let i = 0; i < mistCount; i += 1) {
           const i3 = i * 3;
           arr[i3] = mistBase[i3] + Math.sin(t * 0.9 + i) * 0.8;
-          arr[i3 + 1] = ((mistBase[i3 + 1] + t * 2.1) % 7.2) + 0.4;
+          arr[i3 + 1] = ((mistBase[i3 + 1] + t * 2.1) % 7.5) + 0.4;
         }
         mistGeo.attributes.position.needsUpdate = true;
       });
 
-      buildInstancedSkyline(THREE, scene, Math.round(28 * scale), cnC[0] - 24, cnC[2] - 12, 75, 26, rng, state);
+      // Toronto waterfront skyline cluster
+      buildInstancedSkyline(THREE, scene, Math.round(28 * scale), -45, -95, 75, 26, rng, state);
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // 2. QUEBEC: French-Canadian Silver Church, Heritage Houses & Château
+    // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'quebec') {
-      // Château Frontenac at landmark 0
-      const cfC = lmCoords(0, 0, 10, -58);
-      addBox(THREE, scene, 44, 10, 26, 0x57534e, cfC[0], 5, cfC[2], { map: stoneTex, roughness: 0.92 });
-      const ch = new THREE.Group(); ch.position.set(cfC[0], 10, cfC[2]);
+      // Silver-spired French-Canadian parish stone church (x = -32, z = 130)
+      const chX = -32, chZ = 130;
+      addBox(THREE, scene, 16, 12, 28, 0x78716c, chX, 6, chZ, { map: stoneTex, roughness: 0.9, castShadow: true });
+      // Galvanized tin steep roof
+      addCone(THREE, scene, 11, 8, 4, 0xcbd5e1, chX, 16, chZ, { metalness: 0.65, roughness: 0.35, ry: Math.PI / 4 });
+      // Soaring bell tower / clocher
+      addBox(THREE, scene, 5.5, 18, 5.5, 0x78716c, chX, 9, chZ - 13, { map: stoneTex, castShadow: true });
+      addBox(THREE, scene, 4.5, 4.0, 4.5, 0x64748b, chX, 20, chZ - 13, { metalness: 0.5 });
+      // Gleaming silver spire reaching 34m
+      addCone(THREE, scene, 3.2, 12, 8, 0xf1f5f9, chX, 28, chZ - 13, { metalness: 0.85, roughness: 0.2 });
+      // Silver cross
+      addBox(THREE, scene, 0.2, 2.2, 0.2, 0xffffff, chX, 35, chZ - 13, { emissive: 0xffffff, emissiveIntensity: 0.5 });
+      addBox(THREE, scene, 1.4, 0.2, 0.2, 0xffffff, chX, 35.4, chZ - 13, { emissive: 0xffffff, emissiveIntensity: 0.5 });
+
+      // Row of Steep-roofed heritage village houses with curved bell-cast eaves
+      const villageX = 24;
+      for (let i = 0; i < 5; i += 1) {
+        const vz = 75 + i * 28;
+        addBox(THREE, scene, 9, 6.5, 10, 0xf8fafc, villageX, 3.25, vz, { map: woodTex, castShadow: true });
+        // Steep tin/copper mansard roof with bell-cast eaves
+        addCone(THREE, scene, 7.5, 5.5, 4, i % 2 === 0 ? 0xef4444 : 0x2dd4bf, villageX, 9.25, vz, { ry: Math.PI / 4, metalness: 0.3 });
+        // Stone end-chimneys
+        addBox(THREE, scene, 0.9, 3.5, 0.9, 0x78716c, villageX + 3.8, 8.5, vz, { map: stoneTex });
+      }
+
+      // Château Frontenac at landmark 0 (x = -24, z = -68)
+      const cfC = lmCoords(0, 0, 10, -68);
+      const cfX = -26, cfZ = cfC[2];
+      addBox(THREE, scene, 44, 10, 26, 0x57534e, cfX, 5, cfZ, { map: stoneTex, roughness: 0.92 });
+      const ch = new THREE.Group(); ch.position.set(cfX, 10, cfZ);
       addBox(THREE, ch, 22, 14, 14, 0x9a3412, 0, 7, 0, { map: stoneTex, castShadow: true });
       addBox(THREE, ch, 9, 22, 9, 0xb45309, 0, 11, 0, { map: stoneTex, castShadow: true });
       addCone(THREE, ch, 6.2, 11, 8, 0x2dd4bf, 0, 27.5, 0, { metalness: 0.35, roughness: 0.45 });
@@ -1141,252 +1517,508 @@
       scene.add(ch);
 
       // Montreal Inclined Tower at landmark 1
-      const mtlC = lmCoords(1, -72, 0, 44);
+      const mtlC = lmCoords(1, -78, 0, 210);
       addBox(THREE, scene, 4.5, 34, 4.5, 0xe2e8f0, mtlC[0], 15, mtlC[2], { map: concreteTex, rz: -0.45, castShadow: true });
       addCyl(THREE, scene, 12, 14, 4, 20, 0x475569, mtlC[0] + 10, 2, mtlC[2], { map: concreteTex });
-      buildInstancedSkyline(THREE, scene, Math.round(22 * scale), cfC[0] + 54, cfC[2] - 46, 55, 18, rng, state);
+      buildInstancedSkyline(THREE, scene, Math.round(22 * scale), cfX + 54, cfZ - 46, 55, 18, rng, state);
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // 3. BRITISH COLUMBIA: Highway Avalanche Shed, Towering Firs & Howe Sound
+    // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'british-columbia') {
-      // Canada Place Sails at landmark 0
-      const cpC = lmCoords(0, -18, 0, -48);
+      // Highway Avalanche Shed / Rock Gallery (z ∈ [-170, -125], length 45m spanning highway!)
+      const shedZStart = -170, shedZEnd = -125, shedLen = shedZEnd - shedZStart;
+      const shedMidZ = (shedZStart + shedZEnd) * 0.5;
+      const hazardTex = getHazardStripesTexture(THREE);
+
+      // Mountain-side solid concrete retaining wall (x = -6.4)
+      addBox(THREE, scene, 0.9, 6.2, shedLen, 0x475569, -6.4, 3.1, shedMidZ, { map: concreteTex, castShadow: true });
+
+      // Sloped reinforced concrete roof (sloped down towards the fjord so avalanches slide off)
+      const roof = addBox(THREE, scene, 13.8, 0.45, shedLen, 0x334155, 0.2, 6.3, shedMidZ, { map: concreteTex });
+      roof.rotation.z = -0.10;
+
+      // Heavy timber ceiling cross-beams
+      for (let bz = shedZStart + 4; bz <= shedZEnd - 4; bz += 6) {
+        addBox(THREE, scene, 13.2, 0.35, 0.4, 0x5c4028, 0.2, 6.0, bz, { map: woodTex });
+      }
+
+      // Outer pillars facing the fjord (x = +6.4, allowing views of Howe Sound!)
+      for (let pz = shedZStart + 3; pz <= shedZEnd - 3; pz += 6.5) {
+        addBox(THREE, scene, 0.7, 5.8, 0.8, 0x475569, 6.4, 2.9, pz, { map: concreteTex });
+      }
+
+      // Portal entrances with yellow/black diagonal hazard stripes
+      const portalMat = new THREE.MeshStandardMaterial({ map: hazardTex, roughness: 0.4 });
+      const portalN = new THREE.Mesh(new THREE.BoxGeometry(13.8, 0.8, 0.3), portalMat);
+      portalN.position.set(0.2, 6.4, shedZStart - 0.2); scene.add(portalN);
+      const portalS = new THREE.Mesh(new THREE.BoxGeometry(13.8, 0.8, 0.3), portalMat);
+      portalS.position.set(0.2, 6.4, shedZEnd + 0.2); scene.add(portalS);
+
+      // Sea-to-Sky sheer granite cliffs along mountain side (x = -35 to -70)
+      for (let i = 0; i < 7; i += 1) {
+        const cx = -38 - (i % 2) * 12, cz = -320 + i * 85;
+        addBox(THREE, scene, 26, 42 + (i % 3) * 12, 45, 0x475569, cx, 20, cz, { map: stoneTex, roughness: 0.95 });
+      }
+
+      // Canada Place Sails at landmark 0 (x = -22, z = -72)
+      const cpC = lmCoords(0, -18, 0, -72);
       addBox(THREE, scene, 26, 3, 12, 0x334155, cpC[0], 1.5, cpC[2], { map: concreteTex });
       for (let i = 0; i < 5; i += 1) addCone(THREE, scene, 2.8, 11, 4, 0xf8fafc, cpC[0] - 10 + i * 4.2, 8.5, cpC[2], { roughness: 0.45, castShadow: true });
 
       // Lions Gate Bridge at landmark 1
-      const lgC = lmCoords(1, 62, 0, -18);
+      const lgC = lmCoords(1, 70, 0, -140);
       addBox(THREE, scene, 56, 1.8, 5, 0x10b981, lgC[0], 11, lgC[2], { metalness: 0.55, roughness: 0.35 });
       addBox(THREE, scene, 2, 24, 5, 0x059669, lgC[0] - 18, 12, lgC[2], { metalness: 0.6 });
       addBox(THREE, scene, 2, 24, 5, 0x059669, lgC[0] + 18, 12, lgC[2], { metalness: 0.6 });
       addBox(THREE, scene, 20, 0.25, 0.25, 0x34d399, lgC[0] - 28, 18, lgC[2], { rz: 0.48, metalness: 0.7 });
       addBox(THREE, scene, 20, 0.25, 0.25, 0x34d399, lgC[0] + 28, 18, lgC[2], { rz: -0.48, metalness: 0.7 });
 
-      // BC Rockies / Coast Mountains at landmark 2
-      const bcRockC = lmCoords(2, 0, 0, -200);
-      buildInstancedMountains(THREE, scene, Math.round(28 * scale), 170, bcRockC[2], 60, true, rng);
+      // Coast Mountains massifs
+      buildInstancedMountains(THREE, scene, Math.round(30 * scale), 190, -220, 68, true, rng);
       buildInstancedSkyline(THREE, scene, Math.round(20 * scale), cpC[0] - 18, cpC[2] - 20, 50, 22, rng, state);
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // 4. ALBERTA: Banff Wildlife Overpass, Banff Springs Hotel & Hoodoos
+    // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'alberta') {
-      // ── Calgary Tower at landmark 0 coords ──
-      const calC = lmCoords(0, 0, 0, -65);
-      addCyl(THREE, scene, 2.0, 2.9, 36, 14, 0xdbeafe, calC[0], 18, calC[2], { map: concreteTex, castShadow: true });
-      addCyl(THREE, scene, 4.6, 3.8, 3.2, 18, 0xf59e0b, calC[0], 36, calC[2], { metalness: 0.45, roughness: 0.25, emissive: 0xd97706, emissiveIntensity: 0.35 });
-      addCyl(THREE, scene, 0.3, 0.8, 9, 8, 0xffffff, calC[0], 42, calC[2], { metalness: 0.7 });
+      // Banff Forested Wildlife Overpass spanning over Trans-Canada Highway at z = -120
+      const woZ = -120;
+      const woGroup = new THREE.Group();
+      woGroup.position.set(0, 0, woZ);
 
-      // Calgary skyline
-      buildInstancedSkyline(THREE, scene, Math.round(22 * scale), calC[0], calC[2] - 14, 56, 26, rng, state);
+      // Heavy curved concrete arch abutments flanking the road
+      addBox(THREE, woGroup, 1.8, 6.2, 22, 0x64748b, -7.5, 3.1, 0, { map: concreteTex });
+      addBox(THREE, woGroup, 1.8, 6.2, 22, 0x64748b,  7.5, 3.1, 0, { map: concreteTex });
 
-      // ── Banff Springs Hotel chateau silhouette at landmark 1 coords ──
-      const banffC = lmCoords(1, 0, 0, -215);
-      const banff = new THREE.Group(); banff.position.set(banffC[0], 0, banffC[2]);
-      // Massive stone base
-      addBox(THREE, banff, 50, 12, 28, 0x57534e, 0, 6, 0, { map: stoneTex, roughness: 0.92, castShadow: true });
-      // Central keep
+      // Concrete arch bridge span over the highway (clearance: 5.8m)
+      addBox(THREE, woGroup, 16.8, 1.0, 22, 0x475569, 0, 6.4, 0, { map: concreteTex });
+
+      // Vegetated earth berm on top of the overpass
+      addBox(THREE, woGroup, 16.0, 0.8, 21.6, 0x365314, 0, 7.3, 0, { roughness: 0.95 });
+
+      // Rustic wooden privacy/sound fences along both edges of overpass
+      addBox(THREE, woGroup, 16.4, 1.8, 0.3, 0x78350f, 0, 8.2, -10.8, { map: woodTex });
+      addBox(THREE, woGroup, 16.4, 1.8, 0.3, 0x78350f, 0, 8.2,  10.8, { map: woodTex });
+
+      // Living pine & spruce trees planted on top of the overpass for wildlife
+      for (let tx = -5.5; tx <= 5.5; tx += 2.8) {
+        for (let tz = -7.5; tz <= 7.5; tz += 5.0) {
+          addCone(THREE, woGroup, 1.2, 3.2, 6, 0x14532d, tx + (rng() - 0.5) * 0.8, 9.2, tz + (rng() - 0.5) * 0.8);
+        }
+      }
+      scene.add(woGroup);
+
+      // Banff Springs Hotel chateau silhouette (x = -28, z = -215)
+      const banffC = lmCoords(1, -80, 0, -215);
+      const banff = new THREE.Group(); banff.position.set(-28, 0, banffC[2]);
+      addBox(THREE, banff, 48, 12, 26, 0x57534e, 0, 6, 0, { map: stoneTex, roughness: 0.92, castShadow: true });
       addBox(THREE, banff, 18, 24, 18, 0x9a3412, 0, 18, 0, { map: stoneTex, castShadow: true });
       addCone(THREE, banff, 10, 14, 8, 0x2dd4bf, 0, 37, 0, { metalness: 0.35, roughness: 0.45 });
-      // Corner towers
       for (let tx = -1; tx <= 1; tx += 2) {
         for (let tz = -1; tz <= 1; tz += 2) {
           addCyl(THREE, banff, 3.2, 3.5, 20, 10, 0x9a3412, tx * 22, 10, tz * 11, { map: stoneTex, castShadow: true });
           addCone(THREE, banff, 3.8, 9, 8, 0x2dd4bf, tx * 22, 24, tz * 11, { metalness: 0.35 });
         }
       }
-      // Stone walls connecting towers
-      addBox(THREE, banff, 50, 8, 2.5, 0x78716c, 0, 4, -13, { map: stoneTex });
-      addBox(THREE, banff, 50, 8, 2.5, 0x78716c, 0, 4, 13, { map: stoneTex });
       scene.add(banff);
 
-      // ── Towering Rockies peaks behind Banff ──
-      buildInstancedMountains(THREE, scene, Math.round(32 * scale), 190, banffC[2] - 20, 80, true, rng);
+      // Jagged Rockies peaks behind Banff
+      buildInstancedMountains(THREE, scene, Math.round(34 * scale), 200, banffC[2] - 25, 82, true, rng);
 
-      // ── Turquoise Lake Louise basin at landmark 2 coords ──
-      const louiseC = lmCoords(2, 68, 0, -68);
+      // Turquoise Lake Louise Basin at landmark 2
+      const louiseC = lmCoords(2, 72, 0, 120);
       const louise = new THREE.Mesh(
-        new THREE.CircleGeometry(22, 32),
-        mat(THREE, 0x14b8a6, { roughness: 0.12, metalness: 0.4, bumpMap: waterBump, bumpScale: 0.14, emissive: 0x0d9488, emissiveIntensity: 0.2 })
+        new THREE.CircleGeometry(24, 32),
+        mat(THREE, 0x14b8a6, { roughness: 0.12, metalness: 0.4, bumpMap: waterBump, bumpScale: 0.14, emissive: 0x0d9488, emissiveIntensity: 0.25 })
       );
-      louise.rotation.x = -Math.PI / 2;
-      louise.position.set(louiseC[0], 0.12, louiseC[2]); scene.add(louise);
-      // Snow-covered mountains behind Lake Louise
-      buildInstancedMountains(THREE, scene, Math.round(18 * scale), 120, louiseC[2] - 30, 72, true, rng);
+      louise.rotation.x = -Math.PI / 2; louise.position.set(louiseC[0], 0.12, louiseC[2]); scene.add(louise);
+      buildInstancedMountains(THREE, scene, Math.round(18 * scale), 130, louiseC[2] - 30, 75, true, rng);
 
-      // Alberta Badlands Hoodoos (use 3rd landmark or default z=165)
-      const badC = lmCoords(2, 70, 0, 165);
-      for (let i = 0; i < 7; i += 1) {
-        const hx = badC[0] - 24 + i * 7, hz = badC[2] + (rng() - 0.5) * 20;
+      // Alberta Badlands Terracotta Hoodoos at z = 180
+      for (let i = 0; i < 8; i += 1) {
+        const hx = 65 - 24 + i * 7, hz = 180 + (rng() - 0.5) * 22;
         const hh = 10 + rng() * 8;
         addCyl(THREE, scene, 1.4 + rng() * 0.8, 2.6 + rng() * 1.0, hh, 7, 0xb45309, hx, hh * 0.5, hz, { map: stoneTex, castShadow: true });
         addBox(THREE, scene, 3.5 + rng() * 2, 2.0, 3.5 + rng() * 2, 0x92400e, hx, hh + 1.0, hz, { map: stoneTex });
       }
 
+      // Calgary Tower (stepped back at x = -24, z = -65)
+      const calC = lmCoords(0, 0, 0, -65);
+      addCyl(THREE, scene, 2.0, 2.9, 36, 14, 0xdbeafe, -24, 18, calC[2], { map: concreteTex, castShadow: true });
+      addCyl(THREE, scene, 4.6, 3.8, 3.2, 18, 0xf59e0b, -24, 36, calC[2], { metalness: 0.45, roughness: 0.25, emissive: 0xd97706, emissiveIntensity: 0.35 });
+      addCyl(THREE, scene, 0.3, 0.8, 9, 8, 0xffffff, -24, 42, calC[2], { metalness: 0.7 });
+      buildInstancedSkyline(THREE, scene, Math.round(22 * scale), -35, calC[2] - 14, 56, 26, rng, state);
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 5. NATIONAL CAPITAL: Rideau Canal Embankments & Gothic Heritage Blocks
+    // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'national-capital') {
-      // Parliament Hill at landmark 0
-      const parlC = lmCoords(0, 0, 0, -56);
-      addBox(THREE, scene, 36, 11, 14, 0xd6d3d1, parlC[0], 5.5, parlC[2], { map: stoneTex, roughness: 0.85, castShadow: true });
-      addBox(THREE, scene, 37, 2.5, 15, 0x2dd4bf, parlC[0], 12.2, parlC[2], { metalness: 0.35, roughness: 0.45 });
-      addBox(THREE, scene, 6.2, 32, 6.2, 0xe7e5e4, parlC[0], 16, parlC[2] + 6, { map: stoneTex, roughness: 0.85, castShadow: true });
-      addCone(THREE, scene, 4.4, 9, 4, 0x2dd4bf, parlC[0], 36.5, parlC[2] + 6, { metalness: 0.35, roughness: 0.45 });
-      addBox(THREE, scene, 2.6, 2.6, 0.4, 0xfef08a, parlC[0], 26, parlC[2] + 9.8, { emissive: 0xfacc15, emissiveIntensity: 0.7 });
+      // Parliament Hill Centre Block & Peace Tower (stepped back at x = -26, z = -70)
+      const parlC = lmCoords(0, 0, 0, -70);
+      const px = -26, pz = parlC[2];
+      addBox(THREE, scene, 36, 11, 14, 0xd6d3d1, px, 5.5, pz, { map: stoneTex, roughness: 0.85, castShadow: true });
+      addBox(THREE, scene, 37, 2.5, 15, 0x2dd4bf, px, 12.2, pz, { metalness: 0.35, roughness: 0.45 });
+      // Peace Tower
+      addBox(THREE, scene, 6.2, 34, 6.2, 0xe7e5e4, px, 17, pz + 6, { map: stoneTex, roughness: 0.85, castShadow: true });
+      addCone(THREE, scene, 4.4, 9, 4, 0x2dd4bf, px, 38.5, pz + 6, { metalness: 0.35, roughness: 0.45 });
+      addBox(THREE, scene, 2.6, 2.6, 0.4, 0xfef08a, px, 27, pz + 9.8, { emissive: 0xfacc15, emissiveIntensity: 0.7 });
 
-      // Rideau Canal at landmark 1
-      const rcC = lmCoords(1, 46, 0, -16);
-      addBox(THREE, scene, 12, 0.18, 120, 0x1e6b8a, rcC[0], 0.1, rcC[2], { bumpMap: waterBump, roughness: 0.14, metalness: 0.42 });
+      // Gothic copper-roofed heritage blocks (East Block & West Block style)
+      addBox(THREE, scene, 24, 10, 12, 0xd6d3d1, 28, 5, -70, { map: stoneTex, castShadow: true });
+      addBox(THREE, scene, 25, 2.8, 13, 0x2dd4bf, 28, 11.4, -70, { metalness: 0.35, roughness: 0.45 });
+      addCone(THREE, scene, 3.2, 6, 4, 0x2dd4bf, 28 - 9, 15.8, -70);
+      addCone(THREE, scene, 3.2, 6, 4, 0x2dd4bf, 28 + 9, 15.8, -70);
 
-      // Alexandra Bridge at landmark 2
-      const abC = lmCoords(2, -58, 0, -44);
-      addBox(THREE, scene, 42, 1.5, 4.5, 0x64748b, abC[0], 8, abC[2], { metalness: 0.6, roughness: 0.4 });
-      addBox(THREE, scene, 42, 2.4, 0.35, 0x475569, abC[0], 9.8, abC[2] + 2, { metalness: 0.65 });
-      addBox(THREE, scene, 1.5, 9, 4.5, 0x475569, abC[0] - 12, 4.5, abC[2], { map: stoneTex });
-      addBox(THREE, scene, 1.5, 9, 4.5, 0x475569, abC[0] + 12, 4.5, abC[2], { map: stoneTex });
+      // Rideau Canal stone embankments with canal lock gates (x = 38, z ∈ [-160, 120])
+      addBox(THREE, scene, 12, 0.22, 180, 0x1e6b8a, 42, 0.1, -20, { bumpMap: waterBump, roughness: 0.14, metalness: 0.42 });
+      // Limestone canal walls
+      addBox(THREE, scene, 1.2, 1.2, 180, 0x78716c, 35.4, 0.6, -20, { map: stoneTex });
+      addBox(THREE, scene, 1.2, 1.2, 180, 0x78716c, 48.6, 0.6, -20, { map: stoneTex });
+      // Canal lock timber gates
+      for (let lz = -120; lz <= 80; lz += 50) {
+        addBox(THREE, scene, 12, 2.2, 0.5, 0x78350f, 42, 1.1, lz, { map: woodTex });
+      }
 
+      // Alexandra Interprovincial Bridge cantilever truss at landmark 2
+      const abC = lmCoords(2, -62, 0, 200);
+      addBox(THREE, scene, 46, 1.8, 4.8, 0x64748b, abC[0], 8, abC[2], { metalness: 0.6, roughness: 0.4 });
+      addBox(THREE, scene, 46, 2.6, 0.35, 0x475569, abC[0], 10, abC[2] + 2, { metalness: 0.65 });
+      addBox(THREE, scene, 1.6, 10, 4.8, 0x475569, abC[0] - 14, 5, abC[2], { map: stoneTex });
+      addBox(THREE, scene, 1.6, 10, 4.8, 0x475569, abC[0] + 14, 5, abC[2], { map: stoneTex });
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 6. SASKATCHEWAN: Historic Grain Elevators, Railway & Onion-Domed Church
+    // ──────────────────────────────────────────────────────────────────────────
+    } else if (id === 'saskatchewan') {
+      // Row of Historic Wooden Prairie Grain Elevators along rail tracks (x = -28, z ∈ [-240, -140])
+      const crossbuckTex = getRailwayCrossbuckTexture(THREE);
+      const elevZ = [-230, -185, -140];
+      const elevColors = [0xb91c1c, 0xd97706, 0x15803d];
+      const elevNames = ['SASKATCHEWAN POOL', 'PIONEER GRAIN', 'WHEAT POOL'];
+
+      for (let i = 0; i < 3; i += 1) {
+        const ez = elevZ[i], ec = elevColors[i];
+        // Main tall grain elevator shaft
+        addBox(THREE, scene, 8.5, 24, 8.5, ec, -28, 12, ez, { map: woodTex, castShadow: true });
+        addCone(THREE, scene, 6.2, 5.0, 4, ec, -28, 26.5, ez, { ry: Math.PI / 4 });
+        // Grain annex bins
+        addBox(THREE, scene, 6.0, 16, 6.0, ec, -28, 8, ez + 7.5, { map: woodTex });
+        addCone(THREE, scene, 4.2, 3.8, 4, ec, -28, 17.9, ez + 7.5, { ry: Math.PI / 4 });
+        // White lettering sign
+        addBox(THREE, scene, 0.2, 2.5, 6.8, 0xffffff, -23.6, 17, ez, { emissive: 0xffffff, emissiveIntensity: 0.1 });
+      }
+
+      // Transcontinental Railway parallel to highway (x = -18, full z corridor)
+      // Crushed stone ballast bed
+      addBox(THREE, scene, 2.8, 0.12, 980, 0x64748b, -18, 0.06, 0, { roughness: 0.95 });
+      // Steel rails
+      addBox(THREE, scene, 0.08, 0.14, 980, 0x334155, -18.6, 0.18, 0, { metalness: 0.8 });
+      addBox(THREE, scene, 0.08, 0.14, 980, 0x334155, -17.4, 0.18, 0, { metalness: 0.8 });
+      // Railway crossbuck sign
+      const cbMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), new THREE.MeshStandardMaterial({ map: crossbuckTex, roughness: 0.5 }));
+      cbMesh.position.set(-15.5, 2.8, -190); scene.add(cbMesh);
+      addCyl(THREE, scene, 0.08, 0.08, 3.0, 6, 0x475569, -15.5, 1.5, -190);
+
+      // Onion-Domed Ukrainian/Orthodox Prairie Church (x = 34, z = 160)
+      const uchX = 34, uchZ = 160;
+      addBox(THREE, scene, 14, 8, 20, 0xf8fafc, uchX, 4, uchZ, { map: woodTex, castShadow: true });
+      addCone(THREE, scene, 9.5, 5.5, 4, 0x2dd4bf, uchX, 10.75, uchZ, { ry: Math.PI / 4, metalness: 0.4 });
+      // Three ornate gilded/green onion domes (banyas)
+      const domeOffsets = [-5, 0, 5];
+      for (let d = 0; d < 3; d += 1) {
+        const dz = uchZ + domeOffsets[d];
+        const dh = d === 1 ? 16 : 14;
+        addCyl(THREE, scene, 1.2, 1.2, 4, 10, 0xf8fafc, uchX, dh - 2, dz);
+        // Onion dome bulb
+        const banya = new THREE.Mesh(new THREE.SphereGeometry(1.8, 14, 14, 0, Math.PI * 2, 0, Math.PI * 0.75), mat(THREE, 0xfacc15, { metalness: 0.75, roughness: 0.2 }));
+        banya.position.set(uchX, dh + 0.5, dz); scene.add(banya);
+        // Byzantine Cross
+        addBox(THREE, scene, 0.1, 1.6, 0.1, 0xfacc15, uchX, dh + 2.8, dz, { emissive: 0xfacc15, emissiveIntensity: 0.5 });
+      }
+
+      // Regina Legislative building dome at landmark 0
+      const regC = lmCoords(0, 0, 0, -70);
+      addBox(THREE, scene, 32, 10, 12, 0xe7e5e4, -26, 5, regC[2], { map: stoneTex, castShadow: true });
+      const skDome = new THREE.Mesh(new THREE.SphereGeometry(5.5, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), mat(THREE, 0x2dd4bf, { metalness: 0.35, roughness: 0.4 }));
+      skDome.position.set(-26, 10, regC[2]); scene.add(skDome);
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 7. MANITOBA: Terracotta Exchange District Warehouses & CMHR Spire
+    // ──────────────────────────────────────────────────────────────────────────
+    } else if (id === 'manitoba') {
+      // Historic Exchange District Terracotta Warehouse Blocks (x = -24, z ∈ [-130, -40] and x = 24, z ∈ [50, 140])
+      const whZ = [-110, -70, 70, 110];
+      for (let i = 0; i < whZ.length; i += 1) {
+        const wx = i < 2 ? -25 : 25, wz = whZ[i];
+        // 4-storey Chicago-school terracotta brick warehouse
+        addBox(THREE, scene, 12, 15, 14, 0x9a3412, wx, 7.5, wz, { map: stoneTex, roughness: 0.85, castShadow: true });
+        // Heavy rusticated stone base & cornice
+        addBox(THREE, scene, 12.6, 3.0, 14.6, 0x57534e, wx, 1.5, wz, { map: stoneTex });
+        addBox(THREE, scene, 13.0, 1.2, 15.0, 0xb45309, wx, 15.6, wz, { roughness: 0.7 });
+        // Rooftop timber water tower
+        addCyl(THREE, scene, 1.6, 1.6, 3.2, 10, 0x78350f, wx + 3, 18, wz, { map: woodTex });
+      }
+
+      // Canadian Museum for Human Rights (CMHR) at landmark 0
+      const cmhrC = lmCoords(0, 0, 0, -68);
+      const cmhrX = -26, cmhrZ = cmhrC[2];
+      addBox(THREE, scene, 24, 11, 15, 0x94a3b8, cmhrX, 5.5, cmhrZ, { map: stoneTex, castShadow: true });
+      addCone(THREE, scene, 5.5, 30, 8, 0x38bdf8, cmhrX, 20.5, cmhrZ, { roughness: 0.15, metalness: 0.7, transparent: true, opacity: 0.82, emissive: 0x0284c7, emissiveIntensity: 0.35 });
+
+      // The Forks Red & Assiniboine River Confluence
+      const wpgC = lmCoords(1, 44, 0, 115);
+      addBox(THREE, scene, 16, 0.16, 90, 0x1d5f82, wpgC[0], 0.1, wpgC[2], { ry: 0.35, bumpMap: waterBump, roughness: 0.15, metalness: 0.42 });
+      buildAuroraCurtains(THREE, scene, state.auroraMeshes);
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 8. NEW BRUNSWICK: Bay of Fundy Flowerpot Rocks & Covered Wooden Bridge
+    // ──────────────────────────────────────────────────────────────────────────
+    } else if (id === 'new-brunswick') {
+      // Bay of Fundy Flowerpot Rocks at landmark 0 (narrow base, wide top with dwarf spruce)
+      const hwC = lmCoords(0, 0, 0, -65);
+      const stacks = [[-26, hwC[2]], [-26, hwC[2] - 18], [34, -135], [34, -115]];
+      for (let i = 0; i < stacks.length; i += 1) {
+        addCyl(THREE, scene, 4.0, 2.2, 14, 9, 0xb45309, stacks[i][0], 7.0, stacks[i][1], { map: stoneTex, castShadow: true });
+        addCone(THREE, scene, 3.6, 6.0, 7, 0x15803d, stacks[i][0], 16.5, stacks[i][1]);
+      }
+
+      // Hartland-Style Covered Wooden Bridge spanning a river branch at x = 45, z = 140
+      const brX = 45, brZ = 140;
+      // Red weathered wooden covered tunnel structure
+      addBox(THREE, scene, 9, 5.5, 38, 0xb91c1c, brX, 4.0, brZ, { map: woodTex, castShadow: true });
+      // Shingled gabled roof
+      addCone(THREE, scene, 7, 3.5, 4, 0x374151, brX, 8.2, brZ, { ry: Math.PI / 4 });
+      // Portal entrances with white trim
+      addBox(THREE, scene, 9.4, 0.4, 0.4, 0xffffff, brX, 6.6, brZ - 19);
+      addBox(THREE, scene, 9.4, 0.4, 0.4, 0xffffff, brX, 6.6, brZ + 19);
+      // Stone river piers
+      addCyl(THREE, scene, 2.0, 2.5, 6, 8, 0x78716c, brX, 1.5, brZ - 12, { map: stoneTex });
+      addCyl(THREE, scene, 2.0, 2.5, 6, 8, 0x78716c, brX, 1.5, brZ + 12, { map: stoneTex });
+
+      // Coastal Lighthouse (x = -48, z = 260)
+      addCyl(THREE, scene, 2.2, 3.6, 16, 10, 0xf8fafc, -48, 8, 260, { map: concreteTex, castShadow: true });
+      addCyl(THREE, scene, 2.4, 2.4, 3.0, 10, 0xef4444, -48, 17.5, 260);
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 9. PRINCE EDWARD ISLAND: Red Cliffs, Green Gables & Confederation Bridge
+    // ──────────────────────────────────────────────────────────────────────────
+    } else if (id === 'prince-edward-island') {
+      // Vivid Rust-Red Sandstone Cliffs flanking roadside (x = -32 to -65)
+      for (let i = 0; i < 6; i += 1) {
+        addBox(THREE, scene, 24, 8 + (i % 2) * 4, 32, 0xb91c1c, -45, 4, -260 + i * 90, { map: stoneTex, roughness: 0.95 });
+      }
+
+      // Green Gables Heritage Farmhouse at landmark 1 (x = -32, z = 125)
+      const ggC = lmCoords(1, -58, 0, 125);
+      const ggX = -32, ggZ = ggC[2];
+      addBox(THREE, scene, 13, 7, 10, 0xf8fafc, ggX, 3.5, ggZ, { map: woodTex, castShadow: true });
+      // Distinctive emerald green gables
+      addCone(THREE, scene, 9.2, 5.5, 4, 0x15803d, ggX, 9.75, ggZ, { ry: Math.PI / 4 });
+      // Wrap-around porch
+      addBox(THREE, scene, 14.5, 0.4, 3.5, 0xf8fafc, ggX, 0.2, ggZ - 6);
+      // Red PEI barn
+      addBox(THREE, scene, 16, 9, 12, 0xb91c1c, ggX - 18, 4.5, ggZ + 8, { map: woodTex });
+
+      // Confederation Bridge piers & marine spans crossing Northumberland Strait
+      const confC = lmCoords(0, 20, 0, -78);
+      for (let i = 0; i < 9; i += 1) {
+        const bx = confC[0] + i * 12, bz = confC[2] - Math.sin(i * 0.35) * 12;
+        addBox(THREE, scene, 13, 1.8, 5, 0xe2e8f0, bx, 11, bz, { map: concreteTex, ry: Math.cos(i * 0.35) * 0.15 });
+        addCyl(THREE, scene, 1.3, 1.9, 11, 8, 0xcbd5e1, bx, 5.5, bz, { map: concreteTex });
+      }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 10. NOVA SCOTIA: Peggy's Cove Granite & Pastel Fishing Shacks
+    // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'nova-scotia') {
-      // Peggy's Cove Lighthouse at landmark 0
-      const pcC = lmCoords(0, 0, 4, -52);
-      addCyl(THREE, scene, 9, 13, 4.5, 9, 0x64748b, pcC[0], 2.25, pcC[2], { map: stoneTex, roughness: 0.92 });
-      addCyl(THREE, scene, 2.2, 3.6, 16, 10, 0xf8fafc, pcC[0], 12, pcC[2], { map: concreteTex, castShadow: true });
-      addCyl(THREE, scene, 2.4, 2.4, 3.2, 10, 0xef4444, pcC[0], 21.6, pcC[2], { metalness: 0.35 });
-      const lamp = new THREE.Mesh(new THREE.SphereGeometry(1.1, 10, 10), mat(THREE, 0xfef08a, { emissive: 0xfde047, emissiveIntensity: 1.8 }));
-      lamp.position.set(pcC[0], 23.8, pcC[2]); scene.add(lamp); state.beaconMeshes.push(lamp);
-      const bCount = Math.round(65 * scale);
-      const rocks = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(2.4, 0), mat(THREE, 0x6b7280, { map: stoneTex, roughness: 0.9 }), bCount);
+      // Peggy's Cove Glacially Scoured Granite Boulders
+      const bCount = Math.round(75 * scale);
+      const rocks = new THREE.InstancedMesh(new THREE.DodecahedronGeometry(2.5, 0), mat(THREE, 0x6b7280, { map: stoneTex, roughness: 0.92 }), bCount);
       const dummy = new THREE.Object3D();
       for (let i = 0; i < bCount; i += 1) {
-        dummy.position.set(pcC[0] - 70 + rng() * 140, 0.6, pcC[2] - 20 + rng() * 60);
+        dummy.position.set(-26 - rng() * 55, 0.6, -160 + rng() * 220);
         dummy.scale.set(0.8 + rng() * 1.8, 0.5 + rng() * 0.9, 0.8 + rng() * 1.6);
         dummy.rotation.set(rng(), rng(), rng()); dummy.updateMatrix(); rocks.setMatrixAt(i, dummy.matrix);
       }
       rocks.instanceMatrix.needsUpdate = true; scene.add(rocks);
-      // Halifax Citadel at landmark 1
-      const hfxC = lmCoords(1, 0, 0, 80);
-      addBox(THREE, scene, 32, 8, 20, 0x78716c, hfxC[0], 4, hfxC[2], { map: stoneTex, castShadow: true });
-      addBox(THREE, scene, 34, 1.5, 22, 0x57534e, hfxC[0], 8.75, hfxC[2], { map: stoneTex });
-      addCyl(THREE, scene, 3.5, 4.0, 10, 8, 0x57534e, hfxC[0] - 14, 5, hfxC[2] - 8, { map: stoneTex });
-      addCyl(THREE, scene, 3.5, 4.0, 10, 8, 0x57534e, hfxC[0] + 14, 5, hfxC[2] - 8, { map: stoneTex });
 
-    } else if (id === 'newfoundland') {
-      // Signal Hill / Cabot Tower at landmark 0
-      const shC = lmCoords(0, 0, 12, -56);
-      addCyl(THREE, scene, 14, 22, 12, 10, 0x4b5563, shC[0], 6, shC[2], { map: stoneTex, roughness: 0.92 });
-      addBox(THREE, scene, 8, 12, 8, 0x9a3412, shC[0], 18, shC[2], { map: stoneTex, castShadow: true });
-      addBox(THREE, scene, 4.5, 6, 4.5, 0x7c2d12, shC[0], 27, shC[2], { map: stoneTex });
-      // Jellybean Row at landmark 1
-      const jbC = lmCoords(1, -52, 0, -18);
-      const jelly = [0xef4444, 0xfacc15, 0x3b82f6, 0x10b981, 0xf97316, 0xa855f7];
-      for (let i = 0; i < 6; i += 1) {
-        const h = 7.5 + (i % 2) * 1.5;
-        addBox(THREE, scene, 5.2, h, 6, jelly[i], jbC[0] + i * 5.6, h * 0.5, jbC[2], { map: woodTex, castShadow: true });
-        addCone(THREE, scene, 4.0, 2.6, 4, 0x334155, jbC[0] + i * 5.6, h + 1.3, jbC[2]);
-      }
-      // Atlantic Icebergs at landmark 2
-      const iceC = lmCoords(2, 66, 0, -48);
-      const bergs = [];
+      // Pastel Wooden Fishing Shacks on stilts over water with wharves & lobster traps
+      const shacksZ = [90, 120, 150, 180];
+      const pastels = [0x38bdf8, 0xfde047, 0xef4444, 0xa855f7];
       for (let i = 0; i < 4; i += 1) {
-        const b = addBox(THREE, scene, 12 + i * 2, 8 + (i % 2) * 4, 10, 0xe0f2fe, iceC[0] + i * 18, 3.5, iceC[2] - i * 14, { roughness: 0.25, metalness: 0.15 });
-        bergs.push(b);
+        const sz = shacksZ[i], col = pastels[i];
+        // Wooden wharf / dock on pilings
+        addBox(THREE, scene, 12, 0.3, 10, 0x78350f, 32, 1.5, sz, { map: woodTex });
+        addCyl(THREE, scene, 0.2, 0.2, 3, 6, 0x5c4028, 28, 0, sz - 3);
+        addCyl(THREE, scene, 0.2, 0.2, 3, 6, 0x5c4028, 36, 0, sz - 3);
+        // Pastel fishing shack
+        addBox(THREE, scene, 7, 5, 6, col, 32, 4.2, sz, { map: woodTex, castShadow: true });
+        addCone(THREE, scene, 5.2, 3.2, 4, 0x374151, 32, 8.0, sz, { ry: Math.PI / 4 });
+        // Stacked lobster traps
+        addBox(THREE, scene, 1.5, 0.8, 1.2, 0x92400e, 27.5, 2.0, sz + 2);
+      }
+
+      // Peggy's Point Lighthouse at landmark 0
+      const pcC = lmCoords(0, 0, 4, -72);
+      const pcX = -26, pcZ = pcC[2];
+      addCyl(THREE, scene, 9, 13, 4.5, 9, 0x64748b, pcX, 2.25, pcZ, { map: stoneTex, roughness: 0.92 });
+      addCyl(THREE, scene, 2.2, 3.6, 16, 10, 0xf8fafc, pcX, 12, pcZ, { map: concreteTex, castShadow: true });
+      addCyl(THREE, scene, 2.4, 2.4, 3.2, 10, 0xef4444, pcX, 21.6, pcZ, { metalness: 0.35 });
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(1.1, 10, 10), mat(THREE, 0xfef08a, { emissive: 0xfde047, emissiveIntensity: 1.8 }));
+      lamp.position.set(pcX, 23.8, pcZ); scene.add(lamp); state.beaconMeshes.push(lamp);
+
+      // Halifax Citadel star ramparts
+      const hfxC = lmCoords(1, 0, 0, 80);
+      addBox(THREE, scene, 34, 8, 22, 0x78716c, -45, 4, hfxC[2], { map: stoneTex, castShadow: true });
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 11. NEWFOUNDLAND: Jellybean Row Jewel-Tone Houses & Drifting Icebergs
+    // ──────────────────────────────────────────────────────────────────────────
+    } else if (id === 'newfoundland') {
+      // Jellybean Row continuous terrace of vibrant jewel-toned saltbox houses (x = -26, z ∈ [-150, -60])
+      const jelly = [0xef4444, 0xfacc15, 0x3b82f6, 0x10b981, 0xf97316, 0xa855f7, 0x06b6d4];
+      for (let i = 0; i < 7; i += 1) {
+        const jz = -145 + i * 13;
+        const jh = 8.5 + (i % 2) * 1.8;
+        // Jewel-tone clapboard house
+        addBox(THREE, scene, 7.5, jh, 8.5, jelly[i], -26, jh * 0.5, jz, { map: woodTex, castShadow: true });
+        // Contrasting white cornerboard & trim
+        addBox(THREE, scene, 7.8, jh, 0.3, 0xffffff, -26, jh * 0.5, jz + 4.3);
+        // Roof
+        addCone(THREE, scene, 5.5, 3.2, 4, 0x334155, -26, jh + 1.6, jz, { ry: Math.PI / 4 });
+        // Stepped front entrance stairs
+        addBox(THREE, scene, 1.8, 0.8, 1.5, 0xffffff, -21.8, 0.4, jz);
+      }
+
+      // Drifting Icebergs in Iceberg Alley (floating offshore with animation)
+      const icebergs = [];
+      const bergZ = [120, 180, 240, 300];
+      for (let i = 0; i < 4; i += 1) {
+        const b = addBox(THREE, scene, 16 + i * 3, 10 + (i % 2) * 5, 14, 0xe0f2fe, 75 + i * 16, 4.5, bergZ[i], {
+          roughness: 0.22, metalness: 0.15, transparent: true, opacity: 0.92
+        });
+        icebergs.push(b);
       }
       state.animators.push(function (t) {
-        for (let i = 0; i < bergs.length; i += 1) bergs[i].position.y = 3.2 + Math.sin(t * 0.9 + i) * 0.35;
+        for (let i = 0; i < icebergs.length; i += 1) {
+          icebergs[i].position.y = 4.2 + Math.sin(t * 0.85 + i * 1.2) * 0.4;
+          icebergs[i].rotation.y = Math.sin(t * 0.2 + i) * 0.05;
+        }
       });
 
-    } else if (id === 'new-brunswick') {
-      // Hopewell Rocks at landmark 0
-      const hwC = lmCoords(0, 0, 0, -52);
-      const stacks = [[hwC[0] - 14, hwC[2]], [hwC[0], hwC[2] - 2], [hwC[0] + 14, hwC[2] + 2], [hwC[0] + 26, hwC[2] - 6]];
-      for (let i = 0; i < stacks.length; i += 1) {
-        addCyl(THREE, scene, 3.6, 2.2, 13, 9, 0xb45309, stacks[i][0], 6.5, stacks[i][1], { map: stoneTex, castShadow: true });
-        addCone(THREE, scene, 3.2, 5.5, 7, 0x15803d, stacks[i][0], 15.5, stacks[i][1]);
+      // Signal Hill Cabot Tower atop rocky hill at landmark 0
+      const shC = lmCoords(0, 0, 12, -75);
+      const shX = -32, shZ = shC[2];
+      addCyl(THREE, scene, 14, 22, 12, 10, 0x4b5563, shX, 6, shZ, { map: stoneTex, roughness: 0.92 });
+      addBox(THREE, scene, 8, 12, 8, 0x9a3412, shX, 18, shZ, { map: stoneTex, castShadow: true });
+      addBox(THREE, scene, 4.5, 6, 4.5, 0x7c2d12, shX, 27, shZ, { map: stoneTex });
+
+      // Gros Morne flat-topped tablelands plateau cliffs
+      for (let i = 0; i < 5; i += 1) {
+        addBox(THREE, scene, 55, 38, 50, 0x9a3412, 180, 19, -280 + i * 110, { map: stoneTex, roughness: 0.95 });
       }
-      // Fundy Tidal Range sea wall at landmark 1
-      const funC = lmCoords(1, -56, 0, -34);
-      addBox(THREE, scene, 26, 16, 18, 0x9a3412, funC[0], 8, funC[2], { map: stoneTex });
-      // Confederation-era bridge at landmark 2
-      const nbBrC = lmCoords(2, 64, 0, 28);
-      addBox(THREE, scene, 40, 1.8, 5, 0x64748b, nbBrC[0], 10, nbBrC[2], { metalness: 0.5 });
-      addCyl(THREE, scene, 1.5, 1.5, 12, 8, 0x475569, nbBrC[0] - 16, 6, nbBrC[2], { map: concreteTex });
-      addCyl(THREE, scene, 1.5, 1.5, 12, 8, 0x475569, nbBrC[0] + 16, 6, nbBrC[2], { map: concreteTex });
 
-    } else if (id === 'prince-edward-island') {
-      // Confederation Bridge at landmark 0
-      const confC = lmCoords(0, 20, 0, -58);
-      for (let i = 0; i < 9; i += 1) {
-        const bx = confC[0] - 20 + i * 11, bz = confC[2] - Math.sin(i * 0.35) * 10;
-        addBox(THREE, scene, 12, 1.6, 4.5, 0xe2e8f0, bx, 10, bz, { map: concreteTex, ry: Math.cos(i * 0.35) * 0.15 });
-        addCyl(THREE, scene, 1.1, 1.6, 10, 8, 0xcbd5e1, bx, 5, bz, { map: concreteTex });
-      }
-      // Green Gables farmhouse at landmark 1
-      const ggC = lmCoords(1, -52, 0, 22);
-      addBox(THREE, scene, 12, 6, 9, 0xf8fafc, ggC[0], 3, ggC[2], { map: woodTex, castShadow: true });
-      addCone(THREE, scene, 8.5, 5, 4, 0x15803d, ggC[0], 8.5, ggC[2]);
-      // Red PEI cliffs at landmark 2
-      const peiC = lmCoords(2, -64, 0, -32);
-      addBox(THREE, scene, 22, 6, 14, 0xb91c1c, peiC[0], 3, peiC[2], { map: stoneTex });
-      addCyl(THREE, scene, 1.8, 2.6, 12, 12, 0xf8fafc, peiC[0], 12, peiC[2], { map: concreteTex });
-      addCyl(THREE, scene, 2.0, 2.0, 2.2, 12, 0xef4444, peiC[0], 19, peiC[2]);
-
-    } else if (id === 'manitoba') {
-      // CMHR at landmark 0
-      const cmhrC = lmCoords(0, 0, 0, -54);
-      addBox(THREE, scene, 22, 10, 14, 0x94a3b8, cmhrC[0], 5, cmhrC[2], { map: stoneTex, castShadow: true });
-      addCone(THREE, scene, 5, 28, 8, 0x38bdf8, cmhrC[0], 19, cmhrC[2], { roughness: 0.15, metalness: 0.7, transparent: true, opacity: 0.82, emissive: 0x0284c7, emissiveIntensity: 0.25 });
-      // Winnipeg river at landmark 1
-      const wpgC = lmCoords(1, 36, 0, -24);
-      addBox(THREE, scene, 14, 0.16, 80, 0x1d5f82, wpgC[0], 0.1, wpgC[2], { ry: 0.35, bumpMap: waterBump, roughness: 0.15, metalness: 0.42 });
-      buildAuroraCurtains(THREE, scene, state.auroraMeshes);
-
-    } else if (id === 'saskatchewan') {
-      // Regina Legislative at landmark 0
-      const regC = lmCoords(0, 0, 0, -56);
-      addBox(THREE, scene, 32, 10, 12, 0xe7e5e4, regC[0], 5, regC[2], { map: stoneTex, castShadow: true });
-      const skDome = new THREE.Mesh(new THREE.SphereGeometry(5.5, 18, 12, 0, Math.PI * 2, 0, Math.PI * 0.5), mat(THREE, 0x2dd4bf, { metalness: 0.35, roughness: 0.4 }));
-      skDome.position.set(regC[0], 10, regC[2]); scene.add(skDome);
-      addCyl(THREE, scene, 2.2, 2.2, 6, 12, 0xd6d3d1, regC[0], 12, regC[2], { map: stoneTex });
-      // Grain Elevators at landmark 1
-      const geC = lmCoords(1, -54, 0, -24);
-      for (let i = 0; i < 3; i += 1) {
-        addBox(THREE, scene, 6.5, 18, 6.5, 0xb91c1c, geC[0] + i * 9, 9, geC[2], { map: woodTex, castShadow: true });
-        addCone(THREE, scene, 4.6, 4.5, 4, 0x7f1d1d, geC[0] + i * 9, 20.25, geC[2]);
-      }
-      // Wascana Lake at landmark 2
-      const wsC = lmCoords(2, 58, 0, 26);
-      const wascana = new THREE.Mesh(new THREE.CircleGeometry(22, 28), mat(THREE, 0x1e6b8a, { bumpMap: waterBump, roughness: 0.15, metalness: 0.42 }));
-      wascana.rotation.x = -Math.PI / 2; wascana.position.set(wsC[0], 0.1, wsC[2]); scene.add(wascana);
-
+    // ──────────────────────────────────────────────────────────────────────────
+    // 12. YUKON: Klondike Gold Rush Boardwalk & Mount Logan Glaciers
+    // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'yukon') {
-      // SS Klondike Sternwheeler at landmark 0
-      const ssC = lmCoords(0, 18, 0, -42);
-      addBox(THREE, scene, 22, 4, 7, 0xf8fafc, ssC[0], 2, ssC[2], { map: woodTex, castShadow: true });
-      addBox(THREE, scene, 15, 3.5, 5.5, 0xe2e8f0, ssC[0], 5.75, ssC[2], { map: woodTex });
-      const wheel = addCyl(THREE, scene, 2.6, 2.6, 4.8, 12, 0xef4444, ssC[0] + 12, 3, ssC[2], { rx: Math.PI / 2 });
-      state.animators.push(function (t) { wheel.rotation.y = t * 1.4; });
-      // Log cabins at landmark 1
-      const lcC = lmCoords(1, -62, 0, 24);
-      for (let i = 0; i < 4; i += 1) addBox(THREE, scene, 6, 7, 7, 0x92400e, lcC[0] + i * 7.5, 3.5, lcC[2], { map: woodTex });
-      // Klondike Mountains at landmark 2
-      const ykMC = lmCoords(2, 0, 0, -200);
-      buildInstancedMountains(THREE, scene, Math.round(26 * scale), 170, ykMC[2], 72, true, rng);
+      // Dawson City Klondike Gold Rush False-Front Storefronts & Boardwalk (x = -24, z ∈ [80, 200])
+      const shops = ['ELDORADO SALOON', 'KLONDIKE MINING TRADING CO.', 'YUKON ASSAY OFFICE', 'BONANZA HOTEL'];
+      for (let i = 0; i < 4; i += 1) {
+        const sz = 90 + i * 28;
+        // Wooden building
+        addBox(THREE, scene, 8.5, 6.5, 8.5, 0x92400e, -24, 3.25, sz, { map: woodTex, castShadow: true });
+        // False front facade extending high
+        addBox(THREE, scene, 8.8, 3.5, 0.4, 0x78350f, -19.6, 8.25, sz, { map: woodTex });
+        // Continuous raised wooden boardwalk sidewalk
+        addBox(THREE, scene, 3.2, 0.35, 28, 0x78350f, -18.0, 0.35, sz, { map: woodTex });
+      }
 
+      // SS Klondike Sternwheeler at landmark 0 (with animated revolving paddle wheel)
+      const ssC = lmCoords(0, 18, 0, -62);
+      const ssX = 24, ssZ = ssC[2];
+      addBox(THREE, scene, 24, 4, 8, 0xf8fafc, ssX, 2, ssZ, { map: woodTex, castShadow: true });
+      addBox(THREE, scene, 16, 4, 6, 0xe2e8f0, ssX, 6, ssZ, { map: woodTex });
+      const wheel = addCyl(THREE, scene, 3.2, 3.2, 5.5, 12, 0xef4444, ssX + 14, 3.2, ssZ, { rx: Math.PI / 2 });
+      state.animators.push(function (t) { wheel.rotation.y = t * 1.5; });
+
+      // Mount Logan glacier peaks (Canada's highest peak 5,959m)
+      buildInstancedMountains(THREE, scene, Math.round(30 * scale), 200, -230, 85, true, rng);
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 13. NORTHWEST TERRITORIES: Elevated Permafrost Buildings & Ice Road
+    // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'northwest-territories') {
-      // Diamond Mine Headframe at landmark 0
-      const dmC = lmCoords(0, -58, 0, -56);
-      addBox(THREE, scene, 10, 24, 10, 0x475569, dmC[0], 12, dmC[2], { metalness: 0.55, roughness: 0.4, castShadow: true });
-      addCyl(THREE, scene, 4.5, 4.5, 2, 16, 0x38bdf8, dmC[0], 24.5, dmC[2], { emissive: 0x0284c7, emissiveIntensity: 0.5 });
+      // Elevated Permafrost Buildings on Stilts with Insulated Utilidor Ducts (x = -24, z ∈ [-130, -20])
+      const pz = [-120, -85, -50];
+      for (let i = 0; i < 3; i += 1) {
+        const bz = pz[i];
+        // Heavy steel/timber stilts (clearance 1.6m above frozen ground)
+        addCyl(THREE, scene, 0.22, 0.22, 1.8, 6, 0x475569, -27, 0.9, bz - 3);
+        addCyl(THREE, scene, 0.22, 0.22, 1.8, 6, 0x475569, -21, 0.9, bz - 3);
+        addCyl(THREE, scene, 0.22, 0.22, 1.8, 6, 0x475569, -27, 0.9, bz + 3);
+        addCyl(THREE, scene, 0.22, 0.22, 1.8, 6, 0x475569, -21, 0.9, bz + 3);
+        // Elevated modular dwelling
+        addBox(THREE, scene, 8.5, 5.0, 8.5, i % 2 === 0 ? 0x0284c7 : 0xe2e8f0, -24, 4.3, bz, { map: concreteTex, castShadow: true });
+        // Metal snow stairs down to ground
+        addBox(THREE, scene, 1.8, 1.6, 2.5, 0x64748b, -19.2, 0.8, bz);
+      }
+      // Above-ground silver insulated Utilidor pipeline connecting the buildings
+      addBox(THREE, scene, 0.5, 0.5, 80, 0x94a3b8, -20.0, 1.2, -85, { metalness: 0.8, roughness: 0.3 });
+
+      // Diamond Mine Industrial Headframe at landmark 0
+      const dmC = lmCoords(0, -65, 0, -135);
+      addBox(THREE, scene, 12, 28, 12, 0x475569, dmC[0], 14, dmC[2], { metalness: 0.6, roughness: 0.4, castShadow: true });
+      addCyl(THREE, scene, 5.5, 5.5, 2.5, 16, 0x38bdf8, dmC[0], 29, dmC[2], { emissive: 0x0284c7, emissiveIntensity: 0.6 });
+
       buildAuroraCurtains(THREE, scene, state.auroraMeshes);
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // 14. NUNAVUT: Packed Snow Corridor, Stone Inuksuit & Polar Domes
+    // ──────────────────────────────────────────────────────────────────────────
     } else if (id === 'nunavut') {
-      // Monumental Inuksuk at landmark 0
-      const inuC = lmCoords(0, 0, 0, -50);
-      addBox(THREE, scene, 3.2, 6.5, 2.2, 0x64748b, inuC[0] - 2.5, 3.25, inuC[2], { map: stoneTex, roughness: 0.92, castShadow: true });
-      addBox(THREE, scene, 3.2, 6.5, 2.2, 0x64748b, inuC[0] + 2.5, 3.25, inuC[2], { map: stoneTex, roughness: 0.92, castShadow: true });
-      addBox(THREE, scene, 10.5, 2.6, 2.8, 0x94a3b8, inuC[0], 7.8, inuC[2], { map: stoneTex, roughness: 0.92, castShadow: true });
-      addBox(THREE, scene, 5.5, 4.2, 2.6, 0x64748b, inuC[0], 11.2, inuC[2], { map: stoneTex, roughness: 0.92, castShadow: true });
-      addBox(THREE, scene, 3.4, 3.2, 2.4, 0x94a3b8, inuC[0], 14.9, inuC[2], { map: stoneTex, roughness: 0.92, castShadow: true });
-      // Arctic ice floes at landmark 1
-      const floeC = lmCoords(1, 42, 0, -20);
-      for (let i = 0; i < 8; i += 1) {
-        addBox(THREE, scene, 11 + rng() * 8, 0.7, 9 + rng() * 6, 0xdbeafe, floeC[0] + (i % 4) * 14, 0.1, floeC[2] - Math.floor(i / 4) * 18, { roughness: 0.25 });
+      // Traditional Stone Inuksuk Monuments along rocky headlands
+      const inuksukLocs = [
+        { x: -24, z: -66 },
+        { x:  26, z: 110 },
+        { x: -38, z: 220 }
+      ];
+      for (let k = 0; k < inuksukLocs.length; k += 1) {
+        const inu = inuksukLocs[k];
+        // Stacked granite legs
+        addBox(THREE, scene, 1.8, 4.2, 1.5, 0x64748b, inu.x - 1.5, 2.1, inu.z, { map: stoneTex, roughness: 0.95 });
+        addBox(THREE, scene, 1.8, 4.2, 1.5, 0x64748b, inu.x + 1.5, 2.1, inu.z, { map: stoneTex, roughness: 0.95 });
+        // Torso / waist slab
+        addBox(THREE, scene, 6.2, 1.8, 1.8, 0x78716c, inu.x, 5.1, inu.z, { map: stoneTex, roughness: 0.95 });
+        // Chest
+        addBox(THREE, scene, 3.4, 2.8, 1.8, 0x64748b, inu.x, 7.4, inu.z, { map: stoneTex, roughness: 0.95 });
+        // Outstretched horizontal arms slab
+        addBox(THREE, scene, 7.8, 1.2, 1.6, 0x78716c, inu.x, 9.4, inu.z, { map: stoneTex, roughness: 0.95 });
+        // Head stone
+        addBox(THREE, scene, 2.2, 2.2, 1.6, 0x94a3b8, inu.x, 11.1, inu.z, { map: stoneTex, roughness: 0.95 });
       }
-      // Arctic peaks at landmark 2
-      const arcMC = lmCoords(2, 0, 0, -200);
-      buildInstancedMountains(THREE, scene, Math.round(22 * scale), 160, arcMC[2], 60, true, rng);
+
+      // Insulated Polar Community Geodesic Domes & High Arctic Research Pods on stilts
+      const domeLocs = [{ x: -26, z: 80 }, { x: -26, z: 140 }, { x: 30, z: -140 }];
+      for (let i = 0; i < domeLocs.length; i += 1) {
+        const dl = domeLocs[i];
+        // Stilts
+        addCyl(THREE, scene, 0.2, 0.2, 1.5, 6, 0x64748b, dl.x - 3, 0.75, dl.z);
+        addCyl(THREE, scene, 0.2, 0.2, 1.5, 6, 0x64748b, dl.x + 3, 0.75, dl.z);
+        // Geodesic insulated polar dome
+        const pod = new THREE.Mesh(new THREE.SphereGeometry(4.8, 16, 12, 0, Math.PI * 2, 0, Math.PI * 0.6), mat(THREE, 0xf1f5f9, { roughness: 0.35, metalness: 0.2 }));
+        pod.position.set(dl.x, 1.5, dl.z); scene.add(pod);
+      }
+
+      // Arctic Sea Ice Floes & Tabular Bergs in Frobisher Bay
+      const floeC = lmCoords(1, 64, 0, 120);
+      for (let i = 0; i < 9; i += 1) {
+        addBox(THREE, scene, 13 + rng() * 8, 0.9, 11 + rng() * 6, 0xdbeafe, floeC[0] + (i % 3) * 16, 0.2, floeC[2] - Math.floor(i / 3) * 20, { roughness: 0.25 });
+      }
+
+      // Baffin Island glaciated peaks
+      buildInstancedMountains(THREE, scene, Math.round(26 * scale), 180, -220, 65, true, rng);
       buildAuroraCurtains(THREE, scene, state.auroraMeshes);
     }
   }
@@ -1412,7 +2044,7 @@
     }
   }
 
-  // ─── Functional Buildings (gameplay hubs) ─────────────────────────────────
+  // ─── Functional Buildings (Gameplay Hubs at x = ±8.2, z ∈ [2, 28]) ─────────
 
   const FUNCTIONAL_HUB_SPECS = [
     { id: 'hub-gunshop', type: 'gunshop', name: 'Ammu-North Armory', subtitle: 'Weapons, Ammo & Tactical Gear', shortTitle: 'AMMU-NORTH', tag: 'ARMORY', color: '#f59e0b', side: 1, z: 28 },
@@ -1541,7 +2173,7 @@
         for (let i = 0; i < state.animators.length; i += 1) state.animators[i](elapsed);
         for (let i = 0; i < state.auroraMeshes.length; i += 1) {
           const a = state.auroraMeshes[i];
-          a.position.x = (-20 + i * 25) + Math.sin(elapsed * 0.35 + i) * 6;
+          a.position.x = (-25 + i * 26) + Math.sin(elapsed * 0.35 + i) * 6;
           a.material.opacity = 0.18 + Math.sin(elapsed * 0.9 + i * 1.3) * 0.08;
         }
         for (let i = 0; i < state.beaconMeshes.length; i += 1) {
