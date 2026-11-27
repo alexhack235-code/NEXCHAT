@@ -31,21 +31,21 @@
         {
           id: 'cn-tower',
           name: 'CN Tower',
-          coords: [0, 0, -55],
+          coords: [0, 0, -65],
           elevationM: 553,
           description: '553.3 m concrete communications and observation tower anchoring the Toronto skyline above Lake Ontario.'
         },
         {
           id: 'rogers-centre',
           name: 'Rogers Harbour Dome',
-          coords: [-42, 0, -42],
+          coords: [-48, 0, -120],
           elevationM: 86,
           description: 'Iconic retractable-roof stadium beside the CN Tower along the Toronto waterfront rail corridor.'
         },
         {
           id: 'niagara-falls',
           name: 'Niagara Horseshoe Falls',
-          coords: [78, 0, 52],
+          coords: [82, 0, 205],
           elevationM: 51,
           description: 'Thundering emerald-white cataract plunging 51 metres into the Niagara Gorge with constant rising mist.'
         }
@@ -81,21 +81,21 @@
         {
           id: 'chateau-frontenac',
           name: 'Château Frontenac',
-          coords: [0, 10, -58],
+          coords: [0, 10, -68],
           elevationM: 80,
           description: 'Copper-turreted railway grand hotel crowning Cap Diamant above Old Québec and the St. Lawrence River.'
         },
         {
           id: 'st-lawrence-port',
           name: 'St. Lawrence Riverfront & Citadel',
-          coords: [54, 0, -28],
+          coords: [62, 0, -135],
           elevationM: 35,
           description: 'Historic fortified promontory and deep-water maritime corridor connecting the Great Lakes to the Atlantic.'
         },
         {
           id: 'montreal-olympic-tower',
           name: 'Montréal Inclined Tower',
-          coords: [-72, 0, 44],
+          coords: [-78, 0, 210],
           elevationM: 165,
           description: '165-metre 45-degree inclined concrete tower rising over Hochelaga and the St. Lawrence bridges.'
         }
@@ -131,21 +131,21 @@
         {
           id: 'canada-place',
           name: 'Canada Place Sails',
-          coords: [-18, 0, -48],
+          coords: [-18, 0, -72],
           elevationM: 42,
           description: 'Five iconic white tensioned-fabric sails jutting into Burrard Inlet at Vancouver’s Pacific waterfront.'
         },
         {
           id: 'lions-gate-bridge',
           name: 'Lions Gate Suspension Bridge',
-          coords: [62, 0, -18],
+          coords: [70, 0, -140],
           elevationM: 111,
           description: 'Emerald-green art deco suspension bridge spanning First Narrows between Stanley Park and the North Shore.'
         },
         {
           id: 'coast-mountains-fjord',
           name: 'Coast Mountains & Howe Sound',
-          coords: [-64, 0, -88],
+          coords: [-88, 0, 215],
           elevationM: 1850,
           description: 'Glaciated granite peaks plunging straight into deep Pacific fjord waters and temperate Douglas-fir rainforest.'
         }
@@ -181,21 +181,21 @@
         {
           id: 'calgary-tower',
           name: 'Calgary Tower & Bow Skyline',
-          coords: [0, 0, -52],
+          coords: [0, 0, -65],
           elevationM: 191,
           description: '191-metre observation spire overlooking the Bow River Valley and glass towers of downtown Calgary.'
         },
         {
           id: 'banff-rockies',
           name: 'Banff Rundle & Cascade Massif',
-          coords: [-76, 0, -84],
+          coords: [-80, 0, -215],
           elevationM: 2948,
           description: 'Dramatic tilted limestone strata of the Canadian Rockies rising sharply above spruce foothills.'
         },
         {
           id: 'lake-louise',
           name: 'Lake Louise Glacial Basin',
-          coords: [68, 0, -68],
+          coords: [72, 0, 120],
           elevationM: 1750,
           description: 'Turquoise rock-flour glacial lake cradled beneath Victoria Glacier and subalpine larch slopes.'
         }
@@ -231,21 +231,21 @@
         {
           id: 'peace-tower',
           name: 'Parliament Hill & Peace Tower',
-          coords: [0, 0, -56],
+          coords: [0, 0, -70],
           elevationM: 92,
           description: 'High Victorian Gothic Revival Centre Block crowned by the 92.2 m Peace Tower and patinated copper roofs.'
         },
         {
           id: 'rideau-canal',
           name: 'Rideau Canal Locks',
-          coords: [46, 0, -16],
+          coords: [50, 0, -120],
           elevationM: 60,
           description: 'UNESCO World Heritage 202-km canal and winter skateway winding past Chateau Laurier to the Ottawa River.'
         },
         {
           id: 'alexandra-bridge',
           name: 'Alexandra Interprovincial Bridge',
-          coords: [-58, 0, -44],
+          coords: [-62, 0, 200],
           elevationM: 45,
           description: 'Cantilever steel truss bridge linking Ottawa, Ontario and Gatineau, Quebec across the Ottawa River.'
         }
@@ -281,21 +281,21 @@
         {
           id: 'peggys-cove-lighthouse',
           name: 'Peggy’s Point Lighthouse',
-          coords: [0, 4, -52],
+          coords: [0, 4, -72],
           elevationM: 15,
           description: 'Iconic 1915 octagonal white-and-red beacon perched on glacially scoured Devonian granite boulders.'
         },
         {
           id: 'granite-headland',
           name: 'Peggy’s Cove Granite Batholith',
-          coords: [-38, 0, -28],
+          coords: [-42, 0, -130],
           elevationM: 12,
           description: 'Smooth wave-swept coastal granite ledges meeting the surging swells of St. Margarets Bay.'
         },
         {
           id: 'halifax-harbour-pier',
           name: 'Halifax Harbour & Pier 21',
-          coords: [68, 0, 36],
+          coords: [80, 0, 210],
           elevationM: 8,
           description: 'One of the world’s deepest ice-free natural harbours guarded by Citadel Hill.'
         }
@@ -331,21 +331,21 @@
         {
           id: 'cabot-tower',
           name: 'Signal Hill Cabot Tower',
-          coords: [0, 12, -56],
+          coords: [0, 12, -75],
           elevationM: 150,
           description: 'Sandstone tower on Signal Hill where Guglielmo Marconi received the first transatlantic wireless signal in 1901.'
         },
         {
           id: 'jellybean-row',
           name: 'Jellybean Row Heritage Terrace',
-          coords: [-52, 0, -18],
+          coords: [-55, 0, -145],
           elevationM: 25,
           description: 'Steep St. John’s clapboard rowhouses painted in vibrant yellow, crimson, cobalt, and teal.'
         },
         {
           id: 'iceberg-alley',
           name: 'Iceberg Alley Tabular Bergs',
-          coords: [66, 0, -48],
+          coords: [75, 0, 205],
           elevationM: 45,
           description: '10,000-year-old Greenland glacial icebergs drifting south along the Labrador Current.'
         }
@@ -381,21 +381,21 @@
         {
           id: 'hopewell-rocks',
           name: 'Hopewell Flowerpot Rocks',
-          coords: [0, 0, -52],
+          coords: [0, 0, -65],
           elevationM: 21,
           description: 'Red sandstone sea stacks sculpted by the world’s highest tides and topped with resilient spruce trees.'
         },
         {
           id: 'fundy-cliffs',
           name: 'Bay of Fundy Red Cliffs',
-          coords: [-56, 0, -34],
+          coords: [-62, 0, -135],
           elevationM: 32,
           description: 'Iron-rich conglomerate cliffs experiencing 16-metre vertical tidal swings twice every day.'
         },
         {
           id: 'reversing-falls-bridge',
           name: 'Saint John Harbour Span',
-          coords: [64, 0, 28],
+          coords: [72, 0, 200],
           elevationM: 40,
           description: 'Steel arch crossing over the tidal gorge where Fundy’s surge reverses the Saint John River.'
         }
@@ -431,21 +431,21 @@
         {
           id: 'confederation-bridge',
           name: 'Confederation Bridge',
-          coords: [20, 0, -58],
+          coords: [20, 0, -78],
           elevationM: 60,
           description: '12.9-km curved concrete box-girder bridge spanning the Abegweit Passage of Northumberland Strait.'
         },
         {
           id: 'green-gables',
           name: 'Green Gables Heritage House',
-          coords: [-52, 0, 22],
+          coords: [-58, 0, 125],
           elevationM: 12,
           description: 'White farmhouse with forest-green gables in Cavendish that inspired L.M. Montgomery’s Anne of Green Gables.'
         },
         {
           id: 'point-prim-lighthouse',
           name: 'Red Sandstone Cliffs & Lighthouse',
-          coords: [-64, 0, -32],
+          coords: [-74, 0, -215],
           elevationM: 18,
           description: 'Iron-oxide red sandstone bluffs paired with a classic round brick coastal lighthouse.'
         }
@@ -481,21 +481,21 @@
         {
           id: 'cmhr-spire',
           name: 'Canadian Museum for Human Rights',
-          coords: [0, 0, -54],
+          coords: [0, 0, -68],
           elevationM: 100,
           description: 'Sweeping curvilinear glass cloud and 100-metre Tower of Hope rising at The Forks in Winnipeg.'
         },
         {
           id: 'the-forks',
           name: 'Red & Assiniboine Forks Confluence',
-          coords: [36, 0, -24],
+          coords: [44, 0, 115],
           elevationM: 230,
           description: '6,000-year-old Indigenous meeting place and riverfront promenade where two prairie rivers merge.'
         },
         {
           id: 'churchill-aurora-station',
           name: 'Northern Boreal Aurora Ridge',
-          coords: [-64, 0, -64],
+          coords: [-76, 0, -225],
           elevationM: 45,
           description: 'Subarctic spruce-tundra horizon under the Hudson Bay auroral oval.'
         }
@@ -531,21 +531,21 @@
         {
           id: 'regina-legislative',
           name: 'Saskatchewan Legislative Building',
-          coords: [0, 0, -56],
+          coords: [0, 0, -70],
           elevationM: 53,
           description: 'Beaux-Arts Tyndall limestone dome overlooking Wascana Lake in Regina.'
         },
         {
           id: 'grain-elevators',
           name: 'Prairie Sentinel Grain Elevators',
-          coords: [-54, 0, -24],
+          coords: [-60, 0, -140],
           elevationM: 32,
           description: 'Iconic timber-cribbed prairie grain elevators standing along the transcontinental rail line.'
         },
         {
           id: 'wascana-lake',
           name: 'Wascana Centre & Golden Wheatfields',
-          coords: [58, 0, 26],
+          coords: [68, 0, 195],
           elevationM: 575,
           description: 'Expansive prairie parkland and shimmering amber wheatfields under endless Living Skies.'
         }
@@ -581,21 +581,21 @@
         {
           id: 'ss-klondike',
           name: 'SS Klondike Sternwheeler',
-          coords: [18, 0, -42],
+          coords: [18, 0, -62],
           elevationM: 18,
           description: 'Restored 1937 Yukon River sternwheel paddleboat dry-docked on the Whitehorse riverfront.'
         },
         {
           id: 'dawson-boardwalk',
           name: 'Dawson City Klondike Boardwalk',
-          coords: [-52, 0, 24],
+          coords: [-58, 0, 130],
           elevationM: 14,
           description: 'False-front heritage timber buildings and wooden sidewalks from the 1898 Klondike Gold Rush.'
         },
         {
           id: 'mount-logan',
           name: 'Mount Logan & Kluane Icefields',
-          coords: [-64, 0, -88],
+          coords: [-90, 0, -225],
           elevationM: 5959,
           description: 'Canada’s highest peak (5,959 m) rising from the vast St. Elias non-polar icefields.'
         }
@@ -631,21 +631,21 @@
         {
           id: 'great-slave-ice-road',
           name: 'Great Slave Lake Ice Road',
-          coords: [0, 0, -34],
+          coords: [0, 0, -64],
           elevationM: 156,
           description: 'Engineered winter ice highway linking Yellowknife across frozen Great Slave Lake to Dettah.'
         },
         {
           id: 'diamond-headframe',
           name: 'Canadian Shield Diamond Headframe',
-          coords: [-58, 0, -56],
+          coords: [-65, 0, -135],
           elevationM: 48,
           description: 'Subarctic mine headframe perched on ancient 4-billion-year-old Precambrian Shield granite.'
         },
         {
           id: 'yellowknife-aurora',
           name: 'Yellowknife Auroral Zenith',
-          coords: [58, 0, -60],
+          coords: [68, 0, 205],
           elevationM: 180,
           description: 'Curtains of emerald and violet Aurora Borealis shimmering directly overhead in the clear subarctic sky.'
         }
@@ -681,21 +681,21 @@
         {
           id: 'monumental-inuksuk',
           name: 'Iqaluit Monumental Inuksuk',
-          coords: [0, 0, -50],
+          coords: [0, 0, -66],
           elevationM: 22,
           description: 'Traditional stacked-stone Inuit directional landmark standing sentinel over Frobisher Bay.'
         },
         {
           id: 'frobisher-sea-ice',
           name: 'Frobisher Bay Sea Ice & Pack',
-          coords: [56, 0, -28],
+          coords: [64, 0, 120],
           elevationM: 0,
           description: 'Fractured Arctic sea ice plates and pressure ridges bordering Baffin Island’s tidal bay.'
         },
         {
           id: 'baffin-peaks',
           name: 'Baffin Island Fjord Peaks',
-          coords: [-64, 0, -84],
+          coords: [-78, 0, -220],
           elevationM: 2100,
           description: 'Jagged glaciated granite spires of the Arctic Cordillera glowing beneath polar aurora ribbons.'
         }

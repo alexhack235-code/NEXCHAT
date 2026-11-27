@@ -19,6 +19,7 @@
   const MAX_BULLETS = 36;
   const MAX_SPARKS = 40;
   const MAX_ENEMIES = 8;
+  const MAX_TRAFFIC = 8;
 
   const WEAPON_ORDER = ['unarmed', 'pistol', 'carbine', 'shotgun'];
   const WEAPONS = {
@@ -560,6 +561,101 @@
     };
   }
 
+  // ============================================================================
+  // POOLED AI HIGHWAY TRAFFIC (MAX_TRAFFIC = 8, zero per-frame allocations)
+  // ============================================================================
+  function createTrafficPool(THREE, scene) {
+    // Shared cached geometries — built once at boot
+    const bodyGeoSed = new THREE.BoxGeometry(1.8, 0.72, 4.0);
+    const bodyGeoSuv = new THREE.BoxGeometry(2.0, 0.90, 4.5);
+    const bodyGeoTrk = new THREE.BoxGeometry(2.2, 1.10, 6.2);
+    const cabinGeoSed = new THREE.BoxGeometry(1.52, 0.60, 2.1);
+    const cabinGeoSuv = new THREE.BoxGeometry(1.70, 0.68, 2.4);
+    const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.28, 10);
+    wheelGeo.rotateZ(Math.PI / 2);
+
+    // Shared materials — built once
+    const matSed = new THREE.MeshStandardMaterial({ color: 0xc0c8d8, roughness: 0.45, metalness: 0.3 });
+    const matSuv = new THREE.MeshStandardMaterial({ color: 0x7b8fa1, roughness: 0.5, metalness: 0.25 });
+    const matTrk = new THREE.MeshStandardMaterial({ color: 0x5a4a3a, roughness: 0.6, metalness: 0.2 });
+    const matCabin = new THREE.MeshStandardMaterial({ color: 0x1a2535, roughness: 0.3, metalness: 0.55 });
+    const matWheel = new THREE.MeshStandardMaterial({ color: 0x0d1117, roughness: 0.9 });
+    const matHeadlight = new THREE.MeshBasicMaterial({ color: 0xfffde0 });
+    const matTaillight = new THREE.MeshBasicMaterial({ color: 0xff2222 });
+    const lightGeo = new THREE.BoxGeometry(0.22, 0.14, 0.08);
+
+    const types = ['sedan', 'suv', 'truck'];
+    const traffic = [];
+
+    for (let i = 0; i < MAX_TRAFFIC; i += 1) {
+      const lane = (i % 2 === 0) ? 1 : -1; // +1 = right lane (x=+2.8, moving -Z); -1 = oncoming (x=-2.8, moving +Z)
+      const typeIdx = i % 3;
+      const typeName = types[typeIdx];
+      const bodyGeo = typeIdx === 0 ? bodyGeoSed : (typeIdx === 1 ? bodyGeoSuv : bodyGeoTrk);
+      const bodyMat = typeIdx === 0 ? matSed : (typeIdx === 1 ? matSuv : matTrk);
+      const cabGeo = typeIdx === 0 ? cabinGeoSed : cabinGeoSuv;
+      const halfLen = typeIdx === 2 ? 3.1 : (typeIdx === 1 ? 2.25 : 2.0);
+
+      const group = new THREE.Group();
+
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      body.position.y = 0.72;
+      body.castShadow = true;
+      group.add(body);
+
+      const cabin = new THREE.Mesh(cabGeo, matCabin);
+      cabin.position.set(0, 1.42, 0.22);
+      group.add(cabin);
+
+      const wxOff = typeIdx === 2 ? 1.08 : 0.92;
+      const wzOff = typeIdx === 2 ? 2.2 : (typeIdx === 1 ? 1.65 : 1.45);
+      const wOffsets = [
+        [-wxOff, 0.38, -wzOff], [wxOff, 0.38, -wzOff],
+        [-wxOff, 0.38, wzOff], [wxOff, 0.38, wzOff]
+      ];
+      for (let wi = 0; wi < wOffsets.length; wi += 1) {
+        const w = new THREE.Mesh(wheelGeo, matWheel);
+        w.position.set(wOffsets[wi][0], wOffsets[wi][1], wOffsets[wi][2]);
+        group.add(w);
+      }
+
+      // Subtle headlights (-Z is forward in local space)
+      const headL = new THREE.Mesh(lightGeo, matHeadlight);
+      headL.position.set(-0.55, 0.78, -halfLen);
+      group.add(headL);
+      const headR = new THREE.Mesh(lightGeo, matHeadlight);
+      headR.position.set(0.55, 0.78, -halfLen);
+      group.add(headR);
+
+      // Subtle taillights (+Z is rear in local space)
+      const tailL = new THREE.Mesh(lightGeo, matTaillight);
+      tailL.position.set(-0.55, 0.78, halfLen);
+      group.add(tailL);
+      const tailR = new THREE.Mesh(lightGeo, matTaillight);
+      tailR.position.set(0.55, 0.78, halfLen);
+      group.add(tailR);
+
+      const startZ = -340 + i * (680 / MAX_TRAFFIC);
+      const xPos = lane > 0 ? 2.8 : -2.8;
+      group.position.set(xPos, 0, startZ);
+      // Local -Z is forward: lane > 0 moves -Z (yaw = 0); lane < 0 moves +Z (yaw = Math.PI)
+      group.rotation.y = lane > 0 ? 0 : Math.PI;
+
+      scene.add(group);
+
+      traffic.push({
+        group: group,
+        lane: lane,
+        x: xPos,
+        z: startZ,
+        speed: 22 + (i % 4) * 2.0,
+        typeName: typeName
+      });
+    }
+
+    return traffic;
+  }
+
   function applyLightingFeel(THREE, world, province, mode, renderer) {
     if (!world || !world.lights) return;
     const c = province.climate;
@@ -940,50 +1036,69 @@
   // ============================================================================
   // TACTICAL RADAR (Landmarks + Functional Building Squares + Hostile Blips)
   // ============================================================================
-  function drawRadar(ctx, width, height, px, pz, yaw, landmarks, discovered, functionalBuildings, enemies, accent) {
+  function drawRadar(ctx, width, height, px, pz, yaw, landmarks, discovered, functionalBuildings, enemies, accent, trafficPool) {
     if (!ctx) return;
     const cx = width * 0.5;
     const cy = height * 0.5;
-    const scale = 0.52;
+    // radarRange ~160m — distant landmarks and nearby buildings both read clearly
+    const radarRange = 160;
+    const scale = (cx - 4) / radarRange;
+    const ringR = cx - 2;
 
     ctx.clearRect(0, 0, width, height);
     ctx.fillStyle = 'rgba(6, 14, 26, 0.86)';
     ctx.beginPath();
-    ctx.arc(cx, cy, cx - 2, 0, Math.PI * 2);
+    ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
     ctx.fill();
+
+    // Clip blips to the circular disc
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringR - 1, 0, Math.PI * 2);
+    ctx.clip();
 
     ctx.strokeStyle = 'rgba(255,255,255,0.14)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(cx, cy, cx * 0.5, 0, Math.PI * 2);
+    ctx.arc(cx, cy, ringR * 0.5, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Landmarks (circles)
-    for (let i = 0; i < landmarks.length; i += 1) {
-      const lm = landmarks[i];
-      const dx = (lm.coords[0] - px) * scale;
-      const dz = (lm.coords[2] - pz) * scale;
-      const rx = Math.max(8, Math.min(width - 8, cx + dx));
-      const ry = Math.max(8, Math.min(height - 8, cy + dz));
-      ctx.fillStyle = discovered[lm.id] ? '#10b981' : accent;
-      ctx.beginPath();
-      ctx.arc(rx, ry, 4.0, 0, Math.PI * 2);
-      ctx.fill();
+    // Helper: clamp blip to perimeter ring edge
+    function clampBlip(dx, dz) {
+      const rawX = cx + dx * scale;
+      const rawY = cy + dz * scale;
+      const offX = rawX - cx;
+      const offY = rawY - cy;
+      const r = Math.hypot(offX, offY);
+      if (r <= ringR - 2) return { x: rawX, y: rawY, edge: false };
+      const ratio = (ringR - 2) / r;
+      return { x: cx + offX * ratio, y: cy + offY * ratio, edge: true };
     }
 
-    // Functional Buildings (color-coded squares)
+    // Landmarks (circles — clamped to edge)
+    for (let i = 0; i < landmarks.length; i += 1) {
+      const lm = landmarks[i];
+      const bp = clampBlip(lm.coords[0] - px, lm.coords[2] - pz);
+      ctx.fillStyle = discovered[lm.id] ? '#10b981' : accent;
+      ctx.globalAlpha = bp.edge ? 0.65 : 1.0;
+      ctx.beginPath();
+      ctx.arc(bp.x, bp.y, bp.edge ? 3.0 : 4.0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+    }
+
+    // Functional Buildings (color-coded squares — clamped)
     if (functionalBuildings && functionalBuildings.length) {
       for (let i = 0; i < functionalBuildings.length; i += 1) {
         const fb = functionalBuildings[i];
-        const dx = (fb.x - px) * scale;
-        const dz = (fb.z - pz) * scale;
-        const rx = Math.max(8, Math.min(width - 8, cx + dx));
-        const ry = Math.max(8, Math.min(height - 8, cy + dz));
+        const bp = clampBlip(fb.x - px, fb.z - pz);
         ctx.fillStyle = fb.color || BUILDING_COLORS[fb.type] || '#f59e0b';
-        ctx.fillRect(rx - 3.5, ry - 3.5, 7, 7);
+        ctx.globalAlpha = bp.edge ? 0.6 : 1.0;
+        ctx.fillRect(bp.x - 3.5, bp.y - 3.5, 7, 7);
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 1;
-        ctx.strokeRect(rx - 3.5, ry - 3.5, 7, 7);
+        ctx.strokeRect(bp.x - 3.5, bp.y - 3.5, 7, 7);
+        ctx.globalAlpha = 1.0;
       }
     }
 
@@ -992,22 +1107,35 @@
       for (let i = 0; i < enemies.length; i += 1) {
         const en = enemies[i];
         if (!en.active) continue;
-        const dx = (en.x - px) * scale;
-        const dz = (en.z - pz) * scale;
-        const rx = Math.max(7, Math.min(width - 7, cx + dx));
-        const ry = Math.max(7, Math.min(height - 7, cy + dz));
+        const bp = clampBlip(en.x - px, en.z - pz);
         ctx.fillStyle = en.isContractTarget ? '#f97316' : '#ef4444';
         ctx.beginPath();
-        ctx.moveTo(rx, ry - 4.2);
-        ctx.lineTo(rx + 4.2, ry);
-        ctx.lineTo(rx, ry + 4.2);
-        ctx.lineTo(rx - 4.2, ry);
+        ctx.moveTo(bp.x, bp.y - 4.2);
+        ctx.lineTo(bp.x + 4.2, bp.y);
+        ctx.lineTo(bp.x, bp.y + 4.2);
+        ctx.lineTo(bp.x - 4.2, bp.y);
         ctx.closePath();
         ctx.fill();
       }
     }
 
-    // Player triangle
+    // Traffic blips (cyan dots)
+    if (trafficPool && trafficPool.length) {
+      for (let i = 0; i < trafficPool.length; i += 1) {
+        const tr = trafficPool[i];
+        const bp = clampBlip(tr.x - px, tr.z - pz);
+        ctx.fillStyle = '#67e8f9';
+        ctx.globalAlpha = bp.edge ? 0.5 : 0.8;
+        ctx.beginPath();
+        ctx.arc(bp.x, bp.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+      }
+    }
+
+    ctx.restore();
+
+    // Player triangle (drawn on top, outside clip)
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(-yaw);
@@ -1053,6 +1181,7 @@
     let camera = null;
     let world = null;
     let pools = null;
+    let trafficPool = null;
 
     let qualityKey = 'balanced';
     let lightingIdx = (province.id === 'northwest-territories' || province.id === 'nunavut') ? 2 : 0;
@@ -1326,8 +1455,8 @@
         if (!en.active) {
           const angle = Math.random() * Math.PI * 2;
           const dist = 34 + Math.random() * 24;
-          en.x = Math.max(-200, Math.min(200, player.x + Math.cos(angle) * dist));
-          en.z = Math.max(-165, Math.min(200, player.z + Math.sin(angle) * dist));
+          en.x = Math.max(-195, Math.min(195, player.x + Math.cos(angle) * dist));
+          en.z = Math.max(-355, Math.min(355, player.z + Math.sin(angle) * dist));
           en.y = 1.9;
           en.active = true;
           en.type = type || 'drone';
@@ -1965,6 +2094,7 @@
       scene.add(cruiserMesh);
 
       pools = createCombatPools(THREE, scene);
+      trafficPool = createTrafficPool(THREE, scene);
     } catch (err) {
       container.innerHTML =
         '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#e2e8f0;font-family:sans-serif;padding:24px;text-align:center;">' +
@@ -2182,9 +2312,10 @@
       if (inCruiser) {
         const tierMult = 1 + (profile.cruiserTier - 1) * 0.16;
         const boostMult = 1 + (profile.boostTier - 1) * 0.14;
-        const maxSpd = (boosting ? 42 * boostMult : 28) * tierMult;
+        // Increased top speed for 760m long-drive corridor: cruise 36 km/h-eq, boost 52
+        const maxSpd = (boosting ? 52 * boostMult : 36) * tierMult;
         if (Math.abs(forward) > 0.05) {
-          player.speed += forward * 28 * tierMult * dt;
+          player.speed += forward * 36 * tierMult * dt;
         } else {
           player.speed *= Math.pow(0.25, dt);
         }
@@ -2204,8 +2335,9 @@
 
       player.x -= Math.sin(player.yaw) * player.speed * dt;
       player.z -= Math.cos(player.yaw) * player.speed * dt;
-      player.x = Math.max(-220, Math.min(220, player.x));
-      player.z = Math.max(-180, Math.min(220, player.z));
+      // 760m corridor: x ∈ [-195, 195], z ∈ [-355, 355]
+      player.x = Math.max(-195, Math.min(195, player.x));
+      player.z = Math.max(-355, Math.min(355, player.z));
 
       const isMoving = Math.abs(player.speed) > 0.2;
       const isGrounded = player.y <= 0.01;
@@ -2344,6 +2476,21 @@
         world.update(dt, elapsed);
       }
 
+      // Update Pooled AI Highway Traffic (zero per-frame allocations)
+      if (trafficPool) {
+        for (let i = 0; i < trafficPool.length; i += 1) {
+          const tr = trafficPool[i];
+          if (tr.lane > 0) {
+            tr.z -= tr.speed * dt;
+            if (tr.z < -340) tr.z += 680;
+          } else {
+            tr.z += tr.speed * dt;
+            if (tr.z > 340) tr.z -= 680;
+          }
+          tr.group.position.z = tr.z;
+        }
+      }
+
       renderer.render(scene, camera);
 
       // Proximity check + 15Hz HUD throttle
@@ -2426,7 +2573,8 @@
           discovered,
           world ? world.functionalBuildings : null,
           pools ? pools.enemies : null,
-          province.climate.accent
+          province.climate.accent,
+          trafficPool
         );
       }
     }
