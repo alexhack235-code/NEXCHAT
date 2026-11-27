@@ -2576,6 +2576,7 @@
             <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
               <button id="infoAddMemberBtn" class="info-action-btn" style="flex: 1; min-width: 140px;"><i class="fa-solid fa-user-plus"></i> Add Member</button>
               <button id="infoRemoveAllMembersBtn" class="btn-secondary" style="flex: 1; min-width: 140px; color: var(--accent-gold);"><i class="fa-solid fa-users-slash"></i> Remove All</button>
+              <button id="infoTransferOwnershipBtn" class="btn-secondary" style="flex: 1; min-width: 140px; border: 1px solid rgba(255,215,0,0.5); color: #ffd700; display: none;"><i class="fa-solid fa-crown" style="color: #ffd700;"></i> Transfer Ownership</button>
               <button id="infoDeleteGroupBtn" class="btn-danger" style="flex: 1; min-width: 140px;"><i class="fa-solid fa-trash"></i> Delete Group</button>
             </div>
           </div>
@@ -2866,6 +2867,49 @@
           <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">Select the members you want to mute and choose how long they remain muted.</p>
           <div id="muteMemberList" class="contact-scroll-box" style="max-height: 320px; display: grid; gap: 12px; margin-bottom: 16px;"></div>
           <button id="saveMuteMemberSettingsBtn" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-floppy-disk"></i> Save Mute Settings</button>
+        </div>
+      </div>
+
+      <!-- WhatsApp-Style Transfer Ownership Modal -->
+      <div id="transferOwnershipModal" class="modal" style="display: none; z-index: 10050;">
+        <div class="modal-content" style="max-width: 480px; width: 92%; background: #0c1317; border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.85); padding: 22px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; display: flex; align-items: center; justify-content: center; color: #ffd700; font-size: 17px;">
+                <i class="fa-solid fa-crown"></i>
+              </div>
+              <div>
+                <h3 id="transferOwnershipTitle" style="margin: 0; color: #fff; font-size: 16px; font-weight: 700;">Transfer Ownership</h3>
+                <span id="transferOwnershipTargetName" style="font-size: 11.5px; color: #94a3b8;">Select a new owner</span>
+              </div>
+            </div>
+            <button type="button" class="close-modal" id="closeTransferOwnershipBtn" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px;" title="Close">&times;</button>
+          </div>
+
+          <div style="background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px; color: #cbd5e1; line-height: 1.45;">
+            <i class="fa-solid fa-circle-info" style="color: #ffd700; margin-right: 6px;"></i>
+            <span>Choose a new owner from the list below. As former owner, <strong>you will keep your Admin rights</strong> (WhatsApp style). Ownership cannot be revoked unless transferred back.</span>
+          </div>
+
+          <!-- Search Bar -->
+          <div style="margin-bottom: 12px; position: relative;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 12px;"></i>
+            <input type="text" id="transferOwnershipSearchInput" placeholder="Search members or admins..." style="width: 100%; box-sizing: border-box; padding: 9px 12px 9px 34px; background: #111b21; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #fff; font-size: 13px; outline: none;">
+          </div>
+
+          <!-- Eligible List -->
+          <div id="transferOwnershipList" class="contact-scroll-box" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 2px;">
+            <p style="color: #888; text-align: center; padding: 20px;">Loading eligible recipients...</p>
+          </div>
+
+          <!-- Confirmation Box (Shown on select) -->
+          <div id="transferOwnershipConfirmBox" style="display: none; margin-top: 14px; padding: 14px; background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 12px; text-align: center;">
+            <p id="transferOwnershipConfirmText" style="color: #fff; font-size: 13px; font-weight: 600; margin: 0 0 12px 0; line-height: 1.4;">Transfer ownership to this user?</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+              <button type="button" id="cancelTransferOwnershipConfirmBtn" class="btn-secondary" style="padding: 7px 16px; font-size: 12px; border-radius: 8px; cursor: pointer;">Cancel</button>
+              <button type="button" id="executeTransferOwnershipBtn" class="btn-primary" style="padding: 7px 18px; font-size: 12px; border-radius: 8px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-weight: 800; border: none; cursor: pointer;"><i class="fa-solid fa-crown"></i> Confirm Transfer</button>
+            </div>
+          </div>
         </div>
       </div>
 

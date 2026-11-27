@@ -2842,6 +2842,9 @@
               <button type="button" class="channel-dropdown-item" id="menuToggleFollowBtn">
                 <i class="fa-solid fa-user-plus"></i> <span id="menuFollowBtnText">Follow</span>
               </button>
+              <button type="button" class="channel-dropdown-item" id="menuTransferOwnershipBtn" style="display: none; color: #ffd700;">
+                <i class="fa-solid fa-crown" style="color: #ffd700;"></i> Transfer ownership
+              </button>
             </div>
           </div>
         </header>
@@ -2883,6 +2886,10 @@
               <button type="button" class="channel-dropdown-follow-btn" id="dropdownFollowBtn">
                 <i class="fa-solid fa-plus" id="dropdownFollowIcon"></i>
                 <span id="dropdownFollowText">Follow</span>
+              </button>
+              <button type="button" class="channel-dropdown-action-btn" id="dropdownTransferOwnershipBtn" style="display: none; color: #ffd700; border-color: rgba(255,215,0,0.35);">
+                <i class="fa-solid fa-crown" style="color: #ffd700;"></i>
+                <span>Transfer Ownership</span>
               </button>
             </div>
           </div>
@@ -4232,6 +4239,31 @@
       if (followBtn) followBtn.classList.toggle('following', isFollowing);
       if (followIcon) followIcon.className = isFollowing ? 'fa-solid fa-check' : 'fa-solid fa-plus';
       if (followText) followText.textContent = isFollowing ? 'Following' : 'Follow';
+
+      const user = this.getCurrentUser();
+      const currentUid = user?.uid || window.myUID || (typeof auth !== 'undefined' && auth.currentUser ? auth.currentUser.uid : null);
+      const isOwner = Boolean(currentUid && (channel.creatorId === currentUid || channel.createdBy === currentUid || channel.creator === currentUid));
+
+      const dropdownTransferBtn = document.getElementById('dropdownTransferOwnershipBtn');
+      if (dropdownTransferBtn) {
+        dropdownTransferBtn.style.display = isOwner ? 'inline-flex' : 'none';
+        dropdownTransferBtn.onclick = () => {
+          if (typeof window.openTransferOwnershipModal === 'function') {
+            window.openTransferOwnershipModal(channel.id, 'channel');
+          }
+        };
+      }
+      const menuTransferBtn = document.getElementById('menuTransferOwnershipBtn');
+      if (menuTransferBtn) {
+        menuTransferBtn.style.display = isOwner ? 'flex' : 'none';
+        menuTransferBtn.onclick = () => {
+          const menu = document.getElementById('channelDropdownMenu');
+          if (menu) menu.classList.remove('open');
+          if (typeof window.openTransferOwnershipModal === 'function') {
+            window.openTransferOwnershipModal(channel.id, 'channel');
+          }
+        };
+      }
     }
 
     toggleChannelInfoPanel(forceState) {

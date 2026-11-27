@@ -130,6 +130,8 @@ service cloud.firestore {
                 request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId) ||
                ('createdBy' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
                 request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.createdBy) ||
+               ('creator' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creator) ||
                isSuperAdmin()
              );
     }
@@ -145,7 +147,58 @@ service cloud.firestore {
                 request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId) ||
                ('createdBy' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
                 request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.createdBy) ||
+               ('creator' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creator) ||
                isSuperAdmin()
+             );
+    }
+
+    // 5b. Creator / Owner Verification & Ownership Transfer Validators (Groups & Channels)
+    function isCreatorOwner(data) {
+      return isAuthenticated() && data != null && (
+        ('creatorId' in data && data.creatorId == request.auth.uid) ||
+        ('createdBy' in data && data.createdBy == request.auth.uid) ||
+        ('creator' in data && data.creator == request.auth.uid)
+      );
+    }
+
+    function hasAnyOwnerField(data) {
+      return 'creatorId' in data || 'createdBy' in data || 'creator' in data;
+    }
+
+    function isValidGroupOwnerTransferField(field) {
+      return !(field in request.resource.data) ||
+             (field in resource.data && request.resource.data[field] == resource.data[field]) ||
+             (
+               request.resource.data[field] is string &&
+               request.resource.data[field].size() > 0 &&
+               request.resource.data[field].size() <= 128 &&
+               'admins' in request.resource.data &&
+               request.resource.data.admins is list &&
+               request.resource.data[field] in request.resource.data.admins &&
+               (
+                 ('members' in request.resource.data && request.resource.data.members is list && request.resource.data[field] in request.resource.data.members) ||
+                 ('admins' in request.resource.data && request.resource.data.admins is list && request.resource.data[field] in request.resource.data.admins)
+               )
+             );
+    }
+
+    function isValidChannelOwnerTransferField(field, channelId) {
+      return !(field in request.resource.data) ||
+             (field in resource.data && request.resource.data[field] == resource.data[field]) ||
+             (
+               request.resource.data[field] is string &&
+               request.resource.data[field].size() > 0 &&
+               request.resource.data[field].size() <= 128 &&
+               'admins' in request.resource.data &&
+               request.resource.data.admins is list &&
+               request.resource.data[field] in request.resource.data.admins &&
+               (
+                 ('members' in request.resource.data && request.resource.data.members is list && request.resource.data[field] in request.resource.data.members) ||
+                 ('subscribers' in request.resource.data && request.resource.data.subscribers is list && request.resource.data[field] in request.resource.data.subscribers) ||
+                 ('admins' in request.resource.data && request.resource.data.admins is list && request.resource.data[field] in request.resource.data.admins) ||
+                 exists(/databases/$(database)/documents/channels/$(channelId)/subscribers/$(request.resource.data[field]))
+               )
              );
     }
 
@@ -820,10 +873,16 @@ service cloud.firestore {
 
     // 15. Broadcast Channel Validators
     function isValidChannelCreate(data) {
-      return ('creatorId' in data && data.creatorId == request.auth.uid) &&
+      return isCreatorOwner(data) &&
+             (!('creatorId' in data) || data.creatorId == request.auth.uid) &&
+             (!('createdBy' in data) || data.createdBy == request.auth.uid) &&
+             (!('creator' in data) || data.creator == request.auth.uid) &&
              validStringLength('name', 1, 100) &&
              isValidOptionalString('handle', 0, 100) &&
              isValidOptionalString('description', 0, 2000) &&
+             isValidOptionalList('admins', 100) &&
+             isValidOptionalList('members', 1000) &&
+             isValidOptionalList('subscribers', 10000) &&
              (!('isVerified' in data) || data.isVerified == false || isSuperAdmin());
     }
 
@@ -833,7 +892,14 @@ service cloud.firestore {
              isValidOptionalString('description', 0, 2000) &&
              isValidOptionalUrl('avatar') &&
              isValidOptionalUrl('profilePic') &&
-             isValidOptionalUrl('icon');
+             isValidOptionalUrl('icon') &&
+             isValidOptionalList('admins', 100) &&
+             isValidOptionalList('members', 1000) &&
+             isValidOptionalList('subscribers', 10000) &&
+             (!('isVerified' in request.resource.data) ||
+              ('isVerified' in resource.data && request.resource.data.isVerified == resource.data.isVerified) ||
+              request.resource.data.isVerified == false ||
+              isSuperAdmin());
     }
 
     function isValidPostCreate(data, channelId) {
@@ -1223,7 +1289,7 @@ service cloud.firestore {
       allow read: if isAuthenticated();
 
       allow create: if isAuthenticated() &&
-                       (request.resource.data.creatorId == request.auth.uid || request.resource.data.createdBy == request.auth.uid || isSuperAdmin()) &&
+                       (isCreatorOwner(request.resource.data) || isSuperAdmin()) &&
                        validStringLength('name', 1, 128) &&
                        isValidOptionalString('description', 0, 1000) &&
                        isValidList(request.resource.data.members, 1000) &&
@@ -1231,8 +1297,22 @@ service cloud.firestore {
 
       allow update: if isAuthenticated() && (
         (
+          // Owner-initiated update & WhatsApp-style ownership transfer
+          isCreatorOwner(resource.data) &&
+          areImmutableFieldsUnchanged(['createdAt']) &&
+          hasAnyOwnerField(request.resource.data) &&
+          isValidGroupOwnerTransferField('creatorId') &&
+          isValidGroupOwnerTransferField('createdBy') &&
+          isValidGroupOwnerTransferField('creator') &&
+          isValidOptionalString('name', 1, 128) &&
+          isValidOptionalString('description', 0, 1000) &&
+          isValidOptionalList('members', 1000) &&
+          isValidOptionalList('admins', 100) &&
+          isValidOptionalList('moderators', 100)
+        ) ||
+        (
           isGroupAdmin(groupId) &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'creator', 'createdAt']) &&
           isValidOptionalString('name', 1, 128) &&
           isValidOptionalString('description', 0, 1000) &&
           isValidOptionalList('members', 1000) &&
@@ -1241,12 +1321,12 @@ service cloud.firestore {
         ) ||
         (
           isGroupModerator(groupId) &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'creator', 'createdAt']) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinnedMessages', 'mutedMembers', 'settings', 'updatedAt'])
         ) ||
         (
           isGroupMember(groupId) &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt']) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'creator', 'createdAt']) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'lastMessageTime', 'lastSender', 'updatedAt']) &&
           isValidOptionalString('lastMessage', 0, 10000) &&
           isValidOptionalString('lastSender', 0, 128)
@@ -1254,7 +1334,7 @@ service cloud.firestore {
         (
           // Member self-join / leave
           (!('privacy' in resource.data) || resource.data.privacy != 'private') &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'createdAt', 'admins']) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'creator', 'createdAt', 'admins']) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'roles', 'updatedAt']) &&
           isValidOptionalList('members', 1000)
         ) ||
@@ -1262,8 +1342,7 @@ service cloud.firestore {
       );
 
       allow delete: if isAuthenticated() && (
-        ('creatorId' in resource.data && request.auth.uid == resource.data.creatorId) ||
-        ('createdBy' in resource.data && request.auth.uid == resource.data.createdBy) ||
+        isCreatorOwner(resource.data) ||
         isSuperAdmin()
       );
 
@@ -1888,18 +1967,23 @@ service cloud.firestore {
 
       allow update: if isAuthenticated() && (
         (
-          (resource.data.creatorId == request.auth.uid || isSuperAdmin()) &&
-          areImmutableFieldsUnchanged(['creatorId', 'createdAt']) &&
+          // Current owner update & WhatsApp-style ownership transfer
+          isCreatorOwner(resource.data) &&
+          areImmutableFieldsUnchanged(['createdAt']) &&
+          hasAnyOwnerField(request.resource.data) &&
+          isValidChannelOwnerTransferField('creatorId', channelId) &&
+          isValidChannelOwnerTransferField('createdBy', channelId) &&
+          isValidChannelOwnerTransferField('creator', channelId) &&
           isValidChannelUpdate()
         ) ||
         (
-          areImmutableFieldsUnchanged(['creatorId', 'createdAt', 'name', 'handle', 'description', 'avatar', 'profilePic', 'icon', 'creatorName', 'isVerified', 'isPublic']) &&
+          areImmutableFieldsUnchanged(['creatorId', 'createdBy', 'creator', 'createdAt', 'admins', 'name', 'handle', 'description', 'avatar', 'profilePic', 'icon', 'creatorName', 'isVerified', 'isPublic']) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['subscriberCount', 'followerCount', 'subscribersCount', 'postsCount', 'lastPostSnippet', 'lastPostTime'])
         ) ||
         isSuperAdmin()
       );
 
-      allow delete: if isAuthenticated() && (resource.data.creatorId == request.auth.uid || isSuperAdmin());
+      allow delete: if isAuthenticated() && (isCreatorOwner(resource.data) || isSuperAdmin());
 
       match /posts/{postId} {
         allow read: if isAuthenticated() || (exists(/databases/$(database)/documents/channels/$(channelId)) && get(/databases/$(database)/documents/channels/$(channelId)).data.isPublic == true);

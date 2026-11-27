@@ -3330,10 +3330,12 @@ if (membersContent) membersContent.innerHTML = '';
     const adminMembers = groupData.admins || [groupData.createdBy];
     const modMembers = groupData.moderators || [];
     const mutedMembersMap = normalizeGroupMutedMembers(groupData.mutedMembers || {});
+    const isOwnerUser = Boolean(myUID && (groupData.createdBy === myUID || groupData.creator === myUID || groupData.creatorId === myUID));
 for (const memberId of members) {
       const userDoc = await getDoc(doc(db, 'users', memberId));
       const userData = userDoc.data() || {};
       const username = userData.username || userData.name || 'Unknown';
+      const isMemberOwner = Boolean(memberId && (memberId === groupData.createdBy || memberId === groupData.creator || memberId === groupData.creatorId));
       const isAdminMember = adminMembers.includes(memberId);
       const isModMember = modMembers.includes(memberId);
       const isYou = memberId === myUID;
@@ -3345,15 +3347,27 @@ if (expiresAt > new Date()) {
           muteStatus = ` ·  Muted (${formatTimeRemaining(muteInfo)})`;
         }
       }
-const roleLabel = isAdminMember ? ' Admin' : (isModMember ? ' Moderator' : 'Member');
+      const roleLabel = isMemberOwner ? '👑 Owner' : (isAdminMember ? ' Admin' : (isModMember ? ' Moderator' : 'Member'));
+      const ownerBadge = isMemberOwner
+        ? '<span style="font-size:10px;color:#ffd700;border:1px solid rgba(255,215,0,0.5);background:rgba(255,215,0,0.12);padding:1px 6px;border-radius:10px;margin-left:6px;font-weight:700;"><i class="fa-solid fa-crown"></i> Owner</span>'
+        : '';
 const memberDiv = document.createElement('div');
 memberDiv.className = 'member-item';
 memberDiv.innerHTML = `
 <div class="member-avatar">${username.charAt(0).toUpperCase()}</div>
-<div class="member-info">
-<div class="member-name">${escape(username)} ${isYou ? '(You)' : ''}${muteStatus}</div>
+<div class="member-info" style="flex: 1; min-width: 0;">
+<div class="member-name" style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escape(username)} ${isYou ? '(You)' : ''}</span>
+  ${ownerBadge}
+  ${muteStatus}
+</div>
 <div class="member-role">${roleLabel}</div>
 </div>
+${isOwnerUser && !isYou ? `
+<button type="button" onclick="window.openTransferOwnershipConfirmation('${groupId}', '${memberId}', 'group')" title="Transfer Group Ownership" style="margin-left:auto; background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.4); color: #ffd700; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap;">
+  <i class="fa-solid fa-crown"></i> Transfer
+</button>
+` : ''}
 `;
 if (membersContent) membersContent.appendChild(memberDiv);
     }
@@ -3368,6 +3382,11 @@ const groupAdminActionsSection = document.getElementById('groupAdminActionsSecti
     const groupAdvancedSettingsSection = document.getElementById('groupAdvancedSettingsSection');
 if (groupAdminActionsSection) {
       groupAdminActionsSection.style.display = isAdmin ? 'block' : 'none';
+      const infoTransferOwnershipBtn = document.getElementById('infoTransferOwnershipBtn');
+      if (infoTransferOwnershipBtn) {
+        infoTransferOwnershipBtn.style.display = isOwnerUser ? 'inline-flex' : 'none';
+        infoTransferOwnershipBtn.onclick = () => window.openTransferOwnershipModal(groupId, 'group');
+      }
     }
 if (groupAdvancedSettingsSection) {
       groupAdvancedSettingsSection.style.display = isAdmin ? 'block' : 'none';
@@ -3816,6 +3835,7 @@ return;
     }
 const groupData = groupDoc.data();
     const adminMembers = groupData.admins || [groupData.createdBy];
+    const isOwnerUser = Boolean(myUID && (groupData.createdBy === myUID || groupData.creator === myUID || groupData.creatorId === myUID));
 if (!adminMembers.includes(myUID)) {
       showNotif('Only admins can manage members', 'error');
 return;
@@ -3836,23 +3856,41 @@ const userDoc = await getDoc(doc(db, 'users', memberId));
       const username = userData.username || userData.name || memberId;
       const isSuspended = suspendedMembers.includes(memberId);
       const isAdmin = adminMembers.includes(memberId);
+      const isMemberOwner = Boolean(memberId && (memberId === groupData.createdBy || memberId === groupData.creator || memberId === groupData.creatorId));
 const suspendStatus = isSuspended ? '<i class="fa-solid fa-triangle-exclamation"></i> Suspended' : '<i class="fa-solid fa-circle-check"></i> Active';
-      const adminBadge = isAdmin ? ' <span style="font-size:10px;color:#ffd700;border:1px solid #ffd700;padding:1px 6px;border-radius:10px;"><i class="fa-solid fa-shield-halved"></i> Admin</span>' : '';
+      const adminBadge = isMemberOwner
+        ? ' <span style="font-size:10px;color:#ffd700;border:1px solid #ffd700;background:rgba(255,215,0,0.15);padding:1px 6px;border-radius:10px;font-weight:700;"><i class="fa-solid fa-crown"></i> Owner</span>'
+        : (isAdmin ? ' <span style="font-size:10px;color:#00d4ff;border:1px solid #00d4ff;padding:1px 6px;border-radius:10px;"><i class="fa-solid fa-shield-halved"></i> Admin</span>' : '');
 membersHTML += `
 <div class="group-admin-member-row">
 <div style="flex: 1; min-width: 0;">
 <p style="margin: 0; font-weight: 600; color: #00ff66;">${escape(username)}${adminBadge}</p>
 <p style="margin: 4px 0 0 0; font-size: 12px; color: ${isSuspended ? '#ff6b6b' : '#4CAF50'};">${suspendStatus}</p>
 </div>
-<div class="admin-actions-btns" style="display: flex; gap: 6px; flex-wrap: wrap;">
-${!isAdmin ? `<button onclick="promoteToAdmin('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #00d4ff; color: #000; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-award"></i> Promote</button>` : '<span style="color: #00ff66; font-size: 12px;">Admin</span>'}\n            <button onclick="toggleSuspendMember('${groupId}', '${memberId}', ${isSuspended})" style="padding: 6px 10px; background: ${isSuspended ? '#4CAF50' : '#ff6b6b'}; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">${isSuspended ? '<i class="fa-solid fa-play"></i> Unsuspend' : '<i class="fa-solid fa-pause"></i> Suspend'}</button>\n            <button onclick="kickMember('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #ff4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-user-xmark"></i> Kick</button>\n          </div>\n        </div>\n      `;
+<div class="admin-actions-btns" style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+${isOwnerUser && !isMemberOwner ? `<button onclick="window.openTransferOwnershipConfirmation('${groupId}', '${memberId}', 'group')" style="padding: 6px 10px; background: rgba(255, 215, 0, 0.18); border: 1px solid #ffd700; color: #ffd700; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 700;"><i class="fa-solid fa-crown"></i> Transfer Ownership</button>` : ''}
+${!isAdmin ? `<button onclick="promoteToAdmin('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #00d4ff; color: #000; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-award"></i> Promote</button>` : (isMemberOwner ? '<span style="color: #ffd700; font-size: 12px; font-weight:700;">Owner</span>' : '<span style="color: #00d4ff; font-size: 12px;">Admin</span>')}
+            <button onclick="toggleSuspendMember('${groupId}', '${memberId}', ${isSuspended})" style="padding: 6px 10px; background: ${isSuspended ? '#4CAF50' : '#ff6b6b'}; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">${isSuspended ? '<i class="fa-solid fa-play"></i> Unsuspend' : '<i class="fa-solid fa-pause"></i> Suspend'}</button>
+            <button onclick="kickMember('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #ff4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-user-xmark"></i> Kick</button>
+          </div>
+        </div>
+      `;
     }
 membersHTML += '</div>';
 adminPanel.innerHTML = `
 <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;" onclick="document.getElementById('groupAdminPanel').style.display='none'">
-<div style="background: #0a0f1a; border: 2px solid #00ff66; border-radius: 12px; padding: 20px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-<h3 style="margin: 0; color: #00ff66;"><i class="fa-solid fa-users-gear" style="margin-right:8px;"></i>Manage Members</h3>\n            <button onclick="document.getElementById('groupAdminPanel').style.display='none'" style="background: none; border: none; color: #00ff66; font-size: 24px; cursor: pointer;">&times;</button>\n          </div>\n          ${membersHTML}\n        </div>\n      </div>\n    `;
+<div style="background: #0a0f1a; border: 2px solid #00ff66; border-radius: 12px; padding: 20px; max-width: 520px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 8px; flex-wrap: wrap;">
+<h3 style="margin: 0; color: #00ff66; display: flex; align-items: center;"><i class="fa-solid fa-users-gear" style="margin-right:8px;"></i>Manage Members</h3>
+<div style="display: flex; align-items: center; gap: 8px;">
+  ${isOwnerUser ? `<button onclick="window.openTransferOwnershipModal('${groupId}', 'group')" style="padding: 5px 10px; background: rgba(255,215,0,0.18); border: 1px solid #ffd700; color: #ffd700; border-radius: 6px; cursor: pointer; font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;"><i class="fa-solid fa-crown"></i> Transfer Ownership</button>` : ''}
+  <button onclick="document.getElementById('groupAdminPanel').style.display='none'" style="background: none; border: none; color: #00ff66; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
+</div>
+</div>
+          ${membersHTML}
+        </div>
+      </div>
+    `;
 adminPanel.style.display = 'block';
   } catch (error) {
     console.error('Error showing admin panel:', error);
@@ -3920,6 +3958,451 @@ await showGroupAdminPanel(groupId);
 showNotif('Error: ' + error.message, 'error');
   }
 }
+
+/**
+ * =============================================================================
+ * WHATSAPP-STYLE OWNERSHIP TRANSFER SUBSYSTEM (GROUPS & CHANNELS)
+ * =============================================================================
+ */
+let currentTransferState = {
+  targetId: null,
+  targetType: 'group',
+  targetData: null,
+  selectedUid: null,
+  selectedUserName: null,
+  eligibleRecipients: []
+};
+
+function ensureTransferOwnershipModalDOM() {
+  if (document.getElementById('transferOwnershipModal')) return;
+  const modal = document.createElement('div');
+  modal.id = 'transferOwnershipModal';
+  modal.className = 'modal';
+  modal.style.cssText = 'display: none; z-index: 10050;';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width: 480px; width: 92%; background: #0c1317; border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.85); padding: 22px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; display: flex; align-items: center; justify-content: center; color: #ffd700; font-size: 17px;">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div>
+            <h3 id="transferOwnershipTitle" style="margin: 0; color: #fff; font-size: 16px; font-weight: 700;">Transfer Ownership</h3>
+            <span id="transferOwnershipTargetName" style="font-size: 11.5px; color: #94a3b8;">Select a new owner</span>
+          </div>
+        </div>
+        <button type="button" class="close-modal" id="closeTransferOwnershipBtn" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px;" title="Close">&times;</button>
+      </div>
+
+      <div style="background: rgba(255, 215, 0, 0.08); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px; color: #cbd5e1; line-height: 1.45;">
+        <i class="fa-solid fa-circle-info" style="color: #ffd700; margin-right: 6px;"></i>
+        <span>Choose a new owner from the list below. As former owner, <strong>you will keep your Admin rights</strong> (WhatsApp style). Ownership cannot be revoked unless transferred back.</span>
+      </div>
+
+      <div style="margin-bottom: 12px; position: relative;">
+        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 12px;"></i>
+        <input type="text" id="transferOwnershipSearchInput" placeholder="Search members or admins..." style="width: 100%; box-sizing: border-box; padding: 9px 12px 9px 34px; background: #111b21; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #fff; font-size: 13px; outline: none;">
+      </div>
+
+      <div id="transferOwnershipList" class="contact-scroll-box" style="max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 2px;">
+        <p style="color: #888; text-align: center; padding: 20px;">Loading eligible recipients...</p>
+      </div>
+
+      <div id="transferOwnershipConfirmBox" style="display: none; margin-top: 14px; padding: 14px; background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 215, 0, 0.4); border-radius: 12px; text-align: center;">
+        <p id="transferOwnershipConfirmText" style="color: #fff; font-size: 13px; font-weight: 600; margin: 0 0 12px 0; line-height: 1.4;">Transfer ownership to this user?</p>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button type="button" id="cancelTransferOwnershipConfirmBtn" class="btn-secondary" style="padding: 7px 16px; font-size: 12px; border-radius: 8px; cursor: pointer;">Cancel</button>
+          <button type="button" id="executeTransferOwnershipBtn" class="btn-primary" style="padding: 7px 18px; font-size: 12px; border-radius: 8px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-weight: 800; border: none; cursor: pointer;"><i class="fa-solid fa-crown"></i> Confirm Transfer</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function openTransferOwnershipModal(targetId, targetType = 'group') {
+  const currentUid = myUID || (typeof auth !== 'undefined' && auth.currentUser ? auth.currentUser.uid : null);
+  if (!currentUid) {
+    showNotif('Please log in to transfer ownership', 'error');
+    return;
+  }
+  const id = targetId || currentChatUser || window.currentGroupId;
+  if (!id) {
+    showNotif('No group or channel selected', 'error');
+    return;
+  }
+
+  ensureTransferOwnershipModalDOM();
+
+  const modal = document.getElementById('transferOwnershipModal');
+  const titleEl = document.getElementById('transferOwnershipTitle');
+  const targetNameEl = document.getElementById('transferOwnershipTargetName');
+  const listEl = document.getElementById('transferOwnershipList');
+  const confirmBox = document.getElementById('transferOwnershipConfirmBox');
+  const searchInput = document.getElementById('transferOwnershipSearchInput');
+
+  if (confirmBox) confirmBox.style.display = 'none';
+  if (searchInput) searchInput.value = '';
+  if (modal) modal.style.display = 'flex';
+  if (listEl) {
+    listEl.innerHTML = '<p style="color: #888; text-align: center; padding: 24px;"><i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i>Loading eligible members...</p>';
+  }
+
+  currentTransferState.targetId = id;
+  currentTransferState.targetType = targetType;
+  currentTransferState.selectedUid = null;
+  currentTransferState.selectedUserName = null;
+  currentTransferState.eligibleRecipients = [];
+
+  try {
+    let docData = null;
+    let targetTitle = '';
+    let eligibleUids = [];
+    let adminUids = [];
+
+    if (targetType === 'channel') {
+      const chanRef = doc(db, 'channels', id);
+      const chanSnap = await getDoc(chanRef).catch(() => null);
+      if (chanSnap && chanSnap.exists()) {
+        docData = chanSnap.data();
+      } else if (window.broadcastChannelsEngine) {
+        docData = window.broadcastChannelsEngine.channels.find(c => c.id === id) || null;
+      }
+
+      if (!docData) {
+        showNotif('Channel not found', 'error');
+        if (modal) modal.style.display = 'none';
+        return;
+      }
+
+      const isOwner = Boolean(docData.creatorId === currentUid || docData.createdBy === currentUid || docData.creator === currentUid);
+      if (!isOwner) {
+        showNotif('Only the channel creator/owner can transfer ownership', 'error');
+        if (modal) modal.style.display = 'none';
+        return;
+      }
+
+      targetTitle = docData.name || 'Broadcast Channel';
+      adminUids = Array.isArray(docData.admins) ? docData.admins : (Array.isArray(docData.adminIds) ? docData.adminIds : []);
+
+      const eligibleSet = new Set();
+      try {
+        const subsSnap = await getDocs(collection(db, 'channels', id, 'subscribers'));
+        subsSnap.forEach(s => {
+          if (s.id && s.id !== currentUid) eligibleSet.add(s.id);
+        });
+      } catch (_) {}
+
+      (docData.members || []).forEach(uid => { if (uid && uid !== currentUid) eligibleSet.add(uid); });
+      adminUids.forEach(uid => { if (uid && uid !== currentUid) eligibleSet.add(uid); });
+
+      try {
+        const myDoc = await getDoc(doc(db, 'users', currentUid));
+        const contacts = myDoc.exists() ? (myDoc.data()?.contacts || []) : [];
+        contacts.forEach(cid => {
+          if (cid && cid !== currentUid && cid !== 'chronex-ai') eligibleSet.add(cid);
+        });
+      } catch (_) {}
+
+      eligibleUids = Array.from(eligibleSet);
+    } else {
+      // Group
+      const groupRef = doc(db, 'groups', id);
+      const groupSnap = await getDoc(groupRef);
+      if (!groupSnap.exists()) {
+        showNotif('Group not found', 'error');
+        if (modal) modal.style.display = 'none';
+        return;
+      }
+      docData = groupSnap.data();
+      const isOwner = Boolean(docData.createdBy === currentUid || docData.creator === currentUid || docData.creatorId === currentUid);
+      if (!isOwner) {
+        showNotif('Only the group owner can transfer ownership', 'error');
+        if (modal) modal.style.display = 'none';
+        return;
+      }
+
+      targetTitle = docData.name || 'Group';
+      const members = docData.members || [];
+      adminUids = docData.admins || [docData.createdBy];
+      eligibleUids = members.filter(m => m && m !== currentUid);
+    }
+
+    currentTransferState.targetData = docData;
+    if (titleEl) titleEl.textContent = `Transfer ${targetType === 'channel' ? 'Channel' : 'Group'} Ownership`;
+    if (targetNameEl) targetNameEl.textContent = `Target: ${targetTitle}`;
+
+    if (eligibleUids.length === 0) {
+      if (listEl) {
+        listEl.innerHTML = `
+          <div style="text-align: center; padding: 28px 16px; color: #94a3b8;">
+            <div style="font-size: 32px; color: #ffd700; margin-bottom: 8px;"><i class="fa-solid fa-users-slash"></i></div>
+            <p style="color: #fff; font-weight: 700; margin-bottom: 6px;">No Eligible Recipients</p>
+            <p style="font-size: 12px; margin: 0; line-height: 1.45;">There are no other members in this ${targetType} to transfer ownership to.<br>Add members or contacts first.</p>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    const userDocs = await Promise.all(
+      eligibleUids.map(uid => getDoc(doc(db, 'users', uid)).then(snap => snap.exists() ? { uid, ...snap.data() } : { uid, name: 'User' }).catch(() => ({ uid, name: 'User' })))
+    );
+
+    currentTransferState.eligibleRecipients = userDocs.map(u => ({
+      uid: u.uid,
+      name: u.displayName || u.name || u.username || 'User',
+      username: u.username ? `@${String(u.username).replace(/^@/, '')}` : '',
+      avatar: u.profilePic || u.profilePicUrl || 'logo.jpg',
+      isAdmin: adminUids.includes(u.uid)
+    }));
+
+    renderTransferRecipientsList();
+
+  } catch (err) {
+    console.error('Error opening transfer ownership modal:', err);
+    showNotif('Failed to load eligible recipients: ' + err.message, 'error');
+    if (modal) modal.style.display = 'none';
+  }
+}
+
+function renderTransferRecipientsList(filter = '') {
+  const listEl = document.getElementById('transferOwnershipList');
+  if (!listEl) return;
+
+  const queryText = (filter || '').toLowerCase().trim();
+  const recipients = currentTransferState.eligibleRecipients.filter(r => {
+    if (!queryText) return true;
+    return r.name.toLowerCase().includes(queryText) || r.username.toLowerCase().includes(queryText) || r.uid.toLowerCase().includes(queryText);
+  });
+
+  if (recipients.length === 0) {
+    listEl.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">No matching members found.</p>';
+    return;
+  }
+
+  let html = '';
+  recipients.forEach(r => {
+    const isSelected = currentTransferState.selectedUid === r.uid;
+    const adminBadge = r.isAdmin
+      ? `<span style="font-size: 10px; color: #00d4ff; border: 1px solid rgba(0,212,255,0.4); background: rgba(0,212,255,0.1); padding: 1px 6px; border-radius: 8px;"><i class="fa-solid fa-shield-halved"></i> Admin</span>`
+      : `<span style="font-size: 10px; color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 8px;">Member</span>`;
+
+    html += `
+      <div class="transfer-recipient-row" data-uid="${r.uid}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: ${isSelected ? 'rgba(255, 215, 0, 0.12)' : 'rgba(255, 255, 255, 0.03)'}; border: 1px solid ${isSelected ? '#ffd700' : 'rgba(255, 255, 255, 0.06)'}; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;" onclick="window.selectTransferRecipient('${r.uid}')">
+        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+          <img src="${r.avatar}" onerror="this.src='logo.jpg'" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+          <div style="min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="color: #fff; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(r.name)}</span>
+              ${adminBadge}
+            </div>
+            <div style="color: #00ff66; font-size: 11.5px;">${escapeHtml(r.username || r.uid)}</div>
+          </div>
+        </div>
+        <button type="button" style="padding: 6px 12px; font-size: 11.5px; font-weight: 700; border-radius: 6px; border: 1px solid #ffd700; background: ${isSelected ? 'linear-gradient(135deg, #ffd700, #ff8800)' : 'rgba(255, 215, 0, 0.15)'}; color: ${isSelected ? '#000' : '#ffd700'}; cursor: pointer; white-space: nowrap;">
+          <i class="fa-solid fa-crown" style="margin-right: 4px;"></i> ${isSelected ? 'Selected' : 'Choose'}
+        </button>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html;
+}
+
+function selectTransferRecipient(uid) {
+  const recipient = currentTransferState.eligibleRecipients.find(r => r.uid === uid);
+  if (!recipient) return;
+
+  currentTransferState.selectedUid = uid;
+  currentTransferState.selectedUserName = recipient.name;
+
+  renderTransferRecipientsList(document.getElementById('transferOwnershipSearchInput')?.value || '');
+
+  const confirmBox = document.getElementById('transferOwnershipConfirmBox');
+  const confirmText = document.getElementById('transferOwnershipConfirmText');
+  if (confirmBox && confirmText) {
+    const targetName = currentTransferState.targetData?.name || (currentTransferState.targetType === 'channel' ? 'Channel' : 'Group');
+    confirmText.innerHTML = `Transfer ownership of <strong style="color: #ffd700;">${escapeHtml(targetName)}</strong> to <strong style="color: #00ff66;">${escapeHtml(recipient.name)}</strong>?<br><span style="font-size: 11.5px; color: #94a3b8; font-weight: normal; margin-top: 4px; display: block;">They will become the primary owner. You will retain full Admin permissions.</span>`;
+    confirmBox.style.display = 'block';
+    confirmBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+async function openTransferOwnershipConfirmation(targetId, targetUid, targetType = 'group') {
+  await openTransferOwnershipModal(targetId, targetType);
+  if (targetUid) {
+    setTimeout(() => {
+      selectTransferRecipient(targetUid);
+    }, 150);
+  }
+}
+
+async function executeTransferOwnership(targetId, targetUid, targetType = 'group', targetUserName = null) {
+  const tId = targetId || currentTransferState.targetId;
+  const tUid = targetUid || currentTransferState.selectedUid;
+  const tType = targetType || currentTransferState.targetType || 'group';
+  const currentUid = myUID || (typeof auth !== 'undefined' && auth.currentUser ? auth.currentUser.uid : null);
+
+  if (!tId || !tUid || !currentUid) {
+    showNotif('Missing transfer target or recipient', 'error');
+    return;
+  }
+  if (tUid === currentUid) {
+    showNotif('You already own this ' + tType, 'warning');
+    return;
+  }
+
+  const execBtn = document.getElementById('executeTransferOwnershipBtn');
+  const prevBtnHtml = execBtn ? execBtn.innerHTML : '';
+  if (execBtn) {
+    execBtn.disabled = true;
+    execBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Transferring...';
+  }
+
+  try {
+    let resolvedTargetName = targetUserName || currentTransferState.selectedUserName;
+    if (!resolvedTargetName) {
+      try {
+        const uSnap = await getDoc(doc(db, 'users', tUid));
+        if (uSnap.exists()) {
+          const uData = uSnap.data();
+          resolvedTargetName = uData.displayName || uData.name || uData.username || 'User';
+        }
+      } catch (_) {
+        resolvedTargetName = 'New Owner';
+      }
+    }
+
+    const myName = (typeof myUsername !== 'undefined' && myUsername) || auth?.currentUser?.displayName || 'Former Owner';
+
+    if (tType === 'channel') {
+      const chanRef = doc(db, 'channels', tId);
+      const updatePayload = {
+        createdBy: tUid,
+        creator: tUid,
+        creatorId: tUid,
+        creatorName: resolvedTargetName,
+        admins: arrayUnion(tUid, currentUid), // Keeps previous owner as admin (WhatsApp-style)
+        ownershipTransferredAt: serverTimestamp(),
+        previousOwnerId: currentUid
+      };
+
+      try {
+        await updateDoc(chanRef, updatePayload);
+      } catch (upErr) {
+        await setDoc(chanRef, updatePayload, { merge: true });
+      }
+
+      try {
+        await addDoc(collection(db, 'channels', tId, 'posts'), {
+          authorName: 'Channel System',
+          text: `👑 Channel ownership has been transferred to @${String(resolvedTargetName).replace(/^@/, '')}.`,
+          timestamp: serverTimestamp(),
+          type: 'system'
+        });
+      } catch (_) {}
+
+      if (window.broadcastChannelsEngine) {
+        const ch = window.broadcastChannelsEngine.channels.find(c => c.id === tId);
+        if (ch) {
+          ch.creatorId = tUid;
+          ch.creator = tUid;
+          ch.createdBy = tUid;
+          ch.creatorName = resolvedTargetName;
+          if (!Array.isArray(ch.admins)) ch.admins = [];
+          if (!ch.admins.includes(tUid)) ch.admins.push(tUid);
+          if (!ch.admins.includes(currentUid)) ch.admins.push(currentUid);
+          window.broadcastChannelsEngine.saveChannels();
+        }
+        window.broadcastChannelsEngine.syncChannelInfoPanelContent(tId);
+        if (typeof window.broadcastChannelsEngine.renderChannelsInUpdates === 'function') {
+          window.broadcastChannelsEngine.renderChannelsInUpdates();
+        }
+      }
+    } else {
+      // Group ownership transfer
+      const groupRef = doc(db, 'groups', tId);
+      await updateDoc(groupRef, {
+        createdBy: tUid,
+        creator: tUid,
+        creatorId: tUid,
+        admins: arrayUnion(tUid, currentUid), // Keeps previous owner as admin (WhatsApp-style)
+        ownershipTransferredAt: serverTimestamp(),
+        previousOwnerId: currentUid
+      });
+
+      await sendGroupBotMessage(
+        tId,
+        `👑 Ownership Transfer: @${String(myName).replace(/^@/, '')} transferred group ownership to @${String(resolvedTargetName).replace(/^@/, '')}. @${String(myName).replace(/^@/, '')} remains an Admin.`,
+        [tUid, currentUid]
+      );
+
+      if (window._currentGroupData && (window._currentGroupId === tId || window.currentChatUser === tId)) {
+        window._currentGroupData.createdBy = tUid;
+        window._currentGroupData.creator = tUid;
+        window._currentGroupData.creatorId = tUid;
+        if (!Array.isArray(window._currentGroupData.admins)) window._currentGroupData.admins = [];
+        if (!window._currentGroupData.admins.includes(tUid)) window._currentGroupData.admins.push(tUid);
+        if (!window._currentGroupData.admins.includes(currentUid)) window._currentGroupData.admins.push(currentUid);
+      }
+    }
+
+    showNotif(`Ownership transferred successfully to ${resolvedTargetName}!`, 'success', 3500);
+    if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+
+    closeTransferOwnershipModal();
+
+    if (tType === 'group' || !tType) {
+      if (typeof showGroupInfoPanel === 'function') {
+        await showGroupInfoPanel(tId);
+      }
+      const adminPanel = document.getElementById('groupAdminPanel');
+      if (adminPanel && adminPanel.style.display !== 'none' && typeof showGroupAdminPanel === 'function') {
+        await showGroupAdminPanel(tId);
+      }
+    }
+
+  } catch (err) {
+    console.error('Error executing ownership transfer:', err);
+    showNotif('Failed to transfer ownership: ' + err.message, 'error');
+  } finally {
+    if (execBtn) {
+      execBtn.disabled = false;
+      execBtn.innerHTML = prevBtnHtml || '<i class="fa-solid fa-crown"></i> Confirm Transfer';
+    }
+  }
+}
+
+function closeTransferOwnershipModal() {
+  const modal = document.getElementById('transferOwnershipModal');
+  if (modal) modal.style.display = 'none';
+  const confirmBox = document.getElementById('transferOwnershipConfirmBox');
+  if (confirmBox) confirmBox.style.display = 'none';
+}
+
+// Window global bindings
+window.openTransferOwnershipModal = openTransferOwnershipModal;
+window.openTransferOwnershipConfirmation = openTransferOwnershipConfirmation;
+window.selectTransferRecipient = selectTransferRecipient;
+window.executeTransferOwnership = executeTransferOwnership;
+window.transferOwnership = executeTransferOwnership;
+window.transferGroupOwnership = (id, uid) => executeTransferOwnership(id, uid, 'group');
+window.transferChannelOwnership = (id, uid) => executeTransferOwnership(id, uid, 'channel');
+window.closeTransferOwnershipModal = closeTransferOwnershipModal;
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#closeTransferOwnershipBtn') || e.target.closest('#cancelTransferOwnershipConfirmBtn')) {
+    closeTransferOwnershipModal();
+  } else if (e.target.closest('#executeTransferOwnershipBtn')) {
+    executeTransferOwnership();
+  }
+});
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'transferOwnershipSearchInput') {
+    renderTransferRecipientsList(e.target.value);
+  }
+});
 function setupMentionInput() {
   const input = document.getElementById('message-input');
 if (!input || currentChatType !== 'group') {
@@ -12676,6 +13159,11 @@ document.getElementById("infoRemoveAllMembersBtn")?.addEventListener("click", as
     await removeAllGroupMembers(currentChatUser);
   }
 });
+document.getElementById("infoTransferOwnershipBtn")?.addEventListener("click", () => {
+  if (currentChatType === 'group' && currentChatUser) {
+    openTransferOwnershipModal(currentChatUser, 'group');
+  }
+});
 document.getElementById("infoDeleteGroupBtn")?.addEventListener("click", async () => {
   if (currentChatType === 'group' && currentChatUser) {
     await deleteGroup(currentChatUser);
@@ -18977,8 +19465,11 @@ if (!groupSnap.exists()) {
 return;
     }
 const groupData = groupSnap.data();
-if (groupData.creator === myUID || groupData.createdBy === myUID) {
-      alert("As the group creator, you cannot leave the group. You must transfer ownership or delete the group.");
+if (groupData.creator === myUID || groupData.createdBy === myUID || groupData.creatorId === myUID) {
+      const wantTransfer = confirm("As the group creator/owner, you cannot leave the group without transferring ownership or deleting the group.\n\nWould you like to transfer ownership now?");
+      if (wantTransfer) {
+        openTransferOwnershipModal(gId, 'group');
+      }
 return;
     }
 if (typeof GroupChat !== 'undefined' && typeof GroupChat.leaveGroup === 'function') {
