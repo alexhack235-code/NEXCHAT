@@ -1412,6 +1412,7 @@
       const speedBtn = document.createElement('button');
       speedBtn.type = 'button';
       speedBtn.className = 'nex-voice-speed-pill';
+      speedBtn.style.cssText = 'white-space: nowrap !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center; gap: 4px; width: auto !important; min-width: max-content;';
       speedBtn.textContent = '1.0x';
       speedBtn.title = 'Toggle Voice Note Playback Speed';
 
@@ -1892,15 +1893,15 @@ ${text}`;
       }).join('');
 
       playerDiv.innerHTML = `
-        <div class="nex-wave-top-row">
+        <div class="nex-wave-top-row" style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
           <button type="button" class="nex-wave-play-btn" title="Play Voice Note">
             <i class="fa-solid fa-play"></i>
           </button>
-          <div class="nex-wave-bars-container">
+          <div class="nex-wave-bars-container" style="flex: 1 1 auto; min-width: 48px;">
             ${barsHtml}
           </div>
-          <button type="button" class="nex-voice-speed-pill" title="Toggle Playback Speed">1.0x</button>
-          <button type="button" class="nex-voice-boost-btn" title="Toggle +6dB Audio Booster"><i class="fa-solid fa-volume-high"></i> Boost</button>
+          <button type="button" class="nex-voice-speed-pill" title="Toggle Playback Speed" style="white-space: nowrap !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center; gap: 4px; width: auto !important; min-width: max-content;">1.0x</button>
+          <button type="button" class="nex-voice-boost-btn" title="Toggle +6dB Audio Booster" style="white-space: nowrap !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center; gap: 4px; width: auto !important; min-width: max-content;"><i class="fa-solid fa-volume-high"></i> Boost</button>
         </div>
         <div class="nex-wave-meta-row">
           <span class="nex-wave-timer">0:00 / 0:24</span>

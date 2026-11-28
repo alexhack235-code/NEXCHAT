@@ -2,7 +2,7 @@
  * NEXCHAT - Advanced Report System & Activity Monitoring Suite
  * -------------------------------------------------------------
  * 1. NexReportSystem: Multi-tier categories, sub-reasons, severity ratings,
- *    message history snapshot capture, evidence attachment, WhatsApp escalation hotline.
+ *    message history snapshot capture, and evidence attachment.
  * 2. NexActivityMonitor: User session activity ledger, privacy toggles,
  *    group telemetry velocity, admin event auditing, and interactive audit drawer.
  *
@@ -340,25 +340,6 @@
               Cancel
             </button>
           </div>
-
-          <!-- Emergency WhatsApp Escalation Button -->
-          <button type="button" id="btnEscalateReportWhatsapp" style="
-            width: 100%;
-            padding: 9px 12px;
-            background: rgba(37, 211, 102, 0.08);
-            border: 1px solid rgba(37, 211, 102, 0.35);
-            color: #25d366;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-          ">
-            <i class="fa-brands fa-whatsapp"></i> Emergency Escalation to Hotline (+234 905 434 5858)
-          </button>
         </div>
       </div>
     `;
@@ -369,7 +350,6 @@
     modal.querySelector('#btnNexReportClose')?.addEventListener('click', closeReportModal);
     modal.querySelector('#btnCancelNexReport')?.addEventListener('click', closeReportModal);
     modal.querySelector('#btnSubmitNexReport')?.addEventListener('click', handleReportSubmit);
-    modal.querySelector('#btnEscalateReportWhatsapp')?.addEventListener('click', handleEmergencyWhatsappDispatch);
 
     // File input thumbnail
     const fileInput = modal.querySelector('#nexReportEvidenceFileInput');
@@ -717,15 +697,6 @@
         submitBtn.innerHTML = '<i class="fa-solid fa-flag"></i> Submit Incident Report';
       }
     }
-  }
-
-  function handleEmergencyWhatsappDispatch() {
-    const target = activeReportTarget.targetUsername || 'Target';
-    const uid = activeReportTarget.targetUid || '--';
-    const reporter = (typeof myUsername !== 'undefined' && myUsername) ? myUsername : (localStorage.getItem('myUsername') || 'Reporter');
-    const msg = `NEXCHAT EMERGENCY SEV-1 INCIDENT DISPATCH\nHotline: +234 905 434 5858\n\nReporter: @${reporter}\nReported Target: @${target} (UID: ${uid})\nViolation Category: ${selectedCategoryKey} (${selectedSubReasonText})\nSeverity: ${selectedSeverityKey}\n\nPlease inspect this incident immediately on the SuperAdmin Console.`;
-    const url = `https://wa.me/2349054345858?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
   }
 
 

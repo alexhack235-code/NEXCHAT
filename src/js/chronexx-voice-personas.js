@@ -19,6 +19,7 @@
       name: 'Gemini Neural Voice',
       pitch: 1.0,
       rate: 1.0,
+      edgeVoice: 'en-US-JennyNeural',
       dspFilter: 'none',
       description: 'Balanced, warm, articulate natural voice modeled after Gemini conversational voice AI.'
     },
@@ -27,6 +28,7 @@
       name: 'Cyberpunk Operative',
       pitch: 0.85,
       rate: 1.0,
+      edgeVoice: 'en-US-GuyNeural',
       dspFilter: 'bandpass',
       description: 'Deep vocoder-resonant frequency with subtle cyber resonance.'
     },
@@ -35,6 +37,7 @@
       name: 'Neural Synthesizer',
       pitch: 1.15,
       rate: 1.08,
+      edgeVoice: 'en-US-AriaNeural',
       dspFilter: 'highpass',
       description: 'Crisp, crystal-clear futuristic algorithmic timbre.'
     },
@@ -43,6 +46,7 @@
       name: 'Tactical Commander',
       pitch: 0.92,
       rate: 1.02,
+      edgeVoice: 'en-GB-SoniaNeural',
       dspFilter: 'peaking',
       description: 'Authoritative, resonant delivery with sharp vocal attack.'
     },
@@ -51,6 +55,7 @@
       name: 'Sub-Zero Whisper',
       pitch: 0.95,
       rate: 0.92,
+      edgeVoice: 'en-US-AndrewNeural',
       dspFilter: 'lowpass',
       description: 'Intimate, low-frequency filtered stealth lo-fi audio tone.'
     }
@@ -74,14 +79,41 @@
       return Object.values(PERSONAS);
     },
 
-    speak(text, customPersonaId = null) {
+    async speak(text, customPersonaId = null) {
+      const persona = customPersonaId && PERSONAS[customPersonaId] ? PERSONAS[customPersonaId] : this.getActivePersona();
+
+      // Prioritize natural neural speech API if running in an HTTP/HTTPS context
+      if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+        try {
+          const res = await fetch('/api/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text,
+              voice: persona.edgeVoice || 'en-US-JennyNeural',
+              rate: persona.rate || 1.0
+            })
+          });
+          if (res.ok) {
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const audio = new Audio(blobUrl);
+            audio.playbackRate = persona.rate || 1.0;
+            audio.onended = () => { URL.revokeObjectURL(blobUrl); };
+            audio.play();
+            return;
+          }
+        } catch (_) {
+          // Smoothly fall through to speechSynthesis
+        }
+      }
+
       if (!('speechSynthesis' in window)) {
         console.warn('[VOICE PERSONA] SpeechSynthesis unsupported.');
         return;
       }
 
       window.speechSynthesis.cancel();
-      const persona = customPersonaId && PERSONAS[customPersonaId] ? PERSONAS[customPersonaId] : this.getActivePersona();
       const utterance = new SpeechSynthesisUtterance(text);
 
       utterance.pitch = persona.pitch;

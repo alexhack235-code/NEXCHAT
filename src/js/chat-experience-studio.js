@@ -642,6 +642,15 @@ function syncChatListTemplateUI(template, opts = {}) {
       topBtn.innerHTML = `<i class="${meta.icon}"></i> <span id="chatListTemplateBtnLabel">${meta.name}</span>`;
     }
   }
+  const nTplBtn = document.getElementById('chatListNTemplatesBtn');
+  if (nTplBtn) {
+    nTplBtn.dataset.currentTemplate = active;
+    nTplBtn.title = `N-Templates (${meta.name}) — click to toggle 15 layout templates`;
+    const labelSpan = nTplBtn.querySelector('#nTemplatesBtnLabel, .n-templates-label');
+    if (labelSpan) {
+      labelSpan.textContent = `N-Templates (${meta.name})`;
+    }
+  }
 }
 
 export function setChatListTemplate(templateName, opts = {}) {
@@ -1098,19 +1107,26 @@ function renderTemplateBarInto(bar) {
 export function ensureChatListTemplateBar() {
   if (typeof document === 'undefined') return null;
   let bar = document.getElementById('chatListTemplateBar');
-  const contactList = document.getElementById('contactList');
+  const filterTabs = document.getElementById('chatFilterTabs');
   if (!bar) {
-    if (!contactList || !contactList.parentElement) return null;
-    bar = document.createElement('div');
-    bar.id = 'chatListTemplateBar';
-    bar.className = 'chatlist-template-bar';
-    bar.setAttribute('role', 'tablist');
-    bar.setAttribute('aria-label', 'Chat List Templates');
-    contactList.parentElement.insertBefore(bar, contactList);
+    if (filterTabs) {
+      bar = document.createElement('div');
+      bar.id = 'chatListTemplateBar';
+      bar.className = 'chatlist-template-bar chatlist-template-inline-strip';
+      bar.setAttribute('role', 'tablist');
+      bar.setAttribute('aria-label', 'Chat List Templates');
+      bar.style.display = 'none';
+      filterTabs.appendChild(bar);
+    } else {
+      return null;
+    }
   } else {
     bar.classList.add('chatlist-template-bar');
     if (!bar.getAttribute('role')) bar.setAttribute('role', 'tablist');
     if (!bar.getAttribute('aria-label')) bar.setAttribute('aria-label', 'Chat List Templates');
+    if (filterTabs && bar.parentElement !== filterTabs) {
+      filterTabs.appendChild(bar);
+    }
   }
   renderTemplateBarInto(bar);
   return bar;
@@ -1200,6 +1216,34 @@ function bindChatListTemplateControls() {
         const meta = getChatListTemplateMeta(nextTpl);
         if (typeof window.showNotif === 'function') {
           window.showNotif(`Chat list: ${meta.name}`, 'success', 1400);
+        }
+        return;
+      }
+      const nTplToggleBtn = e.target?.closest?.('#chatListNTemplatesBtn');
+      if (nTplToggleBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const bar = document.getElementById('chatListTemplateBar');
+        if (bar) {
+          const isCurrentlyExpanded = bar.classList.contains('expanded') || bar.style.display === 'inline-flex';
+          if (isCurrentlyExpanded) {
+            bar.style.display = 'none';
+            bar.classList.remove('expanded');
+            nTplToggleBtn.setAttribute('aria-expanded', 'false');
+            nTplToggleBtn.classList.remove('active');
+            const chev = nTplToggleBtn.querySelector('.n-templates-chevron');
+            if (chev) chev.style.transform = 'rotate(0deg)';
+          } else {
+            bar.style.display = 'inline-flex';
+            bar.classList.add('expanded');
+            nTplToggleBtn.setAttribute('aria-expanded', 'true');
+            nTplToggleBtn.classList.add('active');
+            const chev = nTplToggleBtn.querySelector('.n-templates-chevron');
+            if (chev) chev.style.transform = 'rotate(180deg)';
+            try {
+              bar.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+            } catch (_) {}
+          }
         }
         return;
       }

@@ -1,3 +1,9 @@
+const NEUTRAL_PERSON_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><circle cx="64" cy="64" r="64" fill="%231e293b"/><circle cx="64" cy="46" r="24" fill="%2364748b"/><path d="M22 108c0-23.196 18.804-42 42-42s42 18.804 42 42z" fill="%2364748b"/></svg>`;
+const NEUTRAL_GROUP_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><circle cx="64" cy="64" r="64" fill="%231e293b"/><circle cx="48" cy="46" r="18" fill="%23475569"/><path d="M16 104c0-17.673 14.327-32 32-32s32 14.327 32 32z" fill="%23475569"/><circle cx="78" cy="42" r="19" fill="%2364748b"/><path d="M44 104c0-18.778 15.222-34 34-34s34 15.222 34 34z" fill="%2364748b"/></svg>`;
+if (typeof window !== "undefined") {
+  window.NEUTRAL_PERSON_AVATAR = NEUTRAL_PERSON_AVATAR;
+  window.NEUTRAL_GROUP_AVATAR = NEUTRAL_GROUP_AVATAR;
+}
 
 function getNeutralInitialsAvatar(name = 'Contact') {
   const clean = String(name || 'Contact').replace(/^@/, '').trim();
@@ -195,6 +201,7 @@ setupLinkedDevicesManager
 * =============================================================================
 */
 import "./chat2.js";
+import "./src/js/image-annotator.js";
 import "./src/js/nex-crypto-master-vault.js";
 import "./src/js/security-guard.js";
 import { fortressShield } from "./src/js/security-shield.js";
@@ -317,7 +324,7 @@ if (/^https?:\/\/|^\/|^\.\/|^data:image\//i.test(trimmed)) {
   }
 return /\.(jpg|jpeg|png|webp|svg|gif|avif)(\?.*)?$/i.test(trimmed);
 }
-function getValidImageSrc(url, fallback = 'logo.jpg') {
+function getValidImageSrc(url, fallback = (typeof window !== 'undefined' ? window.NEUTRAL_PERSON_AVATAR : 'logo.jpg')) {
   if (!url || typeof url !== 'string') return fallback;
   const trimmed = url.trim();
 if (trimmed.startsWith('blob:')) return fallback;
@@ -847,42 +854,12 @@ if (isAudio) {
 ? (Math.floor(durationNum / 60) + ':' + String(Math.floor(durationNum % 60)).padStart(2, '0'))
 : '0:05';
 attachmentHtml = `
-<div class="nex-voice-card-wrapper" data-audio-url="${escapeHtml(audioSrc)}" style="margin-bottom:6px;min-width:220px;max-width:100%;">
-<div class="custom-audio-player nex-waveform-player" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(15,23,42,0.78);border:1px solid rgba(255,255,255,0.12);border-radius:14px;height:48px;box-sizing:border-box;">
-<button type="button" class="waveform-play-btn" data-audio-src="${escapeHtml(audioSrc)}" aria-label="Play voice note" style="width:32px;height:32px;min-width:32px;border-radius:50%;border:none;background:linear-gradient(135deg,#00ff66,#00d4ff);color:#050a14;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
-<i class="fa-solid fa-play" style="font-size:11px;margin-left:2px;"></i>
-</button>
-<div class="waveform-info" style="display:flex;flex-direction:column;flex:1;min-width:0;gap:2px;justify-content:center;">
-<div class="waveform-bars-container" style="height:18px;display:flex;align-items:center;gap:2px;cursor:pointer;">
-<div class="waveform-bars" style="display:flex;align-items:center;gap:2px;height:100%;">
-<span style="width:2px;height:6px;background:#00ff66;border-radius:1px;"></span>
-<span style="width:2px;height:12px;background:#00ff66;border-radius:1px;"></span>
-<span style="width:2px;height:16px;background:#00ff66;border-radius:1px;"></span>
-<span style="width:2px;height:10px;background:#00ff66;border-radius:1px;"></span>
-<span style="width:2px;height:15px;background:#00f2fe;border-radius:1px;"></span>
-<span style="width:2px;height:8px;background:#00ff66;border-radius:1px;"></span>
-<span style="width:2px;height:14px;background:#00ff66;border-radius:1px;"></span>
-<span style="width:2px;height:11px;background:#00f2fe;border-radius:1px;"></span>
-<span style="width:2px;height:13px;background:#00ff66;border-radius:1px;"></span>
-<span style="width:2px;height:7px;background:#00ff66;border-radius:1px;"></span>
-<span style="width:2px;height:12px;background:#00ff66;border-radius:1px;"></span>
-<span style="width:2px;height:9px;background:#00f2fe;border-radius:1px;"></span>
-</div>
-</div>
-<div class="waveform-time-row" style="display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#94a3b8;line-height:1;">
-<span class="waveform-time">0:00 / ${escapeHtml(durationDisplay)}</span>
-<button type="button" class="nex-transcribe-btn" style="background:transparent;border:none;color:#00f3ff;font-size:10px;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:3px;">
-<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Transcribe</span>
-</button>
-</div>
-</div>
-</div>
+<audio class="nex-raw-audio" src="${escapeHtml(audioSrc)}" preload="metadata" style="display:none;"></audio>
 ${hasTranscript ? `
 <div class="voice-note-transcript-card" style="margin-top:6px;padding:6px 9px;background:rgba(0,243,255,0.08);border-left:2px solid #00f3ff;border-radius:5px;font-size:11.5px;color:#f1f5f9;line-height:1.35;">
 <div style="font-size:9.5px;font-weight:700;color:#00f3ff;text-transform:uppercase;margin-bottom:2px;"><i class="fa-solid fa-language"></i> Voice Note Subtitle</div>
 <div>${escapeHtml(transcriptText)}</div>
-</div>` : ''}
-</div>`;
+</div>` : ''}`;
       } else {
         attachmentHtml = '<div class="cached-attachment-preview" style="display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:12px;color:#cbd5e1;background:rgba(0,0,0,0.22);padding:6px 10px;border-radius:8px;"><i class="fa-solid fa-paperclip" style="color:#00f3ff;"></i><span>' + escapeHtml(att.fileName || 'Attachment') + '</span></div>';
       }
@@ -1329,7 +1306,7 @@ const indicator = document.getElementById('typingIndicator');
   if (!indicator) return;
 isOtherPersonTyping = true;
 const chatAvatarImg = document.getElementById('chatAvatar') || document.querySelector('.chat-header-avatar');
-  const resolvedAvatar = avatarUrl || (chatAvatarImg ? chatAvatarImg.src : '') || 'logo.jpg';
+  const resolvedAvatar = avatarUrl || (chatAvatarImg ? chatAvatarImg.src : '') || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
 let cleanText = label || 'typing...';
   if (cleanText.endsWith(' is typing...')) {
     cleanText = cleanText.replace(' is typing...', ' typing...');
@@ -1349,7 +1326,7 @@ if (action === 'recording_audio') {
     iconOrHashes = `<i class="fa-solid fa-file-arrow-up" style="color: #00ff66; margin-right: 6px; font-size: 13px; animation: nexCyanPulse 1.5s infinite ease-in-out;"></i>`;
   }
 indicator.innerHTML = `
-    <img class="typing-avatar" src="${resolvedAvatar}" alt="User" onerror="this.src='logo.jpg'">
+    <img class="typing-avatar" src="${resolvedAvatar}" alt="User" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')">
     ${iconOrHashes}
     <span class="typing-text nex-typing-name-shimmer">${escapeHtml(cleanText)}</span>
   `;
@@ -1815,7 +1792,7 @@ notif.onclick = function() {
           window.focus();
 this.close();
 if (chatId && typeof openChat === 'function') {
-            openChat(chatId, title || 'Contact', 'logo.jpg', 'direct');
+            openChat(chatId, title || 'Contact', (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg'), 'direct');
           }
         };
       } catch (_) {}
@@ -1827,7 +1804,7 @@ notif.onclick = function() {
         window.focus();
 this.close();
 if (chatId && typeof openChat === 'function') {
-          openChat(chatId, title || 'Contact', 'logo.jpg', 'direct');
+          openChat(chatId, title || 'Contact', (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg'), 'direct');
         }
       };
     } catch (_) {}
@@ -1874,7 +1851,7 @@ toast.innerHTML = `
 toast.onclick = () => {
     toast.remove();
 if (typeof openChat === 'function') {
-      openChat(chatId, senderName || 'Contact', 'logo.jpg', 'direct');
+      openChat(chatId, senderName || 'Contact', (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg'), 'direct');
     }
   };
 container.appendChild(toast);
@@ -3281,7 +3258,7 @@ const infoNameEl = document.getElementById('infoName');
     const infoPicEl = document.getElementById('infoPic');
     const infoMemberCountEl = document.getElementById('infoMemberCount');
 if (infoNameEl) infoNameEl.textContent = groupData.name || 'Group';
-if (infoPicEl) infoPicEl.src = infoPic || 'logo.jpg';
+if (infoPicEl) infoPicEl.src = infoPic || (window.NEUTRAL_GROUP_AVATAR || 'logo.jpg');
 if (infoMemberCountEl) infoMemberCountEl.textContent = `Group - ${members.length} members`;
 try {
       const messagesQuery = query(
@@ -3605,7 +3582,7 @@ const infoNameEl = document.getElementById('infoName');
     const infoPicEl = document.getElementById('infoPic');
     const infoMemberCountEl = document.getElementById('infoMemberCount');
 if (infoNameEl) infoNameEl.textContent = userData.username || userData.name || 'User';
-if (infoPicEl) infoPicEl.src = userData.profilePic || userData.profilePicUrl || 'logo.jpg';
+if (infoPicEl) infoPicEl.src = userData.profilePic || userData.profilePicUrl || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
 if (infoMemberCountEl) infoMemberCountEl.textContent = userData.email || 'User Profile';
 const membersListEl = document.getElementById('membersList');
 if (membersListEl) membersListEl.style.display = 'none';
@@ -3785,7 +3762,7 @@ window.openUserProfileModal = function openUserProfileModal(targetUid, seedData 
       modal.style.display = 'none';
       const resolved = (uid && _nexQuickProfileCache.get(uid)) || {};
       const finalName = resolved.displayName || resolved.username || initialName;
-      const finalAvatar = resolved.avatar || initialAvatar || 'logo.jpg';
+      const finalAvatar = resolved.avatar || initialAvatar || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
       if (typeof openChat === 'function') openChat(uid, finalName, finalAvatar, 'direct');
     };
   }
@@ -4153,7 +4130,7 @@ async function openTransferOwnershipModal(targetId, targetType = 'group') {
       uid: u.uid,
       name: u.displayName || u.name || u.username || 'User',
       username: u.username ? `@${String(u.username).replace(/^@/, '')}` : '',
-      avatar: u.profilePic || u.profilePicUrl || 'logo.jpg',
+      avatar: u.profilePic || u.profilePicUrl || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg'),
       isAdmin: adminUids.includes(u.uid)
     }));
 
@@ -4191,7 +4168,7 @@ function renderTransferRecipientsList(filter = '') {
     html += `
       <div class="transfer-recipient-row" data-uid="${r.uid}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: ${isSelected ? 'rgba(255, 215, 0, 0.12)' : 'rgba(255, 255, 255, 0.03)'}; border: 1px solid ${isSelected ? '#ffd700' : 'rgba(255, 255, 255, 0.06)'}; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;" onclick="window.selectTransferRecipient('${r.uid}')">
         <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-          <img src="${r.avatar}" onerror="this.src='logo.jpg'" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+          <img src="${r.avatar}" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
           <div style="min-width: 0;">
             <div style="display: flex; align-items: center; gap: 6px;">
               <span style="color: #fff; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(r.name)}</span>
@@ -6385,10 +6362,10 @@ const isGroup = !!item.isGroup;
     const handle = isGroup
 ? `Group · ${item.members?.length || 0} members`
 : (isAi ? 'Neural Assistant · Online' : (item.username ? `@${escapeHtml(item.username.replace(/^@+/, ''))}` : (item.email ? escapeHtml(item.email.split('@')[0]) : 'User')));
-    const profilePic = item.profilePic || item.profilePicUrl || item.avatar || (isGroup ? 'logo.jpg' : (isAi ? 'chronex-ai.jpg' : '/favicons/favicon.ico'));
+    const profilePic = item.profilePic || item.profilePicUrl || item.avatar || (isGroup ? (window.NEUTRAL_GROUP_AVATAR || 'logo.jpg') : (isAi ? 'chronex-ai.jpg' : (window.NEUTRAL_PERSON_AVATAR || '/favicons/favicon.ico')));
     const isOnline = item.online === true || isAi;
 const avatarHTML = (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.')))
-? `<img src="${escapeHtml(profilePic)}" alt="${displayName}" class="search-card-avatar" onerror="this.src='logo.jpg'">`
+? `<img src="${escapeHtml(profilePic)}" alt="${displayName}" class="search-card-avatar" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')">`
 : `<div class="search-card-avatar-fallback ${isGroup ? 'is-group' : ''}">${escapeHtml(displayName.charAt(0).toUpperCase())}</div>`;
 const statusDotClass = isGroup ? 'status-group' : (isOnline ? 'status-online' : 'status-offline');
     const isSavedContact = Array.isArray(window.myContacts) && window.myContacts.includes(targetUid);
@@ -7867,272 +7844,48 @@ window.runVoiceAISummary = function(options) {
 function renderUnifiedVoiceNotePlayer(attachment, parentMsg = null, isOwn = false) {
   window.renderUnifiedVoiceNotePlayer = renderUnifiedVoiceNotePlayer;
   const container = document.createElement("div");
-container.className = "message-attachment-container nex-unified-voice-wrapper";
-container.style.cssText = "margin-bottom: 6px; border-radius: 14px; overflow: hidden; max-width: 100%; min-width: 240px;";
-const url = attachment.downloadURL || attachment.url || '';
-  const durationVal = parseFloat(attachment.duration) || 0;
-  const msgId = (parentMsg && (parentMsg.docId || parentMsg.id || parentMsg.clientMsgId)) || ('vn_' + Date.now());
-container.dataset.msgId = msgId;
-container.dataset.audioUrl = url;
-if (attachment.transcript) {
+  container.className = "message-attachment-container";
+  container.style.cssText = "margin-bottom: 2px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+  const url = attachment.downloadURL || attachment.url || "";
+  const msgId = (parentMsg && (parentMsg.docId || parentMsg.id || parentMsg.clientMsgId)) || ("vn_" + Date.now());
+  container.dataset.msgId = msgId;
+  container.dataset.audioUrl = url;
+  if (attachment.transcript) {
     container.dataset.transcript = attachment.transcript;
   }
-// EXACTLY ONE audio element
-const audio = document.createElement("audio");
-audio.preload = "metadata";
-audio.src = url;
-audio.preservesPitch = true;
-if ('webkitPreservesPitch' in audio) audio.webkitPreservesPitch = true;
-if ('mozPreservesPitch' in audio) audio.mozPreservesPitch = true;
-audio.style.display = "none";
-container.appendChild(audio);
-// Stegano auto-decrypt if encoded
-const isStegano = attachment.isSteganoVoice || (attachment.fileName && (attachment.fileName.startsWith('QUANTUM_STEG_') || attachment.fileName.includes('_STEG_'))) || (typeof url === 'string' && url.includes('QUANTUM_STEG'));
-if (isStegano && typeof window.decodeSteganoAudio === 'function') {
-    window.decodeSteganoAudio(url, '').then(res => {
-      if (res && res.decryptedBlob && res.coverType !== 'direct') {
+  // EXACTLY ONE audio element - raw audio for waveform player attachment
+  const audio = document.createElement("audio");
+  audio.className = "nex-raw-audio";
+  audio.preload = "metadata";
+  audio.src = url;
+  audio.preservesPitch = true;
+  if ("webkitPreservesPitch" in audio) audio.webkitPreservesPitch = true;
+  if ("mozPreservesPitch" in audio) audio.mozPreservesPitch = true;
+  audio.style.display = "none";
+  container.appendChild(audio);
+
+  // Stegano auto-decrypt if encoded
+  const isStegano = attachment.isSteganoVoice || (attachment.fileName && (attachment.fileName.startsWith("QUANTUM_STEG_") || attachment.fileName.includes("_STEG_"))) || (typeof url === "string" && url.includes("QUANTUM_STEG"));
+  if (isStegano && typeof window.decodeSteganoAudio === "function") {
+    window.decodeSteganoAudio(url, "").then(res => {
+      if (res && res.decryptedBlob && res.coverType !== "direct") {
         audio.src = URL.createObjectURL(res.decryptedBlob);
       }
     }).catch(() => {});
   }
-// Main Player Card (Obsidian glassmorphism)
-const playerCard = document.createElement("div");
-playerCard.className = "custom-audio-player nex-waveform-player";
-playerCard.style.cssText = "display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(15,23,42,0.85);border:1px solid rgba(0,255,102,0.22);border-radius:14px;box-sizing:border-box;box-shadow:0 4px 14px rgba(0,0,0,0.35);";
-// Circular Play/Pause button
-const playBtn = document.createElement("button");
-playBtn.type = "button";
-playBtn.className = "waveform-play-btn";
-playBtn.setAttribute("aria-label", "Play voice note");
-playBtn.style.cssText = "width:34px;height:34px;min-width:34px;border-radius:50%;border:none;background:linear-gradient(135deg,#00ff66,#00d4ff);color:#050a14;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.15s ease,box-shadow 0.15s ease;box-shadow:0 0 10px rgba(0,255,102,0.35);";
-playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
-// Middle section: Waveform track + Time/Meta Row
-const midSection = document.createElement("div");
-midSection.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:0;gap:4px;justify-content:center;";
-// Interactive 26-Bar Waveform
-const waveTrack = document.createElement("div");
-waveTrack.className = "waveform-bars-container";
-waveTrack.style.cssText = "height:20px;display:flex;align-items:center;gap:2.5px;cursor:pointer;padding:2px 0;";
-const barHeights = [5, 9, 14, 8, 12, 17, 11, 7, 15, 18, 13, 9, 14, 18, 14, 10, 8, 12, 16, 17, 12, 9, 13, 10, 7, 5];
-  const barEls = [];
-barHeights.forEach(h => {
-    const bar = document.createElement("span");
-bar.style.cssText = `width:2.5px;height:${h}px;background:rgba(255,255,255,0.45);border-radius:1px;transition:height 0.15s ease, background 0.15s ease;`;
-waveTrack.appendChild(bar);
-barEls.push(bar);
-  });
-// Time & Status row
-const metaRow = document.createElement("div");
-metaRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#94a3b8;line-height:1;gap:6px;";
-const timeLabel = document.createElement("span");
-timeLabel.className = "waveform-time";
-timeLabel.style.cssText = "font-family:monospace;font-size:10.5px;color:#cbd5e1;white-space:nowrap;";
-const formatSec = (s) => {
-    const n = parseFloat(s) || 0;
-    const m = Math.floor(n / 60);
-    const sec = Math.floor(n % 60);
-return `${m}:${sec < 10 ? '0' : ''}${sec}`;
-  };
-let totalDuration = durationVal > 0 ? durationVal : 0;
-  const updateTimer = (cur) => {
-    const c = cur || audio.currentTime || 0;
-    const tot = (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : totalDuration;
-timeLabel.textContent = `${formatSec(c)} / ${formatSec(tot > 0 ? tot : 5)}`;
-  };
-updateTimer(0);
-audio.addEventListener('loadedmetadata', () => {
-    if (isFinite(audio.duration) && audio.duration > 0) {
-      totalDuration = audio.duration;
-updateTimer();
-    }
-  });
-audio.addEventListener('durationchange', () => {
-    if (isFinite(audio.duration) && audio.duration > 0) {
-      totalDuration = audio.duration;
-updateTimer();
-    }
-  });
-// Speed Pill (1.0x / 1.5x / 2.0x)
-const speedBtn = document.createElement("button");
-speedBtn.type = "button";
-speedBtn.className = "voice-speed-pill";
-speedBtn.textContent = "1.0x";
-speedBtn.style.cssText = "background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#cbd5e1;font-size:9.5px;font-weight:700;padding:2px 5px;border-radius:4px;cursor:pointer;";
-  const speeds = [1.0, 1.5, 2.0];
-  let speedIdx = 0;
-speedBtn.onclick = (e) => {
-    e.stopPropagation();
-speedIdx = (speedIdx + 1) % speeds.length;
-    const nextSpeed = speeds[speedIdx];
-audio.playbackRate = nextSpeed;
-speedBtn.textContent = `${nextSpeed.toFixed(1)}x`;
-speedBtn.style.color = nextSpeed === 1.0 ? '#cbd5e1' : (nextSpeed === 1.5 ? '#00f2fe' : '#ffd700');
-  };
-// Play/Pause logic
-playBtn.onclick = (e) => {
-    e.stopPropagation();
-if (audio.paused) {
-      document.querySelectorAll('audio').forEach(a => {
-        if (a !== audio && !a.paused) a.pause();
-      });
-audio.play().then(() => {
-        playBtn.innerHTML = '<i class="fa-solid fa-pause" style="font-size:12px;"></i>';
-playBtn.style.boxShadow = '0 0 14px #00ff66';
-      }).catch(err => console.warn('Play error:', err));
-    } else {
-      audio.pause();
-playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
-playBtn.style.boxShadow = '0 0 10px rgba(0,255,102,0.35)';
-    }
-  };
-audio.addEventListener('play', () => {
-    playBtn.innerHTML = '<i class="fa-solid fa-pause" style="font-size:12px;"></i>';
-  });
-  let lastRenderedWaveIndex = -1;
-  const resetBarsToIdle = () => {
-    lastRenderedWaveIndex = -1;
-    for (let i = 0; i < barEls.length; i++) {
-      barEls[i].style.background = 'rgba(255,255,255,0.42)';
-      barEls[i].style.transform = 'scaleY(1)';
-    }
-  };
-  audio.addEventListener('pause', () => {
-    playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
-    resetBarsToIdle();
-  });
-  audio.addEventListener('ended', () => {
-    playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
-    updateTimer(0);
-    resetBarsToIdle();
-  });
-  audio.addEventListener('timeupdate', () => {
-    updateTimer();
-    const cur = audio.currentTime;
-    const tot = (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : (totalDuration || 1);
-    const progress = Math.min(1, Math.max(0, cur / tot));
-    const activeIndex = Math.floor(progress * barEls.length);
-    if (activeIndex === lastRenderedWaveIndex) return;
-    const startIdx = lastRenderedWaveIndex >= 0 ? Math.min(lastRenderedWaveIndex, activeIndex) : 0;
-    const endIdx = Math.max(lastRenderedWaveIndex, activeIndex);
-    for (let i = Math.max(0, startIdx); i <= Math.min(barEls.length - 1, endIdx); i++) {
-      barEls[i].style.background = (i <= activeIndex) ? '#00ff66' : 'rgba(255,255,255,0.35)';
-    }
-    if (lastRenderedWaveIndex >= 0 && lastRenderedWaveIndex < barEls.length) {
-      barEls[lastRenderedWaveIndex].style.transform = 'scaleY(1)';
-    }
-    if (activeIndex >= 0 && activeIndex < barEls.length && !audio.paused) {
-      barEls[activeIndex].style.transform = 'scaleY(1.22)';
-    }
-    lastRenderedWaveIndex = activeIndex;
-  });
-// Clicking waveform to seek
-waveTrack.onclick = (e) => {
-    e.stopPropagation();
-    const rect = waveTrack.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const pct = Math.max(0, Math.min(1, clickX / rect.width));
-    const tot = (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : totalDuration;
-if (tot > 0) {
-      audio.currentTime = pct * tot;
-updateTimer();
-    }
-  };
-  const aiToolsToggleBtn = document.createElement("button");
-  aiToolsToggleBtn.type = "button";
-  aiToolsToggleBtn.className = "voice-speed-pill nex-voice-ai-toggle";
-  aiToolsToggleBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles" style="font-size:9px;color:#00f2fe;"></i> <span>AI</span>';
-  aiToolsToggleBtn.style.cssText = "background:rgba(0,242,254,0.1);border:1px solid rgba(0,242,254,0.28);color:#00f2fe;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;";
-metaRow.appendChild(timeLabel);
-metaRow.appendChild(speedBtn);
-metaRow.appendChild(aiToolsToggleBtn);
-midSection.appendChild(waveTrack);
-midSection.appendChild(metaRow);
-playerCard.appendChild(playBtn);
-playerCard.appendChild(midSection);
-container.appendChild(playerCard);
-// Action Row: Transcribe, Translate, AI Summary (collapsed by default to keep chat fast & clean)
-const actionRow = document.createElement("div");
-actionRow.className = "voice-actions-row";
-actionRow.style.cssText = "display:none;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;";
-  aiToolsToggleBtn.onclick = (e) => {
-    e.stopPropagation();
-    const opening = actionRow.style.display === 'none';
-    actionRow.style.display = opening ? 'flex' : 'none';
-    if (opening && window.NexChapteredVoice && typeof window.NexChapteredVoice.inspectAndMountChapters === 'function') {
-      window.NexChapteredVoice.inspectAndMountChapters(container);
-    }
-  };
-const transcribeBtn = document.createElement("button");
-transcribeBtn.type = "button";
-transcribeBtn.className = "nex-action-pill btn-voice-transcribe";
-transcribeBtn.style.cssText = "background:rgba(0,242,254,0.12);border:1px solid rgba(0,242,254,0.3);color:#00f2fe;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.15s ease;";
-transcribeBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Transcribe</span>';
-const translateBtn = document.createElement("button");
-translateBtn.type = "button";
-translateBtn.className = "nex-action-pill btn-voice-translate";
-translateBtn.style.cssText = "background:rgba(0,255,102,0.12);border:1px solid rgba(0,255,102,0.3);color:#00ff66;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.15s ease;";
-translateBtn.innerHTML = '<i class="fa-solid fa-language"></i> <span>Translate</span>';
-const summaryBtn = document.createElement("button");
-summaryBtn.type = "button";
-summaryBtn.className = "nex-action-pill btn-voice-summary";
-summaryBtn.style.cssText = "background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);color:#ffd700;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.15s ease;";
-summaryBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>AI Summary</span>';
-actionRow.appendChild(transcribeBtn);
-actionRow.appendChild(translateBtn);
-actionRow.appendChild(summaryBtn);
-container.appendChild(actionRow);
-// Subtitle / Transcription Card Area (INSIDE SAME BUBBLE)
-const resultCard = document.createElement("div");
-resultCard.className = "voice-note-transcript-card";
-resultCard.style.cssText = "display:none;margin-top:6px;padding:7px 10px;background:rgba(0,243,255,0.08);border-left:2.5px solid #00f3ff;border-radius:6px;font-size:12px;color:#f1f5f9;line-height:1.4;";
-container.appendChild(resultCard);
-transcribeBtn.onclick = (e) => {
-    e.stopPropagation();
-window.runBestEffortVoiceTranscribeAndTranslate({
-      audioUrl: url,
-audioEl: audio,
-msgId: msgId,
-container: container,
-resultCard: resultCard,
-actionBtn: transcribeBtn,
-mode: 'transcribe',
-targetLang: localStorage.getItem('nex_auto_translate_target_lang') || 'en'
-    });
-  };
-translateBtn.onclick = (e) => {
-    e.stopPropagation();
-window.runBestEffortVoiceTranscribeAndTranslate({
-      audioUrl: url,
-audioEl: audio,
-msgId: msgId,
-container: container,
-resultCard: resultCard,
-actionBtn: translateBtn,
-mode: 'translate',
-targetLang: localStorage.getItem('nex_auto_translate_target_lang') || 'en'
-    });
-  };
-summaryBtn.onclick = (e) => {
-    e.stopPropagation();
-window.runVoiceAISummary({
-      audioUrl: url,
-audioEl: audio,
-msgId: msgId,
-container: container,
-resultCard: resultCard,
-actionBtn: summaryBtn
-    });
-  };
-// If already has pre-recorded transcript, render immediately inside same card
-const hasTranscript = Boolean((attachment.translatedText && attachment.translatedText.trim()) || (attachment.transcript && attachment.transcript.trim()));
-if (hasTranscript) {
+
+  // Pre-recorded transcript subtitle card if available
+  const hasTranscript = Boolean((attachment.translatedText && attachment.translatedText.trim()) || (attachment.transcript && attachment.transcript.trim()));
+  if (hasTranscript) {
     const mainText = attachment.translatedText || attachment.transcript;
-    const origText = (attachment.translatedText && attachment.transcript && attachment.translatedText !== attachment.transcript)
-? attachment.transcript
-: null;
-renderVoiceCardResult(resultCard, mainText, origText, attachment.targetLang || 'en', false);
+    const resultCard = document.createElement("div");
+    resultCard.className = "voice-note-transcript-card";
+    resultCard.style.cssText = "margin-top:4px;margin-bottom:4px;padding:6px 9px;background:rgba(0,243,255,0.08);border-left:2px solid #00f3ff;border-radius:5px;font-size:11.5px;color:#f1f5f9;line-height:1.35;";
+    resultCard.innerHTML = `<div style="font-size:9.5px;font-weight:700;color:#00f3ff;text-transform:uppercase;margin-bottom:2px;"><i class="fa-solid fa-language"></i> Voice Note Subtitle</div><div>${escapeHtml(mainText)}</div>`;
+    container.appendChild(resultCard);
   }
-return container;
+
+  return container;
 }
 function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
   if (!attachment || !isRenderableAttachment(attachment)) return null;
@@ -8635,6 +8388,58 @@ tray.appendChild(badge);
 }
 window.renderMessageReactionsTray = renderMessageReactionsTray;
 // Inline 1-Click Babel Neural Translation for Any Message Bubble
+
+function extractCleanMessageText(bubble, m) {
+  if (m && typeof m.text === 'string' && m.text.trim()) {
+    return m.text.trim();
+  }
+  if (!bubble) return '';
+  const textEl = bubble.querySelector('.message-text-content, .message-text, .nex-msg-text, .ai-body-content') || bubble.querySelector('.message-content') || bubble;
+  const clone = textEl.cloneNode(true);
+  clone.querySelectorAll(`
+    .message-time-row, .message-time, .message-timestamp-row, .time-span, .message-time-text, .chat-time, .delivery-status,
+    .media-timestamp-overlay, .e2ee-secure-badge, .message-edited-badge, .tick-sent, .tick-delivered, .tick-read, .tick-pending,
+    .message-reactions-tray, .message-reaction-badge, .reaction-pill, .reaction-count, .reaction-quick-bar, .message-hover-actions,
+    .msg-translate-btn, .nex-msg-translate-btn, .inline-msg-translation-card, .nex-translated-box,
+    .reply-quote, .message-reply-preview, .nex-voice-card-wrapper, .custom-audio-player, .nex-waveform-player,
+    .voice-actions-row, .voice-note-transcript-card, .cached-attachment-preview, audio, video, img, button, script, style
+  `).forEach(el => el.remove());
+  let text = (clone.textContent || '').trim();
+  text = text.replace(/\s*\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?\s*(?:\d+)?\s*$/i, '').trim();
+  return text;
+}
+window.extractCleanMessageText = extractCleanMessageText;
+
+function sanitizeTranslationResult(text, rawOriginalText, targetLang) {
+  if (!text || typeof text !== 'string') return rawOriginalText;
+  const clean = text.trim();
+  const upper = clean.toUpperCase();
+  if (
+    upper.includes('PLEASE SELECT TWO DISTINCT') ||
+    upper.includes('MYMEMORY WARNING') ||
+    upper.includes('INVALID LANGPAIR')
+  ) {
+    return rawOriginalText;
+  }
+  return clean;
+}
+window.sanitizeTranslationResult = sanitizeTranslationResult;
+
+// Intercept inline nex-msg-translate-btn clicks to use clean text extraction
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', (ev) => {
+    const btn = ev.target && ev.target.closest ? ev.target.closest('.nex-msg-translate-btn') : null;
+    if (btn) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      const bubble = btn.closest('.message-bubble');
+      if (bubble) {
+        handleInlineMessageTranslate(bubble, null);
+      }
+    }
+  }, true);
+}
+
 async function handleInlineMessageTranslate(bubble, m) {
   if (!bubble) return;
   let card = bubble.querySelector('.inline-msg-translation-card');
@@ -8656,7 +8461,7 @@ if (!rawText) {
 return;
     }
   } else {
-    rawText = m.text || (bubble.querySelector('.message-text-content, .message-text, .nex-msg-text')?.textContent || '').trim();
+    rawText = extractCleanMessageText(bubble, m);
 if (!rawText) {
       if (typeof showNotif === 'function') showNotif("No translatable text in this message.", "info");
 return;
@@ -8729,7 +8534,8 @@ if (syncMatch) {
         if (currentReqId !== activeTranslateReqId) return;
 currentTranslatedText = syncMatch;
 if (labelEl) labelEl.textContent = `Translated (${target.toUpperCase()})`;
-if (contentEl) contentEl.textContent = currentTranslatedText;
+currentTranslatedText = sanitizeTranslationResult(currentTranslatedText, rawText, target);
+      if (contentEl) contentEl.textContent = currentTranslatedText;
 return;
       }
     }
@@ -9464,7 +9270,7 @@ div.className = "message-wrapper received ai-message-bubble-wrapper";
 div.style.cssText = "display: flex; justify-content: flex-start; align-items: flex-end; margin: 10px 0; padding: 0 12px; gap: 8px; position: relative; width: 100%; box-sizing: border-box; clear: both; content-visibility: visible !important; contain: none !important;";
 const voicePlayerMarkup = window.ChronexxVoiceEngine ? window.ChronexxVoiceEngine.renderVoicePlayerBar(response) : '';
 div.innerHTML = `
-<img src="chronex-ai.jpg" class="message-avatar chronex-avatar" onerror="this.src='logo.jpg';" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff66; margin-bottom: 2px; flex-shrink: 0;" alt="ChronEX AI">
+<img src="chronex-ai.jpg" class="message-avatar chronex-avatar" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg');" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff66; margin-bottom: 2px; flex-shrink: 0;" alt="ChronEX AI">
 <div class="message-bubble chronex-ai-bubble" style="background: #111722; color: #f0f6fc; padding: 14px 18px; border-radius: 18px 18px 18px 4px; max-width: 85%; word-wrap: break-word; border: 1px solid rgba(0, 255, 102, 0.28); font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.6; box-shadow: 0 8px 24px rgba(0,0,0,0.45);">
 <div style="font-size: 11px; font-weight: 700; color: #00ff66; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between;">
 <span><i class="fa-solid fa-bolt" style="font-size: 10px; margin-right: 4px;"></i> CHRONEX AI • PRO</span>
@@ -11013,7 +10819,7 @@ if (activeChatAvatar) {
         activeChatAvatar.src = profilePic;
 activeChatAvatar.style.display = 'block';
       } else {
-        activeChatAvatar.src = 'logo.jpg';
+        activeChatAvatar.src = (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
       }
 activeChatAvatar.style.cursor = 'pointer';
 activeChatAvatar.onclick = (e) => {
@@ -11063,7 +10869,7 @@ const chatUserName = document.getElementById("chatUserName");
 if (chatUserName) chatUserName.textContent = username;
 if (chatUserStatus) chatUserStatus.textContent = status;
 if (chatUserAvatar) {
-      chatUserAvatar.src = profilePic || "logo.jpg";
+      chatUserAvatar.src = profilePic || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
 chatUserAvatar.style.cursor = 'pointer';
 chatUserAvatar.onclick = (e) => {
         e.stopPropagation();
@@ -11419,7 +11225,7 @@ if (chatProfilePicEl) {
     if (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.'))) {
       chatProfilePicEl.src = profilePic;
     } else {
-      chatProfilePicEl.src = 'logo.jpg';
+      chatProfilePicEl.src = (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
     }
   }
 const activeChatName = document.getElementById("activeChatName");
@@ -11437,7 +11243,7 @@ if (infoPicEl) {
     if (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.'))) {
       infoPicEl.src = profilePic;
     } else {
-      infoPicEl.src = 'logo.jpg';
+      infoPicEl.src = (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
     }
   }
 const cachedPartner = (window.loadedContactData && window.loadedContactData.find(c => c.uid === uid)) ||
@@ -13440,7 +13246,69 @@ else if (isArchive) typeLabel = "Folder Archive";
 else if (isPdf) typeLabel = "PDF";
 else if (isDoc) typeLabel = "Document";
 else if (isSheet) typeLabel = "Spreadsheet";
-badgeEl.textContent = `${typeLabel} • ${sizeText}`;
+
+    badgeEl.textContent = `${typeLabel} • ${sizeText}`;
+
+    // Telegram/WhatsApp-Style Image Pen Annotation Editor Button
+    let penBtn = document.getElementById("btnAnnotateImageAttachment");
+    if (isImg) {
+      if (!penBtn) {
+        penBtn = document.createElement("button");
+        penBtn.type = "button";
+        penBtn.id = "btnAnnotateImageAttachment";
+        penBtn.className = "annotate-attachment-btn";
+        penBtn.title = "Annotate / Draw on Image";
+        penBtn.style.cssText = "background: rgba(0, 242, 255, 0.12); border: 1px solid rgba(0, 242, 255, 0.35); color: #00f2ff; width: 34px; height: 34px; min-width: 34px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; margin-right: 6px; font-size: 13px; transition: all 0.15s ease;";
+        penBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+        const removeBtn = document.getElementById("remove-attachment");
+        if (removeBtn && removeBtn.parentNode) {
+          removeBtn.parentNode.insertBefore(penBtn, removeBtn);
+        } else {
+          preview.querySelector(".attachment-item")?.appendChild(penBtn);
+        }
+        penBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!selectedFile && !currentAttachmentPreviewUrl) return;
+          if (window.NexImageAnnotator && typeof window.NexImageAnnotator.open === 'function') {
+            window.NexImageAnnotator.open(selectedFile || currentAttachmentPreviewUrl, (annotatedBlob, annotatedDataUrl) => {
+              const origName = selectedFile?.name || 'photo.jpg';
+              const baseName = origName.replace(/\.[^/.]+$/, '');
+              const isPng = annotatedBlob.type?.includes('png');
+              const newExt = isPng ? 'png' : 'jpg';
+              const newFile = new File([annotatedBlob], `${baseName}_annotated.${newExt}`, {
+                type: annotatedBlob.type || 'image/jpeg',
+                lastModified: Date.now()
+              });
+              selectedFile = newFile;
+              if (currentAttachmentPreviewUrl) {
+                URL.revokeObjectURL(currentAttachmentPreviewUrl);
+              }
+              currentAttachmentPreviewUrl = URL.createObjectURL(newFile);
+              if (thumbEl) {
+                thumbEl.innerHTML = `<img src="${currentAttachmentPreviewUrl}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(0, 240, 118, 0.4);" alt="Preview">`;
+                thumbEl.style.display = "flex";
+              }
+              if (nameEl) {
+                nameEl.innerHTML = `<i class="fa-solid fa-paperclip" style="color: var(--accent-emerald);"></i> ${escape(newFile.name)}`;
+              }
+              if (badgeEl) {
+                const sizeMB = (newFile.size / (1024 * 1024)).toFixed(2);
+                const sizeText = newFile.size >= 1048576 ? `${sizeMB} MB` : `${Math.round(newFile.size / 1024)} KB`;
+                badgeEl.textContent = `Annotated Photo • ${sizeText}`;
+              }
+              if (typeof showNotif === 'function') showNotif("Image annotated successfully!", "success", 1500);
+              try { document.dispatchEvent(new CustomEvent('selectedFileChanged')); } catch (e) {}
+            });
+          }
+        });
+      } else {
+        penBtn.style.display = "inline-flex";
+      }
+    } else {
+      if (penBtn) penBtn.style.display = "none";
+    }
+
   }
 preview.style.display = "block";
 }
@@ -13464,6 +13332,8 @@ const fileInput = document.getElementById("file-input");
 if (fileInput) fileInput.value = "";
 const preview = document.getElementById("attachment-preview");
 if (preview) preview.style.display = "none";
+const penBtn = document.getElementById("btnAnnotateImageAttachment");
+if (penBtn) penBtn.style.display = "none";
 if (notifyUser && hadAttachment) {
   const removedBanner = document.getElementById('attachmentRemovedBanner');
   if (removedBanner) {
@@ -16389,19 +16259,19 @@ return;
 let rowsHtml = '';
 for (const blockedId of blockedIds) {
       let displayName = 'Unknown User';
-      let avatarUrl = 'logo.jpg';
+      let avatarUrl = (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
 try {
         const targetDoc = await getDoc(doc(db, "users", blockedId));
 if (targetDoc.exists()) {
           const targetData = targetDoc.data();
 displayName = targetData.username || targetData.name || targetData.email || 'User';
-avatarUrl = targetData.profilePicUrl || 'logo.jpg';
+avatarUrl = targetData.profilePicUrl || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
         }
       } catch (_) {}
 rowsHtml += `
 <div class="blocked-user-item">
 <div class="blocked-user-meta">
-<img src="${escape(avatarUrl)}" class="blocked-user-avatar" onerror="this.src='logo.jpg'">
+<img src="${escape(avatarUrl)}" class="blocked-user-avatar" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')">
 <div class="blocked-user-info">
 <span class="blocked-user-name">${escape(displayName)}</span>
 <span class="blocked-user-uid">ID: ${escape(blockedId.slice(0, 10))}...</span>
@@ -19168,12 +19038,12 @@ if (user.blocked?.includes(myUID) || user.blockedUsers?.includes(myUID)) return;
 const rawUsername = user.username ? `@${String(user.username).replace(/^@/, '')}` : (user.displayName || user.name || user.email || 'User');
       const safeUsername = String(rawUsername).replace(/"/g, '&quot;');
       const displayName = user.displayName || user.name || user.username || 'User';
-      const avatarUrl = user.profilePic || user.profilePicUrl || 'logo.jpg';
+      const avatarUrl = user.profilePic || user.profilePicUrl || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
       const uniqueId = `member-${cid}`;
 contactsHtml += `
 <div style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="const cb=document.getElementById('${uniqueId}'); if(cb){ cb.checked = !cb.checked; }">
 <input type="checkbox" id="${uniqueId}" class="member-checkbox" data-uid="${cid}" data-username="${safeUsername}" style="cursor: pointer; width: 16px; height: 16px; accent-color: #00ff66;" onclick="event.stopPropagation();">
-<img src="${avatarUrl}" onerror="this.src='logo.jpg'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+<img src="${avatarUrl}" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
 <div style="flex: 1; min-width: 0;">
 <div style="color: #fff; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(displayName)}</div>
 <div style="color: #00ff66; font-size: 11.5px;">${safeUsername}</div>
@@ -19362,7 +19232,7 @@ if (typeof loadGroups === 'function') {
     }
 // Automatically navigate into the newly created group!
 try {
-      openChat(groupRef.id, name, profilePicUrl || 'logo.jpg', 'group');
+      openChat(groupRef.id, name, profilePicUrl || (window.NEUTRAL_GROUP_AVATAR || 'logo.jpg'), 'group');
     } catch (openErr) {
       console.warn('[GROUP] Could not immediately open new group:', openErr);
     }
@@ -19371,7 +19241,7 @@ if (iconPreview) {
 iconPreview.removeAttribute('data-generated');
     }
 await loadContacts();
-await openChat(groupRef.id, name, profilePicUrl || 'logo.jpg', 'group');
+await openChat(groupRef.id, name, profilePicUrl || (window.NEUTRAL_GROUP_AVATAR || 'logo.jpg'), 'group');
 } catch (error) {
     console.error('[Error] Error creating group:', error);
 if (resultDiv) {
@@ -19625,12 +19495,12 @@ if (user.blocked?.includes(myUID) || user.blockedUsers?.includes(myUID)) return;
 const rawUsername = user.username ? `@${String(user.username).replace(/^@/, '')}` : (user.displayName || user.name || user.email || 'User');
       const safeUsername = String(rawUsername).replace(/"/g, '&quot;');
       const displayName = user.displayName || user.name || user.username || 'User';
-      const avatarUrl = user.profilePic || user.profilePicUrl || 'logo.jpg';
+      const avatarUrl = user.profilePic || user.profilePicUrl || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
       const uniqueId = `add-group-member-${cid}`;
 html += `
 <div style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="const cb=document.getElementById('${uniqueId}'); if(cb){ cb.checked = !cb.checked; }">
 <input type="checkbox" id="${uniqueId}" class="member-checkbox" data-uid="${cid}" data-username="${safeUsername}" style="cursor: pointer; width: 16px; height: 16px; accent-color: #00ff66;" onclick="event.stopPropagation();">
-<img src="${avatarUrl}" onerror="this.src='logo.jpg'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+<img src="${avatarUrl}" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
 <div style="flex: 1; min-width: 0;">
 <div style="color: #fff; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(displayName)}</div>
 <div style="color: #00ff66; font-size: 11.5px;">${safeUsername}</div>
@@ -20163,7 +20033,7 @@ groupId = effectiveGroupId;
 if (groupData.members && groupData.members.includes(myUID)) {
       console.log('? User already a member of this group');
 showNotif(`You're already a member of "${groupData.name}"`, 'info', 2000);
-await openChat(groupId, groupData.name, 'logo.jpg', 'group');
+await openChat(groupId, groupData.name, (window.NEUTRAL_GROUP_AVATAR || 'logo.jpg'), 'group');
 return;
     }
 showGroupJoinModal(groupData, groupId);
@@ -20187,7 +20057,7 @@ function showGroupJoinModal(groupData, groupId) {
 if (!modal || !myUID) return;
 currentJoinModalGroupId = groupId;
 currentJoinRequestDocId = null;
-if (iconEl) iconEl.src = groupData.profilePic || 'logo.jpg';
+if (iconEl) iconEl.src = groupData.profilePic || (window.NEUTRAL_GROUP_AVATAR || 'logo.jpg');
 if (nameEl) nameEl.textContent = groupData.name || 'Group';
 if (descEl) descEl.textContent = groupData.description || 'No description provided.';
   const members = groupData.members || [];
@@ -20270,7 +20140,7 @@ if (!isAdminApproval) {
 showNotif(`[SUCCESS] Joined "${groupData.name}"`, 'success', 3000);
 closeGroupJoinModal();
 await loadGroups();
-await openChat(currentJoinModalGroupId, groupData.name, groupData.profilePic || 'logo.jpg', 'group');
+await openChat(currentJoinModalGroupId, groupData.name, groupData.profilePic || (window.NEUTRAL_GROUP_AVATAR || 'logo.jpg'), 'group');
 return;
     }
 const existingRequests = await getDocs(query(collection(db, 'groupJoinRequests'), where('groupId', '==', currentJoinModalGroupId), where('userId', '==', uid), where('status', '==', 'pending')));
@@ -20852,7 +20722,7 @@ if (expTime > now) {
             id: docSnap.id,
 userId: d.userId || 'anon',
 userName: d.username || d.userName || '@User',
-avatarUrl: d.profilePic || d.userAvatar || 'logo.jpg',
+avatarUrl: d.profilePic || d.userAvatar || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg'),
 mediaUrl: d.imageUrl || d.mediaUrl || '',
 mediaType: (d.mediaType === 'video' || (typeof d.mediaType === 'string' && d.mediaType.startsWith('video/')) || d.type === 'video' || /\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i.test(d.imageUrl || d.mediaUrl || ''))
               ? 'video'
@@ -20980,12 +20850,12 @@ cardDiv.innerHTML = `
 <div class="status-story-card-backdrop">
 ${isVideo
 ? `<video src="${previewBg}" class="status-card-bg-img" preload="metadata" muted playsinline></video>`
-: `<img src="${previewBg}" alt="${escape(grp.userName)}" class="status-card-bg-img" loading="eager" decoding="async" onerror="this.src='logo.jpg'" />`
+: `<img src="${previewBg}" alt="${escape(grp.userName)}" class="status-card-bg-img" loading="eager" decoding="async" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')" />`
             }
 <div class="status-card-gradient-overlay"></div>
 </div>
 <div class="status-card-avatar-wrap ${grp.isViewed ? 'viewed' : 'unread'}">
-<img src="${safeAvatar}" alt="${escape(grp.userName)}" class="status-card-avatar-img" loading="eager" decoding="async" onerror="this.src='logo.jpg'" />
+<img src="${safeAvatar}" alt="${escape(grp.userName)}" class="status-card-avatar-img" loading="eager" decoding="async" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')" />
 </div>
 <div class="status-card-copy">
 <span class="status-card-name">${escape(grp.userName)}</span>
@@ -21023,7 +20893,7 @@ row.className = 'status-row-item';
 const safeRowAvatar = getValidImageSrc(grp.avatarUrl, 'logo.jpg');
 row.innerHTML = `
 <div class="status-row-avatar ${grp.isViewed ? 'viewed' : 'unread'}">
-<img src="${safeRowAvatar}" alt="${escape(grp.userName)}" loading="eager" decoding="async" onerror="this.src='logo.jpg'" />
+<img src="${safeRowAvatar}" alt="${escape(grp.userName)}" loading="eager" decoding="async" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')" />
 </div>
 <div class="status-row-info">
 <h4 class="status-row-name">
@@ -21249,7 +21119,7 @@ if (currentSlide.musicTrack && currentSlide.musicTrack.previewUrl) {
       }
       sticker.innerHTML = `
         <div class="music-sticker-disc-icon"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
-        <img src="${currentSlide.musicTrack.artworkUrl || 'logo.jpg'}" class="music-sticker-art" alt="Track Art" onerror="this.src='logo.jpg';">
+        <img src="${currentSlide.musicTrack.artworkUrl || 'logo.jpg'}" class="music-sticker-art" alt="Track Art" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg');">
         <div class="music-sticker-info">
           <span class="music-sticker-title">${currentSlide.musicTrack.trackName || 'Soundtrack'}</span>
           <span class="music-sticker-artist">${currentSlide.musicTrack.artistName || 'Artist'}</span>
@@ -21481,7 +21351,7 @@ if (replyRow) replyRow.style.display = 'none';
         thumb.className = 'status-views-mini-avatar-thumb';
         thumb.src = typeof v === 'object' ? (v.avatarUrl || 'logo.jpg') : 'logo.jpg';
         thumb.alt = 'Viewer';
-        thumb.onerror = () => { thumb.src = 'logo.jpg'; };
+        thumb.onerror = () => { thumb.src = (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg'); };
         miniAvatars.appendChild(thumb);
       });
     }
@@ -21507,7 +21377,7 @@ if (!window.NexStatusEliteSuite || !window.NexStatusEliteSuite.isStealthActive()
           const viewerData = {
             uid: myUID,
 username: myUsername || 'User',
-avatarUrl: myProfilePic || 'logo.jpg',
+avatarUrl: myProfilePic || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg'),
 viewedAt: Date.now()
           };
 if (typeof setDoc === 'function') {
@@ -23541,7 +23411,7 @@ if (!uid) return;
       e._nexChatHandled = true;
       const type = item.getAttribute('data-chat-type') || (uid === 'chronex-ai' ? 'ai' : (item.classList.contains('group-item') ? 'group' : 'direct'));
       const name = item.getAttribute('data-name') || item.querySelector('.chat-name')?.textContent?.trim() || item.querySelector('h4')?.textContent?.trim() || 'User';
-      const pic = item.querySelector('img.chat-avatar')?.src || 'logo.jpg';
+      const pic = item.querySelector('img.chat-avatar')?.src || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
 openChat(uid, name, pic, type);
     });
   };
@@ -24243,7 +24113,7 @@ let groupLongPressTimer = null;
           groupLongPressFired = false;
 return;
         }
-openChat(groupId, group.name, groupPic || "logo.jpg", "group");
+openChat(groupId, group.name, groupPic || (window.NEUTRAL_GROUP_AVATAR || 'logo.jpg'), 'group');
       });
 li.addEventListener("contextmenu", (e) => {
         e.preventDefault();
@@ -24597,7 +24467,7 @@ cachedLi.setAttribute('data-chat-type', 'direct');
 cachedLi.setAttribute('data-name', data.name);
 cachedLi.innerHTML = `
 <div class="chat-avatar-container" style="position: relative;">
-<img src="${data.pic || 'logo.jpg'}" class="chat-avatar" onerror="this.src='logo.jpg';">
+<img src="${data.pic || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg')}" class="chat-avatar" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg');">
 </div>
 <div class="chat-item-content">
 <div class="chat-item-header">
@@ -24626,7 +24496,7 @@ chronexLi.setAttribute('data-chat-id', 'chronex-ai');
 chronexLi.setAttribute('data-chat-type', 'ai');
 chronexLi.innerHTML = `
 <div class="chat-avatar-container" style="position: relative;">
-<img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
+<img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg');" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
 <span class="chat-online-beacon" style="display: block;"></span>
 <span class="avatar-achievement-badge" style="background: linear-gradient(135deg, #00ff66, #00d4ff); color: #041019; box-shadow: 0 0 10px rgba(0,255,102,0.5);"><i class="fa-solid fa-bolt"></i><span>AI</span></span>
 </div>
@@ -25094,7 +24964,7 @@ if (!item) return;
 if (!uid) return;
         const type = item.getAttribute('data-chat-type') || (uid === 'chronex-ai' ? 'ai' : (item.classList.contains('group-item') ? 'group' : 'direct'));
         const name = item.querySelector('.chat-name')?.textContent?.trim() || item.querySelector('h4')?.textContent?.trim() || 'User';
-        const pic = item.querySelector('img.chat-avatar')?.src || 'logo.jpg';
+        const pic = item.querySelector('img.chat-avatar')?.src || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg');
 openChat(uid, name, pic, type);
       });
     }
@@ -25180,7 +25050,7 @@ ${avatarHtml}
 <button class="chat-menu-btn" title="Group options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
 `;
 li.addEventListener('click', () => {
-        openChat(groupId, cleanName, gPic || 'logo.jpg', 'group');
+        openChat(groupId, cleanName, gPic || (window.NEUTRAL_GROUP_AVATAR || 'logo.jpg'), 'group');
       });
 li.addEventListener('contextmenu', (e) => {
         e.preventDefault();
@@ -25511,7 +25381,7 @@ const escapedName = escapeCallHtml(name);
 return `
 <div class="call-history-item" data-call-id="${call.id}" data-contact-id="${contactId}" data-name="${escapedName}" data-favourite="${isFavourite}" onclick="openChat('${contactId}', '${escapedName}', '${profilePic}', 'direct'); showChatDetailView();">
 <div class="call-avatar-wrapper">
-<img src="${profilePic}" alt="${escapedName}" class="call-avatar-img" onerror="this.src='logo.jpg'">
+<img src="${profilePic}" alt="${escapedName}" class="call-avatar-img" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')">
 </div>
 <div class="call-info-col">
 <div class="call-contact-name ${nameClass}">
@@ -25561,7 +25431,7 @@ if (date.getFullYear() === now.getFullYear()) {
 async function quickCallback(contactId, contactName, contactPic, isVideo = false) {
   try {
     if (typeof openChat === 'function') {
-      await openChat(contactId, contactName || 'User', contactPic || 'logo.jpg', 'direct');
+      await openChat(contactId, contactName || 'User', contactPic || (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg'), 'direct');
 if (typeof showChatDetailView === 'function') showChatDetailView();
 setTimeout(() => {
         if (typeof startCall === 'function') {
@@ -25840,7 +25710,7 @@ if (contacts.length === 0) {
       list.innerHTML = contacts.map(c => `
 <div class="calls-picker-item" data-name="${escapeCallHtml(c.name)}">
 <div class="picker-contact-meta">
-<img src="${c.pic}" alt="${escapeCallHtml(c.name)}" class="picker-avatar" onerror="this.src='logo.jpg'">
+<img src="${c.pic}" alt="${escapeCallHtml(c.name)}" class="picker-avatar" onerror="this.src=(window.NEUTRAL_PERSON_AVATAR||'logo.jpg')">
 <span class="picker-name">${escapeCallHtml(c.name)}</span>
 </div>
 <div class="picker-btns">
@@ -27149,7 +27019,7 @@ if (typeof window !== 'undefined') {
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'OPEN_CHAT' && event.data.chatId) {
         if (typeof openChat === 'function') {
-          openChat(event.data.chatId, event.data.chatName || event.data.title || 'Chat', 'logo.jpg', event.data.chatType || 'direct');
+          openChat(event.data.chatId, event.data.chatName || event.data.title || 'Chat', (window.NEUTRAL_PERSON_AVATAR || 'logo.jpg'), event.data.chatType || 'direct');
         }
       }
     });

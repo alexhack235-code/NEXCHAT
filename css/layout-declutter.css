@@ -7543,3 +7543,191 @@ html[data-chat-size="small"] .message-time-text {
   visibility: visible !important;
   align-items: center !important;
 }
+
+/* ==========================================================================
+   IMAGE 2 & IMAGE 4 UI POLISH: CHAT LIST ZERO-GAP & WIDE INPUT DE-CLUTTER
+   ========================================================================== */
+
+/* 1. Tighten top horizontal spacing so Chronex AI starts crisp right under filter tabs */
+#chatListView,
+.chat-list-view {
+  padding-top: 0 !important;
+}
+
+#chatSearchContainer,
+.chat-search-container,
+.search-container {
+  padding: 6px 14px 2px 14px !important;
+  margin: 0 !important;
+}
+
+#chatFilterTabs,
+.chat-filter-tabs,
+.filter-tabs {
+  padding: 2px 14px 4px 14px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* Eliminate permanent second row below #chatFilterTabs */
+#chatListView > #chatListTemplateBar:not(#chatFilterTabs *),
+.chat-main > #chatListTemplateBar:not(#chatFilterTabs *),
+.chat-list-view > #chatListTemplateBar:not(#chatFilterTabs *) {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+}
+
+/* Inline N-Templates inside #chatFilterTabs */
+#chatFilterTabs #chatListTemplateBar,
+#chatFilterTabs .chatlist-template-inline-strip {
+  display: none;
+  align-items: center !important;
+  gap: 6px !important;
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+  margin: 0 0 0 4px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+#chatFilterTabs #chatListTemplateBar.expanded,
+#chatFilterTabs.show-templates #chatListTemplateBar {
+  display: inline-flex !important;
+}
+
+#chatFilterTabs .chatlist-ntemplates-btn,
+#chatListNTemplatesBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: rgba(0, 242, 254, 0.12) !important;
+  border: 1px solid rgba(0, 242, 254, 0.35) !important;
+  color: #00f2fe !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+#chatFilterTabs .chatlist-ntemplates-btn:hover,
+#chatListNTemplatesBtn:hover {
+  background: rgba(0, 242, 254, 0.22) !important;
+  border-color: rgba(0, 242, 254, 0.6) !important;
+  color: #ffffff !important;
+}
+
+#chatFilterTabs .chatlist-ntemplates-btn.active,
+#chatListNTemplatesBtn.active {
+  background: rgba(0, 242, 254, 0.25) !important;
+  border-color: #00f2fe !important;
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.3) !important;
+}
+
+/* Zero dead empty horizontal gap between filter tabs and chat rows */
+.chats-section,
+#contactList {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+#chatSystemRows:not(.revealed) {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* 2. Wider 75-80% Message Input & Zero Dead Space on Right of Mic FAB */
+#message-form,
+.message-form {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  gap: 8px !important;
+  padding: 4px 6px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.message-input-wrapper,
+#message-form .message-input-wrapper {
+  flex: 1 1 78% !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 48px !important;
+  border-radius: 24px !important;
+  padding: 0 8px 0 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  box-sizing: border-box !important;
+}
+
+.message-input-wrapper .message-input {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  padding: 10px 4px !important;
+  margin: 0 !important;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+/* Hidden buttons occupy strictly 0 space when hidden */
+#message-form > [style*="display: none"],
+#message-form > [style*="display:none"],
+#message-form #audio-send-btn[style*="display: none"],
+#message-form #audio-send-btn[style*="display:none"],
+#message-form #sendBtn[style*="display: none"],
+#message-form #sendBtn[style*="display:none"],
+#message-form button.hidden,
+#message-form input[type="file"][style*="display: none"],
+#message-form input[type="file"][style*="display:none"],
+#message-form .input-btn[style*="display: none"],
+#message-form .input-btn[style*="display:none"] {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  position: absolute !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
+}
+
+/* Mic / Send FAB flush on the right with zero dead empty gap */
+#message-form #audio-record-btn:not([style*="display: none"]),
+#message-form #sendBtn:not([style*="display: none"]) {
+  flex: 0 0 46px !important;
+  width: 46px !important;
+  min-width: 46px !important;
+  max-width: 46px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  border-radius: 50% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+}

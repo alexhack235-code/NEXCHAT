@@ -295,6 +295,8 @@
       this.elapsedSec = 0;
       this.playbackRate = 1.0;
       this.pitch = 1.0;
+      this.audioElement = null;
+      this.audioCache = new Map();
     }
 
     cleanTextForSpeech(rawText) {
@@ -359,26 +361,41 @@
       `;
     }
 
-    togglePlay(playerBarEl) {
-      if (!this.synth) {
-        if (window.showNotif) window.showNotif('Speech synthesis not supported on this device', 'error');
-        return;
-      }
-
+    async togglePlay(playerBarEl) {
       const isCurrentPlayer = this.activePlayerEl === playerBarEl;
 
-      if (isCurrentPlayer && this.synth.speaking) {
-        if (this.synth.paused) {
-          this.synth.resume();
-          this.setPlayerPlayingState(playerBarEl, true);
-        } else {
-          this.synth.pause();
-          this.setPlayerPlayingState(playerBarEl, false);
+      // 1. Toggle pause/resume if already active on this player bar
+      if (isCurrentPlayer) {
+        if (this.audioElement) {
+          if (this.audioElement.paused) {
+            try { await this.audioElement.play(); } catch (_) {}
+            this.setPlayerPlayingState(playerBarEl, true);
+            const totalDuration = parseInt(playerBarEl.getAttribute('data-duration') || '10', 10);
+            this.startTimer(playerBarEl, totalDuration);
+          } else {
+            this.audioElement.pause();
+            this.setPlayerPlayingState(playerBarEl, false);
+            clearInterval(this.timerInterval);
+          }
+          return;
         }
-        return;
+
+        if (this.synth && this.synth.speaking) {
+          if (this.synth.paused) {
+            this.synth.resume();
+            this.setPlayerPlayingState(playerBarEl, true);
+            const totalDuration = parseInt(playerBarEl.getAttribute('data-duration') || '10', 10);
+            this.startTimer(playerBarEl, totalDuration);
+          } else {
+            this.synth.pause();
+            this.setPlayerPlayingState(playerBarEl, false);
+            clearInterval(this.timerInterval);
+          }
+          return;
+        }
       }
 
-      // Stop any other active voice note
+      // 2. Stop any active playback on other players
       this.stop();
 
       const speechText = playerBarEl.getAttribute('data-speech');
@@ -387,6 +404,101 @@
 
       this.activePlayerEl = playerBarEl;
       this.elapsedSec = 0;
+
+      // 3. Check memory cache for pre-synthesized neural audio blob
+      let cachedBlobUrl = this.audioCache.get(speechText);
+      if (cachedBlobUrl) {
+        this.playAudioBlob(playerBarEl, cachedBlobUrl, totalDuration);
+        return;
+      }
+
+      // 4. Try fetching natural neural speech via /api/tts if in HTTP/HTTPS environment
+      if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+        this.setPlayerPlayingState(playerBarEl, true);
+        try {
+          const persona = (window.NexChronexxVoicePersonas && window.NexChronexxVoicePersonas.getActivePersona)
+            ? window.NexChronexxVoicePersonas.getActivePersona()
+            : null;
+          const voice = (persona && persona.edgeVoice) ? persona.edgeVoice : 'en-US-JennyNeural';
+
+          const res = await fetch('/api/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: speechText,
+              voice,
+              rate: this.playbackRate
+            })
+          });
+
+          if (res.ok) {
+            const blob = await res.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            this.audioCache.set(speechText, blobUrl);
+
+            // Verify player is still active target before starting playback
+            if (this.activePlayerEl === playerBarEl) {
+              this.playAudioBlob(playerBarEl, blobUrl, totalDuration);
+              return;
+            }
+          }
+        } catch (fetchErr) {
+          console.warn('[ChronexxVoice] /api/tts unavailable, falling back to Web Speech API:', fetchErr);
+        }
+      }
+
+      // 5. Fallback cleanly to browser speechSynthesis if /api/tts is unavailable or offline
+      this.playWithSpeechSynthesis(playerBarEl, speechText, totalDuration);
+    }
+
+    playAudioBlob(playerBarEl, blobUrl, totalDuration) {
+      if (this.audioElement) {
+        try { this.audioElement.pause(); } catch (_) {}
+      }
+
+      const audio = new Audio(blobUrl);
+      this.audioElement = audio;
+      audio.playbackRate = this.playbackRate;
+
+      audio.onplay = () => {
+        this.setPlayerPlayingState(playerBarEl, true);
+        this.startTimer(playerBarEl, totalDuration);
+      };
+
+      audio.ontimeupdate = () => {
+        if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+          this.elapsedSec = Math.floor(audio.currentTime);
+          const finalDuration = Math.ceil(audio.duration);
+          const timerEl = playerBarEl.querySelector('.voice-time-display');
+          if (timerEl) {
+            timerEl.textContent = `${this.formatTime(this.elapsedSec)} / ${this.formatTime(finalDuration)}`;
+          }
+        }
+      };
+
+      audio.onended = () => {
+        this.stop();
+      };
+
+      audio.onerror = () => {
+        console.warn('[ChronexxVoice] Audio playback failed, trying speechSynthesis');
+        const speechText = playerBarEl.getAttribute('data-speech');
+        this.playWithSpeechSynthesis(playerBarEl, speechText, totalDuration);
+      };
+
+      audio.play().catch(err => {
+        console.warn('[ChronexxVoice] Audio play error:', err);
+        const speechText = playerBarEl.getAttribute('data-speech');
+        this.playWithSpeechSynthesis(playerBarEl, speechText, totalDuration);
+      });
+    }
+
+    playWithSpeechSynthesis(playerBarEl, speechText, totalDuration) {
+      if (!this.synth) {
+        if (window.showNotif) window.showNotif('Speech synthesis not supported on this device', 'error');
+        this.setPlayerPlayingState(playerBarEl, false);
+        return;
+      }
 
       const utterance = new SpeechSynthesisUtterance(speechText);
       utterance.rate = this.playbackRate;
@@ -456,7 +568,9 @@
         speedBtn.textContent = `${this.playbackRate.toFixed(1)}x`;
       }
 
-      if (this.synth && this.synth.speaking) {
+      if (this.audioElement && !this.audioElement.paused) {
+        this.audioElement.playbackRate = this.playbackRate;
+      } else if (this.synth && this.synth.speaking) {
         const speechText = playerBarEl.getAttribute('data-speech');
         this.stop();
         this.togglePlay(playerBarEl);
@@ -465,6 +579,13 @@
 
     stop() {
       clearInterval(this.timerInterval);
+      if (this.audioElement) {
+        try {
+          this.audioElement.pause();
+          this.audioElement.currentTime = 0;
+        } catch (_) {}
+        this.audioElement = null;
+      }
       if (this.synth) {
         try { this.synth.cancel(); } catch (_) {}
       }

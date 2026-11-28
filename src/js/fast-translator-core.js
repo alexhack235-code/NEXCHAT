@@ -141,6 +141,56 @@ export function normalizeLangCode(lang) {
 }
 
 // ---------------------------------------------------------------------------
+// SOURCE LANGUAGE DETECTOR (< 0.01ms) - SCRIPTS & COMMON LANGUAGE PATTERNS
+// ---------------------------------------------------------------------------
+export function detectSourceLangCode(text) {
+  if (!text || typeof text !== 'string') return null;
+  const clean = text.trim();
+  if (!clean) return null;
+
+  // 1. Unicode script detection
+  if (/[\u0400-\u04FF]/.test(clean)) return 'ru'; // Cyrillic (Russian, Ukrainian, etc.)
+  if (/[\u0600-\u06FF]/.test(clean)) return 'ar'; // Arabic
+  if (/[\u4E00-\u9FFF]/.test(clean)) return 'zh-CN'; // Chinese
+  if (/[\u3040-\u30FF]/.test(clean)) return 'ja'; // Japanese (Hiragana / Katakana)
+  if (/[\uAC00-\uD7AF]/.test(clean)) return 'ko'; // Korean (Hangul)
+  if (/[\u0900-\u097F]/.test(clean)) return 'hi'; // Hindi (Devanagari)
+
+  const lower = clean.toLowerCase();
+
+  // 2. Nigerian Pidgin patterns
+  if (/\b(wetin|dey|abi|na|sef|kwanu|how far|no wahala|una|abeg|commot|chop|pikin|fit|don|wahala)\b/i.test(lower)) {
+    return 'pcm';
+  }
+
+  // 3. French word patterns & diacritics
+  if (/\b(bonjour|merci|s'il vous plaît|s'il|au revoir|bienvenue|salut|je suis|c'est)\b/i.test(lower) ||
+      (/\b(le|la|les|un|une|des|est|sont|ce|cette|pour|avec|dans|mais|ou|et|donc)\b/i.test(lower) && /[éàèùâêîôûëïüç]/.test(lower))) {
+    return 'fr';
+  }
+
+  // 4. Spanish word patterns & diacritics
+  if (/\b(hola|gracias|por favor|buenos días|buenas noches|amigo|amiga|cómo estás|adiós)\b/i.test(lower) ||
+      (/\b(el|la|los|las|un|una|unos|unas|es|son|está|están|por|para|con|pero)\b/i.test(lower) && /[ñáéíóú¿¡]/.test(lower))) {
+    return 'es';
+  }
+
+  // 5. German word patterns & diacritics
+  if (/\b(hallo|guten morgen|guten tag|guten abend|danke|bitte|tschüss|auf wiedersehen)\b/i.test(lower) ||
+      (/\b(der|die|das|den|dem|des|ein|eine|einen|einer|ist|sind|nicht|und|oder|aber)\b/i.test(lower) && /[äöüß]/.test(lower))) {
+    return 'de';
+  }
+
+  // 6. Portuguese word patterns & diacritics
+  if (/\b(olá|obrigado|obrigada|por favor|bom dia|boa tarde|boa noite|tudo bem)\b/i.test(lower) ||
+      (/\b(o|a|os|as|um|uma|é|são|com|para|não|você|nós)\b/i.test(lower) && /[ãõáéíóúâêôç]/.test(lower))) {
+    return 'pt';
+  }
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // TIER 1 FAST DIRECT TRANSLATE (0ms SYNCHRONOUS O(1) MAP RESOLUTION)
 // ---------------------------------------------------------------------------
 const dictMapCache = new Map();
@@ -263,6 +313,7 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
     // Fast Concurrent Race: Google GTX vs MyMemory (< 300ms typical)
     if (typeof fetch === 'function' && normLang !== 'pcm' && normLang !== 'pidgin') {
       const apiTarget = normLang === 'en' ? 'en' : (normLang === 'zh' ? 'zh-CN' : normLang);
+      const detectedSrc = detectSourceLangCode(clean);
       const raceGtx = async () => {
         const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
         const timer = controller ? setTimeout(() => controller.abort(), 2400) : null;
@@ -280,16 +331,28 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
         }
       };
       const raceMyMemory = async () => {
+        const srcLang = detectedSrc || (apiTarget !== 'en' ? 'en' : null);
+        if (!srcLang || srcLang === 'auto' || srcLang === apiTarget) {
+          throw new Error('MM skipped: identical or unknown langpair');
+        }
         const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
         const timer = controller ? setTimeout(() => controller.abort(), 2400) : null;
         try {
-          const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=en|${encodeURIComponent(apiTarget)}`, {
+          const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=${encodeURIComponent(srcLang)}|${encodeURIComponent(apiTarget)}`, {
             signal: controller?.signal
           });
           if (!res.ok) throw new Error('MM HTTP ' + res.status);
           const data = await res.json();
           const trans = data?.responseData?.translatedText?.trim() || '';
-          if (trans && !trans.toUpperCase().includes('MYMEMORY WARNING') && trans.toLowerCase() !== clean.toLowerCase()) return trans;
+          const upper = trans.toUpperCase();
+          if (
+            trans &&
+            !upper.includes('MYMEMORY WARNING') &&
+            !upper.includes('PLEASE SELECT TWO DISTINCT') &&
+            trans.toLowerCase() !== clean.toLowerCase()
+          ) {
+            return trans;
+          }
           throw new Error('MM invalid');
         } finally {
           if (timer) clearTimeout(timer);
@@ -308,6 +371,7 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
     if (typeof window !== 'undefined') {
       try {
         let cleanAi = '';
+        const detectedSrc = detectSourceLangCode(clean);
         if (typeof fetch === 'function' && window.location?.protocol?.startsWith('http')) {
           const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
           const timer = controller ? setTimeout(() => controller.abort(), 3500) : null;
@@ -315,7 +379,7 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
             const transResp = await fetch('/api/translate', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: clean, targetLang: langName, sourceLang: 'auto' }),
+              body: JSON.stringify({ text: clean, targetLang: langName, sourceLang: detectedSrc || 'auto' }),
               signal: controller?.signal
             });
             if (transResp.ok) {
@@ -353,6 +417,7 @@ if (typeof window !== 'undefined') {
   window.fastTranslateSync = fastTranslateSync;
   window.fastTranslateAsync = fastTranslateAsync;
   window.normalizeLangCode = normalizeLangCode;
+  window.detectSourceLangCode = detectSourceLangCode;
   window.translationLRU = translationLRU;
   window.EXPANDED_MULTILINGUAL_DICTIONARY = EXPANDED_MULTILINGUAL_DICTIONARY;
 }

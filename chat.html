@@ -309,17 +309,15 @@
         <!-- Header shows NEXCHAT logo by default, contact name when in chat -->
         <div id="headerLogoContainer">
           <div class="nex-logo" id="headerLogoImg">
-            <img src="logo.jpg" alt="NEXCHAT" class="nex-header-logo-badge" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(0, 255, 102, 0.4); box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);">
             <div class="nex-header-brand-wrap" style="display: flex; align-items: center; gap: 6px;">
               <span class="nex-text nex-brand-title app-logo-text">NEXCHAT</span>
-              
             </div>
             <span class="nex-online-pulse"></span>
           </div>
         </div>
         <!-- Active chat contact info (shows when in chat) -->
         <div id="activeChatHeader" class="active-chat-header" style="display: none;">
-          <img id="activeChatAvatar" src="logo.jpg" alt="" class="active-chat-avatar" style="cursor: pointer;" onerror="this.onerror=null; this.src='logo.jpg';">
+          <img id="activeChatAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="" class="active-chat-avatar" style="cursor: pointer;" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E';">
           <div class="active-chat-info">
             <div class="chat-title-lock-row">
               <div id="activeChatName" class="active-chat-name"></div>
@@ -426,15 +424,8 @@
           <button id="settings-btn-header" class="header-icon-btn" title="Settings" onclick="if(window.openSettingsModal) window.openSettingsModal();"><i class="fa-solid fa-gear"></i></button>
         </div>
 
-        <!-- Mobile Header Actions (visible on mobile < 900px: Camera, Search, 3-dots Menu) -->
+        <!-- Mobile Header Actions (visible on mobile < 900px: Alerts/Bell, Search, 3-dots Menu) -->
         <div class="header-right mobile-header-actions">
-          <button type="button" id="stealthGhostBtnMobile" class="header-icon-btn mobile-action-btn stealth-ghost-toggle-btn" title="Stealth Ghost Mode" aria-label="Toggle Stealth Ghost Mode" data-stealth-active="false">
-            <i class="fa-solid fa-ghost"></i>
-          </button>
-
-          <button type="button" id="aegisPrivacyBtnMobile" class="header-icon-btn mobile-action-btn aegis-privacy-toggle-btn" title="Aegis Privacy Shield (Anti-Shoulder Surfing)" aria-label="Toggle Aegis Privacy Shield" data-aegis-active="false">
-            <i class="fa-solid fa-user-secret" style="color: #00f3ff;"></i>
-          </button>
           <button id="mobileAlertsBtn" class="header-icon-btn mobile-action-btn" title="Alerts &amp; Announcements" onclick="if(window.handleNavigation) window.handleNavigation('announcements');" style="position: relative;" aria-label="Alerts">
             <i class="fa-solid fa-bell"></i>
             <span class="nav-status-beacon" id="mobileAlertsBeacon" style="display: none; background: #00ff88; width: 6px; height: 6px; position: absolute; top: 6px; right: 6px; border-radius: 50%;"></span>
@@ -482,11 +473,11 @@
             <!-- 1. My status card -->
             <div class="status-circle-item my-status-item status-story-card my-status-story-card" id="myStatusCircleItem" onclick="if(window.openCreateStatusModal) window.openCreateStatusModal('media');" title="My status">
               <div class="status-story-card-backdrop" id="myStatusBackdrop">
-                <img id="myStatusBgPreview" src="logo.jpg" alt="Status preview" class="status-card-bg-img" />
+                <img id="myStatusBgPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Status preview" class="status-card-bg-img" />
                 <div class="status-card-gradient-overlay"></div>
               </div>
               <div class="status-avatar-wrapper my-status-avatar-wrapper" id="myStatusAvatarWrapper">
-                <img id="myStatusPic" src="logo.jpg" alt="My status" class="status-avatar-img">
+                <img id="myStatusPic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="My status" class="status-avatar-img">
                 <button type="button" id="myStatusAddBadge" class="status-plus-badge" title="Add status update" onclick="event.stopPropagation(); if(window.openCreateStatusModal) window.openCreateStatusModal('media');">
                   <i class="fa-solid fa-plus"></i>
                 </button>
@@ -607,7 +598,7 @@
 
             <!-- User Account Pill at Rail Bottom -->
             <div class="x-nav-user-pill" id="globalDropNavUserPill">
-              <img src="logo.jpg" alt="User Avatar" class="x-nav-user-avatar" id="globalDropNavUserAvatar" onerror="this.src='logo.jpg'" />
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="User Avatar" class="x-nav-user-avatar" id="globalDropNavUserAvatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E'" />
               <div class="x-nav-user-info">
                 <span class="x-nav-user-name" id="globalDropNavUserName">NEX User</span>
                 <span class="x-nav-user-handle" id="globalDropNavUserHandle">@nexnode</span>
@@ -623,7 +614,7 @@
           <header class="x-timeline-header">
             <div class="x-timeline-header-top">
               <div class="x-mobile-header-avatar" id="globalDropMobileHeaderAvatarWrap" role="button" aria-label="Open Account Navigation" onclick="if(window.globalDropOpenDrawer) window.globalDropOpenDrawer(event); else if(window.globalDropEngine?.openAccountDrawer) window.globalDropEngine.openAccountDrawer(event);">
-                <img src="logo.jpg" alt="Me" id="globalDropMobileHeaderAvatar" onerror="this.src='logo.jpg'" />
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Me" id="globalDropMobileHeaderAvatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E'" />
               </div>
               <div class="x-mobile-header-logo">
                 <i class="fa-solid fa-earth-americas"></i>
@@ -669,7 +660,7 @@
             </div>
             <div class="x-composer-row">
               <div class="x-composer-avatar-col">
-                <img id="globalDropComposerAvatar" src="logo.jpg" alt="Avatar" class="x-composer-avatar" onerror="this.src='logo.jpg'" />
+                <img id="globalDropComposerAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Avatar" class="x-composer-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E'" />
               </div>
               <div class="x-composer-main-col">
                 <!-- Audience selector pill -->
@@ -847,7 +838,7 @@
         <!-- Top Bar: Avatar & More Menu -->
         <div class="x-drawer-header">
           <div class="x-drawer-avatar-wrap">
-            <img src="logo.jpg" alt="User Avatar" class="x-drawer-avatar" id="globalDropDrawerAvatar" onerror="this.src='logo.jpg'" />
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="User Avatar" class="x-drawer-avatar" id="globalDropDrawerAvatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E'" />
           </div>
           <button type="button" class="x-drawer-dots-btn" id="globalDropDrawerDotsBtn" title="Account Options">
             <i class="fa-solid fa-ellipsis"></i>
@@ -1302,27 +1293,24 @@
           <button class="filter-tab" data-filter="market" title="Market Hub Messages">Market</button>
           <button class="filter-tab" data-filter="unread" title="Unread messages">Unread</button>
           <button class="filter-tab add-chat-tab" id="newChatFromTab" title="Start New Direct Chat"><i class="fa-solid fa-plus"></i></button>
-          <button type="button" class="filter-tab chatlist-template-tab" id="chatListTemplateBtn" title="Switch Chat List Template: Former Classic vs New Glass Cards"><i class="fa-solid fa-layer-group"></i> <span id="chatListTemplateBtnLabel">Glass Cards</span></button>
-          <button type="button" class="filter-tab chatlist-style-tab" id="chatListCustomizeBtn" title="Customize Chat List Glassmorphism &amp; Picture"><i class="fa-solid fa-wand-magic-sparkles"></i> <span>Glass</span></button>
-        </div>
-
-        <!-- Chat List Layout Template Switcher Bar -->
-        <div id="chatListTemplateBar" class="chatlist-template-bar" role="tablist" aria-label="Chat List Templates">
-          <button type="button" class="chatlist-template-pill is-active active" role="tab" aria-selected="true" aria-pressed="true" data-chatlist-template="glass-studio">Glass Cards</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="classic">Classic Flat</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="swift-compact">Swift Compact</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="aurora-bento">Aurora Bento</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="terminal-grid">Terminal Grid</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="minimal-air">Air Minimal</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="neon-dock">Neon Dock</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-liquid-refraction">Liquid Refraction</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-spatial-vision">Spatial Vision</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-ios-inset">iOS Inset</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-dynamic-dock">Dynamic Dock</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-oneui-curves">One UI Curves</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-galaxy-ultra">Galaxy Ultra</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-fold-split">Fold Split</button>
-          <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-knox-minimal">Knox Minimal</button>
+          <button type="button" class="filter-tab chatlist-ntemplates-btn" id="chatListNTemplatesBtn" title="N-Templates: Toggle 15 Layout Templates" aria-expanded="false"><i class="fa-solid fa-shapes"></i> <span id="nTemplatesBtnLabel">N-Templates</span> <i class="fa-solid fa-chevron-down n-templates-chevron" style="font-size: 10px; margin-left: 3px; transition: transform 0.2s ease;"></i></button>
+          <div id="chatListTemplateBar" class="chatlist-template-bar chatlist-template-inline-strip" role="tablist" aria-label="Chat List Templates" style="display: none;">
+            <button type="button" class="chatlist-template-pill is-active active" role="tab" aria-selected="true" aria-pressed="true" data-chatlist-template="glass-studio">Glass Cards</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="classic">Classic Flat</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="swift-compact">Swift Compact</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="aurora-bento">Aurora Bento</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="terminal-grid">Terminal Grid</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="minimal-air">Air Minimal</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="neon-dock">Neon Dock</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-liquid-refraction">Liquid Refraction</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-spatial-vision">Spatial Vision</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-ios-inset">iOS Inset</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="apple-dynamic-dock">Dynamic Dock</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-oneui-curves">One UI Curves</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-galaxy-ultra">Galaxy Ultra</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-fold-split">Fold Split</button>
+            <button type="button" class="chatlist-template-pill" role="tab" aria-selected="false" aria-pressed="false" data-chatlist-template="samsung-knox-minimal">Knox Minimal</button>
+          </div>
         </div>
 
         <!-- WhatsApp-Style System Action Rows: Locked chats & Archived -->
@@ -1366,7 +1354,7 @@
             <!-- 1. ChronEX AI Pre-seeded Instant Chat -->
             <li class="chat-list-item chat-item chronex-ai-item" data-chat-id="chronex-ai" data-chat-type="ai" data-name="Chronex AI">
               <div class="chat-avatar-container" style="position: relative;">
-                <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
+                <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
                 <span class="chat-online-beacon" style="display: block;"></span>
                 <span class="avatar-achievement-badge" style="background: linear-gradient(135deg, #00ff66, #00d4ff); color: #041019; box-shadow: 0 0 10px rgba(0,255,102,0.5);"><i class="fa-solid fa-bolt"></i><span>AI</span></span>
               </div>
@@ -1426,7 +1414,7 @@
             <!-- 4. king Alex001 -->
             <li class="chat-list-item chat-item" data-chat-id="king-alex001" data-chat-type="direct" data-name="king Alex001">
               <div class="chat-avatar-container" style="position: relative;">
-                <img src="logo.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" class="chat-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">
                 <span class="chat-online-beacon" style="display: none;"></span>
               </div>
               <div class="chat-item-content">
@@ -1590,7 +1578,7 @@
           <div class="chat-header-profile" id="chatHeaderProfile" style="cursor: pointer; position: relative;"
             title="Click to open group settings">
             <div class="header-avatar-container" style="position: relative; display: inline-flex; flex-shrink: 0;">
-              <img id="chatProfilePic" src="logo.jpg" alt="" class="header-avatar" onerror="this.onerror=null; this.src='logo.jpg';">
+              <img id="chatProfilePic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="" class="header-avatar" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E';">
               <span id="chatOnlineIndicator" class="header-avatar-online-dot"></span>
             </div>
             <div class="header-text">
@@ -2054,7 +2042,7 @@
             <section class="thread-root-anchor-section">
               <div class="thread-root-card">
                 <div class="thread-root-header">
-                  <img id="threadRootAvatar" src="logo.jpg" alt="Author" class="thread-root-avatar" onerror="this.src=\'logo.jpg\';">
+                  <img id="threadRootAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Author" class="thread-root-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E';">
                   <div class="thread-root-meta">
                     <span id="threadRootSender" class="thread-root-name">User</span>
                     <span id="threadRootTime" class="thread-root-timestamp">12:00 PM</span>
@@ -2350,7 +2338,7 @@
 
           <!-- Unique NEXCHAT Terminal Hash Typing Indicator (Above Input Box - Fixed 20px Container) -->
           <div id="typingIndicator" class="nex-typing-indicator" style="height: 20px; min-height: 20px; max-height: 20px; overflow: hidden; visibility: hidden; flex-shrink: 0;">
-            <img id="typingAvatar" class="typing-avatar" src="logo.jpg" alt="User">
+            <img id="typingAvatar" class="typing-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="User">
             <div class="typing-hashes">
               <span class="hash-dot">#</span>
               <span class="hash-dot">#</span>
@@ -2359,30 +2347,30 @@
             <span id="typingIndicatorText" class="typing-text">typing...</span>
           </div>
 
-          <form id="message-form" class="message-form nex-message-form flex items-center gap-2 w-full px-2 py-2">
-            <div class="message-input-wrapper">
+          <form id="message-form" class="message-form nex-message-form flex items-center justify-between w-full">
+            <div class="message-input-wrapper" style="flex: 1 1 78% !important; min-width: 0; width: 100%;">
               <button type="button" id="emoji-btn" class="input-inline-btn emoji-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
               <button type="button" id="sticker-btn" class="input-inline-btn sticker-toggle-btn" title="Stickers" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
-              <input type="text" id="message-input" class="message-input nex-input nex-message-input flex-1 min-w-0 w-full h-[48px] min-h-[48px] px-4 py-3 text-[15px] leading-[48px] whitespace-nowrap overflow-hidden truncate rounded-full outline-none" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" />
+              <input type="text" id="message-input" class="message-input nex-input nex-message-input flex-1 min-w-0 w-full h-[48px] min-h-[48px] px-3 py-2 text-[15px] leading-[22px] whitespace-nowrap overflow-hidden truncate rounded-full outline-none" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" />
               <button type="button" id="voiceDictateBtn" class="input-inline-btn voice-dictate-btn" style="display: none !important;" title="Voice to Text &amp; Translate"><i class="fa-solid fa-microphone-lines"></i></button>
               <button type="button" id="btnToggleAttachmentHub" class="input-inline-btn" title="Attachment Hub" onclick="if(typeof window.toggleAttachmentHub==='function'){window.toggleAttachmentHub(event);}else{const h=document.getElementById('attachmentPopupHub');if(h){const isO=h.style.display==='grid'||h.classList.contains('active');h.style.display=isO?'none':'grid';h.classList.toggle('active',!isO);}}"><i class="fa-solid fa-paperclip"></i></button>
               <button type="button" id="camera-btn" class="input-inline-btn chat-camera-inline-btn" title="Take photo or video" onclick="document.getElementById('file-input')?.click();"><i class="fa-solid fa-camera"></i></button>
               <button type="button" id="aiPolishInputBtn" class="input-inline-btn ai-polish-inline-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
             </div>
             <!-- Non-intrusive Hidden Hooks for Existing JS / Hotkeys -->
-            <button type="button" id="btnAirDropBeam" style="display: none !important;" aria-hidden="true" onclick="if(window.NexAirDropMesh) window.NexAirDropMesh.openRadar();"></button>
-            <button type="button" id="btnGalleryVault" style="display: none !important;" aria-hidden="true" onclick="if(window.NexGallerySandbox) window.NexGallerySandbox.openVault();"></button>
-            <button type="button" id="btnConfidentialCipher" style="display: none !important;" aria-hidden="true"></button>
+            <button type="button" id="btnAirDropBeam" style="display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;" aria-hidden="true" onclick="if(window.NexAirDropMesh) window.NexAirDropMesh.openRadar();"></button>
+            <button type="button" id="btnGalleryVault" style="display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;" aria-hidden="true" onclick="if(window.NexGallerySandbox) window.NexGallerySandbox.openVault();"></button>
+            <button type="button" id="btnConfidentialCipher" style="display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;" aria-hidden="true"></button>
             
-            <button type="button" id="attach-btn" style="display: none !important;" aria-hidden="true"></button>
-            <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
-            <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
-            <button type="button" id="soundboardToggleBtn" class="input-btn soundboard-toggle-btn" title="Tactile Soundboard FX" style="display: none;"><i class="fa-solid fa-volume-high"></i></button>
-            <button type="button" id="cyberScribeWandBtn" class="input-btn cyber-scribe-wand-btn" title="Cyber Scribe AI: Polish or Translate Draft" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-            <button type="button" id="ghostWhisperDockBtn" class="input-btn ghost-whisper-dock-btn" title="Send 1-View Ghost Whisper" style="display: none;"><i class="fa-solid fa-ghost"></i></button>
+            <button type="button" id="attach-btn" style="display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;" aria-hidden="true"></button>
+            <input type="file" id="file-input" style="display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
+            <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;"><i class="fa-solid fa-square-poll-vertical"></i></button>
+            <button type="button" id="soundboardToggleBtn" class="input-btn soundboard-toggle-btn" title="Tactile Soundboard FX" style="display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;"><i class="fa-solid fa-volume-high"></i></button>
+            <button type="button" id="cyberScribeWandBtn" class="input-btn cyber-scribe-wand-btn" title="Cyber Scribe AI: Polish or Translate Draft" style="display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+            <button type="button" id="ghostWhisperDockBtn" class="input-btn ghost-whisper-dock-btn" title="Send 1-View Ghost Whisper" style="display: none !important; width: 0 !important; height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;"><i class="fa-solid fa-ghost"></i></button>
             <button type="button" id="audio-record-btn" class="fab-circle-btn mic-action-btn" title="Record voice message"><i class="fa-solid fa-microphone"></i></button>
-            <button type="button" id="audio-send-btn" class="audio-send-btn fab-circle-btn" title="Send audio" style="display: none;"><i class="fa-solid fa-play"></i></button>
-            <button type="button" class="send-btn fab-circle-btn" id="sendBtn" title="Send message" style="display: none;"><i class="fa-solid fa-paper-plane"></i></button>
+            <button type="button" id="audio-send-btn" class="audio-send-btn fab-circle-btn" title="Send audio" style="display: none !important; width: 0 !important; min-width: 0 !important; max-width: 0 !important; height: 0 !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;"><i class="fa-solid fa-play"></i></button>
+            <button type="button" class="send-btn fab-circle-btn" id="sendBtn" title="Send message" style="display: none !important; width: 0 !important; min-width: 0 !important; max-width: 0 !important; height: 0 !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; position: absolute !important; opacity: 0 !important; pointer-events: none !important;"><i class="fa-solid fa-paper-plane"></i></button>
           </form>
 
           <!-- Audio Recording UI -->
@@ -2977,7 +2965,7 @@
             <div class="form-group" style="text-align: center; margin-bottom: 20px;">
               <label class="form-label">Group Icon</label>
               <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 10px;">
-                <img id="groupIconPreview" src="logo.jpg" alt="Group Icon" class="modal-avatar" style="width: 80px; height: 80px; margin: 0;"
+                <img id="groupIconPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Group Icon" class="modal-avatar" style="width: 80px; height: 80px; margin: 0;"
                   onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDBmZjY2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGNpcmNsZSBjeD0iOS41IiBjeT0iNyIgcj0iNCIvPjxwYXRoIGQ9Ik0zIDIxdi0yYTQgNCAwIDAgMSA0LTRoNWE0IDQgMCAwIDEgNCA0djIiLz48cGF0aCBkPSJNMTYgMy4xM2E0IDQgMCAwIDEgMCA3Ljc1Ii8+PHBhdGggZD0iTTIxIDIxdi0yYTQgNCAwIDAgMC0zLTMuODUiLz48L3N2Zz4='">
                 <div onclick="document.getElementById('groupIconInput').click()"
                   style="position: absolute; bottom: 0; right: 0; background: var(--accent-primary); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #000; font-weight: bold; border: 2px solid var(--bg-surface);">
@@ -3086,7 +3074,7 @@
         <div class="modal-content">
           <span class="close-modal" onclick="closeGroupJoinModal()"><i class="fa-solid fa-xmark"></i></span>
           <div class="modal-avatar-wrapper">
-            <img id="joinGroupIcon" src="logo.jpg" alt="Group Icon" class="modal-avatar">
+            <img id="joinGroupIcon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Group Icon" class="modal-avatar">
             <h2 id="joinGroupName" class="modal-title">Group Name</h2>
             <p id="joinGroupDesc" class="modal-desc">Group description appears here.</p>
           </div>
@@ -3301,7 +3289,7 @@
                 <div class="settings-card settings-profile-card">
                   <div class="settings-profile-hero">
                     <div class="settings-profile-avatar-wrap" id="settingsAvatarContainer" title="Click to change profile photo">
-                      <img id="tabProfilePic" class="settings-profile-avatar" src="logo.jpg" alt="Profile" onerror="this.onerror=null;this.src='logo.jpg';">
+                      <img id="tabProfilePic" class="settings-profile-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Profile" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E';">
                       <button type="button" class="settings-avatar-edit-overlay" id="btnSettingsAvatarOverlay" title="Change profile photo" aria-label="Change profile photo">
                         <i class="fa-solid fa-camera"></i>
                       </button>
@@ -6675,7 +6663,7 @@
                   </div>
 
                   <div class="status-studio-preview-card">
-                    <img id="statusModalImgPreview" src="logo.jpg" alt="Preview" class="status-studio-preview-media" style="display: none;">
+                    <img id="statusModalImgPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Preview" class="status-studio-preview-media" style="display: none;">
                     <video id="statusModalVideoPreview" src="" controls playsinline class="status-studio-preview-media" style="display: none;"></video>
                     
                     <!-- Floating Top Media Overlay Tools -->
@@ -6694,7 +6682,7 @@
                     <!-- Floating Music Sticker Chip on Media Preview (Click to open Music Status & Time-Frame Studio) -->
                     <div id="statusAttachedMusicSticker" class="status-attached-music-sticker" style="display: none;">
                       <div class="music-sticker-disc-icon" id="statusAttachedMusicQuickPlay" title="Play or pause preview"><i class="fa-solid fa-compact-disc fa-spin"></i></div>
-                      <img id="statusAttachedMusicArt" src="logo.jpg" class="music-sticker-art" alt="Track Art">
+                      <img id="statusAttachedMusicArt" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" class="music-sticker-art" alt="Track Art">
                       <div class="music-sticker-info">
                         <span id="statusAttachedMusicTitle" class="music-sticker-title">Track Name</span>
                         <div class="music-sticker-title-row">
@@ -7259,7 +7247,7 @@
             <i class="fa-solid fa-arrow-left"></i>
           </button>
           <div class="status-viewer-avatar-wrap">
-            <img id="statusViewerAvatar" src="logo.jpg" alt="Avatar" class="status-viewer-avatar">
+            <img id="statusViewerAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Avatar" class="status-viewer-avatar">
             <span class="status-avatar-live-dot"></span>
           </div>
           <div class="status-viewer-meta">
@@ -7309,7 +7297,7 @@
       <div class="status-tap-zone right-zone" id="statusTapNext" title="Next Slide"></div>
 
       <!-- Media Elements -->
-      <img id="statusViewerImage" src="logo.jpg" alt="Status" class="status-media-content" style="display: none;">
+      <img id="statusViewerImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Status" class="status-media-content" style="display: none;">
       <video id="statusViewerVideo" src="" class="status-media-content" playsinline autoplay muted style="display: none;"></video>
       <div id="statusViewerFallbackText" class="status-viewer-text-slide" style="display: none;"></div>
 
@@ -7317,7 +7305,7 @@
       <div id="statusViewerAudioStage" class="status-viewer-audio-stage" style="display: none;">
         <div class="status-audio-visualizer-card">
           <div class="status-audio-avatar-halo">
-            <img id="statusViewerAudioAvatar" src="logo.jpg" alt="Voice" class="status-audio-avatar" onerror="this.src='logo.jpg'">
+            <img id="statusViewerAudioAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Voice" class="status-audio-avatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E'">
             <span class="status-audio-pulse-ring"></span>
           </div>
           <div class="status-audio-meta-info">
@@ -8259,7 +8247,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
         <div class="podium-speakers-grid" id="podiumSpeakersGrid">
           <div class="podium-speaker active-speaking">
             <div class="speaker-avatar-wrap">
-              <img src="logo.jpg" alt="Host" class="speaker-avatar">
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Host" class="speaker-avatar">
               <span class="speaker-role-badge host"><i class="fa-solid fa-crown"></i></span>
             </div>
             <span class="speaker-name">Alex [Host]</span>
@@ -8288,7 +8276,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <span class="gallery-label">LISTENERS:</span>
           <div class="gallery-avatars" id="galleryAvatars">
             <img src="favicon.png" class="gallery-avatar" title="Listener 1">
-            <img src="logo.jpg" class="gallery-avatar" title="Listener 2">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" class="gallery-avatar" title="Listener 2">
             <img src="chronex-ai.jpg" class="gallery-avatar" title="Listener 3">
             <span class="gallery-more-badge">+145</span>
           </div>
@@ -9512,7 +9500,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       <div class="modal-content" style="text-align: center;">
         <span class="close-modal" id="closeAppInstallModalBtn"><i class="fa-solid fa-xmark"></i></span>
         <div style="width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 16px; overflow: hidden; border: 2px solid #00ff66; box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);">
-          <img src="logo.jpg" alt="NEXCHAT" style="width: 100%; height: 100%; object-fit: cover;">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b141a'/%3E%3Cpath d='M18 20h28c2.2 0 4 1.8 4 4v16c0 2.2-1.8 4-4 4h-8l-8 6v-6h-12c-2.2 0-4-1.8-4-4V24c0-2.2 1.8-4 4-4z' fill='%2300ff66'/%3E%3C/svg%3E" alt="NEXCHAT" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
         <h2 style="font-family: 'Orbitron', monospace; font-size: 20px; color: #00ff66; margin-bottom: 8px;">INSTALL NEXCHAT APP</h2>
         <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
@@ -10919,7 +10907,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
         <div class="live-vc-user-card" id="liveVcCardSelf">
           <div class="live-vc-avatar-wrap">
             <canvas class="live-vc-freq-canvas" width="84" height="84"></canvas>
-            <img src="logo.jpg" alt="You" class="live-vc-avatar" onerror="this.src='favicons/favicon.ico'" />
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="You" class="live-vc-avatar" onerror="this.src='favicons/favicon.ico'" />
             <div class="live-vc-mic-status">
               <i class="fa-solid fa-microphone-slash"></i>
             </div>
@@ -11049,7 +11037,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           Replying to <span class="x-replying-handle" id="globalDropThreadReplyingHandle">@user</span>
         </div>
         <div class="x-thread-composer-row">
-          <img src="logo.jpg" alt="You" class="x-thread-composer-avatar" id="globalDropThreadComposerAvatar" onerror="this.src='logo.jpg'" />
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="You" class="x-thread-composer-avatar" id="globalDropThreadComposerAvatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E'" />
           <div class="x-thread-composer-main">
             <textarea id="globalDropReplyInput" class="x-thread-composer-textarea" placeholder="Post your reply" rows="1"></textarea>
             <div class="x-thread-composer-toolbar">
@@ -11110,7 +11098,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       <div class="x-profile-info-section">
         <div class="x-profile-avatar-row">
           <div class="x-profile-avatar-wrapper">
-            <img src="logo.jpg" alt="Avatar" class="x-profile-avatar" id="globalDropProfileAvatar" onerror="this.src='logo.jpg'" />
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%231e293b'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%2394a3b8'/%3E%3Cpath d='M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z' fill='%2394a3b8'/%3E%3C/svg%3E" alt="Avatar" class="x-profile-avatar" id="globalDropProfileAvatar" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 64 64\'%3E%3Ccircle cx=\'32\' cy=\'32\' r=\'32\' fill=\'%231e293b\'/%3E%3Ccircle cx=\'32\' cy=\'24\' r=\'12\' fill=\'%2394a3b8\'/%3E%3Cpath d=\'M16 52c0-8.837 7.163-16 16-16s16 7.163 16 16z\' fill=\'%2394a3b8\'/%3E%3C/svg%3E'" />
             <div class="x-profile-avatar-beacon"></div>
           </div>
           <div class="x-profile-cta-buttons" id="globalDropProfileCtaButtons">
